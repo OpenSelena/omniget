@@ -182,6 +182,7 @@ pub async fn delete_saved_session() -> anyhow::Result<()> {
     Ok(())
 }
 
+#[cfg(windows)]
 const COOKIE_URIS: &[&str] = &[
     "https://www.udemy.com",
     "https://udemy.com",
