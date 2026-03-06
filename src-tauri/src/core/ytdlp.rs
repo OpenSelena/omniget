@@ -576,7 +576,7 @@ pub async fn get_video_info(
         args.extend(extra_flags.iter().cloned());
         args.push(url.to_string());
 
-        let mut child = crate::core::process::command(ytdlp)
+        let child = crate::core::process::command(ytdlp)
             .args(&args)
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
@@ -615,8 +615,6 @@ pub async fn get_video_info(
 
         let stderr = String::from_utf8_lossy(&result.stderr).to_string();
         tracing::debug!("[yt-dlp info] stderr ({} bytes): {}", stderr.len(), stderr.trim());
-        let stderr_msg = extract_error_message(&stderr);
-
         let stderr_lower = stderr.to_lowercase();
         if stderr_lower.contains("http error 429") {
             RATE_LIMIT_429_COUNT.fetch_add(1, Ordering::Relaxed);
