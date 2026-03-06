@@ -440,8 +440,8 @@
     "telegram": "Συνδέστε τον λογαριασμό σας στο Telegram για λήψη πολυμέσων από κανάλια και ομάδες.",
     "hotkey": "Καθολικό πλήκτρο πρόσβασης: κατεβάζει αυτόματα τη διεύθυνση URL που βρίσκεται αυτή τη στιγμή στο πρόχειρό σας.",
     "clipboard": "Εντοπίζει αυτόματα τις διευθύνσεις URL όταν αντιγράφετε έναν σύνδεσμο και στέλνεται στο omnibox.",
-    "downloads_empty": "Your downloads will appear here. Go to the home page to start.",
-    "convert": "Convert media files between formats using FFmpeg."
+    "downloads_empty": "Οι λήψεις σας θα εμφανιστούν εδώ. Πηγαίνετε στην αρχική σελίδα για έναρξη.",
+    "convert": "Μετατρέψτε αρχεία πολυμέσων μεταξύ μορφών χρησιμοποιώντας το FFmpeg."
   },
   "common": {
     "cancel": "Ακύρωση",
