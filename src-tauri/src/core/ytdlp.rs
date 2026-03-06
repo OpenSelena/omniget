@@ -498,6 +498,30 @@ fn is_youtube_url(url: &str) -> bool {
     lower.contains("youtube.com") || lower.contains("youtu.be")
 }
 
+/// Extracts the most meaningful error line from yt-dlp stderr output.
+/// Prefers lines starting with "ERROR:", falls back to "WARNING:", then raw trimmed output.
+fn extract_error_message(stderr: &str) -> String {
+    let error_line = stderr
+        .lines()
+        .find(|l| l.to_uppercase().contains("ERROR:"))
+        .map(|l| l.trim().to_string());
+
+    if let Some(msg) = error_line {
+        return msg;
+    }
+
+    let warning_line = stderr
+        .lines()
+        .find(|l| l.to_uppercase().contains("WARNING:"))
+        .map(|l| l.trim().to_string());
+
+    if let Some(msg) = warning_line {
+        return msg;
+    }
+
+    stderr.trim().to_string()
+}
+
 pub async fn get_video_info(
     ytdlp: &Path,
     url: &str,
@@ -614,6 +638,7 @@ pub async fn get_video_info(
         } else {
             stderr_content
         };
+        let stderr_msg = extract_error_message(&stderr);
 
         let stderr_lower = stderr.to_lowercase();
         if stderr_lower.contains("http error 429") {
@@ -649,11 +674,11 @@ pub async fn get_video_info(
         }
 
         tracing::debug!("[perf] get_video_info took {:?}", _timer_start.elapsed());
-        return Err(anyhow!("yt-dlp failed: {}", stderr.trim()));
+        return Err(anyhow!("yt-dlp failed: {}", stderr_msg));
     }
 
     tracing::debug!("[perf] get_video_info took {:?}", _timer_start.elapsed());
-    Err(anyhow!("yt-dlp failed: {}", last_error.trim()))
+    Err(anyhow!("yt-dlp failed: {}", extract_error_message(&last_error)))
 }
 
 pub async fn get_playlist_info(
@@ -719,7 +744,7 @@ pub async fn get_playlist_info(
                 player_client
             );
         }
-        return Err(anyhow!("yt-dlp playlist failed: {}", stderr.trim()));
+        return Err(anyhow!("yt-dlp playlist failed: {}", extract_error_message(&stderr)));
     }
 
     let stdout = String::from_utf8_lossy(&output.stdout);
