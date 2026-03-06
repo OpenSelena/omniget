@@ -651,11 +651,11 @@ pub async fn get_video_info(
         }
 
         tracing::debug!("[perf] get_video_info took {:?}", _timer_start.elapsed());
-        return Err(anyhow!("yt-dlp failed: {}", stderr_msg));
+        return Err(translate_ytdlp_error(&stderr));
     }
 
     tracing::debug!("[perf] get_video_info took {:?}", _timer_start.elapsed());
-    Err(anyhow!("yt-dlp failed: {}", extract_error_message(&last_error)))
+    Err(translate_ytdlp_error(&last_error))
 }
 
 pub async fn get_playlist_info(
