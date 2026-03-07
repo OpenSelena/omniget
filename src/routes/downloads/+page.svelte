@@ -563,17 +563,17 @@
 
   .item-status[data-status="downloading"] {
     background: var(--orange);
-    color: #000;
+    color: var(--on-accent);
   }
 
   .item-status[data-status="complete"] {
     background: var(--green);
-    color: #000;
+    color: var(--on-success);
   }
 
   .item-status[data-status="error"] {
     background: var(--red);
-    color: #fff;
+    color: var(--on-error);
   }
 
   .item-status[data-status="queued"] {
@@ -583,7 +583,7 @@
 
   .item-status[data-status="paused"] {
     background: var(--blue);
-    color: #fff;
+    color: var(--on-accent);
   }
 
   .item-detail {
