@@ -1175,7 +1175,7 @@
   .update-spinner {
     width: 14px;
     height: 14px;
-    border: 2px solid rgba(47, 138, 249, 0.3);
+    border: 2px solid var(--content-border);
     border-top-color: var(--blue);
     border-radius: 50%;
     animation: spin 0.6s linear infinite;
