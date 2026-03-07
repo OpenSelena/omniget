@@ -837,7 +837,7 @@ pub async fn download_video(
                 _ => "bv*/b".to_string(),
             },
             _ => {
-                if ffmpeg_available {
+                if ffmpeg_location.is_some() {
                     match quality_height {
                         Some(h) if h > 0 => format!(
                             "bv*[height<={}]+ba[ext=m4a]/bv*[height<={}]+ba/b[height<={}]/b",
@@ -876,7 +876,7 @@ pub async fn download_video(
     };
     let mut base_args = vec!["-f".to_string(), format_selector];
 
-    if format_id.is_none() && mode != "audio" && ffmpeg_available {
+    if format_id.is_none() && mode != "audio" && ffmpeg_location.is_some() {
         base_args.push("--merge-output-format".to_string());
         base_args.push("mp4".to_string());
     }
