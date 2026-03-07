@@ -338,6 +338,7 @@
             <option value="ja">{$t('settings.appearance.lang_ja')}</option>
             <option value="it">{$t('settings.appearance.lang_it')}</option>
             <option value="fr">{$t('settings.appearance.lang_fr')}</option>
+            <option value="el">{$t('settings.appearance.lang_el')}</option>
           </select>
         </div>
       </div>
