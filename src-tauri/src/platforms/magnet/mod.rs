@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use async_trait::async_trait;
 use tokio::sync::mpsc;
 use librqbit::{Session, AddTorrent};
@@ -32,9 +30,6 @@ impl PlatformDownloader for MagnetDownloader {
     }
 
     async fn get_media_info(&self, url: &str) -> anyhow::Result<MediaInfo> {
-        // Return a generic placeholder for the torrent since fetching the full
-        // metadata might take some time or require connection to DHT/Peers.
-        // We will just show "Torrent file" or derived name from the magnet link if possible.
         let mut title = "Torrent Download".to_string();
 
         if url.starts_with("magnet:") {
@@ -61,8 +56,8 @@ impl PlatformDownloader for MagnetDownloader {
                 url: url.to_string(),
                 format: "torrent".to_string(),
             }],
-            media_type: MediaType::Video, // fallback to Video since File variant doesn't exist
-            file_size_bytes: None, // Cannot easily know upfront for magnet links
+            media_type: MediaType::Video,
+            file_size_bytes: None,
         })
     }
 
@@ -80,16 +75,16 @@ impl PlatformDownloader for MagnetDownloader {
         };
 
         let output_dir = &opts.output_dir;
-        
-        // Initialize the rqbit session pointed to the output directory
+
+        tracing::info!("[magnet] initializing session, output: {}", output_dir.display());
         let session = match Session::new(output_dir.into()).await {
             Ok(s) => s,
             Err(e) => anyhow::bail!("Failed to initialize torrent session: {}", e),
         };
 
-        // Add the torrent from the URL (can be a magnet link or HTTP URL to a .torrent)
         let add_torrent = AddTorrent::from_url(url);
-        
+
+        tracing::info!("[magnet] adding torrent...");
         let managed_torrent = match session.add_torrent(add_torrent, None).await {
             Ok(handle) => match handle.into_handle() {
                 Some(h) => h,
@@ -98,36 +93,43 @@ impl PlatformDownloader for MagnetDownloader {
             Err(e) => anyhow::bail!("Failed to add torrent: {}", e),
         };
 
-        // Poll for progress updates
-        let mut cancel_rx = opts.cancel_token.clone();
-        
+        tracing::info!("[magnet] torrent added, waiting for download...");
+
+        // Pin the completion future so it persists across select! iterations
+        let completion = managed_torrent.wait_until_completed();
+        tokio::pin!(completion);
+
+        let cancel_rx = opts.cancel_token.clone();
+
         loop {
             tokio::select! {
                 _ = tokio::time::sleep(std::time::Duration::from_millis(500)) => {
                     let stats = managed_torrent.stats();
-                    
+
                     let total = stats.total_bytes;
                     let downloaded = stats.progress_bytes;
-                    
+
                     if total > 0 {
                         let pct = (downloaded as f64 / total as f64) * 100.0;
                         let _ = progress.send(pct).await;
-                    }
-
-                    match stats.state {
-                        librqbit::TorrentStatsState::Error => anyhow::bail!("Torrent download entered error state"),
-                        _ => {}
+                        tracing::debug!(
+                            "[magnet] progress: {:.1}% ({:.1} MB / {:.1} MB)",
+                            pct,
+                            downloaded as f64 / 1_048_576.0,
+                            total as f64 / 1_048_576.0,
+                        );
                     }
                 }
                 _ = cancel_rx.cancelled() => {
-                    let _ = session.pause(&managed_torrent).await;
+                    tracing::info!("[magnet] download cancelled by user");
                     anyhow::bail!("Download cancelled");
                 }
-                res = managed_torrent.wait_until_completed() => {
+                res = &mut completion => {
                     if let Err(e) = res {
                         anyhow::bail!("Torrent download failed: {}", e);
                     }
                     let _ = progress.send(100.0).await;
+                    tracing::info!("[magnet] download complete");
                     break;
                 }
             }
@@ -139,7 +141,7 @@ impl PlatformDownloader for MagnetDownloader {
         }).unwrap_or(0);
 
         Ok(DownloadResult {
-            file_path: output_dir.clone(), // Best we can do is point to output dir
+            file_path: output_dir.clone(),
             file_size_bytes: total_size,
             duration_seconds: 0.0,
         })
