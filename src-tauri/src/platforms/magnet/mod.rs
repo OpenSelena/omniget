@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use std::sync::Arc;
 
 use async_trait::async_trait;
@@ -11,11 +12,15 @@ type SharedSession = Arc<tokio::sync::Mutex<Option<Arc<Session>>>>;
 
 pub struct MagnetDownloader {
     session: SharedSession,
+    session_output_dir: Arc<tokio::sync::Mutex<Option<PathBuf>>>,
 }
 
 impl MagnetDownloader {
     pub fn new(session: SharedSession) -> Self {
-        Self { session }
+        Self {
+            session,
+            session_output_dir: Arc::new(tokio::sync::Mutex::new(None)),
+        }
     }
 }
 
@@ -76,15 +81,21 @@ impl PlatformDownloader for MagnetDownloader {
 
         let output_dir = &opts.output_dir;
 
-        // Get or create the shared session
+        // Get or create the shared session, recreating if output_dir changed
         let session = {
             let mut guard = self.session.lock().await;
-            if let Some(s) = guard.as_ref() {
-                tracing::info!("[magnet] reusing existing session");
-                s.clone()
-            } else {
+            let mut dir_guard = self.session_output_dir.lock().await;
+            let need_new_session = match (&*guard, &*dir_guard) {
+                (Some(_), Some(prev_dir)) => prev_dir != output_dir,
+                (None, _) => true,
+                _ => true,
+            };
+            if need_new_session {
+                if guard.is_some() {
+                    tracing::info!("[magnet] output dir changed, recreating session");
+                }
                 let listen_port = opts.torrent_listen_port.unwrap_or(6881).min(65525);
-                tracing::info!("[magnet] creating shared session, port: {}", listen_port);
+                tracing::info!("[magnet] creating shared session, port: {}, output: {}", listen_port, output_dir.display());
                 let session_opts = SessionOptions {
                     listen_port_range: Some(listen_port..listen_port.saturating_add(10)),
                     ..Default::default()
@@ -99,14 +110,17 @@ impl PlatformDownloader for MagnetDownloader {
                     }
                 };
                 *guard = Some(s.clone());
+                *dir_guard = Some(output_dir.clone());
                 s
+            } else {
+                tracing::info!("[magnet] reusing existing session");
+                guard.as_ref().unwrap().clone()
             }
         };
 
         let add_torrent = AddTorrent::from_url(url);
         let torrent_opts = AddTorrentOptions {
             overwrite: true,
-            output_folder: Some(output_dir.to_string_lossy().to_string()),
             ..Default::default()
         };
 
