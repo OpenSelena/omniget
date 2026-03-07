@@ -19,6 +19,33 @@ static FFMPEG_LOCATION_CACHE: std::sync::RwLock<Option<Option<String>>> =
 static COOKIES_BROWSER_CACHE: std::sync::RwLock<Option<Option<String>>> =
     std::sync::RwLock::new(None);
 static RATE_LIMIT_429_COUNT: AtomicU64 = AtomicU64::new(0);
+static RATE_LIMIT_429_LAST_TS: AtomicU64 = AtomicU64::new(0);
+
+fn rate_limit_429_count() -> u64 {
+    let last = RATE_LIMIT_429_LAST_TS.load(Ordering::Relaxed);
+    if last == 0 {
+        return 0;
+    }
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
+    if now.saturating_sub(last) > 1800 {
+        RATE_LIMIT_429_COUNT.store(0, Ordering::Relaxed);
+        RATE_LIMIT_429_LAST_TS.store(0, Ordering::Relaxed);
+        return 0;
+    }
+    RATE_LIMIT_429_COUNT.load(Ordering::Relaxed)
+}
+
+fn rate_limit_429_increment() {
+    RATE_LIMIT_429_COUNT.fetch_add(1, Ordering::Relaxed);
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
+    RATE_LIMIT_429_LAST_TS.store(now, Ordering::Relaxed);
+}
 
 pub fn reset_ytdlp_cache() {
     if let Ok(mut cache) = YTDLP_PATH_CACHE.write() {
@@ -261,55 +288,10 @@ async fn check_ytdlp_freshness(path: &Path) {
 
 async fn find_ffmpeg_location() -> Option<String> {
     let _timer_start = std::time::Instant::now();
-    #[cfg(target_os = "windows")]
-    let output = crate::core::process::command("where")
-        .arg("ffmpeg.exe")
-        .stdout(Stdio::piped())
-        .stderr(Stdio::null())
-        .output()
-        .await
-        .ok()?;
-
-    #[cfg(target_os = "macos")]
-    let output = crate::core::process::command("which")
-        .arg("ffmpeg")
-        .stdout(Stdio::piped())
-        .stderr(Stdio::null())
-        .output()
-        .await
-        .ok()?;
-
-    #[cfg(target_os = "linux")]
-    let output = crate::core::process::command("sh")
-        .args(["-c", "command -v ffmpeg"])
-        .stdout(Stdio::piped())
-        .stderr(Stdio::null())
-        .output()
-        .await
-        .ok()?;
-
-    if !output.status.success() {
-        tracing::debug!(
-            "[perf] find_ffmpeg_location took {:?}",
-            _timer_start.elapsed()
-        );
-        return None;
-    }
-
-    let path_str = String::from_utf8_lossy(&output.stdout);
-    let first_line = path_str.lines().next()?.trim().to_string();
-    if first_line.is_empty() {
-        tracing::debug!(
-            "[perf] find_ffmpeg_location took {:?}",
-            _timer_start.elapsed()
-        );
-        return None;
-    }
-
-    let p = PathBuf::from(&first_line);
-    let result = if p.exists() {
-        p.parent()
+    let result = if let Some(path) = crate::core::dependencies::find_tool("ffmpeg").await {
+        path.parent()
             .and_then(|dir| dir.to_str())
+            .filter(|s| !s.is_empty())
             .map(|s| s.to_string())
     } else {
         None
@@ -498,6 +480,30 @@ fn is_youtube_url(url: &str) -> bool {
     lower.contains("youtube.com") || lower.contains("youtu.be")
 }
 
+/// Extracts the most meaningful error line from yt-dlp stderr output.
+/// Prefers lines starting with "ERROR:", falls back to "WARNING:", then raw trimmed output.
+fn extract_error_message(stderr: &str) -> String {
+    let error_line = stderr
+        .lines()
+        .find(|l| l.to_uppercase().contains("ERROR:"))
+        .map(|l| l.trim().to_string());
+
+    if let Some(msg) = error_line {
+        return msg;
+    }
+
+    let warning_line = stderr
+        .lines()
+        .find(|l| l.to_uppercase().contains("WARNING:"))
+        .map(|l| l.trim().to_string());
+
+    if let Some(msg) = warning_line {
+        return msg;
+    }
+
+    stderr.trim().to_string()
+}
+
 pub async fn get_video_info(
     ytdlp: &Path,
     url: &str,
@@ -552,7 +558,7 @@ pub async fn get_video_info(
         args.extend(extra_flags.iter().cloned());
         args.push(url.to_string());
 
-        let mut child = crate::core::process::command(ytdlp)
+        let child = crate::core::process::command(ytdlp)
             .args(&args)
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
@@ -563,25 +569,6 @@ pub async fn get_video_info(
             _timer_start.elapsed(),
             attempt + 1
         );
-
-        let stderr_pipe = child.stderr.take().ok_or_else(|| anyhow!("No stderr"))?;
-        let stderr_reader = tokio::spawn(async move {
-            let mut buf = String::new();
-            let mut lines = BufReader::new(stderr_pipe).lines();
-            while let Ok(Some(line)) = lines.next_line().await {
-                let lower = line.to_lowercase();
-                if lower.contains("extracting url") {
-                    tracing::debug!("[yt-dlp info] Extracting URL");
-                } else if lower.contains("downloading") && !lower.contains("download") {
-                    tracing::debug!("[yt-dlp info] Downloading metadata");
-                } else if lower.contains("format") {
-                    tracing::debug!("[yt-dlp info] Selecting format");
-                }
-                buf.push_str(&line);
-                buf.push('\n');
-            }
-            buf
-        });
 
         let result =
             tokio::time::timeout(std::time::Duration::from_secs(60), child.wait_with_output())
@@ -595,7 +582,6 @@ pub async fn get_video_info(
                     anyhow!("Failed to run yt-dlp: {}", e)
                 })?;
 
-        let stderr_content = stderr_reader.await.unwrap_or_default();
         tracing::debug!(
             "[perf] get_video_info: yt-dlp process exited at {:?} (attempt {})",
             _timer_start.elapsed(),
@@ -609,15 +595,11 @@ pub async fn get_video_info(
             return Ok(json);
         }
 
-        let stderr = if stderr_content.is_empty() {
-            String::from_utf8_lossy(&result.stderr).to_string()
-        } else {
-            stderr_content
-        };
-
+        let stderr = String::from_utf8_lossy(&result.stderr).to_string();
+        tracing::debug!("[yt-dlp info] stderr ({} bytes): {}", stderr.len(), stderr.trim());
         let stderr_lower = stderr.to_lowercase();
         if stderr_lower.contains("http error 429") {
-            RATE_LIMIT_429_COUNT.fetch_add(1, Ordering::Relaxed);
+            rate_limit_429_increment();
             let sanitized_url = sanitize_log_line(url);
             tracing::warn!(
                 "[yt-429] rate limit in get_video_info: url={} attempt={}/{}",
@@ -649,11 +631,11 @@ pub async fn get_video_info(
         }
 
         tracing::debug!("[perf] get_video_info took {:?}", _timer_start.elapsed());
-        return Err(anyhow!("yt-dlp failed: {}", stderr.trim()));
+        return Err(translate_ytdlp_error(&stderr));
     }
 
     tracing::debug!("[perf] get_video_info took {:?}", _timer_start.elapsed());
-    Err(anyhow!("yt-dlp failed: {}", last_error.trim()))
+    Err(translate_ytdlp_error(&last_error))
 }
 
 pub async fn get_playlist_info(
@@ -706,7 +688,7 @@ pub async fn get_playlist_info(
         let stderr = String::from_utf8_lossy(&output.stderr);
         let stderr_lower = stderr.to_lowercase();
         if stderr_lower.contains("http error 429") {
-            RATE_LIMIT_429_COUNT.fetch_add(1, Ordering::Relaxed);
+            rate_limit_429_increment();
             let sanitized_url = sanitize_log_line(url);
             let player_client = if is_youtube_url(url) {
                 "default"
@@ -719,7 +701,7 @@ pub async fn get_playlist_info(
                 player_client
             );
         }
-        return Err(anyhow!("yt-dlp playlist failed: {}", stderr.trim()));
+        return Err(anyhow!("yt-dlp playlist failed: {}", extract_error_message(&stderr)));
     }
 
     let stdout = String::from_utf8_lossy(&output.stdout);
@@ -841,16 +823,11 @@ pub async fn download_video(
 
     let mode = download_mode.unwrap_or("auto");
     let is_audio_only = mode == "audio";
-    let (ffmpeg_available, ffmpeg_location_result, aria2c_path) = tokio::join!(
+    let (ffmpeg_available, ffmpeg_location, aria2c_path) = tokio::join!(
         crate::core::ffmpeg::is_ffmpeg_available(),
         find_ffmpeg_location_cached(),
         crate::core::dependencies::ensure_aria2c(),
     );
-    let ffmpeg_location = if ffmpeg_available {
-        ffmpeg_location_result
-    } else {
-        None
-    };
 
     let format_selector = if let Some(fid) = format_id {
         fid.to_string()
@@ -924,7 +901,7 @@ pub async fn download_video(
     }
 
     let effective_fragments = if is_youtube_url(url) {
-        let rate_limit_count = RATE_LIMIT_429_COUNT.load(Ordering::Relaxed);
+        let rate_limit_count = rate_limit_429_count();
         let max_frags = if rate_limit_count >= 2 {
             2
         } else if rate_limit_count > 0 {
@@ -998,7 +975,7 @@ pub async fn download_video(
     }
 
     let should_download_subs =
-        download_subtitles && RATE_LIMIT_429_COUNT.load(Ordering::Relaxed) < 2;
+        download_subtitles && rate_limit_429_count() < 2;
     let subtitle_args = if should_download_subs {
         vec![
             "--write-sub".to_string(),
@@ -1124,9 +1101,21 @@ pub async fn download_video(
                     );
                 }
                 if let Some(dest) = parse_destination_line(&line) {
-                    phase += 1;
-                    let mut guard = captured_path_writer.lock().unwrap();
-                    *guard = Some(PathBuf::from(dest));
+                    let dest_path = PathBuf::from(&dest);
+                    let ext = dest_path
+                        .extension()
+                        .and_then(|e| e.to_str())
+                        .unwrap_or("")
+                        .to_lowercase();
+                    let is_subtitle = matches!(
+                        ext.as_str(),
+                        "vtt" | "srt" | "ass" | "ssa" | "sub" | "lrc"
+                    );
+                    if !is_subtitle {
+                        phase += 1;
+                        let mut guard = captured_path_writer.lock().unwrap();
+                        *guard = Some(dest_path);
+                    }
                 }
                 if line.contains("[Merger]") {
                     if 99.0 > max_reported {
@@ -1202,7 +1191,24 @@ pub async fn download_video(
             };
 
             let file_path = match file_path {
-                Some(p) if p.exists() => p,
+                Some(p) if p.exists() => {
+                    let ext = p.extension().and_then(|e| e.to_str()).unwrap_or("");
+                    let is_audio_ext = matches!(
+                        ext.to_lowercase().as_str(),
+                        "m4a" | "mp3" | "ogg" | "opus" | "flac" | "aac" | "wav"
+                    );
+                    if is_audio_ext && !is_audio_only {
+                        let stem = p.file_stem().and_then(|s| s.to_str()).unwrap_or("");
+                        let mp4_candidate = p.with_file_name(format!("{}.mp4", stem));
+                        if mp4_candidate.exists() {
+                            mp4_candidate
+                        } else {
+                            find_downloaded_file(output_dir, url).await.unwrap_or(p)
+                        }
+                    } else {
+                        p
+                    }
+                }
                 _ => find_downloaded_file(output_dir, url).await?,
             };
 
@@ -1245,7 +1251,7 @@ pub async fn download_video(
                     tracing::warn!("[yt-dlp] subtitle-only 429, retrying without subtitles (keeping current player_client)");
                     tokio::time::sleep(std::time::Duration::from_secs(3)).await;
                 } else {
-                    RATE_LIMIT_429_COUNT.fetch_add(1, Ordering::Relaxed);
+                    rate_limit_429_increment();
                     let sanitized_url = sanitize_log_line(url);
                     let player_client = if is_youtube_url(url) {
                         "default"

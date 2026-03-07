@@ -355,6 +355,7 @@ fn render_badge(base: &[u8], w: u32, h: u32, count: u32) -> Vec<u8> {
     buf
 }
 
+#[cfg(target_os = "windows")]
 fn render_overlay_badge(_base: &[u8], w: u32, h: u32, count: u32) -> Vec<u8> {
     let mut buf = vec![0u8; (w * h * 4) as usize];
 
@@ -446,7 +447,7 @@ fn render_overlay_badge(_base: &[u8], w: u32, h: u32, count: u32) -> Vec<u8> {
     buf
 }
 
-pub fn update_taskbar_badge(app: &AppHandle, active_count: u32, avg_percent: f64) {
+pub fn update_taskbar_badge(app: &AppHandle, active_count: u32, _avg_percent: f64) {
     if let Some(window) = app.get_webview_window("main") {
         #[cfg(target_os = "macos")]
         {
@@ -466,7 +467,7 @@ pub fn update_taskbar_badge(app: &AppHandle, active_count: u32, avg_percent: f64
                     let overlay = render_overlay_badge(base, 16, 16, active_count);
                     let _ = window.set_overlay_icon(Some(Image::new_owned(overlay, 16, 16)));
                 }
-                let progress_val = (avg_percent.clamp(0.0, 1.0) * 100.0) as u64;
+                let progress_val = (_avg_percent.clamp(0.0, 1.0) * 100.0) as u64;
                 let _ = window.set_progress_bar(ProgressBarState {
                     progress: Some(progress_val),
                     status: None,

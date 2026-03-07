@@ -1,6 +1,7 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
   import { t } from "$lib/i18n";
+  import { translateBackendError } from "$lib/error-translate";
   import { showToast } from "$lib/stores/toast-store.svelte";
   import {
     getDownloads,
@@ -105,6 +106,15 @@
   async function clearFinished() {
     try {
       await invoke("clear_finished_downloads");
+    } catch (e: any) {
+      const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
+      showToast("error", msg);
+    }
+  }
+
+  async function revealFile(path: string) {
+    try {
+      await invoke("reveal_file", { path });
     } catch (e: any) {
       const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
       showToast("error", msg);
@@ -243,6 +253,36 @@
               <path d="M18 6L6 18M6 6l12 12" />
             </svg>
           </button>
+        {:else if item.status === "complete" && item.filePath}
+          <button
+            class="action-icon-btn"
+            onclick={() => revealFile(item.filePath!)}
+            aria-label={$t('downloads.open_folder')}
+            title={$t('downloads.open_folder')}
+          >
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
+            </svg>
+          </button>
+          <button
+            class="action-icon-btn"
+            onclick={() => removeItem(item.id)}
+            aria-label={$t('common.close')}
+          >
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        {:else if item.status === "complete"}
+          <button
+            class="action-icon-btn"
+            onclick={() => removeItem(item.id)}
+            aria-label={$t('common.close')}
+          >
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
         {:else if item.status === "queued"}
           <button
             class="action-icon-btn"
@@ -301,7 +341,7 @@
     {/if}
 
     {#if item.status === "error" && item.error}
-      <span class="item-error">{item.error}</span>
+      <span class="item-error">{translateBackendError(item.error, $t)}</span>
     {/if}
 
     {#if item.status !== "queued"}
@@ -368,7 +408,7 @@
     {/if}
 
     {#if item.status === "error" && item.error}
-      <span class="item-error">{item.error}</span>
+      <span class="item-error">{translateBackendError(item.error, $t)}</span>
     {/if}
 
     <div class="progress-track">
@@ -562,17 +602,17 @@
 
   .item-status[data-status="downloading"] {
     background: var(--orange);
-    color: #000;
+    color: var(--on-accent);
   }
 
   .item-status[data-status="complete"] {
     background: var(--green);
-    color: #000;
+    color: var(--on-success);
   }
 
   .item-status[data-status="error"] {
     background: var(--red);
-    color: #fff;
+    color: var(--on-error);
   }
 
   .item-status[data-status="queued"] {
@@ -582,7 +622,7 @@
 
   .item-status[data-status="paused"] {
     background: var(--blue);
-    color: #fff;
+    color: var(--on-accent);
   }
 
   .item-detail {

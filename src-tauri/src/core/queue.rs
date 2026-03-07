@@ -473,12 +473,6 @@ async fn spawn_download_inner(
         )
     };
 
-    let state = {
-        let q = queue.lock().await;
-        q.get_state()
-    };
-    emit_queue_state_from_state(&app, state);
-
     let info_start = std::time::Instant::now();
     let info = match media_info {
         Some(i) => {
@@ -831,21 +825,17 @@ pub async fn prefetch_info_with_emit(
 
 pub async fn try_start_next(app: tauri::AppHandle, queue: Arc<tokio::sync::Mutex<DownloadQueue>>) {
     let _timer_start = std::time::Instant::now();
-    let (next_ids, stagger, should_emit) = {
+    let (next_ids, stagger, state_to_emit) = {
         let mut q = queue.lock().await;
         let ids = q.next_queued_ids();
         for nid in &ids {
             q.mark_active(*nid);
         }
-        let should_emit = !ids.is_empty();
-        (ids, q.stagger_delay_ms, should_emit)
+        let state = if !ids.is_empty() { Some(q.get_state()) } else { None };
+        (ids, q.stagger_delay_ms, state)
     };
 
-    if should_emit {
-        let state = {
-            let q = queue.lock().await;
-            q.get_state()
-        };
+    if let Some(state) = state_to_emit {
         emit_queue_state_from_state(&app, state);
     }
 

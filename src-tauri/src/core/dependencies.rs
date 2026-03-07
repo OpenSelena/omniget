@@ -49,8 +49,19 @@ pub async fn find_tool(tool: &str) -> Option<PathBuf> {
 
     let managed = managed_bin_dir()?.join(&name);
     if managed.exists() {
-        tracing::debug!("[perf] find_tool({}) took {:?}", tool, _timer_start.elapsed());
-        return Some(managed);
+        if let Ok(status) = crate::core::process::command(&managed)
+            .arg(version_flag)
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .status()
+            .await
+        {
+            if status.success() {
+                tracing::debug!("[perf] find_tool({}) took {:?}", tool, _timer_start.elapsed());
+                return Some(managed);
+            }
+        }
+        tracing::warn!("find_tool({}): binary exists at {} but failed to execute", tool, managed.display());
     }
 
     tracing::debug!("[perf] find_tool({}) took {:?}", tool, _timer_start.elapsed());
@@ -170,23 +181,41 @@ async fn download_ffmpeg() -> anyhow::Result<PathBuf> {
 
     #[cfg(target_os = "macos")]
     {
-        let _ = tokio::process::Command::new("xattr")
+        if let Err(e) = tokio::process::Command::new("xattr")
             .args(["-d", "com.apple.quarantine"])
             .arg(&ffmpeg_target)
             .output()
-            .await;
+            .await
+        {
+            tracing::warn!("Failed to remove quarantine from ffmpeg: {}", e);
+        }
         let ffprobe_path = bin_dir.join(&ffprobe_name);
         if ffprobe_path.exists() {
-            let _ = tokio::process::Command::new("xattr")
+            if let Err(e) = tokio::process::Command::new("xattr")
                 .args(["-d", "com.apple.quarantine"])
                 .arg(&ffprobe_path)
                 .output()
-                .await;
+                .await
+            {
+                tracing::warn!("Failed to remove quarantine from ffprobe: {}", e);
+            }
         }
     }
 
     if !ffmpeg_target.exists() {
         return Err(anyhow!("FFmpeg binary not found after extraction"));
+    }
+
+    let verify = crate::core::process::command(&ffmpeg_target)
+        .arg("-version")
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .status()
+        .await;
+    match verify {
+        Ok(s) if s.success() => {}
+        Ok(s) => return Err(anyhow!("FFmpeg installed but failed to execute (exit code {})", s)),
+        Err(e) => return Err(anyhow!("FFmpeg installed but failed to execute: {}", e)),
     }
 
     tracing::info!("FFmpeg installed to {}", ffmpeg_target.display());
