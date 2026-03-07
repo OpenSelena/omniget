@@ -96,14 +96,14 @@ pub fn run() {
             telegram_session.clone(),
         ),
     ));
-    // Generic yt-dlp fallback — MUST be last so specific downloaders take priority
-    registry.register(Arc::new(
-        platforms::generic_ytdlp::GenericYtdlpDownloader::new(),
-    ));
     let torrent_session: Arc<tokio::sync::Mutex<Option<Arc<librqbit::Session>>>> =
         Arc::new(tokio::sync::Mutex::new(None));
     registry.register(Arc::new(
         platforms::magnet::MagnetDownloader::new(torrent_session.clone()),
+    ));
+    // Generic yt-dlp fallback — MUST be last so specific downloaders take priority
+    registry.register(Arc::new(
+        platforms::generic_ytdlp::GenericYtdlpDownloader::new(),
     ));
 
     let auth_registry = core::auth::AuthRegistry::new();
@@ -131,7 +131,7 @@ pub fn run() {
         .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
             tray::show_window(app);
             if let Some(url) = argv.get(1) {
-                if url.starts_with("http://") || url.starts_with("https://") {
+                if url.starts_with("http://") || url.starts_with("https://") || url.starts_with("magnet:") {
                     let _ = app.emit("deep-link", url.clone());
                 }
             }

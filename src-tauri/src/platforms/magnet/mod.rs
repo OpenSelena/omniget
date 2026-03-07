@@ -89,9 +89,15 @@ impl PlatformDownloader for MagnetDownloader {
                     listen_port_range: Some(listen_port..listen_port.saturating_add(10)),
                     ..Default::default()
                 };
-                let s = Session::new_with_opts(output_dir.into(), session_opts)
-                    .await
-                    .map_err(|e| anyhow::anyhow!("Failed to initialize torrent session: {}", e))?;
+                let cancel_rx = opts.cancel_token.clone();
+                let s = tokio::select! {
+                    result = Session::new_with_opts(output_dir.into(), session_opts) => {
+                        result.map_err(|e| anyhow::anyhow!("Failed to initialize torrent session: {}", e))?
+                    }
+                    _ = cancel_rx.cancelled() => {
+                        anyhow::bail!("Download cancelled during session creation");
+                    }
+                };
                 *guard = Some(s.clone());
                 s
             }
@@ -100,6 +106,7 @@ impl PlatformDownloader for MagnetDownloader {
         let add_torrent = AddTorrent::from_url(url);
         let torrent_opts = AddTorrentOptions {
             overwrite: true,
+            output_folder: Some(output_dir.to_string_lossy().to_string()),
             ..Default::default()
         };
 
@@ -130,6 +137,9 @@ impl PlatformDownloader for MagnetDownloader {
         loop {
             tokio::select! {
                 _ = tokio::time::sleep(std::time::Duration::from_millis(500)) => {
+                    if managed_torrent.is_paused() {
+                        continue;
+                    }
                     let stats = managed_torrent.stats();
                     let total = stats.total_bytes;
                     let downloaded = stats.progress_bytes;
