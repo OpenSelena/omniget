@@ -129,7 +129,7 @@
     }
   }
 
-  let fileInput: HTMLInputElement;
+  let fileInput: HTMLInputElement = $state() as HTMLInputElement;
 
   function loadCookieFile() {
     fileInput.click();
