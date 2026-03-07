@@ -562,6 +562,7 @@ async fn spawn_download_inner(
         cancel_token: cancel_token.clone(),
         concurrent_fragments: settings.advanced.concurrent_fragments,
         ytdlp_path,
+        torrent_listen_port: Some(settings.advanced.torrent_listen_port),
     };
 
     let total_bytes = info.file_size_bytes;

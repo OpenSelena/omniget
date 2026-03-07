@@ -258,7 +258,9 @@
       "stagger_delay": "Délai d'espacement (ms)",
       "stagger_delay_desc": "Délai entre le démarrage des téléchargements simultanés",
       "reset": "Réinitialiser les paramètres",
-      "reset_confirm": "Êtes-vous sûr ? Tous les paramètres seront réinitialisés."
+      "reset_confirm": "Êtes-vous sûr ? Tous les paramètres seront réinitialisés.",
+      "torrent_listen_port": "Port d’écoute torrent",
+      "torrent_listen_port_desc": "Port TCP pour les connexions BitTorrent entrantes"
     }
   },
   "omnibox": {

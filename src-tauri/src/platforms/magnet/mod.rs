@@ -1,6 +1,6 @@
 use async_trait::async_trait;
 use tokio::sync::mpsc;
-use librqbit::{Session, AddTorrent};
+use librqbit::{Session, SessionOptions, AddTorrent};
 
 use crate::models::media::{DownloadOptions, DownloadResult, MediaInfo, MediaType, VideoQuality};
 use crate::platforms::traits::PlatformDownloader;
@@ -76,8 +76,13 @@ impl PlatformDownloader for MagnetDownloader {
 
         let output_dir = &opts.output_dir;
 
-        tracing::info!("[magnet] initializing session, output: {}", output_dir.display());
-        let session = match Session::new(output_dir.into()).await {
+        let listen_port = opts.torrent_listen_port.unwrap_or(6881);
+        tracing::info!("[magnet] initializing session, output: {}, port: {}", output_dir.display(), listen_port);
+        let session_opts = SessionOptions {
+            listen_port_range: Some(listen_port..listen_port + 10),
+            ..Default::default()
+        };
+        let session = match Session::new_with_opts(output_dir.into(), session_opts).await {
             Ok(s) => s,
             Err(e) => anyhow::bail!("Failed to initialize torrent session: {}", e),
         };
@@ -135,13 +140,23 @@ impl PlatformDownloader for MagnetDownloader {
             }
         }
 
-        let total_size = managed_torrent.with_metadata(|meta| {
-            meta.info.iter_file_lengths().ok().map(|iter| iter.sum::<u64>())
-                .unwrap_or_else(|| meta.file_infos.iter().map(|f| f.len).sum())
-        }).unwrap_or(0);
+        let (total_size, torrent_name) = managed_torrent.with_metadata(|meta| {
+            let size = meta.info.iter_file_lengths().ok().map(|iter| iter.sum::<u64>())
+                .unwrap_or_else(|| meta.file_infos.iter().map(|f| f.len).sum());
+            let name = meta.info.name.as_ref()
+                .map(|n| String::from_utf8_lossy(n.as_ref()).to_string())
+                .unwrap_or_default();
+            (size, name)
+        }).unwrap_or((0, String::new()));
+
+        let file_path = if torrent_name.is_empty() {
+            output_dir.clone()
+        } else {
+            output_dir.join(&torrent_name)
+        };
 
         Ok(DownloadResult {
-            file_path: output_dir.clone(),
+            file_path,
             file_size_bytes: total_size,
             duration_seconds: 0.0,
         })

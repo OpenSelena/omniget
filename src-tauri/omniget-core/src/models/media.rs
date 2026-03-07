@@ -48,6 +48,7 @@ pub struct DownloadOptions {
     pub cancel_token: CancellationToken,
     pub concurrent_fragments: u32,
     pub ytdlp_path: Option<PathBuf>,
+    pub torrent_listen_port: Option<u16>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

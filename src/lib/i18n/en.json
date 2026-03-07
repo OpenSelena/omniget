@@ -270,7 +270,9 @@
       "stagger_delay": "Stagger delay (ms)",
       "stagger_delay_desc": "Delay between starting concurrent downloads",
       "reset": "Reset defaults",
-      "reset_confirm": "Are you sure? All settings will be reset."
+      "reset_confirm": "Are you sure? All settings will be reset.",
+      "torrent_listen_port": "Torrent listen port",
+      "torrent_listen_port_desc": "TCP port for incoming BitTorrent connections"
     }
   },
   "omnibox": {
