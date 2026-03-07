@@ -291,6 +291,7 @@ async fn find_ffmpeg_location() -> Option<String> {
     let result = if let Some(path) = crate::core::dependencies::find_tool("ffmpeg").await {
         path.parent()
             .and_then(|dir| dir.to_str())
+            .filter(|s| !s.is_empty())
             .map(|s| s.to_string())
     } else {
         None
@@ -822,7 +823,8 @@ pub async fn download_video(
 
     let mode = download_mode.unwrap_or("auto");
     let is_audio_only = mode == "audio";
-    let (ffmpeg_location, aria2c_path) = tokio::join!(
+    let (ffmpeg_available, ffmpeg_location, aria2c_path) = tokio::join!(
+        crate::core::ffmpeg::is_ffmpeg_available(),
         find_ffmpeg_location_cached(),
         crate::core::dependencies::ensure_aria2c(),
     );
@@ -837,7 +839,7 @@ pub async fn download_video(
                 _ => "bv*/b".to_string(),
             },
             _ => {
-                if ffmpeg_location.is_some() {
+                if ffmpeg_available {
                     match quality_height {
                         Some(h) if h > 0 => format!(
                             "bv*[height<={}]+ba[ext=m4a]/bv*[height<={}]+ba/b[height<={}]/b",
@@ -876,7 +878,7 @@ pub async fn download_video(
     };
     let mut base_args = vec!["-f".to_string(), format_selector];
 
-    if format_id.is_none() && mode != "audio" && ffmpeg_location.is_some() {
+    if format_id.is_none() && mode != "audio" && ffmpeg_available {
         base_args.push("--merge-output-format".to_string());
         base_args.push("mp4".to_string());
     }
