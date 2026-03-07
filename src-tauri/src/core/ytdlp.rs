@@ -19,6 +19,33 @@ static FFMPEG_LOCATION_CACHE: std::sync::RwLock<Option<Option<String>>> =
 static COOKIES_BROWSER_CACHE: std::sync::RwLock<Option<Option<String>>> =
     std::sync::RwLock::new(None);
 static RATE_LIMIT_429_COUNT: AtomicU64 = AtomicU64::new(0);
+static RATE_LIMIT_429_LAST_TS: AtomicU64 = AtomicU64::new(0);
+
+fn rate_limit_429_count() -> u64 {
+    let last = RATE_LIMIT_429_LAST_TS.load(Ordering::Relaxed);
+    if last == 0 {
+        return 0;
+    }
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
+    if now.saturating_sub(last) > 1800 {
+        RATE_LIMIT_429_COUNT.store(0, Ordering::Relaxed);
+        RATE_LIMIT_429_LAST_TS.store(0, Ordering::Relaxed);
+        return 0;
+    }
+    RATE_LIMIT_429_COUNT.load(Ordering::Relaxed)
+}
+
+fn rate_limit_429_increment() {
+    RATE_LIMIT_429_COUNT.fetch_add(1, Ordering::Relaxed);
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
+    RATE_LIMIT_429_LAST_TS.store(now, Ordering::Relaxed);
+}
 
 pub fn reset_ytdlp_cache() {
     if let Ok(mut cache) = YTDLP_PATH_CACHE.write() {
@@ -571,7 +598,7 @@ pub async fn get_video_info(
         tracing::debug!("[yt-dlp info] stderr ({} bytes): {}", stderr.len(), stderr.trim());
         let stderr_lower = stderr.to_lowercase();
         if stderr_lower.contains("http error 429") {
-            RATE_LIMIT_429_COUNT.fetch_add(1, Ordering::Relaxed);
+            rate_limit_429_increment();
             let sanitized_url = sanitize_log_line(url);
             tracing::warn!(
                 "[yt-429] rate limit in get_video_info: url={} attempt={}/{}",
@@ -660,7 +687,7 @@ pub async fn get_playlist_info(
         let stderr = String::from_utf8_lossy(&output.stderr);
         let stderr_lower = stderr.to_lowercase();
         if stderr_lower.contains("http error 429") {
-            RATE_LIMIT_429_COUNT.fetch_add(1, Ordering::Relaxed);
+            rate_limit_429_increment();
             let sanitized_url = sanitize_log_line(url);
             let player_client = if is_youtube_url(url) {
                 "default"
@@ -878,7 +905,7 @@ pub async fn download_video(
     }
 
     let effective_fragments = if is_youtube_url(url) {
-        let rate_limit_count = RATE_LIMIT_429_COUNT.load(Ordering::Relaxed);
+        let rate_limit_count = rate_limit_429_count();
         let max_frags = if rate_limit_count >= 2 {
             2
         } else if rate_limit_count > 0 {
@@ -952,7 +979,7 @@ pub async fn download_video(
     }
 
     let should_download_subs =
-        download_subtitles && RATE_LIMIT_429_COUNT.load(Ordering::Relaxed) < 2;
+        download_subtitles && rate_limit_429_count() < 2;
     let subtitle_args = if should_download_subs {
         vec![
             "--write-sub".to_string(),
@@ -1168,7 +1195,24 @@ pub async fn download_video(
             };
 
             let file_path = match file_path {
-                Some(p) if p.exists() => p,
+                Some(p) if p.exists() => {
+                    let ext = p.extension().and_then(|e| e.to_str()).unwrap_or("");
+                    let is_audio_ext = matches!(
+                        ext.to_lowercase().as_str(),
+                        "m4a" | "mp3" | "ogg" | "opus" | "flac" | "aac" | "wav"
+                    );
+                    if is_audio_ext && !is_audio_only {
+                        let stem = p.file_stem().and_then(|s| s.to_str()).unwrap_or("");
+                        let mp4_candidate = p.with_file_name(format!("{}.mp4", stem));
+                        if mp4_candidate.exists() {
+                            mp4_candidate
+                        } else {
+                            find_downloaded_file(output_dir, url).await.unwrap_or(p)
+                        }
+                    } else {
+                        p
+                    }
+                }
                 _ => find_downloaded_file(output_dir, url).await?,
             };
 
@@ -1211,7 +1255,7 @@ pub async fn download_video(
                     tracing::warn!("[yt-dlp] subtitle-only 429, retrying without subtitles (keeping current player_client)");
                     tokio::time::sleep(std::time::Duration::from_secs(3)).await;
                 } else {
-                    RATE_LIMIT_429_COUNT.fetch_add(1, Ordering::Relaxed);
+                    rate_limit_429_increment();
                     let sanitized_url = sanitize_log_line(url);
                     let player_client = if is_youtube_url(url) {
                         "default"
