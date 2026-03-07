@@ -17,7 +17,8 @@
       "downloading": "Downloading",
       "paused": "Paused",
       "complete": "Complete",
-      "error": "Error"
+      "error": "Error",
+      "seeding": "Seeding"
     },
     "section_queued": "Queued",
     "section_finished": "Finished",
@@ -33,7 +34,8 @@
     "cancel": "Cancel",
     "clear_finished": "Clear finished",
     "show_more": "Show {{count}} more",
-    "open_folder": "Show in folder"
+    "open_folder": "Show in folder",
+    "stop": "Stop"
   },
   "toast": {
     "download_preparing": "Preparing download...",

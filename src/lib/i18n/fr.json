@@ -17,7 +17,8 @@
       "downloading": "En cours",
       "paused": "En pause",
       "complete": "Terminé",
-      "error": "Erreur"
+      "error": "Erreur",
+      "seeding": "En partage"
     },
     "section_queued": "En file d'attente",
     "section_finished": "Terminés",
@@ -33,7 +34,8 @@
     "cancel": "Annuler",
     "clear_finished": "Effacer les terminés",
     "show_more": "Afficher {{count}} de plus",
-    "open_folder": "Afficher dans le dossier"
+    "open_folder": "Afficher dans le dossier",
+    "stop": "Arrêter"
   },
   "toast": {
     "download_preparing": "Préparation du téléchargement...",
