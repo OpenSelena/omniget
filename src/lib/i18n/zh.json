@@ -32,7 +32,8 @@
     "phase_preparing": "正在准备下载...",
     "cancel": "取消",
     "clear_finished": "清除已完成",
-    "show_more": "显示更多 {{count}} 项"
+    "show_more": "显示更多 {{count}} 项",
+    "open_folder": "在文件夹中显示"
   },
   "toast": {
     "download_preparing": "正在准备下载...",
