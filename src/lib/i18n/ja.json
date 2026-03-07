@@ -32,7 +32,8 @@
     "phase_preparing": "ダウンロードを準備中...",
     "cancel": "キャンセル",
     "clear_finished": "完了済みをクリア",
-    "show_more": "さらに {{count}} 件を表示"
+    "show_more": "さらに {{count}} 件を表示",
+    "open_folder": "フォルダーで表示"
   },
   "toast": {
     "download_preparing": "ダウンロードを準備中...",
