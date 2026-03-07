@@ -421,8 +421,9 @@ pub async fn clear_finished_downloads(
 pub async fn reveal_file(path: String) -> Result<(), String> {
     #[cfg(target_os = "windows")]
     {
+        use std::os::windows::process::CommandExt;
         std::process::Command::new("explorer")
-            .args(["/select,", &path])
+            .raw_arg(format!("/select,\"{}\"", path))
             .spawn()
             .map_err(|e| e.to_string())?;
     }

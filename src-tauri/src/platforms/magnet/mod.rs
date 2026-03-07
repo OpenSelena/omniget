@@ -181,7 +181,7 @@ impl PlatformDownloader for MagnetDownloader {
         let file_path = if torrent_name.is_empty() {
             output_dir.clone()
         } else {
-            output_dir.join(sanitize_filename::sanitize(&torrent_name))
+            output_dir.join(&torrent_name)
         };
 
         Ok(DownloadResult {
