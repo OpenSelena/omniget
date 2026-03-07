@@ -49,6 +49,7 @@ pub struct DownloadOptions {
     pub concurrent_fragments: u32,
     pub ytdlp_path: Option<PathBuf>,
     pub torrent_listen_port: Option<u16>,
+    pub torrent_id_slot: Option<std::sync::Arc<tokio::sync::Mutex<Option<usize>>>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

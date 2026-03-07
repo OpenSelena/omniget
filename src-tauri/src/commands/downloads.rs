@@ -269,14 +269,22 @@ pub async fn pause_download(
     state: tauri::State<'_, AppState>,
     download_id: u64,
 ) -> Result<String, String> {
-    let state_to_emit = {
+    let (state_to_emit, torrent_id) = {
         let mut q = state.download_queue.lock().await;
         if q.pause(download_id) {
-            Some(q.get_state())
+            let tid = q.items.iter().find(|i| i.id == download_id).and_then(|i| i.torrent_id);
+            (Some(q.get_state()), tid)
         } else {
-            None
+            (None, None)
         }
     };
+    if let Some(tid) = torrent_id {
+        if let Some(session) = state.torrent_session.lock().await.as_ref() {
+            if let Some(handle) = session.get(librqbit::api::TorrentIdOrHash::Id(tid)) {
+                let _ = session.pause(&handle).await;
+            }
+        }
+    }
     if let Some(s) = state_to_emit {
         emit_queue_state_from_state(&app, s);
         queue::try_start_next(app, state.download_queue.clone()).await;
@@ -292,14 +300,22 @@ pub async fn resume_download(
     state: tauri::State<'_, AppState>,
     download_id: u64,
 ) -> Result<String, String> {
-    let state_to_emit = {
+    let (state_to_emit, torrent_id) = {
         let mut q = state.download_queue.lock().await;
         if q.resume(download_id) {
-            Some(q.get_state())
+            let tid = q.items.iter().find(|i| i.id == download_id).and_then(|i| i.torrent_id);
+            (Some(q.get_state()), tid)
         } else {
-            None
+            (None, None)
         }
     };
+    if let Some(tid) = torrent_id {
+        if let Some(session) = state.torrent_session.lock().await.as_ref() {
+            if let Some(handle) = session.get(librqbit::api::TorrentIdOrHash::Id(tid)) {
+                let _ = session.unpause(&handle).await;
+            }
+        }
+    }
     if let Some(s) = state_to_emit {
         emit_queue_state_from_state(&app, s);
         queue::try_start_next(app, state.download_queue.clone()).await;

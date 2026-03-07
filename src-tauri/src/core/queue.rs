@@ -260,6 +260,7 @@ impl DownloadQueue {
         speed: f64,
         downloaded: u64,
         total: Option<u64>,
+        torrent_id: Option<usize>,
     ) {
         if let Some(item) = self.items.iter_mut().find(|i| i.id == id) {
             item.percent = percent;
@@ -268,13 +269,18 @@ impl DownloadQueue {
             if let Some(t) = total {
                 item.total_bytes = Some(t);
             }
+            if torrent_id.is_some() && item.torrent_id.is_none() {
+                item.torrent_id = torrent_id;
+            }
         }
     }
 
     pub fn pause(&mut self, id: u64) -> bool {
         if let Some(item) = self.items.iter_mut().find(|i| i.id == id) {
             if item.status == QueueStatus::Active {
-                item.cancel_token.cancel();
+                if item.platform != "magnet" {
+                    item.cancel_token.cancel();
+                }
                 item.status = QueueStatus::Paused;
                 item.speed_bytes_per_sec = 0.0;
                 return true;
@@ -286,8 +292,12 @@ impl DownloadQueue {
     pub fn resume(&mut self, id: u64) -> bool {
         if let Some(item) = self.items.iter_mut().find(|i| i.id == id) {
             if item.status == QueueStatus::Paused {
-                item.status = QueueStatus::Queued;
-                item.cancel_token = CancellationToken::new();
+                if item.platform == "magnet" {
+                    item.status = QueueStatus::Active;
+                } else {
+                    item.status = QueueStatus::Queued;
+                    item.cancel_token = CancellationToken::new();
+                }
                 return true;
             }
         }
@@ -580,6 +590,7 @@ async fn spawn_download_inner(
     if settings.download.organize_by_platform {
         final_output_dir = final_output_dir.join(&platform_name);
     }
+    let torrent_id_slot = Arc::new(tokio::sync::Mutex::new(None));
     let opts = crate::models::media::DownloadOptions {
         quality: quality.or_else(|| Some(settings.download.video_quality.clone())),
         output_dir: final_output_dir,
@@ -592,6 +603,7 @@ async fn spawn_download_inner(
         concurrent_fragments: settings.advanced.concurrent_fragments,
         ytdlp_path,
         torrent_listen_port: Some(settings.advanced.torrent_listen_port),
+        torrent_id_slot: Some(torrent_id_slot.clone()),
     };
 
     let total_bytes = info.file_size_bytes;
@@ -601,6 +613,7 @@ async fn spawn_download_inner(
 
     let app_progress = app.clone();
     let queue_progress = queue.clone();
+    let torrent_id_slot_progress = torrent_id_slot.clone();
     let progress_forwarder = tokio::spawn(async move {
         let mut last_bytes: u64 = 0;
         let mut last_time = std::time::Instant::now();
@@ -642,7 +655,8 @@ async fn spawn_download_inner(
 
             {
                 let mut q = queue_progress.lock().await;
-                q.update_progress(item_id, clamped, current_speed, downloaded_bytes, total_bytes);
+                let tid = { *torrent_id_slot_progress.lock().await };
+                q.update_progress(item_id, clamped, current_speed, downloaded_bytes, total_bytes, tid);
             }
 
             let _ = app_progress.emit("queue-item-progress", &QueueItemProgress {

@@ -118,6 +118,10 @@ impl PlatformDownloader for MagnetDownloader {
 
         tracing::info!("[magnet] torrent added (id={}), waiting for download...", torrent_id);
 
+        if let Some(slot) = &opts.torrent_id_slot {
+            *slot.lock().await = Some(torrent_id);
+        }
+
         let completion = managed_torrent.wait_until_completed();
         tokio::pin!(completion);
 
