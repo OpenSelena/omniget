@@ -438,31 +438,98 @@ pub async fn reveal_file(path: String) -> Result<(), String> {
 
     #[cfg(target_os = "linux")]
     {
-        let file_path = std::path::Path::new(&path);
-        let dir = file_path.parent().unwrap_or(file_path);
+        use std::path::{Path, PathBuf};
+        use std::process::Stdio;
 
-        let portal_result = tokio::process::Command::new("gdbus")
+        let file_path = Path::new(&path);
+        let abs_path: PathBuf = if file_path.is_absolute() {
+            file_path.to_path_buf()
+        } else {
+            std::env::current_dir()
+                .map(|cwd| cwd.join(file_path))
+                .unwrap_or_else(|_| file_path.to_path_buf())
+        };
+
+        let dir_path = abs_path.parent().unwrap_or(&abs_path);
+        let item_uri = url::Url::from_file_path(&abs_path)
+            .or_else(|_| url::Url::from_file_path(file_path))
+            .map(|u| u.to_string())
+            .unwrap_or_else(|_| format!("file://{}", abs_path.display()));
+        let dir_uri = url::Url::from_directory_path(dir_path)
+            .map(|u| u.to_string())
+            .unwrap_or_else(|_| format!("file://{}", dir_path.display()));
+
+        let gdbus_show_items_arg =
+            format!("[\"{}\"]", item_uri.replace('\\', "\\\\").replace('"', "\\\""));
+        let show_items_with_gdbus = tokio::process::Command::new("gdbus")
             .args([
-                "call", "--session",
-                "--dest", "org.freedesktop.portal.Desktop",
-                "--object-path", "/org/freedesktop/portal/desktop",
-                "--method", "org.freedesktop.portal.OpenURI.OpenDirectory",
+                "call",
+                "--session",
+                "--dest",
+                "org.freedesktop.FileManager1",
+                "--object-path",
+                "/org/freedesktop/FileManager1",
+                "--method",
+                "org.freedesktop.FileManager1.ShowItems",
+                &gdbus_show_items_arg,
                 "",
-                &format!("file://{}", dir.display()),
-                "{}",
             ])
-            .stdout(std::process::Stdio::null())
-            .stderr(std::process::Stdio::null())
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
             .status()
-            .await;
+            .await
+            .map(|s| s.success())
+            .unwrap_or(false);
 
-        match portal_result {
-            Ok(status) if status.success() => {}
-            _ => {
+        let show_items_ok = if show_items_with_gdbus {
+            true
+        } else {
+            let dbus_send_array_arg = format!("array:string:{}", item_uri);
+            tokio::process::Command::new("dbus-send")
+                .args([
+                    "--session",
+                    "--dest=org.freedesktop.FileManager1",
+                    "--type=method_call",
+                    "/org/freedesktop/FileManager1",
+                    "org.freedesktop.FileManager1.ShowItems",
+                    &dbus_send_array_arg,
+                    "string:",
+                ])
+                .stdout(Stdio::null())
+                .stderr(Stdio::null())
+                .status()
+                .await
+                .map(|s| s.success())
+                .unwrap_or(false)
+        };
+
+        if !show_items_ok {
+            let portal_ok = tokio::process::Command::new("gdbus")
+                .args([
+                    "call",
+                    "--session",
+                    "--dest",
+                    "org.freedesktop.portal.Desktop",
+                    "--object-path",
+                    "/org/freedesktop/portal/desktop",
+                    "--method",
+                    "org.freedesktop.portal.OpenURI.OpenDirectory",
+                    "",
+                    &dir_uri,
+                    "{}",
+                ])
+                .stdout(Stdio::null())
+                .stderr(Stdio::null())
+                .status()
+                .await
+                .map(|s| s.success())
+                .unwrap_or(false);
+
+            if !portal_ok {
                 std::process::Command::new("xdg-open")
-                    .arg(dir)
-                    .stdout(std::process::Stdio::null())
-                    .stderr(std::process::Stdio::null())
+                    .arg(dir_path)
+                    .stdout(Stdio::null())
+                    .stderr(Stdio::null())
                     .spawn()
                     .map_err(|e| e.to_string())?;
             }
