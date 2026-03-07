@@ -234,7 +234,7 @@
     font-weight: 500;
     line-height: 16px;
     text-align: center;
-    color: #fff;
+    color: var(--on-accent);
     background: var(--blue);
     border-radius: 9999px;
     pointer-events: none;
