@@ -25,6 +25,11 @@ fn setup_environment() {
 
     std::env::set_var("PYTHONIOENCODING", "utf-8");
     std::env::set_var("PYTHONUTF8", "1");
+
+    #[cfg(target_os = "linux")]
+    if std::env::var("WEBKIT_DISABLE_DMABUF_RENDERER").is_err() {
+        std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
+    }
 }
 
 fn main() {
