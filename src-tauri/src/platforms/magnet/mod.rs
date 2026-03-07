@@ -99,7 +99,6 @@ impl PlatformDownloader for MagnetDownloader {
 
         let add_torrent = AddTorrent::from_url(url);
         let torrent_opts = AddTorrentOptions {
-            output_folder: Some(output_dir.to_string_lossy().to_string()),
             overwrite: true,
             ..Default::default()
         };
