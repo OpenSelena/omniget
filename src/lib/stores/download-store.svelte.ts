@@ -307,17 +307,23 @@ export function upsertGenericProgress(
     speed = existing.speed * (1 - SPEED_SMOOTHING) + speedBytesPerSec * SPEED_SMOOTHING;
   }
 
+  // Preserve non-downloading statuses (paused, seeding, complete, error)
+  // to avoid race conditions with queue-state-update events
+  const keepStatus = existing?.kind === "generic"
+    && (existing.status === "paused" || existing.status === "seeding" || existing.status === "complete" || existing.status === "error");
+  const resolvedStatus: DownloadStatus = keepStatus ? existing!.status : "downloading";
+
   downloads.set(id, {
     kind: "generic",
     id,
     name: title,
     platform,
     percent: Math.max(0, percent),
-    speed,
+    speed: resolvedStatus === "downloading" ? speed : 0,
     downloadedBytes,
     totalBytes,
     phase,
-    status: "downloading",
+    status: resolvedStatus,
     startedAt: existing?.startedAt ?? now,
     lastUpdateAt: now,
   });

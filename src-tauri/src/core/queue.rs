@@ -304,7 +304,7 @@ impl DownloadQueue {
         false
     }
 
-    /// Cancel an item. Returns the torrent_id if the item was seeding (caller should delete from session).
+    /// Cancel an item. Returns the torrent_id if the item needs torrent cleanup (caller should delete from session).
     pub fn cancel(&mut self, id: u64) -> (bool, Option<usize>) {
         if let Some(item) = self.items.iter_mut().find(|i| i.id == id) {
             match &item.status {
@@ -324,7 +324,19 @@ impl DownloadQueue {
                     item.speed_bytes_per_sec = 0.0;
                     return (true, tid);
                 }
-                QueueStatus::Queued | QueueStatus::Paused => {
+                QueueStatus::Paused => {
+                    // For magnet downloads, the cancel_token was not cancelled during pause,
+                    // so we must cancel it now to stop the background download loop.
+                    // Also return the torrent_id for session cleanup.
+                    item.cancel_token.cancel();
+                    let tid = if item.platform == "magnet" { item.torrent_id } else { None };
+                    item.status = QueueStatus::Error {
+                        message: "Cancelled".to_string(),
+                    };
+                    item.speed_bytes_per_sec = 0.0;
+                    return (true, tid);
+                }
+                QueueStatus::Queued => {
                     item.status = QueueStatus::Error {
                         message: "Cancelled".to_string(),
                     };
@@ -352,14 +364,20 @@ impl DownloadQueue {
         false
     }
 
-    /// Remove an item. Returns the torrent_id if the item was seeding (caller should delete from session).
+    /// Remove an item. Returns the torrent_id if the item needs torrent cleanup (caller should delete from session).
     pub fn remove(&mut self, id: u64) -> Option<Option<usize>> {
         if let Some(pos) = self.items.iter().position(|i| i.id == id) {
             let item = &self.items[pos];
             if item.status == QueueStatus::Active {
                 item.cancel_token.cancel();
             }
-            let torrent_id = if item.status == QueueStatus::Seeding {
+            // For paused magnet items, the cancel_token was not cancelled during pause
+            if item.status == QueueStatus::Paused && item.platform == "magnet" {
+                item.cancel_token.cancel();
+            }
+            let torrent_id = if item.status == QueueStatus::Seeding
+                || (item.status == QueueStatus::Paused && item.platform == "magnet")
+            {
                 item.torrent_id
             } else {
                 None
