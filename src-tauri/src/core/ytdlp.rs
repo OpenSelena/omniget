@@ -822,16 +822,10 @@ pub async fn download_video(
 
     let mode = download_mode.unwrap_or("auto");
     let is_audio_only = mode == "audio";
-    let (ffmpeg_available, ffmpeg_location_result, aria2c_path) = tokio::join!(
-        crate::core::ffmpeg::is_ffmpeg_available(),
+    let (ffmpeg_location, aria2c_path) = tokio::join!(
         find_ffmpeg_location_cached(),
         crate::core::dependencies::ensure_aria2c(),
     );
-    let ffmpeg_location = if ffmpeg_available {
-        ffmpeg_location_result
-    } else {
-        None
-    };
 
     let format_selector = if let Some(fid) = format_id {
         fid.to_string()
