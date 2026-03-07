@@ -76,10 +76,10 @@ impl PlatformDownloader for MagnetDownloader {
 
         let output_dir = &opts.output_dir;
 
-        let listen_port = opts.torrent_listen_port.unwrap_or(6881);
+        let listen_port = opts.torrent_listen_port.unwrap_or(6881).min(65525);
         tracing::info!("[magnet] initializing session, output: {}, port: {}", output_dir.display(), listen_port);
         let session_opts = SessionOptions {
-            listen_port_range: Some(listen_port..listen_port + 10),
+            listen_port_range: Some(listen_port..listen_port.saturating_add(10)),
             ..Default::default()
         };
         let session = match Session::new_with_opts(output_dir.into(), session_opts).await {
@@ -152,7 +152,7 @@ impl PlatformDownloader for MagnetDownloader {
         let file_path = if torrent_name.is_empty() {
             output_dir.clone()
         } else {
-            output_dir.join(&torrent_name)
+            output_dir.join(sanitize_filename::sanitize(&torrent_name))
         };
 
         Ok(DownloadResult {

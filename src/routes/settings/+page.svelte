@@ -833,7 +833,7 @@
             type="number"
             class="input-number"
             min="1024"
-            max="65535"
+            max="65525"
             value={settings.advanced.torrent_listen_port}
             onchange={(e) => changeNumber("advanced", "torrent_listen_port", e)}
           />

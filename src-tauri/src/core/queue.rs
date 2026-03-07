@@ -655,7 +655,7 @@ async fn spawn_download_inner(
 
     match result {
         Ok(dl) => {
-            if settings.download.embed_metadata && ffmpeg::is_ffmpeg_available().await {
+            if settings.download.embed_metadata && platform_name != "magnet" && ffmpeg::is_ffmpeg_available().await {
                 let metadata = MetadataEmbed {
                     title: Some(info.title.clone()),
                     artist: Some(info.author.clone()),
