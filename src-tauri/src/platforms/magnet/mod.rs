@@ -144,6 +144,12 @@ impl PlatformDownloader for MagnetDownloader {
                             downloaded as f64 / 1_048_576.0,
                             total as f64 / 1_048_576.0,
                         );
+                        // Fallback: detect completion from stats when
+                        // wait_until_completed() doesn't resolve
+                        if downloaded >= total {
+                            tracing::info!("[magnet] download complete from stats (id={})", torrent_id);
+                            break;
+                        }
                     }
                 }
                 _ = cancel_rx.cancelled() => {
