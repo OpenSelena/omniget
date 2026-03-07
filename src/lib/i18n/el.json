@@ -32,7 +32,8 @@
     "phase_preparing": "Προετοιμασία μεταφόρτωσης...",
     "cancel": "Ακύρωση",
     "clear_finished": "Εκκαθάριση των ολοκληρωμένων",
-    "show_more": "Δείξε {{count}} περισσότερα"
+    "show_more": "Δείξε {{count}} περισσότερα",
+    "open_folder": "Εμφάνιση στο φάκελο"
   },
   "toast": {
     "download_preparing": "Προετοιμασία λήψης...",
