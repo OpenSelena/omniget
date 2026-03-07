@@ -7,7 +7,15 @@ use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 
 pub async fn is_ffmpeg_available() -> bool {
-    crate::core::dependencies::find_tool("ffmpeg").await.is_some()
+    use tokio::sync::OnceCell;
+    static CACHED: OnceCell<bool> = OnceCell::const_new();
+    *CACHED
+        .get_or_init(|| async {
+            crate::core::dependencies::find_tool("ffmpeg")
+                .await
+                .is_some()
+        })
+        .await
 }
 
 pub async fn mux_video_audio(video: &Path, audio: &Path, output: &Path) -> anyhow::Result<()> {
