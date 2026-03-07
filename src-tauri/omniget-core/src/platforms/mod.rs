@@ -4,7 +4,7 @@ use std::fmt;
 use std::str::FromStr;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Platform {
     Hotmart,
@@ -19,6 +19,7 @@ pub enum Platform {
     Telegram,
     Vimeo,
     Udemy,
+    Other(String),
 }
 
 impl fmt::Display for Platform {
@@ -36,6 +37,7 @@ impl fmt::Display for Platform {
             Platform::Telegram => "telegram",
             Platform::Vimeo => "vimeo",
             Platform::Udemy => "udemy",
+            Platform::Other(ref name) => name.as_str(),
         };
         write!(f, "{}", name)
     }

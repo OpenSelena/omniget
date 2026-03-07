@@ -274,7 +274,7 @@
     }
   },
   "omnibox": {
-    "placeholder": "Paste a URL or search",
+    "placeholder": "Paste a URL, magnet link, or search",
     "search_placeholder": "Search videos...",
     "searching": "Searching...",
     "search_empty": "No results found",

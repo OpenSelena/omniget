@@ -99,6 +99,9 @@ pub fn run() {
     registry.register(Arc::new(
         platforms::generic_ytdlp::GenericYtdlpDownloader::new(),
     ));
+    registry.register(Arc::new(
+        platforms::magnet::MagnetDownloader::new(),
+    ));
 
     let auth_registry = core::auth::AuthRegistry::new();
 
