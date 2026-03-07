@@ -240,14 +240,20 @@ pub async fn cancel_generic_download(
     state: tauri::State<'_, AppState>,
     download_id: u64,
 ) -> Result<String, String> {
-    let state_to_emit = {
+    let (state_to_emit, seeding_torrent_id) = {
         let mut q = state.download_queue.lock().await;
-        if q.cancel(download_id) {
-            Some(q.get_state())
+        let (cancelled, torrent_id) = q.cancel(download_id);
+        if cancelled {
+            (Some(q.get_state()), torrent_id)
         } else {
-            None
+            (None, None)
         }
     };
+    if let Some(tid) = seeding_torrent_id {
+        if let Some(session) = state.torrent_session.lock().await.as_ref() {
+            let _ = session.delete(librqbit::api::TorrentIdOrHash::Id(tid), false).await;
+        }
+    }
     if let Some(s) = state_to_emit {
         emit_queue_state_from_state(&app, s);
         queue::try_start_next(app, state.download_queue.clone()).await;
@@ -332,14 +338,18 @@ pub async fn remove_download(
     state: tauri::State<'_, AppState>,
     download_id: u64,
 ) -> Result<String, String> {
-    let state_to_emit = {
+    let (state_to_emit, seeding_torrent_id) = {
         let mut q = state.download_queue.lock().await;
-        if q.remove(download_id) {
-            Some(q.get_state())
-        } else {
-            None
+        match q.remove(download_id) {
+            Some(torrent_id) => (Some(q.get_state()), torrent_id),
+            None => (None, None),
         }
     };
+    if let Some(tid) = seeding_torrent_id {
+        if let Some(session) = state.torrent_session.lock().await.as_ref() {
+            let _ = session.delete(librqbit::api::TorrentIdOrHash::Id(tid), false).await;
+        }
+    }
     if let Some(s) = state_to_emit {
         emit_queue_state_from_state(&app, s);
         queue::try_start_next(app, state.download_queue.clone()).await;

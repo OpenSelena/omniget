@@ -179,6 +179,7 @@ impl PlatformDownloader for MagnetDownloader {
             file_path,
             file_size_bytes: total_size,
             duration_seconds: 0.0,
+            torrent_id: Some(torrent_id),
         })
     }
 }

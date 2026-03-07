@@ -43,6 +43,7 @@ pub struct AppState {
     pub udemy_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
     pub udemy_api_webview: Arc<tokio::sync::Mutex<Option<tauri::WebviewWindow>>>,
     pub udemy_api_result: Arc<std::sync::Mutex<Option<String>>>,
+    pub torrent_session: Arc<tokio::sync::Mutex<Option<Arc<librqbit::Session>>>>,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -99,9 +100,10 @@ pub fn run() {
     registry.register(Arc::new(
         platforms::generic_ytdlp::GenericYtdlpDownloader::new(),
     ));
-    let torrent_session = Arc::new(tokio::sync::Mutex::new(None));
+    let torrent_session: Arc<tokio::sync::Mutex<Option<Arc<librqbit::Session>>>> =
+        Arc::new(tokio::sync::Mutex::new(None));
     registry.register(Arc::new(
-        platforms::magnet::MagnetDownloader::new(torrent_session),
+        platforms::magnet::MagnetDownloader::new(torrent_session.clone()),
     ));
 
     let auth_registry = core::auth::AuthRegistry::new();
@@ -122,6 +124,7 @@ pub fn run() {
         udemy_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
         udemy_api_webview: Arc::new(tokio::sync::Mutex::new(None)),
         udemy_api_result: Arc::new(std::sync::Mutex::new(None)),
+        torrent_session,
     };
 
     tauri::Builder::default()
