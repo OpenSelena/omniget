@@ -32,7 +32,8 @@
     "phase_preparing": "Preparazione download...",
     "cancel": "Annulla",
     "clear_finished": "Cancella completati",
-    "show_more": "Mostra altri {{count}}"
+    "show_more": "Mostra altri {{count}}",
+    "open_folder": "Mostra nella cartella"
   },
   "toast": {
     "download_preparing": "Preparazione download...",
