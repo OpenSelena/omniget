@@ -513,9 +513,32 @@ pub async fn embed_metadata(
         return Err(anyhow!("ffmpeg metadata failed: {}", stderr));
     }
 
-    tokio::fs::rename(&temp_output, file)
-        .await
-        .map_err(|e| anyhow!("Failed to replace file: {}", e))?;
+    let mut rename_ok = false;
+    for attempt in 0..3 {
+        match tokio::fs::rename(&temp_output, file).await {
+            Ok(()) => {
+                rename_ok = true;
+                break;
+            }
+            Err(e) if attempt < 2 => {
+                tracing::warn!(
+                    "Failed to replace file (attempt {}): {}, retrying...",
+                    attempt + 1,
+                    e
+                );
+                tokio::time::sleep(std::time::Duration::from_millis(500 * (attempt as u64 + 1)))
+                    .await;
+            }
+            Err(e) => {
+                let _ = tokio::fs::remove_file(&temp_output).await;
+                return Err(anyhow!("Failed to replace file after 3 attempts: {}", e));
+            }
+        }
+    }
+    if !rename_ok {
+        let _ = tokio::fs::remove_file(&temp_output).await;
+        return Err(anyhow!("Failed to replace file"));
+    }
 
     Ok(())
 }
