@@ -19,6 +19,7 @@ pub enum Platform {
     Telegram,
     Vimeo,
     Udemy,
+    Bilibili,
     Other(String),
 }
 
@@ -37,6 +38,7 @@ impl fmt::Display for Platform {
             Platform::Telegram => "telegram",
             Platform::Vimeo => "vimeo",
             Platform::Udemy => "udemy",
+            Platform::Bilibili => "bilibili",
             Platform::Other(ref name) => name.as_str(),
         };
         write!(f, "{}", name)
@@ -60,6 +62,7 @@ impl FromStr for Platform {
             "telegram" | "tg" => Ok(Platform::Telegram),
             "vimeo" => Ok(Platform::Vimeo),
             "udemy" => Ok(Platform::Udemy),
+            "bilibili" | "b站" => Ok(Platform::Bilibili),
             _ => Err(format!("Unknown platform: {}", s)),
         }
     }
@@ -109,6 +112,8 @@ impl Platform {
             Some(Platform::Vimeo)
         } else if matches("udemy.com") {
             Some(Platform::Udemy)
+        } else if matches("bilibili.com") || host == "b23.tv" {
+            Some(Platform::Bilibili)
         } else {
             None
         }
@@ -128,6 +133,7 @@ impl Platform {
             Platform::Telegram,
             Platform::Vimeo,
             Platform::Udemy,
+            Platform::Bilibili,
         ]
     }
 }
