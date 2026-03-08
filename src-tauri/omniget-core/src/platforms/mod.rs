@@ -68,7 +68,8 @@ impl FromStr for Platform {
 impl Platform {
     pub fn from_url(url_str: &str) -> Option<Self> {
         // Magnet links have no hostname, detect by scheme prefix
-        if url_str.starts_with("magnet:") {
+        // .torrent URLs are also handled by the magnet downloader
+        if url_str.starts_with("magnet:") || url_str.ends_with(".torrent") {
             return Some(Platform::Other("magnet".to_string()));
         }
 
