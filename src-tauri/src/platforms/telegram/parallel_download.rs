@@ -394,13 +394,19 @@ async fn download_sequential(
             limit: PART_SIZE,
         };
 
-        let response = match client.invoke_in_dc(dc, &request).await {
+        let result = if dc > 0 {
+            client.invoke_in_dc(dc, &request).await
+        } else {
+            client.invoke(&request).await
+        };
+        let response = match result {
             Ok(r) => r,
             Err(InvocationError::Rpc(ref err)) if err.code == FILE_MIGRATE_ERROR => {
                 if let Some(new_dc) = err.value {
+                    let new_dc = new_dc as i32;
                     tracing::info!(
-                        "[tg-parallel] sequential FILE_MIGRATE: DC {} → DC {}",
-                        dc, new_dc
+                        "[tg-parallel] sequential FILE_MIGRATE: switching to DC {}",
+                        new_dc
                     );
                     dc = new_dc;
                     continue;
