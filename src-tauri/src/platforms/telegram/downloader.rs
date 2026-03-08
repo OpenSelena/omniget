@@ -1,5 +1,5 @@
 use async_trait::async_trait;
-use tokio::io::AsyncWriteExt;
+use grammers_client::types::Peer;
 use tokio::sync::mpsc;
 
 use super::auth::TelegramSessionHandle;
@@ -31,10 +31,8 @@ impl TelegramDownloader {
             return None;
         }
 
-        // t.me/channel/123 or t.me/c/1234567/123
         if segments.len() >= 2 {
             if segments[0] == "c" && segments.len() >= 3 {
-                // Private channel: t.me/c/{channel_id}/{message_id}
                 let channel = format!("c/{}", segments[1]);
                 let msg_id = segments[2].parse::<i32>().ok();
                 return Some((channel, msg_id));
@@ -44,7 +42,6 @@ impl TelegramDownloader {
             return Some((username, msg_id));
         }
 
-        // t.me/channel (no message_id)
         let first = segments[0];
         if !["joinchat", "addstickers", "login", "share"].contains(&first) {
             return Some((first.to_string(), None));
@@ -79,9 +76,7 @@ impl PlatformDownloader for TelegramDownloader {
             .clone();
         drop(guard);
 
-        // Resolve channel by username
         let peer = if username.starts_with("c/") {
-            // Private channel with numeric ID
             let id_str = username.strip_prefix("c/").unwrap();
             let channel_id: i64 = id_str
                 .parse()
@@ -129,7 +124,6 @@ impl PlatformDownloader for TelegramDownloader {
                 let name = if raw_name.is_empty() {
                     format!("file_{}", doc.id())
                 } else {
-                    // Strip extension for title, we'll use format field
                     raw_name
                         .rsplit_once('.')
                         .map(|(n, _)| n.to_string())
@@ -185,42 +179,25 @@ impl PlatformDownloader for TelegramDownloader {
             .first()
             .ok_or_else(|| anyhow::anyhow!("No quality available"))?;
 
-        tracing::info!("[tg-diag] download: quality.url raw={}", quality.url);
         let tg_ref = quality
             .url
             .strip_prefix("tg://")
-            .ok_or_else(|| {
-                tracing::error!("[tg-diag] download: quality.url missing tg:// prefix: {}", quality.url);
-                anyhow::anyhow!("Invalid internal reference")
-            })?;
+            .ok_or_else(|| anyhow::anyhow!("Invalid internal reference"))?;
         let (username, msg_id_str) = tg_ref
             .rsplit_once(':')
-            .ok_or_else(|| {
-                tracing::error!("[tg-diag] download: invalid tg ref format (no colon): {}", tg_ref);
-                anyhow::anyhow!("Invalid internal reference format")
-            })?;
+            .ok_or_else(|| anyhow::anyhow!("Invalid internal reference format"))?;
         let msg_id: i32 = msg_id_str.parse()?;
-        tracing::info!("[tg-perf] TelegramDownloader::download: parsed tg ref username={}, msg_id={}", username, msg_id);
+        tracing::info!("[tg-dl] download: username={}, msg_id={}", username, msg_id);
 
         let guard = self.session.lock().await;
         let client = guard
             .client
             .as_ref()
-            .ok_or_else(|| {
-                tracing::error!("[tg-diag] download: client is None (not authenticated)");
-                anyhow::anyhow!("Not authenticated to Telegram")
-            })?
+            .ok_or_else(|| anyhow::anyhow!("Not authenticated to Telegram"))?
             .clone();
         drop(guard);
 
-        let is_auth = client.is_authorized().await.unwrap_or(false);
-        tracing::info!("[tg-diag] download: is_authorized={}", is_auth);
-        if !is_auth {
-            tracing::error!("[tg-diag] download: client not authorized, download will likely fail");
-        }
-
         let peer = if username.starts_with("c/") {
-            tracing::info!("[tg-diag] download: resolving private channel (c/ branch)");
             let id_str = username.strip_prefix("c/").unwrap();
             let channel_id: i64 = id_str.parse()?;
             use grammers_client::session::defs::{PeerAuth, PeerId, PeerRef};
@@ -231,25 +208,24 @@ impl PlatformDownloader for TelegramDownloader {
             client
                 .resolve_peer(peer_ref)
                 .await
-                .map_err(|e| {
-                    tracing::error!("[tg-diag] download: failed to resolve channel: {}", e);
-                    anyhow::anyhow!("Cannot resolve channel: {}", e)
-                })?
+                .map_err(|e| anyhow::anyhow!("Cannot resolve channel: {}", e))?
         } else {
-            tracing::info!("[tg-diag] download: resolving by username={}", username);
             client
                 .resolve_username(username)
                 .await
-                .map_err(|e| {
-                    tracing::error!("[tg-diag] download: failed to resolve username {}: {}", username, e);
-                    anyhow::anyhow!("Cannot resolve username: {}", e)
-                })?
-                .ok_or_else(|| {
-                    tracing::error!("[tg-diag] download: username {} resolved to None", username);
-                    anyhow::anyhow!("Channel not found")
-                })?
+                .map_err(|e| anyhow::anyhow!("Cannot resolve username: {}", e))?
+                .ok_or_else(|| anyhow::anyhow!("Channel not found"))?
         };
-        tracing::info!("[tg-perf] TelegramDownloader::download: peer resolved successfully");
+
+        let is_channel = matches!(&peer, Peer::Channel(_));
+        use grammers_client::session::defs::PeerRef;
+        let (bare_id, peer_access_hash) = std::panic::catch_unwind(
+            std::panic::AssertUnwindSafe(|| {
+                let peer_ref = PeerRef::from(peer);
+                (peer_ref.id.bare_id(), peer_ref.auth.hash())
+            }),
+        )
+        .map_err(|_| anyhow::anyhow!("Peer has an unsupported ID"))?;
 
         let use_prefix = opts
             .filename_template
@@ -266,80 +242,140 @@ impl PlatformDownloader for TelegramDownloader {
         tokio::fs::create_dir_all(&opts.output_dir).await?;
 
         let tmp_path = std::path::PathBuf::from(format!("{}.tmp", output_path.display()));
+        const MAX_REF_RETRIES: u32 = 2;
 
-        // Fetch the message to get Media (which implements Downloadable)
-        let messages = client
-            .get_messages_by_id(&peer, &[msg_id])
-            .await
-            .map_err(|e| anyhow::anyhow!("Cannot fetch message: {}", e))?;
+        for ref_attempt in 0..=MAX_REF_RETRIES {
+            let (raw_media, _msg_date) = super::parallel_download::fetch_raw_media(
+                &client, bare_id, peer_access_hash, is_channel, msg_id,
+            )
+            .await?;
 
-        let message = messages
-            .into_iter()
-            .next()
-            .flatten()
-            .ok_or_else(|| anyhow::anyhow!("Message {} not found", msg_id))?;
+            let media = super::parallel_download::media_to_location(&raw_media)
+                .ok_or_else(|| anyhow::anyhow!("Unsupported media type for download"))?;
 
-        let media = message
-            .media()
-            .ok_or_else(|| anyhow::anyhow!("Message has no downloadable media"))?;
-
-        // Get total size for progress reporting
-        let total_size: u64 = match &media {
-            grammers_client::types::Media::Document(doc) => doc.size().max(0) as u64,
-            grammers_client::types::Media::Photo(photo) => photo.size().max(0) as u64,
-            _ => 0,
-        };
-        tracing::info!("[tg-perf] download: total_size={}", total_size);
-
-        // Use grammers' built-in iter_download which handles FILE_MIGRATE
-        // and AUTH_KEY_UNREGISTERED internally via copy_auth_to_dc()
-        let mut download_iter = client.iter_download(&media);
-
-        let mut file = tokio::fs::File::create(&tmp_path).await?;
-        let mut downloaded: u64 = 0;
-
-        loop {
-            if opts.cancel_token.is_cancelled() {
-                drop(file);
-                let _ = tokio::fs::remove_file(&tmp_path).await;
-                return Err(anyhow::anyhow!("Download cancelled"));
+            if ref_attempt == 0 {
+                tracing::info!(
+                    "[tg-dl] download: size={}, dc={}",
+                    media.size, media.dc_id
+                );
             }
 
-            match download_iter.next().await {
-                Ok(Some(chunk)) => {
-                    file.write_all(&chunk).await?;
-                    downloaded += chunk.len() as u64;
+            let result = super::parallel_download::download_parallel(
+                &client,
+                &media,
+                &tmp_path,
+                progress.clone(),
+                &opts.cancel_token,
+                8,
+            )
+            .await;
 
-                    if total_size > 0 {
-                        let percent = (downloaded as f64 / total_size as f64) * 100.0;
-                        let _ = progress.send(percent.min(100.0)).await;
-                    }
+            match result {
+                Ok(size) => {
+                    tokio::fs::rename(&tmp_path, &output_path).await?;
+                    let _ = progress.send(100.0).await;
+                    tracing::info!(
+                        "[tg-dl] download completed in {:?}, {} bytes",
+                        _t.elapsed(),
+                        size
+                    );
+                    return Ok(DownloadResult {
+                        file_path: output_path,
+                        file_size_bytes: size,
+                        duration_seconds: 0.0,
+                        torrent_id: None,
+                    });
                 }
-                Ok(None) => break,
                 Err(e) => {
-                    drop(file);
                     let _ = tokio::fs::remove_file(&tmp_path).await;
-                    return Err(anyhow::anyhow!("Download failed: {}", e));
+                    let err_str = e.to_string().to_lowercase();
+
+                    if err_str.contains("file_reference") && ref_attempt < MAX_REF_RETRIES {
+                        tracing::warn!(
+                            "[tg-dl] FILE_REFERENCE expired, re-fetching ({}/{})",
+                            ref_attempt + 1,
+                            MAX_REF_RETRIES
+                        );
+                        continue;
+                    }
+
+                    if err_str.contains("file_migrate") {
+                        tracing::warn!(
+                            "[tg-dl] FILE_MIGRATE detected, falling back to iter_download"
+                        );
+                        return download_with_iter_fallback(
+                            &client, &raw_media, media.size, &tmp_path, &output_path,
+                            progress.clone(), &opts.cancel_token, _t,
+                        )
+                        .await;
+                    }
+
+                    return Err(e);
                 }
             }
         }
 
-        file.flush().await?;
-        drop(file);
-
-        tokio::fs::rename(&tmp_path, &output_path).await?;
-        let _ = progress.send(100.0).await;
-
-        tracing::info!(
-            "[tg-perf] TelegramDownloader::download completed in {:?}, {} bytes",
-            _t.elapsed(), downloaded
-        );
-
-        Ok(DownloadResult {
-            file_path: output_path,
-            file_size_bytes: downloaded,
-            duration_seconds: 0.0,
-            torrent_id: None,
-        })
+        unreachable!()
     }
+}
+
+async fn download_with_iter_fallback(
+    client: &grammers_client::Client,
+    raw_media: &grammers_client::grammers_tl_types::enums::MessageMedia,
+    total_size: u64,
+    tmp_path: &std::path::Path,
+    output_path: &std::path::Path,
+    progress: mpsc::Sender<f64>,
+    cancel_token: &tokio_util::sync::CancellationToken,
+    start_time: std::time::Instant,
+) -> anyhow::Result<DownloadResult> {
+    use grammers_client::grammers_tl_types as tl;
+    use grammers_client::types::Downloadable;
+
+    let media_loc = super::parallel_download::media_to_location(raw_media)
+        .ok_or_else(|| anyhow::anyhow!("Unsupported media type"))?;
+
+    struct DlLoc {
+        location: tl::enums::InputFileLocation,
+        size: u64,
+    }
+    impl Downloadable for DlLoc {
+        fn to_raw_input_location(&self) -> Option<tl::enums::InputFileLocation> {
+            Some(self.location.clone())
+        }
+        fn size(&self) -> Option<usize> {
+            if self.size > 0 { Some(self.size as usize) } else { None }
+        }
+    }
+
+    let downloadable = DlLoc {
+        location: media_loc.location,
+        size: media_loc.size,
+    };
+
+    let size = super::parallel_download::download_with_iter(
+        client,
+        &downloadable,
+        total_size,
+        tmp_path,
+        progress.clone(),
+        cancel_token,
+    )
+    .await?;
+
+    tokio::fs::rename(tmp_path, output_path).await?;
+    let _ = progress.send(100.0).await;
+
+    tracing::info!(
+        "[tg-dl] iter_download fallback completed in {:?}, {} bytes",
+        start_time.elapsed(),
+        size
+    );
+
+    Ok(DownloadResult {
+        file_path: output_path.to_path_buf(),
+        file_size_bytes: size,
+        duration_seconds: 0.0,
+        torrent_id: None,
+    })
 }
