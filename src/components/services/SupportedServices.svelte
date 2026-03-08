@@ -7,7 +7,7 @@
   const services = [
     "YouTube", "Instagram", "TikTok", "Twitter / X",
     "Reddit", "Twitch", "Pinterest", "Vimeo",
-    "Bluesky", "Hotmart", "Telegram",
+    "Bluesky", "Hotmart", "Telegram", "Torrent",
   ];
 
   const YT_DLP_SITES_URL = "https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md";
