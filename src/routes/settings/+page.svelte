@@ -7,6 +7,7 @@
   import { installUpdate } from "$lib/updater";
   import { showToast } from "$lib/stores/toast-store.svelte";
   import { refreshYtdlpStatus } from "$lib/stores/dependency-store.svelte";
+  import { isDebugEnabled, setDebugEnabled, setDebugPanelOpen } from "$lib/stores/debug-store.svelte";
   import ContextHint from "$components/hints/ContextHint.svelte";
 
   type DependencyStatus = {
@@ -838,6 +839,32 @@
             onchange={(e) => changeNumber("advanced", "torrent_listen_port", e)}
           />
         </div>
+        <div class="divider"></div>
+        <div class="setting-row">
+          <div class="setting-col">
+            <span class="setting-label">{$t('debug.enable')}</span>
+            <span class="setting-path">{$t('debug.enable_desc')}</span>
+          </div>
+          <button
+            class="toggle"
+            class:on={isDebugEnabled()}
+            onclick={() => setDebugEnabled(!isDebugEnabled())}
+            role="switch"
+            aria-checked={isDebugEnabled()}
+            aria-label={$t('debug.enable')}
+          >
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
+        {#if isDebugEnabled()}
+          <div class="divider"></div>
+          <div class="setting-row">
+            <span class="setting-label">{$t('debug.open_panel')}</span>
+            <button class="button" onclick={() => setDebugPanelOpen(true)}>
+              {$t('debug.open_panel')}
+            </button>
+          </div>
+        {/if}
         <div class="divider"></div>
         <div class="setting-row">
           <span class="setting-label">{$t('settings.advanced.reset')}</span>
