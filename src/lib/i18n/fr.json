@@ -265,6 +265,18 @@
       "reset_confirm": "Êtes-vous sûr ? Tous les paramètres seront réinitialisés.",
       "torrent_listen_port": "Port d’écoute torrent",
       "torrent_listen_port_desc": "Port TCP pour les connexions BitTorrent entrantes"
+    },
+    "proxy": {
+      "title": "Proxy",
+      "enabled": "Activer le proxy",
+      "type": "Type",
+      "host": "Hôte",
+      "port": "Port",
+      "username": "Nom d’utilisateur",
+      "password": "Mot de passe"
+    },
+    "ytdlp_flags": {
+      "title": "Paramètres yt-dlp"
     }
   },
   "omnibox": {
@@ -462,5 +474,48 @@
     "unsupported_url": "URL non supportée — vérifiez le lien",
     "page_access_failed": "Impossible d'accéder à la page — vérifiez le lien et la connexion",
     "no_formats": "Aucun format vidéo trouvé pour ce lien"
+  },
+  "debug": {
+    "title": "Journal d'activité",
+    "enable": "Journal d'activité",
+    "enable_desc": "Voir ce que fait OmniGet en coulisses",
+    "filter_all": "Tout",
+    "filter_downloads": "Téléchargements",
+    "filter_network": "Réseau",
+    "filter_auth": "Authentification",
+    "filter_system": "Système",
+    "filter_convert": "Conversion",
+    "filter_errors": "Erreurs uniquement",
+    "copy_report": "Copier le rapport",
+    "report_copied": "Rapport de diagnostic copié dans le presse-papiers",
+    "clear": "Effacer",
+    "no_entries": "Aucune activité pour le moment. Lancez un téléchargement pour voir les événements ici.",
+    "open_panel": "Ouvrir le journal d'activité"
+  },
+  "p2p": {
+    "send_file": "Envoyer un fichier",
+    "send_title": "Envoyer un fichier via P2P",
+    "send_description": "Envoyez un fichier à un autre utilisateur OmniGet. Un code de partage sera généré — le destinataire le colle dans la barre de recherche pour télécharger.",
+    "select_file": "Sélectionner un fichier",
+    "share_code": "Code de partage",
+    "click_to_copy": "Cliquez pour copier",
+    "share_hint": "Partagez ce code avec le destinataire",
+    "code_copied": "Code copié dans le presse-papiers",
+    "waiting_for_receiver": "En attente du destinataire...",
+    "transferring": "Transfert en cours...",
+    "transfer_complete": "Transfert terminé",
+    "send_failed": "Échec de l'envoi",
+    "try_again": "Réessayer",
+    "pause": "Pause",
+    "resume": "Reprendre",
+    "paused": "En pause",
+    "receive_title": "Transfert P2P entrant",
+    "receive_description": "Quelqu'un souhaite vous envoyer un fichier. Acceptez pour commencer le téléchargement.",
+    "accept_transfer": "Accepter et télécharger",
+    "reject_transfer": "Refuser",
+    "searching_sender": "Recherche de l'expéditeur...",
+    "searching_hint": "Assurez-vous que les deux appareils sont sur le même réseau.",
+    "sender_not_found": "Expéditeur introuvable",
+    "sender_not_found_hint": "L'expéditeur n'est peut-être pas encore actif. Assurez-vous que les deux appareils sont sur le même réseau Wi-Fi et que l'expéditeur a partagé le code."
   }
 }
