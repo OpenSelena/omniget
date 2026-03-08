@@ -537,16 +537,15 @@ pub async fn download_media(
             &client, chat_id, access_hash, is_channel, message_id,
         ).await?;
 
-        let (location, total_size) = super::parallel_download::media_to_input_location(&raw_media)
+        let media = super::parallel_download::media_to_location(&raw_media)
             .ok_or_else(|| anyhow::anyhow!("Unsupported media type"))?;
 
         if ref_attempt == 0 {
-            tracing::info!("[tg-perf] download_media: total_size={}", total_size);
+            tracing::info!("[tg-perf] download_media: size={}, dc={}", media.size, media.dc_id);
         }
 
-        let downloadable = super::parallel_download::DownloadableLocation::new(location, total_size);
-        let result = super::parallel_download::download_with_iter(
-            &client, &downloadable, total_size, &tmp_path, progress_tx.clone(), cancel_token,
+        let result = super::parallel_download::download_parallel(
+            &client, &media, &tmp_path, progress_tx.clone(), cancel_token, 8,
         ).await;
 
         match result {
