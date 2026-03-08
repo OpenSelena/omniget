@@ -100,28 +100,34 @@ pub async fn delete_session() -> anyhow::Result<()> {
 }
 
 pub async fn check_session(handle: &TelegramSessionHandle) -> anyhow::Result<String> {
-    let (existing_client, existing_phone) = {
-        let guard = handle.lock().await;
-        (guard.client.clone(), guard.phone.clone())
+    let check = async {
+        let (existing_client, existing_phone) = {
+            let guard = handle.lock().await;
+            (guard.client.clone(), guard.phone.clone())
+        };
+
+        if let Some(client) = existing_client {
+            if client.is_authorized().await? {
+                return Ok(existing_phone);
+            }
+        }
+
+        let client = create_client()?;
+        if client.is_authorized().await? {
+            let me = client.get_me().await?;
+            let phone = me.phone().unwrap_or("").to_string();
+            let mut guard = handle.lock().await;
+            guard.client = Some(client);
+            guard.phone = phone.clone();
+            return Ok(phone);
+        }
+
+        Err(anyhow!("not_authenticated"))
     };
 
-    if let Some(client) = existing_client {
-        if client.is_authorized().await? {
-            return Ok(existing_phone);
-        }
-    }
-
-    let client = create_client()?;
-    if client.is_authorized().await? {
-        let me = client.get_me().await?;
-        let phone = me.phone().unwrap_or("").to_string();
-        let mut guard = handle.lock().await;
-        guard.client = Some(client);
-        guard.phone = phone.clone();
-        return Ok(phone);
-    }
-
-    Err(anyhow!("not_authenticated"))
+    tokio::time::timeout(std::time::Duration::from_secs(15), check)
+        .await
+        .map_err(|_| anyhow!("Session check timed out — please try again"))?
 }
 
 pub struct QrLoginResult {
