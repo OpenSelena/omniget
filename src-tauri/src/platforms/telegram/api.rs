@@ -544,8 +544,8 @@ pub async fn download_media(
             tracing::info!("[tg-perf] download_media: size={}, dc={}", media.size, media.dc_id);
         }
 
-        let result = super::parallel_download::download_parallel(
-            &client, &media, &tmp_path, progress_tx.clone(), cancel_token, 8,
+        let result = super::parallel_download::download_file(
+            &client, &media, &tmp_path, progress_tx.clone(), cancel_token,
         ).await;
 
         match result {
