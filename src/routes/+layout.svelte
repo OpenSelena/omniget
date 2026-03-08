@@ -7,6 +7,7 @@
   import { getCounts } from "$lib/stores/download-store.svelte";
   import { getSettings } from "$lib/stores/settings-store.svelte";
   import Toast from "$components/toast/Toast.svelte";
+  import DebugPanel from "$components/debug/DebugPanel.svelte";
   import { open } from "@tauri-apps/plugin-shell";
   import { refreshUpdateInfo } from "$lib/stores/update-store.svelte";
   import { startClipboardMonitor, stopClipboardMonitor } from "$lib/stores/clipboard-monitor";
@@ -154,6 +155,7 @@
 </div>
 
 <Toast />
+<DebugPanel />
 <ChangelogDialog />
 {#if showOnboarding}
   <OnboardingWizard />
