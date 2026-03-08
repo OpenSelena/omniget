@@ -377,7 +377,7 @@ async fn download_sequential(
     let mut file = tokio::fs::File::create(output_path).await?;
     let mut offset: i64 = 0;
     let mut downloaded: u64 = 0;
-    let mut dc = client.session().home_dc_id();
+    let mut dc: i32 = 0; // 0 = home DC
 
     loop {
         if cancel_token.is_cancelled() {
