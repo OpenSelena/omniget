@@ -262,7 +262,21 @@
       "stagger_delay": "開始遅延 (ms)",
       "stagger_delay_desc": "同時ダウンロード開始間の遅延時間",
       "reset": "既定値にリセット",
-      "reset_confirm": "本当によろしいですか？すべての設定がリセットされます。"
+      "reset_confirm": "本当によろしいですか？すべての設定がリセットされます。",
+      "torrent_listen_port": "Torrent待ち受けポート",
+      "torrent_listen_port_desc": "BitTorrent接続を受け付けるTCPポート"
+    },
+    "proxy": {
+      "title": "プロキシ",
+      "enabled": "プロキシを有効にする",
+      "type": "タイプ",
+      "host": "ホスト",
+      "port": "ポート",
+      "username": "ユーザー名",
+      "password": "パスワード"
+    },
+    "ytdlp_flags": {
+      "title": "yt-dlp フラグ"
     }
   },
   "omnibox": {
@@ -460,5 +474,48 @@
     "unsupported_url": "サポートされていないURL — リンクを確認してください",
     "page_access_failed": "ページにアクセスできませんでした — リンクと接続を確認してください",
     "no_formats": "このリンクには動画フォーマットが見つかりません"
+  },
+  "debug": {
+    "title": "アクティビティログ",
+    "enable": "アクティビティログ",
+    "enable_desc": "OmniGetがバックグラウンドで行っている処理を確認できます",
+    "filter_all": "すべて",
+    "filter_downloads": "ダウンロード",
+    "filter_network": "ネットワーク",
+    "filter_auth": "認証",
+    "filter_system": "システム",
+    "filter_convert": "変換",
+    "filter_errors": "エラーのみ",
+    "copy_report": "レポートをコピー",
+    "report_copied": "診断レポートをクリップボードにコピーしました",
+    "clear": "クリア",
+    "no_entries": "まだアクティビティがありません。ダウンロードを開始するとここにイベントが表示されます。",
+    "open_panel": "アクティビティログを開く"
+  },
+  "p2p": {
+    "send_file": "ファイルを送信",
+    "send_title": "P2Pでファイルを送信",
+    "send_description": "他のOmniGetユーザーにファイルを送信します。共有コードが生成されます — 受信側がオムニボックスに貼り付けてダウンロードします。",
+    "select_file": "ファイルを選択",
+    "share_code": "共有コード",
+    "click_to_copy": "クリックしてコピー",
+    "share_hint": "このコードを受信者と共有してください",
+    "code_copied": "コードをクリップボードにコピーしました",
+    "waiting_for_receiver": "受信者を待っています...",
+    "transferring": "転送中...",
+    "transfer_complete": "転送完了",
+    "send_failed": "送信に失敗しました",
+    "try_again": "再試行",
+    "pause": "一時停止",
+    "resume": "再開",
+    "paused": "一時停止中",
+    "receive_title": "P2P転送の受信",
+    "receive_description": "誰かがあなたにファイルを送信しようとしています。承諾するとダウンロードが開始されます。",
+    "accept_transfer": "承諾してダウンロード",
+    "reject_transfer": "拒否",
+    "searching_sender": "送信者を検索中...",
+    "searching_hint": "両方のデバイスが同じネットワークに接続されていることを確認してください。",
+    "sender_not_found": "送信者が見つかりません",
+    "sender_not_found_hint": "送信者がまだアクティブでない可能性があります。両方のデバイスが同じWi-Fiネットワークに接続されており、送信者がコードを共有していることを確認してください。"
   }
 }
