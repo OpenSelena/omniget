@@ -280,7 +280,7 @@
     }
   },
   "omnibox": {
-    "placeholder": "Paste a URL, magnet link, or search",
+    "placeholder": "Paste a URL, magnet link, .torrent, or search",
     "search_placeholder": "Search videos...",
     "searching": "Searching...",
     "search_empty": "No results found",
@@ -474,5 +474,48 @@
     "unsupported_url": "Unsupported URL — check the link",
     "page_access_failed": "Could not access the page — check the link and connection",
     "no_formats": "No video formats found for this link"
+  },
+  "debug": {
+    "title": "Activity Log",
+    "enable": "Activity log",
+    "enable_desc": "See what OmniGet is doing behind the scenes",
+    "filter_all": "All",
+    "filter_downloads": "Downloads",
+    "filter_network": "Network",
+    "filter_auth": "Authentication",
+    "filter_system": "System",
+    "filter_convert": "Convert",
+    "filter_errors": "Errors only",
+    "copy_report": "Copy report",
+    "report_copied": "Diagnostic report copied to clipboard",
+    "clear": "Clear",
+    "no_entries": "No activity yet. Start a download to see events here.",
+    "open_panel": "Open activity log"
+  },
+  "p2p": {
+    "send_file": "Send File",
+    "send_title": "Send File via P2P",
+    "send_description": "Send any file to another OmniGet user. A share code will be generated — the receiver pastes it in the omnibox to download.",
+    "select_file": "Select File",
+    "share_code": "Share Code",
+    "click_to_copy": "Click to copy",
+    "share_hint": "Share this code with the receiver",
+    "code_copied": "Code copied to clipboard",
+    "waiting_for_receiver": "Waiting for receiver...",
+    "transferring": "Transferring...",
+    "transfer_complete": "Transfer complete",
+    "send_failed": "Send failed",
+    "try_again": "Try Again",
+    "pause": "Pause",
+    "resume": "Resume",
+    "paused": "Paused",
+    "receive_title": "Incoming P2P Transfer",
+    "receive_description": "Someone wants to send you a file. Accept to start downloading.",
+    "accept_transfer": "Accept & Download",
+    "reject_transfer": "Decline",
+    "searching_sender": "Searching for sender...",
+    "searching_hint": "Make sure both devices are on the same network.",
+    "sender_not_found": "Sender not found",
+    "sender_not_found_hint": "The sender may not be active yet. Make sure both devices are on the same Wi-Fi network and the sender has shared the code."
   }
 }
