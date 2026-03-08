@@ -253,9 +253,11 @@ impl PlatformDownloader for TelegramDownloader {
 
         let is_channel = matches!(&peer, Peer::Channel(_));
         use grammers_client::session::defs::PeerRef;
-        let peer_ref = PeerRef::from(peer);
-        let bare_id = peer_ref.id.bare_id();
-        let peer_access_hash = peer_ref.auth.hash();
+        let (bare_id, peer_access_hash) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            let peer_ref = PeerRef::from(peer);
+            (peer_ref.id.bare_id(), peer_ref.auth.hash())
+        }))
+        .map_err(|_| anyhow::anyhow!("Peer has an unsupported ID"))?;
 
         let use_prefix = opts
             .filename_template
