@@ -1,5 +1,5 @@
 const POLL_INTERVAL = 2000;
-const URL_PATTERN = /^(https?:\/\/|magnet:\?).+/;
+const URL_PATTERN = /^(https?:\/\/|magnet:\?|p2p:).+/;
 
 type ClipboardCallback = (url: string) => void;
 
@@ -31,9 +31,7 @@ export function startClipboardMonitor() {
         lastDetectedUrl = trimmed;
         callback?.(trimmed);
       }
-    } catch {
-      // clipboard read denied or unavailable
-    }
+    } catch {}
   }, POLL_INTERVAL);
 }
 
