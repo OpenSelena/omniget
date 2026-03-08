@@ -278,15 +278,19 @@ impl HlsDownloader {
     ) -> anyhow::Result<Option<EncryptionInfo>> {
         for segment in &playlist.segments {
             if let Some(key) = &segment.key {
-                if matches!(key.method, m3u8_rs::KeyMethod::AES128) {
-                    if let Some(uri) = &key.uri {
-                        let key_url = resolve_url(m3u8_url, uri);
-                        let key_bytes = self.fetch_key_with_retry(&key_url, referer, 3).await?;
-
-                        let iv = key.iv.as_ref().map(|iv_str| parse_hex_iv(iv_str));
-
-                        return Ok(Some(EncryptionInfo { key_bytes, iv }));
+                match key.method {
+                    m3u8_rs::KeyMethod::AES128 => {
+                        if let Some(uri) = &key.uri {
+                            let key_url = resolve_url(m3u8_url, uri);
+                            let key_bytes = self.fetch_key_with_retry(&key_url, referer, 3).await?;
+                            let iv = key.iv.as_ref().map(|iv_str| parse_hex_iv(iv_str));
+                            return Ok(Some(EncryptionInfo { key_bytes, iv }));
+                        }
                     }
+                    m3u8_rs::KeyMethod::SampleAES => {
+                        anyhow::bail!("HLS stream uses SAMPLE-AES (FairPlay DRM), cannot decrypt");
+                    }
+                    _ => {}
                 }
             }
         }

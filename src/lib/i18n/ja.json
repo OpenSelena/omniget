@@ -45,7 +45,8 @@
     "download_error": "ダウンロード失敗: {{name}}",
     "download_cancelled": "ダウンロードがキャンセルされました",
     "clipboard_url_detected": "クリップボードでURLを検出しました",
-    "file_copied_to_clipboard": "ファイルをクリップボードにコピーしました"
+    "file_copied_to_clipboard": "ファイルをクリップボードにコピーしました",
+    "drm_skipped": "{{count}} 本の動画をスキップしました — DRM保護（FairPlay/SAMPLE-AES）"
   },
   "hotmart": {
     "title": "Hotmart",
