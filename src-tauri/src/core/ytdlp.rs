@@ -850,8 +850,11 @@ pub async fn download_video(
                 } else {
                     tracing::warn!("[yt-dlp] ffmpeg not available, using single-stream format");
                     match quality_height {
-                        Some(h) if h > 0 => format!("b[height<={}]/b", h),
-                        _ => "b".to_string(),
+                        Some(h) if h > 0 => format!(
+                            "b[height<={}]/bv*[height<={}]+ba/b",
+                            h, h
+                        ),
+                        _ => "b/bv*+ba".to_string(),
                     }
                 }
             }
