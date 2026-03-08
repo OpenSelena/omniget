@@ -9,6 +9,12 @@ use platforms::udemy::auth::UdemySession;
 use platforms::telegram::auth::{TelegramSessionHandle, TelegramState};
 use tokio_util::sync::CancellationToken;
 
+pub struct P2pSendHandle {
+    pub cancel_token: CancellationToken,
+    pub paused: Arc<std::sync::atomic::AtomicBool>,
+}
+pub type ActiveP2pSends = Arc<tokio::sync::Mutex<HashMap<String, P2pSendHandle>>>;
+
 pub mod commands;
 pub mod core;
 pub mod hotkey;
@@ -44,6 +50,7 @@ pub struct AppState {
     pub udemy_api_webview: Arc<tokio::sync::Mutex<Option<tauri::WebviewWindow>>>,
     pub udemy_api_result: Arc<std::sync::Mutex<Option<String>>>,
     pub torrent_session: Arc<tokio::sync::Mutex<Option<Arc<librqbit::Session>>>>,
+    pub active_p2p_sends: ActiveP2pSends,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -101,7 +108,9 @@ pub fn run() {
     registry.register(Arc::new(
         platforms::magnet::MagnetDownloader::new(torrent_session.clone()),
     ));
-    // Generic yt-dlp fallback — MUST be last so specific downloaders take priority
+    registry.register(Arc::new(
+        platforms::p2p::P2pDownloader::new(),
+    ));
     registry.register(Arc::new(
         platforms::generic_ytdlp::GenericYtdlpDownloader::new(),
     ));
@@ -125,13 +134,14 @@ pub fn run() {
         udemy_api_webview: Arc::new(tokio::sync::Mutex::new(None)),
         udemy_api_result: Arc::new(std::sync::Mutex::new(None)),
         torrent_session,
+        active_p2p_sends: Arc::new(tokio::sync::Mutex::new(HashMap::new())),
     };
 
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
             tray::show_window(app);
             if let Some(url) = argv.get(1) {
-                if url.starts_with("http://") || url.starts_with("https://") || url.starts_with("magnet:") {
+                if url.starts_with("http://") || url.starts_with("https://") || url.starts_with("magnet:") || url.starts_with("p2p:") {
                     let _ = app.emit("deep-link", url.clone());
                 }
             }
@@ -236,6 +246,12 @@ pub fn run() {
             commands::udemy_courses::udemy_refresh_courses,
             commands::udemy_downloads::start_udemy_course_download,
             commands::udemy_downloads::cancel_udemy_course_download,
+            commands::p2p::p2p_send_file,
+            commands::p2p::p2p_cancel_send,
+            commands::p2p::p2p_pause_send,
+            commands::p2p::p2p_resume_send,
+            commands::p2p::p2p_get_active_sends,
+            commands::p2p::p2p_validate_code,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
