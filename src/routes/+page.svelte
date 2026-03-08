@@ -12,6 +12,8 @@
   import MediaPreview from "$components/omnibox/MediaPreview.svelte";
   import BatchDownload from "$components/omnibox/BatchDownload.svelte";
   import SearchResults from "$components/omnibox/SearchResults.svelte";
+  import P2pSendDialog from "$components/p2p/P2pSendDialog.svelte";
+  import P2pReceiveDialog from "$components/p2p/P2pReceiveDialog.svelte";
   import { getDownloads } from "$lib/stores/download-store.svelte";
   import { getSettings } from "$lib/stores/settings-store.svelte";
   import { showToast } from "$lib/stores/toast-store.svelte";
@@ -83,6 +85,9 @@
   let referer = $state("");
   let mediaPreview = $derived(getMediaPreview());
   let previewImageLoading = $state(true);
+  let showP2pSendDialog = $state(false);
+  let p2pReceiveCode = $state<string | null>(null);
+  let p2pReceiveUrl = $state("");
 
   onMount(() => {
     onClipboardUrl((detectedUrl) => {
@@ -156,7 +161,7 @@
   );
 
   function isUrl(value: string): boolean {
-    return value.startsWith("http://") || value.startsWith("https://") || value.startsWith("magnet:");
+    return value.startsWith("http://") || value.startsWith("https://") || value.startsWith("magnet:") || value.startsWith("p2p:");
   }
 
   function handleInput() {
@@ -304,6 +309,14 @@
       return;
     }
 
+    if (info.platform === "p2p") {
+      const trimmed = url.trim();
+      const code = trimmed.replace(/^p2p:/, "");
+      p2pReceiveUrl = trimmed;
+      p2pReceiveCode = code;
+      return;
+    }
+
     const settings = getSettings();
     let outputDir = settings?.download.default_output_dir ?? "";
 
@@ -383,6 +396,47 @@
     url = omniState.originalUrl;
     omniState = { kind: "detecting" };
     detectPlatform(url.trim());
+  }
+
+  async function handleP2pAccept() {
+    const currentUrl = p2pReceiveUrl;
+    p2pReceiveCode = null;
+    p2pReceiveUrl = "";
+
+    const settings = getSettings();
+    let outputDir = settings?.download.default_output_dir ?? "";
+
+    if (settings?.download.always_ask_path || !outputDir) {
+      const selected = await open({
+        directory: true,
+        title: $t("settings.download.default_output_dir"),
+      });
+      if (!selected) return;
+      outputDir = selected;
+    }
+
+    omniState = { kind: "preparing", platform: "p2p" };
+    url = "";
+
+    try {
+      await invoke("download_from_url", {
+        url: currentUrl,
+        outputDir,
+        downloadMode: null,
+        quality: "best",
+        formatId: null,
+        referer: null,
+      });
+      omniState = { kind: "idle" };
+    } catch (e: any) {
+      const msg = typeof e === "string" ? e : e.message ?? $t("omnibox.error");
+      omniState = { kind: "error", message: msg, originalUrl: currentUrl, platform: "p2p" };
+    }
+  }
+
+  function handleP2pReject() {
+    p2pReceiveCode = null;
+    p2pReceiveUrl = "";
   }
 
   function handleDismiss() {
@@ -540,6 +594,26 @@
       </div>
     {/if}
   </div>
+
+  <button class="p2p-send-btn" onclick={() => { showP2pSendDialog = true; }}>
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 2L11 13" />
+      <path d="M22 2L15 22 11 13 2 9z" />
+    </svg>
+    {$t("p2p.send_file")}
+  </button>
+
+  {#if showP2pSendDialog}
+    <P2pSendDialog onClose={() => { showP2pSendDialog = false; }} />
+  {/if}
+
+  {#if p2pReceiveCode}
+    <P2pReceiveDialog
+      code={p2pReceiveCode}
+      onAccept={handleP2pAccept}
+      onReject={handleP2pReject}
+    />
+  {/if}
 
   <SupportedServices />
 
@@ -816,6 +890,35 @@
 
   .search-hint {
     color: var(--gray);
+  }
+
+  .p2p-send-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    background: var(--button-elevated);
+    border: 1px solid var(--input-border);
+    border-radius: var(--border-radius);
+    color: var(--secondary);
+    cursor: pointer;
+  }
+
+  @media (hover: hover) {
+    .p2p-send-btn:hover {
+      background: var(--button-hover);
+    }
+  }
+
+  .p2p-send-btn:active {
+    background: var(--button-press);
+  }
+
+  .p2p-send-btn svg {
+    pointer-events: none;
+    color: var(--accent);
   }
 
   .terms-note {
