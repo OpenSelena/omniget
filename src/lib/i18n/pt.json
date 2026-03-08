@@ -45,7 +45,8 @@
     "download_error": "Falha no download: {{name}}",
     "download_cancelled": "Download cancelado",
     "clipboard_url_detected": "URL detectada no clipboard",
-    "file_copied_to_clipboard": "Arquivo copiado para o clipboard"
+    "file_copied_to_clipboard": "Arquivo copiado para o clipboard",
+    "drm_skipped": "{{count}} vídeo(s) ignorados — protegidos por DRM (FairPlay/SAMPLE-AES)"
   },
   "hotmart": {
     "title": "Hotmart",

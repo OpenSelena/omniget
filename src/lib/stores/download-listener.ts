@@ -109,6 +109,7 @@ type UdemyCompletePayload = {
   course_name: string;
   success: boolean;
   error: string | null;
+  drm_skipped: number;
 };
 
 const seenCourseIds = new Set<number>();
@@ -205,6 +206,9 @@ export async function initDownloadListener(): Promise<() => void> {
     const tr = get(t);
     if (d.success) {
       showToast("success", tr("toast.download_complete", { name: d.course_name }));
+      if (d.drm_skipped > 0) {
+        showToast("info", tr("toast.drm_skipped", { count: String(d.drm_skipped) }));
+      }
     } else {
       let msg = tr("toast.download_error", { name: d.course_name });
       if (d.error) msg += ` — ${d.error}`;

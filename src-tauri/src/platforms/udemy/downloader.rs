@@ -74,7 +74,7 @@ impl UdemyDownloader {
         curriculum: api::UdemyCurriculum,
         progress_tx: mpsc::Sender<UdemyCourseDownloadProgress>,
         cancel_token: CancellationToken,
-    ) -> anyhow::Result<()> {
+    ) -> anyhow::Result<u32> {
         let session = {
             let guard = self.session.lock().await;
             guard.clone().ok_or_else(|| anyhow!("Not authenticated"))?
@@ -98,6 +98,7 @@ impl UdemyDownloader {
         let total_lectures = curriculum.total_lectures;
         let mut completed_lectures: u32 = 0;
         let mut downloaded_bytes: u64 = 0;
+        let mut drm_skipped: u32 = 0;
 
         for (ch_idx, chapter) in curriculum.chapters.iter().enumerate() {
             if cancel_token.is_cancelled() {
@@ -134,7 +135,7 @@ impl UdemyDownloader {
                     completed_lectures,
                 }).await;
 
-                let bytes = self.download_lecture(
+                let result = self.download_lecture(
                     &session,
                     lecture,
                     &chapter_dir,
@@ -142,9 +143,10 @@ impl UdemyDownloader {
                     lecture_num,
                 ).await;
 
-                match bytes {
-                    Ok(b) => {
+                match result {
+                    Ok((b, drm)) => {
                         downloaded_bytes += b;
+                        drm_skipped += drm;
                     }
                     Err(e) => {
                         tracing::error!(
@@ -172,11 +174,11 @@ impl UdemyDownloader {
         }).await;
 
         tracing::info!(
-            "[udemy] course '{}' download complete: {} lectures, {} bytes",
-            course.title, completed_lectures, downloaded_bytes
+            "[udemy] course '{}' download complete: {} lectures, {} bytes, {} drm-skipped",
+            course.title, completed_lectures, downloaded_bytes, drm_skipped
         );
 
-        Ok(())
+        Ok(drm_skipped)
     }
 
     async fn download_lecture(
@@ -186,15 +188,15 @@ impl UdemyDownloader {
         chapter_dir: &Path,
         cancel_token: &CancellationToken,
         lecture_num: u32,
-    ) -> anyhow::Result<u64> {
+    ) -> anyhow::Result<(u64, u32)> {
         if lecture.lecture_class == "quiz" || lecture.lecture_class == "practice" {
             tracing::info!("[udemy] skipping {}: {}", lecture.lecture_class, lecture.title);
-            return Ok(0);
+            return Ok((0, 0));
         }
 
         let asset = match &lecture.asset {
             Some(a) => a,
-            None => return Ok(0),
+            None => return Ok((0, 0)),
         };
 
         let asset_type = asset.get("asset_type")
@@ -204,12 +206,15 @@ impl UdemyDownloader {
             .to_lowercase();
 
         let mut total_bytes: u64 = 0;
+        let mut drm_skipped: u32 = 0;
 
         match asset_type.as_str() {
             "video" => {
-                total_bytes += self.download_video_asset(
+                let (bytes, drm) = self.download_video_asset(
                     session, asset, &lecture.title, chapter_dir, cancel_token, lecture_num
                 ).await?;
+                total_bytes += bytes;
+                drm_skipped += drm;
             }
             "article" => {
                 let body = asset.get("body").and_then(|v| v.as_str()).unwrap_or("");
@@ -288,7 +293,7 @@ impl UdemyDownloader {
             }
         }
 
-        Ok(total_bytes)
+        Ok((total_bytes, drm_skipped))
     }
 
     async fn download_video_asset(
@@ -299,21 +304,28 @@ impl UdemyDownloader {
         chapter_dir: &Path,
         cancel_token: &CancellationToken,
         lecture_num: u32,
-    ) -> anyhow::Result<u64> {
+    ) -> anyhow::Result<(u64, u32)> {
         let file_name = format!("{:02} - {}.mp4", lecture_num, safe_filename(title));
         let file_path = chapter_dir.join(&file_name);
 
         if file_exists_with_content(&file_path).await {
             tracing::info!("[udemy] skipping existing video: {}", file_name);
-            return Ok(0);
+            return Ok((0, 0));
         }
 
         let stream_urls = asset.get("stream_urls");
         if let Some(streams) = stream_urls {
             if let Some(videos) = streams.get("Video").and_then(|v| v.as_array()) {
-                return self.download_from_stream_urls(
+                match self.download_from_stream_urls(
                     session, videos, &file_path, title, cancel_token
-                ).await;
+                ).await {
+                    Ok(bytes) => return Ok((bytes, 0)),
+                    Err(e) if e.to_string().contains("SAMPLE-AES") => {
+                        tracing::warn!("[udemy] DRM-protected (SAMPLE-AES) via stream_urls: '{}'", title);
+                        return Ok((0, 1));
+                    }
+                    Err(e) => return Err(e),
+                }
             }
         }
 
@@ -323,38 +335,46 @@ impl UdemyDownloader {
             ).await;
 
             match result {
-                Ok(bytes) if bytes > 0 => return Ok(bytes),
+                Ok(bytes) if bytes > 0 => return Ok((bytes, 0)),
                 Ok(_) => {}
                 Err(e) => {
+                    let is_drm = asset.get("course_is_drmed")
+                        .and_then(|v| v.as_bool())
+                        .unwrap_or(false);
+                    if is_drm || e.to_string().contains("SAMPLE-AES") {
+                        tracing::warn!("[udemy] DRM-protected video skipped: '{}'", title);
+                        return Ok((0, 1));
+                    }
                     tracing::warn!("[udemy] media_sources download failed for '{}': {}", title, e);
+                    return Err(e);
                 }
             }
 
             let is_drm = asset.get("course_is_drmed")
                 .and_then(|v| v.as_bool())
-                .unwrap_or(false)
-                || asset.get("media_license_token").is_some();
+                .unwrap_or(false);
 
             if is_drm {
                 tracing::warn!(
                     "[udemy] DRM-protected video skipped: '{}' (no downloadable sources available)",
                     title
                 );
-            } else {
-                tracing::warn!(
-                    "[udemy] no usable video sources in media_sources for '{}' (types: {})",
-                    title,
-                    sources.iter()
-                        .filter_map(|s| s.get("type").and_then(|t| t.as_str()))
-                        .collect::<Vec<_>>()
-                        .join(", ")
-                );
+                return Ok((0, 1));
             }
-            return Ok(0);
+
+            tracing::warn!(
+                "[udemy] no usable video sources in media_sources for '{}' (types: {})",
+                title,
+                sources.iter()
+                    .filter_map(|s| s.get("type").and_then(|t| t.as_str()))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            );
+            return Ok((0, 0));
         }
 
         tracing::warn!("[udemy] no video sources found for '{}'", title);
-        Ok(0)
+        Ok((0, 0))
     }
 
     async fn download_from_stream_urls(
@@ -393,27 +413,7 @@ impl UdemyDownloader {
         let is_hls = url_str.contains(".m3u8");
 
         if is_hls {
-            let output_str = file_path.to_string_lossy().to_string();
-            let result = MediaProcessor::download_hls(
-                &url_str,
-                &output_str,
-                "https://www.udemy.com/",
-                None,
-                cancel_token.clone(),
-                self.max_concurrent_segments,
-                self.max_retries,
-                Some(self.hls_client.clone()),
-            ).await;
-            match result {
-                Ok(r) => {
-                    tracing::info!("[udemy] HLS download complete: {}", title);
-                    Ok(r.file_size)
-                }
-                Err(e) => {
-                    let _ = tokio::fs::remove_file(file_path).await;
-                    Err(e)
-                }
-            }
+            self.download_hls_and_remux(&url_str, file_path, title, cancel_token).await
         } else {
             let bytes = download_file_simple(&session.client, &url_str, file_path).await?;
             tracing::info!("[udemy] direct download complete: {} ({}p, {} bytes)", title, best_height, bytes);
@@ -467,32 +467,52 @@ impl UdemyDownloader {
 
         if let Some(hls_url) = hls_source {
             tracing::info!("[udemy] downloading '{}' via HLS (media_sources)", title);
-
-            let output_str = file_path.to_string_lossy().to_string();
-            let result = MediaProcessor::download_hls(
-                hls_url,
-                &output_str,
-                "https://www.udemy.com/",
-                None,
-                cancel_token.clone(),
-                self.max_concurrent_segments,
-                self.max_retries,
-                Some(self.hls_client.clone()),
-            ).await;
-
-            match result {
-                Ok(r) => {
-                    tracing::info!("[udemy] HLS download complete: {}", title);
-                    return Ok(r.file_size);
-                }
-                Err(e) => {
-                    let _ = tokio::fs::remove_file(file_path).await;
-                    return Err(e);
-                }
-            }
+            return self.download_hls_and_remux(hls_url, file_path, title, cancel_token).await;
         }
 
         Ok(0)
+    }
+
+    async fn download_hls_and_remux(
+        &self,
+        hls_url: &str,
+        file_path: &Path,
+        title: &str,
+        cancel_token: &CancellationToken,
+    ) -> anyhow::Result<u64> {
+        let temp_ts_path = file_path.with_extension("ts");
+        let output_str_ts = temp_ts_path.to_string_lossy().to_string();
+        let output_str_mp4 = file_path.to_string_lossy().to_string();
+
+        let result = MediaProcessor::download_hls(
+            hls_url,
+            &output_str_ts,
+            "https://www.udemy.com/",
+            None,
+            cancel_token.clone(),
+            self.max_concurrent_segments,
+            self.max_retries,
+            Some(self.hls_client.clone()),
+        ).await;
+
+        match result {
+            Ok(r) => {
+                tracing::info!("[udemy] HLS download complete ({} bytes), remuxing...", r.file_size);
+                if let Err(e) = MediaProcessor::remux(&output_str_ts, &output_str_mp4).await {
+                    tracing::error!("[udemy] Remuxing failed: {}", e);
+                    let _ = tokio::fs::remove_file(&temp_ts_path).await;
+                    return Err(e);
+                }
+                let _ = tokio::fs::remove_file(&temp_ts_path).await;
+                let final_size = tokio::fs::metadata(file_path).await?.len();
+                tracing::info!("[udemy] Remux complete: {}", title);
+                Ok(final_size)
+            }
+            Err(e) => {
+                let _ = tokio::fs::remove_file(&temp_ts_path).await;
+                Err(e)
+            }
+        }
     }
 
     async fn download_downloadable_asset(

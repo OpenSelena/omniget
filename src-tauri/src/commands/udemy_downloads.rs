@@ -16,6 +16,7 @@ struct UdemyDownloadCompleteEvent {
     course_name: String,
     success: bool,
     error: Option<String>,
+    drm_skipped: u32,
 }
 
 async fn fetch_curriculum_via_webview(
@@ -261,13 +262,14 @@ pub async fn start_udemy_course_download(
         }
 
         match result {
-            Ok(()) => {
+            Ok(drm_skipped) => {
                 let _ = app.emit(
                     "udemy-download-complete",
                     &UdemyDownloadCompleteEvent {
                         course_name: course.title,
                         success: true,
                         error: None,
+                        drm_skipped,
                     },
                 );
             }
@@ -279,6 +281,7 @@ pub async fn start_udemy_course_download(
                         course_name: course.title,
                         success: false,
                         error: Some(e.to_string()),
+                        drm_skipped: 0,
                     },
                 );
             }

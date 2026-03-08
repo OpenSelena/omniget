@@ -45,7 +45,8 @@
     "download_error": "Échec du téléchargement : {{name}}",
     "download_cancelled": "Téléchargement annulé",
     "clipboard_url_detected": "URL détectée dans le presse-papiers",
-    "file_copied_to_clipboard": "Fichier copié dans le presse-papiers"
+    "file_copied_to_clipboard": "Fichier copié dans le presse-papiers",
+    "drm_skipped": "{{count}} vidéo(s) ignorée(s) — protégée(s) par DRM (FairPlay/SAMPLE-AES)"
   },
   "hotmart": {
     "title": "Hotmart",
