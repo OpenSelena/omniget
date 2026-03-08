@@ -848,10 +848,13 @@ pub async fn download_video(
                         _ => "bv*+ba[ext=m4a]/bv*+ba/b".to_string(),
                     }
                 } else {
-                    tracing::warn!("[yt-dlp] ffmpeg not available, using single-stream format");
+                    tracing::warn!("[yt-dlp] ffmpeg not available, using fallback format selector");
                     match quality_height {
-                        Some(h) if h > 0 => format!("b[height<={}]/b", h),
-                        _ => "b".to_string(),
+                        Some(h) if h > 0 => format!(
+                            "b[height<={}]/bv*[height<={}]/b",
+                            h, h
+                        ),
+                        _ => "b/bv*".to_string(),
                     }
                 }
             }
@@ -1357,9 +1360,12 @@ pub async fn download_video(
                 tracing::warn!("[yt-dlp] login required, enabling cookies-from-browser");
             }
 
-            if stderr_lower.contains("requested format") && stderr_lower.contains("not available") {
+            if stderr_lower.contains("requested format") && stderr_lower.contains("not available")
+                || stderr_lower.contains("ffmpeg") && stderr_lower.contains("not found")
+                || stderr_lower.contains("postprocessing")
+            {
                 if format_already_simplified {
-                    tracing::warn!("[yt-dlp] format not available after simplification, giving up");
+                    tracing::warn!("[yt-dlp] format/postprocessing error after simplification, giving up");
                     break;
                 }
 
@@ -1371,7 +1377,7 @@ pub async fn download_video(
                     base_args.remove(pos + 1);
                     base_args.remove(pos);
                 }
-                tracing::warn!("[yt-dlp] format not available on attempt {}, removed -f and player_client to use yt-dlp defaults", attempt + 1);
+                tracing::warn!("[yt-dlp] format/postprocessing error on attempt {}, removed -f and player_client to use yt-dlp defaults", attempt + 1);
                 format_already_simplified = true;
             }
 
