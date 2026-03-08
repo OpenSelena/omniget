@@ -15,6 +15,7 @@ import {
   markFileError,
 } from "./convert-store.svelte";
 import { setMediaPreview } from "./media-preview-store.svelte";
+import { addLog } from "./debug-store.svelte";
 
 type ProgressPayload = {
   course_id: number;
@@ -114,6 +115,8 @@ type UdemyCompletePayload = {
 
 const seenCourseIds = new Set<number>();
 const seenUdemyCourseIds = new Set<number>();
+const loggedQueueTerminal = new Set<number>();
+const seenGenericIds = new Set<number>();
 
 let throttleTimer: ReturnType<typeof setTimeout> | null = null;
 let pendingPayload: QueueItemInfo[] | null = null;
@@ -142,6 +145,7 @@ export async function initDownloadListener(): Promise<() => void> {
       seenCourseIds.add(d.course_id);
       const tr = get(t);
       showToast("info", tr("toast.download_started", { name: d.course_name }));
+      addLog("info", "download", `Course download started: ${d.course_name}`);
     }
 
     upsertProgress(
@@ -165,10 +169,12 @@ export async function initDownloadListener(): Promise<() => void> {
     const tr = get(t);
     if (d.success) {
       showToast("success", tr("toast.download_complete", { name: d.course_name }));
+      addLog("info", "download", `Course download complete: ${d.course_name}`);
     } else {
       let msg = tr("toast.download_error", { name: d.course_name });
       if (d.error) msg += ` — ${d.error}`;
       showToast("error", msg);
+      addLog("error", "download", `Course download failed: ${d.course_name}`, d.error ?? undefined);
     }
   });
 
@@ -179,6 +185,7 @@ export async function initDownloadListener(): Promise<() => void> {
       seenUdemyCourseIds.add(d.course_id);
       const tr = get(t);
       showToast("info", tr("toast.download_started", { name: d.course_name }));
+      addLog("info", "download", `Udemy download started: ${d.course_name}`);
     }
 
     upsertProgress(
@@ -206,20 +213,37 @@ export async function initDownloadListener(): Promise<() => void> {
     const tr = get(t);
     if (d.success) {
       showToast("success", tr("toast.download_complete", { name: d.course_name }));
+      addLog("info", "download", `Udemy download complete: ${d.course_name}`);
       if (d.drm_skipped > 0) {
         showToast("info", tr("toast.drm_skipped", { count: String(d.drm_skipped) }));
+        addLog("warn", "download", `${d.drm_skipped} DRM-protected video(s) skipped`, d.course_name);
       }
     } else {
       let msg = tr("toast.download_error", { name: d.course_name });
       if (d.error) msg += ` — ${d.error}`;
       showToast("error", msg);
+      addLog("error", "download", `Udemy download failed: ${d.course_name}`, d.error ?? undefined);
     }
   });
 
   const unlistenQueueState = await listen<QueueItemInfo[]>(
     "queue-state-update",
     (event) => {
-      throttledSyncQueueState(event.payload);
+      const payload = event.payload;
+      for (const item of payload) {
+        if (loggedQueueTerminal.has(item.id)) continue;
+        if (item.status.type === "Error") {
+          loggedQueueTerminal.add(item.id);
+          const errMsg = typeof item.status.data === "string"
+            ? item.status.data
+            : (item.status.data as { message?: string } | undefined)?.message;
+          addLog("error", "download", `Download error: ${item.title}`, errMsg ?? undefined);
+        } else if (item.status.type === "Complete") {
+          loggedQueueTerminal.add(item.id);
+          addLog("info", "download", `Download complete: ${item.title}`, item.file_path ?? undefined);
+        }
+      }
+      throttledSyncQueueState(payload);
     },
   );
 
@@ -227,6 +251,10 @@ export async function initDownloadListener(): Promise<() => void> {
     "queue-item-progress",
     (event) => {
       const d = event.payload;
+      if (!seenGenericIds.has(d.id)) {
+        seenGenericIds.add(d.id);
+        addLog("info", "download", `Download started: ${d.title}`, `Platform: ${d.platform}`);
+      }
       upsertGenericProgress(
         d.id,
         d.title,
@@ -264,10 +292,12 @@ export async function initDownloadListener(): Promise<() => void> {
       if (d.success && d.result) {
         markFileComplete(d.id, d.result.output_path, d.result.file_size_bytes);
         showToast("success", tr("convert.toast_complete"));
+        addLog("info", "convert", `Conversion complete: ${d.result.output_path}`);
       } else {
         const errorMsg = d.error ?? d.result?.error ?? tr("common.unknown_error");
         markFileError(d.id, errorMsg);
         showToast("error", `${tr("convert.toast_error")} — ${errorMsg}`);
+        addLog("error", "convert", `Conversion failed`, errorMsg);
       }
     },
   );
