@@ -2,6 +2,7 @@ pub mod auth;
 pub mod autostart;
 pub mod diagnostics;
 pub mod downloads;
+pub mod p2p;
 pub mod platform_auth;
 pub mod settings;
 pub mod telegram;
