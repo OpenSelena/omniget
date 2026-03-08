@@ -1,5 +1,6 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
+  import { listen, type UnlistenFn } from "@tauri-apps/api/event";
   import { open } from "@tauri-apps/plugin-dialog";
   import { showToast } from "$lib/stores/toast-store.svelte";
   import { getSettings } from "$lib/stores/settings-store.svelte";
@@ -71,8 +72,13 @@
   let isBatchActive = $derived(activeBatchId !== null);
   let batchPercent = $derived(batchTotal > 0 ? (batchDone / batchTotal) * 100 : 0);
 
-  // Single-file downloading (kept for individual downloads)
+  // Single-file downloading: tracks message_id → download progress
   let downloadingIds: Set<number> = $state(new Set());
+  // Maps download_id → message_id for event correlation
+  let downloadIdToMessageId: Map<number, number> = $state(new Map());
+  // Per-item download progress: message_id → percent
+  let downloadProgress: Map<number, number> = $state(new Map());
+  let downloadUnlisteners: UnlistenFn[] = [];
 
   let chatPhotos: Map<number, string> = $state(new Map());
   let thumbnails: Map<number, string> = $state(new Map());
@@ -98,6 +104,7 @@
 
   $effect(() => {
     checkSession();
+    initDownloadListeners();
 
     onBatchFileStatus(handleBatchFileStatus);
     document.addEventListener("keydown", handleKeydown);
@@ -109,8 +116,49 @@
       document.removeEventListener("keydown", handleKeydown);
       if (searchDebounce) clearTimeout(searchDebounce);
       invoke("telegram_clear_thumbnail_cache").catch(() => {});
+      for (const unlisten of downloadUnlisteners) unlisten();
+      downloadUnlisteners = [];
     };
   });
+
+  async function initDownloadListeners() {
+    type GenericProgress = { id: number; title: string; platform: string; percent: number };
+    type GenericComplete = {
+      id: number; title: string; platform: string; success: boolean;
+      error: string | null; file_path: string | null;
+      file_size_bytes: number | null; file_count: number | null;
+    };
+
+    const unlistenProgress = await listen<GenericProgress>("generic-download-progress", (event) => {
+      const d = event.payload;
+      if (d.platform !== "telegram") return;
+      const msgId = downloadIdToMessageId.get(d.id);
+      if (msgId === undefined) return;
+      downloadProgress.set(msgId, d.percent);
+      downloadProgress = new Map(downloadProgress);
+    });
+
+    const unlistenComplete = await listen<GenericComplete>("generic-download-complete", (event) => {
+      const d = event.payload;
+      if (d.platform !== "telegram") return;
+      const msgId = downloadIdToMessageId.get(d.id);
+      if (msgId === undefined) return;
+
+      downloadingIds = new Set([...downloadingIds].filter((id) => id !== msgId));
+      downloadIdToMessageId.delete(d.id);
+      downloadIdToMessageId = new Map(downloadIdToMessageId);
+      downloadProgress.delete(msgId);
+      downloadProgress = new Map(downloadProgress);
+
+      if (d.success) {
+        showToast("success", $t("toast.download_complete", { name: d.title }));
+      } else {
+        showToast("error", d.error ?? $t("common.error"));
+      }
+    });
+
+    downloadUnlisteners = [unlistenProgress, unlistenComplete];
+  }
 
   function handleBatchFileStatus(payload: BatchFileStatusPayload) {
     if (payload.batch_id !== activeBatchId) return;
@@ -476,13 +524,15 @@
     downloadingIds = new Set([...downloadingIds, item.message_id]);
 
     try {
-      await invoke("telegram_download_media", {
+      const result = await invoke<{ id: number; file_name: string }>("telegram_download_media", {
         chatId: selectedChat.id,
         chatType: selectedChat.chat_type,
         messageId: item.message_id,
         fileName: item.file_name,
         outputDir,
       });
+      downloadIdToMessageId.set(result.id, item.message_id);
+      downloadIdToMessageId = new Map(downloadIdToMessageId);
       showToast("info", $t("toast.download_started", { name: item.file_name }));
     } catch (e: any) {
       const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
@@ -1031,7 +1081,8 @@
                 onclick={() => downloadItem(item)}
               >
                 {#if downloadingIds.has(item.message_id)}
-                  {$t("telegram.downloading")}
+                  {@const pct = downloadProgress.get(item.message_id) ?? 0}
+                  {pct > 0 ? `${Math.round(pct)}%` : $t("telegram.downloading")}
                 {:else}
                   {$t("telegram.download_btn")}
                 {/if}
