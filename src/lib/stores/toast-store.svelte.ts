@@ -1,3 +1,5 @@
+import { addLog } from "./debug-store.svelte";
+
 export type ToastType = "success" | "error" | "info";
 
 export type ToastItem = {
@@ -22,6 +24,8 @@ export function getToasts(): ToastItem[] {
 export function showToast(type: ToastType, message: string, duration?: number) {
   const id = nextId++;
   const ms = duration ?? (type === "error" ? ERROR_DURATION : DEFAULT_DURATION);
+
+  addLog(type === "error" ? "error" : "info", "system", message);
 
   toasts = [...toasts, { id, type, message, closing: false }];
 
