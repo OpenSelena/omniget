@@ -42,6 +42,7 @@ pub fn parse_url(url_str: &str) -> Option<ParsedUrl> {
         Platform::Telegram => parse_telegram(&segments),
         Platform::Vimeo => parse_vimeo(&segments),
         Platform::Udemy => parse_udemy(&segments),
+        Platform::Bilibili => parse_bilibili(&segments),
         Platform::Other(_) => (None, ParsedContentType::Unknown),
     };
 
@@ -249,6 +250,15 @@ fn parse_udemy(segments: &[&str]) -> (Option<String>, ParsedContentType) {
     if segments.first() == Some(&"course") {
         let slug = segments.get(1).map(|s| s.to_string());
         return (slug, ParsedContentType::Course);
+    }
+    (None, ParsedContentType::Unknown)
+}
+
+fn parse_bilibili(segments: &[&str]) -> (Option<String>, ParsedContentType) {
+    // bilibili.com/video/BV1xxxxx/
+    if segments.first() == Some(&"video") {
+        let id = segments.get(1).map(|s| s.to_string());
+        return (id, ParsedContentType::Video);
     }
     (None, ParsedContentType::Unknown)
 }
