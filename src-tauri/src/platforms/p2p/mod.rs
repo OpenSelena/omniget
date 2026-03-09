@@ -1,4 +1,6 @@
+pub mod hole_punch;
 pub mod protocol;
+pub mod stun;
 pub mod words;
 
 use std::net::SocketAddr;
@@ -46,11 +48,15 @@ impl PlatformDownloader for P2pDownloader {
             .strip_prefix("p2p:")
             .ok_or_else(|| anyhow::anyhow!("Invalid P2P URL: {}", url))?;
 
-        if !words::is_valid_code(code) {
-            anyhow::bail!("Invalid share code: {}", code);
-        }
+        let parsed = words::parse_code(code)
+            .ok_or_else(|| anyhow::anyhow!("Invalid share code: {}", code))?;
 
-        let title = format!("P2P Transfer ({})", code);
+        let label = if parsed.remote_endpoint.is_some() {
+            "remote"
+        } else {
+            "local"
+        };
+        let title = format!("P2P Transfer ({}, {})", parsed.words, label);
 
         Ok(MediaInfo {
             title,
@@ -85,9 +91,30 @@ impl PlatformDownloader for P2pDownloader {
             .strip_prefix("p2p:")
             .ok_or_else(|| anyhow::anyhow!("Invalid P2P URL"))?;
 
+        let parsed = words::parse_code(code)
+            .ok_or_else(|| anyhow::anyhow!("Invalid share code"))?;
+
         let _ = progress.send(-2.0).await;
 
-        let expected_hash = hash_code(code);
+        if let Some(endpoint) = parsed.remote_endpoint {
+            tracing::info!("[p2p] trying remote connection to {}", endpoint);
+            match try_remote_download(
+                &parsed.words,
+                endpoint,
+                &opts.output_dir,
+                &progress,
+                &opts.cancel_token,
+            )
+            .await
+            {
+                Ok(result) => return Ok(result),
+                Err(e) => {
+                    tracing::warn!("[p2p] remote failed: {}, falling back to LAN", e);
+                }
+            }
+        }
+
+        let expected_hash = hash_code(&parsed.words);
 
         let sender_info = tokio::select! {
             result = discover_sender(&expected_hash, std::time::Duration::from_secs(60)) => {
@@ -123,104 +150,141 @@ impl PlatformDownloader for P2pDownloader {
             }
         };
 
-        write_message(
-            &mut stream,
-            &Message::Hello {
-                code_hash: expected_hash.clone(),
-            },
-        )
-        .await?;
+        tcp_receive(&mut stream, &expected_hash, &opts.output_dir, &progress, &opts.cancel_token)
+            .await
+    }
+}
 
-        let (filename, file_size) = match read_message(&mut stream).await? {
-            Message::FileInfo {
-                name,
-                size,
-                file_count: _,
-            } => (name, size),
-            Message::Error { message } => anyhow::bail!("Sender error: {}", message),
-            other => anyhow::bail!("Unexpected message: {:?}", other),
-        };
+async fn try_remote_download(
+    code: &str,
+    endpoint: SocketAddr,
+    output_dir: &std::path::Path,
+    progress_tx: &mpsc::Sender<f64>,
+    cancel: &CancellationToken,
+) -> anyhow::Result<DownloadResult> {
+    let socket = hole_punch::punch_to_sender(
+        code,
+        endpoint,
+        std::time::Duration::from_secs(15),
+        cancel,
+    )
+    .await?;
 
-        tracing::info!(
-            "[p2p] receiving file: {} ({} bytes)",
-            filename,
-            file_size
-        );
+    let _ = progress_tx.send(-1.0).await;
 
-        write_message(&mut stream, &Message::Accept).await?;
+    hole_punch::receive_file_udp(&socket, endpoint, output_dir, progress_tx, cancel).await
+}
 
-        let _ = progress.send(0.0).await;
+async fn tcp_receive(
+    stream: &mut TcpStream,
+    expected_hash: &str,
+    output_dir: &std::path::Path,
+    progress: &mpsc::Sender<f64>,
+    cancel: &CancellationToken,
+) -> anyhow::Result<DownloadResult> {
+    write_message(
+        stream,
+        &Message::Hello {
+            code_hash: expected_hash.to_string(),
+        },
+    )
+    .await?;
 
-        let safe_name = sanitize_filename::sanitize(&filename);
-        let mut output_path = opts.output_dir.join(&safe_name);
+    let (filename, file_size) = match read_message(stream).await? {
+        Message::FileInfo {
+            name,
+            size,
+            file_count: _,
+        } => (name, size),
+        Message::Error { message } => anyhow::bail!("Sender error: {}", message),
+        other => anyhow::bail!("Unexpected message: {:?}", other),
+    };
 
-        if let Some(parent) = output_path.parent() {
-            tokio::fs::create_dir_all(parent).await?;
-        }
+    tracing::info!(
+        "[p2p] receiving file: {} ({} bytes)",
+        filename,
+        file_size
+    );
 
-        if output_path.exists() {
-            let stem = output_path.file_stem().map(|s| s.to_string_lossy().to_string()).unwrap_or_default();
-            let ext = output_path.extension().map(|e| format!(".{}", e.to_string_lossy())).unwrap_or_default();
-            let parent = output_path.parent().unwrap().to_path_buf();
-            let mut n = 1u32;
-            loop {
-                let candidate = parent.join(format!("{} ({}){}", stem, n, ext));
-                if !candidate.exists() {
-                    output_path = candidate;
-                    break;
-                }
-                n += 1;
-            }
-        }
+    write_message(stream, &Message::Accept).await?;
 
-        let file = File::create(&output_path).await?;
-        let mut writer = BufWriter::new(file);
-        let mut received: u64 = 0;
+    let _ = progress.send(0.0).await;
 
+    let safe_name = sanitize_filename::sanitize(&filename);
+    let mut output_path = output_dir.join(&safe_name);
+
+    if let Some(parent) = output_path.parent() {
+        tokio::fs::create_dir_all(parent).await?;
+    }
+
+    if output_path.exists() {
+        let stem = output_path
+            .file_stem()
+            .map(|s| s.to_string_lossy().to_string())
+            .unwrap_or_default();
+        let ext = output_path
+            .extension()
+            .map(|e| format!(".{}", e.to_string_lossy()))
+            .unwrap_or_default();
+        let parent = output_path.parent().unwrap().to_path_buf();
+        let mut n = 1u32;
         loop {
-            if opts.cancel_token.is_cancelled() {
-                drop(writer);
-                let _ = tokio::fs::remove_file(&output_path).await;
-                anyhow::bail!("Transfer cancelled");
-            }
-
-            let data = read_data_frame(&mut stream).await?;
-            if data.is_empty() {
+            let candidate = parent.join(format!("{} ({}){}", stem, n, ext));
+            if !candidate.exists() {
+                output_path = candidate;
                 break;
             }
-
-            writer.write_all(&data).await?;
-            received += data.len() as u64;
-
-            if file_size > 0 {
-                let pct = (received as f64 / file_size as f64) * 100.0;
-                let _ = progress.send(pct).await;
-            }
+            n += 1;
         }
-
-        writer.flush().await?;
-        drop(writer);
-
-        match read_message(&mut stream).await {
-            Ok(Message::Done) => {}
-            _ => tracing::warn!("[p2p] did not receive Done message"),
-        }
-
-        let _ = progress.send(100.0).await;
-
-        tracing::info!(
-            "[p2p] transfer complete: {} ({} bytes)",
-            safe_name,
-            received
-        );
-
-        Ok(DownloadResult {
-            file_path: output_path,
-            file_size_bytes: received,
-            duration_seconds: 0.0,
-            torrent_id: None,
-        })
     }
+
+    let file = File::create(&output_path).await?;
+    let mut writer = BufWriter::new(file);
+    let mut received: u64 = 0;
+
+    loop {
+        if cancel.is_cancelled() {
+            drop(writer);
+            let _ = tokio::fs::remove_file(&output_path).await;
+            anyhow::bail!("Transfer cancelled");
+        }
+
+        let data = read_data_frame(stream).await?;
+        if data.is_empty() {
+            break;
+        }
+
+        writer.write_all(&data).await?;
+        received += data.len() as u64;
+
+        if file_size > 0 {
+            let pct = (received as f64 / file_size as f64) * 100.0;
+            let _ = progress.send(pct).await;
+        }
+    }
+
+    writer.flush().await?;
+    drop(writer);
+
+    match read_message(stream).await {
+        Ok(Message::Done) => {}
+        _ => tracing::warn!("[p2p] did not receive Done message"),
+    }
+
+    let _ = progress.send(100.0).await;
+
+    tracing::info!(
+        "[p2p] transfer complete: {} ({} bytes)",
+        safe_name,
+        received
+    );
+
+    Ok(DownloadResult {
+        file_path: output_path,
+        file_size_bytes: received,
+        duration_seconds: 0.0,
+        torrent_id: None,
+    })
 }
 
 struct SenderInfo {
@@ -276,6 +340,11 @@ async fn discover_sender(
     }
 }
 
+enum Connection {
+    Tcp(TcpStream),
+    Udp(SocketAddr),
+}
+
 pub struct P2pSendSession {
     pub code: String,
     pub file_path: PathBuf,
@@ -286,6 +355,8 @@ pub struct P2pSendSession {
     pub status: Arc<tokio::sync::Mutex<String>>,
     pub sent_bytes: Arc<tokio::sync::Mutex<u64>>,
     pub paused: Arc<std::sync::atomic::AtomicBool>,
+    pub udp_socket: Option<Arc<UdpSocket>>,
+    pub public_endpoint: Option<SocketAddr>,
 }
 
 pub async fn start_send(
@@ -302,21 +373,56 @@ pub async fn start_send(
 
     let file_size = metadata.len();
     let file_name = protocol::safe_filename(&file_path);
-    let code = words::generate_code();
+    let base_code = words::generate_code();
 
-    let session = P2pSendSession {
-        code: code.clone(),
-        file_path: file_path.clone(),
-        file_name: file_name.clone(),
+    let udp_socket = UdpSocket::bind("0.0.0.0:0").await.ok();
+    let (public_endpoint, udp_arc) = match udp_socket {
+        Some(sock) => {
+            let arc = Arc::new(sock);
+            match tokio::time::timeout(
+                std::time::Duration::from_secs(5),
+                stun::discover_public_endpoint(&arc),
+            )
+            .await
+            {
+                Ok(Ok(ep)) => (Some(ep), Some(arc)),
+                Ok(Err(e)) => {
+                    tracing::warn!("[p2p] STUN failed: {}", e);
+                    (None, Some(arc))
+                }
+                Err(_) => {
+                    tracing::warn!("[p2p] STUN timed out");
+                    (None, Some(arc))
+                }
+            }
+        }
+        None => (None, None),
+    };
+
+    let code = match &public_endpoint {
+        Some(ep) => format!("{}@{}", base_code, ep),
+        None => base_code,
+    };
+
+    tracing::info!(
+        "[p2p] session created: code={}, endpoint={:?}",
+        code,
+        public_endpoint
+    );
+
+    Ok(P2pSendSession {
+        code,
+        file_path,
+        file_name,
         file_size,
-        cancel_token: cancel_token.clone(),
+        cancel_token,
         progress: Arc::new(tokio::sync::Mutex::new(0.0)),
         status: Arc::new(tokio::sync::Mutex::new("waiting".to_string())),
         sent_bytes: Arc::new(tokio::sync::Mutex::new(0)),
         paused: Arc::new(std::sync::atomic::AtomicBool::new(false)),
-    };
-
-    Ok(session)
+        udp_socket: udp_arc,
+        public_endpoint,
+    })
 }
 
 pub async fn run_sender(session: &P2pSendSession) -> anyhow::Result<()> {
@@ -335,8 +441,11 @@ pub async fn run_sender(session: &P2pSendSession) -> anyhow::Result<()> {
 
     *session.status.lock().await = "waiting_for_receiver".to_string();
 
+    let code_words = session.code.split('@').next().unwrap_or(&session.code);
+    let expected_hash = hash_code(code_words);
+
     let discovery_packet = protocol::encode_discovery_packet(
-        &session.code,
+        code_words,
         tcp_port,
         &session.file_name,
         session.file_size,
@@ -373,40 +482,114 @@ pub async fn run_sender(session: &P2pSendSession) -> anyhow::Result<()> {
         }
     });
 
-    let mut stream = tokio::select! {
-        result = tokio::time::timeout(
-            std::time::Duration::from_secs(600),
-            tcp_listener.accept(),
-        ) => {
-            match result {
-                Ok(Ok((stream, addr))) => {
-                    tracing::info!("[p2p] receiver connected from {}", addr);
-                    stream
-                }
-                Ok(Err(e)) => {
-                    broadcast_handle.abort();
-                    anyhow::bail!("TCP accept failed: {}", e);
-                }
-                Err(_) => {
-                    broadcast_handle.abort();
-                    anyhow::bail!("No receiver connected within 10 minutes");
+    let connection = if let Some(ref udp) = session.udp_socket {
+        let udp_clone = udp.clone();
+        let hash_clone = expected_hash.clone();
+        let cancel_clone = cancel.clone();
+
+        tokio::select! {
+            result = tcp_listener.accept() => {
+                match result {
+                    Ok((stream, addr)) => {
+                        tracing::info!("[p2p] TCP receiver connected from {}", addr);
+                        Connection::Tcp(stream)
+                    }
+                    Err(e) => {
+                        broadcast_handle.abort();
+                        anyhow::bail!("TCP accept failed: {}", e);
+                    }
                 }
             }
+            result = hole_punch::wait_for_punch(&udp_clone, &hash_clone, &cancel_clone) => {
+                match result {
+                    Ok(peer) => {
+                        tracing::info!("[p2p] UDP receiver punched from {}", peer);
+                        Connection::Udp(peer)
+                    }
+                    Err(e) => {
+                        broadcast_handle.abort();
+                        return Err(e);
+                    }
+                }
+            }
+            result = tokio::time::timeout(std::time::Duration::from_secs(600), std::future::pending::<()>()) => {
+                let _ = result;
+                broadcast_handle.abort();
+                anyhow::bail!("No receiver connected within 10 minutes");
+            }
+            _ = cancel.cancelled() => {
+                broadcast_handle.abort();
+                anyhow::bail!("Send cancelled while waiting for receiver");
+            }
         }
-        _ = cancel.cancelled() => {
-            broadcast_handle.abort();
-            anyhow::bail!("Send cancelled while waiting for receiver");
+    } else {
+        tokio::select! {
+            result = tokio::time::timeout(
+                std::time::Duration::from_secs(600),
+                tcp_listener.accept(),
+            ) => {
+                match result {
+                    Ok(Ok((stream, addr))) => {
+                        tracing::info!("[p2p] receiver connected from {}", addr);
+                        Connection::Tcp(stream)
+                    }
+                    Ok(Err(e)) => {
+                        broadcast_handle.abort();
+                        anyhow::bail!("TCP accept failed: {}", e);
+                    }
+                    Err(_) => {
+                        broadcast_handle.abort();
+                        anyhow::bail!("No receiver connected within 10 minutes");
+                    }
+                }
+            }
+            _ = cancel.cancelled() => {
+                broadcast_handle.abort();
+                anyhow::bail!("Send cancelled while waiting for receiver");
+            }
         }
     };
 
     broadcast_handle.abort();
 
-    let expected_hash = hash_code(&session.code);
-    match read_message(&mut stream).await? {
+    match connection {
+        Connection::Tcp(mut stream) => {
+            tcp_send(&mut stream, session).await
+        }
+        Connection::Udp(peer) => {
+            let socket = session.udp_socket.as_ref().unwrap();
+            *session.status.lock().await = "transferring".to_string();
+            hole_punch::send_file_udp(
+                socket,
+                peer,
+                &session.file_path,
+                &session.file_name,
+                session.file_size,
+                &session.progress,
+                &session.sent_bytes,
+                &session.cancel_token,
+                &session.paused,
+            )
+            .await?;
+            *session.status.lock().await = "complete".to_string();
+            Ok(())
+        }
+    }
+}
+
+async fn tcp_send(stream: &mut TcpStream, session: &P2pSendSession) -> anyhow::Result<()> {
+    let cancel = &session.cancel_token;
+
+    let expected_hash = {
+        let code_words = session.code.split('@').next().unwrap_or(&session.code);
+        hash_code(code_words)
+    };
+
+    match read_message(stream).await? {
         Message::Hello { code_hash } => {
             if code_hash != expected_hash {
                 write_message(
-                    &mut stream,
+                    stream,
                     &Message::Error {
                         message: "Invalid code".to_string(),
                     },
@@ -421,7 +604,7 @@ pub async fn run_sender(session: &P2pSendSession) -> anyhow::Result<()> {
     }
 
     write_message(
-        &mut stream,
+        stream,
         &Message::FileInfo {
             name: session.file_name.clone(),
             size: session.file_size,
@@ -430,7 +613,7 @@ pub async fn run_sender(session: &P2pSendSession) -> anyhow::Result<()> {
     )
     .await?;
 
-    match read_message(&mut stream).await? {
+    match read_message(stream).await? {
         Message::Accept => {}
         Message::Reject => {
             anyhow::bail!("Receiver rejected the transfer");
@@ -464,7 +647,7 @@ pub async fn run_sender(session: &P2pSendSession) -> anyhow::Result<()> {
         }
 
         tokio::select! {
-            result = write_data_frame(&mut stream, &buf[..n]) => {
+            result = write_data_frame(stream, &buf[..n]) => {
                 result?;
             }
             _ = cancel.cancelled() => {
@@ -480,15 +663,14 @@ pub async fn run_sender(session: &P2pSendSession) -> anyhow::Result<()> {
         }
     }
 
-    write_data_frame(&mut stream, &[]).await?;
-
-    write_message(&mut stream, &Message::Done).await?;
+    write_data_frame(stream, &[]).await?;
+    write_message(stream, &Message::Done).await?;
 
     *session.progress.lock().await = 100.0;
     *session.status.lock().await = "complete".to_string();
 
     tracing::info!(
-        "[p2p] transfer complete: {} ({} bytes sent)",
+        "[p2p] TCP transfer complete: {} ({} bytes sent)",
         session.file_name,
         sent
     );
