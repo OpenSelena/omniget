@@ -24,7 +24,7 @@ Built with Tauri and Rust for speed and a small footprint.
 
 - Download from 13 platforms natively, plus [1000+ more via yt-dlp](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
 - Download torrents and magnet links natively with seeding, pause/resume
-- P2P file transfer between devices on the local network
+- P2P file transfer between devices (local network or across the internet via STUN/UDP hole punching)
 - Download full Hotmart and Udemy courses with login (videos, attachments, descriptions)
 - Download Telegram media with QR code or phone number login
 - Convert media files between formats with FFmpeg and GPU acceleration
