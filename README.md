@@ -12,7 +12,7 @@
 
 <h3 align="center">Paste a link. Get your file.<br>No browser extensions, no web apps</h3>
 
-OmniGet is a free, open source desktop app for downloading videos and media from the internet. It natively supports YouTube, Instagram, TikTok, Twitter/X, Reddit, Twitch, Pinterest, Vimeo, Bluesky, Hotmart courses, Udemy courses, and Telegram. Any other URL falls back to yt-dlp, covering [1000+ additional sites](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md).
+OmniGet is a free, open source desktop app for downloading videos and media from the internet. It natively supports YouTube, Instagram, TikTok, Twitter/X, Reddit, Twitch, Pinterest, Vimeo, Bluesky, Bilibili, Hotmart courses, Udemy courses, and Telegram. It also downloads torrents and magnet links natively. Any other URL falls back to yt-dlp, covering [1000+ additional sites](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md).
 
 Built with Tauri and Rust for speed and a small footprint.
 
@@ -22,7 +22,9 @@ Built with Tauri and Rust for speed and a small footprint.
 
 ## Features
 
-- Download from 12 platforms natively, plus [1000+ more via yt-dlp](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
+- Download from 13 platforms natively, plus [1000+ more via yt-dlp](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
+- Download torrents and magnet links natively with seeding, pause/resume
+- P2P file transfer between devices on the local network
 - Download full Hotmart and Udemy courses with login (videos, attachments, descriptions)
 - Download Telegram media with QR code or phone number login
 - Convert media files between formats with FFmpeg and GPU acceleration
@@ -33,9 +35,10 @@ Built with Tauri and Rust for speed and a small footprint.
 - Clipboard URL detection and batch downloads
 - System tray with download count badge
 - Built-in auto-updater
+- Debug diagnostics export for troubleshooting
 - Proxy support (HTTP/SOCKS5)
 - Dark and light theme
-- Available in English, Portuguese, Chinese, Japanese, Italian, and French
+- Available in English, Portuguese, Chinese, Japanese, Italian, French, and Greek
 - Loop, the mascot that reacts to your downloads
 
 ## Supported Platforms
@@ -51,9 +54,11 @@ Built with Tauri and Rust for speed and a small footprint.
 | Pinterest | Images, Videos |
 | Vimeo | Videos (with referer support) |
 | Bluesky | Images, Videos |
+| Bilibili | Videos |
 | Hotmart | Full courses with login |
 | Udemy | Full courses with login |
 | Telegram | Photos, Videos, Files, Audio |
+| Torrent / Magnet | Any .torrent file or magnet link |
 | [1000+ more](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md) | Anything yt-dlp supports |
 
 Platform availability may vary depending on each service.
