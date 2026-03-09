@@ -167,7 +167,6 @@
   function handleInput() {
     if (debounceTimer) clearTimeout(debounceTimer);
     clearMediaPreview();
-    downloadMode = "auto";
     selectedQuality = "best";
     selectedFormatId = null;
     formats = [];
