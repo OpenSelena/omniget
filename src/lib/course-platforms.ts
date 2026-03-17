@@ -74,7 +74,7 @@ export const COURSE_PLATFORMS: CoursePlatform[] = [
     route: "/courses/pluralsight",
     icon: "pluralsight",
     color: "#E80A89",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "greatcourses",
@@ -82,7 +82,7 @@ export const COURSE_PLATFORMS: CoursePlatform[] = [
     route: "/courses/greatcourses",
     icon: "greatcourses",
     color: "#1E3A5F",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "masterclass",
@@ -90,7 +90,7 @@ export const COURSE_PLATFORMS: CoursePlatform[] = [
     route: "/courses/masterclass",
     icon: "masterclass",
     color: "#000000",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "thinkific",
@@ -98,7 +98,8 @@ export const COURSE_PLATFORMS: CoursePlatform[] = [
     route: "/courses/thinkific",
     icon: "thinkific",
     color: "#4A90D9",
-    enabled: false,
+    enabled: true,
+    authCheckCommand: "thinkific_check_session",
   },
   {
     id: "curseduca",
@@ -146,7 +147,8 @@ export const COURSE_PLATFORMS: CoursePlatform[] = [
     route: "/courses/rocketseat",
     icon: "rocketseat",
     color: "#8257E5",
-    enabled: false,
+    enabled: true,
+    authCheckCommand: "rocketseat_check_session",
   },
   {
     id: "grancursos",
