@@ -453,10 +453,7 @@ pub async fn get_item_detail(
     let result = serde_json::json!({
         "sub_blocks": all_sub_blocks
     });
-    return Ok(result);
-
-    let body: serde_json::Value = serde_json::from_str(&body_text)?;
-    Ok(body)
+    Ok(result)
 }
 
 pub async fn get_track_info(
