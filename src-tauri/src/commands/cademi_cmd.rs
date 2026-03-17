@@ -58,15 +58,16 @@ pub async fn cademi_login_cookie(
     *state.cademi_courses_cache.lock().await = None;
 
     let trimmed_url = site_url.trim_end_matches('/').to_string();
+    let parsed = crate::core::cookie_parser::parse_cookie_input(&cookie, "app_v4_session");
 
     let session = CademiSession {
-        cookies: cookie.clone(),
+        cookies: parsed.token.clone(),
         site_url: trimmed_url.clone(),
         client: crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
             .user_agent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0")
             .default_headers({
                 let mut h = reqwest::header::HeaderMap::new();
-                h.insert("Cookie", format!("app_v4_session={}", cookie).parse().unwrap());
+                h.insert("Cookie", parsed.cookie_string.parse().unwrap());
                 h.insert("Referer", format!("{}/", trimmed_url).parse().unwrap());
                 h
             })
@@ -254,7 +255,7 @@ pub async fn start_cademi_course_download(
         match result {
             Ok(()) => {
                 let _ = app.emit(
-                    "cademi-download-complete",
+                    "download-complete",
                     &CademiDownloadCompleteEvent {
                         course_name: course.name,
                         success: true,
@@ -265,7 +266,7 @@ pub async fn start_cademi_course_download(
             Err(e) => {
                 tracing::error!("[cademi] download error for '{}': {}", course.name, e);
                 let _ = app.emit(
-                    "cademi-download-complete",
+                    "download-complete",
                     &CademiDownloadCompleteEvent {
                         course_name: course.name,
                         success: false,
