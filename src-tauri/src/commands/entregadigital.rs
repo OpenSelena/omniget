@@ -32,11 +32,13 @@ pub async fn entregadigital_login_token(
     *state.entregadigital_session_validated_at.lock().await = None;
     *state.entregadigital_courses_cache.lock().await = None;
 
+    let parsed_token = crate::core::cookie_parser::parse_bearer_input(&token);
+
     let api_base = api::build_api_base(&site_url)
         .map_err(|e| format!("Invalid site URL: {}", e))?;
 
     let session = EntregaDigitalSession {
-        token: token.clone(),
+        token: parsed_token.clone(),
         api_base,
         app_version: app_version.clone(),
         device_id: device_id.clone(),
@@ -45,7 +47,7 @@ pub async fn entregadigital_login_token(
             .user_agent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0")
             .default_headers({
                 let mut h = reqwest::header::HeaderMap::new();
-                h.insert("Authorization", format!("Bearer {}", token).parse().unwrap());
+                h.insert("Authorization", format!("Bearer {}", parsed_token).parse().unwrap());
                 h.insert("Accept", "application/json".parse().unwrap());
                 h.insert("app-version", app_version.parse().unwrap());
                 h.insert("device-id", device_id.parse().unwrap());
@@ -229,7 +231,7 @@ pub async fn start_entregadigital_course_download(
         match result {
             Ok(()) => {
                 let _ = app.emit(
-                    "entregadigital-download-complete",
+                    "download-complete",
                     &EntregaDigitalDownloadCompleteEvent {
                         course_name: course.name,
                         success: true,
@@ -240,7 +242,7 @@ pub async fn start_entregadigital_course_download(
             Err(e) => {
                 tracing::error!("[entregadigital] download error for '{}': {}", course.name, e);
                 let _ = app.emit(
-                    "entregadigital-download-complete",
+                    "download-complete",
                     &EntregaDigitalDownloadCompleteEvent {
                         course_name: course.name,
                         success: false,
