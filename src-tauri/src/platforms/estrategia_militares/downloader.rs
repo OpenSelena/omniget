@@ -32,7 +32,7 @@ pub async fn download_full_course(
     output_dir: &str,
     cancel_token: CancellationToken,
 ) -> anyhow::Result<()> {
-    let modules = api::get_course_content(session, &course.id).await?;
+    let modules = api::get_course_content(session, &course.slug).await?;
 
     if modules.is_empty() {
         return Err(anyhow!(
