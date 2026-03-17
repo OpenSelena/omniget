@@ -3,9 +3,8 @@
     "home": "Home",
     "downloads": "Download",
     "convert": "Converti",
-    "hotmart": "Hotmart",
+    "courses": "Corsi",
     "telegram": "Telegram",
-    "udemy": "Udemy",
     "settings": "Impostazioni",
     "about": "Info"
   },
@@ -47,6 +46,13 @@
     "clipboard_url_detected": "URL rilevato negli appunti",
     "file_copied_to_clipboard": "File copiato negli appunti",
     "drm_skipped": "{{count}} video ignorati — protetti da DRM (FairPlay/SAMPLE-AES)"
+  },
+  "courses": {
+    "title": "Corsi",
+    "not_connected": "Non connesso",
+    "connected_as": "Connesso come {{email}}",
+    "back": "Torna ai Corsi",
+    "coming_soon": "In arrivo"
   },
   "hotmart": {
     "title": "Hotmart",
