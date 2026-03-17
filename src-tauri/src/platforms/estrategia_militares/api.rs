@@ -395,22 +395,65 @@ pub async fn get_item_detail(
     session: &EstrategiaMilitaresSession,
     item_id: &str,
 ) -> anyhow::Result<serde_json::Value> {
-    let url = format!(
-        "{}/v3/mci/items/{}?page=1&per_page=50",
-        API_BASE, item_id
-    );
+    let mut all_sub_blocks = Vec::new();
+    let mut page = 1u32;
 
-    let resp = session.client.get(&url).send().await?;
-    let status = resp.status();
-    let body_text = resp.text().await?;
+    loop {
+        let url = format!("{}/v3/mci/items/{}", API_BASE, item_id);
 
-    if !status.is_success() {
-        return Err(anyhow!(
-            "get_item_detail returned status {}: {}",
-            status,
-            &body_text[..body_text.len().min(300)]
-        ));
+        let resp = session.client.get(&url)
+            .query(&[
+                ("page", page.to_string().as_str()),
+                ("order", "asc"),
+                ("per_page", "30"),
+                ("view_mode", "complete"),
+                ("should_load_metadata", "true"),
+                ("video_only", "false"),
+                ("text_only", "false"),
+                ("question_only", "false"),
+                ("cast_only", "false"),
+                ("attachment_only", "false"),
+            ])
+            .send()
+            .await?;
+
+        let status = resp.status();
+        let body_text = resp.text().await?;
+
+        if !status.is_success() {
+            if all_sub_blocks.is_empty() {
+                return Err(anyhow!(
+                    "get_item_detail returned status {}: {}",
+                    status,
+                    &body_text[..body_text.len().min(300)]
+                ));
+            }
+            break;
+        }
+
+        let body: serde_json::Value = serde_json::from_str(&body_text)?;
+        let item_data = body.get("data").unwrap_or(&body);
+
+        if let Some(blocks) = item_data.get("sub_blocks").and_then(|v| v.as_array()) {
+            all_sub_blocks.extend(blocks.clone());
+        }
+
+        let total_pages = body
+            .get("meta")
+            .and_then(|m| m.get("last_page"))
+            .and_then(|v| v.as_u64())
+            .unwrap_or(1) as u32;
+
+        if page >= total_pages {
+            break;
+        }
+        page += 1;
     }
+
+    let result = serde_json::json!({
+        "sub_blocks": all_sub_blocks
+    });
+    return Ok(result);
 
     let body: serde_json::Value = serde_json::from_str(&body_text)?;
     Ok(body)
