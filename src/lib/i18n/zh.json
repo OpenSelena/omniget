@@ -3,9 +3,8 @@
     "home": "首页",
     "downloads": "下载",
     "convert": "转换",
-    "hotmart": "Hotmart",
+    "courses": "\u8bfe\u7a0b",
     "telegram": "Telegram",
-    "udemy": "Udemy",
     "settings": "设置",
     "about": "关于"
   },
@@ -47,6 +46,13 @@
     "clipboard_url_detected": "检测到剪贴板中的链接",
     "file_copied_to_clipboard": "文件已复制到剪贴板",
     "drm_skipped": "{{count}} 个视频已跳过 — 受DRM保护（FairPlay/SAMPLE-AES）"
+  },
+  "courses": {
+    "title": "\u8bfe\u7a0b",
+    "not_connected": "\u672a\u8fde\u63a5",
+    "connected_as": "\u5df2\u4ee5 {{email}} \u767b\u5f55",
+    "back": "\u8fd4\u56de\u8bfe\u7a0b",
+    "coming_soon": "\u5373\u5c06\u63a8\u51fa"
   },
   "hotmart": {
     "title": "Hotmart",
