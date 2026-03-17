@@ -12,6 +12,8 @@
   type EstrategiaMilitaresCourse = {
     id: string;
     name: string;
+    slug: string;
+    goal_id: string;
   };
 
   let token = $state("");
@@ -101,6 +103,8 @@
     currentPage = 1;
   }
 
+  let searchQuery = $state("");
+
   async function loadCourses() {
     loadingCourses = true;
     coursesError = "";
@@ -109,6 +113,20 @@
       currentPage = 1;
     } catch (e: any) {
       coursesError = typeof e === "string" ? e : e.message ?? $t('hotmart.courses_error');
+    } finally {
+      loadingCourses = false;
+    }
+  }
+
+  async function handleSearch() {
+    if (!searchQuery.trim()) return;
+    loadingCourses = true;
+    coursesError = "";
+    try {
+      courses = await invoke("estrategia_militares_search_courses", { query: searchQuery.trim() });
+      currentPage = 1;
+    } catch (e: any) {
+      coursesError = typeof e === "string" ? e : e.message ?? "Search failed";
     } finally {
       loadingCourses = false;
     }
@@ -149,7 +167,7 @@
     }
 
     try {
-      await invoke("start_estrategia_militares_download", {
+      await invoke("start_estrategia_militares_course_download", {
         courseJson: JSON.stringify(course),
         outputDir,
       });
@@ -214,6 +232,18 @@
         <button class="button" onclick={handleLogout}>{$t('hotmart.logout')}</button>
       </div>
     </div>
+
+    <form class="search-bar" onsubmit={(e) => { e.preventDefault(); handleSearch(); }}>
+      <input
+        class="input search-input"
+        type="text"
+        placeholder="Search courses (e.g. Marinha, Exercito, FAB...)"
+        bind:value={searchQuery}
+      />
+      <button class="button" type="submit" disabled={loadingCourses || !searchQuery.trim()}>
+        Search
+      </button>
+    </form>
 
     {#if loadingCourses}
       <div class="spinner-section">
@@ -319,6 +349,16 @@
 {/if}
 
 <style>
+  .search-bar {
+    display: flex;
+    gap: calc(var(--padding) / 2);
+    width: 100%;
+  }
+
+  .search-input {
+    flex: 1;
+  }
+
   .back-link {
     display: inline-flex;
     align-items: center;
