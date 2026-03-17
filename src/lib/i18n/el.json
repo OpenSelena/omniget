@@ -3,9 +3,8 @@
     "home": "Αρχική",
     "downloads": "Λήψεις",
     "convert": "Μετατροπή",
-    "hotmart": "Πλατφόρμα Hotmart",
+    "courses": "Μαθήματα",
     "telegram": "Εφαρμογή Telegram",
-    "udemy": "Πλατφόρμα Udemy",
     "settings": "Ρυθμίσεις",
     "about": "Σχετικά"
   },
@@ -47,6 +46,13 @@
     "clipboard_url_detected": "Ανιχνεύθηκε σύνδεσμος URL στο πρόχειρο",
     "file_copied_to_clipboard": "Το αρχείο αντιγράφηκε στο πρόχειρο",
     "drm_skipped": "{{count}} βίντεο παραλείφθηκαν — προστατευμένα DRM (FairPlay/SAMPLE-AES)"
+  },
+  "courses": {
+    "title": "Μαθήματα",
+    "not_connected": "Μη συνδεδεμένο",
+    "connected_as": "Συνδεδεμένο ως {{email}}",
+    "back": "Πίσω στα Μαθήματα",
+    "coming_soon": "Σύντομα διαθέσιμο"
   },
   "hotmart": {
     "title": "Πλατφόρμα Hotmart",
