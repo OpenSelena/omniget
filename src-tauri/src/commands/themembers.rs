@@ -57,7 +57,9 @@ pub async fn themembers_login_token(
     *state.themembers_session_validated_at.lock().await = None;
     *state.themembers_courses_cache.lock().await = None;
 
-    match api::authenticate_token(&token, &domain).await {
+    let parsed_token = crate::core::cookie_parser::parse_bearer_input(&token);
+
+    match api::authenticate_token(&parsed_token, &domain).await {
         Ok(session) => {
             let response_domain = session.domain.clone();
             let _ = api::save_session(&session).await;
@@ -232,7 +234,7 @@ pub async fn start_themembers_course_download(
         match result {
             Ok(()) => {
                 let _ = app.emit(
-                    "themembers-download-complete",
+                    "download-complete",
                     &TheMembersDownloadCompleteEvent {
                         course_name: course.name,
                         success: true,
@@ -243,7 +245,7 @@ pub async fn start_themembers_course_download(
             Err(e) => {
                 tracing::error!("[themembers] download error for '{}': {}", course.name, e);
                 let _ = app.emit(
-                    "themembers-download-complete",
+                    "download-complete",
                     &TheMembersDownloadCompleteEvent {
                         course_name: course.name,
                         success: false,
