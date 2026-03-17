@@ -28,13 +28,15 @@ pub async fn greenn_login_token(
     *state.greenn_session_validated_at.lock().await = None;
     *state.greenn_courses_cache.lock().await = None;
 
+    let parsed_token = crate::core::cookie_parser::parse_bearer_input(&token);
+
     let session = GreennSession {
-        token: token.clone(),
+        token: parsed_token.clone(),
         client: crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
             .user_agent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0")
             .default_headers({
                 let mut h = reqwest::header::HeaderMap::new();
-                h.insert("Authorization", token.parse().unwrap());
+                h.insert("Authorization", parsed_token.parse().unwrap());
                 h.insert("Accept", "application/json".parse().unwrap());
                 h.insert("Origin", "https://greenn.club".parse().unwrap());
                 h.insert("Referer", "https://greenn.club/".parse().unwrap());
@@ -217,7 +219,7 @@ pub async fn start_greenn_course_download(
         match result {
             Ok(()) => {
                 let _ = app.emit(
-                    "greenn-download-complete",
+                    "download-complete",
                     &GreennDownloadCompleteEvent {
                         course_name: course.name,
                         success: true,
@@ -228,7 +230,7 @@ pub async fn start_greenn_course_download(
             Err(e) => {
                 tracing::error!("[greenn] download error for '{}': {}", course.name, e);
                 let _ = app.emit(
-                    "greenn-download-complete",
+                    "download-complete",
                     &GreennDownloadCompleteEvent {
                         course_name: course.name,
                         success: false,
