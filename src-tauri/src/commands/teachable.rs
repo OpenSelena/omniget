@@ -63,11 +63,13 @@ pub async fn teachable_login_token(
     *state.teachable_session_validated_at.lock().await = None;
     *state.teachable_courses_cache.lock().await = None;
 
+    let parsed_token = crate::core::cookie_parser::parse_bearer_input(&token);
+
     let client = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent("ktor-client")
         .default_headers({
             let mut h = reqwest::header::HeaderMap::new();
-            h.insert("Authorization", format!("Bearer {}", token).parse().unwrap());
+            h.insert("Authorization", format!("Bearer {}", parsed_token).parse().unwrap());
             h.insert("CLIENT-TOKEN", "9e44e885ac601aae4ee7109baec9ee0a503bfbb4fd11cbcb7d1de9d5e84f395b37d1521b08add19c2604dbe3c1d6c986bbd62a2513884e04e5b40704e77944e4".parse().unwrap());
             h.insert("X-APP-VERSION", "2.3.0".parse().unwrap());
             h.insert("X-DEVICE-OS", "Android 35".parse().unwrap());
@@ -80,7 +82,7 @@ pub async fn teachable_login_token(
         .map_err(|e| format!("Failed to build client: {}", e))?;
 
     let session = TeachableSession {
-        token,
+        token: parsed_token,
         school_id: None,
         client,
     };
@@ -295,7 +297,7 @@ pub async fn start_teachable_course_download(
         match result {
             Ok(()) => {
                 let _ = app.emit(
-                    "teachable-download-complete",
+                    "download-complete",
                     &TeachableDownloadCompleteEvent {
                         course_name: course.name,
                         success: true,
@@ -306,7 +308,7 @@ pub async fn start_teachable_course_download(
             Err(e) => {
                 tracing::error!("[teachable] download error for '{}': {}", course.name, e);
                 let _ = app.emit(
-                    "teachable-download-complete",
+                    "download-complete",
                     &TeachableDownloadCompleteEvent {
                         course_name: course.name,
                         success: false,
