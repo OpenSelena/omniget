@@ -85,3 +85,13 @@ pub mod greennclub;
 pub mod themembers;
 #[cfg(not(target_os = "android"))]
 pub mod voompplay;
+#[cfg(not(target_os = "android"))]
+pub mod estrategia_concursos;
+#[cfg(not(target_os = "android"))]
+pub mod estrategia_ldi;
+#[cfg(not(target_os = "android"))]
+pub mod estrategia_militares;
+#[cfg(not(target_os = "android"))]
+pub mod matematicaprapassar;
+#[cfg(not(target_os = "android"))]
+pub mod caktomembers;
