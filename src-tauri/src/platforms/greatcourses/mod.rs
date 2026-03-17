@@ -1,3 +1,6 @@
+pub mod api;
+pub mod downloader;
+
 use anyhow::anyhow;
 use async_trait::async_trait;
 use tokio::sync::mpsc;
@@ -29,7 +32,10 @@ impl PlatformDownloader for GreatCoursesDownloader {
         if let Ok(parsed) = url::Url::parse(url) {
             if let Some(host) = parsed.host_str() {
                 let host = host.to_lowercase();
-                return host == "thegreatcoursesplus.com" || host == "wondrium.com";
+                return host == "thegreatcoursesplus.com"
+                    || host == "www.thegreatcoursesplus.com"
+                    || host == "wondrium.com"
+                    || host == "www.wondrium.com";
             }
         }
         false
@@ -37,7 +43,7 @@ impl PlatformDownloader for GreatCoursesDownloader {
 
     async fn get_media_info(&self, url: &str) -> anyhow::Result<MediaInfo> {
         Ok(MediaInfo {
-            title: "Great Courses".to_string(),
+            title: "Wondrium Course".to_string(),
             author: String::new(),
             platform: "greatcourses".to_string(),
             duration_seconds: None,
@@ -60,6 +66,6 @@ impl PlatformDownloader for GreatCoursesDownloader {
         _opts: &DownloadOptions,
         _progress: mpsc::Sender<f64>,
     ) -> anyhow::Result<DownloadResult> {
-        Err(anyhow!("Use the courses interface to download Great Courses"))
+        Err(anyhow!("Use the courses interface to download Wondrium courses"))
     }
 }
