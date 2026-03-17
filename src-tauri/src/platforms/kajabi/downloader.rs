@@ -17,9 +17,12 @@ pub struct KajabiCourseDownloadProgress {
     pub course_name: String,
     pub percent: f64,
     pub current_module: String,
+    #[serde(rename = "current_page")]
     pub current_lesson: String,
     pub downloaded_bytes: u64,
+    #[serde(rename = "total_pages")]
     pub total_lessons: u32,
+    #[serde(rename = "completed_pages")]
     pub completed_lessons: u32,
     pub total_modules: u32,
     pub current_module_index: u32,
@@ -54,7 +57,7 @@ pub async fn download_full_course(
     let completed = Arc::new(AtomicUsize::new(0));
 
     let _ = app.emit(
-        "kajabi-download-progress",
+        "download-progress",
         &KajabiCourseDownloadProgress {
             course_id: course.id.clone(),
             course_name: course.name.clone(),
@@ -97,7 +100,7 @@ pub async fn download_full_course(
                     );
                     let done = completed.fetch_add(1, Ordering::Relaxed) + 1;
                     let _ = app.emit(
-                        "kajabi-download-progress",
+                        "download-progress",
                         &KajabiCourseDownloadProgress {
                             course_id: course.id.clone(),
                             course_name: course.name.clone(),
@@ -147,7 +150,7 @@ pub async fn download_full_course(
                         tracing::info!("[kajabi] Skipping existing: {}", video_path);
                         let done = completed.fetch_add(1, Ordering::Relaxed) + 1;
                         let _ = app.emit(
-                            "kajabi-download-progress",
+                            "download-progress",
                             &KajabiCourseDownloadProgress {
                                 course_id: course.id.clone(),
                                 course_name: course.name.clone(),
@@ -240,7 +243,7 @@ pub async fn download_full_course(
 
             let done = completed.fetch_add(1, Ordering::Relaxed) + 1;
             let _ = app.emit(
-                "kajabi-download-progress",
+                "download-progress",
                 &KajabiCourseDownloadProgress {
                     course_id: course.id.clone(),
                     course_name: course.name.clone(),
