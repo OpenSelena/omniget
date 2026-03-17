@@ -161,7 +161,7 @@
   );
 
   function isUrl(value: string): boolean {
-    return value.startsWith("http://") || value.startsWith("https://") || value.startsWith("magnet:") || value.startsWith("p2p:");
+    return value.startsWith("http://") || value.startsWith("https://") || value.startsWith("magnet:") || value.startsWith("p2p:") || value.endsWith(".torrent");
   }
 
   function handleInput() {
