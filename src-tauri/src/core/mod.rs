@@ -1,4 +1,5 @@
 pub mod auth;
+pub mod cookie_parser;
 pub mod events;
 pub mod http_client;
 pub mod paths;
