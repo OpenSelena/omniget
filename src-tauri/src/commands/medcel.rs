@@ -56,11 +56,13 @@ pub async fn medcel_login_token(
     *state.medcel_session_validated_at.lock().await = None;
     *state.medcel_courses_cache.lock().await = None;
 
-    let client = api::build_client_with_origin(&token, &api_key, "https://areaaluno.medcel.com.br")
+    let parsed_token = crate::core::cookie_parser::parse_bearer_input(&token);
+
+    let client = api::build_client_with_origin(&parsed_token, &api_key, "https://areaaluno.medcel.com.br")
         .map_err(|e| format!("Failed to build client: {}", e))?;
 
     let mut session = MedcelSession {
-        token: token.clone(),
+        token: parsed_token.clone(),
         api_key: api_key.clone(),
         student_id: String::new(),
         client,
@@ -247,7 +249,7 @@ pub async fn start_medcel_course_download(
         match result {
             Ok(()) => {
                 let _ = app.emit(
-                    "medcel-download-complete",
+                    "download-complete",
                     &MedcelDownloadCompleteEvent {
                         course_name: course.name,
                         success: true,
@@ -258,7 +260,7 @@ pub async fn start_medcel_course_download(
             Err(e) => {
                 tracing::error!("[medcel] download error for '{}': {}", course.name, e);
                 let _ = app.emit(
-                    "medcel-download-complete",
+                    "download-complete",
                     &MedcelDownloadCompleteEvent {
                         course_name: course.name,
                         success: false,
