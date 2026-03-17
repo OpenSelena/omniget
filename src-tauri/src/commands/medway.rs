@@ -28,11 +28,13 @@ pub async fn medway_login_token(
     *state.medway_session_validated_at.lock().await = None;
     *state.medway_courses_cache.lock().await = None;
 
+    let parsed_token = crate::core::cookie_parser::parse_bearer_input(&token);
+
     let client = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0")
         .default_headers({
             let mut h = reqwest::header::HeaderMap::new();
-            h.insert("Authorization", format!("Bearer {}", token).parse().unwrap());
+            h.insert("Authorization", format!("Bearer {}", parsed_token).parse().unwrap());
             h.insert("Accept", "application/json".parse().unwrap());
             h
         })
@@ -42,7 +44,7 @@ pub async fn medway_login_token(
         .map_err(|e| format!("Failed to build client: {}", e))?;
 
     let session = MedwaySession {
-        token: token.clone(),
+        token: parsed_token.clone(),
         client,
     };
 
@@ -217,7 +219,7 @@ pub async fn start_medway_course_download(
         match result {
             Ok(()) => {
                 let _ = app.emit(
-                    "medway-download-complete",
+                    "download-complete",
                     &MedwayDownloadCompleteEvent {
                         course_name: course.name,
                         success: true,
@@ -228,7 +230,7 @@ pub async fn start_medway_course_download(
             Err(e) => {
                 tracing::error!("[medway] download error for '{}': {}", course.name, e);
                 let _ = app.emit(
-                    "medway-download-complete",
+                    "download-complete",
                     &MedwayDownloadCompleteEvent {
                         course_name: course.name,
                         success: false,
