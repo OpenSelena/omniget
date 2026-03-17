@@ -29,7 +29,9 @@ pub async fn alpaclass_login(
     *state.alpaclass_session_validated_at.lock().await = None;
     *state.alpaclass_courses_cache.lock().await = None;
 
-    match api::authenticate(&token, &platform_url).await {
+    let parsed_token = crate::core::cookie_parser::parse_bearer_input(&token);
+
+    match api::authenticate(&parsed_token, &platform_url).await {
         Ok(session) => {
             let subdomain = session.subdomain.clone();
             let _ = api::save_session(&session).await;
@@ -210,7 +212,7 @@ pub async fn start_alpaclass_course_download(
         match result {
             Ok(()) => {
                 let _ = app.emit(
-                    "alpaclass-download-complete",
+                    "download-complete",
                     &AlpaclassDownloadCompleteEvent {
                         course_name: course.name,
                         success: true,
@@ -221,7 +223,7 @@ pub async fn start_alpaclass_course_download(
             Err(e) => {
                 tracing::error!("[alpaclass] download error for '{}': {}", course.name, e);
                 let _ = app.emit(
-                    "alpaclass-download-complete",
+                    "download-complete",
                     &AlpaclassDownloadCompleteEvent {
                         course_name: course.name,
                         success: false,
