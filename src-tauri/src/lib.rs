@@ -236,6 +236,41 @@ pub struct MedcofCoursesCache {
     pub fetched_at: std::time::Instant,
 }
 
+use platforms::pluralsight::api::PluralsightCourse;
+
+pub struct PluralsightCoursesCache {
+    pub courses: Vec<PluralsightCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::greatcourses::api::WondriumCourse;
+
+pub struct WondriumCoursesCache {
+    pub courses: Vec<WondriumCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::masterclass::api::MasterClassCourse;
+
+pub struct MasterClassCoursesCache {
+    pub courses: Vec<MasterClassCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::thinkific::api::ThinkificCourse;
+
+pub struct ThinkificCoursesCache {
+    pub courses: Vec<ThinkificCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::rocketseat::api::RocketseatCourse;
+
+pub struct RocketseatCoursesCache {
+    pub courses: Vec<RocketseatCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
 pub struct AppState {
     pub hotmart_session: Arc<tokio::sync::Mutex<Option<HotmartSession>>>,
     pub active_downloads: Arc<tokio::sync::Mutex<HashMap<u64, CancellationToken>>>,
@@ -341,6 +376,21 @@ pub struct AppState {
     pub medcof_session: Arc<tokio::sync::Mutex<Option<platforms::medcof::api::MedcofSession>>>,
     pub medcof_courses_cache: Arc<tokio::sync::Mutex<Option<MedcofCoursesCache>>>,
     pub medcof_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub thinkific_session: Arc<tokio::sync::Mutex<Option<platforms::thinkific::api::ThinkificSession>>>,
+    pub thinkific_courses_cache: Arc<tokio::sync::Mutex<Option<ThinkificCoursesCache>>>,
+    pub thinkific_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub rocketseat_session: Arc<tokio::sync::Mutex<Option<platforms::rocketseat::api::RocketseatSession>>>,
+    pub rocketseat_courses_cache: Arc<tokio::sync::Mutex<Option<RocketseatCoursesCache>>>,
+    pub rocketseat_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub pluralsight_session: Arc<tokio::sync::Mutex<Option<platforms::pluralsight::api::PluralsightSession>>>,
+    pub pluralsight_courses_cache: Arc<tokio::sync::Mutex<Option<PluralsightCoursesCache>>>,
+    pub pluralsight_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub wondrium_session: Arc<tokio::sync::Mutex<Option<platforms::greatcourses::api::WondriumSession>>>,
+    pub wondrium_courses_cache: Arc<tokio::sync::Mutex<Option<WondriumCoursesCache>>>,
+    pub wondrium_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub masterclass_session: Arc<tokio::sync::Mutex<Option<platforms::masterclass::api::MasterClassSession>>>,
+    pub masterclass_courses_cache: Arc<tokio::sync::Mutex<Option<MasterClassCoursesCache>>>,
+    pub masterclass_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -547,6 +597,21 @@ pub fn run() {
         medcof_session: Arc::new(tokio::sync::Mutex::new(None)),
         medcof_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
         medcof_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        thinkific_session: Arc::new(tokio::sync::Mutex::new(None)),
+        thinkific_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        thinkific_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        rocketseat_session: Arc::new(tokio::sync::Mutex::new(None)),
+        rocketseat_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        rocketseat_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        pluralsight_session: Arc::new(tokio::sync::Mutex::new(None)),
+        pluralsight_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        pluralsight_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        wondrium_session: Arc::new(tokio::sync::Mutex::new(None)),
+        wondrium_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        wondrium_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        masterclass_session: Arc::new(tokio::sync::Mutex::new(None)),
+        masterclass_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        masterclass_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
     };
 
     tauri::Builder::default()
@@ -758,6 +823,7 @@ pub fn run() {
             commands::estrategia_militares::estrategia_militares_check_session,
             commands::estrategia_militares::estrategia_militares_logout,
             commands::estrategia_militares::estrategia_militares_list_courses,
+            commands::estrategia_militares::estrategia_militares_search_courses,
             commands::estrategia_militares::estrategia_militares_refresh_courses,
             commands::estrategia_militares::start_estrategia_militares_course_download,
             commands::grancursos::grancursos_login_cookies,
@@ -859,6 +925,37 @@ pub fn run() {
             commands::medcof::medcof_list_courses,
             commands::medcof::medcof_refresh_courses,
             commands::medcof::start_medcof_course_download,
+            commands::thinkific::thinkific_login,
+            commands::thinkific::thinkific_check_session,
+            commands::thinkific::thinkific_logout,
+            commands::thinkific::thinkific_list_courses,
+            commands::thinkific::thinkific_refresh_courses,
+            commands::thinkific::start_thinkific_course_download,
+            commands::rocketseat::rocketseat_login_token,
+            commands::rocketseat::rocketseat_check_session,
+            commands::rocketseat::rocketseat_logout,
+            commands::rocketseat::rocketseat_list_courses,
+            commands::rocketseat::rocketseat_refresh_courses,
+            commands::rocketseat::start_rocketseat_course_download,
+            commands::pluralsight::pluralsight_login_cookies,
+            commands::pluralsight::pluralsight_check_session,
+            commands::pluralsight::pluralsight_logout,
+            commands::pluralsight::pluralsight_list_courses,
+            commands::pluralsight::pluralsight_refresh_courses,
+            commands::pluralsight::start_pluralsight_course_download,
+            commands::greatcourses::wondrium_login,
+            commands::greatcourses::wondrium_login_token,
+            commands::greatcourses::wondrium_check_session,
+            commands::greatcourses::wondrium_logout,
+            commands::greatcourses::wondrium_list_courses,
+            commands::greatcourses::wondrium_refresh_courses,
+            commands::greatcourses::start_wondrium_course_download,
+            commands::masterclass::masterclass_login_cookies,
+            commands::masterclass::masterclass_check_session,
+            commands::masterclass::masterclass_logout,
+            commands::masterclass::masterclass_list_courses,
+            commands::masterclass::masterclass_refresh_courses,
+            commands::masterclass::start_masterclass_course_download,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
