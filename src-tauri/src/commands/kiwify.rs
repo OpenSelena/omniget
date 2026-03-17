@@ -158,14 +158,21 @@ pub async fn kiwify_logout(
 async fn fetch_kiwify_courses(
     state: &tauri::State<'_, AppState>,
 ) -> Result<Vec<KiwifyCourse>, String> {
-    let guard = state.kiwify_session.lock().await;
-    let session = guard
-        .as_ref()
-        .ok_or_else(|| "Not authenticated. Please log in first.".to_string())?;
+    let session = {
+        let guard = state.kiwify_session.lock().await;
+        guard
+            .as_ref()
+            .ok_or_else(|| "Not authenticated. Please log in first.".to_string())?
+            .clone()
+    };
 
-    let courses = api::list_courses(session)
-        .await
-        .map_err(|e| e.to_string())?;
+    let courses = tokio::time::timeout(
+        std::time::Duration::from_secs(60),
+        api::list_courses(&session),
+    )
+    .await
+    .map_err(|_| "Timeout loading courses (60s)".to_string())?
+    .map_err(|e| e.to_string())?;
 
     let mut cache = state.kiwify_courses_cache.lock().await;
     *cache = Some(crate::KiwifyCoursesCache {
