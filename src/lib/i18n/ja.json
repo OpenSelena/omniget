@@ -3,9 +3,8 @@
     "home": "ホーム",
     "downloads": "ダウンロード",
     "convert": "変換",
-    "hotmart": "Hotmart",
+    "courses": "\u30b3\u30fc\u30b9",
     "telegram": "Telegram",
-    "udemy": "Udemy",
     "settings": "設定",
     "about": "このアプリについて"
   },
@@ -47,6 +46,13 @@
     "clipboard_url_detected": "クリップボードでURLを検出しました",
     "file_copied_to_clipboard": "ファイルをクリップボードにコピーしました",
     "drm_skipped": "{{count}} 本の動画をスキップしました — DRM保護（FairPlay/SAMPLE-AES）"
+  },
+  "courses": {
+    "title": "\u30b3\u30fc\u30b9",
+    "not_connected": "\u672a\u63a5\u7d9a",
+    "connected_as": "{{email}} \u3067\u30ed\u30b0\u30a4\u30f3\u4e2d",
+    "back": "\u30b3\u30fc\u30b9\u306b\u623b\u308b",
+    "coming_soon": "\u8fd1\u65e5\u516c\u958b"
   },
   "hotmart": {
     "title": "Hotmart",
