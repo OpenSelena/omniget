@@ -28,11 +28,13 @@ pub async fn grancursos_login_cookies(
     *state.grancursos_session_validated_at.lock().await = None;
     *state.grancursos_courses_cache.lock().await = None;
 
+    let parsed = crate::core::cookie_parser::parse_cookie_input(&cookies, "laravel_session");
+
     let client = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0")
         .default_headers({
             let mut h = reqwest::header::HeaderMap::new();
-            h.insert("Cookie", cookies.parse().unwrap());
+            h.insert("Cookie", parsed.cookie_string.parse().unwrap());
             h.insert("Accept", "application/json".parse().unwrap());
             h.insert("Referer", "https://www.grancursosonline.com.br/".parse().unwrap());
             h
@@ -43,7 +45,7 @@ pub async fn grancursos_login_cookies(
         .map_err(|e| format!("Failed to build client: {}", e))?;
 
     let mut session = GranCursosSession {
-        cookies: cookies.clone(),
+        cookies: parsed.cookie_string.clone(),
         contract_id: None,
         client,
     };
@@ -221,7 +223,7 @@ pub async fn start_grancursos_course_download(
         match result {
             Ok(()) => {
                 let _ = app.emit(
-                    "grancursos-download-complete",
+                    "download-complete",
                     &GranCursosDownloadCompleteEvent {
                         course_name: course.name,
                         success: true,
@@ -232,7 +234,7 @@ pub async fn start_grancursos_course_download(
             Err(e) => {
                 tracing::error!("[grancursos] download error for '{}': {}", course.name, e);
                 let _ = app.emit(
-                    "grancursos-download-complete",
+                    "download-complete",
                     &GranCursosDownloadCompleteEvent {
                         course_name: course.name,
                         success: false,
