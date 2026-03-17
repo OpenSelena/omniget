@@ -438,6 +438,18 @@
     p2pReceiveUrl = "";
   }
 
+  async function openTorrentFile() {
+    const selected = await open({
+      title: "Select .torrent file",
+      filters: [{ name: "Torrent", extensions: ["torrent"] }],
+      multiple: false,
+    });
+    if (selected && typeof selected === "string") {
+      url = selected;
+      handleInput();
+    }
+  }
+
   function handleDismiss() {
     clearMediaPreview();
     omniState = { kind: "idle" };
@@ -594,13 +606,25 @@
     {/if}
   </div>
 
-  <button class="p2p-send-btn" onclick={() => { showP2pSendDialog = true; }}>
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M22 2L11 13" />
-      <path d="M22 2L15 22 11 13 2 9z" />
-    </svg>
-    {$t("p2p.send_file")}
-  </button>
+  <div class="bottom-actions">
+    <button class="action-btn" onclick={() => { showP2pSendDialog = true; }}>
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 2L11 13" />
+        <path d="M22 2L15 22 11 13 2 9z" />
+      </svg>
+      {$t("p2p.send_file")}
+    </button>
+    <button class="action-btn" onclick={openTorrentFile}>
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3" />
+        <circle cx="5" cy="6" r="2" />
+        <circle cx="19" cy="6" r="2" />
+        <path d="M9.5 10.5L6.5 7.5" />
+        <path d="M14.5 10.5l3-3" />
+      </svg>
+      Open .torrent
+    </button>
+  </div>
 
   {#if showP2pSendDialog}
     <P2pSendDialog onClose={() => { showP2pSendDialog = false; }} />
@@ -891,7 +915,13 @@
     color: var(--gray);
   }
 
-  .p2p-send-btn {
+  .bottom-actions {
+    display: flex;
+    gap: calc(var(--padding) / 2);
+    flex-wrap: wrap;
+  }
+
+  .action-btn {
     display: flex;
     align-items: center;
     gap: 6px;
@@ -906,16 +936,16 @@
   }
 
   @media (hover: hover) {
-    .p2p-send-btn:hover {
+    .action-btn:hover {
       background: var(--button-hover);
     }
   }
 
-  .p2p-send-btn:active {
+  .action-btn:active {
     background: var(--button-press);
   }
 
-  .p2p-send-btn svg {
+  .action-btn svg {
     pointer-events: none;
     color: var(--accent);
   }
