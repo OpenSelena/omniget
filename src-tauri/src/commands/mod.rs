@@ -79,3 +79,13 @@ pub mod caktomembers;
 pub mod curseduca;
 #[cfg(not(target_os = "android"))]
 pub mod medcof;
+#[cfg(not(target_os = "android"))]
+pub mod thinkific;
+#[cfg(not(target_os = "android"))]
+pub mod rocketseat;
+#[cfg(not(target_os = "android"))]
+pub mod pluralsight;
+#[cfg(not(target_os = "android"))]
+pub mod greatcourses;
+#[cfg(not(target_os = "android"))]
+pub mod masterclass;
