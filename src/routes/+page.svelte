@@ -304,7 +304,7 @@
     const info = omniState.info;
 
     if (info.platform === "hotmart") {
-      goto("/hotmart");
+      goto("/courses/hotmart");
       return;
     }
 
