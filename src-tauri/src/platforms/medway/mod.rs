@@ -1,8 +1,11 @@
+pub mod api;
+pub mod downloader;
+
 use anyhow::anyhow;
 use async_trait::async_trait;
 use tokio::sync::mpsc;
 
-use crate::models::media::{DownloadOptions, DownloadResult, MediaInfo, MediaType};
+use crate::models::media::{DownloadOptions, DownloadResult, MediaInfo, MediaType, VideoQuality};
 use crate::platforms::traits::PlatformDownloader;
 
 pub struct MedwayDownloader;
@@ -36,14 +39,20 @@ impl PlatformDownloader for MedwayDownloader {
         false
     }
 
-    async fn get_media_info(&self, _url: &str) -> anyhow::Result<MediaInfo> {
+    async fn get_media_info(&self, url: &str) -> anyhow::Result<MediaInfo> {
         Ok(MediaInfo {
-            title: "Medway".to_string(),
+            title: "Medway Course".to_string(),
             author: String::new(),
             platform: "medway".to_string(),
             duration_seconds: None,
             thumbnail_url: None,
-            available_qualities: vec![],
+            available_qualities: vec![VideoQuality {
+                label: "course".to_string(),
+                width: 0,
+                height: 0,
+                url: url.to_string(),
+                format: "course".to_string(),
+            }],
             media_type: MediaType::Course,
             file_size_bytes: None,
         })
@@ -55,6 +64,8 @@ impl PlatformDownloader for MedwayDownloader {
         _opts: &DownloadOptions,
         _progress: mpsc::Sender<f64>,
     ) -> anyhow::Result<DownloadResult> {
-        Err(anyhow!("Use the courses interface to download from Medway"))
+        Err(anyhow!(
+            "Use the courses interface to download Medway courses"
+        ))
     }
 }
