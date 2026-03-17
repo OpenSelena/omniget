@@ -28,14 +28,14 @@ pub async fn estrategia_militares_login_token(
     *state.estrategia_militares_session_validated_at.lock().await = None;
     *state.estrategia_militares_courses_cache.lock().await = None;
 
-    let (jwt, cookie_string) = api::parse_token_input(&token);
+    let parsed = crate::core::cookie_parser::parse_cookie_input(&token, "__Secure-SID");
 
     let client = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0")
         .default_headers({
             let mut h = reqwest::header::HeaderMap::new();
-            h.insert("Authorization", format!("Bearer {}", jwt).parse().unwrap());
-            h.insert("Cookie", cookie_string.parse().unwrap());
+            h.insert("Authorization", format!("Bearer {}", parsed.token).parse().unwrap());
+            h.insert("Cookie", parsed.cookie_string.parse().unwrap());
             h.insert("Accept", "application/json, text/plain, */*".parse().unwrap());
             h.insert("Accept-Language", "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7".parse().unwrap());
             h.insert("Origin", "https://militares.estrategia.com".parse().unwrap());
@@ -50,8 +50,8 @@ pub async fn estrategia_militares_login_token(
         .map_err(|e| format!("Failed to build client: {}", e))?;
 
     let session = EstrategiaMilitaresSession {
-        token: jwt,
-        cookie_string,
+        token: parsed.token,
+        cookie_string: parsed.cookie_string,
         client,
     };
 
@@ -255,7 +255,7 @@ pub async fn start_estrategia_militares_course_download(
         match result {
             Ok(()) => {
                 let _ = app.emit(
-                    "estrategia-militares-download-complete",
+                    "download-complete",
                     &EstrategiaMilitaresDownloadCompleteEvent {
                         course_name: course.name,
                         success: true,
@@ -266,7 +266,7 @@ pub async fn start_estrategia_militares_course_download(
             Err(e) => {
                 tracing::error!("[estrategia_militares] download error for '{}': {}", course.name, e);
                 let _ = app.emit(
-                    "estrategia-militares-download-complete",
+                    "download-complete",
                     &EstrategiaMilitaresDownloadCompleteEvent {
                         course_name: course.name,
                         success: false,
