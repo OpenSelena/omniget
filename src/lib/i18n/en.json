@@ -49,7 +49,9 @@
   },
   "courses": {
     "title": "Courses",
+    "search_placeholder": "Search platforms...",
     "not_connected": "Not connected",
+    "connection_failed": "Connection failed",
     "connected_as": "Connected as {{email}}",
     "back": "Back to Courses",
     "coming_soon": "Coming soon"
