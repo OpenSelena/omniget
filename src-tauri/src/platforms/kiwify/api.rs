@@ -161,17 +161,24 @@ pub async fn list_courses(session: &KiwifySession) -> anyhow::Result<Vec<KiwifyC
             page
         );
 
+        tracing::info!("[kiwify] fetching courses page {}", page);
+
         let resp = session.client.get(&url).send().await?;
 
         let status = resp.status();
         let body_text = resp.text().await?;
 
+        tracing::info!("[kiwify] page {} status={} body_len={}", page, status, body_text.len());
+
         if !status.is_success() {
-            return Err(anyhow!(
-                "list_courses returned status {}: {}",
-                status,
-                &body_text[..body_text.len().min(300)]
-            ));
+            if all_courses.is_empty() {
+                return Err(anyhow!(
+                    "list_courses returned status {}: {}",
+                    status,
+                    &body_text[..body_text.len().min(300)]
+                ));
+            }
+            break;
         }
 
         let body: serde_json::Value = serde_json::from_str(&body_text)?;
@@ -181,6 +188,11 @@ pub async fn list_courses(session: &KiwifySession) -> anyhow::Result<Vec<KiwifyC
             .and_then(|v| v.as_array())
             .cloned()
             .unwrap_or_default();
+
+        let total_count = body.get("count").and_then(|v| v.as_i64()).unwrap_or(0);
+        let page_size = body.get("page_size").and_then(|v| v.as_i64()).unwrap_or(10);
+
+        tracing::info!("[kiwify] page {} returned {} courses (total={}, page_size={})", page, courses_arr.len(), total_count, page_size);
 
         if courses_arr.is_empty() {
             break;
@@ -242,9 +254,19 @@ pub async fn list_courses(session: &KiwifySession) -> anyhow::Result<Vec<KiwifyC
             });
         }
 
+        if total_count > 0 && (page as i64 * page_size) >= total_count {
+            break;
+        }
+
+        if page >= 50 {
+            tracing::warn!("[kiwify] safety limit reached at page 50");
+            break;
+        }
+
         page += 1;
     }
 
+    tracing::info!("[kiwify] total courses found: {}", all_courses.len());
     Ok(all_courses)
 }
 
