@@ -51,7 +51,7 @@ pub async fn download_product(
     let completed = Arc::new(AtomicUsize::new(0));
 
     let _ = app.emit(
-        "gumroad-download-progress",
+        "download-progress",
         &GumroadDownloadProgress {
             product_id: product.id.clone(),
             product_name: product.name.clone(),
@@ -77,7 +77,7 @@ pub async fn download_product(
                 tracing::info!("[gumroad] Skipping existing: {}", dest_path);
                 let done = completed.fetch_add(1, Ordering::Relaxed) + 1;
                 let _ = app.emit(
-                    "gumroad-download-progress",
+                    "download-progress",
                     &GumroadDownloadProgress {
                         product_id: product.id.clone(),
                         product_name: product.name.clone(),
@@ -160,7 +160,7 @@ pub async fn download_product(
 
         let done = completed.fetch_add(1, Ordering::Relaxed) + 1;
         let _ = app.emit(
-            "gumroad-download-progress",
+            "download-progress",
             &GumroadDownloadProgress {
                 product_id: product.id.clone(),
                 product_name: product.name.clone(),
