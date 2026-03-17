@@ -136,6 +136,8 @@ impl Platform {
             Some(Platform::Other("curseduca".to_string()))
         } else if matches("cademi.com.br") {
             Some(Platform::Other("cademi".to_string()))
+        } else if host == "app.cakto.com.br" {
+            Some(Platform::Other("caktomembers".to_string()))
         } else if matches("cakto.com.br") {
             Some(Platform::Other("cakto".to_string()))
         } else if matches("kirvano.com") {
@@ -174,6 +176,16 @@ impl Platform {
             Some(Platform::Other("themembers".to_string()))
         } else if matches("voompplay.com.br") {
             Some(Platform::Other("voompplay".to_string()))
+        } else if matches("estrategiaconcursos.com.br") {
+            Some(Platform::Other("estrategia_concursos".to_string()))
+        } else if host == "concursos.estrategia.com" {
+            Some(Platform::Other("estrategia_ldi".to_string()))
+        } else if host == "militares.estrategia.com" {
+            Some(Platform::Other("estrategia_militares".to_string()))
+        } else if matches("estrategia.com") && parsed.path().contains("concursos") {
+            Some(Platform::Other("estrategia_concursos".to_string()))
+        } else if matches("matematicaprapassar.com.br") {
+            Some(Platform::Other("matematicaprapassar".to_string()))
         } else {
             None
         }
