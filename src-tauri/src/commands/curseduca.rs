@@ -60,16 +60,17 @@ pub async fn curseduca_login_token(
     *state.curseduca_courses_cache.lock().await = None;
 
     let clean_url = site_url.trim_end_matches('/').to_string();
+    let parsed_token = crate::core::cookie_parser::parse_bearer_input(&token);
 
     let session = CurseducaSession {
-        token: token.clone(),
+        token: parsed_token.clone(),
         api_key: api_key.clone(),
         site_url: clean_url,
         client: crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
             .user_agent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0")
             .default_headers({
                 let mut h = reqwest::header::HeaderMap::new();
-                h.insert("Authorization", format!("Bearer {}", token).parse().unwrap());
+                h.insert("Authorization", format!("Bearer {}", parsed_token).parse().unwrap());
                 h.insert("api_key", api_key.parse().unwrap());
                 h.insert("Accept", "application/json".parse().unwrap());
                 h
@@ -257,7 +258,7 @@ pub async fn start_curseduca_course_download(
         match result {
             Ok(()) => {
                 let _ = app.emit(
-                    "curseduca-download-complete",
+                    "download-complete",
                     &CurseducaDownloadCompleteEvent {
                         course_name: course.name,
                         success: true,
@@ -268,7 +269,7 @@ pub async fn start_curseduca_course_download(
             Err(e) => {
                 tracing::error!("[curseduca] download error for '{}': {}", course.name, e);
                 let _ = app.emit(
-                    "curseduca-download-complete",
+                    "download-complete",
                     &CurseducaDownloadCompleteEvent {
                         course_name: course.name,
                         success: false,
