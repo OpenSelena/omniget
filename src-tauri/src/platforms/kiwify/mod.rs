@@ -1,3 +1,6 @@
+pub mod api;
+pub mod downloader;
+
 use anyhow::anyhow;
 use async_trait::async_trait;
 use tokio::sync::mpsc;
@@ -29,7 +32,9 @@ impl PlatformDownloader for KiwifyDownloader {
         if let Ok(parsed) = url::Url::parse(url) {
             if let Some(host) = parsed.host_str() {
                 let host = host.to_lowercase();
-                return host == "kiwify.com.br" || host.ends_with(".kiwify.com.br");
+                return host == "kiwify.com.br"
+                    || host.ends_with(".kiwify.com.br")
+                    || host == "admin.kiwify.com.br";
             }
         }
         false
@@ -60,6 +65,8 @@ impl PlatformDownloader for KiwifyDownloader {
         _opts: &DownloadOptions,
         _progress: mpsc::Sender<f64>,
     ) -> anyhow::Result<DownloadResult> {
-        Err(anyhow!("Use the courses interface to download Kiwify courses"))
+        Err(anyhow!(
+            "Use the courses interface to download Kiwify courses"
+        ))
     }
 }
