@@ -28,14 +28,20 @@ pub async fn estrategia_militares_login_token(
     *state.estrategia_militares_session_validated_at.lock().await = None;
     *state.estrategia_militares_courses_cache.lock().await = None;
 
+    let (jwt, cookie_string) = api::parse_token_input(&token);
+
     let client = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0")
         .default_headers({
             let mut h = reqwest::header::HeaderMap::new();
-            h.insert("Authorization", format!("Bearer {}", token).parse().unwrap());
-            h.insert("Accept", "application/json".parse().unwrap());
+            h.insert("Authorization", format!("Bearer {}", jwt).parse().unwrap());
+            h.insert("Cookie", cookie_string.parse().unwrap());
+            h.insert("Accept", "application/json, text/plain, */*".parse().unwrap());
+            h.insert("Accept-Language", "pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7".parse().unwrap());
             h.insert("Origin", "https://militares.estrategia.com".parse().unwrap());
             h.insert("Referer", "https://militares.estrategia.com/".parse().unwrap());
+            h.insert("x-vertical", "militares".parse().unwrap());
+            h.insert("x-requester-id", "front-student".parse().unwrap());
             h
         })
         .connect_timeout(Duration::from_secs(30))
@@ -44,7 +50,8 @@ pub async fn estrategia_militares_login_token(
         .map_err(|e| format!("Failed to build client: {}", e))?;
 
     let session = EstrategiaMilitaresSession {
-        token: token.clone(),
+        token: jwt,
+        cookie_string,
         client,
     };
 
@@ -161,6 +168,29 @@ pub async fn estrategia_militares_list_courses(
     }
 
     fetch_estrategia_militares_courses(&state).await
+}
+
+#[tauri::command]
+pub async fn estrategia_militares_search_courses(
+    state: tauri::State<'_, AppState>,
+    query: String,
+) -> Result<Vec<EstrategiaMilitaresCourse>, String> {
+    let guard = state.estrategia_militares_session.lock().await;
+    let session = guard
+        .as_ref()
+        .ok_or_else(|| "Not authenticated. Please log in first.".to_string())?;
+
+    let courses = api::search_courses(session, &query)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let mut cache = state.estrategia_militares_courses_cache.lock().await;
+    *cache = Some(crate::EstrategiaMilitaresCoursesCache {
+        courses: courses.clone(),
+        fetched_at: Instant::now(),
+    });
+
+    Ok(courses)
 }
 
 #[tauri::command]
