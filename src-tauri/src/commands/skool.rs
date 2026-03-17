@@ -54,11 +54,13 @@ pub async fn skool_login_token(
     *state.skool_session_validated_at.lock().await = None;
     *state.skool_courses_cache.lock().await = None;
 
+    let parsed = crate::core::cookie_parser::parse_cookie_input(&token, "skooltok");
+
     let client = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0")
         .default_headers({
             let mut h = reqwest::header::HeaderMap::new();
-            h.insert("Cookie", format!("skooltok={}", token).parse().unwrap());
+            h.insert("Cookie", parsed.cookie_string.parse().unwrap());
             h.insert("Accept", "application/json".parse().unwrap());
             h.insert("Referer", "https://www.skool.com/".parse().unwrap());
             h
@@ -71,7 +73,7 @@ pub async fn skool_login_token(
     let build_id = String::new();
 
     let session = SkoolSession {
-        cookie_token: token,
+        cookie_token: parsed.token,
         build_id,
         client,
     };
@@ -253,7 +255,7 @@ pub async fn start_skool_course_download(
         match result {
             Ok(()) => {
                 let _ = app.emit(
-                    "skool-download-complete",
+                    "download-complete",
                     &SkoolDownloadCompleteEvent {
                         group_name: group.name,
                         success: true,
@@ -264,7 +266,7 @@ pub async fn start_skool_course_download(
             Err(e) => {
                 tracing::error!("[skool] download error for '{}': {}", group.name, e);
                 let _ = app.emit(
-                    "skool-download-complete",
+                    "download-complete",
                     &SkoolDownloadCompleteEvent {
                         group_name: group.name,
                         success: false,
