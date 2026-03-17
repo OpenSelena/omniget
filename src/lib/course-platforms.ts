@@ -50,7 +50,7 @@ export const COURSE_PLATFORMS: CoursePlatform[] = [
     route: "/courses/teachable",
     icon: "teachable",
     color: "#4B5563",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "kajabi",
@@ -58,7 +58,7 @@ export const COURSE_PLATFORMS: CoursePlatform[] = [
     route: "/courses/kajabi",
     icon: "kajabi",
     color: "#2563EB",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "skool",
@@ -66,7 +66,7 @@ export const COURSE_PLATFORMS: CoursePlatform[] = [
     route: "/courses/skool",
     icon: "skool",
     color: "#5865F2",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "pluralsight",
@@ -106,7 +106,7 @@ export const COURSE_PLATFORMS: CoursePlatform[] = [
     route: "/courses/curseduca",
     icon: "curseduca",
     color: "#6366F1",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "cademi",
@@ -114,7 +114,7 @@ export const COURSE_PLATFORMS: CoursePlatform[] = [
     route: "/courses/cademi",
     icon: "cademi",
     color: "#10B981",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "cakto",
@@ -122,7 +122,7 @@ export const COURSE_PLATFORMS: CoursePlatform[] = [
     route: "/courses/cakto",
     icon: "cakto",
     color: "#F59E0B",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "kirvano",
@@ -138,7 +138,7 @@ export const COURSE_PLATFORMS: CoursePlatform[] = [
     route: "/courses/memberkit",
     icon: "memberkit",
     color: "#3B82F6",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "rocketseat",
@@ -154,7 +154,7 @@ export const COURSE_PLATFORMS: CoursePlatform[] = [
     route: "/courses/grancursos",
     icon: "grancursos",
     color: "#1D4ED8",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "fluencyacademy",
@@ -162,7 +162,7 @@ export const COURSE_PLATFORMS: CoursePlatform[] = [
     route: "/courses/fluencyacademy",
     icon: "fluencyacademy",
     color: "#F97316",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "datascienceacademy",
@@ -186,7 +186,7 @@ export const COURSE_PLATFORMS: CoursePlatform[] = [
     route: "/courses/medcof",
     icon: "medcof",
     color: "#0891B2",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "medway",
@@ -218,7 +218,7 @@ export const COURSE_PLATFORMS: CoursePlatform[] = [
     route: "/courses/areademembros",
     icon: "areademembros",
     color: "#6B7280",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "astronmembers",
@@ -226,7 +226,7 @@ export const COURSE_PLATFORMS: CoursePlatform[] = [
     route: "/courses/astronmembers",
     icon: "astronmembers",
     color: "#1E40AF",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "eduzznutror",
@@ -234,7 +234,7 @@ export const COURSE_PLATFORMS: CoursePlatform[] = [
     route: "/courses/eduzznutror",
     icon: "eduzznutror",
     color: "#EA580C",
-    enabled: false,
+    enabled: true,
   },
   {
     id: "entregadigital",
@@ -266,6 +266,38 @@ export const COURSE_PLATFORMS: CoursePlatform[] = [
     route: "/courses/voompplay",
     icon: "voompplay",
     color: "#0EA5E9",
+    enabled: true,
+  },
+  {
+    id: "estrategia_concursos",
+    name: "Estratégia Concursos",
+    route: "/courses/estrategia-concursos",
+    icon: "estrategia",
+    color: "#1E3A8A",
+    enabled: true,
+  },
+  {
+    id: "estrategia_ldi",
+    name: "Estratégia LDI",
+    route: "/courses/estrategia-ldi",
+    icon: "estrategia",
+    color: "#1E40AF",
+    enabled: true,
+  },
+  {
+    id: "estrategia_militares",
+    name: "Estratégia Militares",
+    route: "/courses/estrategia-militares",
+    icon: "estrategia",
+    color: "#15803D",
+    enabled: true,
+  },
+  {
+    id: "caktomembers",
+    name: "Cakto Members",
+    route: "/courses/caktomembers",
+    icon: "cakto",
+    color: "#D97706",
     enabled: true,
   },
 ];
