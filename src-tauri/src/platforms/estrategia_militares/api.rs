@@ -501,32 +501,60 @@ pub async fn get_track_info(
 pub fn extract_track_ids(item_detail: &serde_json::Value) -> Vec<String> {
     let mut track_ids = Vec::new();
 
-    let tracks = item_detail
-        .get("tracks")
+    let sub_blocks = item_detail
+        .get("sub_blocks")
         .and_then(|v| v.as_array())
         .cloned()
         .unwrap_or_default();
 
-    for track in &tracks {
-        if let Some(id) = track.get("id").map(|v| match v {
-            serde_json::Value::Number(n) => n.to_string(),
-            serde_json::Value::String(s) => s.clone(),
-            _ => String::new(),
-        }) {
-            if !id.is_empty() {
-                track_ids.push(id);
+    for block in &sub_blocks {
+        let block_type = block.get("type").and_then(|v| v.as_str()).unwrap_or("");
+
+        if block_type == "cast" {
+            let data = block.get("data")
+                .or_else(|| block.get("simple_data"))
+                .cloned()
+                .unwrap_or_default();
+
+            let track_type = data.get("type").and_then(|v| v.as_str()).unwrap_or("");
+            let track_value = data.get("value").and_then(|v| v.as_str()).unwrap_or("");
+
+            if track_type == "track" && !track_value.is_empty() {
+                track_ids.push(track_value.to_string());
+            }
+        } else if block_type == "videoMyDocuments" {
+            let data = block.get("data")
+                .or_else(|| block.get("simple_data"))
+                .cloned()
+                .unwrap_or_default();
+
+            let resolved = data.get("resolved").cloned().unwrap_or_default();
+            let video_url = resolved.get("data")
+                .and_then(|v| v.as_str())
+                .unwrap_or("");
+
+            if !video_url.is_empty() {
+                track_ids.push(format!("direct:{}", video_url));
             }
         }
     }
 
     if track_ids.is_empty() {
-        if let Some(track_id) = item_detail.get("track_id").map(|v| match v {
-            serde_json::Value::Number(n) => n.to_string(),
-            serde_json::Value::String(s) => s.clone(),
-            _ => String::new(),
-        }) {
-            if !track_id.is_empty() {
-                track_ids.push(track_id);
+        let tracks = item_detail
+            .get("tracks")
+            .and_then(|v| v.as_array())
+            .cloned()
+            .unwrap_or_default();
+
+        for track in &tracks {
+            if let Some(id) = track.get("id").map(|v| match v {
+                serde_json::Value::Number(n) => n.to_string(),
+                serde_json::Value::String(s) => s.clone(),
+                _ => String::new(),
+            }) {
+                if !id.is_empty() {
+                    track_ids.push(id);
+                }
             }
         }
     }
