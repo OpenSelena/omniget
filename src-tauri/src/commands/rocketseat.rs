@@ -28,7 +28,14 @@ pub async fn rocketseat_login_token(
     *state.rocketseat_session_validated_at.lock().await = None;
     *state.rocketseat_courses_cache.lock().await = None;
 
-    let session = api::create_session(&token)
+    let parsed = crate::core::cookie_parser::parse_cookie_input(&token, "skylab_next_access_token_v4");
+    let parsed_token = if parsed.token.is_empty() {
+        crate::core::cookie_parser::parse_bearer_input(&token)
+    } else {
+        parsed.token
+    };
+
+    let session = api::create_session(&parsed_token)
         .map_err(|e| format!("Failed to create session: {}", e))?;
 
     match api::validate_token(&session).await {
@@ -208,7 +215,7 @@ pub async fn start_rocketseat_course_download(
         match result {
             Ok(()) => {
                 let _ = app.emit(
-                    "rocketseat-download-complete",
+                    "download-complete",
                     &RocketseatDownloadCompleteEvent {
                         course_name: course.name,
                         success: true,
@@ -219,7 +226,7 @@ pub async fn start_rocketseat_course_download(
             Err(e) => {
                 tracing::error!("[rocketseat] download error for '{}': {}", course.name, e);
                 let _ = app.emit(
-                    "rocketseat-download-complete",
+                    "download-complete",
                     &RocketseatDownloadCompleteEvent {
                         course_name: course.name,
                         success: false,
