@@ -1,3 +1,6 @@
+pub mod api;
+pub mod downloader;
+
 use anyhow::anyhow;
 use async_trait::async_trait;
 use tokio::sync::mpsc;
@@ -39,13 +42,13 @@ impl PlatformDownloader for MedcelDownloader {
 
     async fn get_media_info(&self, url: &str) -> anyhow::Result<MediaInfo> {
         Ok(MediaInfo {
-            title: "Medcel".to_string(),
+            title: "Medcel Course".to_string(),
             author: String::new(),
             platform: "medcel".to_string(),
             duration_seconds: None,
             thumbnail_url: None,
             available_qualities: vec![VideoQuality {
-                label: "Original".to_string(),
+                label: "course".to_string(),
                 width: 0,
                 height: 0,
                 url: url.to_string(),
@@ -62,6 +65,8 @@ impl PlatformDownloader for MedcelDownloader {
         _opts: &DownloadOptions,
         _progress: mpsc::Sender<f64>,
     ) -> anyhow::Result<DownloadResult> {
-        Err(anyhow!("Use the courses interface to download from Medcel"))
+        Err(anyhow!(
+            "Use the courses interface to download Medcel courses"
+        ))
     }
 }
