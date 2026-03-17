@@ -31,7 +31,13 @@ impl PlatformDownloader for MagnetDownloader {
     }
 
     fn can_handle(&self, url: &str) -> bool {
-        url.starts_with("magnet:") || url.ends_with(".torrent")
+        url.starts_with("magnet:")
+            || url.ends_with(".torrent")
+            || (std::path::Path::new(url).exists()
+                && std::path::Path::new(url)
+                    .extension()
+                    .map(|e| e == "torrent")
+                    .unwrap_or(false))
     }
 
     async fn get_media_info(&self, url: &str) -> anyhow::Result<MediaInfo> {
@@ -44,6 +50,17 @@ impl PlatformDownloader for MagnetDownloader {
                         title = value.to_string();
                         break;
                     }
+                }
+            }
+        } else {
+            let path = std::path::Path::new(url);
+            if path.exists() {
+                if let Some(stem) = path.file_stem() {
+                    title = stem.to_string_lossy().to_string();
+                }
+            } else if url.ends_with(".torrent") {
+                if let Some(name) = url.rsplit('/').next() {
+                    title = name.trim_end_matches(".torrent").to_string();
                 }
             }
         }
@@ -118,7 +135,18 @@ impl PlatformDownloader for MagnetDownloader {
             }
         };
 
-        let add_torrent = AddTorrent::from_url(url);
+        let add_torrent = if url.starts_with("magnet:") || url.starts_with("http://") || url.starts_with("https://") {
+            AddTorrent::from_url(url)
+        } else {
+            let path = std::path::Path::new(url);
+            if path.exists() && path.extension().map(|e| e == "torrent").unwrap_or(false) {
+                let bytes = tokio::fs::read(path).await
+                    .map_err(|e| anyhow::anyhow!("Failed to read .torrent file: {}", e))?;
+                AddTorrent::from_bytes(bytes)
+            } else {
+                AddTorrent::from_url(url)
+            }
+        };
         let torrent_opts = AddTorrentOptions {
             overwrite: true,
             ..Default::default()
