@@ -33,6 +33,7 @@ pub async fn estrategia_ldi_login_token(
         .default_headers({
             let mut h = reqwest::header::HeaderMap::new();
             h.insert("Authorization", format!("Bearer {}", token).parse().unwrap());
+            h.insert("Cookie", format!("__Secure-SID={}", token).parse().unwrap());
             h.insert("Accept", "application/json".parse().unwrap());
             h.insert("Origin", "https://concursos.estrategia.com".parse().unwrap());
             h.insert("Referer", "https://concursos.estrategia.com/".parse().unwrap());
