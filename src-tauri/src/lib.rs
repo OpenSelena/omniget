@@ -111,6 +111,36 @@ pub fn run() {
     registry.register(Arc::new(
         platforms::p2p::P2pDownloader::new(),
     ));
+    registry.register(Arc::new(platforms::kiwify::KiwifyDownloader::new()));
+    registry.register(Arc::new(platforms::gumroad::GumroadDownloader::new()));
+    registry.register(Arc::new(platforms::teachable::TeachableDownloader::new()));
+    registry.register(Arc::new(platforms::kajabi::KajabiDownloader::new()));
+    registry.register(Arc::new(platforms::skool::SkoolDownloader::new()));
+    registry.register(Arc::new(platforms::pluralsight::PluralsightDownloader::new()));
+    registry.register(Arc::new(platforms::greatcourses::GreatCoursesDownloader::new()));
+    registry.register(Arc::new(platforms::masterclass::MasterClassDownloader::new()));
+    registry.register(Arc::new(platforms::thinkific::ThinkificDownloader::new()));
+    registry.register(Arc::new(platforms::curseduca::CurseducaDownloader::new()));
+    registry.register(Arc::new(platforms::cademi::CademiDownloader::new()));
+    registry.register(Arc::new(platforms::cakto::CaktoDownloader::new()));
+    registry.register(Arc::new(platforms::kirvano::KirvanoDownloader::new()));
+    registry.register(Arc::new(platforms::memberkit::MemberkitDownloader::new()));
+    registry.register(Arc::new(platforms::rocketseat::RocketseatDownloader::new()));
+    registry.register(Arc::new(platforms::grancursos::GrancursosDownloader::new()));
+    registry.register(Arc::new(platforms::fluencyacademy::FluencyAcademyDownloader::new()));
+    registry.register(Arc::new(platforms::datascienceacademy::DataScienceAcademyDownloader::new()));
+    registry.register(Arc::new(platforms::medcel::MedcelDownloader::new()));
+    registry.register(Arc::new(platforms::medcof::MedcofDownloader::new()));
+    registry.register(Arc::new(platforms::medway::MedwayDownloader::new()));
+    registry.register(Arc::new(platforms::afyainternato::AfyaInternatoDownloader::new()));
+    registry.register(Arc::new(platforms::alpaclass::AlpaclassDownloader::new()));
+    registry.register(Arc::new(platforms::areademembros::AreaDeMembrosDownloader::new()));
+    registry.register(Arc::new(platforms::astronmembers::AstronMembersDownloader::new()));
+    registry.register(Arc::new(platforms::eduzznutror::EduzzNutrorDownloader::new()));
+    registry.register(Arc::new(platforms::entregadigital::EntregaDigitalDownloader::new()));
+    registry.register(Arc::new(platforms::greennclub::GreennClubDownloader::new()));
+    registry.register(Arc::new(platforms::themembers::TheMembersDownloader::new()));
+    registry.register(Arc::new(platforms::voompplay::VoompPlayDownloader::new()));
     registry.register(Arc::new(
         platforms::generic_ytdlp::GenericYtdlpDownloader::new(),
     ));
