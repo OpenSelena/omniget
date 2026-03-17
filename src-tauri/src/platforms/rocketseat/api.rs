@@ -93,10 +93,16 @@ pub fn create_session(token: &str) -> anyhow::Result<RocketseatSession> {
 pub async fn validate_token(session: &RocketseatSession) -> anyhow::Result<bool> {
     let resp = session
         .client
-        .get(&format!("{}/v2/users/me", API_URL))
+        .get(&format!("{}/v2/search/multi-search", API_URL))
+        .query(&[("query", "test"), ("page", "1")])
+        .header("Host", "skylab-api.rocketseat.com.br")
         .send()
         .await?;
-    Ok(resp.status().is_success())
+
+    let status = resp.status();
+    tracing::info!("[rocketseat] validate_token status={}", status);
+
+    Ok(status.is_success())
 }
 
 pub async fn search_courses(
@@ -204,50 +210,7 @@ pub async fn search_courses(
 pub async fn list_courses(
     session: &RocketseatSession,
 ) -> anyhow::Result<Vec<RocketseatCourse>> {
-    let mut courses = Vec::new();
-
-    for endpoint in &[
-        "/v2/journeys",
-        "/v2/users/me/journeys",
-    ] {
-        let url = format!("{}{}", API_URL, endpoint);
-        let resp = match session.client.get(&url).send().await {
-            Ok(r) if r.status().is_success() => r,
-            _ => continue,
-        };
-
-        let body: serde_json::Value = match resp.json().await {
-            Ok(v) => v,
-            Err(_) => continue,
-        };
-
-        let items = match &body {
-            serde_json::Value::Array(arr) => arr.clone(),
-            serde_json::Value::Object(map) => {
-                for key in &["journeys", "items", "data"] {
-                    if let Some(serde_json::Value::Array(arr)) = map.get(*key) {
-                        courses = parse_journey_items(arr);
-                        if !courses.is_empty() {
-                            return Ok(courses);
-                        }
-                    }
-                }
-                continue;
-            }
-            _ => continue,
-        };
-
-        courses = parse_journey_items(&items);
-        if !courses.is_empty() {
-            return Ok(courses);
-        }
-    }
-
-    if courses.is_empty() {
-        courses = search_courses(session, "").await.unwrap_or_default();
-    }
-
-    Ok(courses)
+    search_courses(session, "rocketseat").await
 }
 
 fn parse_journey_items(items: &[serde_json::Value]) -> Vec<RocketseatCourse> {
