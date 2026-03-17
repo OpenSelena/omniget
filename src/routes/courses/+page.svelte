@@ -88,26 +88,33 @@
   .courses-page {
     display: flex;
     flex-direction: column;
+    align-items: center;
     gap: calc(var(--padding) * 2);
-    max-width: 800px;
+    width: 100%;
   }
 
   h1 {
     font-size: 20px;
     font-weight: 500;
     margin-block: 0;
+    width: 100%;
+    max-width: 900px;
   }
 
   .platform-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: var(--padding);
+    width: 100%;
+    max-width: 900px;
+    justify-items: center;
   }
 
   .platform-card {
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 100%;
     gap: calc(var(--padding) * 0.75);
     padding: calc(var(--padding) * 2) var(--padding);
     background: var(--button-elevated);
