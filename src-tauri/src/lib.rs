@@ -117,6 +117,125 @@ pub struct MedwayCoursesCache {
     pub fetched_at: std::time::Instant,
 }
 
+use platforms::estrategia_concursos::api::EstrategiaConcursosCourse;
+
+pub struct EstrategiaConcursosCoursesCache {
+    pub courses: Vec<EstrategiaConcursosCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::estrategia_ldi::api::EstrategiaLdiCourse;
+
+pub struct EstrategiaLdiCoursesCache {
+    pub courses: Vec<EstrategiaLdiCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::estrategia_militares::api::EstrategiaMilitaresCourse;
+
+pub struct EstrategiaMilitaresCoursesCache {
+    pub courses: Vec<EstrategiaMilitaresCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::grancursos::api::GranCursosCourse;
+
+pub struct GranCursosCoursesCache {
+    pub courses: Vec<GranCursosCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::skool::api::SkoolGroup;
+
+pub struct SkoolCoursesCache {
+    pub groups: Vec<SkoolGroup>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::teachable::api::TeachableCourse;
+
+pub struct TeachableCoursesCache {
+    pub courses: Vec<TeachableCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::kajabi::api::KajabiCourse;
+
+pub struct KajabiCoursesCache {
+    pub courses: Vec<KajabiCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::fluencyacademy::api::FluencyCourse;
+
+pub struct FluencyCoursesCache {
+    pub courses: Vec<FluencyCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::eduzznutror::api::NutrorCourse;
+
+pub struct NutrorCoursesCache {
+    pub courses: Vec<NutrorCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::cademi::api::CademiCourse;
+
+pub struct CademiCoursesCache {
+    pub courses: Vec<CademiCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::memberkit::api::MemberkitCourse;
+
+pub struct MemberkitCoursesCache {
+    pub courses: Vec<MemberkitCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::areademembros::api::AreaDeMembrosApiCourse;
+
+pub struct AreaDeMembrosCoursesCache {
+    pub courses: Vec<AreaDeMembrosApiCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::astronmembers::api::AstronCourse;
+
+pub struct AstronCoursesCache {
+    pub courses: Vec<AstronCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::cakto::api::CaktoCourse;
+
+pub struct CaktoCoursesCache {
+    pub courses: Vec<CaktoCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::caktomembers::api::CaktoMembersCourse;
+
+pub struct CaktoMembersCoursesCache {
+    pub courses: Vec<CaktoMembersCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::curseduca::api::CurseducaCourse;
+
+pub struct CurseducaCoursesCache {
+    pub courses: Vec<CurseducaCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::medcof::api::MedcofCourse;
+
+pub struct MedcofCoursesCache {
+    pub courses: Vec<MedcofCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
 pub struct AppState {
     pub hotmart_session: Arc<tokio::sync::Mutex<Option<HotmartSession>>>,
     pub active_downloads: Arc<tokio::sync::Mutex<HashMap<u64, CancellationToken>>>,
@@ -171,6 +290,57 @@ pub struct AppState {
     pub medway_session: Arc<tokio::sync::Mutex<Option<platforms::medway::api::MedwaySession>>>,
     pub medway_courses_cache: Arc<tokio::sync::Mutex<Option<MedwayCoursesCache>>>,
     pub medway_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub estrategia_concursos_session: Arc<tokio::sync::Mutex<Option<platforms::estrategia_concursos::api::EstrategiaConcursosSession>>>,
+    pub estrategia_concursos_courses_cache: Arc<tokio::sync::Mutex<Option<EstrategiaConcursosCoursesCache>>>,
+    pub estrategia_concursos_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub estrategia_ldi_session: Arc<tokio::sync::Mutex<Option<platforms::estrategia_ldi::api::EstrategiaLdiSession>>>,
+    pub estrategia_ldi_courses_cache: Arc<tokio::sync::Mutex<Option<EstrategiaLdiCoursesCache>>>,
+    pub estrategia_ldi_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub estrategia_militares_session: Arc<tokio::sync::Mutex<Option<platforms::estrategia_militares::api::EstrategiaMilitaresSession>>>,
+    pub estrategia_militares_courses_cache: Arc<tokio::sync::Mutex<Option<EstrategiaMilitaresCoursesCache>>>,
+    pub estrategia_militares_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub grancursos_session: Arc<tokio::sync::Mutex<Option<platforms::grancursos::api::GranCursosSession>>>,
+    pub grancursos_courses_cache: Arc<tokio::sync::Mutex<Option<GranCursosCoursesCache>>>,
+    pub grancursos_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub skool_session: Arc<tokio::sync::Mutex<Option<platforms::skool::api::SkoolSession>>>,
+    pub skool_courses_cache: Arc<tokio::sync::Mutex<Option<SkoolCoursesCache>>>,
+    pub skool_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub teachable_session: Arc<tokio::sync::Mutex<Option<platforms::teachable::api::TeachableSession>>>,
+    pub teachable_courses_cache: Arc<tokio::sync::Mutex<Option<TeachableCoursesCache>>>,
+    pub teachable_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub kajabi_session: Arc<tokio::sync::Mutex<Option<platforms::kajabi::api::KajabiSession>>>,
+    pub kajabi_courses_cache: Arc<tokio::sync::Mutex<Option<KajabiCoursesCache>>>,
+    pub kajabi_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub fluency_session: Arc<tokio::sync::Mutex<Option<platforms::fluencyacademy::api::FluencySession>>>,
+    pub fluency_courses_cache: Arc<tokio::sync::Mutex<Option<FluencyCoursesCache>>>,
+    pub fluency_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub nutror_session: Arc<tokio::sync::Mutex<Option<platforms::eduzznutror::api::NutrorSession>>>,
+    pub nutror_courses_cache: Arc<tokio::sync::Mutex<Option<NutrorCoursesCache>>>,
+    pub nutror_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub cademi_session: Arc<tokio::sync::Mutex<Option<platforms::cademi::api::CademiSession>>>,
+    pub cademi_courses_cache: Arc<tokio::sync::Mutex<Option<CademiCoursesCache>>>,
+    pub cademi_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub memberkit_session: Arc<tokio::sync::Mutex<Option<platforms::memberkit::api::MemberkitSession>>>,
+    pub memberkit_courses_cache: Arc<tokio::sync::Mutex<Option<MemberkitCoursesCache>>>,
+    pub memberkit_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub areademembros_session: Arc<tokio::sync::Mutex<Option<platforms::areademembros::api::AreaDeMembrosSession>>>,
+    pub areademembros_courses_cache: Arc<tokio::sync::Mutex<Option<AreaDeMembrosCoursesCache>>>,
+    pub areademembros_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub astron_session: Arc<tokio::sync::Mutex<Option<platforms::astronmembers::api::AstronSession>>>,
+    pub astron_courses_cache: Arc<tokio::sync::Mutex<Option<AstronCoursesCache>>>,
+    pub astron_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub cakto_session: Arc<tokio::sync::Mutex<Option<platforms::cakto::api::CaktoSession>>>,
+    pub cakto_courses_cache: Arc<tokio::sync::Mutex<Option<CaktoCoursesCache>>>,
+    pub cakto_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub caktomembers_session: Arc<tokio::sync::Mutex<Option<platforms::caktomembers::api::CaktoMembersSession>>>,
+    pub caktomembers_courses_cache: Arc<tokio::sync::Mutex<Option<CaktoMembersCoursesCache>>>,
+    pub caktomembers_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub curseduca_session: Arc<tokio::sync::Mutex<Option<platforms::curseduca::api::CurseducaSession>>>,
+    pub curseduca_courses_cache: Arc<tokio::sync::Mutex<Option<CurseducaCoursesCache>>>,
+    pub curseduca_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub medcof_session: Arc<tokio::sync::Mutex<Option<platforms::medcof::api::MedcofSession>>>,
+    pub medcof_courses_cache: Arc<tokio::sync::Mutex<Option<MedcofCoursesCache>>>,
+    pub medcof_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -261,6 +431,11 @@ pub fn run() {
     registry.register(Arc::new(platforms::greennclub::GreennClubDownloader::new()));
     registry.register(Arc::new(platforms::themembers::TheMembersDownloader::new()));
     registry.register(Arc::new(platforms::voompplay::VoompPlayDownloader::new()));
+    registry.register(Arc::new(platforms::estrategia_concursos::EstrategiaConcursosDownloader::new()));
+    registry.register(Arc::new(platforms::estrategia_ldi::EstrategiaLdiDownloader::new()));
+    registry.register(Arc::new(platforms::estrategia_militares::EstrategiaMilitaresDownloader::new()));
+    registry.register(Arc::new(platforms::matematicaprapassar::MatematicaPraPassarDownloader::new()));
+    registry.register(Arc::new(platforms::caktomembers::CaktoMembersDownloader::new()));
     registry.register(Arc::new(
         platforms::generic_ytdlp::GenericYtdlpDownloader::new(),
     ));
@@ -321,6 +496,57 @@ pub fn run() {
         medway_session: Arc::new(tokio::sync::Mutex::new(None)),
         medway_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
         medway_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        estrategia_concursos_session: Arc::new(tokio::sync::Mutex::new(None)),
+        estrategia_concursos_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        estrategia_concursos_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        estrategia_ldi_session: Arc::new(tokio::sync::Mutex::new(None)),
+        estrategia_ldi_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        estrategia_ldi_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        estrategia_militares_session: Arc::new(tokio::sync::Mutex::new(None)),
+        estrategia_militares_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        estrategia_militares_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        grancursos_session: Arc::new(tokio::sync::Mutex::new(None)),
+        grancursos_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        grancursos_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        skool_session: Arc::new(tokio::sync::Mutex::new(None)),
+        skool_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        skool_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        teachable_session: Arc::new(tokio::sync::Mutex::new(None)),
+        teachable_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        teachable_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        kajabi_session: Arc::new(tokio::sync::Mutex::new(None)),
+        kajabi_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        kajabi_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        fluency_session: Arc::new(tokio::sync::Mutex::new(None)),
+        fluency_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        fluency_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        nutror_session: Arc::new(tokio::sync::Mutex::new(None)),
+        nutror_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        nutror_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        cademi_session: Arc::new(tokio::sync::Mutex::new(None)),
+        cademi_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        cademi_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        memberkit_session: Arc::new(tokio::sync::Mutex::new(None)),
+        memberkit_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        memberkit_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        areademembros_session: Arc::new(tokio::sync::Mutex::new(None)),
+        areademembros_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        areademembros_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        astron_session: Arc::new(tokio::sync::Mutex::new(None)),
+        astron_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        astron_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        cakto_session: Arc::new(tokio::sync::Mutex::new(None)),
+        cakto_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        cakto_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        caktomembers_session: Arc::new(tokio::sync::Mutex::new(None)),
+        caktomembers_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        caktomembers_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        curseduca_session: Arc::new(tokio::sync::Mutex::new(None)),
+        curseduca_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        curseduca_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        medcof_session: Arc::new(tokio::sync::Mutex::new(None)),
+        medcof_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        medcof_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
     };
 
     tauri::Builder::default()
@@ -516,6 +742,123 @@ pub fn run() {
             commands::dsa::dsa_list_courses,
             commands::dsa::dsa_refresh_courses,
             commands::dsa::start_dsa_course_download,
+            commands::estrategia_concursos::estrategia_concursos_login_token,
+            commands::estrategia_concursos::estrategia_concursos_check_session,
+            commands::estrategia_concursos::estrategia_concursos_logout,
+            commands::estrategia_concursos::estrategia_concursos_list_courses,
+            commands::estrategia_concursos::estrategia_concursos_refresh_courses,
+            commands::estrategia_concursos::start_estrategia_concursos_course_download,
+            commands::estrategia_ldi::estrategia_ldi_login_token,
+            commands::estrategia_ldi::estrategia_ldi_check_session,
+            commands::estrategia_ldi::estrategia_ldi_logout,
+            commands::estrategia_ldi::estrategia_ldi_list_courses,
+            commands::estrategia_ldi::estrategia_ldi_refresh_courses,
+            commands::estrategia_ldi::start_estrategia_ldi_course_download,
+            commands::estrategia_militares::estrategia_militares_login_token,
+            commands::estrategia_militares::estrategia_militares_check_session,
+            commands::estrategia_militares::estrategia_militares_logout,
+            commands::estrategia_militares::estrategia_militares_list_courses,
+            commands::estrategia_militares::estrategia_militares_refresh_courses,
+            commands::estrategia_militares::start_estrategia_militares_course_download,
+            commands::grancursos::grancursos_login_cookies,
+            commands::grancursos::grancursos_check_session,
+            commands::grancursos::grancursos_logout,
+            commands::grancursos::grancursos_list_courses,
+            commands::grancursos::grancursos_refresh_courses,
+            commands::grancursos::start_grancursos_course_download,
+            commands::skool::skool_login,
+            commands::skool::skool_login_token,
+            commands::skool::skool_check_session,
+            commands::skool::skool_logout,
+            commands::skool::skool_list_groups,
+            commands::skool::skool_refresh_groups,
+            commands::skool::start_skool_course_download,
+            commands::teachable::teachable_request_otp,
+            commands::teachable::teachable_verify_otp,
+            commands::teachable::teachable_login_token,
+            commands::teachable::teachable_check_session,
+            commands::teachable::teachable_logout,
+            commands::teachable::teachable_set_school,
+            commands::teachable::teachable_list_schools,
+            commands::teachable::teachable_list_courses,
+            commands::teachable::teachable_refresh_courses,
+            commands::teachable::start_teachable_course_download,
+            commands::kajabi::kajabi_request_login_link,
+            commands::kajabi::kajabi_verify_login,
+            commands::kajabi::kajabi_login_token,
+            commands::kajabi::kajabi_check_session,
+            commands::kajabi::kajabi_logout,
+            commands::kajabi::kajabi_list_sites,
+            commands::kajabi::kajabi_set_site,
+            commands::kajabi::kajabi_list_courses,
+            commands::kajabi::kajabi_refresh_courses,
+            commands::kajabi::start_kajabi_course_download,
+            commands::fluencyacademy::fluency_login,
+            commands::fluencyacademy::fluency_login_token,
+            commands::fluencyacademy::fluency_check_session,
+            commands::fluencyacademy::fluency_logout,
+            commands::fluencyacademy::fluency_list_courses,
+            commands::fluencyacademy::fluency_refresh_courses,
+            commands::fluencyacademy::start_fluency_course_download,
+            commands::nutror::nutror_login_token,
+            commands::nutror::nutror_check_session,
+            commands::nutror::nutror_logout,
+            commands::nutror::nutror_list_courses,
+            commands::nutror::nutror_refresh_courses,
+            commands::nutror::start_nutror_course_download,
+            commands::cademi_cmd::cademi_login,
+            commands::cademi_cmd::cademi_login_cookie,
+            commands::cademi_cmd::cademi_check_session,
+            commands::cademi_cmd::cademi_logout,
+            commands::cademi_cmd::cademi_list_courses,
+            commands::cademi_cmd::cademi_refresh_courses,
+            commands::cademi_cmd::start_cademi_course_download,
+            commands::memberkit_cmd::memberkit_login,
+            commands::memberkit_cmd::memberkit_login_cookie,
+            commands::memberkit_cmd::memberkit_check_session,
+            commands::memberkit_cmd::memberkit_logout,
+            commands::memberkit_cmd::memberkit_list_courses,
+            commands::memberkit_cmd::memberkit_refresh_courses,
+            commands::memberkit_cmd::start_memberkit_course_download,
+            commands::areademembros::areademembros_login_token,
+            commands::areademembros::areademembros_check_session,
+            commands::areademembros::areademembros_logout,
+            commands::areademembros::areademembros_list_courses,
+            commands::areademembros::areademembros_refresh_courses,
+            commands::areademembros::start_areademembros_course_download,
+            commands::astronmembers::astron_login,
+            commands::astronmembers::astron_login_token,
+            commands::astronmembers::astron_check_session,
+            commands::astronmembers::astron_logout,
+            commands::astronmembers::astron_list_courses,
+            commands::astronmembers::astron_refresh_courses,
+            commands::astronmembers::start_astron_course_download,
+            commands::cakto::cakto_login,
+            commands::cakto::cakto_login_token,
+            commands::cakto::cakto_check_session,
+            commands::cakto::cakto_logout,
+            commands::cakto::cakto_list_courses,
+            commands::cakto::cakto_refresh_courses,
+            commands::cakto::start_cakto_course_download,
+            commands::caktomembers::caktomembers_login_token,
+            commands::caktomembers::caktomembers_check_session,
+            commands::caktomembers::caktomembers_logout,
+            commands::caktomembers::caktomembers_list_courses,
+            commands::caktomembers::caktomembers_refresh_courses,
+            commands::caktomembers::start_caktomembers_course_download,
+            commands::curseduca::curseduca_login,
+            commands::curseduca::curseduca_login_token,
+            commands::curseduca::curseduca_check_session,
+            commands::curseduca::curseduca_logout,
+            commands::curseduca::curseduca_list_courses,
+            commands::curseduca::curseduca_refresh_courses,
+            commands::curseduca::start_curseduca_course_download,
+            commands::medcof::medcof_login_token,
+            commands::medcof::medcof_check_session,
+            commands::medcof::medcof_logout,
+            commands::medcof::medcof_list_courses,
+            commands::medcof::medcof_refresh_courses,
+            commands::medcof::start_medcof_course_download,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
