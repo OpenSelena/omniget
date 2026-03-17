@@ -11,12 +11,14 @@ const API_BASE: &str = "https://api.estrategia.com";
 #[derive(Clone)]
 pub struct EstrategiaMilitaresSession {
     pub token: String,
+    pub cookie_string: String,
     pub client: reqwest::Client,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SavedSession {
     pub token: String,
+    pub cookie_string: String,
     pub saved_at: u64,
 }
 
@@ -24,6 +26,8 @@ pub struct SavedSession {
 pub struct EstrategiaMilitaresCourse {
     pub id: String,
     pub name: String,
+    pub slug: String,
+    pub goal_id: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -47,13 +51,65 @@ pub struct EstrategiaMilitaresTrack {
     pub duration: Option<f64>,
 }
 
-fn build_client(token: &str) -> anyhow::Result<reqwest::Client> {
+pub fn parse_token_input(input: &str) -> (String, String) {
+    let trimmed = input.trim();
+
+    if trimmed.starts_with('{') || trimmed.starts_with('[') {
+        if let Ok(val) = serde_json::from_str::<serde_json::Value>(trimmed) {
+            let cookies_arr = val.get("cookies")
+                .and_then(|v| v.as_array())
+                .cloned()
+                .or_else(|| val.as_array().cloned())
+                .unwrap_or_default();
+
+            let mut jwt = String::new();
+            let mut cookie_parts: Vec<String> = Vec::new();
+
+            for c in &cookies_arr {
+                let name = c.get("name").and_then(|v| v.as_str()).unwrap_or("");
+                let value = c.get("value").and_then(|v| v.as_str()).unwrap_or("");
+                if !name.is_empty() && !value.is_empty() {
+                    cookie_parts.push(format!("{}={}", name, value));
+                    if name == "__Secure-SID" {
+                        jwt = value.to_string();
+                    }
+                }
+            }
+
+            if !jwt.is_empty() {
+                return (jwt, cookie_parts.join("; "));
+            }
+        }
+    }
+
+    if trimmed.contains("; ") || trimmed.contains("__Secure-SID=") || trimmed.contains("_cfuvid=") {
+        let mut jwt = String::new();
+        for part in trimmed.split("; ") {
+            if let Some(val) = part.strip_prefix("__Secure-SID=") {
+                jwt = val.to_string();
+            }
+        }
+        if !jwt.is_empty() {
+            return (jwt, trimmed.to_string());
+        }
+        return (trimmed.to_string(), format!("__Secure-SID={}", trimmed));
+    }
+
+    (trimmed.to_string(), format!("__Secure-SID={}", trimmed))
+}
+
+fn build_client(token: &str, cookie_string: &str) -> anyhow::Result<reqwest::Client> {
     let mut headers = HeaderMap::new();
     headers.insert(
         "Authorization",
         HeaderValue::from_str(&format!("Bearer {}", token))?,
     );
-    headers.insert("Accept", HeaderValue::from_static("application/json"));
+    headers.insert(
+        "Cookie",
+        HeaderValue::from_str(cookie_string)?,
+    );
+    headers.insert("Accept", HeaderValue::from_static("application/json, text/plain, */*"));
+    headers.insert("Accept-Language", HeaderValue::from_static("pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7"));
     headers.insert(
         "Origin",
         HeaderValue::from_static("https://militares.estrategia.com"),
@@ -62,6 +118,8 @@ fn build_client(token: &str) -> anyhow::Result<reqwest::Client> {
         "Referer",
         HeaderValue::from_static("https://militares.estrategia.com/"),
     );
+    headers.insert("x-vertical", HeaderValue::from_static("militares"));
+    headers.insert("x-requester-id", HeaderValue::from_static("front-student"));
 
     let client = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent(USER_AGENT)
@@ -83,92 +141,173 @@ fn session_file_path() -> anyhow::Result<PathBuf> {
 pub async fn validate_token(session: &EstrategiaMilitaresSession) -> anyhow::Result<bool> {
     let resp = session
         .client
-        .get(format!("{}/bff/goals/shelves?page=1&per_page=1", API_BASE))
+        .get(format!("{}/bff/goals/shelves?page=1&per_page=1&name=test", API_BASE))
         .send()
         .await?;
 
-    Ok(resp.status().is_success())
+    let status = resp.status();
+    let body = resp.text().await.unwrap_or_default();
+    tracing::info!("[estrategia_militares] validate_token status={} body_preview={}", status, &body[..body.len().min(500)]);
+
+    Ok(status.is_success())
 }
 
-pub async fn search_courses(session: &EstrategiaMilitaresSession, query: &str) -> anyhow::Result<Vec<EstrategiaMilitaresCourse>> {
+async fn fetch_ldi_courses_for_goal(session: &EstrategiaMilitaresSession, goal_id: &str) -> Vec<EstrategiaMilitaresCourse> {
+    let url = format!("{}/bff/goals/{}/contents/ldi?page=1&per_page=50", API_BASE, goal_id);
+
+    let resp = match session.client.get(&url).send().await {
+        Ok(r) => r,
+        Err(e) => {
+            tracing::warn!("[estrategia_militares] failed to fetch LDI for goal {}: {}", goal_id, e);
+            return Vec::new();
+        }
+    };
+
+    let body_text = match resp.text().await {
+        Ok(t) => t,
+        Err(_) => return Vec::new(),
+    };
+
+    let body: serde_json::Value = match serde_json::from_str(&body_text) {
+        Ok(v) => v,
+        Err(_) => return Vec::new(),
+    };
+
+    let contents = body
+        .get("data")
+        .and_then(|d| d.get("contents"))
+        .and_then(|c| c.as_array())
+        .cloned()
+        .unwrap_or_default();
+
     let mut courses = Vec::new();
-    let mut page = 1u32;
+    for c in &contents {
+        let id = c.get("id").map(|v| match v {
+            serde_json::Value::Number(n) => n.to_string(),
+            serde_json::Value::String(s) => s.clone(),
+            _ => String::new(),
+        }).unwrap_or_default();
 
-    loop {
-        let url = format!(
-            "{}/bff/goals/shelves?page={}&per_page=20&name={}",
-            API_BASE,
-            page,
-            urlencoding::encode(query)
-        );
+        let name = c.get("title")
+            .or(c.get("name"))
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .to_string();
 
-        let resp = session.client.get(&url).send().await?;
-        let status = resp.status();
-        let body_text = resp.text().await?;
+        let slug = c.get("slug")
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .to_string();
 
-        if !status.is_success() {
-            return Err(anyhow!(
-                "search_courses returned status {}: {}",
-                status,
-                &body_text[..body_text.len().min(300)]
-            ));
-        }
-
-        let body: serde_json::Value = serde_json::from_str(&body_text)?;
-
-        let goals = body
-            .get("goals")
-            .and_then(|v| v.as_array())
-            .cloned()
-            .unwrap_or_default();
-
-        if goals.is_empty() {
-            break;
-        }
-
-        for goal in &goals {
-            let id = goal
-                .get("id")
-                .map(|v| match v {
-                    serde_json::Value::Number(n) => n.to_string(),
-                    serde_json::Value::String(s) => s.clone(),
-                    _ => String::new(),
-                })
-                .unwrap_or_default();
-
-            let name = goal
-                .get("title")
-                .and_then(|v| v.as_str())
-                .unwrap_or("")
-                .to_string();
-
-            if !id.is_empty() {
-                courses.push(EstrategiaMilitaresCourse { id, name });
-            }
-        }
-
-        page += 1;
-        if page > 50 {
-            break;
+        if !id.is_empty() && !slug.is_empty() {
+            courses.push(EstrategiaMilitaresCourse {
+                id,
+                name,
+                slug,
+                goal_id: goal_id.to_string(),
+            });
         }
     }
 
-    Ok(courses)
+    courses
 }
 
-pub async fn list_courses(session: &EstrategiaMilitaresSession) -> anyhow::Result<Vec<EstrategiaMilitaresCourse>> {
-    search_courses(session, "").await
-}
+pub async fn search_courses(session: &EstrategiaMilitaresSession, query: &str) -> anyhow::Result<Vec<EstrategiaMilitaresCourse>> {
+    if query.trim().is_empty() {
+        return Ok(Vec::new());
+    }
 
-pub async fn get_course_content(
-    session: &EstrategiaMilitaresSession,
-    goal_id: &str,
-) -> anyhow::Result<Vec<EstrategiaMilitaresModule>> {
-    let url = format!("{}/bff/goals/{}/contents/ldi", API_BASE, goal_id);
+    let url = format!(
+        "{}/bff/goals/shelves?page=1&per_page=20&name={}",
+        API_BASE,
+        urlencoding::encode(query.trim())
+    );
 
     let resp = session.client.get(&url).send().await?;
     let status = resp.status();
     let body_text = resp.text().await?;
+
+    tracing::info!("[estrategia_militares] search status={} body_len={}", status, body_text.len());
+
+    if !status.is_success() {
+        return Err(anyhow!(
+            "search_courses returned status {}: {}",
+            status,
+            &body_text[..body_text.len().min(300)]
+        ));
+    }
+
+    let body: serde_json::Value = serde_json::from_str(&body_text)?;
+    let mut all_goal_ids = Vec::new();
+
+    let result_data = body.get("data").unwrap_or(&body);
+
+    if let Some(shelves) = result_data.get("shelves").and_then(|v| v.as_object()) {
+        for (_shelf_name, goals_val) in shelves {
+            let goals = goals_val.as_array().cloned().unwrap_or_default();
+            for goal in &goals {
+                let goal_id = goal.get("id").map(|v| match v {
+                    serde_json::Value::Number(n) => n.to_string(),
+                    serde_json::Value::String(s) => s.clone(),
+                    _ => String::new(),
+                }).unwrap_or_default();
+
+                if !goal_id.is_empty() {
+                    all_goal_ids.push(goal_id);
+                }
+            }
+        }
+    }
+
+    if let Some(highlights) = result_data.get("highlights") {
+        let highlight_goals = highlights.get("goals").and_then(|v| v.as_array()).cloned().unwrap_or_default();
+        for goal in &highlight_goals {
+            let goal_id = goal.get("id").map(|v| match v {
+                serde_json::Value::Number(n) => n.to_string(),
+                serde_json::Value::String(s) => s.clone(),
+                _ => String::new(),
+            }).unwrap_or_default();
+
+            if !goal_id.is_empty() && !all_goal_ids.contains(&goal_id) {
+                all_goal_ids.push(goal_id);
+            }
+        }
+    }
+
+    let mut courses = Vec::new();
+    let mut seen_ids = std::collections::HashSet::new();
+
+    for goal_id in &all_goal_ids {
+        let ldi_courses = fetch_ldi_courses_for_goal(session, goal_id).await;
+        for c in ldi_courses {
+            if seen_ids.insert(c.id.clone()) {
+                courses.push(c);
+            }
+        }
+    }
+
+    tracing::info!("[estrategia_militares] found {} courses across {} goals for query '{}'", courses.len(), all_goal_ids.len(), query);
+    Ok(courses)
+}
+
+pub async fn list_courses(session: &EstrategiaMilitaresSession) -> anyhow::Result<Vec<EstrategiaMilitaresCourse>> {
+    search_courses(session, "militar").await
+}
+
+pub async fn get_course_content(
+    session: &EstrategiaMilitaresSession,
+    course_slug: &str,
+) -> anyhow::Result<Vec<EstrategiaMilitaresModule>> {
+    let url = format!("{}/v3/mci/courses/slug/{}", API_BASE, course_slug);
+
+    let resp = session.client.get(&url)
+        .header("cache-control", "no-cache")
+        .send()
+        .await?;
+    let status = resp.status();
+    let body_text = resp.text().await?;
+
+    tracing::info!("[estrategia_militares] get_course_content slug={} status={} len={}", course_slug, status, body_text.len());
 
     if !status.is_success() {
         return Err(anyhow!(
@@ -180,13 +319,13 @@ pub async fn get_course_content(
 
     let body: serde_json::Value = serde_json::from_str(&body_text)?;
 
-    let chapters = body
+    let course_data = body.get("data").unwrap_or(&body);
+
+    let chapters = course_data
         .get("chapters")
         .and_then(|v| v.as_array())
         .cloned()
-        .unwrap_or_else(|| {
-            body.as_array().cloned().unwrap_or_default()
-        });
+        .unwrap_or_default();
 
     let mut modules = Vec::new();
 
@@ -199,7 +338,8 @@ pub async fn get_course_content(
             .to_string();
 
         let chapter_id = chapter
-            .get("id")
+            .get("chapter_id")
+            .or(chapter.get("id"))
             .map(|v| match v {
                 serde_json::Value::Number(n) => n.to_string(),
                 serde_json::Value::String(s) => s.clone(),
@@ -217,7 +357,8 @@ pub async fn get_course_content(
 
         for (ii, item) in items.iter().enumerate() {
             let item_id = item
-                .get("id")
+                .get("item_id")
+                .or(item.get("id"))
                 .map(|v| match v {
                     serde_json::Value::Number(n) => n.to_string(),
                     serde_json::Value::String(s) => s.clone(),
@@ -393,6 +534,7 @@ pub async fn save_session(session: &EstrategiaMilitaresSession) -> anyhow::Resul
 
     let saved = SavedSession {
         token: session.token.clone(),
+        cookie_string: session.cookie_string.clone(),
         saved_at: std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
             .unwrap_or_default()
@@ -413,12 +555,13 @@ pub async fn load_session() -> anyhow::Result<Option<EstrategiaMilitaresSession>
     };
 
     let saved: SavedSession = serde_json::from_str(&json)?;
-    let client = build_client(&saved.token)?;
+    let client = build_client(&saved.token, &saved.cookie_string)?;
 
     tracing::info!("[estrategia_militares] session loaded");
 
     Ok(Some(EstrategiaMilitaresSession {
         token: saved.token,
+        cookie_string: saved.cookie_string,
         client,
     }))
 }
