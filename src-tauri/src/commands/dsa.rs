@@ -28,13 +28,15 @@ pub async fn dsa_login_token(
     *state.dsa_session_validated_at.lock().await = None;
     *state.dsa_courses_cache.lock().await = None;
 
+    let parsed_token = crate::core::cookie_parser::parse_bearer_input(&token);
+
     let session = DsaSession {
-        token: token.clone(),
+        token: parsed_token.clone(),
         client: crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
             .user_agent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0")
             .default_headers({
                 let mut h = reqwest::header::HeaderMap::new();
-                h.insert("Token", token.parse().unwrap());
+                h.insert("Token", parsed_token.parse().unwrap());
                 h.insert("Accept", "application/json".parse().unwrap());
                 h.insert("Origin", "https://www.datascienceacademy.com.br".parse().unwrap());
                 h.insert("Referer", "https://www.datascienceacademy.com.br/".parse().unwrap());
@@ -223,7 +225,7 @@ pub async fn start_dsa_course_download(
         match result {
             Ok(()) => {
                 let _ = app.emit(
-                    "dsa-download-complete",
+                    "download-complete",
                     &DsaDownloadCompleteEvent {
                         course_name: course.name,
                         success: true,
@@ -234,7 +236,7 @@ pub async fn start_dsa_course_download(
             Err(e) => {
                 tracing::error!("[dsa] download error for '{}': {}", course.name, e);
                 let _ = app.emit(
-                    "dsa-download-complete",
+                    "download-complete",
                     &DsaDownloadCompleteEvent {
                         course_name: course.name,
                         success: false,
