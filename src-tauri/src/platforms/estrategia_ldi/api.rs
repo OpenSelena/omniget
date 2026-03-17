@@ -53,6 +53,10 @@ fn build_client(token: &str) -> anyhow::Result<reqwest::Client> {
         "Authorization",
         HeaderValue::from_str(&format!("Bearer {}", token))?,
     );
+    headers.insert(
+        "Cookie",
+        HeaderValue::from_str(&format!("__Secure-SID={}", token))?,
+    );
     headers.insert("Accept", HeaderValue::from_static("application/json"));
     headers.insert(
         "Origin",
