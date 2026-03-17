@@ -98,11 +98,13 @@ pub async fn kajabi_login_token(
     *state.kajabi_session_validated_at.lock().await = None;
     *state.kajabi_courses_cache.lock().await = None;
 
+    let parsed_token = crate::core::cookie_parser::parse_bearer_input(&token);
+
     let client = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent("KajabiMobileApp")
         .default_headers({
             let mut h = reqwest::header::HeaderMap::new();
-            h.insert("Authorization", format!("Bearer {}", token).parse().unwrap());
+            h.insert("Authorization", format!("Bearer {}", parsed_token).parse().unwrap());
             h.insert("Kjb-App-Id", "Kajabi".parse().unwrap());
             h.insert("KJB-DP", "ANDROID".parse().unwrap());
             h.insert("KJB-SITE-ID", site_id.parse().unwrap());
@@ -115,7 +117,7 @@ pub async fn kajabi_login_token(
         .map_err(|e| format!("Failed to build client: {}", e))?;
 
     let session = KajabiSession {
-        token,
+        token: parsed_token,
         site_id,
         client,
     };
@@ -343,7 +345,7 @@ pub async fn start_kajabi_course_download(
         match result {
             Ok(()) => {
                 let _ = app.emit(
-                    "kajabi-download-complete",
+                    "download-complete",
                     &KajabiDownloadCompleteEvent {
                         course_name: course.name,
                         success: true,
@@ -354,7 +356,7 @@ pub async fn start_kajabi_course_download(
             Err(e) => {
                 tracing::error!("[kajabi] download error for '{}': {}", course.name, e);
                 let _ = app.emit(
-                    "kajabi-download-complete",
+                    "download-complete",
                     &KajabiDownloadCompleteEvent {
                         course_name: course.name,
                         success: false,
