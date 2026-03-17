@@ -33,6 +33,90 @@ pub struct UdemyCoursesCache {
     pub fetched_at: std::time::Instant,
 }
 
+use platforms::kiwify::api::KiwifyCourse;
+
+pub struct KiwifyCoursesCache {
+    pub courses: Vec<KiwifyCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::greennclub::api::GreennCourse;
+
+pub struct GreennCoursesCache {
+    pub courses: Vec<GreennCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::voompplay::api::VoompCourse;
+
+pub struct VoompCoursesCache {
+    pub courses: Vec<VoompCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::entregadigital::api::EntregaDigitalCourse;
+
+pub struct EntregaDigitalCoursesCache {
+    pub courses: Vec<EntregaDigitalCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::alpaclass::api::AlpaclassCourse;
+
+pub struct AlpaclassCoursesCache {
+    pub courses: Vec<AlpaclassCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::themembers::api::TheMembersCourse;
+
+pub struct TheMembersCoursesCache {
+    pub courses: Vec<TheMembersCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::gumroad::api::GumroadProduct;
+
+pub struct GumroadCoursesCache {
+    pub products: Vec<GumroadProduct>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::kirvano::api::KirvanoCourse;
+
+pub struct KirvanoCoursesCache {
+    pub courses: Vec<KirvanoCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::datascienceacademy::api::DsaCourse;
+
+pub struct DsaCoursesCache {
+    pub courses: Vec<DsaCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::medcel::api::MedcelCourse;
+
+pub struct MedcelCoursesCache {
+    pub courses: Vec<MedcelCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::afyainternato::api::AfyaCourse;
+
+pub struct AfyaCoursesCache {
+    pub courses: Vec<AfyaCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
+use platforms::medway::api::MedwayCourse;
+
+pub struct MedwayCoursesCache {
+    pub courses: Vec<MedwayCourse>,
+    pub fetched_at: std::time::Instant,
+}
+
 pub struct AppState {
     pub hotmart_session: Arc<tokio::sync::Mutex<Option<HotmartSession>>>,
     pub active_downloads: Arc<tokio::sync::Mutex<HashMap<u64, CancellationToken>>>,
@@ -51,6 +135,42 @@ pub struct AppState {
     pub udemy_api_result: Arc<std::sync::Mutex<Option<String>>>,
     pub torrent_session: Arc<tokio::sync::Mutex<Option<Arc<librqbit::Session>>>>,
     pub active_p2p_sends: ActiveP2pSends,
+    pub kiwify_session: Arc<tokio::sync::Mutex<Option<platforms::kiwify::api::KiwifySession>>>,
+    pub kiwify_courses_cache: Arc<tokio::sync::Mutex<Option<KiwifyCoursesCache>>>,
+    pub kiwify_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub greenn_session: Arc<tokio::sync::Mutex<Option<platforms::greennclub::api::GreennSession>>>,
+    pub greenn_courses_cache: Arc<tokio::sync::Mutex<Option<GreennCoursesCache>>>,
+    pub greenn_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub voomp_session: Arc<tokio::sync::Mutex<Option<platforms::voompplay::api::VoompSession>>>,
+    pub voomp_courses_cache: Arc<tokio::sync::Mutex<Option<VoompCoursesCache>>>,
+    pub voomp_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub entregadigital_session: Arc<tokio::sync::Mutex<Option<platforms::entregadigital::api::EntregaDigitalSession>>>,
+    pub entregadigital_courses_cache: Arc<tokio::sync::Mutex<Option<EntregaDigitalCoursesCache>>>,
+    pub entregadigital_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub alpaclass_session: Arc<tokio::sync::Mutex<Option<platforms::alpaclass::api::AlpaclassSession>>>,
+    pub alpaclass_courses_cache: Arc<tokio::sync::Mutex<Option<AlpaclassCoursesCache>>>,
+    pub alpaclass_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub themembers_session: Arc<tokio::sync::Mutex<Option<platforms::themembers::api::TheMembersSession>>>,
+    pub themembers_courses_cache: Arc<tokio::sync::Mutex<Option<TheMembersCoursesCache>>>,
+    pub themembers_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub gumroad_session: Arc<tokio::sync::Mutex<Option<platforms::gumroad::api::GumroadSession>>>,
+    pub gumroad_courses_cache: Arc<tokio::sync::Mutex<Option<GumroadCoursesCache>>>,
+    pub gumroad_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub kirvano_session: Arc<tokio::sync::Mutex<Option<platforms::kirvano::api::KirvanoSession>>>,
+    pub kirvano_courses_cache: Arc<tokio::sync::Mutex<Option<KirvanoCoursesCache>>>,
+    pub kirvano_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub dsa_session: Arc<tokio::sync::Mutex<Option<platforms::datascienceacademy::api::DsaSession>>>,
+    pub dsa_courses_cache: Arc<tokio::sync::Mutex<Option<DsaCoursesCache>>>,
+    pub dsa_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub medcel_session: Arc<tokio::sync::Mutex<Option<platforms::medcel::api::MedcelSession>>>,
+    pub medcel_courses_cache: Arc<tokio::sync::Mutex<Option<MedcelCoursesCache>>>,
+    pub medcel_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub afya_session: Arc<tokio::sync::Mutex<Option<platforms::afyainternato::api::AfyaSession>>>,
+    pub afya_courses_cache: Arc<tokio::sync::Mutex<Option<AfyaCoursesCache>>>,
+    pub afya_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
+    pub medway_session: Arc<tokio::sync::Mutex<Option<platforms::medway::api::MedwaySession>>>,
+    pub medway_courses_cache: Arc<tokio::sync::Mutex<Option<MedwayCoursesCache>>>,
+    pub medway_session_validated_at: Arc<tokio::sync::Mutex<Option<std::time::Instant>>>,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -165,6 +285,42 @@ pub fn run() {
         udemy_api_result: Arc::new(std::sync::Mutex::new(None)),
         torrent_session,
         active_p2p_sends: Arc::new(tokio::sync::Mutex::new(HashMap::new())),
+        kiwify_session: Arc::new(tokio::sync::Mutex::new(None)),
+        kiwify_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        kiwify_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        greenn_session: Arc::new(tokio::sync::Mutex::new(None)),
+        greenn_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        greenn_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        voomp_session: Arc::new(tokio::sync::Mutex::new(None)),
+        voomp_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        voomp_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        entregadigital_session: Arc::new(tokio::sync::Mutex::new(None)),
+        entregadigital_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        entregadigital_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        alpaclass_session: Arc::new(tokio::sync::Mutex::new(None)),
+        alpaclass_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        alpaclass_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        themembers_session: Arc::new(tokio::sync::Mutex::new(None)),
+        themembers_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        themembers_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        gumroad_session: Arc::new(tokio::sync::Mutex::new(None)),
+        gumroad_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        gumroad_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        kirvano_session: Arc::new(tokio::sync::Mutex::new(None)),
+        kirvano_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        kirvano_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        dsa_session: Arc::new(tokio::sync::Mutex::new(None)),
+        dsa_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        dsa_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        medcel_session: Arc::new(tokio::sync::Mutex::new(None)),
+        medcel_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        medcel_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        afya_session: Arc::new(tokio::sync::Mutex::new(None)),
+        afya_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        afya_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
+        medway_session: Arc::new(tokio::sync::Mutex::new(None)),
+        medway_courses_cache: Arc::new(tokio::sync::Mutex::new(None)),
+        medway_session_validated_at: Arc::new(tokio::sync::Mutex::new(None)),
     };
 
     tauri::Builder::default()
@@ -282,6 +438,84 @@ pub fn run() {
             commands::p2p::p2p_resume_send,
             commands::p2p::p2p_get_active_sends,
             commands::p2p::p2p_validate_code,
+            commands::kiwify::kiwify_login,
+            commands::kiwify::kiwify_login_token,
+            commands::kiwify::kiwify_check_session,
+            commands::kiwify::kiwify_logout,
+            commands::kiwify::kiwify_list_courses,
+            commands::kiwify::kiwify_refresh_courses,
+            commands::kiwify::start_kiwify_course_download,
+            commands::greenn::greenn_login_token,
+            commands::greenn::greenn_check_session,
+            commands::greenn::greenn_logout,
+            commands::greenn::greenn_list_courses,
+            commands::greenn::greenn_refresh_courses,
+            commands::greenn::start_greenn_course_download,
+            commands::voomp::voomp_login_token,
+            commands::voomp::voomp_check_session,
+            commands::voomp::voomp_logout,
+            commands::voomp::voomp_list_courses,
+            commands::voomp::voomp_refresh_courses,
+            commands::voomp::start_voomp_course_download,
+            commands::entregadigital::entregadigital_login_token,
+            commands::entregadigital::entregadigital_check_session,
+            commands::entregadigital::entregadigital_logout,
+            commands::entregadigital::entregadigital_list_courses,
+            commands::entregadigital::entregadigital_refresh_courses,
+            commands::entregadigital::start_entregadigital_course_download,
+            commands::alpaclass::alpaclass_login,
+            commands::alpaclass::alpaclass_check_session,
+            commands::alpaclass::alpaclass_logout,
+            commands::alpaclass::alpaclass_list_courses,
+            commands::alpaclass::alpaclass_refresh_courses,
+            commands::alpaclass::start_alpaclass_course_download,
+            commands::themembers::themembers_login,
+            commands::themembers::themembers_login_token,
+            commands::themembers::themembers_check_session,
+            commands::themembers::themembers_logout,
+            commands::themembers::themembers_list_courses,
+            commands::themembers::themembers_refresh_courses,
+            commands::themembers::start_themembers_course_download,
+            commands::medcel::medcel_login,
+            commands::medcel::medcel_login_token,
+            commands::medcel::medcel_check_session,
+            commands::medcel::medcel_logout,
+            commands::medcel::medcel_list_courses,
+            commands::medcel::medcel_refresh_courses,
+            commands::medcel::start_medcel_course_download,
+            commands::afya::afya_login,
+            commands::afya::afya_login_token,
+            commands::afya::afya_check_session,
+            commands::afya::afya_logout,
+            commands::afya::afya_list_courses,
+            commands::afya::afya_refresh_courses,
+            commands::afya::start_afya_course_download,
+            commands::medway::medway_login_token,
+            commands::medway::medway_check_session,
+            commands::medway::medway_logout,
+            commands::medway::medway_list_courses,
+            commands::medway::medway_refresh_courses,
+            commands::medway::start_medway_course_download,
+            commands::gumroad::gumroad_login,
+            commands::gumroad::gumroad_login_token,
+            commands::gumroad::gumroad_check_session,
+            commands::gumroad::gumroad_logout,
+            commands::gumroad::gumroad_list_products,
+            commands::gumroad::gumroad_refresh_products,
+            commands::gumroad::start_gumroad_download,
+            commands::kirvano::kirvano_login,
+            commands::kirvano::kirvano_login_token,
+            commands::kirvano::kirvano_check_session,
+            commands::kirvano::kirvano_logout,
+            commands::kirvano::kirvano_list_courses,
+            commands::kirvano::kirvano_refresh_courses,
+            commands::kirvano::start_kirvano_course_download,
+            commands::dsa::dsa_login_token,
+            commands::dsa::dsa_check_session,
+            commands::dsa::dsa_logout,
+            commands::dsa::dsa_list_courses,
+            commands::dsa::dsa_refresh_courses,
+            commands::dsa::start_dsa_course_download,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
