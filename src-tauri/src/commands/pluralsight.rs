@@ -28,7 +28,9 @@ pub async fn pluralsight_login_cookies(
     *state.pluralsight_session_validated_at.lock().await = None;
     *state.pluralsight_courses_cache.lock().await = None;
 
-    let session = api::authenticate_cookies(&cookies)
+    let parsed = crate::core::cookie_parser::parse_cookie_input(&cookies, "PsJwt-production");
+
+    let session = api::authenticate_cookies(&parsed.cookie_string)
         .map_err(|e| format!("Authentication failed: {}", e))?;
 
     match api::validate_token(&session).await {
@@ -208,7 +210,7 @@ pub async fn start_pluralsight_course_download(
         match result {
             Ok(()) => {
                 let _ = app.emit(
-                    "pluralsight-download-complete",
+                    "download-complete",
                     &PluralsightDownloadCompleteEvent {
                         course_name: course.name,
                         success: true,
@@ -219,7 +221,7 @@ pub async fn start_pluralsight_course_download(
             Err(e) => {
                 tracing::error!("[pluralsight] download error for '{}': {}", course.name, e);
                 let _ = app.emit(
-                    "pluralsight-download-complete",
+                    "download-complete",
                     &PluralsightDownloadCompleteEvent {
                         course_name: course.name,
                         success: false,
