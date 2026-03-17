@@ -99,6 +99,8 @@
     currentPage = 1;
   }
 
+  let searchQuery = $state("");
+
   async function loadCourses() {
     loadingCourses = true;
     coursesError = "";
@@ -107,6 +109,20 @@
       currentPage = 1;
     } catch (e: any) {
       coursesError = typeof e === "string" ? e : e.message ?? $t('hotmart.courses_error');
+    } finally {
+      loadingCourses = false;
+    }
+  }
+
+  async function handleSearch() {
+    if (!searchQuery.trim()) return;
+    loadingCourses = true;
+    coursesError = "";
+    try {
+      courses = await invoke("rocketseat_search_courses", { query: searchQuery.trim() });
+      currentPage = 1;
+    } catch (e: any) {
+      coursesError = typeof e === "string" ? e : e.message ?? "Search failed";
     } finally {
       loadingCourses = false;
     }
@@ -225,6 +241,18 @@
       </div>
     </div>
 
+    <form class="search-bar" onsubmit={(e) => { e.preventDefault(); handleSearch(); }}>
+      <input
+        class="input search-input"
+        type="text"
+        placeholder="Search courses (e.g. Node, React, Java...)"
+        bind:value={searchQuery}
+      />
+      <button class="button" type="submit" disabled={loadingCourses || !searchQuery.trim()}>
+        Search
+      </button>
+    </form>
+
     {#if loadingCourses}
       <div class="spinner-section">
         <span class="spinner"></span>
@@ -330,6 +358,16 @@
 {/if}
 
 <style>
+  .search-bar {
+    display: flex;
+    gap: calc(var(--padding) / 2);
+    width: 100%;
+  }
+
+  .search-input {
+    flex: 1;
+  }
+
   .back-link {
     display: inline-flex;
     align-items: center;
