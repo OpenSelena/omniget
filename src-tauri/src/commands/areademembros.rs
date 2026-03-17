@@ -30,15 +30,16 @@ pub async fn areademembros_login_token(
     *state.areademembros_courses_cache.lock().await = None;
 
     let clean_url = site_url.trim_end_matches('/').to_string();
+    let parsed = crate::core::cookie_parser::parse_cookie_input(&cookies, "session");
 
     let session = AreaDeMembrosSession {
-        cookies: cookies.clone(),
+        cookies: parsed.cookie_string.clone(),
         site_url: clean_url.clone(),
         client: crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
             .user_agent("Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0")
             .default_headers({
                 let mut h = reqwest::header::HeaderMap::new();
-                h.insert("Cookie", cookies.parse().unwrap());
+                h.insert("Cookie", parsed.cookie_string.parse().unwrap());
                 h.insert("Referer", format!("{}/", clean_url).parse().unwrap());
                 h.insert("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8".parse().unwrap());
                 h
@@ -227,7 +228,7 @@ pub async fn start_areademembros_course_download(
         match result {
             Ok(()) => {
                 let _ = app.emit(
-                    "areademembros-download-complete",
+                    "download-complete",
                     &AreaDeMembrosDownloadCompleteEvent {
                         course_name: course.name,
                         success: true,
@@ -238,7 +239,7 @@ pub async fn start_areademembros_course_download(
             Err(e) => {
                 tracing::error!("[areademembros] download error for '{}': {}", course.name, e);
                 let _ = app.emit(
-                    "areademembros-download-complete",
+                    "download-complete",
                     &AreaDeMembrosDownloadCompleteEvent {
                         course_name: course.name,
                         success: false,
