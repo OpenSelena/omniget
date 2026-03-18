@@ -59,6 +59,12 @@ pub fn reset_ffmpeg_location_cache() {
     }
 }
 
+pub fn reset_cookies_browser_cache() {
+    if let Ok(mut cache) = COOKIES_BROWSER_CACHE.write() {
+        *cache = None;
+    }
+}
+
 fn proxy_args() -> Vec<String> {
     match crate::core::http_client::proxy_url() {
         Some(url) => vec!["--proxy".to_string(), url],
@@ -149,8 +155,15 @@ pub async fn find_ytdlp_cached() -> Option<PathBuf> {
     let _timer_start = std::time::Instant::now();
     if let Ok(cache) = YTDLP_PATH_CACHE.read() {
         if let Some(ref cached) = *cache {
-            tracing::debug!("[perf] find_ytdlp_cached (hit): {:?}", _timer_start.elapsed());
-            return cached.clone();
+            if let Some(ref path) = cached {
+                if path.exists() {
+                    tracing::debug!("[perf] find_ytdlp_cached (hit): {:?}", _timer_start.elapsed());
+                    return cached.clone();
+                }
+                tracing::warn!("[ytdlp] cached path no longer exists: {}", path.display());
+            } else {
+                return None;
+            }
         }
     }
     let result = find_ytdlp().await;
@@ -306,7 +319,15 @@ async fn find_ffmpeg_location() -> Option<String> {
 async fn find_ffmpeg_location_cached() -> Option<String> {
     if let Ok(cache) = FFMPEG_LOCATION_CACHE.read() {
         if let Some(ref cached) = *cache {
-            return cached.clone();
+            if let Some(ref dir) = cached {
+                let check_path = std::path::Path::new(dir).join(crate::core::dependencies::bin_name("ffmpeg"));
+                if check_path.exists() {
+                    return cached.clone();
+                }
+                tracing::warn!("[ffmpeg] cached location no longer valid: {}", dir);
+            } else {
+                return None;
+            }
         }
     }
     let result = find_ffmpeg_location().await;
@@ -321,32 +342,6 @@ fn detect_cookies_browser() -> Option<String> {
     let result = (|| -> Option<String> {
         #[cfg(target_os = "windows")]
         {
-            if let Some(local) = dirs::data_local_dir() {
-                if local
-                    .join("Google")
-                    .join("Chrome")
-                    .join("User Data")
-                    .is_dir()
-                {
-                    return Some("chrome".to_string());
-                }
-                if local
-                    .join("Microsoft")
-                    .join("Edge")
-                    .join("User Data")
-                    .is_dir()
-                {
-                    return Some("edge".to_string());
-                }
-                if local
-                    .join("BraveSoftware")
-                    .join("Brave-Browser")
-                    .join("User Data")
-                    .is_dir()
-                {
-                    return Some("brave".to_string());
-                }
-            }
             if let Some(roaming) = dirs::data_dir() {
                 if roaming
                     .join("Mozilla")
@@ -357,16 +352,42 @@ fn detect_cookies_browser() -> Option<String> {
                     return Some("firefox".to_string());
                 }
             }
+            if let Some(local) = dirs::data_local_dir() {
+                if local
+                    .join("BraveSoftware")
+                    .join("Brave-Browser")
+                    .join("User Data")
+                    .is_dir()
+                {
+                    return Some("brave".to_string());
+                }
+                if local
+                    .join("Microsoft")
+                    .join("Edge")
+                    .join("User Data")
+                    .is_dir()
+                {
+                    return Some("edge".to_string());
+                }
+                if local
+                    .join("Google")
+                    .join("Chrome")
+                    .join("User Data")
+                    .is_dir()
+                {
+                    return Some("chrome".to_string());
+                }
+            }
         }
         #[cfg(target_os = "macos")]
         {
             if let Some(home) = dirs::home_dir() {
                 let support = home.join("Library").join("Application Support");
-                if support.join("Google").join("Chrome").is_dir() {
-                    return Some("chrome".to_string());
-                }
                 if support.join("Firefox").join("Profiles").is_dir() {
                     return Some("firefox".to_string());
+                }
+                if support.join("Google").join("Chrome").is_dir() {
+                    return Some("chrome".to_string());
                 }
             }
         }
@@ -880,6 +901,15 @@ pub async fn download_video(
         None
     };
     let mut base_args = vec!["-f".to_string(), format_selector];
+
+    if format_id.is_none() {
+        base_args.push("-S".to_string());
+        if mode == "audio" {
+            base_args.push("+codec:aac:m4a".to_string());
+        } else {
+            base_args.push("+codec:avc:m4a".to_string());
+        }
+    }
 
     if format_id.is_none() && mode != "audio" && ffmpeg_available {
         base_args.push("--merge-output-format".to_string());
