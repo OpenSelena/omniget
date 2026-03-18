@@ -42,7 +42,7 @@
       "icons/icon.ico"
     ],
     "macOS": {
-      "entitlements": null,
+      "entitlements": "Entitlements.plist",
       "minimumSystemVersion": "10.15"
     }
   }
