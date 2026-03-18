@@ -475,21 +475,42 @@ pub async fn get_track_info(
     }
 
     let body: serde_json::Value = serde_json::from_str(&body_text)?;
+    let track_data = body.get("data").unwrap_or(&body);
 
-    let track_url = body
-        .get("url")
-        .or_else(|| body.get("source"))
-        .or_else(|| body.get("file"))
-        .and_then(|v| v.as_str())
-        .unwrap_or("")
-        .to_string();
+    let mut video_files: Vec<(i64, String)> = Vec::new();
+    if let Some(files) = track_data.get("video_files").and_then(|v| v.as_array()) {
+        for vf in files {
+            let height = vf.get("height").and_then(|v| v.as_i64()).unwrap_or(0);
+            let link = vf.get("link").and_then(|v| v.as_str()).unwrap_or("").to_string();
+            if !link.is_empty() {
+                video_files.push((height, link));
+            }
+        }
+    }
 
-    let duration = body
+    video_files.sort_by(|a, b| b.0.cmp(&a.0));
+
+    let track_url = if let Some((_, best_url)) = video_files.first() {
+        best_url.clone()
+    } else {
+        track_data
+            .get("url")
+            .or_else(|| track_data.get("source"))
+            .or_else(|| track_data.get("link"))
+            .or_else(|| body.get("url"))
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .to_string()
+    };
+
+    let duration = track_data
         .get("duration")
         .and_then(|v| v.as_f64());
 
+    tracing::info!("[estrategia_militares] track {} url_len={} has_video_files={}", track_id, track_url.len(), !video_files.is_empty());
+
     if track_url.is_empty() {
-        return Err(anyhow!("No URL found in track response"));
+        return Err(anyhow!("No URL found in track response for track_id={}", track_id));
     }
 
     Ok(EstrategiaMilitaresTrack {
@@ -564,6 +585,42 @@ pub fn extract_track_ids(item_detail: &serde_json::Value) -> Vec<String> {
 
 pub fn extract_attachment_urls(item_detail: &serde_json::Value) -> Vec<(String, String)> {
     let mut attachments = Vec::new();
+
+    let sub_blocks = item_detail
+        .get("sub_blocks")
+        .and_then(|v| v.as_array())
+        .cloned()
+        .unwrap_or_default();
+
+    for block in &sub_blocks {
+        let block_type = block.get("type").and_then(|v| v.as_str()).unwrap_or("");
+
+        if block_type == "attachment" || block_type == "pdfMyDocuments" {
+            let data = block.get("data")
+                .or_else(|| block.get("simple_data"))
+                .cloned()
+                .unwrap_or_default();
+
+            let resolved = data.get("resolved").cloned().unwrap_or(data.clone());
+
+            let url = resolved.get("url")
+                .or_else(|| resolved.get("data"))
+                .or_else(|| resolved.get("file"))
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .to_string();
+
+            let name = resolved.get("name")
+                .or_else(|| resolved.get("title"))
+                .and_then(|v| v.as_str())
+                .unwrap_or("attachment")
+                .to_string();
+
+            if !url.is_empty() {
+                attachments.push((name, url));
+            }
+        }
+    }
 
     let atts = item_detail
         .get("attachments")
