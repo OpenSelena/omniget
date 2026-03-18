@@ -12,7 +12,7 @@ fn managed_bin_dir() -> Option<PathBuf> {
     Some(crate::core::paths::app_data_dir()?.join("bin"))
 }
 
-fn bin_name(tool: &str) -> String {
+pub fn bin_name(tool: &str) -> String {
     if cfg!(target_os = "windows") {
         format!("{}.exe", tool)
     } else {
