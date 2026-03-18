@@ -12,7 +12,7 @@
 
 <h3 align="center">Paste a link. Get your file.<br>No browser extensions, no web apps</h3>
 
-OmniGet is a free, open source desktop app for downloading videos and media from the internet. It natively supports YouTube, Instagram, TikTok, Twitter/X, Reddit, Twitch, Pinterest, Vimeo, Bluesky, Bilibili, Hotmart courses, Udemy courses, and Telegram. It also downloads torrents and magnet links natively. Any other URL falls back to yt-dlp, covering [1000+ additional sites](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md).
+OmniGet is a free, open source desktop app for downloading videos, media, and full courses from the internet. It natively supports 50+ platforms including YouTube, Instagram, TikTok, Bilibili, Douyin, and 35+ course platforms like Hotmart, Udemy, Kiwify, Teachable, Kajabi, Skool, Pluralsight, MasterClass, Rocketseat, and more. It also downloads torrents and magnet links natively. Any other URL falls back to yt-dlp, covering [1000+ additional sites](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md).
 
 Built with Tauri and Rust for speed and a small footprint.
 
@@ -22,10 +22,11 @@ Built with Tauri and Rust for speed and a small footprint.
 
 ## Features
 
-- Download from 13 platforms natively, plus [1000+ more via yt-dlp](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
+- Download from 50+ platforms natively, plus [1000+ more via yt-dlp](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
 - Download torrents and magnet links natively with seeding, pause/resume
+- Open .torrent files directly with file picker or drag-and-drop
 - P2P file transfer between devices (local network or across the internet via STUN/UDP hole punching)
-- Download full Hotmart and Udemy courses with login (videos, attachments, descriptions)
+- Download full courses from 35+ platforms with login (videos, attachments, descriptions)
 - Download Telegram media with QR code or phone number login
 - Convert media files between formats with FFmpeg and GPU acceleration
 - Search YouTube directly from the omnibox
@@ -43,6 +44,8 @@ Built with Tauri and Rust for speed and a small footprint.
 
 ## Supported Platforms
 
+### Media Platforms
+
 | Platform | Content |
 |----------|---------|
 | YouTube | Videos, Shorts, Playlists, Search |
@@ -54,14 +57,60 @@ Built with Tauri and Rust for speed and a small footprint.
 | Pinterest | Images, Videos |
 | Vimeo | Videos (with referer support) |
 | Bluesky | Images, Videos |
-| Bilibili | Videos |
-| Hotmart | Full courses with login |
-| Udemy | Full courses with login |
+| Bilibili (哔哩哔哩) | Videos, Series, Playlists |
+| Douyin (抖音) | Videos |
+| Xiaohongshu (小红书) | Videos, Images |
+| Kuaishou (快手) | Videos |
+| Youku (优酷) | Videos |
+| Tencent Video (腾讯视频) | Videos |
+| iQiyi (爱奇艺) | Videos |
+| Mango TV (芒果TV) | Videos |
 | Telegram | Photos, Videos, Files, Audio |
 | Torrent / Magnet | Any .torrent file or magnet link |
 | [1000+ more](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md) | Anything yt-dlp supports |
 
-Platform availability may vary depending on each service.
+### Course Platforms
+
+| Platform | Auth | Region |
+|----------|------|--------|
+| Hotmart | Email + Password | BR / Global |
+| Udemy | Email + Cookies | Global |
+| Kiwify | Email + Password / Token | BR |
+| Gumroad | Email + Password / Token | Global |
+| Teachable | OTP (Email) | Global |
+| Kajabi | OTP (Email) | Global |
+| Skool | Email + Password | Global |
+| Pluralsight | Browser Cookies | Global |
+| MasterClass | Browser Cookies | Global |
+| Wondrium / Great Courses | Email + Password / Token | US |
+| Thinkific | Browser Cookies | Global |
+| Rocketseat | Browser Cookies | BR |
+| Estratégia Concursos | Token / Cookies | BR |
+| Estratégia LDI | Token / Cookies | BR |
+| Estratégia Militares | Token / Cookies | BR |
+| Gran Cursos Online | Session Cookies | BR |
+| Fluency Academy | Email + Password / Token | BR |
+| Data Science Academy | Token | BR |
+| Eduzz / Nutror | Token | BR |
+| Kirvano | Token | BR |
+| MemberKit | Email + Password / Cookies | BR |
+| Cademi | Email + Password / Cookies | BR |
+| Curseduca | Email + Password / Token | BR |
+| Medcel | Token + API Key | BR |
+| Medcof | Token | BR |
+| Medway | Token | BR |
+| Afya Internato | Token + API Key | BR |
+| AlpaClass | Token | BR |
+| Área de Membros | Cookies | BR |
+| Astron Members | Email + Password / Cookies | BR |
+| Cakto | Email + Password / Cookies | BR |
+| Cakto Members | Cookies | BR |
+| Greenn Club | Token | BR |
+| TheMembers | Email + Password / Token | BR |
+| Voomp Play | Token | BR |
+| Entrega Digital | Token + Metadata | BR |
+
+Platform availability may vary depending on each service. Chinese platforms may require a Chinese IP address (VPN/proxy). Some streaming platforms use DRM on premium content.
 
 ## Download
 
@@ -129,4 +178,4 @@ Found a bug or want to suggest a feature? [Open an issue](https://github.com/ton
 
 OmniGet is licensed under [GPL-3.0](LICENSE). The OmniGet name, logo, and Loop mascot are project trademarks not covered by the code license.
 
-<!-- omniget, video downloader, media downloader, youtube downloader, instagram downloader, tiktok downloader, twitter downloader, reddit downloader, twitch downloader, pinterest downloader, vimeo downloader, bluesky downloader, hotmart downloader, udemy downloader, telegram downloader, course downloader, desktop app, open source, rust, tauri -->
+<!-- omniget, video downloader, media downloader, course downloader, youtube downloader, instagram downloader, tiktok downloader, twitter downloader, reddit downloader, twitch downloader, pinterest downloader, vimeo downloader, bluesky downloader, bilibili downloader, douyin downloader, xiaohongshu downloader, hotmart downloader, udemy downloader, kiwify downloader, teachable downloader, kajabi downloader, skool downloader, pluralsight downloader, masterclass downloader, rocketseat downloader, estrategia concursos downloader, telegram downloader, torrent downloader, magnet downloader, desktop app, open source, rust, tauri -->
