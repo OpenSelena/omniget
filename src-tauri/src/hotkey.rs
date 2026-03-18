@@ -25,6 +25,22 @@ pub fn register_from_settings(app: &tauri::AppHandle) {
         Ok(shortcut) => {
             if let Err(e) = app.global_shortcut().register(shortcut) {
                 tracing::warn!("Failed to register hotkey '{}': {}", binding, e);
+                #[cfg(target_os = "macos")]
+                {
+                    tracing::warn!(
+                        "[hotkey] macOS: Global shortcut registration failed. \
+                        The app may need Accessibility permission. \
+                        Go to System Settings > Privacy & Security > Accessibility \
+                        and enable OmniGet."
+                    );
+                    let _ = app.emit(
+                        "hotkey-permission-error",
+                        serde_json::json!({
+                            "message": "Global hotkey requires Accessibility permission. Open System Settings > Privacy & Security > Accessibility and enable OmniGet.",
+                            "platform": "macos"
+                        }),
+                    );
+                }
             } else {
                 tracing::info!("[hotkey] registered: {}", binding);
             }
