@@ -6,6 +6,7 @@ use futures::StreamExt;
 
 pub fn is_flatpak() -> bool {
     std::path::Path::new("/.flatpak-info").exists()
+        || std::env::var("FLATPAK_ID").is_ok()
 }
 
 fn managed_bin_dir() -> Option<PathBuf> {
