@@ -12,7 +12,7 @@
 
 <h3 align="center">Paste a link. Get your file.<br>No browser extensions, no web apps</h3>
 
-OmniGet is a free, open source desktop app for downloading videos, media, and full courses from the internet. It natively supports 50+ platforms including YouTube, Instagram, TikTok, Bilibili, Douyin, and 35+ course platforms like Hotmart, Udemy, Kiwify, Teachable, Kajabi, Skool, Pluralsight, MasterClass, Rocketseat, and more. It also downloads torrents and magnet links natively. Any other URL falls back to yt-dlp, covering [1000+ additional sites](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md).
+OmniGet is a free, open source desktop app for downloading videos, media, and full courses from the internet. It natively supports 50+ platforms including YouTube, Instagram, TikTok, Twitter/X, Reddit, Twitch, Pinterest, Vimeo, Bluesky, and Chinese platforms like Bilibili (哔哩哔哩), Douyin (抖音), Xiaohongshu (小红书), Kuaishou (快手), Youku (优酷视频), Tencent Video (腾讯视频), iQiyi (爱奇艺), and Mango TV (芒果TV). It downloads full courses from 35+ education platforms like Hotmart, Udemy, Kiwify, Teachable, Kajabi, Skool, Pluralsight, MasterClass, Rocketseat, Estratégia Concursos, and more. It also downloads torrents and magnet links natively, and lets you send files directly between computers via P2P transfer over local network or the internet. Any other URL falls back to yt-dlp, covering [1000+ additional sites](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md).
 
 Built with Tauri and Rust for speed and a small footprint.
 
