@@ -6,16 +6,27 @@ use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 
+static FFMPEG_AVAILABLE_CACHE: std::sync::RwLock<Option<bool>> = std::sync::RwLock::new(None);
+
 pub async fn is_ffmpeg_available() -> bool {
-    use tokio::sync::OnceCell;
-    static CACHED: OnceCell<bool> = OnceCell::const_new();
-    *CACHED
-        .get_or_init(|| async {
-            crate::core::dependencies::find_tool("ffmpeg")
-                .await
-                .is_some()
-        })
+    if let Ok(cache) = FFMPEG_AVAILABLE_CACHE.read() {
+        if let Some(val) = *cache {
+            return val;
+        }
+    }
+    let available = crate::core::dependencies::find_tool("ffmpeg")
         .await
+        .is_some();
+    if let Ok(mut cache) = FFMPEG_AVAILABLE_CACHE.write() {
+        *cache = Some(available);
+    }
+    available
+}
+
+pub fn reset_ffmpeg_available_cache() {
+    if let Ok(mut cache) = FFMPEG_AVAILABLE_CACHE.write() {
+        *cache = None;
+    }
 }
 
 pub async fn mux_video_audio(video: &Path, audio: &Path, output: &Path) -> anyhow::Result<()> {
