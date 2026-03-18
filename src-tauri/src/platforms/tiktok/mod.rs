@@ -254,6 +254,75 @@ impl TikTokDownloader {
         Some(urls)
     }
 
+    async fn get_media_info_via_ytdlp(&self, url: &str, post_id: &str) -> anyhow::Result<MediaInfo> {
+        let ytdlp_path = crate::core::ytdlp::find_ytdlp_cached()
+            .await
+            .ok_or_else(|| anyhow!("yt-dlp not found — install it in Settings"))?;
+
+        let json = crate::core::ytdlp::get_video_info(&ytdlp_path, url, &[]).await?;
+
+        let title = json
+            .get("title")
+            .and_then(|v| v.as_str())
+            .map(|s| format!("tiktok_{}", sanitize_filename::sanitize(s)))
+            .unwrap_or_else(|| format!("tiktok_{}", post_id));
+
+        let author = json
+            .get("uploader")
+            .or_else(|| json.get("creator"))
+            .and_then(|v| v.as_str())
+            .unwrap_or("unknown")
+            .to_string();
+
+        let duration = json.get("duration").and_then(|v| v.as_f64());
+
+        let thumbnail = json
+            .get("thumbnail")
+            .and_then(|v| v.as_str())
+            .map(String::from);
+
+        let video_url = json
+            .get("url")
+            .and_then(|v| v.as_str())
+            .map(String::from);
+
+        if let Some(vurl) = video_url {
+            return Ok(MediaInfo {
+                title,
+                author,
+                platform: "tiktok".to_string(),
+                duration_seconds: duration,
+                thumbnail_url: thumbnail,
+                available_qualities: vec![VideoQuality {
+                    label: "original".to_string(),
+                    width: 0,
+                    height: 0,
+                    url: vurl,
+                    format: "mp4".to_string(),
+                }],
+                media_type: MediaType::Video,
+                file_size_bytes: None,
+            });
+        }
+
+        Ok(MediaInfo {
+            title,
+            author,
+            platform: "tiktok".to_string(),
+            duration_seconds: duration,
+            thumbnail_url: thumbnail,
+            available_qualities: vec![VideoQuality {
+                label: "original".to_string(),
+                width: 0,
+                height: 0,
+                url: url.to_string(),
+                format: "mp4".to_string(),
+            }],
+            media_type: MediaType::Video,
+            file_size_bytes: None,
+        })
+    }
+
     fn extract_music_url(detail: &serde_json::Value) -> Option<String> {
         detail
             .pointer("/music/playUrl")
@@ -287,21 +356,18 @@ impl PlatformDownloader for TikTokDownloader {
         let post_id = match Self::extract_post_id(url) {
             Some(id) => id,
             None => {
-                let canonical = self.resolve_short_link(url).await?;
+                let canonical = self.resolve_short_link(url).await
+                    .unwrap_or_else(|_| url.to_string());
                 Self::extract_post_id(&canonical)
-                    .ok_or_else(|| anyhow!("Could not extract post ID"))?
+                    .unwrap_or_else(|| "unknown".to_string())
             }
         };
 
         let detail = match self.fetch_detail(&post_id).await {
             Ok(d) => d,
             Err(first_err) => {
-                let err_msg = first_err.to_string();
-                if err_msg.contains("CAPTCHA") || err_msg.contains("bloqueando") {
-                    return Err(first_err);
-                }
-                tokio::time::sleep(std::time::Duration::from_secs(2)).await;
-                self.fetch_detail(&post_id).await.map_err(|_| first_err)?
+                tracing::info!("[tiktok] direct fetch failed: {}, trying yt-dlp", first_err);
+                return self.get_media_info_via_ytdlp(url, &post_id).await;
             }
         };
 
@@ -402,22 +468,55 @@ impl PlatformDownloader for TikTokDownloader {
                 let filename = format!("{}.mp4", sanitize_filename::sanitize(&info.title));
                 let output = opts.output_dir.join(&filename);
 
-                let bytes = direct_downloader::download_direct_with_headers(
+                let direct_result = direct_downloader::download_direct_with_headers(
                     &self.client,
                     &quality.url,
                     &output,
-                    progress,
+                    progress.clone(),
                     Some(headers),
                     None,
                 )
-                .await?;
+                .await;
 
-                Ok(DownloadResult {
-                    file_path: output,
-                    file_size_bytes: bytes,
-                    duration_seconds: info.duration_seconds.unwrap_or(0.0),
-                    torrent_id: None,
-                })
+                match direct_result {
+                    Ok(bytes) if bytes > 1000 => {
+                        Ok(DownloadResult {
+                            file_path: output,
+                            file_size_bytes: bytes,
+                            duration_seconds: info.duration_seconds.unwrap_or(0.0),
+                            torrent_id: None,
+                        })
+                    }
+                    _ => {
+                        let _ = tokio::fs::remove_file(&output).await;
+                        tracing::info!("[tiktok] direct download failed or too small, trying yt-dlp");
+
+                        let ytdlp_path = match &opts.ytdlp_path {
+                            Some(p) => p.clone(),
+                            None => crate::core::ytdlp::find_ytdlp_cached()
+                                .await
+                                .ok_or_else(|| anyhow!("yt-dlp not found"))?,
+                        };
+
+                        crate::core::ytdlp::download_video(
+                            &ytdlp_path,
+                            &quality.url,
+                            &opts.output_dir,
+                            None,
+                            progress,
+                            opts.download_mode.as_deref(),
+                            None,
+                            opts.filename_template.as_deref(),
+                            Some("https://www.tiktok.com/"),
+                            opts.cancel_token.clone(),
+                            None,
+                            opts.concurrent_fragments,
+                            false,
+                            &[],
+                        )
+                        .await
+                    }
+                }
             }
             MediaType::Photo | MediaType::Carousel => {
                 let mut total_bytes = 0u64;
