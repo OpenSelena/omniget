@@ -79,7 +79,8 @@ pub async fn webview_get(
         .map_err(|e| anyhow!("eval failed: {}", e))?;
 
     let start = std::time::Instant::now();
-    let timeout = Duration::from_secs(30);
+    let timeout = Duration::from_secs(90);
+    let mut poll_interval = 100u64;
     loop {
         if let Some(data) = result_store.lock().unwrap().take() {
             if let Some(err_msg) = data.strip_prefix("{\"__fetch_error\":\"") {
@@ -89,8 +90,14 @@ pub async fn webview_get(
             return Ok(data);
         }
         if start.elapsed() > timeout {
-            return Err(anyhow!("Timeout waiting for API response"));
+            return Err(anyhow!(
+                "Timeout waiting for API response ({}s). The page may be blocked by Cloudflare or the server is slow.",
+                timeout.as_secs()
+            ));
         }
-        tokio::time::sleep(Duration::from_millis(100)).await;
+        tokio::time::sleep(Duration::from_millis(poll_interval)).await;
+        if poll_interval < 500 {
+            poll_interval = (poll_interval * 3 / 2).min(500);
+        }
     }
 }
