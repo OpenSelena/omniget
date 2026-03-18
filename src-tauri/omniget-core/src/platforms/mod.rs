@@ -186,6 +186,20 @@ impl Platform {
             Some(Platform::Other("estrategia_concursos".to_string()))
         } else if matches("matematicaprapassar.com.br") {
             Some(Platform::Other("matematicaprapassar".to_string()))
+        } else if matches("douyin.com") {
+            Some(Platform::Other("douyin".to_string()))
+        } else if matches("kuaishou.com") {
+            Some(Platform::Other("kuaishou".to_string()))
+        } else if matches("xiaohongshu.com") || host == "xhslink.com" {
+            Some(Platform::Other("xiaohongshu".to_string()))
+        } else if host == "v.qq.com" || (matches("qq.com") && parsed.path().starts_with("/x/")) {
+            Some(Platform::Other("tencentvideo".to_string()))
+        } else if matches("iqiyi.com") {
+            Some(Platform::Other("iqiyi".to_string()))
+        } else if matches("mgtv.com") {
+            Some(Platform::Other("mgtv".to_string()))
+        } else if matches("youku.com") {
+            Some(Platform::Other("youku".to_string()))
         } else {
             None
         }
