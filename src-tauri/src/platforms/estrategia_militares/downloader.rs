@@ -123,16 +123,25 @@ pub async fn download_full_course(
                     return Err(anyhow!("Download cancelled by user"));
                 }
 
-                let track_info = match api::get_track_info(session, track_id).await {
-                    Ok(t) => t,
-                    Err(e) => {
-                        tracing::error!(
-                            "[estrategia_militares] Failed to get track '{}': {}",
-                            track_id,
-                            e
-                        );
-                        continue;
+                let video_url = if let Some(direct_url) = track_id.strip_prefix("direct:") {
+                    direct_url.to_string()
+                } else {
+                    match api::get_track_info(session, track_id).await {
+                        Ok(t) => t.url,
+                        Err(e) => {
+                            tracing::error!(
+                                "[estrategia_militares] Failed to get track '{}': {}",
+                                track_id,
+                                e
+                            );
+                            continue;
+                        }
                     }
+                };
+
+                let track_info = api::EstrategiaMilitaresTrack {
+                    url: video_url,
+                    duration: None,
                 };
 
                 let suffix = if track_ids.len() > 1 {
@@ -157,6 +166,12 @@ pub async fn download_full_course(
                     }
                 }
 
+                let is_direct_url = track_info.url.contains(".mp4")
+                    || track_info.url.contains("vimeocdn")
+                    || track_info.url.contains("akamaized")
+                    || track_info.url.contains("cloudfront")
+                    || track_info.url.contains("player.vimeo.com/progressive");
+
                 if track_info.url.contains(".m3u8") {
                     match download_hls_video(&track_info.url, &video_path, &cancel_token).await {
                         Ok(size) => {
@@ -169,6 +184,32 @@ pub async fn download_full_course(
                                 e
                             );
                             let _ = tokio::fs::remove_file(&video_path).await;
+                        }
+                    }
+                } else if is_direct_url {
+                    tracing::info!("[estrategia_militares] Direct download for '{}'", lesson.name);
+                    match download_file_direct(&session.client, &track_info.url, &video_path, &cancel_token).await {
+                        Ok(size) => {
+                            total_bytes.fetch_add(size, Ordering::Relaxed);
+                        }
+                        Err(e) => {
+                            tracing::error!(
+                                "[estrategia_militares] Direct download failed for '{}': {}, trying yt-dlp",
+                                lesson.name,
+                                e
+                            );
+                            match download_with_ytdlp(&track_info.url, &mod_dir, &cancel_token).await {
+                                Ok(size) => {
+                                    total_bytes.fetch_add(size, Ordering::Relaxed);
+                                }
+                                Err(e2) => {
+                                    tracing::error!(
+                                        "[estrategia_militares] All methods failed for '{}': {}",
+                                        lesson.name,
+                                        e2
+                                    );
+                                }
+                            }
                         }
                     }
                 } else {
