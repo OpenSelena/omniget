@@ -48,6 +48,7 @@ pub struct FluencyLessonDetail {
     pub id: String,
     pub name: String,
     pub video_url: Option<String>,
+    pub description: Option<String>,
 }
 
 fn build_client(token: &str) -> anyhow::Result<reqwest::Client> {
@@ -366,6 +367,7 @@ pub async fn get_lesson_detail(
 
     let mut video_url: Option<String> = None;
     let mut lesson_name = String::new();
+    let mut description: Option<String> = None;
 
     for task in &tasks {
         if lesson_name.is_empty() {
@@ -438,7 +440,21 @@ pub async fn get_lesson_detail(
             }
         }
 
-        if video_url.is_some() {
+        if description.is_none() {
+            if let Some(desc) = task.get("description") {
+                let text = desc
+                    .get("content")
+                    .and_then(|v| v.as_str())
+                    .or_else(|| desc.as_str())
+                    .filter(|s| !s.trim().is_empty())
+                    .map(String::from);
+                if text.is_some() {
+                    description = text;
+                }
+            }
+        }
+
+        if video_url.is_some() && description.is_some() {
             break;
         }
     }
@@ -447,6 +463,7 @@ pub async fn get_lesson_detail(
         id: lesson_id.to_string(),
         name: lesson_name,
         video_url,
+        description,
     })
 }
 
