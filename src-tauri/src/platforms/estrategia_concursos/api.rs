@@ -57,6 +57,8 @@ pub struct EstrategiaConcursosLessonDetail {
 pub struct EstrategiaConcursosVideo {
     pub quality: String,
     pub url: String,
+    pub audio_url: Option<String>,
+    pub slide_url: Option<String>,
 }
 
 fn build_client(token: &str) -> anyhow::Result<reqwest::Client> {
