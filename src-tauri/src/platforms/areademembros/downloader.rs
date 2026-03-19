@@ -51,6 +51,11 @@ pub async fn download_full_course(
     );
     tokio::fs::create_dir_all(&course_dir).await?;
 
+    if crate::core::course_utils::is_course_complete(&course_dir) {
+        tracing::info!("[areademembros] course already complete, skipping");
+        return Ok(());
+    }
+
     let total_lessons: usize = modules.iter().map(|m| m.lessons.len()).sum();
     let total_modules = modules.len();
     let total_bytes = Arc::new(AtomicU64::new(0));
@@ -88,9 +93,39 @@ pub async fn download_full_course(
 
             let lesson_name = filename::sanitize_path_component(&lesson.name);
 
-            let video_url = match api::get_lesson_video_url(session, &lesson.url).await {
-                Ok(Some(url)) => url,
-                Ok(None) => {
+            let (video_url_opt, description) = match api::get_lesson_video_url(session, &lesson.url).await {
+                Ok(result) => result,
+                Err(e) => {
+                    tracing::error!("[areademembros] Failed to get video URL for '{}': {}", lesson.name, e);
+                    let done = completed.fetch_add(1, Ordering::Relaxed) + 1;
+                    let _ = app.emit(
+                        "download-progress",
+                        &AreaDeMembrosDownloadProgress {
+                            course_id: course.id.clone(),
+                            course_name: course.name.clone(),
+                            percent: done as f64 / total_lessons as f64 * 100.0,
+                            current_module: module.name.clone(),
+                            current_lesson: lesson.name.clone(),
+                            downloaded_bytes: total_bytes.load(Ordering::Relaxed),
+                            total_lessons: total_lessons as u32,
+                            completed_lessons: done as u32,
+                            total_modules: total_modules as u32,
+                            current_module_index: (mi + 1) as u32,
+                        },
+                    );
+                    continue;
+                }
+            };
+
+            if let Some(ref desc) = description {
+                let lesson_desc_dir = format!("{}/{}. {}", mod_dir, li + 1, lesson_name);
+                tokio::fs::create_dir_all(&lesson_desc_dir).await?;
+                crate::core::course_utils::save_description(&lesson_desc_dir, desc, "html").await.ok();
+            }
+
+            let video_url = match video_url_opt {
+                Some(url) => url,
+                None => {
                     tracing::warn!("[areademembros] No video found for lesson '{}'", lesson.name);
                     let done = completed.fetch_add(1, Ordering::Relaxed) + 1;
                     let _ = app.emit(
@@ -198,6 +233,8 @@ pub async fn download_full_course(
     if cancel_token.is_cancelled() {
         return Err(anyhow!("Download cancelled by user"));
     }
+
+    crate::core::course_utils::mark_course_complete(&course_dir).await.ok();
 
     Ok(())
 }
