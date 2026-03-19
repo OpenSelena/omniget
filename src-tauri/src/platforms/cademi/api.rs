@@ -47,6 +47,7 @@ pub struct CademiLessonDetail {
     pub id: String,
     pub name: String,
     pub video_url: Option<String>,
+    pub description: Option<String>,
 }
 
 fn build_client(cookies: &str, site_url: &str) -> anyhow::Result<reqwest::Client> {
