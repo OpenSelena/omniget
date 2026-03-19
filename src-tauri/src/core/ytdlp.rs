@@ -20,6 +20,15 @@ static COOKIES_BROWSER_CACHE: std::sync::RwLock<Option<Option<String>>> =
     std::sync::RwLock::new(None);
 static RATE_LIMIT_429_COUNT: AtomicU64 = AtomicU64::new(0);
 static RATE_LIMIT_429_LAST_TS: AtomicU64 = AtomicU64::new(0);
+static COOKIE_ERROR_FLAG: AtomicBool = AtomicBool::new(false);
+
+pub fn has_cookie_error() -> bool {
+    COOKIE_ERROR_FLAG.load(std::sync::atomic::Ordering::Relaxed)
+}
+
+pub fn clear_cookie_error() {
+    COOKIE_ERROR_FLAG.store(false, std::sync::atomic::Ordering::Relaxed);
+}
 
 fn rate_limit_429_count() -> u64 {
     let last = RATE_LIMIT_429_LAST_TS.load(Ordering::Relaxed);
@@ -901,11 +910,25 @@ pub async fn download_video(
 
     tokio::fs::create_dir_all(output_dir).await?;
 
-    let browser_cookies = if cookie_file.is_none() {
+    let global_cookie_file = {
+        let settings = crate::storage::config::load_settings_standalone();
+        let cf = settings.download.cookie_file.clone();
+        if !cf.is_empty() && std::path::Path::new(&cf).exists() {
+            Some(cf)
+        } else {
+            None
+        }
+    };
+
+    let browser_cookies = if cookie_file.is_none() && global_cookie_file.is_none() {
         detect_cookies_browser_cached().await
     } else {
         None
     };
+
+    let effective_cookie_file = cookie_file
+        .map(|p| p.to_path_buf())
+        .or_else(|| global_cookie_file.map(std::path::PathBuf::from));
     let mut base_args = vec!["-f".to_string(), format_selector];
 
     if format_id.is_none() {
@@ -929,7 +952,7 @@ pub async fn download_video(
         base_args.push(format!("Referer:{}", ref_url));
     }
 
-    if let Some(cf) = cookie_file {
+    if let Some(ref cf) = effective_cookie_file {
         base_args.push("--cookies".to_string());
         base_args.push(cf.to_string_lossy().to_string());
     }
@@ -973,7 +996,7 @@ pub async fn download_video(
 
     let mut use_aria2c = aria2c_path.is_some()
         && mode != "audio"
-        && cookie_file.is_none()
+        && effective_cookie_file.is_none()
         && browser_cookies.is_none();
 
     base_args.extend([
@@ -1297,7 +1320,7 @@ pub async fn download_video(
                     } else {
                         "n/a"
                     };
-                    let cookies_enabled = use_browser_cookies || cookie_file.is_some();
+                    let cookies_enabled = use_browser_cookies || effective_cookie_file.is_some();
                     tracing::warn!(
                         "[yt-429] rate limit in download_video: url={} attempt={}/{} player_client={} cookies={} aria2c={}",
                         sanitized_url,
@@ -1381,11 +1404,13 @@ pub async fn download_video(
             if ((stderr_lower.contains("could not") && stderr_lower.contains("cookie"))
                 || stderr_lower.contains("cookies-from-browser")
                 || stderr_lower.contains("failed to decrypt")
-                || stderr_lower.contains("keyring"))
+                || stderr_lower.contains("keyring")
+                || stderr_lower.contains("permission denied"))
                 && use_browser_cookies
             {
                 use_browser_cookies = false;
-                tracing::warn!("[yt-dlp] cookies-from-browser failed, retrying without");
+                tracing::warn!("[yt-dlp] cookies-from-browser failed (Chrome/Edge cookie encryption). Use Firefox or set a cookie file in Settings.");
+                COOKIE_ERROR_FLAG.store(true, std::sync::atomic::Ordering::Relaxed);
             }
 
             if (stderr_lower.contains("sign in") || stderr_lower.contains("login required"))
