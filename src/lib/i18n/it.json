@@ -463,7 +463,12 @@
     "error": "Errore",
     "unknown_error": "Errore sconosciuto",
     "ytdlp_missing": "yt-dlp non è installato. Installalo nelle Impostazioni per abilitare i download.",
-    "go_to_settings": "Vai alle Impostazioni"
+    "go_to_settings": "Vai alle Impostazioni",
+    "cookie_error_title": "Accesso cookie fallito",
+    "cookie_error_message": "Il rilevamento automatico dei cookie funziona solo con Firefox. Chrome, Edge e altri browser Chromium bloccano l'accesso. Installa Firefox e accedi ai tuoi account, oppure esporta un file cookies.txt e configuralo in Impostazioni > Download > File cookie.",
+    "cookie_file_label": "File cookie (cookies.txt)",
+    "cookie_file_choose": "Scegli file",
+    "cookie_file_hint": "Esporta i cookie dal browser usando un'estensione e seleziona il file qui."
   },
   "errors": {
     "login_required": "Accesso richiesto — usa i cookie del browser o prova un altro link",
