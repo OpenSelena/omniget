@@ -51,6 +51,10 @@ pub async fn download_full_course(
     );
     tokio::fs::create_dir_all(&course_dir).await?;
 
+    if crate::core::course_utils::is_course_complete(&course_dir) {
+        return Ok(());
+    }
+
     let total_lessons: usize = modules.iter().map(|m| m.lessons.len()).sum();
     let total_modules = modules.len();
     let total_bytes = Arc::new(AtomicU64::new(0));
@@ -117,6 +121,20 @@ pub async fn download_full_course(
                     continue;
                 }
             };
+
+            if let Some(ref desc) = detail.description {
+                crate::core::course_utils::save_description(&lesson_dir, desc, "html").await.ok();
+            }
+
+            if let Some(ref pdf_url) = detail.url_pdf {
+                crate::core::course_utils::download_attachment(
+                    &session.client,
+                    pdf_url,
+                    &lesson_dir,
+                    &format!("{}.pdf", lesson_name),
+                    &cancel_token,
+                ).await.ok();
+            }
 
             if let Some(ref video_url) = detail.video_url {
                 let video_ext = if video_url.contains(".m3u8") {
@@ -263,6 +281,8 @@ pub async fn download_full_course(
     if cancel_token.is_cancelled() {
         return Err(anyhow!("Download cancelled by user"));
     }
+
+    crate::core::course_utils::mark_course_complete(&course_dir).await.ok();
 
     Ok(())
 }
