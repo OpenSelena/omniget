@@ -320,6 +320,21 @@ export async function initDownloadListener(): Promise<() => void> {
     setMediaPreview(event.payload);
   });
 
+  let cookieErrorShown = false;
+  const cookieCheckInterval = setInterval(async () => {
+    if (cookieErrorShown) return;
+    try {
+      const { invoke } = await import("@tauri-apps/api/core");
+      const hasError = await invoke<boolean>("check_cookie_error");
+      if (hasError && !cookieErrorShown) {
+        cookieErrorShown = true;
+        const tr = get(t);
+        showToast("error", tr("common.cookie_error_message"), 15000);
+        addLog("error", "system", "Cookie access failed - Chrome/Edge cookies are not accessible");
+      }
+    } catch {}
+  }, 5000);
+
   return () => {
     unlistenProgress();
     unlistenComplete();
@@ -332,6 +347,7 @@ export async function initDownloadListener(): Promise<() => void> {
     unlistenConvertComplete();
     unlistenFileCopied();
     unlistenMediaPreview();
+    clearInterval(cookieCheckInterval);
     if (throttleTimer !== null) {
       clearTimeout(throttleTimer);
       throttleTimer = null;
