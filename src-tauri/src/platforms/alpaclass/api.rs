@@ -57,6 +57,7 @@ pub struct AlpaclassLesson {
 pub struct AlpaclassLessonDetail {
     pub slug: String,
     pub name: String,
+    pub html_content: Option<String>,
     pub video_url: Option<String>,
     pub files: Vec<AlpaclassFile>,
 }
@@ -362,6 +363,11 @@ pub async fn get_lesson_detail(
         .unwrap_or(lesson_slug)
         .to_string();
 
+    let html_content = body
+        .get("htmlContent")
+        .and_then(|v| v.as_str())
+        .map(String::from);
+
     let video_url = body
         .get("content")
         .and_then(|c| {
@@ -420,6 +426,7 @@ pub async fn get_lesson_detail(
     Ok(AlpaclassLessonDetail {
         slug: lesson_slug.to_string(),
         name,
+        html_content,
         video_url,
         files,
     })
