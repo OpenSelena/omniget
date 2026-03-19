@@ -95,6 +95,10 @@ pub async fn download_full_course(
             let lesson_dir = format!("{}/{}. {}", mod_dir, li + 1, lesson_name);
             tokio::fs::create_dir_all(&lesson_dir).await?;
 
+            if let Some(ref desc) = lesson.description {
+                crate::core::course_utils::save_description(&lesson_dir, desc, "txt").await.ok();
+            }
+
             if lesson.type_id == "videoClass" || lesson.type_id.contains("video") {
                 match api::get_video_url(session, &lesson.id, &lesson.product_id).await {
                     Ok(video_url) => {
