@@ -50,7 +50,7 @@ function detectPlatform(url) {
   if (matchesHost(host, "twitter.com") || matchesHost(host, "x.com") || matchesHost(host, "vxtwitter.com") || matchesHost(host, "fixvx.com")) return "twitter";
   if (matchesHost(host, "reddit.com") || host === "v.redd.it" || host === "redd.it") return "reddit";
   if (matchesHost(host, "twitch.tv")) return "twitch";
-  if (host === "pin.it" || host.includes("pinterest.")) return "pinterest";
+  if (host === "pin.it" || isPinterestHost(host)) return "pinterest";
   if (host === "bsky.app" || host.endsWith(".bsky.app")) return "bluesky";
   if (host === "t.me" || matchesHost(host, "telegram.me") || matchesHost(host, "telegram.org")) return "telegram";
   if (matchesHost(host, "vimeo.com")) return "vimeo";
@@ -112,6 +112,10 @@ function parseYouTube(url, segments) {
     return "playlist";
   }
 
+  if ((segments[0] === "live" || segments[0] === "embed" || segments[0] === "v") && segments[1]) {
+    return "video";
+  }
+
   if (
     segments[0] === "channel" ||
     segments[0] === "c" ||
@@ -144,7 +148,12 @@ function parseTikTok(segments) {
     return "profile";
   }
 
-  return segments[0] ? "video" : "unknown";
+  const tiktokNonVideo = ["explore", "foryou", "following", "live", "about", "legal", "safety", "transparency"];
+  if (segments[0] && !tiktokNonVideo.includes(segments[0])) {
+    return "video";
+  }
+
+  return "unknown";
 }
 
 function parseTwitter(segments) {
@@ -181,7 +190,7 @@ function parseReddit(url, segments) {
     return segments[1] ? "profile" : "unknown";
   }
 
-  return segments[0] ? "video" : "unknown";
+  return "unknown";
 }
 
 function parseTwitch(url, segments) {
@@ -199,7 +208,12 @@ function parseTwitch(url, segments) {
     return "clip";
   }
 
-  return segments[0] && !["directory", "settings", "downloads"].includes(segments[0]) ? "profile" : "unknown";
+  const twitchNonChannel = ["directory", "settings", "downloads", "jobs", "turbo", "store", "inventory", "wallet", "subscriptions", "friends", "prime"];
+  if (segments[0] && !twitchNonChannel.includes(segments[0])) {
+    return "video"; // live stream — downloadable via yt-dlp
+  }
+
+  return "unknown";
 }
 
 function parseHotmart(segments) {
@@ -248,4 +262,8 @@ function parseBilibili(segments) {
 
 function matchesHost(host, domain) {
   return host === domain || host.endsWith(`.${domain}`);
+}
+
+function isPinterestHost(host) {
+  return /(?:^|\.)pinterest\.\w+(?:\.\w+)?$/.test(host);
 }

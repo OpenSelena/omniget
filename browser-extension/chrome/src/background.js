@@ -101,6 +101,7 @@ async function refreshTabAction(tabId, tab) {
   }
 
   try {
+    // TODO: use chrome.i18n via _locales/ for multi-language tooltips
     await chrome.action.setTitle({
       tabId,
       title: supported

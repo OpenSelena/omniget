@@ -58,7 +58,7 @@ pub fn ensure_registered() -> anyhow::Result<()> {
     fs::create_dir_all(&integration_dir)?;
 
     let host_exe = integration_dir.join(HOST_COPY_NAME);
-    if current_exe != host_exe {
+    if current_exe != host_exe && should_copy_exe(&current_exe, &host_exe) {
         fs::copy(&current_exe, &host_exe)?;
     }
 
@@ -106,9 +106,22 @@ pub fn ensure_registered() -> anyhow::Result<()> {
     Ok(())
 }
 
+// TODO: implement native messaging host registration for macOS
+// (~/.config/google-chrome/NativeMessagingHosts/ on Linux,
+// ~/Library/Application Support/Google/Chrome/NativeMessagingHosts/ on macOS)
 #[cfg(not(target_os = "windows"))]
 pub fn ensure_registered() -> anyhow::Result<()> {
     Ok(())
+}
+
+fn should_copy_exe(source: &Path, dest: &Path) -> bool {
+    let Ok(src_meta) = fs::metadata(source) else {
+        return true;
+    };
+    let Ok(dst_meta) = fs::metadata(dest) else {
+        return true;
+    };
+    src_meta.len() != dst_meta.len()
 }
 
 fn handle_request(request: NativeHostRequest) -> NativeHostResponse {
@@ -165,9 +178,17 @@ fn launch_omniget(url: &str) -> anyhow::Result<()> {
 }
 
 fn read_message() -> anyhow::Result<NativeHostRequest> {
+    const MAX_MESSAGE_LENGTH: usize = 1_048_576; // 1 MB — Chrome's own limit
+
     let mut length_bytes = [0u8; 4];
     std::io::stdin().read_exact(&mut length_bytes)?;
     let length = u32::from_le_bytes(length_bytes) as usize;
+
+    if length > MAX_MESSAGE_LENGTH {
+        anyhow::bail!(
+            "Native message too large ({length} bytes, max {MAX_MESSAGE_LENGTH})"
+        );
+    }
 
     let mut payload = vec![0u8; length];
     std::io::stdin().read_exact(&mut payload)?;

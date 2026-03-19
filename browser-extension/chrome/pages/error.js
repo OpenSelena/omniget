@@ -11,6 +11,8 @@ const detail = document.getElementById("detail");
 const urlNode = document.getElementById("url");
 const installLink = document.getElementById("install-link");
 
+const openExtensionsBtn = document.getElementById("open-extensions");
+
 const content = getContent(code);
 
 title.textContent = content.title;
@@ -18,6 +20,10 @@ body.textContent = content.body;
 detail.textContent = message || content.detail;
 urlNode.textContent = url;
 installLink.href = installUrl;
+
+openExtensionsBtn.addEventListener("click", () => {
+  chrome.tabs.create({ url: "chrome://extensions" });
+});
 
 function getContent(errorCode) {
   switch (errorCode) {
