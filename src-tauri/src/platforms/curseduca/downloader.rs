@@ -51,6 +51,11 @@ pub async fn download_full_course(
     );
     tokio::fs::create_dir_all(&course_dir).await?;
 
+    if crate::core::course_utils::is_course_complete(&course_dir) {
+        tracing::info!("[curseduca] course already complete, skipping");
+        return Ok(());
+    }
+
     let total_lessons: usize = modules.iter().map(|m| m.lessons.len()).sum();
     let total_modules = modules.len();
     let total_bytes = Arc::new(AtomicU64::new(0));
@@ -87,6 +92,12 @@ pub async fn download_full_course(
             }
 
             let lesson_name = filename::sanitize_path_component(&lesson.name);
+
+            if let Some(ref desc) = lesson.description {
+                let lesson_desc_dir = format!("{}/{}. {}", mod_dir, li + 1, lesson_name);
+                tokio::fs::create_dir_all(&lesson_desc_dir).await?;
+                crate::core::course_utils::save_description(&lesson_desc_dir, desc, "html").await.ok();
+            }
 
             let lesson_uuid = lesson.uuid.as_deref().unwrap_or(&lesson.id);
 
@@ -208,6 +219,8 @@ pub async fn download_full_course(
     if cancel_token.is_cancelled() {
         return Err(anyhow!("Download cancelled by user"));
     }
+
+    crate::core::course_utils::mark_course_complete(&course_dir).await.ok();
 
     Ok(())
 }
