@@ -49,6 +49,7 @@ pub struct SkoolLesson {
 pub struct SkoolLessonDetail {
     pub id: String,
     pub name: String,
+    pub description: Option<String>,
     pub video_url: Option<String>,
     pub files: Vec<SkoolFile>,
 }
@@ -404,6 +405,19 @@ pub async fn get_lesson_detail(
         .unwrap_or("")
         .to_string();
 
+    let description = metadata
+        .get("description")
+        .or_else(|| metadata.get("content"))
+        .or_else(|| metadata.get("body"))
+        .and_then(|v| {
+            if v.is_string() {
+                v.as_str().map(String::from)
+            } else {
+                Some(serde_json::to_string_pretty(v).unwrap_or_default())
+            }
+        })
+        .filter(|s| !s.trim().is_empty());
+
     let video_url = metadata
         .get("videoLink")
         .and_then(|v| v.as_str())
@@ -437,6 +451,7 @@ pub async fn get_lesson_detail(
     Ok(SkoolLessonDetail {
         id: lesson_id.to_string(),
         name,
+        description,
         video_url,
         files,
     })
