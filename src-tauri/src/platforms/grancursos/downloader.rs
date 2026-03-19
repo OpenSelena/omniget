@@ -56,6 +56,11 @@ pub async fn download_full_course(
     );
     tokio::fs::create_dir_all(&course_dir).await?;
 
+    if crate::core::course_utils::is_course_complete(&course_dir) {
+        tracing::info!("[grancursos] course already complete, skipping");
+        return Ok(());
+    }
+
     let mut all_modules = Vec::new();
 
     for discipline in &disciplines {
@@ -227,6 +232,8 @@ pub async fn download_full_course(
     if cancel_token.is_cancelled() {
         return Err(anyhow!("Download cancelled by user"));
     }
+
+    crate::core::course_utils::mark_course_complete(&course_dir).await.ok();
 
     Ok(())
 }
