@@ -34,6 +34,15 @@ pub struct PlatformInfo {
 }
 
 #[tauri::command]
+pub fn check_cookie_error() -> bool {
+    let has_error = crate::core::ytdlp::has_cookie_error();
+    if has_error {
+        crate::core::ytdlp::clear_cookie_error();
+    }
+    has_error
+}
+
+#[tauri::command]
 pub async fn detect_platform(url: String) -> Result<PlatformInfo, String> {
     let _timer_start = std::time::Instant::now();
     match Platform::from_url(&url) {
