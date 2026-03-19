@@ -93,6 +93,12 @@ pub async fn download_full_course(
 
             let lesson_name = filename::sanitize_path_component(&lesson.name);
 
+            if let Some(ref desc) = lesson.description {
+                let lesson_desc_dir = format!("{}/{}. {}", mod_dir, li + 1, lesson_name);
+                tokio::fs::create_dir_all(&lesson_desc_dir).await?;
+                crate::core::course_utils::save_description(&lesson_desc_dir, desc, "html").await.ok();
+            }
+
             if lesson.item_type == "ivideo" || lesson.item_type == "video" {
                 if let Some(ref vimeo_id) = lesson.vimeo_id {
                     if vimeo_id.is_empty() {
