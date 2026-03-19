@@ -50,6 +50,7 @@ pub struct NutrorLessonDetail {
     pub name: String,
     pub video_url: Option<String>,
     pub files: Vec<NutrorFile>,
+    pub description: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -379,6 +380,7 @@ pub async fn get_lesson_detail(
 
     let mut video_url: Option<String> = None;
     let mut files = Vec::new();
+    let mut description: Option<String> = None;
 
     let contents = lesson
         .get("contents")
@@ -398,6 +400,10 @@ pub async fn get_lesson_detail(
             .or_else(|| content.get("url"))
             .and_then(|v| v.as_str())
             .unwrap_or("");
+
+        if type_id == 4 && description.is_none() && !embed.trim().is_empty() {
+            description = Some(embed.to_string());
+        }
 
         if video_url.is_none() {
             match type_id {
@@ -459,11 +465,20 @@ pub async fn get_lesson_detail(
         }
     }
 
+    if description.is_none() {
+        description = lesson
+            .get("description")
+            .and_then(|v| v.as_str())
+            .filter(|s| !s.trim().is_empty())
+            .map(String::from);
+    }
+
     Ok(NutrorLessonDetail {
         id,
         name,
         video_url,
         files,
+        description,
     })
 }
 
