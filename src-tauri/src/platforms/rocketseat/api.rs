@@ -213,51 +213,6 @@ pub async fn list_courses(
     search_courses(session, "rocketseat").await
 }
 
-fn parse_journey_items(items: &[serde_json::Value]) -> Vec<RocketseatCourse> {
-    let mut courses = Vec::new();
-    let mut seen = std::collections::HashSet::new();
-
-    for item in items {
-        let id = item
-            .get("id")
-            .and_then(|v| v.as_str())
-            .unwrap_or("")
-            .to_string();
-
-        if id.is_empty() || seen.contains(&id) {
-            continue;
-        }
-        seen.insert(id.clone());
-
-        let name = item
-            .get("title")
-            .or_else(|| item.get("name"))
-            .and_then(|v| v.as_str())
-            .unwrap_or("")
-            .to_string();
-
-        let slug = item
-            .get("slug")
-            .and_then(|v| v.as_str())
-            .unwrap_or("")
-            .to_string();
-
-        let description = item
-            .get("description")
-            .and_then(|v| v.as_str())
-            .map(String::from);
-
-        courses.push(RocketseatCourse {
-            id,
-            name,
-            slug,
-            description,
-        });
-    }
-
-    courses
-}
-
 fn parse_rsc_response(text: &str) -> serde_json::Value {
     for line in text.lines() {
         if line.is_empty() {
