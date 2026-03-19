@@ -38,8 +38,16 @@ pub fn parse_cookie_input(input: &str, target_cookie: &str) -> ParsedInput {
 
                 let cookie_string = parts.join("; ");
 
-                let token = if let Some(t) = cookies.get(target_cookie) {
-                    t.clone()
+                let token = if !target_cookie.is_empty() {
+                    if let Some(t) = cookies.get(target_cookie) {
+                        t.clone()
+                    } else {
+                        cookies
+                            .values()
+                            .find(|v| v.starts_with("eyJ"))
+                            .cloned()
+                            .unwrap_or_default()
+                    }
                 } else {
                     cookies
                         .values()
@@ -58,7 +66,7 @@ pub fn parse_cookie_input(input: &str, target_cookie: &str) -> ParsedInput {
         }
     }
 
-    if trimmed.contains("; ") || trimmed.contains('=') {
+    if trimmed.contains("; ") || (trimmed.contains('=') && !trimmed.starts_with("eyJ")) {
         let mut cookies = HashMap::new();
         for pair in trimmed.split("; ") {
             if let Some(idx) = pair.find('=') {
@@ -68,7 +76,15 @@ pub fn parse_cookie_input(input: &str, target_cookie: &str) -> ParsedInput {
             }
         }
 
-        let token = cookies.get(target_cookie).cloned().unwrap_or_default();
+        let token = if !target_cookie.is_empty() {
+            cookies.get(target_cookie).cloned().unwrap_or_default()
+        } else {
+            cookies
+                .values()
+                .find(|v| v.starts_with("eyJ"))
+                .cloned()
+                .unwrap_or_default()
+        };
 
         return ParsedInput {
             token,
@@ -79,9 +95,15 @@ pub fn parse_cookie_input(input: &str, target_cookie: &str) -> ParsedInput {
     }
 
     let token = trimmed.to_string();
-    let cookie_string = format!("{}={}", target_cookie, token);
+    let cookie_string = if !target_cookie.is_empty() {
+        format!("{}={}", target_cookie, token)
+    } else {
+        String::new()
+    };
     let mut cookies = HashMap::new();
-    cookies.insert(target_cookie.to_string(), token.clone());
+    if !target_cookie.is_empty() {
+        cookies.insert(target_cookie.to_string(), token.clone());
+    }
 
     ParsedInput {
         token,
@@ -94,11 +116,41 @@ pub fn parse_cookie_input(input: &str, target_cookie: &str) -> ParsedInput {
 pub fn parse_bearer_input(input: &str) -> String {
     let trimmed = input.trim();
 
-    if trimmed.starts_with('{') {
+    if trimmed.starts_with('{') || trimmed.starts_with('[') {
         if let Ok(val) = serde_json::from_str::<serde_json::Value>(trimmed) {
-            for key in &["access_token", "token", "idToken"] {
+            for key in &["access_token", "token", "idToken", "bearerToken", "bearer_token"] {
                 if let Some(t) = val.get(*key).and_then(|v| v.as_str()) {
                     return t.to_string();
+                }
+            }
+
+            let cookie_array = if let Some(arr) = val.get("cookies").and_then(|c| c.as_array()) {
+                arr.clone()
+            } else if let Some(arr) = val.as_array() {
+                arr.clone()
+            } else {
+                Vec::new()
+            };
+
+            for cookie_obj in &cookie_array {
+                if let Some(value) = cookie_obj.get("value").and_then(|v| v.as_str()) {
+                    if value.starts_with("eyJ") && value.len() > 50 {
+                        return value.to_string();
+                    }
+                }
+            }
+
+            for cookie_obj in &cookie_array {
+                if let (Some(name), Some(value)) = (
+                    cookie_obj.get("name").and_then(|n| n.as_str()),
+                    cookie_obj.get("value").and_then(|v| v.as_str()),
+                ) {
+                    let lower = name.to_lowercase();
+                    if lower.contains("token") || lower.contains("auth") || lower.contains("session") || lower.contains("sid") {
+                        if value.len() > 20 {
+                            return value.to_string();
+                        }
+                    }
                 }
             }
         }
