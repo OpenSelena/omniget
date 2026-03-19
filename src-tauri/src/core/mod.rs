@@ -25,3 +25,4 @@ pub mod media_processor;
 pub mod ytdlp;
 #[cfg(not(target_os = "android"))]
 pub mod dependencies;
+pub mod course_utils;
