@@ -50,6 +50,7 @@ pub struct KiwifyLesson {
 pub struct KiwifyLessonDetail {
     pub id: String,
     pub name: String,
+    pub description: Option<String>,
     pub video_url: Option<String>,
     pub files: Vec<KiwifyFile>,
 }
@@ -523,6 +524,14 @@ pub async fn get_lesson_detail(
         .unwrap_or("")
         .to_string();
 
+    let description = lesson
+        .get("description")
+        .or_else(|| lesson.get("content"))
+        .or_else(|| lesson.get("body"))
+        .and_then(|v| v.as_str())
+        .filter(|s| !s.trim().is_empty())
+        .map(String::from);
+
     let video_url = lesson
         .get("stream_link")
         .or_else(|| lesson.get("video_url"))
@@ -573,6 +582,7 @@ pub async fn get_lesson_detail(
     Ok(KiwifyLessonDetail {
         id,
         name,
+        description,
         video_url,
         files,
     })
