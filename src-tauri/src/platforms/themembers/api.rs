@@ -51,7 +51,9 @@ pub struct TheMembersLesson {
 pub struct TheMembersLessonDetail {
     pub id: i64,
     pub name: String,
+    pub description: Option<String>,
     pub video_url: Option<String>,
+    pub url_pdf: Option<String>,
     pub host: String,
     pub files: Vec<TheMembersFile>,
 }
@@ -402,6 +404,17 @@ pub async fn get_lesson_detail(
         .unwrap_or("")
         .to_string();
 
+    let description = class_obj
+        .get("description")
+        .and_then(|v| v.as_str())
+        .map(String::from);
+
+    let url_pdf = class_obj
+        .get("url_pdf")
+        .and_then(|v| v.as_str())
+        .filter(|s| !s.is_empty())
+        .map(String::from);
+
     let host = class_obj
         .get("host")
         .and_then(|v| v.as_str())
@@ -470,7 +483,9 @@ pub async fn get_lesson_detail(
     Ok(TheMembersLessonDetail {
         id: lesson_id,
         name,
+        description,
         video_url,
+        url_pdf,
         host,
         files,
     })
