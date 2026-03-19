@@ -57,15 +57,97 @@ jobs:
           workspaces: './src-tauri -> target'
 
       - uses: tauri-apps/tauri-action@v0
+        id: tauri-build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_SIGNING_IDENTITY: ${{ secrets.APPLE_SIGNING_IDENTITY }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_KEY_PATH: ${{ secrets.APPLE_API_KEY_PATH }}
+          LDAI_UPDATE_INFORMATION: ${{ contains(matrix.platform, 'ubuntu') && 'gh-releases-zsync|tonhowtf|omniget|latest|*AppImage.zsync' || '' }}
         with:
           tagName: v__VERSION__
           releaseName: 'OmniGet v__VERSION__'
           releaseBody: 'Download the installer for your platform below.'
           releaseDraft: true
           prerelease: false
-          includeUpdaterJson: true
+          includeUpdaterJson: false
           args: ${{ matrix.args }}
+
+      - name: Upload Windows portable binary
+        if: matrix.platform == 'windows-latest'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $TAG = "${{ github.ref_name }}"
+          $VERSION = $TAG -replace '^v', ''
+          $EXE = "src-tauri/target/release/omniget.exe"
+          $DEST = "omniget_${VERSION}_x64-portable.exe"
+          if (Test-Path $EXE) {
+            Copy-Item $EXE $DEST
+            gh release upload $TAG $DEST --repo ${{ github.repository }} --clobber
+          }
+        shell: pwsh
+
+  upload-updater-json:
+    needs: publish-tauri
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Generate and upload latest.json
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          TAG="${GITHUB_REF#refs/tags/}"
+          VERSION="${TAG#v}"
+          REPO="${GITHUB_REPOSITORY}"
+          PUB_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+
+          JSON=$(jq -n \
+            --arg v "$VERSION" \
+            --arg d "$PUB_DATE" \
+            '{version: $v, notes: "", pub_date: $d, platforms: {}}')
+
+          ASSETS=$(gh release view "$TAG" --repo "$REPO" --json assets -q '.assets[].name')
+          TMPDIR=$(mktemp -d)
+
+          declare -A PLATFORM_MAP=(
+            ["aarch64.app.tar.gz.sig"]="darwin-aarch64"
+            ["x86_64.app.tar.gz.sig"]="darwin-x86_64"
+            ["amd64.AppImage.tar.gz.sig"]="linux-x86_64"
+            ["arm64.AppImage.tar.gz.sig"]="linux-aarch64"
+            ["x64-setup.nsis.zip.sig"]="windows-x86_64"
+          )
+
+          for SUFFIX in "${!PLATFORM_MAP[@]}"; do
+            PLATFORM="${PLATFORM_MAP[$SUFFIX]}"
+            SIG_FILE=$(echo "$ASSETS" | grep "${SUFFIX}$" || true)
+
+            if [ -n "$SIG_FILE" ]; then
+              BUNDLE="${SIG_FILE%.sig}"
+              gh release download "$TAG" --repo "$REPO" --pattern "$SIG_FILE" --dir "$TMPDIR" --clobber
+              SIG_CONTENT=$(cat "$TMPDIR/$SIG_FILE")
+              URL="https://github.com/${REPO}/releases/download/${TAG}/${BUNDLE}"
+
+              JSON=$(echo "$JSON" | jq \
+                --arg p "$PLATFORM" \
+                --arg sig "$SIG_CONTENT" \
+                --arg url "$URL" \
+                '.platforms[$p] = {signature: $sig, url: $url}')
+            fi
+          done
+
+          echo "$JSON" > latest.json
+          echo "Generated latest.json:"
+          cat latest.json
+
+          gh release upload "$TAG" latest.json --repo "$REPO" --clobber
+
+          rm -rf "$TMPDIR"
