@@ -48,6 +48,8 @@ pub struct EstrategiaMilitaresLesson {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct EstrategiaMilitaresTrack {
     pub url: String,
+    pub audio_url: Option<String>,
+    pub title: Option<String>,
     pub duration: Option<f64>,
 }
 
@@ -507,7 +509,20 @@ pub async fn get_track_info(
         .get("duration")
         .and_then(|v| v.as_f64());
 
-    tracing::info!("[estrategia_militares] track {} url_len={} has_video_files={}", track_id, track_url.len(), !video_files.is_empty());
+    let audio_url = track_data
+        .get("audio_url")
+        .or_else(|| track_data.get("audio"))
+        .and_then(|v| v.as_str())
+        .filter(|s| !s.is_empty())
+        .map(String::from);
+
+    let title = track_data
+        .get("name")
+        .or_else(|| track_data.get("title"))
+        .and_then(|v| v.as_str())
+        .map(String::from);
+
+    tracing::info!("[estrategia_militares] track {} url_len={} has_video_files={} has_audio={}", track_id, track_url.len(), !video_files.is_empty(), audio_url.is_some());
 
     if track_url.is_empty() {
         return Err(anyhow!("No URL found in track response for track_id={}", track_id));
@@ -515,6 +530,8 @@ pub async fn get_track_info(
 
     Ok(EstrategiaMilitaresTrack {
         url: track_url,
+        audio_url,
+        title,
         duration,
     })
 }
@@ -649,6 +666,100 @@ pub fn extract_attachment_urls(item_detail: &serde_json::Value) -> Vec<(String, 
     }
 
     attachments
+}
+
+pub fn extract_description(item_detail: &serde_json::Value) -> String {
+    let sub_blocks = item_detail.get("sub_blocks").and_then(|v| v.as_array()).cloned().unwrap_or_default();
+    let mut parts = Vec::new();
+
+    for block in &sub_blocks {
+        let block_type = block.get("type").and_then(|v| v.as_str()).unwrap_or("");
+
+        if block_type == "tiptap" {
+            let data = block.get("data").or_else(|| block.get("simple_data")).cloned().unwrap_or_default();
+            if let Some(content) = data.get("content").and_then(|v| v.as_str()) {
+                parts.push(content.to_string());
+            } else if let Some(html) = data.as_str() {
+                parts.push(html.to_string());
+            }
+        } else if block_type == "question" {
+            let data = block.get("data").or_else(|| block.get("simple_data")).cloned().unwrap_or_default();
+            let resolved = data.get("resolved").cloned().unwrap_or(data.clone());
+
+            let statement = resolved.get("statement")
+                .or_else(|| resolved.get("enunciado"))
+                .and_then(|v| v.as_str())
+                .unwrap_or("");
+
+            if !statement.is_empty() {
+                let mut q = format!("<div class=\"question\"><p><strong>Questao:</strong> {}</p>", statement);
+
+                if let Some(alts) = resolved.get("alternatives").and_then(|v| v.as_array()) {
+                    q.push_str("<ol type=\"A\">");
+                    for alt in alts {
+                        let text = alt.get("text")
+                            .or_else(|| alt.get("content"))
+                            .and_then(|v| v.as_str())
+                            .unwrap_or("");
+                        let is_correct = alt.get("is_correct")
+                            .or_else(|| alt.get("correct"))
+                            .and_then(|v| v.as_bool())
+                            .unwrap_or(false);
+                        if is_correct {
+                            q.push_str(&format!("<li><strong>{}</strong> ✓</li>", text));
+                        } else {
+                            q.push_str(&format!("<li>{}</li>", text));
+                        }
+                    }
+                    q.push_str("</ol>");
+                }
+
+                let answer = resolved.get("answer")
+                    .or_else(|| resolved.get("resposta"))
+                    .or_else(|| resolved.get("gabarito"))
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("");
+                if !answer.is_empty() {
+                    q.push_str(&format!("<p><strong>Resposta:</strong> {}</p>", answer));
+                }
+
+                let explanation = resolved.get("explanation")
+                    .or_else(|| resolved.get("explicacao"))
+                    .or_else(|| resolved.get("comment"))
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("");
+                if !explanation.is_empty() {
+                    q.push_str(&format!("<p><strong>Explicacao:</strong> {}</p>", explanation));
+                }
+
+                q.push_str("</div>");
+                parts.push(q);
+            }
+        }
+    }
+
+    parts.join("\n\n")
+}
+
+pub fn extract_audio_urls(item_detail: &serde_json::Value) -> Vec<(String, String)> {
+    let sub_blocks = item_detail.get("sub_blocks").and_then(|v| v.as_array()).cloned().unwrap_or_default();
+    let mut audios = Vec::new();
+
+    for block in &sub_blocks {
+        let block_type = block.get("type").and_then(|v| v.as_str()).unwrap_or("");
+
+        if block_type == "cast" {
+            let data = block.get("data").or_else(|| block.get("simple_data")).cloned().unwrap_or_default();
+            let track_type = data.get("type").and_then(|v| v.as_str()).unwrap_or("");
+            let track_value = data.get("value").and_then(|v| v.as_str()).unwrap_or("");
+
+            if track_type == "track" && !track_value.is_empty() {
+                audios.push(("track".to_string(), track_value.to_string()));
+            }
+        }
+    }
+
+    audios
 }
 
 pub async fn save_session(session: &EstrategiaMilitaresSession) -> anyhow::Result<()> {
