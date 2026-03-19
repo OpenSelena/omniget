@@ -78,7 +78,10 @@ windows-core = "0.61"
 
 [profile.dev]
 split-debuginfo = "unpacked"
-codegen-units = 16
+codegen-units = 256
+debug = 1
+opt-level = 0
+incremental = true
 
 [profile.release]
 lto = "thin"
