@@ -48,6 +48,7 @@ pub struct MedcelLesson {
     pub type_id: String,
     pub product_id: String,
     pub materials: Vec<MedcelMaterial>,
+    pub description: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -459,6 +460,13 @@ async fn get_playlist_lessons(
             .unwrap_or("")
             .to_string();
 
+        let description = content
+            .get("description")
+            .or_else(|| chosen.get("description"))
+            .and_then(|v| v.as_str())
+            .filter(|s| !s.trim().is_empty())
+            .map(String::from);
+
         lessons.push(MedcelLesson {
             id: class_id,
             name: content_name,
@@ -466,6 +474,7 @@ async fn get_playlist_lessons(
             type_id,
             product_id: product_id.to_string(),
             materials: all_materials,
+            description,
         });
     }
 
