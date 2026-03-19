@@ -75,3 +75,12 @@ tauri-plugin-single-instance = "2"
 [target.'cfg(windows)'.dependencies]
 webview2-com = "0.38"
 windows-core = "0.61"
+
+[profile.dev]
+split-debuginfo = "unpacked"
+codegen-units = 16
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
+strip = true
