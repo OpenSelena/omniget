@@ -45,6 +45,7 @@ pub struct CurseducaLesson {
     pub order: i64,
     pub uuid: Option<String>,
     pub video_type: Option<i64>,
+    pub description: Option<String>,
 }
 
 fn build_client(token: &str, api_key: &str) -> anyhow::Result<reqwest::Client> {
@@ -374,12 +375,19 @@ fn extract_modules_from_data(data: &serde_json::Value) -> Option<Vec<CurseducaMo
                 .or_else(|| lesson_val.get("videoType"))
                 .and_then(|v| v.as_i64());
 
+            let description = lesson_val.get("description")
+                .or_else(|| lesson_val.get("content"))
+                .and_then(|v| v.as_str())
+                .filter(|s| !s.trim().is_empty())
+                .map(String::from);
+
             lessons.push(CurseducaLesson {
                 id: lesson_id,
                 name: lesson_name,
                 order: li as i64,
                 uuid,
                 video_type,
+                description,
             });
         }
 
