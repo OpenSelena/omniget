@@ -114,10 +114,10 @@ jobs:
 
           declare -A PLATFORM_MAP=(
             ["aarch64.app.tar.gz.sig"]="darwin-aarch64"
-            ["x86_64.app.tar.gz.sig"]="darwin-x86_64"
-            ["amd64.AppImage.tar.gz.sig"]="linux-x86_64"
-            ["arm64.AppImage.tar.gz.sig"]="linux-aarch64"
-            ["x64-setup.nsis.zip.sig"]="windows-x86_64"
+            ["x64.app.tar.gz.sig"]="darwin-x86_64"
+            ["amd64.AppImage.sig"]="linux-x86_64"
+            ["aarch64.AppImage.sig"]="linux-aarch64"
+            ["x64-setup.exe.sig"]="windows-x86_64"
           )
 
           for SUFFIX in "${!PLATFORM_MAP[@]}"; do
