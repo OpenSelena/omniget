@@ -210,29 +210,52 @@ pub async fn get_course_content(
 pub async fn get_lesson_video_url(
     session: &AreaDeMembrosSession,
     lesson_url: &str,
-) -> anyhow::Result<Option<String>> {
+) -> anyhow::Result<(Option<String>, Option<String>)> {
     let resp = session.client.get(lesson_url).send().await?;
     let body = resp.text().await?;
+
+    let mut video_url = None;
 
     for line in body.lines() {
         let trimmed = line.trim();
         if trimmed.contains("video-container") || trimmed.contains("<iframe") {
             if let Some(src) = extract_attr(trimmed, "src") {
                 if src.contains("youtube") || src.contains("vimeo") || src.contains("player") || src.contains("embed") {
-                    return Ok(Some(src));
+                    video_url = Some(src);
+                    break;
                 }
             }
         }
     }
 
-    if let Some(pos) = body.find("<iframe") {
-        let rest = &body[pos..];
-        if let Some(src) = extract_attr(rest, "src") {
-            return Ok(Some(src));
+    if video_url.is_none() {
+        if let Some(pos) = body.find("<iframe") {
+            let rest = &body[pos..];
+            if let Some(src) = extract_attr(rest, "src") {
+                video_url = Some(src);
+            }
         }
     }
 
-    Ok(None)
+    let description = extract_lesson_description(&body);
+
+    Ok((video_url, description))
+}
+
+fn extract_lesson_description(html: &str) -> Option<String> {
+    if let Some(start) = html.find("class=\"conteudo-aula\"").or_else(|| html.find("class=\"lesson-content\"")).or_else(|| html.find("class=\"aula-conteudo\"")) {
+        let rest = &html[start..];
+        if let Some(tag_end) = rest.find('>') {
+            let content = &rest[tag_end + 1..];
+            if let Some(end) = content.find("</div>") {
+                let text = content[..end].trim();
+                if !text.is_empty() {
+                    return Some(text.to_string());
+                }
+            }
+        }
+    }
+    None
 }
 
 fn extract_attr(html: &str, attr: &str) -> Option<String> {
