@@ -93,10 +93,10 @@ pub async fn download_full_course(
 
             let lesson_name = filename::sanitize_path_component(&lesson.name);
 
-            let video_url = match api::get_lesson_video_url(session, &lesson.url).await {
-                Ok(Some(url)) => url,
-                Ok(None) => {
-                    tracing::warn!("[astron] No video found for lesson '{}'", lesson.name);
+            let (video_url_opt, description) = match api::get_lesson_video_url(session, &lesson.url).await {
+                Ok(result) => result,
+                Err(e) => {
+                    tracing::error!("[astron] Failed to get video URL for '{}': {}", lesson.name, e);
                     let done = completed.fetch_add(1, Ordering::Relaxed) + 1;
                     let _ = app.emit(
                         "download-progress",
@@ -115,8 +115,18 @@ pub async fn download_full_course(
                     );
                     continue;
                 }
-                Err(e) => {
-                    tracing::error!("[astron] Failed to get video URL for '{}': {}", lesson.name, e);
+            };
+
+            if let Some(ref desc) = description {
+                let lesson_desc_dir = format!("{}/{}. {}", mod_dir, li + 1, lesson_name);
+                tokio::fs::create_dir_all(&lesson_desc_dir).await?;
+                crate::core::course_utils::save_description(&lesson_desc_dir, desc, "html").await.ok();
+            }
+
+            let video_url = match video_url_opt {
+                Some(url) => url,
+                None => {
+                    tracing::warn!("[astron] No video found for lesson '{}'", lesson.name);
                     let done = completed.fetch_add(1, Ordering::Relaxed) + 1;
                     let _ = app.emit(
                         "download-progress",
