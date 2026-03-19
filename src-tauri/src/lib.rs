@@ -671,6 +671,7 @@ pub fn run() {
             commands::downloads::cancel_course_download,
             commands::downloads::get_active_downloads,
             commands::downloads::detect_platform,
+            commands::downloads::check_cookie_error,
             commands::downloads::get_media_formats,
             commands::downloads::prefetch_media_info,
             commands::downloads::download_from_url,
