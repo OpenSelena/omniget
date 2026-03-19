@@ -186,6 +186,63 @@ pub async fn download_full_course(
                         );
                     }
                 }
+
+                if let Some(ref audio_url) = video.audio_url {
+                    let audio_path = format!(
+                        "{}/{}. Audio - {}{}.mp3",
+                        mod_dir,
+                        li + 1,
+                        lesson_name,
+                        suffix
+                    );
+
+                    if !tokio::fs::try_exists(&audio_path).await.unwrap_or(false) {
+                        match download_file_direct(&session.client, audio_url, &audio_path, &cancel_token).await {
+                            Ok(size) => {
+                                total_bytes.fetch_add(size, Ordering::Relaxed);
+                            }
+                            Err(e) => {
+                                tracing::error!(
+                                    "[estrategia_concursos] Audio download failed for '{}': {}",
+                                    lesson.name,
+                                    e
+                                );
+                            }
+                        }
+                    }
+                }
+
+                if let Some(ref slide_url) = video.slide_url {
+                    let slide_ext = slide_url
+                        .rsplit('.')
+                        .next()
+                        .and_then(|e| e.split('?').next())
+                        .filter(|e| e.len() <= 5)
+                        .unwrap_or("pdf");
+                    let slide_path = format!(
+                        "{}/{}. Slide - {}{}.{}",
+                        mod_dir,
+                        li + 1,
+                        lesson_name,
+                        suffix,
+                        slide_ext
+                    );
+
+                    if !tokio::fs::try_exists(&slide_path).await.unwrap_or(false) {
+                        match download_file_direct(&session.client, slide_url, &slide_path, &cancel_token).await {
+                            Ok(size) => {
+                                total_bytes.fetch_add(size, Ordering::Relaxed);
+                            }
+                            Err(e) => {
+                                tracing::error!(
+                                    "[estrategia_concursos] Slide download failed for '{}': {}",
+                                    lesson.name,
+                                    e
+                                );
+                            }
+                        }
+                    }
+                }
             }
 
             if let Some(ref pdf_url) = detail.pdf_url {
