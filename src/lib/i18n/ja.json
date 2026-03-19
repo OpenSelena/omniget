@@ -463,7 +463,12 @@
     "error": "エラー",
     "unknown_error": "不明なエラー",
     "ytdlp_missing": "yt-dlpがインストールされていません。ダウンロードを有効にするには設定からインストールしてください。",
-    "go_to_settings": "設定へ移動"
+    "go_to_settings": "設定へ移動",
+    "cookie_error_title": "Cookie アクセスエラー",
+    "cookie_error_message": "自動Cookie検出はFirefoxでのみ動作します。Chrome、Edgeなどはアクセスをブロックします。Firefoxをインストールしてログインするか、cookies.txtファイルを設定 > ダウンロード > Cookieファイルで設定してください。",
+    "cookie_file_label": "Cookie ファイル (cookies.txt)",
+    "cookie_file_choose": "ファイルを選択",
+    "cookie_file_hint": "ブラウザ拡張機能でCookieをエクスポートし、ここでファイルを選択してください。"
   },
   "errors": {
     "login_required": "ログインが必要です — ブラウザのCookieを使用するか別のURLをお試しください",
