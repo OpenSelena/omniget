@@ -121,6 +121,11 @@ pub async fn download_full_course(
                 }
             };
 
+            let description = api::extract_description(&item_detail);
+            if !description.is_empty() {
+                crate::core::course_utils::save_description(&mod_dir, &description, "html").await.ok();
+            }
+
             let track_ids = api::extract_track_ids(&item_detail);
 
             for (ti, track_id) in track_ids.iter().enumerate() {
@@ -128,15 +133,19 @@ pub async fn download_full_course(
                     return Err(anyhow!("Download cancelled by user"));
                 }
 
-                let track_info = match api::get_track_info(session, track_id).await {
-                    Ok(t) => t,
-                    Err(e) => {
-                        tracing::error!(
-                            "[estrategia_ldi] Failed to get track '{}': {}",
-                            track_id,
-                            e
-                        );
-                        continue;
+                let (video_url, audio_url, track_title) = if let Some(direct_url) = track_id.strip_prefix("direct:") {
+                    (direct_url.to_string(), None, None)
+                } else {
+                    match api::get_track_info(session, track_id).await {
+                        Ok(t) => (t.url, t.audio_url, t.title),
+                        Err(e) => {
+                            tracing::error!(
+                                "[estrategia_ldi] Failed to get track '{}': {}",
+                                track_id,
+                                e
+                            );
+                            continue;
+                        }
                     }
                 };
 
@@ -158,46 +167,25 @@ pub async fn download_full_course(
                     let meta = tokio::fs::metadata(&video_path).await;
                     if meta.map(|m| m.len() > 0).unwrap_or(false) {
                         tracing::info!("[estrategia_ldi] Skipping existing: {}", video_path);
-                        continue;
-                    }
-                }
-
-                if track_info.url.contains(".m3u8") {
-                    match download_hls_video(&track_info.url, &video_path, &cancel_token).await {
-                        Ok(size) => {
-                            total_bytes.fetch_add(size, Ordering::Relaxed);
-                        }
-                        Err(e) => {
-                            tracing::error!(
-                                "[estrategia_ldi] HLS download failed for '{}': {}",
-                                lesson.name,
-                                e
-                            );
-                            let _ = tokio::fs::remove_file(&video_path).await;
-                        }
+                    } else {
+                        download_video_ldi(session, &video_url, &video_path, &mod_dir, &lesson.name, &cancel_token, &total_bytes).await;
                     }
                 } else {
-                    match download_with_ytdlp(&track_info.url, &mod_dir, &cancel_token).await {
-                        Ok(size) => {
-                            total_bytes.fetch_add(size, Ordering::Relaxed);
-                        }
-                        Err(e) => {
-                            tracing::error!(
-                                "[estrategia_ldi] yt-dlp failed for '{}': {}, trying direct",
-                                lesson.name,
-                                e
-                            );
-                            match download_file_direct(&session.client, &track_info.url, &video_path, &cancel_token).await {
-                                Ok(size) => {
-                                    total_bytes.fetch_add(size, Ordering::Relaxed);
-                                }
-                                Err(e2) => {
-                                    tracing::error!(
-                                        "[estrategia_ldi] Direct download also failed for '{}': {}",
-                                        lesson.name,
-                                        e2
-                                    );
-                                }
+                    download_video_ldi(session, &video_url, &video_path, &mod_dir, &lesson.name, &cancel_token, &total_bytes).await;
+                }
+
+                if let Some(ref a_url) = audio_url {
+                    let audio_name = track_title.as_deref().unwrap_or(&lesson.name);
+                    let safe_audio = filename::sanitize_path_component(audio_name);
+                    let audio_path = format!("{}/{}. Audio - {}{}.mp3", mod_dir, li + 1, safe_audio, suffix);
+
+                    if !tokio::fs::try_exists(&audio_path).await.unwrap_or(false) {
+                        match download_file_direct(&session.client, a_url, &audio_path, &cancel_token).await {
+                            Ok(size) => {
+                                total_bytes.fetch_add(size, Ordering::Relaxed);
+                            }
+                            Err(e) => {
+                                tracing::error!("[estrategia_ldi] audio download failed: {}", e);
                             }
                         }
                     }
@@ -334,4 +322,66 @@ async fn download_file_direct(
         Some(cancel_token),
     )
     .await
+}
+
+async fn download_video_ldi(
+    session: &api::EstrategiaLdiSession,
+    video_url: &str,
+    video_path: &str,
+    mod_dir: &str,
+    lesson_name: &str,
+    cancel_token: &CancellationToken,
+    total_bytes: &Arc<AtomicU64>,
+) {
+    let is_direct_url = video_url.contains(".mp4")
+        || video_url.contains("vimeocdn")
+        || video_url.contains("akamaized")
+        || video_url.contains("cloudfront")
+        || video_url.contains("player.vimeo.com/progressive");
+
+    if video_url.contains(".m3u8") {
+        match download_hls_video(video_url, video_path, cancel_token).await {
+            Ok(size) => {
+                total_bytes.fetch_add(size, Ordering::Relaxed);
+            }
+            Err(e) => {
+                tracing::error!("[estrategia_ldi] HLS download failed for '{}': {}", lesson_name, e);
+                let _ = tokio::fs::remove_file(video_path).await;
+            }
+        }
+    } else if is_direct_url {
+        match download_file_direct(&session.client, video_url, video_path, cancel_token).await {
+            Ok(size) => {
+                total_bytes.fetch_add(size, Ordering::Relaxed);
+            }
+            Err(e) => {
+                tracing::error!("[estrategia_ldi] Direct download failed for '{}': {}, trying yt-dlp", lesson_name, e);
+                match download_with_ytdlp(video_url, mod_dir, cancel_token).await {
+                    Ok(size) => {
+                        total_bytes.fetch_add(size, Ordering::Relaxed);
+                    }
+                    Err(e2) => {
+                        tracing::error!("[estrategia_ldi] All methods failed for '{}': {}", lesson_name, e2);
+                    }
+                }
+            }
+        }
+    } else {
+        match download_with_ytdlp(video_url, mod_dir, cancel_token).await {
+            Ok(size) => {
+                total_bytes.fetch_add(size, Ordering::Relaxed);
+            }
+            Err(e) => {
+                tracing::error!("[estrategia_ldi] yt-dlp failed for '{}': {}, trying direct", lesson_name, e);
+                match download_file_direct(&session.client, video_url, video_path, cancel_token).await {
+                    Ok(size) => {
+                        total_bytes.fetch_add(size, Ordering::Relaxed);
+                    }
+                    Err(e2) => {
+                        tracing::error!("[estrategia_ldi] Direct download also failed for '{}': {}", lesson_name, e2);
+                    }
+                }
+            }
+        }
+    }
 }
