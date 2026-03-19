@@ -340,25 +340,59 @@ pub async fn get_track_info(
     }
 
     let body: serde_json::Value = serde_json::from_str(&body_text)?;
+    let track_data = body.get("data").unwrap_or(&body);
 
-    let track_url = body
-        .get("url")
-        .or_else(|| body.get("source"))
-        .or_else(|| body.get("file"))
-        .and_then(|v| v.as_str())
-        .unwrap_or("")
-        .to_string();
+    let mut video_files: Vec<(i64, String)> = Vec::new();
+    if let Some(files) = track_data.get("video_files").and_then(|v| v.as_array()) {
+        for vf in files {
+            let height = vf.get("height").and_then(|v| v.as_i64()).unwrap_or(0);
+            let link = vf.get("link").and_then(|v| v.as_str()).unwrap_or("").to_string();
+            if !link.is_empty() {
+                video_files.push((height, link));
+            }
+        }
+    }
 
-    let duration = body
+    video_files.sort_by(|a, b| b.0.cmp(&a.0));
+
+    let track_url = if let Some((_, best_url)) = video_files.first() {
+        best_url.clone()
+    } else {
+        track_data
+            .get("url")
+            .or_else(|| track_data.get("source"))
+            .or_else(|| track_data.get("link"))
+            .or_else(|| body.get("url"))
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .to_string()
+    };
+
+    let duration = track_data
         .get("duration")
         .and_then(|v| v.as_f64());
 
+    let audio_url = track_data
+        .get("audio_url")
+        .or_else(|| track_data.get("audio"))
+        .and_then(|v| v.as_str())
+        .filter(|s| !s.is_empty())
+        .map(String::from);
+
+    let title = track_data
+        .get("name")
+        .or_else(|| track_data.get("title"))
+        .and_then(|v| v.as_str())
+        .map(String::from);
+
     if track_url.is_empty() {
-        return Err(anyhow!("No URL found in track response"));
+        return Err(anyhow!("No URL found in track response for track_id={}", track_id));
     }
 
     Ok(EstrategiaLdiTrack {
         url: track_url,
+        audio_url,
+        title,
         duration,
     })
 }
@@ -366,20 +400,60 @@ pub async fn get_track_info(
 pub fn extract_track_ids(item_detail: &serde_json::Value) -> Vec<String> {
     let mut track_ids = Vec::new();
 
-    let tracks = item_detail
-        .get("tracks")
+    let sub_blocks = item_detail
+        .get("sub_blocks")
         .and_then(|v| v.as_array())
         .cloned()
         .unwrap_or_default();
 
-    for track in &tracks {
-        if let Some(id) = track.get("id").map(|v| match v {
-            serde_json::Value::Number(n) => n.to_string(),
-            serde_json::Value::String(s) => s.clone(),
-            _ => String::new(),
-        }) {
-            if !id.is_empty() {
-                track_ids.push(id);
+    for block in &sub_blocks {
+        let block_type = block.get("type").and_then(|v| v.as_str()).unwrap_or("");
+
+        if block_type == "cast" {
+            let data = block.get("data")
+                .or_else(|| block.get("simple_data"))
+                .cloned()
+                .unwrap_or_default();
+
+            let track_type = data.get("type").and_then(|v| v.as_str()).unwrap_or("");
+            let track_value = data.get("value").and_then(|v| v.as_str()).unwrap_or("");
+
+            if track_type == "track" && !track_value.is_empty() {
+                track_ids.push(track_value.to_string());
+            }
+        } else if block_type == "videoMyDocuments" {
+            let data = block.get("data")
+                .or_else(|| block.get("simple_data"))
+                .cloned()
+                .unwrap_or_default();
+
+            let resolved = data.get("resolved").cloned().unwrap_or_default();
+            let video_url = resolved.get("data")
+                .and_then(|v| v.as_str())
+                .unwrap_or("");
+
+            if !video_url.is_empty() {
+                track_ids.push(format!("direct:{}", video_url));
+            }
+        }
+    }
+
+    if track_ids.is_empty() {
+        let tracks = item_detail
+            .get("tracks")
+            .and_then(|v| v.as_array())
+            .cloned()
+            .unwrap_or_default();
+
+        for track in &tracks {
+            if let Some(id) = track.get("id").map(|v| match v {
+                serde_json::Value::Number(n) => n.to_string(),
+                serde_json::Value::String(s) => s.clone(),
+                _ => String::new(),
+            }) {
+                if !id.is_empty() {
+                    track_ids.push(id);
+                }
             }
         }
     }
@@ -401,6 +475,42 @@ pub fn extract_track_ids(item_detail: &serde_json::Value) -> Vec<String> {
 
 pub fn extract_attachment_urls(item_detail: &serde_json::Value) -> Vec<(String, String)> {
     let mut attachments = Vec::new();
+
+    let sub_blocks = item_detail
+        .get("sub_blocks")
+        .and_then(|v| v.as_array())
+        .cloned()
+        .unwrap_or_default();
+
+    for block in &sub_blocks {
+        let block_type = block.get("type").and_then(|v| v.as_str()).unwrap_or("");
+
+        if block_type == "attachment" || block_type == "pdfMyDocuments" {
+            let data = block.get("data")
+                .or_else(|| block.get("simple_data"))
+                .cloned()
+                .unwrap_or_default();
+
+            let resolved = data.get("resolved").cloned().unwrap_or(data.clone());
+
+            let url = resolved.get("url")
+                .or_else(|| resolved.get("data"))
+                .or_else(|| resolved.get("file"))
+                .and_then(|v| v.as_str())
+                .unwrap_or("")
+                .to_string();
+
+            let name = resolved.get("name")
+                .or_else(|| resolved.get("title"))
+                .and_then(|v| v.as_str())
+                .unwrap_or("attachment")
+                .to_string();
+
+            if !url.is_empty() {
+                attachments.push((name, url));
+            }
+        }
+    }
 
     let atts = item_detail
         .get("attachments")
@@ -429,6 +539,100 @@ pub fn extract_attachment_urls(item_detail: &serde_json::Value) -> Vec<(String, 
     }
 
     attachments
+}
+
+pub fn extract_description(item_detail: &serde_json::Value) -> String {
+    let sub_blocks = item_detail.get("sub_blocks").and_then(|v| v.as_array()).cloned().unwrap_or_default();
+    let mut parts = Vec::new();
+
+    for block in &sub_blocks {
+        let block_type = block.get("type").and_then(|v| v.as_str()).unwrap_or("");
+
+        if block_type == "tiptap" {
+            let data = block.get("data").or_else(|| block.get("simple_data")).cloned().unwrap_or_default();
+            if let Some(content) = data.get("content").and_then(|v| v.as_str()) {
+                parts.push(content.to_string());
+            } else if let Some(html) = data.as_str() {
+                parts.push(html.to_string());
+            }
+        } else if block_type == "question" {
+            let data = block.get("data").or_else(|| block.get("simple_data")).cloned().unwrap_or_default();
+            let resolved = data.get("resolved").cloned().unwrap_or(data.clone());
+
+            let statement = resolved.get("statement")
+                .or_else(|| resolved.get("enunciado"))
+                .and_then(|v| v.as_str())
+                .unwrap_or("");
+
+            if !statement.is_empty() {
+                let mut q = format!("<div class=\"question\"><p><strong>Questao:</strong> {}</p>", statement);
+
+                if let Some(alts) = resolved.get("alternatives").and_then(|v| v.as_array()) {
+                    q.push_str("<ol type=\"A\">");
+                    for alt in alts {
+                        let text = alt.get("text")
+                            .or_else(|| alt.get("content"))
+                            .and_then(|v| v.as_str())
+                            .unwrap_or("");
+                        let is_correct = alt.get("is_correct")
+                            .or_else(|| alt.get("correct"))
+                            .and_then(|v| v.as_bool())
+                            .unwrap_or(false);
+                        if is_correct {
+                            q.push_str(&format!("<li><strong>{}</strong></li>", text));
+                        } else {
+                            q.push_str(&format!("<li>{}</li>", text));
+                        }
+                    }
+                    q.push_str("</ol>");
+                }
+
+                let answer = resolved.get("answer")
+                    .or_else(|| resolved.get("resposta"))
+                    .or_else(|| resolved.get("gabarito"))
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("");
+                if !answer.is_empty() {
+                    q.push_str(&format!("<p><strong>Resposta:</strong> {}</p>", answer));
+                }
+
+                let explanation = resolved.get("explanation")
+                    .or_else(|| resolved.get("explicacao"))
+                    .or_else(|| resolved.get("comment"))
+                    .and_then(|v| v.as_str())
+                    .unwrap_or("");
+                if !explanation.is_empty() {
+                    q.push_str(&format!("<p><strong>Explicacao:</strong> {}</p>", explanation));
+                }
+
+                q.push_str("</div>");
+                parts.push(q);
+            }
+        }
+    }
+
+    parts.join("\n\n")
+}
+
+pub fn extract_audio_urls(item_detail: &serde_json::Value) -> Vec<(String, String)> {
+    let sub_blocks = item_detail.get("sub_blocks").and_then(|v| v.as_array()).cloned().unwrap_or_default();
+    let mut audios = Vec::new();
+
+    for block in &sub_blocks {
+        let block_type = block.get("type").and_then(|v| v.as_str()).unwrap_or("");
+
+        if block_type == "cast" {
+            let data = block.get("data").or_else(|| block.get("simple_data")).cloned().unwrap_or_default();
+            let track_type = data.get("type").and_then(|v| v.as_str()).unwrap_or("");
+            let track_value = data.get("value").and_then(|v| v.as_str()).unwrap_or("");
+
+            if track_type == "track" && !track_value.is_empty() {
+                audios.push(("track".to_string(), track_value.to_string()));
+            }
+        }
+    }
+
+    audios
 }
 
 pub async fn save_session(session: &EstrategiaLdiSession) -> anyhow::Result<()> {
