@@ -52,6 +52,7 @@ pub struct EntregaDigitalLesson {
 pub struct EntregaDigitalLessonDetail {
     pub id: i64,
     pub name: String,
+    pub description: Option<String>,
     pub video_url: Option<String>,
     pub attachments: Vec<EntregaDigitalAttachment>,
 }
@@ -306,6 +307,11 @@ pub async fn get_lesson_detail(
         .unwrap_or("")
         .to_string();
 
+    let description = body
+        .get("description")
+        .and_then(|v| v.as_str())
+        .map(String::from);
+
     let detail = body.get("detail");
 
     let video_url = detail
@@ -370,6 +376,7 @@ pub async fn get_lesson_detail(
     Ok(EntregaDigitalLessonDetail {
         id: lesson_id,
         name,
+        description,
         video_url,
         attachments,
     })
