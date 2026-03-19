@@ -51,6 +51,10 @@ pub async fn download_full_course(
     );
     tokio::fs::create_dir_all(&course_dir).await?;
 
+    if crate::core::course_utils::is_course_complete(&course_dir) {
+        return Ok(());
+    }
+
     let total_lessons: usize = modules.iter().map(|m| m.lessons.len()).sum();
     let total_modules = modules.len();
     let total_bytes = Arc::new(AtomicU64::new(0));
@@ -116,6 +120,11 @@ pub async fn download_full_course(
                 }
             };
 
+            let description = api::extract_description(&item_detail);
+            if !description.is_empty() {
+                crate::core::course_utils::save_description(&mod_dir, &description, "html").await.ok();
+            }
+
             let track_ids = api::extract_track_ids(&item_detail);
 
             for (ti, track_id) in track_ids.iter().enumerate() {
@@ -139,8 +148,19 @@ pub async fn download_full_course(
                     }
                 };
 
+                let (audio_url, track_title) = if !track_id.starts_with("direct:") {
+                    match api::get_track_info(session, track_id).await {
+                        Ok(ref t) => (t.audio_url.clone(), t.title.clone()),
+                        Err(_) => (None, None),
+                    }
+                } else {
+                    (None, None)
+                };
+
                 let track_info = api::EstrategiaMilitaresTrack {
                     url: video_url,
+                    audio_url: audio_url.clone(),
+                    title: track_title.clone(),
                     duration: None,
                 };
 
@@ -238,6 +258,23 @@ pub async fn download_full_course(
                         }
                     }
                 }
+
+                if let Some(ref a_url) = audio_url {
+                    let audio_name = track_title.as_deref().unwrap_or(&lesson.name);
+                    let safe_audio = filename::sanitize_path_component(audio_name);
+                    let audio_path = format!("{}/{}. Audio - {}{}.mp3", mod_dir, li + 1, safe_audio, suffix);
+
+                    if !tokio::fs::try_exists(&audio_path).await.unwrap_or(false) {
+                        match download_file_direct(&session.client, a_url, &audio_path, &cancel_token).await {
+                            Ok(size) => {
+                                total_bytes.fetch_add(size, Ordering::Relaxed);
+                            }
+                            Err(e) => {
+                                tracing::error!("[estrategia_militares] audio download failed: {}", e);
+                            }
+                        }
+                    }
+                }
             }
 
             let attachments = api::extract_attachment_urls(&item_detail);
@@ -294,6 +331,8 @@ pub async fn download_full_course(
     if cancel_token.is_cancelled() {
         return Err(anyhow!("Download cancelled by user"));
     }
+
+    crate::core::course_utils::mark_course_complete(&course_dir).await.ok();
 
     Ok(())
 }
