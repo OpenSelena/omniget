@@ -42,6 +42,7 @@ pub struct CaktoLesson {
     pub order: i64,
     pub video_url: Option<String>,
     pub files: Vec<CaktoFile>,
+    pub description: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -310,12 +311,20 @@ pub async fn get_course_content(
                 })
                 .unwrap_or_default();
 
+            let description = lesson_val
+                .get("description")
+                .or_else(|| lesson_val.get("content"))
+                .and_then(|v| v.as_str())
+                .filter(|s| !s.trim().is_empty())
+                .map(String::from);
+
             lessons.push(CaktoLesson {
                 id: if lesson_id.is_empty() { format!("{}", li) } else { lesson_id },
                 name: lesson_name,
                 order: li as i64,
                 video_url,
                 files,
+                description,
             });
         }
 
