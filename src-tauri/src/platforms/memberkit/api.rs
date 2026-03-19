@@ -50,6 +50,7 @@ pub struct MemberkitLessonDetail {
     pub name: String,
     pub video_url: Option<String>,
     pub attachments: Vec<MemberkitAttachment>,
+    pub description: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -457,11 +458,30 @@ pub async fn get_lesson_detail(
         });
     }
 
+    let mut description: Option<String> = None;
+    let body_re = regex::Regex::new(r#"(?s)class="[^"]*content__body[^"]*"[^>]*>(.*?)</div>"#)?;
+    if let Some(cap) = body_re.captures(&body_text) {
+        let text = cap[1].trim();
+        if !text.is_empty() {
+            description = Some(text.to_string());
+        }
+    }
+    if description.is_none() {
+        let lesson_re = regex::Regex::new(r#"(?s)class="[^"]*lesson__content[^"]*"[^>]*>(.*?)</div>"#)?;
+        if let Some(cap) = lesson_re.captures(&body_text) {
+            let text = cap[1].trim();
+            if !text.is_empty() {
+                description = Some(text.to_string());
+            }
+        }
+    }
+
     Ok(MemberkitLessonDetail {
         id,
         name,
         video_url,
         attachments,
+        description,
     })
 }
 
