@@ -27,6 +27,18 @@
 
   let loginMode = $state<"credentials" | "cookie">("credentials");
 
+  let fileInput: HTMLInputElement = $state() as HTMLInputElement;
+
+  function onFileSelected(e: Event) {
+    const input = e.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => { cookie = reader.result as string; };
+    reader.readAsText(file);
+    input.value = "";
+  }
+
   let courses: CademiCourse[] = $state([]);
   let loadingCourses = $state(false);
   let coursesError = $state("");
@@ -390,15 +402,26 @@
             />
           </label>
           <label class="field">
-            <span class="field-label">Cookie</span>
+            <span class="field-label">Cookies JSON</span>
             <textarea
               class="input token-textarea"
-              placeholder="Paste your session cookie here..."
+              placeholder="Paste cookies JSON from browser extension or a raw token"
               bind:value={cookie}
               disabled={loading}
-              rows="4"
+              rows="5"
             ></textarea>
           </label>
+
+          <input
+            type="file"
+            accept=".json,.txt"
+            class="hidden-file-input"
+            bind:this={fileInput}
+            onchange={onFileSelected}
+          />
+          <button class="button" onclick={() => fileInput?.click()} disabled={loading}>
+            Import .json file
+          </button>
 
           {#if error}
             <p class="error-msg">{error}</p>
@@ -595,10 +618,13 @@
     border-radius: 0 var(--border-radius) var(--border-radius) 0;
   }
 
+  .hidden-file-input { display: none; }
+
   .token-textarea {
     resize: vertical;
     min-height: 80px;
-    font-size: 12px;
+    font-size: 11.5px;
+    font-family: var(--font-mono);
     line-height: 1.5;
   }
 
