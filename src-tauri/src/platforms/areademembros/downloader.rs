@@ -145,26 +145,6 @@ pub async fn download_full_course(
                     );
                     continue;
                 }
-                Err(e) => {
-                    tracing::error!("[areademembros] Failed to get video URL for '{}': {}", lesson.name, e);
-                    let done = completed.fetch_add(1, Ordering::Relaxed) + 1;
-                    let _ = app.emit(
-                        "download-progress",
-                        &AreaDeMembrosDownloadProgress {
-                            course_id: course.id.clone(),
-                            course_name: course.name.clone(),
-                            percent: done as f64 / total_lessons as f64 * 100.0,
-                            current_module: module.name.clone(),
-                            current_lesson: lesson.name.clone(),
-                            downloaded_bytes: total_bytes.load(Ordering::Relaxed),
-                            total_lessons: total_lessons as u32,
-                            completed_lessons: done as u32,
-                            total_modules: total_modules as u32,
-                            current_module_index: (mi + 1) as u32,
-                        },
-                    );
-                    continue;
-                }
             };
 
             let video_path = format!(
