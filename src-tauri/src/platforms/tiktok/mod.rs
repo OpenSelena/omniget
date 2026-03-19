@@ -411,7 +411,7 @@ impl PlatformDownloader for TikTokDownloader {
             });
         }
 
-        if let Some(video_url) = Self::extract_video_url(&detail) {
+        if let Some(_video_url) = Self::extract_video_url(&detail) {
             return Ok(MediaInfo {
                 title: filename_base,
                 author,
@@ -419,10 +419,10 @@ impl PlatformDownloader for TikTokDownloader {
                 duration_seconds: Self::extract_duration(&detail),
                 thumbnail_url: None,
                 available_qualities: vec![VideoQuality {
-                    label: "original".to_string(),
+                    label: "best".to_string(),
                     width: 0,
                     height: 0,
-                    url: video_url,
+                    url: original_url,
                     format: "mp4".to_string(),
                 }],
                 media_type: MediaType::Video,
@@ -467,58 +467,30 @@ impl PlatformDownloader for TikTokDownloader {
                     .first()
                     .ok_or_else(|| anyhow!("No video URL available"))?;
 
-                let filename = format!("{}.mp4", sanitize_filename::sanitize(&info.title));
-                let output = opts.output_dir.join(&filename);
-
-                let direct_result = direct_downloader::download_direct_with_headers(
-                    &self.client,
-                    &quality.url,
-                    &output,
-                    progress.clone(),
-                    Some(headers),
-                    None,
-                )
-                .await;
-
-                match direct_result {
-                    Ok(bytes) if bytes > 1000 => {
-                        Ok(DownloadResult {
-                            file_path: output,
-                            file_size_bytes: bytes,
-                            duration_seconds: info.duration_seconds.unwrap_or(0.0),
-                            torrent_id: None,
-                        })
-                    }
-                    _ => {
-                        let _ = tokio::fs::remove_file(&output).await;
-                        tracing::info!("[tiktok] direct download failed or too small, trying yt-dlp");
-
-                        let ytdlp_path = match &opts.ytdlp_path {
-                            Some(p) => p.clone(),
-                            None => crate::core::ytdlp::find_ytdlp_cached()
-                                .await
-                                .ok_or_else(|| anyhow!("yt-dlp not found"))?,
-                        };
-
-                        crate::core::ytdlp::download_video(
-                            &ytdlp_path,
-                            &quality.url,
-                            &opts.output_dir,
-                            None,
-                            progress,
-                            opts.download_mode.as_deref(),
-                            None,
-                            opts.filename_template.as_deref(),
-                            Some("https://www.tiktok.com/"),
-                            opts.cancel_token.clone(),
-                            None,
-                            opts.concurrent_fragments,
-                            false,
-                            &[],
-                        )
+                let ytdlp_path = match &opts.ytdlp_path {
+                    Some(p) => p.clone(),
+                    None => crate::core::ytdlp::find_ytdlp_cached()
                         .await
-                    }
-                }
+                        .ok_or_else(|| anyhow!("yt-dlp not found"))?,
+                };
+
+                crate::core::ytdlp::download_video(
+                    &ytdlp_path,
+                    &quality.url,
+                    &opts.output_dir,
+                    None,
+                    progress,
+                    opts.download_mode.as_deref(),
+                    None,
+                    opts.filename_template.as_deref(),
+                    Some("https://www.tiktok.com/"),
+                    opts.cancel_token.clone(),
+                    None,
+                    opts.concurrent_fragments,
+                    false,
+                    &[],
+                )
+                .await
             }
             MediaType::Photo | MediaType::Carousel => {
                 let mut total_bytes = 0u64;
