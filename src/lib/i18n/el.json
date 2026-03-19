@@ -463,7 +463,12 @@
     "error": "Error",
     "unknown_error": "Άγνωστο σφάλμα",
     "ytdlp_missing": "Το yt-dlp δεν είναι εγκατεστημένο. Εγκαταστήστε το στις Ρυθμίσεις για να ενεργοποιήσετε τις λήψεις.",
-    "go_to_settings": "Πήγαινε στις Ρυθμίσεις"
+    "go_to_settings": "Πήγαινε στις Ρυθμίσεις",
+    "cookie_error_title": "Αποτυχία πρόσβασης cookie",
+    "cookie_error_message": "Η αυτόματη ανίχνευση cookie λειτουργεί μόνο με Firefox. Τα Chrome, Edge και άλλα προγράμματα Chromium μπλοκάρουν την πρόσβαση. Εγκαταστήστε τον Firefox, ή εξάγετε ένα αρχείο cookies.txt και ρυθμίστε το στις Ρυθμίσεις.",
+    "cookie_file_label": "Αρχείο cookie (cookies.txt)",
+    "cookie_file_choose": "Επιλογή αρχείου",
+    "cookie_file_hint": "Εξάγετε τα cookie από το πρόγραμμα περιήγησής σας και επιλέξτε το αρχείο εδώ."
   },
   "errors": {
     "login_required": "Απαιτείται σύνδεση — χρησιμοποιήστε τα cookies του browser ή δοκιμάστε άλλο URL",
