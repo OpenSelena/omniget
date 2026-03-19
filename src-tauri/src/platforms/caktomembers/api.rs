@@ -42,6 +42,7 @@ pub struct CaktoMembersLesson {
     pub name: String,
     pub order: i64,
     pub video_uuid: Option<String>,
+    pub description: Option<String>,
 }
 
 fn build_client(access_token: &str) -> anyhow::Result<reqwest::Client> {
@@ -297,11 +298,19 @@ pub async fn get_course_content(
                 .and_then(|v| v.as_str())
                 .map(String::from);
 
+            let description = lesson_val
+                .get("descricao")
+                .or_else(|| lesson_val.get("description"))
+                .and_then(|v| v.as_str())
+                .filter(|s| !s.trim().is_empty())
+                .map(String::from);
+
             lessons.push(CaktoMembersLesson {
                 id: lesson_id,
                 name: lesson_name,
                 order: li as i64,
                 video_uuid,
+                description,
             });
         }
 
