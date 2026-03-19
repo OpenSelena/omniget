@@ -353,6 +353,8 @@ impl PlatformDownloader for TikTokDownloader {
     }
 
     async fn get_media_info(&self, url: &str) -> anyhow::Result<MediaInfo> {
+        let original_url = url.to_string();
+
         let post_id = match Self::extract_post_id(url) {
             Some(id) => id,
             None => {
@@ -367,7 +369,7 @@ impl PlatformDownloader for TikTokDownloader {
             Ok(d) => d,
             Err(first_err) => {
                 tracing::info!("[tiktok] direct fetch failed: {}, trying yt-dlp", first_err);
-                return self.get_media_info_via_ytdlp(url, &post_id).await;
+                return self.get_media_info_via_ytdlp(&original_url, &post_id).await;
             }
         };
 
