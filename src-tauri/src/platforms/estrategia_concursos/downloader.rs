@@ -141,6 +141,12 @@ pub async fn download_full_course(
                 }
             };
 
+            if !detail.description.is_empty() {
+                let desc_dir = format!("{}/{}. {}", mod_dir, li + 1, lesson_name);
+                tokio::fs::create_dir_all(&desc_dir).await.ok();
+                crate::core::course_utils::save_description(&desc_dir, &detail.description, "html").await.ok();
+            }
+
             for (vi, video) in detail.videos.iter().enumerate() {
                 if cancel_token.is_cancelled() {
                     return Err(anyhow!("Download cancelled by user"));
