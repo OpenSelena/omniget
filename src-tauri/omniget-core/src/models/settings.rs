@@ -53,6 +53,8 @@ pub struct DownloadSettings {
     pub extra_ytdlp_flags: Vec<String>,
     #[serde(default = "default_true")]
     pub copy_to_clipboard_on_hotkey: bool,
+    #[serde(default)]
+    pub cookie_file: String,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
