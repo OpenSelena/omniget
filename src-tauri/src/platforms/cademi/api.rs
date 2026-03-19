@@ -368,10 +368,29 @@ pub async fn get_lesson_detail(
         }
     }
 
+    let mut description: Option<String> = None;
+    let article_re = regex::Regex::new(r#"(?s)<article[^>]*>(.*?)</article>"#)?;
+    if let Some(cap) = article_re.captures(&body_text) {
+        let text = cap[1].trim();
+        if !text.is_empty() {
+            description = Some(text.to_string());
+        }
+    }
+    if description.is_none() {
+        let content_re = regex::Regex::new(r#"(?s)class="conteudo-aula"[^>]*>(.*?)</div>"#)?;
+        if let Some(cap) = content_re.captures(&body_text) {
+            let text = cap[1].trim();
+            if !text.is_empty() {
+                description = Some(text.to_string());
+            }
+        }
+    }
+
     Ok(CademiLessonDetail {
         id: lesson_id.to_string(),
         name,
         video_url,
+        description,
     })
 }
 
