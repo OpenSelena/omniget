@@ -163,6 +163,7 @@ impl Default for AppSettings {
                 hotkey_binding: default_hotkey_binding(),
                 extra_ytdlp_flags: Vec::new(),
                 copy_to_clipboard_on_hotkey: true,
+                cookie_file: String::new(),
             },
             advanced: AdvancedSettings {
                 max_concurrent_segments: 20,
