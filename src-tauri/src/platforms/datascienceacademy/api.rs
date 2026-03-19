@@ -42,6 +42,7 @@ pub struct DsaLesson {
     pub order: i64,
     pub item_type: String,
     pub vimeo_id: Option<String>,
+    pub description: Option<String>,
 }
 
 fn build_client(token: &str) -> anyhow::Result<reqwest::Client> {
@@ -276,12 +277,20 @@ pub async fn get_course_content(
                 None
             };
 
+            let description = item
+                .get("description")
+                .or_else(|| item.get("content"))
+                .and_then(|v| v.as_str())
+                .filter(|s| !s.trim().is_empty())
+                .map(String::from);
+
             lessons.push(DsaLesson {
                 id: unit_id,
                 name: lesson_title,
                 order: (lesson_index + 1) as i64,
                 item_type: unit_type,
                 vimeo_id,
+                description,
             });
         }
 
