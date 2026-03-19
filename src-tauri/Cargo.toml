@@ -77,11 +77,13 @@ webview2-com = "0.38"
 windows-core = "0.61"
 
 [profile.dev]
-split-debuginfo = "unpacked"
+debug = 0
 codegen-units = 256
-debug = 1
-opt-level = 0
 incremental = true
+
+[profile.dev.package."*"]
+debug = false
+opt-level = 1
 
 [profile.release]
 lto = "thin"
