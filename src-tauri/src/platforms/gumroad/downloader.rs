@@ -46,6 +46,10 @@ pub async fn download_product(
     );
     tokio::fs::create_dir_all(&product_dir).await?;
 
+    if crate::core::course_utils::is_course_complete(&product_dir) {
+        return Ok(());
+    }
+
     let total_files = files.len();
     let total_bytes = Arc::new(AtomicU64::new(0));
     let completed = Arc::new(AtomicUsize::new(0));
@@ -176,6 +180,8 @@ pub async fn download_product(
     if cancel_token.is_cancelled() {
         return Err(anyhow!("Download cancelled by user"));
     }
+
+    crate::core::course_utils::mark_course_complete(&product_dir).await.ok();
 
     Ok(())
 }
