@@ -33,6 +33,70 @@ test("clears the previous badge and shows success feedback after a successful se
   ]);
 });
 
+test("includes cookies in the native message when getCookies returns data", async () => {
+  const calls = [];
+  const fakeCookies = [{ domain: ".youtube.com", name: "LOGIN_INFO", value: "abc" }];
+
+  await handleSupportedActionClick({
+    tabId: 1,
+    url: "https://www.youtube.com/watch?v=123",
+    platform: "youtube",
+    getCookies: async () => fakeCookies,
+    sendNativeMessage: async (message) => {
+      calls.push(["send", message]);
+      return { ok: true };
+    },
+    clearBadge: async () => {},
+    showSuccessBadge: async () => {},
+    openErrorPage: async () => {},
+    mapChromeErrorCode: () => "LAUNCH_FAILED",
+  });
+
+  assert.deepEqual(calls[0][1].cookies, fakeCookies);
+});
+
+test("sends message without cookies when getCookies returns null", async () => {
+  const calls = [];
+
+  await handleSupportedActionClick({
+    tabId: 1,
+    url: "https://www.youtube.com/watch?v=123",
+    platform: "youtube",
+    getCookies: async () => null,
+    sendNativeMessage: async (message) => {
+      calls.push(["send", message]);
+      return { ok: true };
+    },
+    clearBadge: async () => {},
+    showSuccessBadge: async () => {},
+    openErrorPage: async () => {},
+    mapChromeErrorCode: () => "LAUNCH_FAILED",
+  });
+
+  assert.equal(calls[0][1].cookies, undefined);
+});
+
+test("sends message without cookies when getCookies throws", async () => {
+  const calls = [];
+
+  await handleSupportedActionClick({
+    tabId: 1,
+    url: "https://www.youtube.com/watch?v=123",
+    platform: "youtube",
+    getCookies: async () => { throw new Error("permission denied"); },
+    sendNativeMessage: async (message) => {
+      calls.push(["send", message]);
+      return { ok: true };
+    },
+    clearBadge: async () => {},
+    showSuccessBadge: async () => {},
+    openErrorPage: async () => {},
+    mapChromeErrorCode: () => "LAUNCH_FAILED",
+  });
+
+  assert.equal(calls[0][1].cookies, undefined);
+});
+
 test("does not show success feedback when the native host returns an error response", async () => {
   const calls = [];
 

@@ -3,6 +3,8 @@ const DEFAULT_LAUNCH_FAILED_CODE = "LAUNCH_FAILED";
 export async function handleSupportedActionClick({
   tabId,
   url,
+  platform,
+  getCookies,
   sendNativeMessage,
   clearBadge = async () => {},
   showSuccessBadge = async () => {},
@@ -13,11 +15,22 @@ export async function handleSupportedActionClick({
     await clearBadge(tabId);
   }
 
+  let cookies = null;
   try {
-    const response = await sendNativeMessage({
-      type: "enqueue",
-      url,
-    });
+    if (getCookies && platform) {
+      cookies = await getCookies(platform);
+    }
+  } catch {
+    // Cookie extraction failed — continue without cookies
+  }
+
+  try {
+    const message = { type: "enqueue", url };
+    if (cookies && cookies.length > 0) {
+      message.cookies = cookies;
+    }
+
+    const response = await sendNativeMessage(message);
 
     if (!response?.ok) {
       await openErrorPage({

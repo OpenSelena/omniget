@@ -346,6 +346,20 @@ async fn find_ffmpeg_location_cached() -> Option<String> {
     result
 }
 
+fn extension_cookie_file() -> Option<std::path::PathBuf> {
+    let path = crate::native_host::extension_cookie_file_path();
+    if !path.exists() {
+        return None;
+    }
+    let metadata = std::fs::metadata(&path).ok()?;
+    let modified = metadata.modified().ok()?;
+    if modified.elapsed().unwrap_or_default() < std::time::Duration::from_secs(86400) {
+        Some(path)
+    } else {
+        None
+    }
+}
+
 fn detect_cookies_browser() -> Option<String> {
     let _timer_start = std::time::Instant::now();
     let result = (|| -> Option<String> {
@@ -584,10 +598,16 @@ pub async fn get_video_info(
             args.push(extractor_args.to_string());
         }
 
-        let browser_cookies = detect_cookies_browser_cached().await;
-        if let Some(ref browser) = browser_cookies {
-            args.push("--cookies-from-browser".to_string());
-            args.push(browser.clone());
+        let extension_cookies = extension_cookie_file();
+        if let Some(ref cf) = extension_cookies {
+            args.push("--cookies".to_string());
+            args.push(cf.to_string_lossy().to_string());
+        } else {
+            let browser_cookies = detect_cookies_browser_cached().await;
+            if let Some(ref browser) = browser_cookies {
+                args.push("--cookies-from-browser".to_string());
+                args.push(browser.clone());
+            }
         }
 
         args.extend(proxy_args());
@@ -920,7 +940,13 @@ pub async fn download_video(
         }
     };
 
-    let browser_cookies = if cookie_file.is_none() && global_cookie_file.is_none() {
+    let ext_cookies = if cookie_file.is_none() && global_cookie_file.is_none() {
+        extension_cookie_file()
+    } else {
+        None
+    };
+
+    let browser_cookies = if cookie_file.is_none() && global_cookie_file.is_none() && ext_cookies.is_none() {
         detect_cookies_browser_cached().await
     } else {
         None
@@ -928,7 +954,8 @@ pub async fn download_video(
 
     let effective_cookie_file = cookie_file
         .map(|p| p.to_path_buf())
-        .or_else(|| global_cookie_file.map(std::path::PathBuf::from));
+        .or_else(|| global_cookie_file.map(std::path::PathBuf::from))
+        .or(ext_cookies);
     let mut base_args = vec!["-f".to_string(), format_selector];
 
     if format_id.is_none() {

@@ -26,6 +26,20 @@ struct NativeHostRequest {
     #[serde(rename = "type")]
     kind: String,
     url: String,
+    #[serde(default)]
+    cookies: Option<Vec<NativeCookie>>,
+}
+
+#[derive(Debug, Deserialize)]
+struct NativeCookie {
+    domain: String,
+    #[serde(rename = "httpOnly")]
+    http_only: bool,
+    path: String,
+    secure: bool,
+    expires: i64,
+    name: String,
+    value: String,
 }
 
 #[derive(Debug, Serialize)]
@@ -229,6 +243,47 @@ fn should_copy_exe(source: &Path, dest: &Path) -> bool {
     src_meta.len() != dst_meta.len()
 }
 
+pub fn extension_cookie_file_path() -> PathBuf {
+    crate::core::paths::app_data_dir()
+        .unwrap_or_else(|| PathBuf::from("."))
+        .join("chrome-extension-cookies.txt")
+}
+
+fn write_extension_cookies(cookies: &[NativeCookie]) -> anyhow::Result<()> {
+    let path = extension_cookie_file_path();
+    if let Some(parent) = path.parent() {
+        fs::create_dir_all(parent)?;
+    }
+
+    let mut content = String::from("# Netscape HTTP Cookie File\n");
+    for c in cookies {
+        let http_only_prefix = if c.http_only { "#HttpOnly_" } else { "" };
+        let include_subdomains = if c.domain.starts_with('.') { "TRUE" } else { "FALSE" };
+        let secure = if c.secure { "TRUE" } else { "FALSE" };
+        content.push_str(&format!(
+            "{}{}\t{}\t{}\t{}\t{}\t{}\t{}\n",
+            http_only_prefix,
+            c.domain,
+            include_subdomains,
+            c.path,
+            secure,
+            c.expires,
+            c.name,
+            c.value,
+        ));
+    }
+
+    fs::write(&path, content)?;
+
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        fs::set_permissions(&path, std::fs::Permissions::from_mode(0o600))?;
+    }
+
+    Ok(())
+}
+
 fn handle_request(request: NativeHostRequest) -> NativeHostResponse {
     if request.kind != "enqueue" {
         return NativeHostResponse {
@@ -244,6 +299,14 @@ fn handle_request(request: NativeHostRequest) -> NativeHostResponse {
             code: Some("INVALID_URL"),
             message: Some("The requested URL is invalid".to_string()),
         };
+    }
+
+    if let Some(ref cookies) = request.cookies {
+        if !cookies.is_empty() {
+            if let Err(e) = write_extension_cookies(cookies) {
+                eprintln!("[OmniGet] Warning: failed to write extension cookies: {e}");
+            }
+        }
     }
 
     match launch_omniget(&request.url) {

@@ -1,3 +1,4 @@
+import { extractCookiesForPlatform } from "./cookies.js";
 import { detectSupportedMediaUrl } from "./detect.js";
 import { handleSupportedActionClick } from "./action-click.js";
 import { createActionFeedbackController } from "./action-feedback.js";
@@ -73,6 +74,8 @@ chrome.action.onClicked.addListener(async (tab) => {
   await handleSupportedActionClick({
     tabId: tab?.id,
     url: detected.url,
+    platform: detected.platform,
+    getCookies: extractCookiesForPlatform,
     sendNativeMessage,
     clearBadge: (tabId) => actionFeedback.clearBadge(tabId),
     showSuccessBadge: (tabId) => actionFeedback.showSuccessBadge(tabId),
