@@ -249,6 +249,12 @@ pub fn extension_cookie_file_path() -> PathBuf {
         .join("chrome-extension-cookies.txt")
 }
 
+fn sanitize_cookie_field(s: &str) -> String {
+    s.chars()
+        .filter(|c| *c != '\n' && *c != '\r' && *c != '\t')
+        .collect()
+}
+
 fn write_extension_cookies(cookies: &[NativeCookie]) -> anyhow::Result<()> {
     let path = extension_cookie_file_path();
     if let Some(parent) = path.parent() {
@@ -257,19 +263,23 @@ fn write_extension_cookies(cookies: &[NativeCookie]) -> anyhow::Result<()> {
 
     let mut content = String::from("# Netscape HTTP Cookie File\n");
     for c in cookies {
+        let domain = sanitize_cookie_field(&c.domain);
+        let path_field = sanitize_cookie_field(&c.path);
+        let name = sanitize_cookie_field(&c.name);
+        let value = sanitize_cookie_field(&c.value);
         let http_only_prefix = if c.http_only { "#HttpOnly_" } else { "" };
-        let include_subdomains = if c.domain.starts_with('.') { "TRUE" } else { "FALSE" };
+        let include_subdomains = if domain.starts_with('.') { "TRUE" } else { "FALSE" };
         let secure = if c.secure { "TRUE" } else { "FALSE" };
         content.push_str(&format!(
             "{}{}\t{}\t{}\t{}\t{}\t{}\t{}\n",
             http_only_prefix,
-            c.domain,
+            domain,
             include_subdomains,
-            c.path,
+            path_field,
             secure,
             c.expires,
-            c.name,
-            c.value,
+            name,
+            value,
         ));
     }
 
