@@ -188,6 +188,9 @@ fn register_host_manifest(manifest_path: &Path) -> anyhow::Result<()> {
     Ok(())
 }
 
+// On Linux/macOS, placing the manifest JSON in the well-known directory is
+// sufficient — no registry step is needed (unlike Windows which requires a
+// registry key under HKCU\Software\Google\Chrome\NativeMessagingHosts).
 #[cfg(not(target_os = "windows"))]
 fn register_host_manifest(_manifest_path: &Path) -> anyhow::Result<()> {
     Ok(())

@@ -1,8 +1,8 @@
 {
   "action_title_supported": {
-    "message": "Envoyer cette page multimedia vers OmniGet"
+    "message": "Envoyer cette page multimédia vers OmniGet"
   },
   "action_title_unsupported": {
-    "message": "Aucun media pris en charge detecte sur cette page"
+    "message": "Aucun média pris en charge détecté sur cette page"
   }
 }
