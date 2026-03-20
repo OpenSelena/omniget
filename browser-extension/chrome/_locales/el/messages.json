@@ -1,0 +1,8 @@
+{
+  "action_title_supported": {
+    "message": "Στείλτε αυτήν τη σελίδα πολυμέσων στο OmniGet"
+  },
+  "action_title_unsupported": {
+    "message": "Δεν εντοπίστηκαν υποστηριζόμενα πολυμέσα σε αυτήν τη σελίδα"
+  }
+}

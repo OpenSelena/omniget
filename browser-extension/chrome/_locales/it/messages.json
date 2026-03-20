@@ -1,0 +1,8 @@
+{
+  "action_title_supported": {
+    "message": "Invia questa pagina multimediale a OmniGet"
+  },
+  "action_title_unsupported": {
+    "message": "Nessun contenuto multimediale supportato rilevato in questa pagina"
+  }
+}

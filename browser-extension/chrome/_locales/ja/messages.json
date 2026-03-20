@@ -1,0 +1,8 @@
+{
+  "action_title_supported": {
+    "message": "このメディアページをOmniGetに送信"
+  },
+  "action_title_unsupported": {
+    "message": "このページでは対応しているメディアが見つかりません"
+  }
+}

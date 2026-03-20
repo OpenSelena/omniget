@@ -1,0 +1,8 @@
+{
+  "action_title_supported": {
+    "message": "Enviar esta pagina de midia para o OmniGet"
+  },
+  "action_title_unsupported": {
+    "message": "Nenhuma midia compativel detectada nesta pagina"
+  }
+}

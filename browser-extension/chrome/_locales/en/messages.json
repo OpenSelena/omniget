@@ -1,0 +1,8 @@
+{
+  "action_title_supported": {
+    "message": "Send this media page to OmniGet"
+  },
+  "action_title_unsupported": {
+    "message": "No supported media detected on this page"
+  }
+}

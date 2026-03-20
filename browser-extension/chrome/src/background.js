@@ -1,4 +1,5 @@
 import { detectSupportedMediaUrl } from "./detect.js";
+import { resolveActionTitle } from "./action-title.js";
 
 const HOST_NAME = "wtf.tonho.omniget";
 const INSTALL_URL = "https://github.com/tonhowtf/omniget/releases/latest";
@@ -101,12 +102,9 @@ async function refreshTabAction(tabId, tab) {
   }
 
   try {
-    // TODO: use chrome.i18n via _locales/ for multi-language tooltips
     await chrome.action.setTitle({
       tabId,
-      title: supported
-        ? "Send this media page to OmniGet"
-        : "No supported media detected on this page",
+      title: resolveActionTitle(supported),
     });
   } catch (error) {
     console.error("[OmniGet] Failed to set title:", error);

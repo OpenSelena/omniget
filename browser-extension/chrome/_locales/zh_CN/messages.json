@@ -1,0 +1,8 @@
+{
+  "action_title_supported": {
+    "message": "将此媒体页面发送到 OmniGet"
+  },
+  "action_title_unsupported": {
+    "message": "此页面未检测到受支持的媒体"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "action_title_supported": {
+    "message": "將此媒體頁面傳送到 OmniGet"
+  },
+  "action_title_unsupported": {
+    "message": "此頁面未偵測到支援的媒體"
+  }
+}
