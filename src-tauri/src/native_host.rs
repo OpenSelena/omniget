@@ -65,10 +65,45 @@ pub fn should_run_as_native_host() -> bool {
 }
 
 pub fn run_native_host() -> anyhow::Result<()> {
+    detect_portable_mode();
     let request = read_message()?;
     let response = handle_request(request);
     write_message(&response)?;
     Ok(())
+}
+
+/// Detect portable mode by reading the native-host config to locate the main
+/// app executable, then checking its parent directory for portable markers.
+/// This mirrors the `check_portable_mode()` logic in `main.rs` so that
+/// `app_data_dir()` resolves to the portable data directory when the native
+/// host process is launched by Chrome.
+fn detect_portable_mode() {
+    let exe = match std::env::current_exe() {
+        Ok(p) => p,
+        Err(_) => return,
+    };
+    let host_dir = match exe.parent() {
+        Some(d) => d,
+        None => return,
+    };
+    let config_bytes = match fs::read(host_dir.join(HOST_CONFIG_NAME)) {
+        Ok(b) => b,
+        Err(_) => return,
+    };
+    let config: NativeHostConfig = match serde_json::from_slice(&config_bytes) {
+        Ok(c) => c,
+        Err(_) => return,
+    };
+    let app_dir = match Path::new(&config.app_path).parent() {
+        Some(d) => d,
+        None => return,
+    };
+    if app_dir.join("portable.txt").exists() || app_dir.join(".portable").exists() {
+        let data_dir = app_dir.join("data");
+        let _ = fs::create_dir_all(&data_dir);
+        std::env::set_var("OMNIGET_PORTABLE", "1");
+        std::env::set_var("OMNIGET_DATA_DIR", data_dir.to_string_lossy().to_string());
+    }
 }
 
 pub fn ensure_registered() -> anyhow::Result<()> {
