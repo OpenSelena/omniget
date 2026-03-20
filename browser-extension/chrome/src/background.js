@@ -96,6 +96,7 @@ async function refreshTabAction(tabId, tab) {
   try {
     await actionFeedback.clearBadge(tabId);
   } catch (error) {
+    if (isTabGoneError(error)) return;
     console.error("[OmniGet] Failed to clear badge:", error);
   }
 
@@ -112,6 +113,7 @@ async function refreshTabAction(tabId, tab) {
       path: supported ? getIconPath(ACTIVE_ICON_PATHS) : getIconPath(INACTIVE_ICON_PATHS),
     });
   } catch (error) {
+    if (isTabGoneError(error)) return;
     console.error("[OmniGet] Failed to set icon:", error);
   }
 
@@ -121,6 +123,7 @@ async function refreshTabAction(tabId, tab) {
       title: resolveActionTitle(supported),
     });
   } catch (error) {
+    if (isTabGoneError(error)) return;
     console.error("[OmniGet] Failed to set title:", error);
   }
 
@@ -131,8 +134,14 @@ async function refreshTabAction(tabId, tab) {
       await chrome.action.disable(tabId);
     }
   } catch (error) {
+    if (isTabGoneError(error)) return;
     console.error("[OmniGet] Failed to set enabled state:", error);
   }
+}
+
+function isTabGoneError(error) {
+  const msg = error instanceof Error ? error.message : String(error);
+  return msg.includes("No tab with id");
 }
 
 function sendNativeMessage(message) {
