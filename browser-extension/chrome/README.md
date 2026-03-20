@@ -8,7 +8,7 @@ MV3 extension for sending supported media pages to OmniGet.
 2. Open `chrome://extensions`.
 3. Enable `Developer mode`.
 4. Click `Load unpacked`.
-5. Select this folder: [`browser-extension/chrome`](/E:/Workspace/omniget/browser-extension/chrome)
+5. Select this folder: `browser-extension/chrome`
 
 On macOS and Linux, that first launch writes Chrome's native messaging manifest into your user profile automatically.
 
@@ -22,7 +22,7 @@ The committed `manifest.json` intentionally keeps its `key` so local unpacked in
 
 Before submitting a package to the Chrome Web Store, remove the `key` field from the submitted copy of `manifest.json`. The Chrome Web Store will assign its own extension ID.
 
-Once the store ID is known, add it to the Chrome native host allowlist in [`src-tauri/src/native_host.rs`](/E:/Workspace/omniget/src-tauri/src/native_host.rs) so the published extension can talk to OmniGet alongside the unpacked development build.
+Once the store ID is known, add it to the Chrome native host allowlist in [`src-tauri/src/native_host.rs`](../../src-tauri/src/native_host.rs) so the published extension can talk to OmniGet alongside the unpacked development build.
 
 ## What it does
 
