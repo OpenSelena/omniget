@@ -13,10 +13,11 @@
  *   4. Creates a .zip archive
  */
 
-import { cpSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { basename, join, resolve } from "node:path";
+import { cpSync, createWriteStream, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
+import { basename, join, relative, resolve } from "node:path";
 import { tmpdir } from "node:os";
-import { execSync } from "node:child_process";
+import { Writable } from "node:stream";
+import zlib from "node:zlib";
 
 const EXTENSION_DIR = resolve(import.meta.dirname, "..");
 
@@ -47,16 +48,121 @@ function removeDevFiles(dir) {
   }
 }
 
-function createZip(sourceDir, outputPath) {
-  // Use tar on Unix-like systems, PowerShell on Windows
-  if (process.platform === "win32") {
-    execSync(
-      `powershell -Command "Compress-Archive -Path '${sourceDir}\\*' -DestinationPath '${outputPath}' -Force"`,
-      { stdio: "inherit" }
-    );
-  } else {
-    execSync(`cd "${sourceDir}" && zip -r "${outputPath}" .`, { stdio: "inherit" });
+/** Collect all files recursively, returning paths relative to root. */
+function walkDir(dir, root = dir) {
+  const entries = [];
+  for (const entry of readdirSync(dir, { withFileTypes: true })) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) {
+      entries.push(...walkDir(full, root));
+    } else {
+      entries.push(relative(root, full));
+    }
   }
+  return entries;
+}
+
+/**
+ * Creates a ZIP archive using only Node.js built-ins (no external tools).
+ * Implements the ZIP format (local file headers + central directory + EOCD)
+ * with DEFLATE compression via node:zlib.
+ */
+function createZip(sourceDir, outputPath) {
+  const files = walkDir(sourceDir);
+  const fd = createWriteStream(outputPath);
+  const centralEntries = [];
+  let offset = 0;
+
+  function writeBuffer(buf) {
+    fd.write(buf);
+    offset += buf.length;
+  }
+
+  for (const relPath of files) {
+    const absPath = join(sourceDir, relPath);
+    const raw = readFileSync(absPath);
+    const compressed = zlib.deflateRawSync(raw);
+    const crc = crc32(raw);
+    // Use forward slashes in zip entries (required by spec)
+    const nameBytes = Buffer.from(relPath.replace(/\\/g, "/"), "utf8");
+
+    const localHeaderOffset = offset;
+
+    // Local file header (30 bytes + name + compressed data)
+    const localHeader = Buffer.alloc(30);
+    localHeader.writeUInt32LE(0x04034b50, 0);  // signature
+    localHeader.writeUInt16LE(20, 4);           // version needed
+    localHeader.writeUInt16LE(0, 6);            // flags
+    localHeader.writeUInt16LE(8, 8);            // compression: deflate
+    localHeader.writeUInt16LE(0, 10);           // mod time
+    localHeader.writeUInt16LE(0, 12);           // mod date
+    localHeader.writeUInt32LE(crc, 14);         // crc-32
+    localHeader.writeUInt32LE(compressed.length, 18); // compressed size
+    localHeader.writeUInt32LE(raw.length, 22);  // uncompressed size
+    localHeader.writeUInt16LE(nameBytes.length, 26); // name length
+    localHeader.writeUInt16LE(0, 28);           // extra length
+
+    writeBuffer(localHeader);
+    writeBuffer(nameBytes);
+    writeBuffer(compressed);
+
+    // Save for central directory
+    centralEntries.push({ nameBytes, crc, compressed, raw, localHeaderOffset });
+  }
+
+  const centralStart = offset;
+
+  for (const entry of centralEntries) {
+    const cdHeader = Buffer.alloc(46);
+    cdHeader.writeUInt32LE(0x02014b50, 0);     // signature
+    cdHeader.writeUInt16LE(20, 4);              // version made by
+    cdHeader.writeUInt16LE(20, 6);              // version needed
+    cdHeader.writeUInt16LE(0, 8);               // flags
+    cdHeader.writeUInt16LE(8, 10);              // compression: deflate
+    cdHeader.writeUInt16LE(0, 12);              // mod time
+    cdHeader.writeUInt16LE(0, 14);              // mod date
+    cdHeader.writeUInt32LE(entry.crc, 16);      // crc-32
+    cdHeader.writeUInt32LE(entry.compressed.length, 20); // compressed size
+    cdHeader.writeUInt32LE(entry.raw.length, 24); // uncompressed size
+    cdHeader.writeUInt16LE(entry.nameBytes.length, 28); // name length
+    cdHeader.writeUInt16LE(0, 30);              // extra length
+    cdHeader.writeUInt16LE(0, 32);              // comment length
+    cdHeader.writeUInt16LE(0, 34);              // disk start
+    cdHeader.writeUInt16LE(0, 36);              // internal attrs
+    cdHeader.writeUInt32LE(0, 38);              // external attrs
+    cdHeader.writeUInt32LE(entry.localHeaderOffset, 42); // offset
+
+    writeBuffer(cdHeader);
+    writeBuffer(entry.nameBytes);
+  }
+
+  const centralSize = offset - centralStart;
+
+  // End of central directory record
+  const eocd = Buffer.alloc(22);
+  eocd.writeUInt32LE(0x06054b50, 0);           // signature
+  eocd.writeUInt16LE(0, 4);                     // disk number
+  eocd.writeUInt16LE(0, 6);                     // disk with CD
+  eocd.writeUInt16LE(centralEntries.length, 8); // entries on disk
+  eocd.writeUInt16LE(centralEntries.length, 10); // total entries
+  eocd.writeUInt32LE(centralSize, 12);          // CD size
+  eocd.writeUInt32LE(centralStart, 16);         // CD offset
+  eocd.writeUInt16LE(0, 20);                    // comment length
+
+  writeBuffer(eocd);
+  fd.end();
+}
+
+/** CRC-32 (ISO 3309) — same algorithm as used by ZIP. */
+function crc32(buf) {
+  let crc = 0xffffffff;
+  for (let i = 0; i < buf.length; i++) {
+    crc ^= buf[i];
+    for (let j = 0; j < 8; j++) {
+      crc = (crc >>> 1) ^ (crc & 1 ? 0xedb88320 : 0);
+    }
+  }
+  return (crc ^ 0xffffffff) >>> 0;
 }
 
 const { output } = parseArgs();
