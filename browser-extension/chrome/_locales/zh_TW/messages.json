@@ -42,6 +42,6 @@
     "message": "擴充功能已與原生主機通訊，但桌面應用程式未能正確啟動。"
   },
   "error_launch_failed_detail": {
-    "message": "請確認 OmniGet 已安裝且未被 Windows 封鎖，然後再試一次。"
+    "message": "請確認 OmniGet 已安裝且未被系統封鎖，然後再試一次。"
   }
 }

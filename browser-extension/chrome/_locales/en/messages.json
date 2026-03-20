@@ -42,6 +42,6 @@
     "message": "The extension talked to the native host, but the desktop app did not start correctly."
   },
   "error_launch_failed_detail": {
-    "message": "Check that OmniGet is installed and not blocked by Windows, then try again."
+    "message": "Check that OmniGet is installed and not blocked by your system, then try again."
   }
 }

@@ -42,6 +42,6 @@
     "message": "扩展程序已与原生主机通信，但桌面应用未能正确启动。"
   },
   "error_launch_failed_detail": {
-    "message": "请确认 OmniGet 已安装且未被 Windows 阻止，然后重试。"
+    "message": "请确认 OmniGet 已安装且未被系统阻止，然后重试。"
   }
 }

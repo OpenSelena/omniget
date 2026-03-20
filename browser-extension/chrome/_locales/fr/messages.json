@@ -42,6 +42,6 @@
     "message": "L'extension a bien contacté l'hôte natif, mais l'application de bureau ne s'est pas lancée correctement."
   },
   "error_launch_failed_detail": {
-    "message": "Vérifiez qu'OmniGet est installé et non bloqué par Windows, puis réessayez."
+    "message": "Vérifiez qu'OmniGet est installé et non bloqué par votre système, puis réessayez."
   }
 }

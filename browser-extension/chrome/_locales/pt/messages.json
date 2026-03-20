@@ -42,6 +42,6 @@
     "message": "A extensão falou com o host nativo, mas o aplicativo de desktop não iniciou corretamente."
   },
   "error_launch_failed_detail": {
-    "message": "Verifique se o OmniGet está instalado e não foi bloqueado pelo Windows, depois tente novamente."
+    "message": "Verifique se o OmniGet está instalado e não foi bloqueado pelo sistema, depois tente novamente."
   }
 }

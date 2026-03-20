@@ -42,6 +42,6 @@
     "message": "L'estensione ha comunicato con l'host nativo, ma l'app desktop non si è avviata correttamente."
   },
   "error_launch_failed_detail": {
-    "message": "Verifica che OmniGet sia installato e non bloccato da Windows, poi riprova."
+    "message": "Verifica che OmniGet sia installato e non bloccato dal sistema, poi riprova."
   }
 }

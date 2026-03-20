@@ -16,7 +16,7 @@ const ERROR_PAGE_MESSAGES = Object.freeze({
   error_launch_failed_body:
     "The extension talked to the native host, but the desktop app did not start correctly.",
   error_launch_failed_detail:
-    "Check that OmniGet is installed and not blocked by Windows, then try again.",
+    "Check that OmniGet is installed and not blocked by your system, then try again.",
 });
 
 const ERROR_CODES = Object.freeze({
