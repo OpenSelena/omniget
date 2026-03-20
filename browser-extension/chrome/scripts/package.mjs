@@ -4,13 +4,14 @@
  * Packages the Chrome extension into a .zip ready for Chrome Web Store upload.
  *
  * Usage:
- *   node browser-extension/chrome/scripts/package.mjs [--output path/to/output.zip]
+ *   node browser-extension/chrome/scripts/package.mjs [--version X.Y.Z] [--output path/to/output.zip]
  *
  * What it does:
  *   1. Copies browser-extension/chrome/ into a temp directory
  *   2. Strips the "key" field from manifest.json (CWS assigns its own)
- *   3. Removes dev-only files (tests/, scripts/, CHPR.md, README.md, package.json)
- *   4. Creates a .zip archive
+ *   3. If --version is given, overwrites manifest.json "version" field
+ *   4. Removes dev-only files (tests/, scripts/, CHPR.md, README.md, package.json)
+ *   5. Creates a .zip archive
  */
 
 import { cpSync, createWriteStream, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
@@ -25,19 +26,34 @@ const DEV_ONLY = ["tests", "scripts", "CHPR.md", "README.md", "package.json"];
 
 function parseArgs() {
   const args = process.argv.slice(2);
+  let output = null;
+  let version = null;
+
   const outputIndex = args.indexOf("--output");
   if (outputIndex !== -1 && args[outputIndex + 1]) {
-    return { output: resolve(args[outputIndex + 1]) };
+    output = resolve(args[outputIndex + 1]);
   }
 
-  const manifest = JSON.parse(readFileSync(join(EXTENSION_DIR, "manifest.json"), "utf8"));
-  return { output: resolve(`omniget-chrome-extension-v${manifest.version}.zip`) };
+  const versionIndex = args.indexOf("--version");
+  if (versionIndex !== -1 && args[versionIndex + 1]) {
+    version = args[versionIndex + 1];
+  }
+
+  if (!output) {
+    const manifest = JSON.parse(readFileSync(join(EXTENSION_DIR, "manifest.json"), "utf8"));
+    output = resolve(`omniget-chrome-extension-v${version || manifest.version}.zip`);
+  }
+
+  return { output, version };
 }
 
-function stripManifestKey(dir) {
+function patchManifest(dir, version) {
   const manifestPath = join(dir, "manifest.json");
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
   delete manifest.key;
+  if (version) {
+    manifest.version = version;
+  }
   writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + "\n");
 }
 
@@ -165,7 +181,7 @@ function crc32(buf) {
   return (crc ^ 0xffffffff) >>> 0;
 }
 
-const { output } = parseArgs();
+const { output, version } = parseArgs();
 
 const tempDir = mkdtempSync(join(tmpdir(), "omniget-chrome-ext-"));
 const stageDir = join(tempDir, "chrome");
@@ -174,8 +190,8 @@ try {
   console.log("Copying extension files...");
   cpSync(EXTENSION_DIR, stageDir, { recursive: true });
 
-  console.log("Stripping manifest key...");
-  stripManifestKey(stageDir);
+  console.log("Patching manifest...");
+  patchManifest(stageDir, version);
 
   console.log("Removing dev-only files...");
   removeDevFiles(stageDir);

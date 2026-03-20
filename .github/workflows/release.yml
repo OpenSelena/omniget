@@ -105,7 +105,7 @@ jobs:
           TAG="${GITHUB_REF#refs/tags/}"
           VERSION="${TAG#v}"
           OUTPUT="omniget-chrome-extension-v${VERSION}.zip"
-          node browser-extension/chrome/scripts/package.mjs --output "$OUTPUT"
+          node browser-extension/chrome/scripts/package.mjs --version "$VERSION" --output "$OUTPUT"
           gh release upload "$TAG" "$OUTPUT" --repo "${{ github.repository }}" --clobber
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
