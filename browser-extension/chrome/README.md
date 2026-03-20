@@ -16,6 +16,14 @@ The unpacked extension keeps a stable ID through the committed manifest key:
 
 `dkjelkhaaakffpghdfalobccaaipajip`
 
+## Chrome Web Store packaging
+
+The committed `manifest.json` intentionally keeps its `key` so local unpacked installs keep the same development ID.
+
+Before submitting a package to the Chrome Web Store, remove the `key` field from the submitted copy of `manifest.json`. The Chrome Web Store will assign its own extension ID.
+
+Once the store ID is known, add it to the Chrome native host allowlist in [`src-tauri/src/native_host.rs`](/E:/Workspace/omniget/src-tauri/src/native_host.rs) so the published extension can talk to OmniGet alongside the unpacked development build.
+
 ## What it does
 
 - Colors the toolbar icon on supported media pages only.
@@ -26,5 +34,5 @@ The unpacked extension keeps a stable ID through the committed manifest key:
 ## Quick test
 
 ```powershell
-node --test browser-extension/chrome/tests/detect.test.mjs browser-extension/chrome/tests/action-title.test.mjs
+node --test browser-extension/chrome/tests/action-title.test.mjs browser-extension/chrome/tests/action-click.test.mjs browser-extension/chrome/tests/action-feedback.test.mjs browser-extension/chrome/tests/detect.test.mjs browser-extension/chrome/tests/error-content.test.mjs browser-extension/chrome/tests/manifest.test.mjs
 ```

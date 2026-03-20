@@ -84,7 +84,12 @@ h1 {
   justify-content: center;
   min-height: 42px;
   padding: 0 16px;
+  border: none;
   border-radius: 999px;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  font: inherit;
   color: #f5f7fb;
   text-decoration: none;
   background: rgba(255, 255, 255, 0.08);

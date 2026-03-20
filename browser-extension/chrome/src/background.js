@@ -1,4 +1,6 @@
 import { detectSupportedMediaUrl } from "./detect.js";
+import { handleSupportedActionClick } from "./action-click.js";
+import { createActionFeedbackController } from "./action-feedback.js";
 import { resolveActionTitle } from "./action-title.js";
 
 const HOST_NAME = "wtf.tonho.omniget";
@@ -6,14 +8,31 @@ const INSTALL_URL = "https://github.com/tonhowtf/omniget/releases/latest";
 
 function getIconPath(iconSet) {
   return {
-    16: chrome.runtime.getURL(iconSet[0]),
-    24: chrome.runtime.getURL(iconSet[1]),
-    32: chrome.runtime.getURL(iconSet[2]),
+    16: chrome.runtime.getURL(iconSet[16]),
+    24: chrome.runtime.getURL(iconSet[24]),
+    32: chrome.runtime.getURL(iconSet[32]),
+    48: chrome.runtime.getURL(iconSet[48]),
   };
 }
 
-const ACTIVE_ICON_PATHS = ["icons/active-16.png", "icons/active-24.png", "icons/active-32.png"];
-const INACTIVE_ICON_PATHS = ["icons/inactive-16.png", "icons/inactive-24.png", "icons/inactive-32.png"];
+const ACTIVE_ICON_PATHS = Object.freeze({
+  16: "icons/active-16.png",
+  24: "icons/active-24.png",
+  32: "icons/active-32.png",
+  48: "icons/active-48.png",
+});
+
+const INACTIVE_ICON_PATHS = Object.freeze({
+  16: "icons/inactive-16.png",
+  24: "icons/inactive-24.png",
+  32: "icons/inactive-32.png",
+  48: "icons/inactive-48.png",
+});
+
+const actionFeedback = createActionFeedbackController({
+  setBadgeText: (details) => chrome.action.setBadgeText(details),
+  setBadgeBackgroundColor: (details) => chrome.action.setBadgeBackgroundColor(details),
+});
 
 chrome.runtime.onInstalled.addListener(() => {
   refreshActiveTab().catch(() => {});
@@ -51,26 +70,15 @@ chrome.action.onClicked.addListener(async (tab) => {
     return;
   }
 
-  try {
-    const response = await sendNativeMessage({
-      type: "enqueue",
-      url: detected.url,
-    });
-
-    if (!response?.ok) {
-      openErrorPage({
-        code: response?.code ?? "LAUNCH_FAILED",
-        message: response?.message ?? "OmniGet could not be launched from Chrome.",
-        url: detected.url,
-      });
-    }
-  } catch (error) {
-    openErrorPage({
-      code: mapChromeErrorCode(error),
-      message: error instanceof Error ? error.message : String(error),
-      url: detected.url,
-    });
-  }
+  await handleSupportedActionClick({
+    tabId: tab?.id,
+    url: detected.url,
+    sendNativeMessage,
+    clearBadge: (tabId) => actionFeedback.clearBadge(tabId),
+    showSuccessBadge: (tabId) => actionFeedback.showSuccessBadge(tabId),
+    openErrorPage,
+    mapChromeErrorCode,
+  });
 });
 
 async function refreshActiveTab() {
@@ -85,6 +93,12 @@ async function refreshActiveTab() {
 }
 
 async function refreshTabAction(tabId, tab) {
+  try {
+    await actionFeedback.clearBadge(tabId);
+  } catch (error) {
+    console.error("[OmniGet] Failed to clear badge:", error);
+  }
+
   if (!tab?.url) {
     return;
   }
@@ -147,12 +161,16 @@ function mapChromeErrorCode(error) {
 function openErrorPage({ code, message, url }) {
   const params = new URLSearchParams({
     code,
-    installUrl: INSTALL_URL,
-    message,
     url,
   });
 
-  chrome.tabs.create({
+  if (message) {
+    params.set("message", message);
+  }
+
+  params.set("installUrl", INSTALL_URL);
+
+  return chrome.tabs.create({
     url: `${chrome.runtime.getURL("pages/error.html")}?${params.toString()}`,
   });
 }

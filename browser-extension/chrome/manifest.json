@@ -14,11 +14,12 @@
     "type": "module"
   },
   "action": {
-    "default_title": "OmniGet",
+    "default_title": "__MSG_action_title_unsupported__",
     "default_icon": {
       "16": "icons/inactive-16.png",
       "24": "icons/inactive-24.png",
-      "32": "icons/inactive-32.png"
+      "32": "icons/inactive-32.png",
+      "48": "icons/inactive-48.png"
     }
   },
   "icons": {

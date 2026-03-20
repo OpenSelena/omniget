@@ -7,7 +7,11 @@ use anyhow::Context;
 use serde::{Deserialize, Serialize};
 
 pub const CHROME_HOST_NAME: &str = "wtf.tonho.omniget";
-pub const CHROME_EXTENSION_ID: &str = "dkjelkhaaakffpghdfalobccaaipajip";
+pub const CHROME_EXTENSION_IDS: &[&str] = &[
+    // Unpacked development extension ID derived from browser-extension/chrome/manifest.json.
+    "dkjelkhaaakffpghdfalobccaaipajip",
+    // Add the Chrome Web Store extension ID here once it is assigned.
+];
 
 #[cfg(target_os = "windows")]
 const HOST_COPY_NAME: &str = "omniget-native-host.exe";
@@ -108,10 +112,15 @@ fn build_host_manifest(host_exe: &Path) -> serde_json::Value {
         "description": "OmniGet native host for Chrome",
         "path": host_exe.to_string_lossy().to_string(),
         "type": "stdio",
-        "allowed_origins": [
-            format!("chrome-extension://{}/", CHROME_EXTENSION_ID)
-        ]
+        "allowed_origins": chrome_allowed_origins()
     })
+}
+
+fn chrome_allowed_origins() -> Vec<String> {
+    CHROME_EXTENSION_IDS
+        .iter()
+        .map(|extension_id| format!("chrome-extension://{extension_id}/"))
+        .collect()
 }
 
 #[cfg(target_os = "windows")]
@@ -361,9 +370,17 @@ mod tests {
         assert_eq!(manifest["description"].as_str(), Some("OmniGet native host for Chrome"));
         assert_eq!(manifest["path"].as_str(), Some(host_exe.to_string_lossy().as_ref()));
         assert_eq!(manifest["type"].as_str(), Some("stdio"));
-        assert_eq!(
-            manifest["allowed_origins"][0].as_str(),
-            Some(format!("chrome-extension://{CHROME_EXTENSION_ID}/").as_str())
-        );
+        let allowed_origins = manifest["allowed_origins"]
+            .as_array()
+            .expect("allowed_origins should be an array");
+
+        assert_eq!(allowed_origins.len(), CHROME_EXTENSION_IDS.len());
+
+        for (origin, extension_id) in allowed_origins.iter().zip(CHROME_EXTENSION_IDS.iter()) {
+            assert_eq!(
+                origin.as_str(),
+                Some(format!("chrome-extension://{extension_id}/").as_str())
+            );
+        }
     }
 }
