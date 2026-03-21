@@ -70,6 +70,12 @@ pub fn reset_ffmpeg_location_cache() {
     }
 }
 
+pub fn reset_js_runtime_cache() {
+    if let Ok(mut cache) = JS_RUNTIME_CACHE.write() {
+        *cache = None;
+    }
+}
+
 pub fn reset_cookies_browser_cache() {
     if let Ok(mut cache) = COOKIES_BROWSER_CACHE.write() {
         *cache = None;
@@ -202,6 +208,8 @@ pub async fn ensure_ytdlp() -> anyhow::Result<PathBuf> {
         tokio::spawn(async move {
             check_ytdlp_freshness(&path_clone).await;
         });
+        // Ensure a JS runtime is available in the background (for YouTube nsig).
+        tokio::spawn(async { crate::core::dependencies::ensure_js_runtime().await; });
         tracing::debug!("[perf] ensure_ytdlp took {:?}", _timer_start.elapsed());
         return Ok(path);
     }
@@ -213,6 +221,8 @@ pub async fn ensure_ytdlp() -> anyhow::Result<PathBuf> {
 
     let path = download_ytdlp_binary().await?;
     reset_ytdlp_cache();
+    // Ensure a JS runtime is available in the background (for YouTube nsig).
+    tokio::spawn(async { crate::core::dependencies::ensure_js_runtime().await; });
     tracing::debug!("[perf] ensure_ytdlp took {:?}", _timer_start.elapsed());
     Ok(path)
 }
@@ -553,6 +563,16 @@ fn detect_js_runtime() -> Option<String> {
                         return Some(format!("{}:{}", runtime, path));
                     }
                 }
+            }
+        }
+    }
+
+    // Check managed bin dir (Deno auto-downloaded alongside yt-dlp).
+    if let Some(bin_dir) = crate::core::paths::app_data_dir().map(|d| d.join("bin")) {
+        for &(runtime, bin) in runtimes {
+            let managed = bin_dir.join(bin);
+            if managed.exists() {
+                return Some(format!("{}:{}", runtime, managed.display()));
             }
         }
     }
