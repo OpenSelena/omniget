@@ -148,8 +148,11 @@ function parseTikTok(segments) {
     return "profile";
   }
 
-  const tiktokNonVideo = ["explore", "foryou", "following", "live", "about", "legal", "safety", "transparency"];
-  if (segments[0] && !tiktokNonVideo.includes(segments[0])) {
+  // Short video links (/t/<code>) and embeds (/embed/v2/<id>)
+  if (segments[0] === "t" && segments[1]) {
+    return "video";
+  }
+  if (segments[0] === "embed" && segments[1] === "v2" && segments[2]) {
     return "video";
   }
 
