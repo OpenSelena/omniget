@@ -128,12 +128,27 @@ test("TikTok: profile is unsupported", () => {
   assertUnsupported("https://www.tiktok.com/@user", "tiktok", "profile");
 });
 
+test("TikTok: short link /t/<code>", () => {
+  assertSupported("https://www.tiktok.com/t/ZTxxxxxx", "tiktok", "video");
+});
+
+test("TikTok: embed /embed/v2/<id>", () => {
+  assertSupported("https://www.tiktok.com/embed/v2/1234567890", "tiktok", "video");
+});
+
 test("TikTok: explore page is unknown", () => {
   assertUnsupported("https://www.tiktok.com/explore", "tiktok", "unknown");
 });
 
 test("TikTok: foryou page is unknown", () => {
   assertUnsupported("https://www.tiktok.com/foryou", "tiktok", "unknown");
+});
+
+test("TikTok: non-video paths are unknown (no false positives)", () => {
+  assertUnsupported("https://www.tiktok.com/tag/funny", "tiktok", "unknown");
+  assertUnsupported("https://www.tiktok.com/discover", "tiktok", "unknown");
+  assertUnsupported("https://www.tiktok.com/search/hello", "tiktok", "unknown");
+  assertUnsupported("https://www.tiktok.com/music/original-sound-123", "tiktok", "unknown");
 });
 
 // ── Twitter / X ──────────────────────────────────────────────────────────
@@ -281,8 +296,11 @@ test("Telegram: channel profile is unsupported", () => {
   assertUnsupported("https://t.me/channel", "telegram", "profile");
 });
 
-test("Telegram: joinchat is unknown", () => {
+test("Telegram: joinchat/addstickers/login/share are unknown", () => {
   assertUnsupported("https://t.me/joinchat", "telegram", "unknown");
+  assertUnsupported("https://t.me/addstickers", "telegram", "unknown");
+  assertUnsupported("https://t.me/login", "telegram", "unknown");
+  assertUnsupported("https://t.me/share", "telegram", "unknown");
 });
 
 test("Telegram: telegram.me domain", () => {
