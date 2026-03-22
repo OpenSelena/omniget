@@ -17,7 +17,6 @@
 import { cpSync, createWriteStream, mkdtempSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { basename, join, relative, resolve } from "node:path";
 import { tmpdir } from "node:os";
-import { Writable } from "node:stream";
 import zlib from "node:zlib";
 
 const EXTENSION_DIR = resolve(import.meta.dirname, "..");
