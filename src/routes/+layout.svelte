@@ -21,7 +21,11 @@
   import { isYtdlpAvailable, isDepsChecked, refreshYtdlpStatus } from "$lib/stores/dependency-store.svelte";
   import { showToast } from "$lib/stores/toast-store.svelte";
   import { t } from "$lib/i18n";
+  import { NAV_ITEMS } from "$lib/nav-config";
   import type { Snippet } from "svelte";
+
+  const primaryNav = NAV_ITEMS.filter((item) => item.group === "primary");
+  const secondaryNav = NAV_ITEMS.filter((item) => item.group === "secondary");
 
   let ytdlpDismissed = $state(false);
   let ytdlpMissing = $derived(isDepsChecked() && !isYtdlpAvailable());
@@ -100,16 +104,6 @@
     };
   });
 
-  const nav = [
-    { href: "/", labelKey: "nav.home", icon: "home" },
-    { href: "/downloads", labelKey: "nav.downloads", icon: "downloads" },
-    { href: "/convert", labelKey: "nav.convert", icon: "convert" },
-    { href: "/courses", labelKey: "nav.courses", icon: "courses" },
-    { href: "/telegram", labelKey: "nav.telegram", icon: "telegram" },
-    { href: "/settings", labelKey: "nav.settings", icon: "settings" },
-    { href: "/about", labelKey: "nav.about", icon: "about" },
-  ] as const;
-
   function isActive(href: string): boolean {
     if (href === "/") return page.url.pathname === "/";
     return page.url.pathname.startsWith(href);
@@ -118,7 +112,7 @@
 
 <div class="layout">
   <nav class="sidebar">
-    {#each nav as item}
+    {#each primaryNav as item}
       <a
         href={item.href}
         class="nav-item"
@@ -133,14 +127,33 @@
           {:else if item.icon === "downloads"}
             <path d="M12 3v12m0 0l-4-4m4 4l4-4" />
             <path d="M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2" />
-          {:else if item.icon === "convert"}
-            <path d="M20 10H4l4-4" />
-            <path d="M4 14h16l-4 4" />
           {:else if item.icon === "courses"}
             <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
             <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
             <path d="M8 7h8" />
             <path d="M8 11h6" />
+          {/if}
+        </svg>
+        {#if item.badge === "downloads" && counts.badge > 0}
+          <span class="badge">{badgeLabel}</span>
+        {/if}
+      </a>
+    {/each}
+
+    <div class="nav-divider"></div>
+
+    {#each secondaryNav as item}
+      <a
+        href={item.href}
+        class="nav-item"
+        class:active={isActive(item.href)}
+        title={$t(item.labelKey)}
+      >
+        <span class="indicator"></span>
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          {#if item.icon === "convert"}
+            <path d="M20 10H4l4-4" />
+            <path d="M4 14h16l-4 4" />
           {:else if item.icon === "telegram"}
             <path d="M21 5L2 12.5l7 1M21 5l-5.5 15-4.5-7.5M21 5L9 13.5" />
           {:else if item.icon === "settings"}
@@ -151,9 +164,6 @@
             <path d="M12 16v-4m0-4h.01" />
           {/if}
         </svg>
-        {#if item.icon === "downloads" && counts.badge > 0}
-          <span class="badge">{badgeLabel}</span>
-        {/if}
       </a>
     {/each}
   </nav>
@@ -239,6 +249,14 @@
 
   .nav-item.active {
     color: var(--blue);
+  }
+
+  .nav-divider {
+    width: 24px;
+    height: 1px;
+    background: var(--content-border);
+    margin: 6px 0;
+    flex-shrink: 0;
   }
 
   .indicator {
@@ -392,6 +410,12 @@
       height: 44px;
       padding: 0 calc(var(--padding) * 1.5);
       flex-shrink: 0;
+    }
+
+    .nav-divider {
+      width: 1px;
+      height: 24px;
+      margin: 0 4px;
     }
 
     .indicator {
