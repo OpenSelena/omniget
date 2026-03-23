@@ -10,7 +10,7 @@
 
 <h1 align="center">OmniGet</h1>
 
-<h3 align="center">Paste a link. Get your file.<br>No browser extensions, no web apps</h3>
+<h3 align="center">Paste a link. Get your file.</h3>
 
 OmniGet is a free, open source desktop app for downloading videos, media, and full courses from the internet. It natively supports 50+ platforms including YouTube, Instagram, TikTok, Twitter/X, Reddit, Twitch, Pinterest, Vimeo, Bluesky, and Chinese platforms like Bilibili (哔哩哔哩), Douyin (抖音), Xiaohongshu (小红书), Kuaishou (快手), Youku (优酷视频), Tencent Video (腾讯视频), iQiyi (爱奇艺), and Mango TV (芒果TV). It downloads full courses from 35+ education platforms like Hotmart, Udemy, Kiwify, Teachable, Kajabi, Skool, Pluralsight, MasterClass, Rocketseat, Estratégia Concursos, and more. It also downloads torrents and magnet links natively, and lets you send files directly between computers via P2P transfer over local network or the internet. Any other URL falls back to yt-dlp, covering [1000+ additional sites](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md).
 
@@ -43,6 +43,7 @@ Built with Tauri and Rust for speed and a small footprint.
 - Firefox-first cookie detection for authenticated downloads
 - Dark and light theme
 - Available in English, Portuguese, Chinese, Japanese, Italian, French, and Greek
+- Chrome extension to send media pages to OmniGet with one click
 - Loop, the mascot that reacts to your downloads
 
 ## Supported Platforms
@@ -114,6 +115,12 @@ Built with Tauri and Rust for speed and a small footprint.
 | Entrega Digital | Token + Metadata | BR |
 
 Platform availability may vary depending on each service. Chinese platforms may require a Chinese IP address (VPN/proxy). Some streaming platforms use DRM on premium content.
+
+## Chrome Extension
+
+OmniGet includes a Chrome extension that detects supported media pages and sends them to the desktop app with one click. The extension activates its icon on 13 platforms (YouTube, Instagram, TikTok, Twitter/X, Reddit, Twitch, Hotmart, Pinterest, Bluesky, Telegram, Vimeo, Udemy, Bilibili) and forwards cookies for authenticated downloads.
+
+Install OmniGet and launch it once to register the native messaging host, then load the extension from `browser-extension/chrome/`. See the [extension README](browser-extension/chrome/README.md) for details.
 
 ## Download
 
