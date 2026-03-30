@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { invoke } from "@tauri-apps/api/core";
+  import { pluginInvoke } from "$lib/plugin-invoke";
   import { open } from "@tauri-apps/plugin-dialog";
   import CourseCard from "$components/hotmart/CourseCard.svelte";
   import { showToast } from "$lib/stores/toast-store.svelte";
@@ -73,7 +73,7 @@
 
   async function checkSession() {
     try {
-      await invoke<string>("masterclass_check_session");
+      await pluginInvoke<string>("courses", "masterclass_check_session");
       loggedIn = true;
       loadCourses();
     } catch {
@@ -88,7 +88,7 @@
     error = "";
     loading = true;
     try {
-      await invoke<string>("masterclass_login_cookies", { cookies: cookies.trim() });
+      await pluginInvoke<string>("courses", "masterclass_login_cookies", { cookies: cookies.trim() });
       loggedIn = true;
       loadCourses();
     } catch (e: any) {
@@ -100,7 +100,7 @@
 
   async function handleLogout() {
     try {
-      await invoke("masterclass_logout");
+      await pluginInvoke("courses", "masterclass_logout");
     } catch {
     }
     loggedIn = false;
@@ -113,7 +113,7 @@
     loadingCourses = true;
     coursesError = "";
     try {
-      courses = await invoke("masterclass_list_courses");
+      courses = await pluginInvoke("courses", "masterclass_list_courses");
       currentPage = 1;
     } catch (e: any) {
       coursesError = typeof e === "string" ? e : e.message ?? $t('hotmart.courses_error');
@@ -168,7 +168,7 @@
     }
 
     try {
-      await invoke("start_masterclass_course_download", {
+      await pluginInvoke("courses", "start_masterclass_course_download", {
         courseJson: JSON.stringify(course),
         outputDir,
       });
@@ -186,7 +186,7 @@
     loadingCourses = true;
     coursesError = "";
     try {
-      courses = await invoke("masterclass_refresh_courses");
+      courses = await pluginInvoke("courses", "masterclass_refresh_courses");
       currentPage = 1;
     } catch (e: any) {
       coursesError = typeof e === "string" ? e : e.message ?? $t('hotmart.courses_error');

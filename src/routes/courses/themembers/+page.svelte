@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { invoke } from "@tauri-apps/api/core";
+  import { pluginInvoke } from "$lib/plugin-invoke";
   import { open } from "@tauri-apps/plugin-dialog";
   import CourseCard from "$components/hotmart/CourseCard.svelte";
   import { showToast } from "$lib/stores/toast-store.svelte";
@@ -79,7 +79,7 @@
 
   async function checkSession() {
     try {
-      const result = await invoke<string>("themembers_check_session");
+      const result = await pluginInvoke<string>("courses", "themembers_check_session");
       sessionEmail = result;
       loggedIn = true;
       loadCourses();
@@ -94,7 +94,7 @@
     error = "";
     loading = true;
     try {
-      const result = await invoke<string>("themembers_login", {
+      const result = await pluginInvoke<string>("courses", "themembers_login", {
         email,
         password,
         domain: domain.trim(),
@@ -114,7 +114,7 @@
     error = "";
     loading = true;
     try {
-      const result = await invoke<string>("themembers_login_token", {
+      const result = await pluginInvoke<string>("courses", "themembers_login_token", {
         token: token.trim(),
         domain: domain.trim(),
       });
@@ -130,7 +130,7 @@
 
   async function handleLogout() {
     try {
-      await invoke("themembers_logout");
+      await pluginInvoke("courses", "themembers_logout");
     } catch {
     }
     loggedIn = false;
@@ -144,7 +144,7 @@
     loadingCourses = true;
     coursesError = "";
     try {
-      courses = await invoke("themembers_list_courses");
+      courses = await pluginInvoke("courses", "themembers_list_courses");
       currentPage = 1;
     } catch (e: any) {
       coursesError = typeof e === "string" ? e : e.message ?? $t('hotmart.courses_error');
@@ -188,7 +188,7 @@
     }
 
     try {
-      await invoke("start_themembers_course_download", {
+      await pluginInvoke("courses", "start_themembers_course_download", {
         courseJson: JSON.stringify(course),
         outputDir,
       });
@@ -206,7 +206,7 @@
     loadingCourses = true;
     coursesError = "";
     try {
-      courses = await invoke("themembers_refresh_courses");
+      courses = await pluginInvoke("courses", "themembers_refresh_courses");
       currentPage = 1;
     } catch (e: any) {
       coursesError = typeof e === "string" ? e : e.message ?? $t('hotmart.courses_error');

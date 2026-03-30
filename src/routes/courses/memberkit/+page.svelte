@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { invoke } from "@tauri-apps/api/core";
+  import { pluginInvoke } from "$lib/plugin-invoke";
   import { open } from "@tauri-apps/plugin-dialog";
   import CourseCard from "$components/hotmart/CourseCard.svelte";
   import { showToast } from "$lib/stores/toast-store.svelte";
@@ -80,7 +80,7 @@
 
   async function checkSession() {
     try {
-      const result = await invoke<string>("memberkit_check_session");
+      const result = await pluginInvoke<string>("courses", "memberkit_check_session");
       sessionEmail = result;
       loggedIn = true;
       loadCourses();
@@ -95,7 +95,7 @@
     error = "";
     loading = true;
     try {
-      const result = await invoke<string>("memberkit_login", { email, password, siteUrl: siteUrl.trim() });
+      const result = await pluginInvoke<string>("courses", "memberkit_login", { email, password, siteUrl: siteUrl.trim() });
       sessionEmail = result || email;
       loggedIn = true;
       loadCourses();
@@ -111,7 +111,7 @@
     error = "";
     loading = true;
     try {
-      const result = await invoke<string>("memberkit_login_cookie", { cookie: cookie.trim(), siteUrl: siteUrl.trim() });
+      const result = await pluginInvoke<string>("courses", "memberkit_login_cookie", { cookie: cookie.trim(), siteUrl: siteUrl.trim() });
       sessionEmail = result || "Cookie";
       loggedIn = true;
       loadCourses();
@@ -124,7 +124,7 @@
 
   async function handleLogout() {
     try {
-      await invoke("memberkit_logout");
+      await pluginInvoke("courses", "memberkit_logout");
     } catch {
     }
     loggedIn = false;
@@ -138,7 +138,7 @@
     loadingCourses = true;
     coursesError = "";
     try {
-      courses = await invoke("memberkit_list_courses");
+      courses = await pluginInvoke("courses", "memberkit_list_courses");
       currentPage = 1;
     } catch (e: any) {
       coursesError = typeof e === "string" ? e : e.message ?? $t('hotmart.courses_error');
@@ -184,7 +184,7 @@
     }
 
     try {
-      await invoke("start_memberkit_download", {
+      await pluginInvoke("courses", "start_memberkit_download", {
         courseJson: JSON.stringify(course),
         outputDir,
       });
@@ -202,7 +202,7 @@
     loadingCourses = true;
     coursesError = "";
     try {
-      courses = await invoke("memberkit_refresh_courses");
+      courses = await pluginInvoke("courses", "memberkit_refresh_courses");
       currentPage = 1;
     } catch (e: any) {
       coursesError = typeof e === "string" ? e : e.message ?? $t('hotmart.courses_error');

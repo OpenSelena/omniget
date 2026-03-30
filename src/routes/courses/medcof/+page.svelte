@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { invoke } from "@tauri-apps/api/core";
+  import { pluginInvoke } from "$lib/plugin-invoke";
   import { open } from "@tauri-apps/plugin-dialog";
   import CourseCard from "$components/hotmart/CourseCard.svelte";
   import { showToast } from "$lib/stores/toast-store.svelte";
@@ -72,7 +72,7 @@
 
   async function checkSession() {
     try {
-      const result = await invoke<string>("medcof_check_session");
+      const result = await pluginInvoke<string>("courses", "medcof_check_session");
       sessionEmail = result;
       loggedIn = true;
       loadCourses();
@@ -88,7 +88,7 @@
     error = "";
     loading = true;
     try {
-      const result = await invoke<string>("medcof_login_token", { token: token.trim() });
+      const result = await pluginInvoke<string>("courses", "medcof_login_token", { token: token.trim() });
       sessionEmail = result || "Token";
       loggedIn = true;
       loadCourses();
@@ -101,7 +101,7 @@
 
   async function handleLogout() {
     try {
-      await invoke("medcof_logout");
+      await pluginInvoke("courses", "medcof_logout");
     } catch {
     }
     loggedIn = false;
@@ -115,7 +115,7 @@
     loadingCourses = true;
     coursesError = "";
     try {
-      courses = await invoke("medcof_list_courses");
+      courses = await pluginInvoke("courses", "medcof_list_courses");
       currentPage = 1;
     } catch (e: any) {
       coursesError = typeof e === "string" ? e : e.message ?? $t('hotmart.courses_error');
@@ -161,7 +161,7 @@
     }
 
     try {
-      await invoke("start_medcof_download", {
+      await pluginInvoke("courses", "start_medcof_download", {
         courseJson: JSON.stringify(course),
         outputDir,
       });
@@ -179,7 +179,7 @@
     loadingCourses = true;
     coursesError = "";
     try {
-      courses = await invoke("medcof_refresh_courses");
+      courses = await pluginInvoke("courses", "medcof_refresh_courses");
       currentPage = 1;
     } catch (e: any) {
       coursesError = typeof e === "string" ? e : e.message ?? $t('hotmart.courses_error');

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { invoke } from "@tauri-apps/api/core";
+  import { pluginInvoke } from "$lib/plugin-invoke";
   import { listen, type UnlistenFn } from "@tauri-apps/api/event";
   import { open } from "@tauri-apps/plugin-dialog";
   import { showToast } from "$lib/stores/toast-store.svelte";
@@ -115,7 +115,7 @@
       resetThumbnails();
       document.removeEventListener("keydown", handleKeydown);
       if (searchDebounce) clearTimeout(searchDebounce);
-      invoke("telegram_clear_thumbnail_cache").catch(() => {});
+      pluginInvoke("telegram", "telegram_clear_thumbnail_cache").catch(() => {});
       for (const unlisten of downloadUnlisteners) unlisten();
       downloadUnlisteners = [];
     };
@@ -198,7 +198,7 @@
   async function checkSession() {
     view = "checking";
     try {
-      const result = await invoke<string>("telegram_check_session");
+      const result = await pluginInvoke<string>("telegram", "telegram_check_session");
       sessionPhone = result;
       view = "chats";
       loadChats();
@@ -215,7 +215,7 @@
     stopQrPolling();
 
     try {
-      const result = await invoke<QrStartResponse>("telegram_qr_start");
+      const result = await pluginInvoke<QrStartResponse>("telegram", "telegram_qr_start");
       qrSvg = result.svg;
       qrLoading = false;
 
@@ -239,7 +239,7 @@
 
   async function pollQrLogin() {
     try {
-      const status = await invoke<string>("telegram_qr_poll");
+      const status = await pluginInvoke<string>("telegram", "telegram_qr_poll");
       if (status === "waiting") return;
 
       stopQrPolling();
@@ -274,7 +274,7 @@
     error = "";
     loading = true;
     try {
-      await invoke("telegram_send_code", { phone: phone.trim() });
+      await pluginInvoke("telegram", "telegram_send_code", { phone: phone.trim() });
       view = "code";
     } catch (e: any) {
       error = typeof e === "string" ? e : e.message ?? $t("telegram.unknown_error");
@@ -287,7 +287,7 @@
     error = "";
     loading = true;
     try {
-      const result = await invoke<string>("telegram_verify_code", { code: code.trim() });
+      const result = await pluginInvoke<string>("telegram", "telegram_verify_code", { code: code.trim() });
       sessionPhone = result;
       view = "chats";
       loadChats();
@@ -310,7 +310,7 @@
     error = "";
     loading = true;
     try {
-      const result = await invoke<string>("telegram_verify_2fa", { password });
+      const result = await pluginInvoke<string>("telegram", "telegram_verify_2fa", { password });
       sessionPhone = result;
       view = "chats";
       loadChats();
@@ -329,7 +329,7 @@
   async function handleLogout() {
     stopQrPolling();
     try {
-      await invoke("telegram_logout");
+      await pluginInvoke("telegram", "telegram_logout");
     } catch {}
     sessionPhone = "";
     chats = [];
@@ -348,7 +348,7 @@
     loadingChats = true;
     chatsError = "";
     try {
-      chats = await invoke("telegram_list_chats");
+      chats = await pluginInvoke("telegram", "telegram_list_chats");
     } catch (e: any) {
       chatsError = typeof e === "string" ? e : e.message ?? $t("telegram.chats_error");
     } finally {
@@ -389,7 +389,7 @@
     loadingMedia = true;
     mediaError = "";
     try {
-      const items: TelegramMediaItem[] = await invoke("telegram_list_media", {
+      const items: TelegramMediaItem[] = await pluginInvoke("telegram", "telegram_list_media", {
         chatId: selectedChat.id,
         chatType: selectedChat.chat_type,
         mediaType: mediaFilter === "all" ? null : mediaFilter,
@@ -412,7 +412,7 @@
       const offset = mediaItems.length > 0
         ? Math.min(...mediaItems.map((m) => m.message_id))
         : 0;
-      const items: TelegramMediaItem[] = await invoke("telegram_list_media", {
+      const items: TelegramMediaItem[] = await pluginInvoke("telegram", "telegram_list_media", {
         chatId: selectedChat.id,
         chatType: selectedChat.chat_type,
         mediaType: mediaFilter === "all" ? null : mediaFilter,
@@ -445,7 +445,7 @@
     mediaError = "";
     hasMore = false;
     try {
-      const items: TelegramMediaItem[] = await invoke("telegram_search_media", {
+      const items: TelegramMediaItem[] = await pluginInvoke("telegram", "telegram_search_media", {
         chatId: selectedChat.id,
         chatType: selectedChat.chat_type,
         query,
@@ -524,7 +524,7 @@
     downloadingIds = new Set([...downloadingIds, item.message_id]);
 
     try {
-      const result = await invoke<{ id: number; file_name: string }>("telegram_download_media", {
+      const result = await pluginInvoke<{ id: number; file_name: string }>("telegram", "telegram_download_media", {
         chatId: selectedChat.id,
         chatType: selectedChat.chat_type,
         messageId: item.message_id,
@@ -560,7 +560,7 @@
     );
 
     try {
-      const batchId = await invoke<number>("telegram_download_batch", {
+      const batchId = await pluginInvoke<number>("telegram", "telegram_download_batch", {
         chatId: selectedChat.id,
         chatType: selectedChat.chat_type,
         chatTitle: selectedChat.title,
@@ -579,7 +579,7 @@
   async function cancelBatch() {
     if (!activeBatchId) return;
     try {
-      await invoke("telegram_cancel_batch", { batchId: activeBatchId });
+      await pluginInvoke("telegram", "telegram_cancel_batch", { batchId: activeBatchId });
       showToast("info", $t("telegram.batch_cancelled"));
     } catch {}
     activeBatchId = null;
@@ -622,7 +622,7 @@
       if (gen !== thumbGeneration) return null;
       if (thumbnails.has(messageId)) return thumbnails.get(messageId)!;
 
-      const result = await invoke<string>("telegram_get_thumbnail", { chatId, chatType, messageId });
+      const result = await pluginInvoke<string>("telegram", "telegram_get_thumbnail", { chatId, chatType, messageId });
       if (gen !== thumbGeneration) return null;
 
       thumbnails.set(messageId, result);
@@ -644,7 +644,7 @@
   async function getChatPhoto(chatId: number, chatType: string) {
     if (chatPhotos.has(chatId)) return;
     try {
-      const result = await invoke<string>("telegram_get_chat_photo", { chatId, chatType });
+      const result = await pluginInvoke<string>("telegram", "telegram_get_chat_photo", { chatId, chatType });
       chatPhotos.set(chatId, result);
       chatPhotos = new Map(chatPhotos);
     } catch {

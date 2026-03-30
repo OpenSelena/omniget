@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { invoke } from "@tauri-apps/api/core";
+  import { pluginInvoke } from "$lib/plugin-invoke";
   import { open } from "@tauri-apps/plugin-dialog";
   import CourseCard from "$components/hotmart/CourseCard.svelte";
   import { showToast } from "$lib/stores/toast-store.svelte";
@@ -79,7 +79,7 @@
 
   async function checkSession() {
     try {
-      const result = await invoke<string>("fluencyacademy_check_session");
+      const result = await pluginInvoke<string>("courses", "fluencyacademy_check_session");
       sessionEmail = result;
       loggedIn = true;
       loadCourses();
@@ -94,7 +94,7 @@
     error = "";
     loading = true;
     try {
-      const result = await invoke<string>("fluencyacademy_login", { email, password });
+      const result = await pluginInvoke<string>("courses", "fluencyacademy_login", { email, password });
       sessionEmail = result || email;
       loggedIn = true;
       loadCourses();
@@ -110,7 +110,7 @@
     error = "";
     loading = true;
     try {
-      const result = await invoke<string>("fluencyacademy_login_token", { token: token.trim() });
+      const result = await pluginInvoke<string>("courses", "fluencyacademy_login_token", { token: token.trim() });
       sessionEmail = result || "Token";
       loggedIn = true;
       loadCourses();
@@ -123,7 +123,7 @@
 
   async function handleLogout() {
     try {
-      await invoke("fluencyacademy_logout");
+      await pluginInvoke("courses", "fluencyacademy_logout");
     } catch {
     }
     loggedIn = false;
@@ -137,7 +137,7 @@
     loadingCourses = true;
     coursesError = "";
     try {
-      courses = await invoke("fluencyacademy_list_courses");
+      courses = await pluginInvoke("courses", "fluencyacademy_list_courses");
       currentPage = 1;
     } catch (e: any) {
       coursesError = typeof e === "string" ? e : e.message ?? $t('hotmart.courses_error');
@@ -183,7 +183,7 @@
     }
 
     try {
-      await invoke("start_fluencyacademy_download", {
+      await pluginInvoke("courses", "start_fluencyacademy_download", {
         courseJson: JSON.stringify(course),
         outputDir,
       });
@@ -201,7 +201,7 @@
     loadingCourses = true;
     coursesError = "";
     try {
-      courses = await invoke("fluencyacademy_refresh_courses");
+      courses = await pluginInvoke("courses", "fluencyacademy_refresh_courses");
       currentPage = 1;
     } catch (e: any) {
       coursesError = typeof e === "string" ? e : e.message ?? $t('hotmart.courses_error');

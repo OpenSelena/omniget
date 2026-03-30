@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { invoke } from "@tauri-apps/api/core";
+  import { pluginInvoke } from "$lib/plugin-invoke";
   import { open } from "@tauri-apps/plugin-dialog";
   import CourseCard from "$components/hotmart/CourseCard.svelte";
   import { showToast } from "$lib/stores/toast-store.svelte";
@@ -76,7 +76,7 @@
 
   async function checkSession() {
     try {
-      const result = await invoke<string>("estrategia_militares_check_session");
+      const result = await pluginInvoke<string>("courses", "estrategia_militares_check_session");
       sessionEmail = result;
       loggedIn = true;
       loadCourses();
@@ -92,7 +92,7 @@
     error = "";
     loading = true;
     try {
-      const result = await invoke<string>("estrategia_militares_login_token", { token: token.trim() });
+      const result = await pluginInvoke<string>("courses", "estrategia_militares_login_token", { token: token.trim() });
       sessionEmail = result || "Token";
       loggedIn = true;
       loadCourses();
@@ -105,7 +105,7 @@
 
   async function handleLogout() {
     try {
-      await invoke("estrategia_militares_logout");
+      await pluginInvoke("courses", "estrategia_militares_logout");
     } catch {
     }
     loggedIn = false;
@@ -121,7 +121,7 @@
     loadingCourses = true;
     coursesError = "";
     try {
-      courses = await invoke("estrategia_militares_list_courses");
+      courses = await pluginInvoke("courses", "estrategia_militares_list_courses");
       currentPage = 1;
     } catch (e: any) {
       coursesError = typeof e === "string" ? e : e.message ?? $t('hotmart.courses_error');
@@ -135,7 +135,7 @@
     loadingCourses = true;
     coursesError = "";
     try {
-      courses = await invoke("estrategia_militares_search_courses", { query: searchQuery.trim() });
+      courses = await pluginInvoke("courses", "estrategia_militares_search_courses", { query: searchQuery.trim() });
       currentPage = 1;
     } catch (e: any) {
       coursesError = typeof e === "string" ? e : e.message ?? "Search failed";
@@ -179,7 +179,7 @@
     }
 
     try {
-      await invoke("start_estrategia_militares_course_download", {
+      await pluginInvoke("courses", "start_estrategia_militares_course_download", {
         courseJson: JSON.stringify(course),
         outputDir,
       });
@@ -197,7 +197,7 @@
     loadingCourses = true;
     coursesError = "";
     try {
-      courses = await invoke("estrategia_militares_refresh_courses");
+      courses = await pluginInvoke("courses", "estrategia_militares_refresh_courses");
       currentPage = 1;
     } catch (e: any) {
       coursesError = typeof e === "string" ? e : e.message ?? $t('hotmart.courses_error');
