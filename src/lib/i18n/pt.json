@@ -353,7 +353,10 @@
     "cap_download_queue": "Enviar downloads para a fila",
     "install": "Instalar",
     "update_available": "Atualizar",
-    "update_hint": "v{{version}} disponivel"
+    "update_hint": "v{{version}} disponivel",
+    "plugin_not_installed": "Plugin nao instalado",
+    "plugin_install_hint": "Instale este plugin pelo Marketplace para usa-lo.",
+    "go_to_marketplace": "Ir para o Marketplace"
   },
   "services": {
     "title": "Suporta YouTube, Instagram e mais 1000 sites",
