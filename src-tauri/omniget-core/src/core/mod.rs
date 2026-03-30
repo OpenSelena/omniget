@@ -1,2 +1,17 @@
 pub mod registry;
 pub mod events;
+pub mod clipboard;
+pub mod cookie_parser;
+pub mod course_utils;
+pub mod direct_downloader;
+pub mod filename;
+pub mod hls_downloader;
+pub mod http_client;
+pub mod hwaccel;
+pub mod media_processor;
+pub mod paths;
+pub mod process;
+pub mod redirect;
+pub mod dependencies;
+pub mod ffmpeg;
+pub mod ytdlp;
