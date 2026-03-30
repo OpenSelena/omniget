@@ -6,7 +6,16 @@
     return `/mascot/${e}.png`;
   }
 
-  let { emotion = "idle" }: { emotion?: MascotEmotion } = $props();
+  let {
+    emotion = "idle",
+    compact = false,
+    bubbleText,
+  }: {
+    emotion?: MascotEmotion;
+    compact?: boolean;
+    bubbleText?: string;
+  } = $props();
+
   let currentSrc = $state("/mascot/idle.png");
   let nextSrc = $state("");
   let showCurrent = $state(false);
@@ -47,7 +56,7 @@
   }
 </script>
 
-<div class="mascot">
+<div class="mascot" class:compact>
   {#if !errored}
     <img
       src={currentSrc}
@@ -63,8 +72,8 @@
     <svg
       class="mascot-fallback"
       viewBox="0 0 64 64"
-      width="152"
-      height="152"
+      width="100"
+      height="100"
       fill="none"
       stroke="currentColor"
       stroke-width="1.5"
@@ -76,24 +85,39 @@
       <path d="M20 48h24" />
     </svg>
   {/if}
+  {#if bubbleText}
+    <div class="mascot-bubble" role="status" aria-live="polite">
+      <span>{bubbleText}</span>
+    </div>
+  {/if}
 </div>
 
 <style>
   .mascot {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 152px;
+    height: 100px;
     position: relative;
+    transition: height 0.2s ease;
+  }
+
+  .mascot.compact {
+    height: 72px;
   }
 
   .mascot-img {
-    height: 152px;
+    height: 100px;
     width: auto;
     opacity: 0;
-    transition: opacity 0.3s ease;
+    transition: opacity 0.3s ease, height 0.2s ease;
     pointer-events: none;
     user-select: none;
+  }
+
+  .mascot.compact .mascot-img {
+    height: 72px;
   }
 
   .mascot-img.visible {
@@ -104,5 +128,47 @@
     color: var(--gray);
     opacity: 0.5;
     pointer-events: none;
+  }
+
+  .mascot-bubble {
+    background: var(--button-elevated);
+    border: 1px solid var(--button-stroke);
+    border-radius: 12px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: var(--secondary);
+    max-width: 260px;
+    text-align: center;
+    margin-top: 8px;
+    position: relative;
+    animation: bubbleFadeIn 200ms ease-out;
+  }
+
+  .mascot-bubble::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 12px;
+    height: 6px;
+    background: var(--button-elevated);
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+  }
+
+  @keyframes bubbleFadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .mascot-bubble {
+      animation: none;
+    }
+
+    .mascot,
+    .mascot-img {
+      transition: none;
+    }
   }
 </style>
