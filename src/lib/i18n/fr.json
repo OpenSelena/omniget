@@ -598,6 +598,9 @@
     "cap_download_queue": "Soumettre des telechargements",
     "install": "Installer",
     "update_available": "Mettre a jour",
-    "update_hint": "v{{version}} disponible"
+    "update_hint": "v{{version}} disponible",
+    "plugin_not_installed": "Plugin non installe",
+    "plugin_install_hint": "Installez ce plugin depuis le Marketplace.",
+    "go_to_marketplace": "Aller au Marketplace"
   }
 }
