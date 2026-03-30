@@ -2,26 +2,38 @@
   import { t } from "$lib/i18n";
 
   let { selectedQuality = $bindable("best"), selectedFormatId } = $props();
+
+  const qualities = [
+    { value: "best", key: "omnibox.quality_best" },
+    { value: "1080p", key: "omnibox.quality_1080p" },
+    { value: "720p", key: "omnibox.quality_720p" },
+    { value: "480p", key: "omnibox.quality_480p" },
+    { value: "360p", key: "omnibox.quality_360p" },
+  ];
 </script>
 
 {#if !selectedFormatId}
-  <div class="quality-select-wrapper">
+  <div class="quality-group">
     <span class="quality-label">{$t('omnibox.quality')}</span>
-    <select class="quality-select" bind:value={selectedQuality}>
-      <option value="best">{$t('omnibox.quality_best')}</option>
-      <option value="1080p">{$t('omnibox.quality_1080p')}</option>
-      <option value="720p">{$t('omnibox.quality_720p')}</option>
-      <option value="480p">{$t('omnibox.quality_480p')}</option>
-      <option value="360p">{$t('omnibox.quality_360p')}</option>
-    </select>
+    <div class="quality-pills">
+      {#each qualities as q}
+        <button
+          class="quality-pill"
+          class:active={selectedQuality === q.value}
+          onclick={() => { selectedQuality = q.value; }}
+        >
+          {$t(q.key)}
+        </button>
+      {/each}
+    </div>
   </div>
 {/if}
 
 <style>
-  .quality-select-wrapper {
+  .quality-group {
     display: flex;
-    align-items: center;
-    gap: var(--padding);
+    flex-direction: column;
+    gap: 6px;
   }
 
   .quality-label {
@@ -30,23 +42,40 @@
     color: var(--gray);
   }
 
-  .quality-select {
-    padding: 6px 28px 6px 10px;
-    font-size: 14.5px;
-    background: var(--button);
-    border: 1px solid var(--input-border);
-    border-radius: calc(var(--border-radius) - 2px);
-    color: var(--secondary);
-    cursor: pointer;
-    appearance: none;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
-    background-repeat: no-repeat;
-    background-position: right 6px center;
-    background-size: 14px;
+  .quality-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
   }
 
-  .quality-select:focus-visible {
-    border-color: var(--secondary);
-    outline: none;
+  .quality-pill {
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--gray);
+    background: var(--button);
+    border: 1px solid transparent;
+    border-radius: calc(var(--border-radius) - 2px);
+    cursor: pointer;
+    white-space: nowrap;
+    box-shadow: var(--button-box-shadow);
+  }
+
+  .quality-pill.active {
+    background: var(--button-elevated);
+    color: var(--secondary);
+    border-color: var(--cta);
+  }
+
+  @media (hover: hover) {
+    .quality-pill:not(.active):hover {
+      background: var(--button-hover);
+      color: var(--secondary);
+    }
+  }
+
+  .quality-pill:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
   }
 </style>
