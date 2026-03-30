@@ -361,6 +361,7 @@ pub fn run() {
             commands::plugins::plugin_command,
             commands::plugins::fetch_marketplace_registry,
             commands::plugins::install_plugin_from_registry,
+            commands::plugins::get_plugin_i18n,
             commands::plugins::check_plugin_updates,
             commands::plugins::update_plugin,
             commands::p2p::p2p_send_file,
