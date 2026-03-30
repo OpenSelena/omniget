@@ -598,6 +598,9 @@
     "cap_download_queue": "提交下载任务",
     "install": "安装",
     "update_available": "更新",
-    "update_hint": "v{{version}} 可用"
+    "update_hint": "v{{version}} 可用",
+    "plugin_not_installed": "插件未安装",
+    "plugin_install_hint": "从 Marketplace 安装此插件即可使用。",
+    "go_to_marketplace": "前往 Marketplace"
   }
 }
