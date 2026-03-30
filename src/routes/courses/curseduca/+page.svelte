@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { invoke } from "@tauri-apps/api/core";
+  import { pluginInvoke } from "$lib/plugin-invoke";
   import { open } from "@tauri-apps/plugin-dialog";
   import CourseCard from "$components/hotmart/CourseCard.svelte";
   import { showToast } from "$lib/stores/toast-store.svelte";
@@ -79,7 +79,7 @@
 
   async function checkSession() {
     try {
-      const result = await invoke<string>("curseduca_check_session");
+      const result = await pluginInvoke<string>("courses", "curseduca_check_session");
       sessionEmail = result;
       loggedIn = true;
       loadCourses();
@@ -94,7 +94,7 @@
     error = "";
     loading = true;
     try {
-      const result = await invoke<string>("curseduca_login", { email, password, siteUrl });
+      const result = await pluginInvoke<string>("courses", "curseduca_login", { email, password, siteUrl });
       sessionEmail = result || email;
       loggedIn = true;
       loadCourses();
@@ -110,7 +110,7 @@
     error = "";
     loading = true;
     try {
-      const result = await invoke<string>("curseduca_login_token", { token: token.trim(), apiKey: apiKey.trim(), siteUrl });
+      const result = await pluginInvoke<string>("courses", "curseduca_login_token", { token: token.trim(), apiKey: apiKey.trim(), siteUrl });
       sessionEmail = result || "Token";
       loggedIn = true;
       loadCourses();
@@ -123,7 +123,7 @@
 
   async function handleLogout() {
     try {
-      await invoke("curseduca_logout");
+      await pluginInvoke("courses", "curseduca_logout");
     } catch {
     }
     loggedIn = false;
@@ -137,7 +137,7 @@
     loadingCourses = true;
     coursesError = "";
     try {
-      courses = await invoke("curseduca_list_courses");
+      courses = await pluginInvoke("courses", "curseduca_list_courses");
       currentPage = 1;
     } catch (e: any) {
       coursesError = typeof e === "string" ? e : e.message ?? $t('hotmart.courses_error');
@@ -183,7 +183,7 @@
     }
 
     try {
-      await invoke("start_curseduca_download", {
+      await pluginInvoke("courses", "start_curseduca_download", {
         courseJson: JSON.stringify(course),
         outputDir,
       });
@@ -201,7 +201,7 @@
     loadingCourses = true;
     coursesError = "";
     try {
-      courses = await invoke("curseduca_refresh_courses");
+      courses = await pluginInvoke("courses", "curseduca_refresh_courses");
       currentPage = 1;
     } catch (e: any) {
       coursesError = typeof e === "string" ? e : e.message ?? $t('hotmart.courses_error');
