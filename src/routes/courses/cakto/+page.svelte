@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { invoke } from "@tauri-apps/api/core";
+  import { pluginInvoke } from "$lib/plugin-invoke";
   import { open } from "@tauri-apps/plugin-dialog";
   import CourseCard from "$components/hotmart/CourseCard.svelte";
   import { showToast } from "$lib/stores/toast-store.svelte";
@@ -77,7 +77,7 @@
 
   async function checkSession() {
     try {
-      const result = await invoke<string>("cakto_check_session");
+      const result = await pluginInvoke<string>("courses", "cakto_check_session");
       sessionEmail = result;
       loggedIn = true;
       loadCourses();
@@ -92,7 +92,7 @@
     error = "";
     loading = true;
     try {
-      const result = await invoke<string>("cakto_login", { email, password });
+      const result = await pluginInvoke<string>("courses", "cakto_login", { email, password });
       sessionEmail = result || email;
       loggedIn = true;
       loadCourses();
@@ -108,7 +108,7 @@
     error = "";
     loading = true;
     try {
-      const result = await invoke<string>("cakto_login_token", { token: token.trim() });
+      const result = await pluginInvoke<string>("courses", "cakto_login_token", { token: token.trim() });
       sessionEmail = result || "Token";
       loggedIn = true;
       loadCourses();
@@ -121,7 +121,7 @@
 
   async function handleLogout() {
     try {
-      await invoke("cakto_logout");
+      await pluginInvoke("courses", "cakto_logout");
     } catch {
     }
     loggedIn = false;
@@ -135,7 +135,7 @@
     loadingCourses = true;
     coursesError = "";
     try {
-      courses = await invoke("cakto_list_courses");
+      courses = await pluginInvoke("courses", "cakto_list_courses");
       currentPage = 1;
     } catch (e: any) {
       coursesError = typeof e === "string" ? e : e.message ?? $t('hotmart.courses_error');
@@ -181,7 +181,7 @@
     }
 
     try {
-      await invoke("start_cakto_download", {
+      await pluginInvoke("courses", "start_cakto_download", {
         courseJson: JSON.stringify(course),
         outputDir,
       });
@@ -199,7 +199,7 @@
     loadingCourses = true;
     coursesError = "";
     try {
-      courses = await invoke("cakto_refresh_courses");
+      courses = await pluginInvoke("courses", "cakto_refresh_courses");
       currentPage = 1;
     } catch (e: any) {
       coursesError = typeof e === "string" ? e : e.message ?? $t('hotmart.courses_error');
