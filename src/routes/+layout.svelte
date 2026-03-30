@@ -20,12 +20,16 @@
   import { needsOnboarding } from "$lib/stores/onboarding-store.svelte";
   import { isYtdlpAvailable, isDepsChecked, refreshYtdlpStatus } from "$lib/stores/dependency-store.svelte";
   import { showToast } from "$lib/stores/toast-store.svelte";
-  import { t } from "$lib/i18n";
-  import { NAV_ITEMS } from "$lib/nav-config";
+  import { t, locale } from "$lib/i18n";
+  import { get } from "svelte/store";
+  import { CORE_NAV_ITEMS, type NavItem } from "$lib/nav-config";
   import type { Snippet } from "svelte";
 
-  const primaryNav = NAV_ITEMS.filter((item) => item.group === "primary");
-  const secondaryNav = NAV_ITEMS.filter((item) => item.group === "secondary");
+  let pluginNavItems = $state<NavItem[]>([]);
+
+  let allNav = $derived([...CORE_NAV_ITEMS, ...pluginNavItems].sort((a, b) => (a.order ?? 50) - (b.order ?? 50)));
+  let primaryNav = $derived(allNav.filter((item) => item.group === "primary"));
+  let secondaryNav = $derived(allNav.filter((item) => item.group === "secondary"));
 
   let ytdlpDismissed = $state(false);
   let ytdlpMissing = $derived(isDepsChecked() && !isYtdlpAvailable());
@@ -72,6 +76,27 @@
     let cleanup: (() => void) | undefined;
     let unlistenExternal: (() => void) | undefined;
     initDownloadListener().then((fn) => (cleanup = fn));
+
+    invoke<{ id: string; enabled: boolean; nav: { route: string; label: Record<string, string>; icon_svg: string | null; group: string; order: number }[] }[]>("list_plugins")
+      .then((plugins) => {
+        const items: NavItem[] = [];
+        for (const p of plugins) {
+          if (!p.enabled) continue;
+          for (const n of p.nav) {
+            items.push({
+              href: n.route,
+              label: n.label[get(locale)] || n.label["en"] || p.id,
+              icon: "plugin",
+              iconSvg: n.icon_svg || undefined,
+              group: n.group === "primary" ? "primary" : "secondary",
+              pluginId: p.id,
+              order: n.order,
+            });
+          }
+        }
+        pluginNavItems = items;
+      })
+      .catch(() => {});
     listen<Omit<ExternalUrlEvent, "id">>("external-url", (event) => {
       handleExternalUrlEvent(event.payload);
     }).then((fn) => {
@@ -113,25 +138,37 @@
 <div class="layout">
   <nav class="sidebar">
     {#each primaryNav as item}
+      {@const itemTitle = item.label || (item.labelKey ? $t(item.labelKey) : '')}
       <a
         href={item.href}
         class="nav-item"
         class:active={isActive(item.href)}
-        title={$t(item.labelKey)}
+        title={itemTitle}
       >
         <span class="indicator"></span>
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          {#if item.icon === "home"}
+          {#if item.iconSvg}
+            {@html item.iconSvg}
+          {:else if item.icon === "home"}
             <path d="M3 12L12 3l9 9" />
             <path d="M5 10v9a1 1 0 001 1h3v-5h6v5h3a1 1 0 001-1v-9" />
           {:else if item.icon === "downloads"}
             <path d="M12 3v12m0 0l-4-4m4 4l4-4" />
             <path d="M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2" />
-          {:else if item.icon === "courses"}
-            <path d="M4 19.5A2.5 2.5 0 016.5 17H20" />
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" />
-            <path d="M8 7h8" />
-            <path d="M8 11h6" />
+          {:else if item.icon === "marketplace"}
+            <path d="M3 21h18" />
+            <path d="M3 7v1a3 3 0 0 0 6 0V7" />
+            <path d="M9 7v1a3 3 0 0 0 6 0V7" />
+            <path d="M15 7v1a3 3 0 0 0 6 0V7" />
+            <path d="M3 7h18l-1.5-4H4.5z" />
+            <path d="M5 21V10" />
+            <path d="M19 21V10" />
+          {:else if item.icon === "settings"}
+            <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <circle cx="12" cy="12" r="3" />
+          {:else}
+            <circle cx="12" cy="12" r="10" />
+            <path d="M12 8v4m0 4h.01" />
           {/if}
         </svg>
         {#if item.badge === "downloads" && counts.badge > 0}
@@ -140,28 +177,27 @@
       </a>
     {/each}
 
-    <div class="nav-divider"></div>
+    {#if secondaryNav.length > 0}
+      <div class="nav-divider"></div>
+    {/if}
 
     {#each secondaryNav as item}
+      {@const itemTitle = item.label || (item.labelKey ? $t(item.labelKey) : '')}
       <a
         href={item.href}
         class="nav-item"
         class:active={isActive(item.href)}
-        title={$t(item.labelKey)}
+        title={itemTitle}
       >
         <span class="indicator"></span>
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          {#if item.icon === "convert"}
-            <path d="M20 10H4l4-4" />
-            <path d="M4 14h16l-4 4" />
-          {:else if item.icon === "telegram"}
-            <path d="M21 5L2 12.5l7 1M21 5l-5.5 15-4.5-7.5M21 5L9 13.5" />
-          {:else if item.icon === "settings"}
-            <path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <circle cx="12" cy="12" r="3" />
+          {#if item.iconSvg}
+            {@html item.iconSvg}
           {:else if item.icon === "about"}
             <circle cx="12" cy="12" r="10" />
             <path d="M12 16v-4m0-4h.01" />
+          {:else}
+            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
           {/if}
         </svg>
       </a>
