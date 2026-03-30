@@ -125,6 +125,27 @@ pub fn get_loaded_plugin_manifests(
 }
 
 #[tauri::command]
+pub fn get_plugin_i18n(
+    state: tauri::State<'_, Arc<tokio::sync::Mutex<PluginManager>>>,
+    plugin_id: String,
+    locale: String,
+) -> Result<serde_json::Value, String> {
+    let manager = state.blocking_lock();
+    let i18n_dir = manager.plugins_dir().join(&plugin_id).join("i18n");
+    let locale_file = i18n_dir.join(format!("{}.json", locale));
+    if !locale_file.exists() {
+        let fallback = i18n_dir.join("en.json");
+        if !fallback.exists() {
+            return Ok(serde_json::json!({}));
+        }
+        let content = std::fs::read_to_string(&fallback).map_err(|e| e.to_string())?;
+        return serde_json::from_str(&content).map_err(|e| e.to_string());
+    }
+    let content = std::fs::read_to_string(&locale_file).map_err(|e| e.to_string())?;
+    serde_json::from_str(&content).map_err(|e| e.to_string())
+}
+
+#[tauri::command]
 pub async fn plugin_command(
     state: tauri::State<'_, Arc<tokio::sync::Mutex<PluginManager>>>,
     plugin_id: String,
