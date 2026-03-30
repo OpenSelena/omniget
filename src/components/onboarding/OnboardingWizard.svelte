@@ -13,13 +13,21 @@
     version: string | null;
   };
 
-  const TOTAL_STEPS = 4;
+  const TOTAL_STEPS = 6;
+
+  const SUGGESTED_PLUGINS = [
+    { id: "courses", name: "Course Downloader", desc: "Hotmart, Udemy, Kiwify, Teachable, Kajabi, MasterClass and 30+ more" },
+    { id: "telegram", name: "Telegram Downloader", desc: "Photos, videos, files from channels and groups" },
+    { id: "convert", name: "Media Converter", desc: "Convert between video and audio formats with GPU acceleration" },
+  ];
 
   let step = $state(1);
   let dialogEl = $state<HTMLDialogElement | null>(null);
   let deps = $state<DependencyStatus[]>([]);
   let installingDep = $state<string | null>(null);
   let settings = $derived(getSettings());
+  let selectedPlugins = $state<Set<string>>(new Set(["courses"]));
+  let hotkeyEnabled = $state(false);
 
   $effect(() => {
     if (dialogEl && !dialogEl.open) {
@@ -87,6 +95,9 @@
   }
 
   async function finish() {
+    if (hotkeyEnabled) {
+      await updateSettings({ download: { hotkey_enabled: true } });
+    }
     await completeOnboarding();
   }
 
@@ -132,7 +143,28 @@
               <option value="ja">日本語</option>
               <option value="it">Italiano</option>
               <option value="fr">Français</option>
+              <option value="el">Ελληνικά</option>
             </select>
+          </div>
+          <div class="theme-row">
+            <span class="language-label">{$t("onboarding.theme_label")}</span>
+            <div class="theme-options">
+              <button
+                class="theme-btn"
+                class:active={settings?.appearance.theme === "system"}
+                onclick={() => updateSettings({ appearance: { theme: "system" } })}
+              >{$t("onboarding.theme_system")}</button>
+              <button
+                class="theme-btn"
+                class:active={settings?.appearance.theme === "light"}
+                onclick={() => updateSettings({ appearance: { theme: "light" } })}
+              >{$t("onboarding.theme_light")}</button>
+              <button
+                class="theme-btn"
+                class:active={settings?.appearance.theme === "dark"}
+                onclick={() => updateSettings({ appearance: { theme: "dark" } })}
+              >{$t("onboarding.theme_dark")}</button>
+            </div>
           </div>
         </div>
       {:else if step === 2}
@@ -196,6 +228,59 @@
           {/if}
         </div>
       {:else if step === 4}
+        <div class="step step-plugins">
+          <div class="step-icon">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+            </svg>
+          </div>
+          <h2>{$t("onboarding.plugins_title")}</h2>
+          <p class="step-desc">{$t("onboarding.plugins_desc")}</p>
+          <div class="plugin-suggestions">
+            {#each SUGGESTED_PLUGINS as plugin}
+              <button
+                class="plugin-suggestion"
+                class:selected={selectedPlugins.has(plugin.id)}
+                onclick={() => {
+                  if (selectedPlugins.has(plugin.id)) {
+                    selectedPlugins.delete(plugin.id);
+                    selectedPlugins = new Set(selectedPlugins);
+                  } else {
+                    selectedPlugins.add(plugin.id);
+                    selectedPlugins = new Set(selectedPlugins);
+                  }
+                }}
+              >
+                <span class="plugin-check">{selectedPlugins.has(plugin.id) ? "✓" : ""}</span>
+                <div class="plugin-text">
+                  <span class="plugin-name">{plugin.name}</span>
+                  <span class="plugin-desc">{plugin.desc}</span>
+                </div>
+              </button>
+            {/each}
+          </div>
+        </div>
+
+      {:else if step === 5}
+        <div class="step step-hotkey">
+          <div class="step-icon">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="4" width="20" height="16" rx="2" />
+              <path d="M6 8h.01M10 8h.01M14 8h.01M18 8h.01M8 12h.01M12 12h.01M16 12h.01M6 16h12" />
+            </svg>
+          </div>
+          <h2>{$t("onboarding.hotkey_title")}</h2>
+          <p class="step-desc">{$t("onboarding.hotkey_desc")}</p>
+          <button
+            class="hotkey-toggle"
+            class:on={hotkeyEnabled}
+            onclick={() => { hotkeyEnabled = !hotkeyEnabled; }}
+          >
+            <span class="hotkey-toggle-label">{hotkeyEnabled ? $t("onboarding.hotkey_on") : $t("onboarding.hotkey_off")}</span>
+          </button>
+        </div>
+
+      {:else if step === 6}
         <div class="step step-done">
           <Mascot emotion="idle" />
           <h2>{$t("onboarding.done_title")}</h2>
@@ -591,5 +676,108 @@
   .back-btn:focus-visible {
     outline: var(--focus-ring);
     outline-offset: var(--focus-ring-offset);
+  }
+
+  .plugin-suggestions {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .plugin-suggestion {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--button);
+    border: 2px solid transparent;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    text-align: left;
+    box-shadow: var(--button-box-shadow);
+  }
+
+  .plugin-suggestion.selected {
+    border-color: var(--cta);
+    background: var(--button-elevated);
+  }
+
+  .plugin-check {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--cta);
+    flex-shrink: 0;
+  }
+
+  .plugin-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .plugin-name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--secondary);
+  }
+
+  .plugin-desc {
+    font-size: 11.5px;
+    color: var(--gray);
+  }
+
+  .hotkey-toggle {
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    border: 2px solid var(--input-border);
+    border-radius: var(--border-radius);
+    background: var(--button);
+    color: var(--gray);
+    cursor: pointer;
+  }
+
+  .hotkey-toggle.on {
+    border-color: var(--cta);
+    background: var(--cta);
+    color: var(--on-cta);
+  }
+
+  .theme-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--padding);
+    width: 100%;
+  }
+
+  .theme-options {
+    display: flex;
+    gap: 4px;
+    background: var(--button);
+    border-radius: var(--border-radius);
+    padding: 3px;
+  }
+
+  .theme-btn {
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--gray);
+    background: none;
+    border: none;
+    border-radius: calc(var(--border-radius) - 3px);
+    cursor: pointer;
+  }
+
+  .theme-btn.active {
+    background: var(--button-elevated);
+    color: var(--secondary);
   }
 </style>
