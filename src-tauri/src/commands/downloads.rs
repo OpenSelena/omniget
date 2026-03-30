@@ -1,7 +1,4 @@
 use serde::Serialize;
-use tauri::Emitter;
-use tokio::sync::mpsc;
-use tokio_util::sync::CancellationToken;
 
 use crate::core::queue::{self, emit_queue_state_from_state, QueueItemInfo};
 use crate::core::url_parser;
@@ -13,17 +10,6 @@ use crate::AppState;
 use crate::core::ytdlp;
 #[cfg(not(target_os = "android"))]
 use crate::models::media::FormatInfo;
-#[cfg(not(target_os = "android"))]
-use crate::platforms::hotmart::api::Course;
-#[cfg(not(target_os = "android"))]
-use crate::platforms::hotmart::downloader::HotmartDownloader;
-
-#[derive(Clone, Serialize)]
-struct DownloadCompleteEvent {
-    course_name: String,
-    success: bool,
-    error: Option<String>,
-}
 
 #[derive(Clone, Serialize)]
 pub struct PlatformInfo {
@@ -548,113 +534,3 @@ pub async fn reveal_file(path: String) -> Result<(), String> {
     Ok(())
 }
 
-#[cfg(not(target_os = "android"))]
-#[tauri::command]
-pub async fn start_course_download(
-    app: tauri::AppHandle,
-    state: tauri::State<'_, AppState>,
-    course_json: String,
-    output_dir: String,
-) -> Result<String, String> {
-    let _timer_start = std::time::Instant::now();
-    let course: Course =
-        serde_json::from_str(&course_json).map_err(|e| format!("Invalid JSON: {}", e))?;
-
-    let course_name = course.name.clone();
-    let course_id = course.id;
-    let session = state.hotmart_session.clone();
-    let active = state.active_downloads.clone();
-
-    let cancel_token = CancellationToken::new();
-
-    {
-        let mut map = active.lock().await;
-        if map.contains_key(&course_id) {
-            return Err("Download already in progress for this course".to_string());
-        }
-        map.insert(course_id, cancel_token.clone());
-    }
-
-    let settings = config::load_settings(&app);
-
-    tokio::spawn(async move {
-        let downloader = HotmartDownloader::new(
-            session,
-            settings.download,
-            settings.advanced.max_concurrent_segments,
-            settings.advanced.max_retries,
-            settings.advanced.concurrent_fragments,
-        );
-        let (tx, mut rx) = mpsc::channel(32);
-
-        let app_clone = app.clone();
-        let progress_forwarder = tokio::spawn(async move {
-            while let Some(progress) = rx.recv().await {
-                let _ = app_clone.emit("download-progress", &progress);
-            }
-        });
-
-        let result = downloader
-            .download_full_course(&course, &output_dir, tx, cancel_token)
-            .await;
-
-        let _ = progress_forwarder.await;
-
-        {
-            let mut map = active.lock().await;
-            map.remove(&course_id);
-        }
-
-        match result {
-            Ok(()) => {
-                let _ = app.emit(
-                    "download-complete",
-                    &DownloadCompleteEvent {
-                        course_name: course.name,
-                        success: true,
-                        error: None,
-                    },
-                );
-            }
-            Err(e) => {
-                tracing::error!("Download error for '{}': {}", course.name, e);
-                let _ = app.emit(
-                    "download-complete",
-                    &DownloadCompleteEvent {
-                        course_name: course.name,
-                        success: false,
-                        error: Some(e.to_string()),
-                    },
-                );
-            }
-        }
-    });
-
-    tracing::debug!("[perf] start_course_download took {:?}", _timer_start.elapsed());
-    Ok(format!("Download started: {}", course_name))
-}
-
-#[cfg(not(target_os = "android"))]
-#[tauri::command]
-pub async fn cancel_course_download(
-    state: tauri::State<'_, AppState>,
-    course_id: u64,
-) -> Result<String, String> {
-    let mut map = state.active_downloads.lock().await;
-    match map.remove(&course_id) {
-        Some(token) => {
-            token.cancel();
-            Ok("Download cancelled".to_string())
-        }
-        None => Err("No active download for this course".to_string()),
-    }
-}
-
-#[cfg(not(target_os = "android"))]
-#[tauri::command]
-pub async fn get_active_downloads(
-    state: tauri::State<'_, AppState>,
-) -> Result<Vec<u64>, String> {
-    let map = state.active_downloads.lock().await;
-    Ok(map.keys().copied().collect())
-}
