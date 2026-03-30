@@ -4,9 +4,9 @@
   let { downloadMode = $bindable("auto" as "auto" | "audio" | "mute"), onChange } = $props();
 </script>
 
-<div class="mode-switcher">
+<div class="mode-group">
   <button
-    class="button mode-btn"
+    class="mode-btn"
     class:active={downloadMode === "auto"}
     onclick={() => { downloadMode = "auto"; onChange?.(); }}
   >
@@ -16,7 +16,7 @@
     {$t('omnibox.mode_auto')}
   </button>
   <button
-    class="button mode-btn"
+    class="mode-btn"
     class:active={downloadMode === "audio"}
     onclick={() => { downloadMode = "audio"; onChange?.(); }}
   >
@@ -28,7 +28,7 @@
     {$t('omnibox.mode_audio')}
   </button>
   <button
-    class="button mode-btn"
+    class="mode-btn"
     class:active={downloadMode === "mute"}
     onclick={() => { downloadMode = "mute"; onChange?.(); }}
   >
@@ -42,15 +42,54 @@
 </div>
 
 <style>
-  .mode-switcher {
+  .mode-group {
     display: flex;
-    gap: var(--padding);
+    background: var(--button);
+    border-radius: var(--border-radius);
+    padding: 3px;
+    gap: 2px;
   }
 
   .mode-btn {
+    flex: 1;
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
-    font-size: 14.5px;
+    padding: 8px 12px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--gray);
+    background: none;
+    border: none;
+    border-radius: calc(var(--border-radius) - 3px);
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .mode-btn.active {
+    background: var(--cta);
+    color: var(--on-cta);
+  }
+
+  .mode-btn.active svg {
+    color: var(--on-cta);
+  }
+
+  @media (hover: hover) {
+    .mode-btn:not(.active):hover {
+      color: var(--secondary);
+      background: var(--button-elevated);
+    }
+  }
+
+  .mode-btn:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .mode-btn svg {
+    flex-shrink: 0;
+    pointer-events: none;
   }
 </style>
