@@ -134,6 +134,16 @@
         </div>
 
         <div class="formats-list">
+          <div class="format-header">
+            <span>ID</span>
+            <span>{$t('omnibox.fmt_type')}</span>
+            <span>{$t('omnibox.fmt_quality')}</span>
+            <span>{$t('omnibox.fmt_streams')}</span>
+            <span>{$t('omnibox.fmt_video')}</span>
+            <span>{$t('omnibox.fmt_audio')}</span>
+            <span>{$t('omnibox.fmt_size')}</span>
+            <span>{$t('omnibox.fmt_speed')}</span>
+          </div>
           {#each formats as fmt (fmt.format_id)}
             <button
               class="format-row"
@@ -273,6 +283,23 @@
     display: none;
   }
 
+  .format-header {
+    display: grid;
+    grid-template-columns: 48px 48px 80px 32px 64px 64px 64px 48px;
+    gap: 2px;
+    padding: calc(var(--padding) / 2) calc(var(--padding) / 2 + 4px);
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--gray);
+    opacity: 0.7;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid var(--content-border);
+    position: sticky;
+    top: 0;
+    background: var(--button);
+  }
+
   .format-row {
     display: grid;
     grid-template-columns: 48px 48px 80px 32px 64px 64px 64px 48px;
@@ -357,9 +384,14 @@
   }
 
   @media (max-width: 535px) {
+    .format-header,
     .format-row {
       grid-template-columns: 40px 40px 64px 24px 56px 56px 56px 40px;
       font-size: 10px;
+    }
+
+    .format-header {
+      font-size: 9px;
     }
   }
 
