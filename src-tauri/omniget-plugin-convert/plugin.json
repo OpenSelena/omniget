@@ -1,0 +1,29 @@
+{
+  "id": "convert",
+  "name": "Media Converter",
+  "version": "0.1.0",
+  "min_omniget_version": "0.4.0",
+  "description": "Convert videos and audio between formats with FFmpeg and GPU hardware acceleration.",
+  "author": "tonhowtf",
+  "license": "GPL-3.0",
+  "homepage": "https://github.com/tonhowtf/omniget-plugin-convert",
+  "icon": "assets/icon.png",
+  "nav": [
+    {
+      "route": "/convert",
+      "label": { "en": "Convert", "pt": "Converter", "zh": "转换", "ja": "変換", "fr": "Convertir", "it": "Converti", "el": "Μετατροπή" },
+      "icon_svg": "M20 10H4l4-4 M4 14h16l-4 4",
+      "group": "secondary",
+      "order": 25
+    }
+  ],
+  "events": {
+    "progress": ["convert-progress"],
+    "complete": ["convert-complete"]
+  },
+  "capabilities": [
+    "core:events",
+    "core:toast",
+    "core:tools"
+  ]
+}
