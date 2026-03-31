@@ -65,7 +65,6 @@ omniget-core = { path = "omniget-core", features = ["desktop"] }
 omniget-plugin-sdk = { path = "omniget-plugin-sdk" }
 omniget-plugin-courses = { path = "omniget-plugin-courses" }
 omniget-plugin-telegram = { path = "omniget-plugin-telegram" }
-omniget-plugin-convert = { path = "omniget-plugin-convert" }
 libloading = "0.8"
 which = "7"
 librqbit = "8.1.1"
