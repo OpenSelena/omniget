@@ -80,7 +80,7 @@ impl PluginManager {
             .get(plugin_id)
             .ok_or_else(|| format!("Plugin '{}' not loaded", plugin_id))?;
 
-        loaded.plugin.handle_command(command, args).await
+        loaded.plugin.handle_command(command.to_string(), args).await
     }
 
     pub fn save_installed(&self) -> anyhow::Result<()> {
