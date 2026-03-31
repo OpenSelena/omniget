@@ -278,7 +278,6 @@ pub fn run() {
         )
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(omniget_plugin_courses::init())
-        .plugin(omniget_plugin_telegram::init())
         .setup(|app| {
             let settings = storage::config::load_settings(app.handle());
             core::http_client::init_proxy(settings.proxy.clone());
@@ -618,22 +617,6 @@ pub fn run() {
             omniget_plugin_courses::commands::voomp::voomp_list_courses,
             omniget_plugin_courses::commands::voomp::voomp_refresh_courses,
             omniget_plugin_courses::commands::voomp::start_voomp_course_download,
-            omniget_plugin_telegram::commands::telegram::telegram_check_session,
-            omniget_plugin_telegram::commands::telegram::telegram_qr_start,
-            omniget_plugin_telegram::commands::telegram::telegram_qr_poll,
-            omniget_plugin_telegram::commands::telegram::telegram_send_code,
-            omniget_plugin_telegram::commands::telegram::telegram_verify_code,
-            omniget_plugin_telegram::commands::telegram::telegram_verify_2fa,
-            omniget_plugin_telegram::commands::telegram::telegram_logout,
-            omniget_plugin_telegram::commands::telegram::telegram_list_chats,
-            omniget_plugin_telegram::commands::telegram::telegram_list_media,
-            omniget_plugin_telegram::commands::telegram::telegram_download_media,
-            omniget_plugin_telegram::commands::telegram::telegram_download_batch,
-            omniget_plugin_telegram::commands::telegram::telegram_cancel_batch,
-            omniget_plugin_telegram::commands::telegram::telegram_get_thumbnail,
-            omniget_plugin_telegram::commands::telegram::telegram_search_media,
-            omniget_plugin_telegram::commands::telegram::telegram_get_chat_photo,
-            omniget_plugin_telegram::commands::telegram::telegram_clear_thumbnail_cache,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
