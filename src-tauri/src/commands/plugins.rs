@@ -64,16 +64,44 @@ pub fn list_plugins(
                         })
                         .collect(),
                 },
-                None => PluginInfo {
-                    id: entry.id.clone(),
-                    name: entry.id.clone(),
-                    version: entry.version.clone(),
-                    description: String::new(),
-                    author: String::new(),
-                    enabled: entry.enabled,
-                    loaded: false,
-                    icon: None,
-                    nav: Vec::new(),
+                None => {
+                    let manifest_path = manager.plugins_dir().join(&entry.id).join("plugin.json");
+                    let manifest: Option<omniget_plugin_sdk::PluginManifest> = std::fs::read_to_string(&manifest_path)
+                        .ok()
+                        .and_then(|s| serde_json::from_str(&s).ok());
+                    match manifest {
+                        Some(m) => PluginInfo {
+                            id: entry.id.clone(),
+                            name: m.name,
+                            version: m.version,
+                            description: m.description,
+                            author: m.author,
+                            enabled: entry.enabled,
+                            loaded: false,
+                            icon: m.icon,
+                            nav: m.nav.iter().map(|n| PluginNavInfo {
+                                route: n.route.clone(),
+                                label: n.label.clone(),
+                                icon_svg: n.icon_svg.clone(),
+                                group: match n.group {
+                                    omniget_plugin_sdk::NavGroup::Primary => "primary".into(),
+                                    omniget_plugin_sdk::NavGroup::Secondary => "secondary".into(),
+                                },
+                                order: n.order,
+                            }).collect(),
+                        },
+                        None => PluginInfo {
+                            id: entry.id.clone(),
+                            name: entry.id.clone(),
+                            version: entry.version.clone(),
+                            description: String::new(),
+                            author: String::new(),
+                            enabled: entry.enabled,
+                            loaded: false,
+                            icon: None,
+                            nav: Vec::new(),
+                        },
+                    }
                 },
             }
         })
@@ -178,7 +206,13 @@ pub struct MarketplaceEntry {
 pub async fn fetch_marketplace_registry(
     state: tauri::State<'_, Arc<tokio::sync::Mutex<PluginManager>>>,
 ) -> Result<Vec<MarketplaceEntry>, String> {
-    let response = reqwest::get(REGISTRY_URL)
+    let client = reqwest::Client::builder()
+        .user_agent("OmniGet")
+        .timeout(std::time::Duration::from_secs(15))
+        .build()
+        .map_err(|e| e.to_string())?;
+
+    let response = client.get(REGISTRY_URL).send()
         .await
         .map_err(|e| format!("Failed to fetch registry: {}", e))?;
 
@@ -195,8 +229,10 @@ pub async fn fetch_marketplace_registry(
     let registry: RegistryFile =
         serde_json::from_str(&body).map_err(|e| format!("Invalid registry: {}", e))?;
 
-    let manager = state.lock().await;
-    let installed = manager.installed_plugins();
+    let installed = {
+        let manager = state.lock().await;
+        manager.installed_plugins().to_vec()
+    };
 
     let entries = registry
         .plugins
@@ -348,6 +384,7 @@ pub async fn check_plugin_updates(
 
     let client = reqwest::Client::builder()
         .user_agent("OmniGet")
+        .timeout(std::time::Duration::from_secs(15))
         .build()
         .map_err(|e| e.to_string())?;
 
