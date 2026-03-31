@@ -148,7 +148,9 @@
         <span class="indicator"></span>
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           {#if item.iconSvg}
-            {@html item.iconSvg}
+            {#each item.iconSvg.split(' M').map((d, i) => i === 0 ? d : 'M' + d) as pathD}
+              <path d={pathD} />
+            {/each}
           {:else if item.icon === "home"}
             <path d="M3 12L12 3l9 9" />
             <path d="M5 10v9a1 1 0 001 1h3v-5h6v5h3a1 1 0 001-1v-9" />
@@ -192,7 +194,9 @@
         <span class="indicator"></span>
         <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           {#if item.iconSvg}
-            {@html item.iconSvg}
+            {#each item.iconSvg.split(' M').map((d, i) => i === 0 ? d : 'M' + d) as pathD}
+              <path d={pathD} />
+            {/each}
           {:else if item.icon === "about"}
             <circle cx="12" cy="12" r="10" />
             <path d="M12 16v-4m0-4h.01" />
