@@ -356,7 +356,8 @@
     "update_hint": "v{{version}} disponivel",
     "plugin_not_installed": "Plugin nao instalado",
     "plugin_install_hint": "Instale este plugin pelo Marketplace para usa-lo.",
-    "go_to_marketplace": "Ir para o Marketplace"
+    "go_to_marketplace": "Ir para o Marketplace",
+    "plugin_restart_hint": "Reinicie o OmniGet para carregar este plugin."
   },
   "services": {
     "title": "Suporta YouTube, Instagram e mais 1000 sites",

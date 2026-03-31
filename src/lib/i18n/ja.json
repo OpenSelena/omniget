@@ -601,6 +601,7 @@
     "update_hint": "v{{version}} が利用可能",
     "plugin_not_installed": "プラグイン未インストール",
     "plugin_install_hint": "マーケットプレイスからインストールしてください。",
-    "go_to_marketplace": "マーケットプレイスへ"
+    "go_to_marketplace": "マーケットプレイスへ",
+    "plugin_restart_hint": "このプラグインを読み込むにはOmniGetを再起動してください。"
   }
 }

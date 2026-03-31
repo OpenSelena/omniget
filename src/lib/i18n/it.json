@@ -601,6 +601,7 @@
     "update_hint": "v{{version}} disponibile",
     "plugin_not_installed": "Plugin non installato",
     "plugin_install_hint": "Installa questo plugin dal Marketplace.",
-    "go_to_marketplace": "Vai al Marketplace"
+    "go_to_marketplace": "Vai al Marketplace",
+    "plugin_restart_hint": "Riavvia OmniGet per caricare questo plugin."
   }
 }
