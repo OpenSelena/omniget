@@ -47,7 +47,7 @@ impl PluginManager {
                     self.loaded.insert(entry.id.clone(), loaded);
                 }
                 Err(e) => {
-                    tracing::error!("Failed to load plugin {}: {e}", entry.id);
+                    tracing::debug!("Plugin {} not loaded dynamically: {e}", entry.id);
                 }
             }
         }
