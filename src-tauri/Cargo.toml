@@ -1,5 +1,5 @@
 [workspace]
-members = [".", "omniget-core", "omniget-plugin-sdk"]
+members = [".", "omniget-core", "omniget-plugin-sdk", "omniget-plugin-courses", "omniget-plugin-telegram", "omniget-plugin-convert"]
 resolver = "2"
 
 [package]
@@ -63,6 +63,9 @@ sha2 = "0.10"
 open = "5"
 omniget-core = { path = "omniget-core", features = ["desktop"] }
 omniget-plugin-sdk = { path = "omniget-plugin-sdk" }
+omniget-plugin-courses = { path = "omniget-plugin-courses" }
+omniget-plugin-telegram = { path = "omniget-plugin-telegram" }
+omniget-plugin-convert = { path = "omniget-plugin-convert" }
 libloading = "0.8"
 which = "7"
 librqbit = "8.1.1"
