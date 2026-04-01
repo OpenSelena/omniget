@@ -1,5 +1,5 @@
 [workspace]
-members = [".", "omniget-core", "omniget-plugin-sdk", "omniget-plugin-courses", "omniget-plugin-telegram", "omniget-plugin-convert"]
+members = [".", "omniget-core", "omniget-plugin-sdk"]
 resolver = "2"
 
 [package]
@@ -30,7 +30,6 @@ async-trait = "0.1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 chromiumoxide = { git = "https://github.com/mattsse/chromiumoxide", rev = "6f2392f", default-features = false, features = ["tokio-runtime"] }
-scraper = "0.21"
 regex = "1"
 m3u8-rs = "6"
 aes = "0.8"
@@ -48,11 +47,6 @@ url = "2"
 urlencoding = "2"
 rand = "0.10.0"
 base64 = "0.22.1"
-grammers-client = "0.8"
-grammers-session = "0.8"
-grammers-tl-types = "0.8"
-grammers-mtsender = "0.8"
-qrcode = { version = "0.14", default-features = false, features = ["svg"] }
 os_info = "3"
 sys-locale = "0.3"
 filetime = "0.2.27"
@@ -63,8 +57,6 @@ sha2 = "0.10"
 open = "5"
 omniget-core = { path = "omniget-core", features = ["desktop"] }
 omniget-plugin-sdk = { path = "omniget-plugin-sdk" }
-omniget-plugin-courses = { path = "omniget-plugin-courses" }
-omniget-plugin-telegram = { path = "omniget-plugin-telegram" }
 libloading = "0.8"
 which = "7"
 librqbit = "8.1.1"
