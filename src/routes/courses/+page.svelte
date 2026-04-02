@@ -3,36 +3,28 @@
   import { invoke } from "@tauri-apps/api/core";
   import { pluginInvoke } from "$lib/plugin-invoke";
   import { onMount } from "svelte";
-  import { COURSE_PLATFORMS, type CoursePlatform } from "$lib/courses/platforms";
   import { PLATFORM_ICONS, DEFAULT_ICON } from "./platform-icons";
   import { t } from "$lib/i18n";
 
-  type PluginStatus = "checking" | "ready" | "needs-restart" | "not-installed";
+  type PlatformConfig = {
+    id: string;
+    name: string;
+    color: string;
+    icon: string;
+    commands: { check_session: string };
+  };
+
+  type PluginStatus = "checking" | "ready" | "not-installed" | "needs-restart";
   let pluginStatus = $state<PluginStatus>("checking");
 
+  let platforms: PlatformConfig[] = $state([]);
   let searchQuery = $state("");
   let authStatus: Record<string, { checked: boolean; email: string | null; error: boolean }> = $state({});
 
-  let enabledPlatforms = $derived(
-    COURSE_PLATFORMS.filter((p) => p.enabled)
-  );
-
-  let disabledPlatforms = $derived(
-    COURSE_PLATFORMS.filter((p) => !p.enabled)
-  );
-
-  let filteredEnabled = $derived(
+  let filteredPlatforms = $derived(
     searchQuery.trim() === ""
-      ? enabledPlatforms
-      : enabledPlatforms.filter((p) =>
-          p.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
-        )
-  );
-
-  let filteredDisabled = $derived(
-    searchQuery.trim() === ""
-      ? disabledPlatforms
-      : disabledPlatforms.filter((p) =>
+      ? platforms
+      : platforms.filter((p) =>
           p.name.toLowerCase().includes(searchQuery.trim().toLowerCase())
         )
   );
@@ -50,26 +42,29 @@
       pluginStatus = "ready";
     }
 
-    for (const platform of COURSE_PLATFORMS) {
-      if (platform.enabled && platform.authCheckCommand) {
-        authStatus[platform.id] = { checked: false, email: null, error: false };
-        pluginInvoke<string>("courses", platform.authCheckCommand!)
-          .then((email) => {
-            authStatus[platform.id] = { checked: true, email, error: false };
-          })
-          .catch(() => {
-            authStatus[platform.id] = { checked: true, email: null, error: true };
-          });
-      }
+    try {
+      platforms = await pluginInvoke<PlatformConfig[]>("courses", "get_platforms");
+    } catch {
+      platforms = [];
+    }
+
+    for (const platform of platforms) {
+      authStatus[platform.id] = { checked: false, email: null, error: false };
+      pluginInvoke<string>("courses", platform.commands.check_session)
+        .then((email) => {
+          authStatus[platform.id] = { checked: true, email, error: false };
+        })
+        .catch(() => {
+          authStatus[platform.id] = { checked: true, email: null, error: true };
+        });
     }
   });
 
-  function handleCardClick(platform: CoursePlatform) {
-    if (!platform.enabled) return;
-    goto(platform.route);
+  function handleCardClick(platform: PlatformConfig) {
+    goto(`/courses/${platform.id}`);
   }
 
-  function handleKeyDown(e: KeyboardEvent, platform: CoursePlatform) {
+  function handleKeyDown(e: KeyboardEvent, platform: PlatformConfig) {
     if (e.key === "Enter" || e.key === " ") {
       e.preventDefault();
       handleCardClick(platform);
@@ -110,7 +105,7 @@
   />
 
   <div class="platform-grid">
-    {#each filteredEnabled as platform (platform.id)}
+    {#each filteredPlatforms as platform (platform.id)}
       <div
         class="platform-card"
         role="button"
@@ -139,26 +134,6 @@
       </div>
     {/each}
   </div>
-
-  {#if filteredDisabled.length > 0}
-    <details class="coming-soon-section">
-      <summary class="coming-soon-toggle">
-        {$t("courses.coming_soon")} ({filteredDisabled.length})
-      </summary>
-      <div class="coming-soon-list">
-        {#each filteredDisabled as platform (platform.id)}
-          <div class="coming-soon-item">
-            <div class="coming-soon-icon" style="--platform-color: {platform.color}">
-              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-                {@html getIconSvg(platform.icon)}
-              </svg>
-            </div>
-            <span>{platform.name}</span>
-          </div>
-        {/each}
-      </div>
-    </details>
-  {/if}
 </div>
 {/if}
 
@@ -197,9 +172,7 @@
     outline-offset: var(--focus-ring-offset);
   }
 
-  .search-input::placeholder {
-    color: var(--gray);
-  }
+  .search-input::placeholder { color: var(--gray); }
 
   .platform-grid {
     display: grid;
@@ -230,9 +203,7 @@
     }
   }
 
-  .platform-card:active {
-    transform: translateY(0);
-  }
+  .platform-card:active { transform: translateY(0); }
 
   .platform-card:focus-visible {
     outline: var(--focus-ring);
@@ -273,17 +244,9 @@
     flex-shrink: 0;
   }
 
-  .status-dot.connected {
-    background: var(--green);
-  }
-
-  .status-dot.disconnected {
-    background: var(--gray);
-  }
-
-  .status-dot.error {
-    background: var(--red);
-  }
+  .status-dot.connected { background: var(--green); }
+  .status-dot.disconnected { background: var(--gray); }
+  .status-dot.error { background: var(--red); }
 
   .status-email {
     overflow: hidden;
@@ -292,73 +255,12 @@
     max-width: 140px;
   }
 
-  .coming-soon-section {
-    width: 100%;
-    max-width: 900px;
-  }
-
-  .coming-soon-toggle {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--gray);
-    cursor: pointer;
-    list-style: none;
-    user-select: none;
-  }
-
-  .coming-soon-toggle::-webkit-details-marker {
-    display: none;
-  }
-
-  .coming-soon-toggle::marker {
-    content: "";
-  }
-
-  @media (hover: hover) {
-    .coming-soon-toggle:hover {
-      color: var(--secondary);
-    }
-  }
-
-  .coming-soon-list {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    padding-top: var(--padding);
-  }
-
-  .coming-soon-item {
-    display: flex;
-    align-items: center;
-    gap: calc(var(--padding) * 0.75);
-    padding: 6px var(--padding);
-    font-size: 13px;
-    color: var(--gray);
-    border-radius: calc(var(--border-radius) - 4px);
-  }
-
-  .coming-soon-icon {
-    width: 28px;
-    height: 28px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 6px;
-    background: color-mix(in srgb, var(--platform-color) 10%, transparent);
-    color: var(--platform-color);
-    opacity: 0.5;
-  }
-
   @media (max-width: 535px) {
-    .platform-grid {
-      grid-template-columns: repeat(2, 1fr);
-    }
+    .platform-grid { grid-template-columns: repeat(2, 1fr); }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .platform-card {
-      transition: none;
-    }
+    .platform-card { transition: none; }
   }
 
   .plugin-guard {
