@@ -3,7 +3,6 @@ pub mod diagnostics;
 pub mod downloads;
 pub mod integration;
 pub mod p2p;
-pub mod platform_auth;
 pub mod plugins;
 pub mod settings;
 
