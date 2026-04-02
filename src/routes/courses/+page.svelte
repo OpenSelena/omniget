@@ -1,6 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { invoke } from "@tauri-apps/api/core";
+  import { pluginInvoke } from "$lib/plugin-invoke";
   import { onMount } from "svelte";
   import { COURSE_PLATFORMS, type CoursePlatform } from "$lib/courses/platforms";
   import { PLATFORM_ICONS, DEFAULT_ICON } from "./platform-icons";
@@ -52,7 +53,7 @@
     for (const platform of COURSE_PLATFORMS) {
       if (platform.enabled && platform.authCheckCommand) {
         authStatus[platform.id] = { checked: false, email: null, error: false };
-        invoke<string>(platform.authCheckCommand)
+        pluginInvoke<string>("courses", platform.authCheckCommand!)
           .then((email) => {
             authStatus[platform.id] = { checked: true, email, error: false };
           })
