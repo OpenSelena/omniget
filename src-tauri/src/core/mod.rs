@@ -15,7 +15,6 @@ pub use omniget_core::core::dependencies;
 pub use omniget_core::core::ffmpeg;
 pub use omniget_core::core::ytdlp;
 
-pub mod auth;
 pub mod events;
 pub mod url_parser;
 pub mod queue;
