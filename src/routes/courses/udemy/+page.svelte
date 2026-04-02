@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { invoke } from "@tauri-apps/api/core";
+  import { pluginInvoke } from "$lib/plugin-invoke";
   import { listen } from "@tauri-apps/api/event";
   import { open } from "@tauri-apps/plugin-dialog";
   import CourseCard from "$components/hotmart/CourseCard.svelte";
@@ -81,10 +81,10 @@
 
   async function checkSession() {
     try {
-      const result = await invoke<string>("udemy_check_session");
+      const result = await pluginInvoke<string>("courses", "udemy_check_session");
       sessionEmail = result;
       loggedIn = true;
-      portalName = await invoke<string>("udemy_get_portal");
+      portalName = await pluginInvoke<string>("courses", "udemy_get_portal");
       loadCourses();
     } catch {
       loggedIn = false;
@@ -98,7 +98,7 @@
     waitingCode = false;
     loading = true;
     try {
-      const result = await invoke<string>("udemy_login", { email });
+      const result = await pluginInvoke<string>("courses", "udemy_login", { email });
       sessionEmail = result || email;
       loggedIn = true;
       waitingCode = false;
@@ -117,10 +117,10 @@
     error = "";
     loading = true;
     try {
-      const result = await invoke<string>("udemy_login_cookies", { cookieJson });
+      const result = await pluginInvoke<string>("courses", "udemy_login_cookies", { cookieJson });
       sessionEmail = result;
       loggedIn = true;
-      portalName = await invoke<string>("udemy_get_portal");
+      portalName = await pluginInvoke<string>("courses", "udemy_get_portal");
       loadCourses();
     } catch (e: any) {
       error = typeof e === "string" ? e : e.message ?? $t('udemy.unknown_error');
@@ -149,7 +149,7 @@
 
   async function handleLogout() {
     try {
-      await invoke("udemy_logout");
+      await pluginInvoke("courses", "udemy_logout");
     } catch {
     }
     loggedIn = false;
@@ -164,7 +164,7 @@
     loadingCourses = true;
     coursesError = "";
     try {
-      courses = await invoke("udemy_list_courses");
+      courses = await pluginInvoke("courses", "udemy_list_courses");
       currentPage = 1;
     } catch (e: any) {
       coursesError = typeof e === "string" ? e : e.message ?? $t('udemy.courses_error');
@@ -208,7 +208,7 @@
     }
 
     try {
-      await invoke("start_udemy_course_download", {
+      await pluginInvoke("courses", "start_udemy_course_download", {
         courseJson: JSON.stringify(course),
         outputDir,
       });
@@ -226,7 +226,7 @@
     loadingCourses = true;
     coursesError = "";
     try {
-      courses = await invoke("udemy_refresh_courses");
+      courses = await pluginInvoke("courses", "udemy_refresh_courses");
       currentPage = 1;
     } catch (e: any) {
       coursesError = typeof e === "string" ? e : e.message ?? $t('udemy.courses_error');
