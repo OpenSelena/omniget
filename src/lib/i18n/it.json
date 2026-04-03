@@ -484,9 +484,9 @@
     "accept_transfer": "Accetta e scarica",
     "reject_transfer": "Rifiuta",
     "searching_sender": "Ricerca del mittente...",
-    "searching_hint": "Assicurati che entrambi i dispositivi siano sulla stessa rete.",
+    "searching_hint": "Connessione al server relay...",
     "sender_not_found": "Mittente non trovato",
-    "sender_not_found_hint": "Il mittente potrebbe non essere ancora attivo. Assicurati che entrambi i dispositivi siano sulla stessa rete Wi-Fi e che il mittente abbia condiviso il codice."
+    "sender_not_found_hint": "Codice non trovato. Assicurati che il mittente sia attivo e che il codice sia corretto."
   },
   "mascot": {
     "idle": "Incolla un link o cerca per iniziare!",
