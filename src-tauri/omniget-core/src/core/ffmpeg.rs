@@ -31,7 +31,7 @@ pub fn reset_ffmpeg_available_cache() {
 
 pub async fn mux_video_audio(video: &Path, audio: &Path, output: &Path) -> anyhow::Result<()> {
     if let Some(parent) = output.parent() {
-        tokio::fs::create_dir_all(parent).await?;
+        std::fs::create_dir_all(parent)?;
     }
 
     let status = crate::core::process::command("ffmpeg")
@@ -270,7 +270,7 @@ pub async fn convert(
     let output_path = Path::new(&opts.output_path);
 
     if let Some(parent) = output_path.parent() {
-        tokio::fs::create_dir_all(parent).await?;
+        std::fs::create_dir_all(parent)?;
     }
 
     let total_duration_us = get_duration_us(input_path).await.unwrap_or(0);
@@ -385,7 +385,7 @@ pub async fn convert(
     match result {
         Ok(status) if status.success() => {
             let _ = progress_tx.send(100.0).await;
-            let meta = tokio::fs::metadata(output_path).await;
+            let meta = std::fs::metadata(output_path);
             let file_size = meta.map(|m| m.len()).unwrap_or(0);
 
             let duration = probe(output_path)
@@ -523,18 +523,18 @@ pub async fn embed_metadata(
         .map_err(|e| anyhow!("Failed to run ffmpeg: {}", e))?;
 
     if let Some(ref thumb) = thumbnail_path {
-        let _ = tokio::fs::remove_file(thumb).await;
+        let _ = std::fs::remove_file(thumb);
     }
 
     if !output.status.success() {
-        let _ = tokio::fs::remove_file(&temp_output).await;
+        let _ = std::fs::remove_file(&temp_output);
         let stderr = String::from_utf8_lossy(&output.stderr);
         return Err(anyhow!("ffmpeg metadata failed: {}", stderr));
     }
 
     let mut rename_ok = false;
     for attempt in 0..3 {
-        match tokio::fs::rename(&temp_output, file).await {
+        match std::fs::rename(&temp_output, file) {
             Ok(()) => {
                 rename_ok = true;
                 break;
@@ -549,13 +549,13 @@ pub async fn embed_metadata(
                     .await;
             }
             Err(e) => {
-                let _ = tokio::fs::remove_file(&temp_output).await;
+                let _ = std::fs::remove_file(&temp_output);
                 return Err(anyhow!("Failed to replace file after 3 attempts: {}", e));
             }
         }
     }
     if !rename_ok {
-        let _ = tokio::fs::remove_file(&temp_output).await;
+        let _ = std::fs::remove_file(&temp_output);
         return Err(anyhow!("Failed to replace file"));
     }
 
@@ -592,7 +592,7 @@ async fn download_thumbnail(
     };
 
     let thumb_path = dest_dir.join(format!(".omniget_thumb_{}.{}", uuid::Uuid::new_v4(), ext));
-    tokio::fs::write(&thumb_path, &bytes).await?;
+    std::fs::write(&thumb_path, &bytes)?;
 
     if ext == "png" {
         let jpg_path = dest_dir.join(format!(".omniget_thumb_{}.jpg", uuid::Uuid::new_v4()));
@@ -608,14 +608,14 @@ async fn download_thumbnail(
             .status()
             .await;
 
-        let _ = tokio::fs::remove_file(&thumb_path).await;
+        let _ = std::fs::remove_file(&thumb_path);
 
         if let Ok(status) = convert_result {
             if status.success() {
                 return Ok(jpg_path);
             }
         }
-        let _ = tokio::fs::remove_file(&jpg_path).await;
+        let _ = std::fs::remove_file(&jpg_path);
         return Err(anyhow!("Failed to convert thumbnail to JPEG"));
     }
 
