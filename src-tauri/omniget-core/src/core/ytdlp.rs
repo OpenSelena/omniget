@@ -4,7 +4,6 @@ use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex, OnceLock};
 
 use anyhow::anyhow;
-use futures::StreamExt;
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
@@ -129,12 +128,15 @@ pub async fn check_ytdlp_update(ytdlp: &Path) -> anyhow::Result<bool> {
         return Ok(false);
     }
 
-    let output = crate::core::process::command(ytdlp)
-        .args(["--update-to", "nightly"])
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .output()
-        .await?;
+    let ytdlp = ytdlp.to_path_buf();
+    let output = tokio::task::spawn_blocking(move || {
+        crate::core::process::std_command(&ytdlp)
+            .args(["--update-to", "nightly"])
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .output()
+    })
+    .await??;
 
     let stdout = String::from_utf8_lossy(&output.stdout);
     let stderr = String::from_utf8_lossy(&output.stderr);
@@ -212,17 +214,23 @@ pub async fn find_ytdlp() -> Option<PathBuf> {
         }
     }
 
-    if let Ok(output) = crate::core::process::command(bin_name)
-        .arg("--version")
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .await
-    {
-        if output.success() {
-            tracing::debug!("[perf] find_ytdlp took {:?}", _timer_start.elapsed());
-            return Some(PathBuf::from(bin_name));
-        }
+    let bin_name_owned = bin_name.to_string();
+    let found = tokio::task::spawn_blocking(move || {
+        crate::core::process::std_command(&bin_name_owned)
+            .arg("--version")
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .status()
+            .ok()
+            .filter(|s| s.success())
+    })
+    .await
+    .ok()
+    .flatten();
+
+    if found.is_some() {
+        tracing::debug!("[perf] find_ytdlp took {:?}", _timer_start.elapsed());
+        return Some(PathBuf::from(bin_name));
     }
 
     let managed = managed_ytdlp_path()?;
@@ -272,11 +280,30 @@ pub async fn ensure_ytdlp() -> anyhow::Result<PathBuf> {
     let _timer_start = std::time::Instant::now();
     if let Some(path) = find_ytdlp_cached().await {
         let path_clone = path.clone();
-        tokio::spawn(async move {
-            check_ytdlp_freshness(&path_clone).await;
-        });
-        // Ensure a JS runtime is available in the background (for YouTube nsig).
-        tokio::spawn(async { crate::core::dependencies::ensure_js_runtime().await; });
+        std::thread::Builder::new()
+            .name("ytdlp-freshness".into())
+            .spawn(move || {
+                let rt = tokio::runtime::Builder::new_current_thread()
+                    .enable_all()
+                    .build()
+                    .expect("freshness runtime");
+                rt.block_on(async move {
+                    check_ytdlp_freshness(&path_clone).await;
+                });
+            })
+            .ok();
+        std::thread::Builder::new()
+            .name("js-runtime-check".into())
+            .spawn(|| {
+                let rt = tokio::runtime::Builder::new_current_thread()
+                    .enable_all()
+                    .build()
+                    .expect("js-runtime runtime");
+                rt.block_on(async {
+                    crate::core::dependencies::ensure_js_runtime().await;
+                });
+            })
+            .ok();
         tracing::debug!("[perf] ensure_ytdlp took {:?}", _timer_start.elapsed());
         return Ok(path);
     }
@@ -288,8 +315,18 @@ pub async fn ensure_ytdlp() -> anyhow::Result<PathBuf> {
 
     let path = download_ytdlp_binary().await?;
     reset_ytdlp_cache();
-    // Ensure a JS runtime is available in the background (for YouTube nsig).
-    tokio::spawn(async { crate::core::dependencies::ensure_js_runtime().await; });
+    std::thread::Builder::new()
+        .name("js-runtime-check".into())
+        .spawn(|| {
+            let rt = tokio::runtime::Builder::new_current_thread()
+                .enable_all()
+                .build()
+                .expect("js-runtime runtime");
+            rt.block_on(async {
+                crate::core::dependencies::ensure_js_runtime().await;
+            });
+        })
+        .ok();
     tracing::debug!("[perf] ensure_ytdlp took {:?}", _timer_start.elapsed());
     Ok(path)
 }
@@ -299,7 +336,7 @@ async fn download_ytdlp_binary() -> anyhow::Result<PathBuf> {
         managed_ytdlp_path().ok_or_else(|| anyhow!("Could not determine data directory"))?;
 
     if let Some(parent) = target.parent() {
-        tokio::fs::create_dir_all(parent).await?;
+        std::fs::create_dir_all(parent)?;
     }
 
     let download_url = if cfg!(target_os = "windows") {
@@ -325,30 +362,29 @@ async fn download_ytdlp_binary() -> anyhow::Result<PathBuf> {
         ));
     }
 
-    {
-        let mut file = tokio::fs::File::create(&target).await?;
-        let mut stream = response.bytes_stream();
-        while let Some(chunk) = stream.next().await {
-            let chunk = chunk.map_err(|e| anyhow!("Stream error: {}", e))?;
-            tokio::io::AsyncWriteExt::write_all(&mut file, &chunk).await?;
-        }
-        tokio::io::AsyncWriteExt::flush(&mut file).await?;
-    }
+    let bytes = response.bytes().await?;
+    let target_clone = target.clone();
+    tokio::task::spawn_blocking(move || std::fs::write(&target_clone, &bytes))
+        .await
+        .map_err(|e| anyhow!("spawn_blocking failed: {}", e))??;
 
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         let perms = std::fs::Permissions::from_mode(0o755);
-        tokio::fs::set_permissions(&target, perms).await?;
+        std::fs::set_permissions(&target, perms)?;
     }
 
     #[cfg(target_os = "macos")]
     {
-        let _ = tokio::process::Command::new("xattr")
-            .args(["-d", "com.apple.quarantine"])
-            .arg(&target)
-            .output()
-            .await;
+        let target_mac = target.clone();
+        let _ = tokio::task::spawn_blocking(move || {
+            crate::core::process::std_command("xattr")
+                .args(["-d", "com.apple.quarantine"])
+                .arg(&target_mac)
+                .output()
+        })
+        .await;
     }
 
     Ok(target)
@@ -363,7 +399,7 @@ async fn check_ytdlp_freshness(path: &Path) {
         return;
     }
 
-    if let Ok(meta) = tokio::fs::metadata(path).await {
+    if let Ok(meta) = std::fs::metadata(path) {
         if let Ok(modified) = meta.modified() {
             if let Ok(age) = modified.elapsed() {
                 if age > std::time::Duration::from_secs(2 * 24 * 60 * 60) {
@@ -374,13 +410,22 @@ async fn check_ytdlp_freshness(path: &Path) {
                         return;
                     }
                     tracing::info!("yt-dlp is older than 2 days, updating in background");
-                    tokio::spawn(async {
-                        match download_ytdlp_binary().await {
-                            Ok(_) => tracing::info!("yt-dlp updated successfully"),
-                            Err(e) => tracing::warn!("Failed to update yt-dlp: {}", e),
-                        }
-                        YTDLP_UPDATING.store(false, Ordering::SeqCst);
-                    });
+                    std::thread::Builder::new()
+                        .name("ytdlp-update".into())
+                        .spawn(|| {
+                            let rt = tokio::runtime::Builder::new_current_thread()
+                                .enable_all()
+                                .build()
+                                .expect("ytdlp-update runtime");
+                            rt.block_on(async {
+                                match download_ytdlp_binary().await {
+                                    Ok(_) => tracing::info!("yt-dlp updated successfully"),
+                                    Err(e) => tracing::warn!("Failed to update yt-dlp: {}", e),
+                                }
+                                YTDLP_UPDATING.store(false, Ordering::SeqCst);
+                            });
+                        })
+                        .ok();
                 }
             }
         }
