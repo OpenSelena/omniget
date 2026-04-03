@@ -4,6 +4,8 @@ use anyhow::anyhow;
 use async_trait::async_trait;
 use tokio::sync::mpsc;
 
+use crate::core::direct_downloader;
+use crate::core::hls_downloader::HlsDownloader;
 use crate::core::ytdlp;
 use crate::models::media::{
     DownloadOptions, DownloadResult, MediaInfo, MediaType, VideoQuality as MediaVideoQuality,
@@ -147,6 +149,83 @@ impl GenericYtdlpDownloader {
     }
 }
 
+fn is_direct_media_url(url: &str) -> Option<&'static str> {
+    let path = url::Url::parse(url)
+        .ok()
+        .map(|u| u.path().to_lowercase())?;
+
+    if path.contains(".m3u8") {
+        return Some("hls");
+    }
+
+    for ext in &[".mp4", ".webm", ".m4v", ".mkv", ".avi", ".mov", ".flv"] {
+        if path.contains(ext) {
+            return Some("direct");
+        }
+    }
+
+    for ext in &[".mp3", ".m4a", ".ogg", ".wav", ".flac", ".aac"] {
+        if path.contains(ext) {
+            return Some("direct");
+        }
+    }
+
+    None
+}
+
+fn filename_from_url(url: &str) -> String {
+    url::Url::parse(url)
+        .ok()
+        .and_then(|u| {
+            let path = u.path();
+            let last = path.rsplit('/').next()?;
+            if last.is_empty() || !last.contains('.') {
+                return None;
+            }
+            Some(
+                urlencoding::decode(last)
+                    .unwrap_or_else(|_| last.into())
+                    .to_string(),
+            )
+        })
+        .map(|name| sanitize_filename::sanitize(&name))
+        .unwrap_or_else(|| "download".to_string())
+}
+
+fn build_direct_media_info(url: &str, media_type_hint: &str) -> MediaInfo {
+    let title = filename_from_url(url);
+    let (format, media_type) = match media_type_hint {
+        "hls" => ("hls".to_string(), MediaType::Video),
+        _ => {
+            let lower = url.to_lowercase();
+            if lower.contains(".mp3") || lower.contains(".m4a") || lower.contains(".ogg")
+                || lower.contains(".wav") || lower.contains(".flac") || lower.contains(".aac")
+            {
+                ("direct_audio".to_string(), MediaType::Audio)
+            } else {
+                ("direct_video".to_string(), MediaType::Video)
+            }
+        }
+    };
+
+    MediaInfo {
+        title,
+        author: String::new(),
+        platform: "generic".to_string(),
+        duration_seconds: None,
+        thumbnail_url: None,
+        available_qualities: vec![MediaVideoQuality {
+            label: "original".to_string(),
+            width: 0,
+            height: 0,
+            url: url.to_string(),
+            format,
+        }],
+        media_type,
+        file_size_bytes: None,
+    }
+}
+
 #[async_trait]
 impl PlatformDownloader for GenericYtdlpDownloader {
     fn name(&self) -> &str {
@@ -162,6 +241,10 @@ impl PlatformDownloader for GenericYtdlpDownloader {
     }
 
     async fn get_media_info(&self, url: &str) -> anyhow::Result<MediaInfo> {
+        if let Some(media_type) = is_direct_media_url(url) {
+            return Ok(build_direct_media_info(url, media_type));
+        }
+
         let ytdlp_path = ytdlp::ensure_ytdlp().await.map_err(|e| {
             anyhow!("yt-dlp unavailable: {}", e)
         })?;
@@ -179,12 +262,6 @@ impl PlatformDownloader for GenericYtdlpDownloader {
     ) -> anyhow::Result<DownloadResult> {
         let _ = progress.send(0.0).await;
 
-        let ytdlp_path = if let Some(ref p) = opts.ytdlp_path {
-            p.clone()
-        } else {
-            ytdlp::ensure_ytdlp().await?
-        };
-
         let first = info
             .available_qualities
             .first()
@@ -197,6 +274,89 @@ impl PlatformDownloader for GenericYtdlpDownloader {
                 .unwrap_or(first)
         } else {
             first
+        };
+
+        if selected.format == "hls" {
+            let title = sanitize_filename::sanitize(&info.title);
+            let filename = if title.ends_with(".mp4") { title } else { format!("{}.mp4", title) };
+            let output_path = opts.output_dir.join(&filename);
+            let output_str = output_path.to_string_lossy().to_string();
+
+            let referer = opts.referer.as_deref()
+                .or_else(|| platform_referer(&selected.url))
+                .unwrap_or("");
+
+            let mut builder = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
+                .timeout(std::time::Duration::from_secs(600));
+
+            let jar = crate::core::cookie_parser::load_extension_cookies_for_url(&selected.url)
+                .or_else(|| opts.referer.as_deref().and_then(crate::core::cookie_parser::load_extension_cookies_for_url));
+            if let Some(jar) = jar {
+                builder = builder.cookie_provider(jar);
+            }
+
+            let client = builder.build().unwrap_or_default();
+            let downloader = HlsDownloader::with_client(client);
+            let _ = progress.send(0.0).await;
+
+            let result = downloader
+                .download(&selected.url, &output_str, referer, None, opts.cancel_token.clone(), 20, 3)
+                .await?;
+
+            let _ = progress.send(100.0).await;
+
+            return Ok(DownloadResult {
+                file_path: result.path,
+                file_size_bytes: result.file_size,
+                duration_seconds: 0.0,
+                torrent_id: None,
+            });
+        }
+
+        if selected.format == "direct_video" || selected.format == "direct_audio" {
+            let title = sanitize_filename::sanitize(&info.title);
+            let output_path = opts.output_dir.join(&title);
+
+            let mut builder = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
+                .timeout(std::time::Duration::from_secs(600));
+
+            let jar = crate::core::cookie_parser::load_extension_cookies_for_url(&selected.url)
+                .or_else(|| opts.referer.as_deref().and_then(crate::core::cookie_parser::load_extension_cookies_for_url));
+            if let Some(jar) = jar {
+                builder = builder.cookie_provider(jar);
+            }
+
+            let client = builder.build().unwrap_or_default();
+
+            let mut headers = reqwest::header::HeaderMap::new();
+            if let Some(ref r) = opts.referer {
+                if let Ok(val) = reqwest::header::HeaderValue::from_str(r) {
+                    headers.insert(reqwest::header::REFERER, val);
+                }
+            }
+
+            let bytes = direct_downloader::download_direct_with_headers(
+                &client,
+                &selected.url,
+                &output_path,
+                progress,
+                Some(headers),
+                Some(&opts.cancel_token),
+            )
+            .await?;
+
+            return Ok(DownloadResult {
+                file_path: output_path,
+                file_size_bytes: bytes,
+                duration_seconds: 0.0,
+                torrent_id: None,
+            });
+        }
+
+        let ytdlp_path = if let Some(ref p) = opts.ytdlp_path {
+            p.clone()
+        } else {
+            ytdlp::ensure_ytdlp().await?
         };
 
         let quality_height = Self::extract_quality_height(&selected.label);
