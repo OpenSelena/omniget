@@ -16,7 +16,7 @@ pub async fn save_description(dir: &str, content: &str, format: &str) -> anyhow:
 
     let path = format!("{}/description.{}", dir, ext);
 
-    if tokio::fs::try_exists(&path).await.unwrap_or(false) {
+    if Path::new(&path).exists() {
         return Ok(());
     }
 
@@ -29,7 +29,7 @@ pub async fn save_description(dir: &str, content: &str, format: &str) -> anyhow:
         content.to_string()
     };
 
-    tokio::fs::write(&path, wrapped.as_bytes()).await?;
+    std::fs::write(&path, wrapped.as_bytes())?;
     tracing::debug!("[course] saved description: {}", path);
     Ok(())
 }
@@ -60,8 +60,8 @@ pub async fn download_attachment(
 
     let path = format!("{}/{}", dir, filename);
 
-    if tokio::fs::try_exists(&path).await.unwrap_or(false) {
-        let meta = tokio::fs::metadata(&path).await;
+    if Path::new(&path).exists() {
+        let meta = std::fs::metadata(&path);
         if meta.map(|m| m.len() > 0).unwrap_or(false) {
             return Ok(0);
         }
@@ -92,8 +92,8 @@ pub async fn download_attachment(
     }
 
     let part_path = format!("{}.part", path);
-    tokio::fs::write(&part_path, &bytes).await?;
-    tokio::fs::rename(&part_path, &path).await?;
+    std::fs::write(&part_path, &bytes)?;
+    std::fs::rename(&part_path, &path)?;
 
     tracing::debug!("[course] attachment saved: {} ({} bytes)", path, size);
     Ok(size)
@@ -101,7 +101,7 @@ pub async fn download_attachment(
 
 pub async fn mark_course_complete(course_dir: &str) -> anyhow::Result<()> {
     let marker = format!("{}/.complete", course_dir);
-    tokio::fs::write(&marker, "done").await?;
+    std::fs::write(&marker, "done")?;
     tracing::info!("[course] marked complete: {}", course_dir);
     Ok(())
 }
@@ -111,6 +111,6 @@ pub fn is_course_complete(course_dir: &str) -> bool {
 }
 
 pub async fn ensure_dir(path: &str) -> anyhow::Result<()> {
-    tokio::fs::create_dir_all(path).await?;
+    std::fs::create_dir_all(path)?;
     Ok(())
 }
