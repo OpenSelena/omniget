@@ -519,9 +519,9 @@
     "accept_transfer": "Aceitar e Baixar",
     "reject_transfer": "Recusar",
     "searching_sender": "Procurando remetente...",
-    "searching_hint": "Certifique-se de que ambos os dispositivos estão na mesma rede.",
+    "searching_hint": "Conectando ao servidor relay...",
     "sender_not_found": "Remetente não encontrado",
-    "sender_not_found_hint": "O remetente pode não estar ativo ainda. Verifique se ambos os dispositivos estão na mesma rede Wi-Fi e se o remetente compartilhou o código."
+    "sender_not_found_hint": "Código não encontrado. Verifique se o remetente está ativo e o código está correto."
   },
   "mascot": {
     "idle": "Cole um link ou pesquise para começar!",
