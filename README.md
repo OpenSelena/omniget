@@ -31,7 +31,7 @@ Also available as a Flatpak on Linux and a portable `.exe` on Windows.
 ## Features
 
 - 📥 Downloads from YouTube, Instagram, TikTok, Twitter/X, Reddit, and [10+ more platforms](#media-platforms) with native downloaders
-- 🎓 Downloads full courses from [36 education platforms](#course-platforms) — log in once, download all lessons
+- 🎓 Downloads full courses from [10 education platforms](#course-platforms) — log in once, download all lessons
 - 🧲 Built-in torrent client for magnet links and `.torrent` files (drag-and-drop supported)
 - 📡 P2P file transfer between devices via relay — no port forwarding needed
 - 🔍 Search YouTube directly from the omnibox
@@ -39,6 +39,7 @@ Also available as a Flatpak on Linux and a portable `.exe` on Windows.
 - 🌐 Chrome extension detects videos on pages and sends them to the app
 - ⚡ Auto-manages yt-dlp and FFmpeg — no manual setup required
 - 🎨 Dark, light, and system themes in 8 languages
+- ⌨️ Global hotkey — copy a URL anywhere, press a key, download starts instantly
 - 🔄 Built-in auto-updater on all platforms
 
 ## Supported Platforms
@@ -81,10 +82,7 @@ Any other URL falls back to [yt-dlp](https://github.com/yt-dlp/yt-dlp), covering
 
 ### Course Platforms
 
-Downloads full courses (videos, attachments, descriptions) from 36 education platforms via the courses plugin. Top platforms include Hotmart, Udemy, Kiwify, Teachable, Kajabi, Skool, Pluralsight, MasterClass, and Rocketseat.
-
-<details>
-<summary><strong>View all 36 course platforms</strong></summary>
+Downloads full courses (videos, attachments, descriptions) via the courses plugin. Log in with your account, browse your library, and batch-download everything.
 
 | Platform | Auth | Region |
 |----------|------|--------|
@@ -92,40 +90,12 @@ Downloads full courses (videos, attachments, descriptions) from 36 education pla
 | Udemy | Email + Cookies | Global |
 | Kiwify | Email + Password / Token | BR |
 | Gumroad | Email + Password / Token | Global |
-| Teachable | OTP (Email) | Global |
-| Kajabi | OTP (Email) | Global |
-| Skool | Email + Password | Global |
-| Pluralsight | Browser Cookies | Global |
-| MasterClass | Browser Cookies | Global |
+| Teachable | Token | Global |
+| Kajabi | Token | Global |
+| Skool | Email + Password / Token | Global |
 | Wondrium / Great Courses | Email + Password / Token | US |
 | Thinkific | Browser Cookies | Global |
-| Rocketseat | Browser Cookies | BR |
-| Estratégia Concursos | Token / Cookies | BR |
-| Estratégia LDI | Token / Cookies | BR |
-| Estratégia Militares | Token / Cookies | BR |
-| Gran Cursos Online | Session Cookies | BR |
-| Fluency Academy | Email + Password / Token | BR |
-| Data Science Academy | Token | BR |
-| Eduzz / Nutror | Token | BR |
-| Kirvano | Token | BR |
-| MemberKit | Email + Password / Cookies | BR |
-| Cademi | Email + Password / Cookies | BR |
-| Curseduca | Email + Password / Token | BR |
-| Medcel | Token + API Key | BR |
-| Medcof | Token | BR |
-| Medway | Token | BR |
-| Afya Internato | Token + API Key | BR |
-| AlpaClass | Token | BR |
-| Área de Membros | Cookies | BR |
-| Astron Members | Email + Password / Cookies | BR |
-| Cakto | Email + Password / Cookies | BR |
-| Cakto Members | Cookies | BR |
-| Greenn Club | Token | BR |
-| TheMembers | Email + Password / Token | BR |
-| Voomp Play | Token | BR |
-| Entrega Digital | Token + Metadata | BR |
-
-</details>
+| Rocketseat | Token | BR |
 
 ## How It Works
 
@@ -134,6 +104,12 @@ Downloads full courses (videos, attachments, descriptions) from 36 education pla
 3. Click download — progress, speed, and ETA update in real time
 
 For courses: log in to the platform, browse your library, and batch-download entire courses with one click.
+
+## Global Hotkey
+
+Copy any video URL to your clipboard, then press **Ctrl+Shift+D** (or **Cmd+Shift+D** on macOS). OmniGet grabs the URL and starts downloading immediately — even if the app is in the background or minimized. No need to switch windows or paste anything.
+
+Change the hotkey or disable it in **Settings → Download → Hotkey**.
 
 ## Browser Extension
 
@@ -149,7 +125,7 @@ See the [extension README](browser-extension/chrome/README.md) for details.
 
 OmniGet has a plugin system with a built-in marketplace. Plugins are Rust DLLs loaded at startup:
 
-- **Courses** — 36 education platforms with login, browsing, and batch download
+- **Courses** — 10 education platforms with login, browsing, and batch download
 - **Telegram** — browse chats and download media with QR code or phone login
 - **Convert** — convert media between formats using FFmpeg
 
