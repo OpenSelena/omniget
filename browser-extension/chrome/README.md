@@ -1,13 +1,34 @@
 # OmniGet Chrome Extension
 
-MV3 extension for sending supported media pages to OmniGet with one click.
+Detects video and audio streams on any website and sends them to the OmniGet desktop app for download — with cookies, referer, and auth headers included.
 
-## Supported platforms
+## Features
+
+- Detects MP4, HLS (M3U8), DASH (MPD), WebM, and audio streams in real time via `webRequest`
+- Groups HLS manifests into logical video sessions — no duplicate entries
+- Filters out HLS `.ts` segments and subtitle manifests automatically
+- Sends cookies, referer, and authorization headers for authenticated downloads
+- Recognizes 13 platforms by URL (YouTube, Instagram, TikTok, etc.) and activates the icon
+- Media detection works on **all websites**, not just recognized platforms
+- Dark-themed popup with quick download, batch download, and per-video controls
+- Sniffer toggle persisted across sessions
+
+## How It Works
+
+### On known platforms
+
+When you visit YouTube, Instagram, TikTok, or any of the 13 recognized platforms, the toolbar icon switches from gray to colored. Open the popup and click the download button — the page URL, cookies, and platform info are sent to OmniGet via native messaging.
+
+### On any website (media detection)
+
+The extension monitors network requests for video and audio streams as pages load them. Detected media appears in the popup grouped by video session. Click the download button on any entry, or use batch download to send all detected videos at once. Each download includes the page's cookies and referer for authenticated content.
+
+## Supported Platforms
 
 | Platform | Content types |
 |----------|--------------|
 | YouTube | video, short, playlist, profile |
-| Instagram | post, reel, story (image), profile |
+| Instagram | post, reel, story, profile |
 | TikTok | video (direct, short link, embed), profile |
 | Twitter / X | post, profile |
 | Reddit | post, video, profile |
@@ -22,45 +43,59 @@ MV3 extension for sending supported media pages to OmniGet with one click.
 
 Mirror domains are also recognized: `youtu.be`, `youtube-nocookie.com`, `ddinstagram.com`, `vxtwitter.com`, `fixvx.com`, `v.redd.it`, `redd.it`, `clips.twitch.tv`, `pin.it`, `b23.tv`, `t.me`, `telegram.me`.
 
-## How it works
+## Install
 
-1. You navigate to a supported media page.
-2. The toolbar icon switches from gray (inactive) to colored (active).
-3. You click the icon.
-4. The extension sends the URL (and cookies for authenticated platforms) to OmniGet via Chrome Native Messaging.
-5. OmniGet opens and starts the download or fills the omnibox.
+1. Install OmniGet desktop app and launch it once (registers the native messaging host).
+2. Open `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, select `browser-extension/chrome/`.
+3. Click the OmniGet icon on any page.
 
-If OmniGet is not installed or cannot be launched, the extension shows a localized error page.
+The unpacked extension keeps a stable ID via the manifest key: `dkjelkhaaakffpghdfalobccaaipajip`
 
-## Load it locally
+On macOS/Linux, the first launch writes the native messaging manifest to your user profile. On Windows, a registry key is created under `HKCU\Software\Google\Chrome\NativeMessagingHosts`.
 
-1. Install OmniGet and launch it once so it registers the Chrome native host.
-2. Open `chrome://extensions`.
-3. Enable **Developer mode**.
-4. Click **Load unpacked**.
-5. Select this folder: `browser-extension/chrome`
+## Permissions
 
-The unpacked extension keeps a stable ID through the committed manifest key:
+| Permission | Why |
+|------------|-----|
+| `webRequest` | Detect video/audio streams in network traffic |
+| `cookies` | Forward session cookies for authenticated downloads |
+| `nativeMessaging` | Communicate with the OmniGet desktop app |
+| `storage` | Remember sniffer on/off preference |
+| `tabs` | Read page URL and title for context |
+| `host_permissions: *://*/*` | Monitor requests on all sites for media detection |
 
-`dkjelkhaaakffpghdfalobccaaipajip`
+## Architecture
 
-On macOS and Linux, that first launch writes Chrome's native messaging manifest into your user profile automatically. On Windows, a registry key is created under `HKCU\Software\Google\Chrome\NativeMessagingHosts`.
-
-## Chrome Web Store packaging
-
-The committed `manifest.json` keeps its `key` so unpacked installs have a stable development ID. The packaging script (`scripts/package.mjs`) strips it automatically before creating the ZIP:
-
-```bash
-node browser-extension/chrome/scripts/package.mjs --version 0.1.0 --output omniget-chrome-extension.zip
+```
+popup/
+  popup.html           Popup shell (header + dynamic content area)
+  popup.css            Dark theme, animations, state-based styles
+  popup.js             State machine UI: known platform / media detected / listening / paused
+src/
+  background.js        Service worker: icon switching, native messaging, message routing
+  media-sniffer.js     webRequest listener: detects media streams, filters .ts segments
+  sniffer-toggle.js    Persists sniffer on/off state via chrome.storage.local
+  detect.js            URL-based platform detection (no content scripts)
+  cookies.js           Cookie extraction for authenticated platforms
+  action-feedback.js   Badge controller (green checkmark for 1.5s)
+  action-title.js      Tooltip resolution with i18n fallback
+  action-click.js      Click handler with DI for testability
+pages/
+  error.html/css/js    Standalone error page (HOST_MISSING, INVALID_URL, LAUNCH_FAILED)
+  error-content.js     Error message resolution with i18n fallback
+scripts/
+  package.mjs          ZIP packaging for CWS (strips manifest key)
+tests/
+  *.test.mjs           96 tests across 7 files
 ```
 
-Once the CWS assigns a store ID, add it to `CHROME_EXTENSION_IDS` in [`src-tauri/src/native_host.rs`](../../src-tauri/src/native_host.rs).
+## Packaging
 
-## Internationalization
+```bash
+node browser-extension/chrome/scripts/package.mjs --version 0.2.0 --output omniget-chrome-extension.zip
+```
 
-8 languages: English, French, Portuguese, Greek, Italian, Japanese, Simplified Chinese, Traditional Chinese.
-
-Locale files are in `_locales/{lang}/messages.json`. Error pages and tooltip titles fall back to English when a translation is missing.
+The packaging script strips the `key` field from `manifest.json` before creating the ZIP. Once the CWS assigns a store ID, add it to `CHROME_EXTENSION_IDS` in [`src-tauri/src/native_host.rs`](../../src-tauri/src/native_host.rs).
 
 ## Tests
 
@@ -68,23 +103,10 @@ Locale files are in `_locales/{lang}/messages.json`. Error pages and tooltip tit
 node --test browser-extension/chrome/tests/*.test.mjs
 ```
 
-94 tests across 7 files covering platform detection, click handling, badge feedback, tooltip titles, error content, cookie extraction, and manifest validation.
+96 tests across 7 files covering platform detection, click handling, badge feedback, tooltip titles, error content, cookie extraction, and manifest validation.
 
-## Architecture
+## Internationalization
 
-```
-src/
-  detect.js          URL-based platform detection (no content scripts)
-  background.js      Service worker: icon switching, native messaging
-  action-click.js    Click handler with DI for testability
-  action-feedback.js Badge controller (green checkmark for 1.5s)
-  action-title.js    Tooltip resolution with i18n fallback
-  cookies.js         Cookie extraction for authenticated platforms
-pages/
-  error.html/css/js  Standalone error page (HOST_MISSING, INVALID_URL, LAUNCH_FAILED)
-  error-content.js   Error message resolution with i18n fallback
-scripts/
-  package.mjs        ZIP packaging for CWS (native Node.js implementation)
-tests/
-  *.test.mjs         94 tests using node:test
-```
+8 languages: English, French, Portuguese, Greek, Italian, Japanese, Simplified Chinese, Traditional Chinese.
+
+Locale files are in `_locales/{lang}/messages.json`. Error pages and tooltip titles fall back to English when a translation is missing.
