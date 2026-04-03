@@ -13,5 +13,6 @@ pub mod paths;
 pub mod process;
 pub mod redirect;
 pub mod dependencies;
+pub mod errors;
 pub mod ffmpeg;
 pub mod ytdlp;
