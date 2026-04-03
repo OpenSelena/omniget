@@ -112,7 +112,7 @@ impl Platform {
             Some(Platform::Vimeo)
         } else if matches("udemy.com") {
             Some(Platform::Udemy)
-        } else if matches("bilibili.com") || host == "b23.tv" {
+        } else if matches("bilibili.com") || matches("bilibili.tv") || host == "b23.tv" {
             Some(Platform::Bilibili)
         } else if matches("kiwify.com.br") {
             Some(Platform::Other("kiwify".to_string()))
@@ -130,13 +130,13 @@ impl Platform {
             Some(Platform::Other("thinkific".to_string()))
         } else if matches("rocketseat.com.br") {
             Some(Platform::Other("rocketseat".to_string()))
-        } else if matches("douyin.com") {
+        } else if matches("douyin.com") || matches("iesdouyin.com") {
             Some(Platform::Other("douyin".to_string()))
         } else if matches("kuaishou.com") {
             Some(Platform::Other("kuaishou".to_string()))
-        } else if matches("xiaohongshu.com") || host == "xhslink.com" {
+        } else if matches("xiaohongshu.com") || matches("xhslink.com") {
             Some(Platform::Other("xiaohongshu".to_string()))
-        } else if host == "v.qq.com" || (matches("qq.com") && parsed.path().starts_with("/x/")) {
+        } else if matches("v.qq.com") || (matches("qq.com") && parsed.path().starts_with("/x/")) {
             Some(Platform::Other("tencentvideo".to_string()))
         } else if matches("iqiyi.com") {
             Some(Platform::Other("iqiyi".to_string()))
