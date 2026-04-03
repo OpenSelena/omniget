@@ -1,5 +1,6 @@
 <script lang="ts">
   import { page } from "$app/stores";
+  import { invoke } from "@tauri-apps/api/core";
   import { pluginInvoke } from "$lib/plugin-invoke";
   import { listen } from "@tauri-apps/api/event";
   import { open } from "@tauri-apps/plugin-dialog";
@@ -200,6 +201,47 @@
       const result = await pluginInvoke<string>("courses", currentMethod.command, args);
       sessionEmail = result || email || "OK";
       loggedIn = true;
+      loadItems();
+    } catch (e: any) {
+      error = typeof e === "string" ? e : e.message ?? $t("common.error");
+    } finally {
+      loading = false;
+    }
+  }
+
+  async function handleBrowserLogin() {
+    if (!config || !currentMethod) return;
+    loading = true;
+    error = "";
+
+    try {
+      const urlField = currentMethod.extra_fields?.find((f) => f.key === "url");
+      const successField = currentMethod.extra_fields?.find((f) => f.key === "success_url");
+      const domainsField = currentMethod.extra_fields?.find((f) => f.key === "cookie_domains");
+
+      const loginUrl = urlField?.placeholder || "";
+      if (!loginUrl) {
+        error = "No login URL configured for this platform";
+        loading = false;
+        return;
+      }
+
+      const result = await invoke<{ cookies: { name: string; value: string; domain: string; path: string }[]; finalUrl: string }>("open_auth_webview", {
+        request: {
+          url: loginUrl,
+          title: `Login - ${config.name}`,
+          cookieDomains: domainsField?.placeholder?.split(",").map((d) => d.trim()) || [],
+          successUrlContains: successField?.placeholder || null,
+        },
+      });
+
+      if (result.cookies.length > 0) {
+        await pluginInvoke("courses", currentMethod.command, { cookies: result.cookies });
+      }
+
+      const email = await pluginInvoke<string>("courses", config.commands.check_session);
+      loggedIn = true;
+      sessionEmail = email;
       loadItems();
     } catch (e: any) {
       error = typeof e === "string" ? e : e.message ?? $t("common.error");
@@ -455,15 +497,30 @@
               {:else if method.method_type === "email_only"}Email
               {:else if method.method_type === "token"}Token
               {:else if method.method_type === "cookies"}Cookies
+              {:else if method.method_type === "browser"}{$t("courses.browser")}
               {:else}{method.method_type}{/if}
             </button>
           {/each}
         </div>
       {/if}
 
-      {#if currentMethod}
+      {#if currentMethod?.method_type === "browser"}
+        <div class="form">
+          {#if error}
+            <p class="error-msg">{error}</p>
+          {/if}
+          <p class="browser-hint">{$t("courses.browser_hint")}</p>
+          <button class="button" onclick={handleBrowserLogin} disabled={loading}>
+            {#if loading}
+              {$t("hotmart.authenticating")}
+            {:else}
+              {$t("courses.login_with_browser")}
+            {/if}
+          </button>
+        </div>
+      {:else if currentMethod}
         <form class="form" onsubmit={(e) => { e.preventDefault(); handleLogin(); }}>
-          {#each currentMethod.extra_fields as field}
+          {#each currentMethod.extra_fields.filter(f => f.field_type !== "hidden") as field}
             <label class="field">
               <span class="field-label">{field.label}</span>
               <input
@@ -751,6 +808,12 @@
     resize: vertical;
     font-family: var(--font-mono);
     font-size: 12.5px;
+  }
+
+  .browser-hint {
+    font-size: 12.5px;
+    color: var(--gray);
+    text-align: center;
   }
 
   .file-upload-label {
