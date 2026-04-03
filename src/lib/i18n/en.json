@@ -214,7 +214,9 @@
       "reset": "Reset defaults",
       "reset_confirm": "Are you sure? All settings will be reset.",
       "torrent_listen_port": "Torrent listen port",
-      "torrent_listen_port_desc": "TCP port for incoming BitTorrent connections"
+      "torrent_listen_port_desc": "TCP port for incoming BitTorrent connections",
+      "cookies_from_browser": "Browser cookies (advanced)",
+      "cookies_from_browser_desc": "Only set this if the browser extension isn't working. Most users should leave this empty."
     },
     "cat_general": "General",
     "cat_downloads": "Downloads",
