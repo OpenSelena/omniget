@@ -908,7 +908,7 @@ pub async fn write_netscape_cookie_file(
             domain, name, value
         ));
     }
-    tokio::fs::write(path, content).await?;
+    std::fs::write(path, content)?;
     Ok(())
 }
 
@@ -988,7 +988,7 @@ pub async fn download_video(
         .unwrap_or_else(|| format!("%(title).{}s [%(id)s].%(ext)s", max_name));
     let output_template = output_dir.join(&template).to_string_lossy().to_string();
 
-    tokio::fs::create_dir_all(output_dir).await?;
+    std::fs::create_dir_all(output_dir)?;
 
     let global_cookie_file = global_cookie_file();
 
@@ -1347,7 +1347,7 @@ pub async fn download_video(
                 _ => find_downloaded_file(output_dir, url).await?,
             };
 
-            let meta = tokio::fs::metadata(&file_path).await?;
+            let meta = std::fs::metadata(&file_path)?;
             tracing::debug!("[perf] download_video took {:?}", _timer_start.elapsed());
             return Ok(DownloadResult {
                 file_path,
@@ -1532,12 +1532,12 @@ pub async fn download_video(
 }
 
 async fn cleanup_part_files(dir: &Path) {
-    if let Ok(mut entries) = tokio::fs::read_dir(dir).await {
-        while let Ok(Some(entry)) = entries.next_entry().await {
+    if let Ok(entries) = std::fs::read_dir(dir) {
+        for entry in entries.flatten() {
             let name = entry.file_name();
             let name = name.to_string_lossy();
             if name.ends_with(".part") || name.ends_with(".ytdl") {
-                let _ = tokio::fs::remove_file(entry.path()).await;
+                let _ = std::fs::remove_file(entry.path());
             }
         }
     }
@@ -1678,10 +1678,10 @@ async fn find_downloaded_file(output_dir: &Path, url: &str) -> anyhow::Result<Pa
     let now = std::time::SystemTime::now();
     let recency_limit = std::time::Duration::from_secs(600);
 
-    let mut entries = tokio::fs::read_dir(output_dir).await?;
+    let read_dir = std::fs::read_dir(output_dir)?;
     let mut candidates: Vec<(PathBuf, std::time::SystemTime, bool)> = Vec::new();
 
-    while let Some(entry) = entries.next_entry().await? {
+    for entry in read_dir.flatten() {
         let path = entry.path();
         if !path.is_file() {
             continue;
@@ -1700,7 +1700,7 @@ async fn find_downloaded_file(output_dir: &Path, url: &str) -> anyhow::Result<Pa
             continue;
         }
 
-        if let Ok(meta) = entry.metadata().await {
+        if let Ok(meta) = entry.metadata() {
             if meta.len() == 0 {
                 continue;
             }
