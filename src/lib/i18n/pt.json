@@ -202,7 +202,9 @@
       "reset": "Restaurar padrões",
       "reset_confirm": "Tem certeza? Todas as configurações serão restauradas.",
       "torrent_listen_port": "Porta de escuta torrent",
-      "torrent_listen_port_desc": "Porta TCP para conexões BitTorrent de entrada"
+      "torrent_listen_port_desc": "Porta TCP para conexões BitTorrent de entrada",
+      "cookies_from_browser": "Cookies do navegador (avançado)",
+      "cookies_from_browser_desc": "Só configure se a extensão do navegador não funcionar. A maioria dos usuários deve deixar vazio."
     },
     "ytdlp_flags": {
       "title": "Flags do yt-dlp"
