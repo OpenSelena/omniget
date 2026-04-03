@@ -502,6 +502,9 @@
     "connected_as": "Συνδεδεμένο ως {{email}}",
     "back": "Πίσω στα Μαθήματα",
     "coming_soon": "Σύντομα διαθέσιμο",
+    "update_plugin_hint": "Ενημερώστε το plugin μαθημάτων για την καλύτερη εμπειρία.",
+    "update_plugin_for_platform": "Αυτή η πλατφόρμα απαιτεί ενημερωμένο plugin μαθημάτων. Ελέγξτε το Marketplace.",
+    "search_btn": "Αναζήτηση",
     "search_placeholder": "Αναζητηση πλατφορμων...",
     "connection_failed": "Αποτυχια συνδεσης"
   },
