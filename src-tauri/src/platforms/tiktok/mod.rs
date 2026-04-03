@@ -1,6 +1,8 @@
+use std::sync::Arc;
+
 use anyhow::anyhow;
 use async_trait::async_trait;
-use reqwest::header::{HeaderMap, HeaderValue, REFERER};
+use reqwest::header::{HeaderMap, HeaderValue, COOKIE, REFERER};
 use tokio::sync::mpsc;
 
 use crate::core::direct_downloader;
@@ -10,9 +12,11 @@ use crate::models::media::{
 use crate::platforms::traits::PlatformDownloader;
 
 const USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36";
+const SHORT_LINK_UA: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)";
 
 pub struct TikTokDownloader {
     client: reqwest::Client,
+    captured_cookies: Arc<tokio::sync::Mutex<Option<String>>>,
 }
 
 impl Default for TikTokDownloader {
@@ -34,12 +38,25 @@ impl TikTokDownloader {
         }
 
         let client = builder.build().unwrap_or_default();
-        Self { client }
+        Self {
+            client,
+            captured_cookies: Arc::new(tokio::sync::Mutex::new(None)),
+        }
     }
 
     fn tiktok_headers() -> HeaderMap {
         let mut headers = HeaderMap::new();
         headers.insert(REFERER, HeaderValue::from_static("https://www.tiktok.com/"));
+        headers
+    }
+
+    fn download_headers(&self, cookies: &Option<String>) -> HeaderMap {
+        let mut headers = Self::tiktok_headers();
+        if let Some(ref cookie_str) = cookies {
+            if let Ok(val) = HeaderValue::from_str(cookie_str) {
+                headers.insert(COOKIE, val);
+            }
+        }
         headers
     }
 
@@ -62,7 +79,7 @@ impl TikTokDownloader {
 
     async fn resolve_short_link(&self, url: &str) -> anyhow::Result<String> {
         let redirect_client = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
-            .user_agent(USER_AGENT)
+            .user_agent(SHORT_LINK_UA)
             .redirect(reqwest::redirect::Policy::none())
             .build()
             .unwrap_or_default();
@@ -121,6 +138,15 @@ impl TikTokDownloader {
 
         if !status.is_success() && status.as_u16() != 302 {
             return Err(anyhow!("TikTok retornou HTTP {}", status));
+        }
+
+        let mut cookie_parts = Vec::new();
+        for cookie in response.cookies() {
+            cookie_parts.push(format!("{}={}", cookie.name(), cookie.value()));
+        }
+        if !cookie_parts.is_empty() {
+            let cookie_str = cookie_parts.join("; ");
+            *self.captured_cookies.lock().await = Some(cookie_str);
         }
 
         let html = response.text().await?;
@@ -258,12 +284,32 @@ impl TikTokDownloader {
         Some(urls)
     }
 
+    async fn fallback_ytdlp(&self, url: &str) -> anyhow::Result<MediaInfo> {
+        let ytdlp_path = crate::core::ytdlp::ensure_ytdlp().await?;
+        let extra_flags = vec![
+            "--referer".to_string(),
+            "https://www.tiktok.com/".to_string(),
+        ];
+        let json = crate::core::ytdlp::get_video_info(&ytdlp_path, url, &extra_flags).await?;
+        let mut info = crate::platforms::generic_ytdlp::GenericYtdlpDownloader::parse_video_info(&json)?;
+        for q in &mut info.available_qualities {
+            q.url = url.to_string();
+            q.format = "ytdlp".to_string();
+        }
+        Ok(info)
+    }
+
     async fn get_media_info_via_ytdlp(&self, url: &str, post_id: &str) -> anyhow::Result<MediaInfo> {
         let ytdlp_path = crate::core::ytdlp::find_ytdlp_cached()
             .await
             .ok_or_else(|| anyhow!("yt-dlp not found — install it in Settings"))?;
 
-        let json = crate::core::ytdlp::get_video_info(&ytdlp_path, url, &[]).await?;
+        let extra_flags = vec![
+            "--referer".to_string(),
+            "https://www.tiktok.com/".to_string(),
+        ];
+
+        let json = crate::core::ytdlp::get_video_info(&ytdlp_path, url, &extra_flags).await?;
 
         let title = json
             .get("title")
@@ -285,30 +331,6 @@ impl TikTokDownloader {
             .and_then(|v| v.as_str())
             .map(String::from);
 
-        let video_url = json
-            .get("url")
-            .and_then(|v| v.as_str())
-            .map(String::from);
-
-        if let Some(vurl) = video_url {
-            return Ok(MediaInfo {
-                title,
-                author,
-                platform: "tiktok".to_string(),
-                duration_seconds: duration,
-                thumbnail_url: thumbnail,
-                available_qualities: vec![VideoQuality {
-                    label: "original".to_string(),
-                    width: 0,
-                    height: 0,
-                    url: vurl,
-                    format: "mp4".to_string(),
-                }],
-                media_type: MediaType::Video,
-                file_size_bytes: None,
-            });
-        }
-
         Ok(MediaInfo {
             title,
             author,
@@ -320,7 +342,7 @@ impl TikTokDownloader {
                 width: 0,
                 height: 0,
                 url: url.to_string(),
-                format: "mp4".to_string(),
+                format: "ytdlp".to_string(),
             }],
             media_type: MediaType::Video,
             file_size_bytes: None,
@@ -372,8 +394,9 @@ impl PlatformDownloader for TikTokDownloader {
         let detail = match self.fetch_detail(&post_id).await {
             Ok(d) => d,
             Err(first_err) => {
-                tracing::info!("[tiktok] direct fetch failed: {}, trying yt-dlp", first_err);
-                return self.get_media_info_via_ytdlp(&original_url, &post_id).await;
+                tracing::warn!("[tiktok] native failed: {}, trying yt-dlp", first_err);
+                return self.get_media_info_via_ytdlp(&original_url, &post_id).await
+                    .or_else(|_| Err(first_err));
             }
         };
 
@@ -415,7 +438,7 @@ impl PlatformDownloader for TikTokDownloader {
             });
         }
 
-        if let Some(_video_url) = Self::extract_video_url(&detail) {
+        if let Some(video_url) = Self::extract_video_url(&detail) {
             return Ok(MediaInfo {
                 title: filename_base,
                 author,
@@ -426,8 +449,8 @@ impl PlatformDownloader for TikTokDownloader {
                     label: "best".to_string(),
                     width: 0,
                     height: 0,
-                    url: original_url,
-                    format: "mp4".to_string(),
+                    url: video_url,
+                    format: "tiktok_direct".to_string(),
                 }],
                 media_type: MediaType::Video,
                 file_size_bytes: None,
@@ -453,7 +476,8 @@ impl PlatformDownloader for TikTokDownloader {
             });
         }
 
-        Err(anyhow!("No media found in post"))
+        tracing::warn!("[tiktok] no media extracted natively, trying yt-dlp fallback");
+        self.fallback_ytdlp(&original_url).await
     }
 
     async fn download(
@@ -462,7 +486,31 @@ impl PlatformDownloader for TikTokDownloader {
         opts: &DownloadOptions,
         progress: mpsc::Sender<f64>,
     ) -> anyhow::Result<DownloadResult> {
-        let headers = Self::tiktok_headers();
+        if let Some(quality) = info.available_qualities.first() {
+            if quality.format == "ytdlp" {
+                let ytdlp_path = crate::core::ytdlp::ensure_ytdlp().await?;
+                return crate::core::ytdlp::download_video(
+                    &ytdlp_path,
+                    &quality.url,
+                    &opts.output_dir,
+                    None,
+                    progress,
+                    opts.download_mode.as_deref(),
+                    opts.format_id.as_deref(),
+                    opts.filename_template.as_deref(),
+                    Some("https://www.tiktok.com/"),
+                    opts.cancel_token.clone(),
+                    None,
+                    opts.concurrent_fragments,
+                    false,
+                    &[],
+                )
+                .await;
+            }
+        }
+
+        let cookies = self.captured_cookies.lock().await.clone();
+        let headers = self.download_headers(&cookies);
 
         match info.media_type {
             MediaType::Video => {
@@ -470,6 +518,36 @@ impl PlatformDownloader for TikTokDownloader {
                     .available_qualities
                     .first()
                     .ok_or_else(|| anyhow!("No video URL available"))?;
+
+                if quality.format == "tiktok_direct" {
+                    let filename = format!("{}.mp4", sanitize_filename::sanitize(&info.title));
+                    let output = opts.output_dir.join(&filename);
+
+                    let result = direct_downloader::download_direct_with_headers(
+                        &self.client,
+                        &quality.url,
+                        &output,
+                        progress.clone(),
+                        Some(headers),
+                        Some(&opts.cancel_token),
+                    )
+                    .await;
+
+                    match result {
+                        Ok(bytes) => {
+                            return Ok(DownloadResult {
+                                file_path: output,
+                                file_size_bytes: bytes,
+                                duration_seconds: info.duration_seconds.unwrap_or(0.0),
+                                torrent_id: None,
+                            });
+                        }
+                        Err(e) => {
+                            tracing::warn!("[tiktok] direct download failed: {}, falling back to yt-dlp", e);
+                            let _ = tokio::fs::remove_file(&output).await;
+                        }
+                    }
+                }
 
                 let ytdlp_path = match &opts.ytdlp_path {
                     Some(p) => p.clone(),
