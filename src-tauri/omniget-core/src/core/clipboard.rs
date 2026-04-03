@@ -1,12 +1,9 @@
 use std::path::Path;
 
-#[cfg(target_os = "windows")]
-const CREATE_NO_WINDOW: u32 = 0x08000000;
-
 const MAX_CLIPBOARD_FILE_SIZE: u64 = 1_073_741_824; // 1 GB
 
 pub async fn copy_file_to_clipboard(path: &Path) -> anyhow::Result<()> {
-    let metadata = tokio::fs::metadata(path).await?;
+    let metadata = std::fs::metadata(path)?;
     if metadata.len() > MAX_CLIPBOARD_FILE_SIZE {
         tracing::info!(
             "[clipboard] skipping copy: file too large ({} bytes)",
@@ -35,20 +32,24 @@ pub async fn copy_file_to_clipboard(path: &Path) -> anyhow::Result<()> {
 
 #[cfg(target_os = "macos")]
 async fn copy_file_macos(path: &str) -> anyhow::Result<()> {
-    let output = tokio::process::Command::new("osascript")
-        .args([
-            "-e",
-            &format!("set the clipboard to POSIX file \"{}\"", path),
-        ])
-        .output()
-        .await?;
+    let path = path.to_string();
+    let output = tokio::task::spawn_blocking(move || {
+        crate::core::process::std_command("osascript")
+            .args([
+                "-e",
+                &format!("set the clipboard to POSIX file \"{}\"", path),
+            ])
+            .output()
+    })
+    .await
+    .map_err(|e| anyhow::anyhow!("spawn_blocking failed: {}", e))??;
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
         return Err(anyhow::anyhow!("osascript failed: {}", stderr));
     }
 
-    tracing::info!("[clipboard] copied file to clipboard (macOS): {}", path);
+    tracing::info!("[clipboard] copied file to clipboard (macOS)");
     Ok(())
 }
 
@@ -56,71 +57,94 @@ async fn copy_file_macos(path: &str) -> anyhow::Result<()> {
 async fn copy_file_linux(path: &str) -> anyhow::Result<()> {
     let uri = format!("file://{}", path);
 
-    let xclip = tokio::process::Command::new("xclip")
-        .args(["-selection", "clipboard", "-target", "text/uri-list"])
-        .stdin(std::process::Stdio::piped())
-        .spawn();
+    let uri_clone = uri.clone();
+    let xclip_result = tokio::task::spawn_blocking(move || {
+        let mut child = match crate::core::process::std_command("xclip")
+            .args(["-selection", "clipboard", "-target", "text/uri-list"])
+            .stdin(std::process::Stdio::piped())
+            .spawn()
+        {
+            Ok(c) => c,
+            Err(_) => return Err(anyhow::anyhow!("xclip not found")),
+        };
+        if let Some(ref mut stdin) = child.stdin {
+            use std::io::Write;
+            let _ = stdin.write_all(uri_clone.as_bytes());
+        }
+        let output = child.wait_with_output()?;
+        if output.status.success() {
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    })
+    .await
+    .map_err(|e| anyhow::anyhow!("{}", e))?;
 
-    match xclip {
-        Ok(mut child) => {
-            if let Some(ref mut stdin) = child.stdin {
-                use tokio::io::AsyncWriteExt;
-                stdin.write_all(uri.as_bytes()).await?;
-            }
-            let output = child.wait_with_output().await?;
-            if output.status.success() {
-                tracing::info!("[clipboard] copied file to clipboard (xclip): {}", path);
-                return Ok(());
-            }
-        }
-        Err(_) => {
-            tracing::debug!("[clipboard] xclip not found, trying xsel");
-        }
+    if let Ok(true) = xclip_result {
+        tracing::info!("[clipboard] copied file to clipboard (xclip): {}", path);
+        return Ok(());
     }
 
-    let xsel = tokio::process::Command::new("xsel")
-        .args(["--clipboard", "--input"])
-        .stdin(std::process::Stdio::piped())
-        .spawn();
+    let uri_clone = uri.clone();
+    let xsel_result = tokio::task::spawn_blocking(move || {
+        let mut child = match crate::core::process::std_command("xsel")
+            .args(["--clipboard", "--input"])
+            .stdin(std::process::Stdio::piped())
+            .spawn()
+        {
+            Ok(c) => c,
+            Err(_) => return Err(anyhow::anyhow!("xsel not found")),
+        };
+        if let Some(ref mut stdin) = child.stdin {
+            use std::io::Write;
+            let _ = stdin.write_all(uri_clone.as_bytes());
+        }
+        let output = child.wait_with_output()?;
+        if output.status.success() {
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    })
+    .await
+    .map_err(|e| anyhow::anyhow!("{}", e))?;
 
-    match xsel {
-        Ok(mut child) => {
-            if let Some(ref mut stdin) = child.stdin {
-                use tokio::io::AsyncWriteExt;
-                stdin.write_all(uri.as_bytes()).await?;
-            }
-            let output = child.wait_with_output().await?;
-            if output.status.success() {
-                tracing::info!("[clipboard] copied file URI to clipboard (xsel): {}", path);
-                return Ok(());
-            }
-        }
-        Err(_) => {
-            tracing::debug!("[clipboard] xsel not found, trying wl-copy");
-        }
+    if let Ok(true) = xsel_result {
+        tracing::info!("[clipboard] copied file URI to clipboard (xsel): {}", path);
+        return Ok(());
     }
 
-    let wl_copy = tokio::process::Command::new("wl-copy")
-        .args(["--type", "text/uri-list"])
-        .stdin(std::process::Stdio::piped())
-        .spawn();
-
-    match wl_copy {
-        Ok(mut child) => {
-            if let Some(ref mut stdin) = child.stdin {
-                use tokio::io::AsyncWriteExt;
-                stdin.write_all(uri.as_bytes()).await?;
-            }
-            let output = child.wait_with_output().await?;
-            if output.status.success() {
-                tracing::info!(
-                    "[clipboard] copied file to clipboard (wl-copy): {}",
-                    path
-                );
-                return Ok(());
-            }
+    let uri_clone = uri.clone();
+    let wl_result = tokio::task::spawn_blocking(move || {
+        let mut child = match crate::core::process::std_command("wl-copy")
+            .args(["--type", "text/uri-list"])
+            .stdin(std::process::Stdio::piped())
+            .spawn()
+        {
+            Ok(c) => c,
+            Err(_) => return Err(anyhow::anyhow!("wl-copy not found")),
+        };
+        if let Some(ref mut stdin) = child.stdin {
+            use std::io::Write;
+            let _ = stdin.write_all(uri_clone.as_bytes());
         }
-        Err(_) => {}
+        let output = child.wait_with_output()?;
+        if output.status.success() {
+            Ok(true)
+        } else {
+            Ok(false)
+        }
+    })
+    .await
+    .map_err(|e| anyhow::anyhow!("{}", e))?;
+
+    if let Ok(true) = wl_result {
+        tracing::info!(
+            "[clipboard] copied file to clipboard (wl-copy): {}",
+            path
+        );
+        return Ok(());
     }
 
     Err(anyhow::anyhow!(
@@ -135,11 +159,13 @@ async fn copy_file_windows(path: &str) -> anyhow::Result<()> {
         path.replace('\'', "''")
     );
 
-    let output = tokio::process::Command::new("powershell")
-        .args(["-NoProfile", "-NonInteractive", "-Command", &ps_script])
-        .creation_flags(CREATE_NO_WINDOW)
-        .output()
-        .await?;
+    let output = tokio::task::spawn_blocking(move || {
+        crate::core::process::std_command("powershell")
+            .args(["-NoProfile", "-NonInteractive", "-Command", &ps_script])
+            .output()
+    })
+    .await
+    .map_err(|e| anyhow::anyhow!("spawn_blocking failed: {}", e))??;
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
