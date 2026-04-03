@@ -41,6 +41,57 @@ impl Default for TwitchClipsDownloader {
 }
 
 impl TwitchClipsDownloader {
+    async fn fallback_ytdlp(&self, url: &str) -> anyhow::Result<MediaInfo> {
+        let ytdlp_path = crate::core::ytdlp::ensure_ytdlp().await?;
+        let json = crate::core::ytdlp::get_video_info(&ytdlp_path, url, &[]).await?;
+        crate::platforms::generic_ytdlp::GenericYtdlpDownloader::parse_video_info(&json)
+    }
+
+    async fn native_get_media_info(&self, url: &str) -> anyhow::Result<MediaInfo> {
+        let slug = Self::extract_clip_slug(url)
+            .ok_or_else(|| anyhow!("Could not extract clip slug"))?;
+
+        let clip = self.fetch_clip_metadata(&slug).await?;
+
+        if clip.video_qualities.is_empty() {
+            return Err(anyhow!("No video quality available"));
+        }
+
+        let broadcaster = clip.broadcaster_login.as_deref()
+            .ok_or_else(|| anyhow!("Dados do clip incompletos"))?;
+
+        let token = self.fetch_access_token(&slug).await?;
+
+        let clip_title = clip.title.trim().to_string();
+
+        let available_qualities: Vec<VideoQuality> = clip
+            .video_qualities
+            .iter()
+            .map(|q| {
+                let height: u32 = q.quality.parse().unwrap_or(0);
+                let authenticated_url = Self::build_authenticated_url(&q.source_url, &token);
+                VideoQuality {
+                    label: format!("{}p", q.quality),
+                    width: 0,
+                    height,
+                    url: authenticated_url,
+                    format: "mp4".to_string(),
+                }
+            })
+            .collect();
+
+        Ok(MediaInfo {
+            title: sanitize_filename::sanitize(&clip_title),
+            author: broadcaster.to_string(),
+            platform: "twitch".to_string(),
+            duration_seconds: Some(clip.duration_seconds),
+            thumbnail_url: clip.thumbnail_url,
+            available_qualities,
+            media_type: MediaType::Video,
+            file_size_bytes: None,
+        })
+    }
+
     pub fn new() -> Self {
         let client = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
             .timeout(std::time::Duration::from_secs(120))
@@ -215,48 +266,13 @@ impl PlatformDownloader for TwitchClipsDownloader {
     }
 
     async fn get_media_info(&self, url: &str) -> anyhow::Result<MediaInfo> {
-        let slug = Self::extract_clip_slug(url)
-            .ok_or_else(|| anyhow!("Could not extract clip slug"))?;
-
-        let clip = self.fetch_clip_metadata(&slug).await?;
-
-        if clip.video_qualities.is_empty() {
-            return Err(anyhow!("No video quality available"));
+        match self.native_get_media_info(url).await {
+            Ok(info) => Ok(info),
+            Err(native_err) => {
+                tracing::warn!("[twitch] native failed: {}, trying yt-dlp fallback", native_err);
+                self.fallback_ytdlp(url).await.map_err(|_| native_err)
+            }
         }
-
-        let broadcaster = clip.broadcaster_login.as_deref()
-            .ok_or_else(|| anyhow!("Dados do clip incompletos"))?;
-
-        let token = self.fetch_access_token(&slug).await?;
-
-        let clip_title = clip.title.trim().to_string();
-
-        let available_qualities: Vec<VideoQuality> = clip
-            .video_qualities
-            .iter()
-            .map(|q| {
-                let height: u32 = q.quality.parse().unwrap_or(0);
-                let authenticated_url = Self::build_authenticated_url(&q.source_url, &token);
-                VideoQuality {
-                    label: format!("{}p", q.quality),
-                    width: 0,
-                    height,
-                    url: authenticated_url,
-                    format: "mp4".to_string(),
-                }
-            })
-            .collect();
-
-        Ok(MediaInfo {
-            title: sanitize_filename::sanitize(&clip_title),
-            author: broadcaster.to_string(),
-            platform: "twitch".to_string(),
-            duration_seconds: Some(clip.duration_seconds),
-            thumbnail_url: clip.thumbnail_url,
-            available_qualities,
-            media_type: MediaType::Video,
-            file_size_bytes: None,
-        })
     }
 
     async fn download(
@@ -265,6 +281,29 @@ impl PlatformDownloader for TwitchClipsDownloader {
         opts: &DownloadOptions,
         progress: mpsc::Sender<f64>,
     ) -> anyhow::Result<DownloadResult> {
+        if let Some(quality) = info.available_qualities.first() {
+            if quality.format == "ytdlp" {
+                let ytdlp_path = crate::core::ytdlp::ensure_ytdlp().await?;
+                return crate::core::ytdlp::download_video(
+                    &ytdlp_path,
+                    &quality.url,
+                    &opts.output_dir,
+                    None,
+                    progress,
+                    opts.download_mode.as_deref(),
+                    opts.format_id.as_deref(),
+                    opts.filename_template.as_deref(),
+                    None,
+                    opts.cancel_token.clone(),
+                    None,
+                    opts.concurrent_fragments,
+                    false,
+                    &[],
+                )
+                .await;
+            }
+        }
+
         let first = info
             .available_qualities
             .first()
