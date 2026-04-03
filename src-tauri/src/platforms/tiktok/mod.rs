@@ -23,13 +23,17 @@ impl Default for TikTokDownloader {
 
 impl TikTokDownloader {
     pub fn new() -> Self {
-        let client = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
+        let mut builder = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
             .user_agent(USER_AGENT)
-            .cookie_store(true)
-            .timeout(std::time::Duration::from_secs(30))
-            .build()
-            .unwrap_or_default();
+            .timeout(std::time::Duration::from_secs(30));
 
+        if let Some(jar) = crate::core::cookie_parser::load_extension_cookies_for_domain("tiktok.com") {
+            builder = builder.cookie_provider(jar);
+        } else {
+            builder = builder.cookie_store(true);
+        }
+
+        let client = builder.build().unwrap_or_default();
         Self { client }
     }
 
