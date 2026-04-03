@@ -110,6 +110,8 @@ pub async fn queue_url_with_defaults(
         .to_string_lossy()
         .to_string();
 
+    let ext_referer = crate::native_host::read_extension_metadata(&url);
+
     {
         let mut q = download_queue.lock().await;
         q.enqueue(
@@ -121,7 +123,7 @@ pub async fn queue_url_with_defaults(
             None,
             None,
             None,
-            None,
+            ext_referer,
             None,
             None,
             None,
