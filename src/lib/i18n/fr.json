@@ -484,9 +484,9 @@
     "accept_transfer": "Accepter et télécharger",
     "reject_transfer": "Refuser",
     "searching_sender": "Recherche de l'expéditeur...",
-    "searching_hint": "Assurez-vous que les deux appareils sont sur le même réseau.",
+    "searching_hint": "Connexion au serveur relais...",
     "sender_not_found": "Expéditeur introuvable",
-    "sender_not_found_hint": "L'expéditeur n'est peut-être pas encore actif. Assurez-vous que les deux appareils sont sur le même réseau Wi-Fi et que l'expéditeur a partagé le code."
+    "sender_not_found_hint": "Code introuvable. Vérifiez que l'expéditeur est actif et que le code est correct."
   },
   "mascot": {
     "idle": "Collez un lien ou recherchez pour commencer !",
