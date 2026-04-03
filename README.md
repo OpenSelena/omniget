@@ -25,7 +25,7 @@ Built with Tauri and Rust for speed and a small footprint.
 - Download from 50+ platforms natively, plus [1000+ more via yt-dlp](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md)
 - Download torrents and magnet links natively with seeding, pause/resume
 - Open .torrent files directly with file picker or drag-and-drop
-- P2P file transfer between devices — works across different networks (powered by [iroh](https://github.com/n0-computer/iroh) with automatic hole punching and relay fallback)
+- P2P file transfer between devices — works across different networks via TCP relay (no port forwarding or NAT traversal needed)
 - Download full courses from 35+ platforms with login (videos, attachments, descriptions)
 - Download Telegram media with QR code or phone number login
 - Convert media files between formats with FFmpeg and GPU acceleration
