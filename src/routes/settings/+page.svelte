@@ -789,6 +789,20 @@
         <div class="divider"></div>
         <div class="setting-row">
           <div class="setting-col">
+            <span class="setting-label">{$t('settings.advanced.cookies_from_browser')}</span>
+            <span class="setting-path">{$t('settings.advanced.cookies_from_browser_desc')}</span>
+          </div>
+          <input
+            type="text"
+            class="input-text"
+            placeholder="e.g., firefox, chrome, edge"
+            value={settings.advanced?.cookies_from_browser ?? ""}
+            onchange={(e) => updateSettings({ advanced: { cookies_from_browser: (e.target as HTMLInputElement).value.trim() } })}
+          />
+        </div>
+        <div class="divider"></div>
+        <div class="setting-row">
+          <div class="setting-col">
             <span class="setting-label">{$t('debug.enable')}</span>
             <span class="setting-path">{$t('debug.enable_desc')}</span>
           </div>
