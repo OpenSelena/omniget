@@ -2,7 +2,6 @@ use std::path::PathBuf;
 use std::process::Stdio;
 
 use anyhow::anyhow;
-use futures::StreamExt;
 
 pub fn is_flatpak() -> bool {
     std::path::Path::new("/.flatpak-info").exists()
@@ -35,32 +34,51 @@ pub async fn find_tool(tool: &str) -> Option<PathBuf> {
         }
     }
 
-    if let Ok(status) = crate::core::process::command(&name)
-        .arg(version_flag)
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
+    let result = {
+        let name = name.clone();
+        let vf = version_flag.to_string();
+        tokio::task::spawn_blocking(move || {
+            crate::core::process::std_command(&name)
+                .arg(&vf)
+                .stdout(Stdio::null())
+                .stderr(Stdio::null())
+                .status()
+                .ok()
+                .filter(|s| s.success())
+                .map(|_| PathBuf::from(&name))
+        })
         .await
-    {
-        if status.success() {
-            tracing::debug!("[perf] find_tool({}) took {:?}", tool, _timer_start.elapsed());
-            return Some(PathBuf::from(&name));
-        }
+        .ok()
+        .flatten()
+    };
+
+    if result.is_some() {
+        tracing::debug!("[perf] find_tool({}) took {:?}", tool, _timer_start.elapsed());
+        return result;
     }
 
     let managed = managed_bin_dir()?.join(&name);
     if managed.exists() {
-        if let Ok(status) = crate::core::process::command(&managed)
-            .arg(version_flag)
-            .stdout(Stdio::null())
-            .stderr(Stdio::null())
-            .status()
+        let check = {
+            let managed = managed.clone();
+            let vf = version_flag.to_string();
+            tokio::task::spawn_blocking(move || {
+                crate::core::process::std_command(&managed)
+                    .arg(&vf)
+                    .stdout(Stdio::null())
+                    .stderr(Stdio::null())
+                    .status()
+                    .ok()
+                    .filter(|s| s.success())
+            })
             .await
-        {
-            if status.success() {
-                tracing::debug!("[perf] find_tool({}) took {:?}", tool, _timer_start.elapsed());
-                return Some(managed);
-            }
+            .ok()
+            .flatten()
+        };
+
+        if check.is_some() {
+            tracing::debug!("[perf] find_tool({}) took {:?}", tool, _timer_start.elapsed());
+            return Some(managed);
         }
         tracing::warn!("find_tool({}): binary exists at {} but failed to execute", tool, managed.display());
     }
@@ -80,13 +98,20 @@ pub async fn check_version(tool: &str) -> Option<String> {
     let _timer_start = std::time::Instant::now();
     let path = find_tool(tool).await?;
     let version_flag = version_flag_for(tool);
-    let output = crate::core::process::command(&path)
-        .arg(version_flag)
-        .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
-        .output()
+    let output = {
+        let path = path.clone();
+        let vf = version_flag.to_string();
+        tokio::task::spawn_blocking(move || {
+            crate::core::process::std_command(&path)
+                .arg(&vf)
+                .stdout(Stdio::piped())
+                .stderr(Stdio::piped())
+                .output()
+        })
         .await
-        .ok()?;
+        .ok()?
+        .ok()?
+    };
 
     if !output.status.success() {
         tracing::debug!("[perf] check_version({}) took {:?}", tool, _timer_start.elapsed());
@@ -131,7 +156,7 @@ pub async fn ensure_ffmpeg() -> anyhow::Result<PathBuf> {
 async fn download_ffmpeg() -> anyhow::Result<PathBuf> {
     let bin_dir = managed_bin_dir()
         .ok_or_else(|| anyhow!("Could not determine data directory"))?;
-    tokio::fs::create_dir_all(&bin_dir).await?;
+    std::fs::create_dir_all(&bin_dir)?;
 
     let ffmpeg_name = bin_name("ffmpeg");
     let ffprobe_name = bin_name("ffprobe");
@@ -151,52 +176,59 @@ async fn download_ffmpeg() -> anyhow::Result<PathBuf> {
         }
 
         let temp_path = bin_dir.join(".ffmpeg_download.tmp");
-        {
-            let mut file = tokio::fs::File::create(&temp_path).await?;
-            let mut stream = response.bytes_stream();
-            while let Some(chunk) = stream.next().await {
-                let chunk = chunk.map_err(|e| anyhow!("Stream error: {}", e))?;
-                tokio::io::AsyncWriteExt::write_all(&mut file, &chunk).await?;
-            }
-            tokio::io::AsyncWriteExt::flush(&mut file).await?;
-        }
+        let bytes = response.bytes().await?;
+        let data = bytes.to_vec();
+        let temp_clone = temp_path.clone();
+        tokio::task::spawn_blocking(move || std::fs::write(&temp_clone, &data))
+            .await
+            .map_err(|e| anyhow!("spawn_blocking failed: {}", e))??;
 
         match archive_type {
             ArchiveType::Zip => extract_zip_ffmpeg(&temp_path, &bin_dir, &ffmpeg_name, &ffprobe_name).await?,
             ArchiveType::TarXz => extract_tar_xz_ffmpeg(&temp_path, &bin_dir, &ffmpeg_name, &ffprobe_name).await?,
         }
 
-        let _ = tokio::fs::remove_file(&temp_path).await;
+        let _ = std::fs::remove_file(&temp_path);
     }
 
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
         let perms = std::fs::Permissions::from_mode(0o755);
-        let _ = tokio::fs::set_permissions(&ffmpeg_target, perms.clone()).await;
+        let _ = std::fs::set_permissions(&ffmpeg_target, perms.clone());
         let ffprobe_path = bin_dir.join(&ffprobe_name);
         if ffprobe_path.exists() {
-            let _ = tokio::fs::set_permissions(&ffprobe_path, perms).await;
+            let _ = std::fs::set_permissions(&ffprobe_path, perms);
         }
     }
 
     #[cfg(target_os = "macos")]
     {
-        if let Err(e) = tokio::process::Command::new("xattr")
-            .args(["-d", "com.apple.quarantine"])
-            .arg(&ffmpeg_target)
-            .output()
-            .await
+        let ffmpeg_mac = ffmpeg_target.clone();
+        if let Err(e) = tokio::task::spawn_blocking(move || {
+            crate::core::process::std_command("xattr")
+                .args(["-d", "com.apple.quarantine"])
+                .arg(&ffmpeg_mac)
+                .output()
+        })
+        .await
+        .map_err(|e| std::io::Error::other(e.to_string()))
+        .and_then(|r| r)
         {
             tracing::warn!("Failed to remove quarantine from ffmpeg: {}", e);
         }
         let ffprobe_path = bin_dir.join(&ffprobe_name);
         if ffprobe_path.exists() {
-            if let Err(e) = tokio::process::Command::new("xattr")
-                .args(["-d", "com.apple.quarantine"])
-                .arg(&ffprobe_path)
-                .output()
-                .await
+            let ffprobe_mac = ffprobe_path.clone();
+            if let Err(e) = tokio::task::spawn_blocking(move || {
+                crate::core::process::std_command("xattr")
+                    .args(["-d", "com.apple.quarantine"])
+                    .arg(&ffprobe_mac)
+                    .output()
+            })
+            .await
+            .map_err(|e| std::io::Error::other(e.to_string()))
+            .and_then(|r| r)
             {
                 tracing::warn!("Failed to remove quarantine from ffprobe: {}", e);
             }
@@ -207,12 +239,18 @@ async fn download_ffmpeg() -> anyhow::Result<PathBuf> {
         return Err(anyhow!("FFmpeg binary not found after extraction"));
     }
 
-    let verify = crate::core::process::command(&ffmpeg_target)
-        .arg("-version")
-        .stdout(Stdio::null())
-        .stderr(Stdio::null())
-        .status()
-        .await;
+    let verify = {
+        let target = ffmpeg_target.clone();
+        tokio::task::spawn_blocking(move || {
+            crate::core::process::std_command(&target)
+                .arg("-version")
+                .stdout(Stdio::null())
+                .stderr(Stdio::null())
+                .status()
+        })
+        .await
+        .map_err(|e| anyhow!("spawn_blocking failed: {}", e))?
+    };
     match verify {
         Ok(s) if s.success() => {}
         Ok(s) => return Err(anyhow!("FFmpeg installed but failed to execute (exit code {})", s)),
@@ -392,7 +430,7 @@ pub async fn ensure_js_runtime() -> Option<PathBuf> {
 async fn download_deno() -> anyhow::Result<PathBuf> {
     let bin_dir = managed_bin_dir()
         .ok_or_else(|| anyhow!("Could not determine data directory"))?;
-    tokio::fs::create_dir_all(&bin_dir).await?;
+    std::fs::create_dir_all(&bin_dir)?;
 
     let deno_name = bin_name("deno");
     let deno_target = bin_dir.join(&deno_name);
@@ -463,16 +501,19 @@ async fn download_deno() -> anyhow::Result<PathBuf> {
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
-        let _ = tokio::fs::set_permissions(&deno_target, std::fs::Permissions::from_mode(0o755)).await;
+        let _ = std::fs::set_permissions(&deno_target, std::fs::Permissions::from_mode(0o755));
     }
 
     #[cfg(target_os = "macos")]
     {
-        let _ = tokio::process::Command::new("xattr")
-            .args(["-d", "com.apple.quarantine"])
-            .arg(&deno_target)
-            .output()
-            .await;
+        let deno_mac = deno_target.clone();
+        let _ = tokio::task::spawn_blocking(move || {
+            crate::core::process::std_command("xattr")
+                .args(["-d", "com.apple.quarantine"])
+                .arg(&deno_mac)
+                .output()
+        })
+        .await;
     }
 
     tracing::info!("Deno installed to {}", deno_target.display());
@@ -502,7 +543,7 @@ pub async fn ensure_aria2c() -> Option<PathBuf> {
 async fn download_aria2c() -> anyhow::Result<PathBuf> {
     let bin_dir = managed_bin_dir()
         .ok_or_else(|| anyhow!("Could not determine data directory"))?;
-    tokio::fs::create_dir_all(&bin_dir).await?;
+    std::fs::create_dir_all(&bin_dir)?;
 
     let aria2c_name = bin_name("aria2c");
     let aria2c_target = bin_dir.join(&aria2c_name);
