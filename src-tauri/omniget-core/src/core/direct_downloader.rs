@@ -293,6 +293,56 @@ async fn download_chunk(
     headers: Option<reqwest::header::HeaderMap>,
     cancel: &CancellationToken,
 ) -> anyhow::Result<()> {
+    let mut last_err = None;
+
+    for attempt in 0..3u32 {
+        if cancel.is_cancelled() {
+            return Err(anyhow!("Download cancelled"));
+        }
+
+        if attempt > 0 {
+            tokio::time::sleep(Duration::from_millis(1000 * (attempt as u64))).await;
+        }
+
+        match download_chunk_attempt(
+            client, url, part_path, start, end, downloaded, total_size, progress_tx,
+            headers.clone(), cancel,
+        )
+        .await
+        {
+            Ok(()) => return Ok(()),
+            Err(e) => {
+                if is_fatal_error(&e) {
+                    return Err(e);
+                }
+                let chunk_bytes = end - start + 1;
+                let current = downloaded.load(Ordering::Relaxed);
+                downloaded.fetch_sub(chunk_bytes.min(current), Ordering::Relaxed);
+                tracing::warn!(
+                    "[direct] chunk {}-{} attempt {}/3 failed: {}",
+                    start, end, attempt + 1, e
+                );
+                last_err = Some(e);
+            }
+        }
+    }
+
+    Err(last_err.unwrap_or_else(|| anyhow!("Chunk failed after 3 attempts")))
+}
+
+#[allow(clippy::too_many_arguments)]
+async fn download_chunk_attempt(
+    client: &reqwest::Client,
+    url: &str,
+    part_path: &Path,
+    start: u64,
+    end: u64,
+    downloaded: &AtomicU64,
+    total_size: u64,
+    progress_tx: &mpsc::Sender<f64>,
+    headers: Option<reqwest::header::HeaderMap>,
+    cancel: &CancellationToken,
+) -> anyhow::Result<()> {
     let mut request = client.get(url);
     if let Some(h) = headers {
         request = request.headers(h);
