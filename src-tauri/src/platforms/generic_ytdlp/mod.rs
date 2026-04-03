@@ -166,7 +166,8 @@ impl PlatformDownloader for GenericYtdlpDownloader {
             anyhow!("yt-dlp unavailable: {}", e)
         })?;
 
-        let json = ytdlp::get_video_info(&ytdlp_path, url, &[]).await?;
+        let extra = platform_extra_flags(url);
+        let json = ytdlp::get_video_info(&ytdlp_path, url, &extra).await?;
         Self::parse_video_info(&json)
     }
 
@@ -201,6 +202,9 @@ impl PlatformDownloader for GenericYtdlpDownloader {
         let quality_height = Self::extract_quality_height(&selected.label);
         let video_url = &selected.url;
 
+        let referer = opts.referer.as_deref()
+            .or_else(|| platform_referer(video_url));
+
         ytdlp::download_video(
             &ytdlp_path,
             video_url,
@@ -210,7 +214,7 @@ impl PlatformDownloader for GenericYtdlpDownloader {
             opts.download_mode.as_deref(),
             opts.format_id.as_deref(),
             opts.filename_template.as_deref(),
-            opts.referer.as_deref(),
+            referer,
             opts.cancel_token.clone(),
             None,
             opts.concurrent_fragments,
@@ -219,4 +223,42 @@ impl PlatformDownloader for GenericYtdlpDownloader {
         )
         .await
     }
+}
+
+fn platform_extra_flags(url: &str) -> Vec<String> {
+    match platform_referer(url) {
+        Some(r) => vec!["--referer".into(), r.to_string()],
+        None => Vec::new(),
+    }
+}
+
+fn platform_referer(url: &str) -> Option<&'static str> {
+    let lower = url.to_lowercase();
+
+    if lower.contains("douyin.com") || lower.contains("iesdouyin.com") {
+        return Some("https://www.douyin.com/");
+    }
+    if lower.contains("v.qq.com") || lower.contains("qq.com/x/") {
+        return Some("https://v.qq.com/");
+    }
+    if lower.contains("youku.com") {
+        return Some("https://www.youku.com/");
+    }
+    if lower.contains("iqiyi.com") {
+        return Some("https://www.iqiyi.com/");
+    }
+    if lower.contains("mgtv.com") {
+        return Some("https://www.mgtv.com/");
+    }
+    if lower.contains("kuaishou.com") {
+        return Some("https://www.kuaishou.com/");
+    }
+    if lower.contains("xiaohongshu.com") || lower.contains("xhslink.com") {
+        return Some("https://www.xiaohongshu.com/");
+    }
+    if lower.contains("bilibili.com") || lower.contains("bilibili.tv") {
+        return Some("https://www.bilibili.com/");
+    }
+
+    None
 }
