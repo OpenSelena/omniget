@@ -484,9 +484,9 @@
     "accept_transfer": "承諾してダウンロード",
     "reject_transfer": "拒否",
     "searching_sender": "送信者を検索中...",
-    "searching_hint": "両方のデバイスが同じネットワークに接続されていることを確認してください。",
+    "searching_hint": "リレーサーバーに接続中...",
     "sender_not_found": "送信者が見つかりません",
-    "sender_not_found_hint": "送信者がまだアクティブでない可能性があります。両方のデバイスが同じWi-Fiネットワークに接続されており、送信者がコードを共有していることを確認してください。"
+    "sender_not_found_hint": "コードが見つかりません。送信者がアクティブで、コードが正しいことを確認してください。"
   },
   "mascot": {
     "idle": "リンクを貼るか検索して始めましょう！",
