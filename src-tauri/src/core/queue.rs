@@ -780,11 +780,17 @@ async fn spawn_download_inner(
             emit_queue_state_from_state(&app, state);
         }
         Err(e) => {
-            let err_msg = e.to_string();
-            tracing::error!("Download error '{}': {}", platform_name, err_msg);
+            let raw_err = e.to_string();
+            let (category, hint) = omniget_core::core::errors::classify_download_error(&raw_err);
+            let user_msg = if category != "unknown" {
+                format!("{} ({})", hint, raw_err)
+            } else {
+                raw_err.clone()
+            };
+            tracing::error!("Download error '{}' [{}]: {}", platform_name, category, raw_err);
             let state = {
                 let mut q = queue.lock().await;
-                q.mark_complete(item_id, false, Some(err_msg), None, None);
+                q.mark_complete(item_id, false, Some(user_msg), None, None);
                 q.get_state()
             };
             emit_queue_state_from_state(&app, state);
