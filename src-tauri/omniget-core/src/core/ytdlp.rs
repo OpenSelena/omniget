@@ -49,7 +49,7 @@ pub fn ext_cookie_path_if_fresh() -> Option<PathBuf> {
     }
     let metadata = std::fs::metadata(&source).ok()?;
     let modified = metadata.modified().ok()?;
-    if modified.elapsed().unwrap_or_default() >= std::time::Duration::from_secs(86400) {
+    if modified.elapsed().unwrap_or_default() >= std::time::Duration::from_secs(604800) {
         return None;
     }
     Some(source)
@@ -437,7 +437,7 @@ fn extension_cookie_file() -> Option<std::path::PathBuf> {
     }
     let metadata = std::fs::metadata(&source).ok()?;
     let modified = metadata.modified().ok()?;
-    if modified.elapsed().unwrap_or_default() >= std::time::Duration::from_secs(86400) {
+    if modified.elapsed().unwrap_or_default() >= std::time::Duration::from_secs(604800) {
         return None;
     }
     let copy = source.with_file_name("chrome-extension-cookies-session.txt");
