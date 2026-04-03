@@ -5,17 +5,48 @@ use std::sync::Arc;
 
 use anyhow::anyhow;
 use async_trait::async_trait;
-use iroh::{Endpoint, NodeAddr, NodeId};
 use tokio::fs::File;
-use tokio::io::{AsyncReadExt, AsyncWriteExt};
+use tokio::io::{AsyncBufReadExt, AsyncReadExt, AsyncWriteExt, BufReader};
+use tokio::net::TcpStream;
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 
 use crate::models::media::{DownloadOptions, DownloadResult, MediaInfo, MediaType, VideoQuality};
 use crate::platforms::traits::PlatformDownloader;
 
-const ALPN: &[u8] = b"omniget/p2p/1";
 const CHUNK_SIZE: usize = 64 * 1024;
+
+fn relay_addr() -> String {
+    std::env::var("OMNIGET_RELAY").unwrap_or_else(|_| "relay.tonho.wtf:9009".to_string())
+}
+
+async fn connect_relay() -> anyhow::Result<TcpStream> {
+    let addr = relay_addr();
+    let stream = tokio::time::timeout(
+        std::time::Duration::from_secs(10),
+        TcpStream::connect(&addr),
+    )
+    .await
+    .map_err(|_| anyhow!("Connection to relay timed out (10s)"))?
+    .map_err(|e| anyhow!("Failed to connect to relay {}: {}", addr, e))?;
+    Ok(stream)
+}
+
+async fn read_line(reader: &mut BufReader<tokio::io::ReadHalf<TcpStream>>) -> anyhow::Result<String> {
+    let mut line = String::new();
+    let n = reader.read_line(&mut line).await?;
+    if n == 0 {
+        anyhow::bail!("Relay closed connection unexpectedly");
+    }
+    Ok(line.trim_end().to_string())
+}
+
+fn check_relay_error(line: &str) -> anyhow::Result<()> {
+    if let Some(err) = line.strip_prefix("ERROR ") {
+        anyhow::bail!("Relay error: {}", err);
+    }
+    Ok(())
+}
 
 pub struct P2pDownloader;
 
@@ -84,56 +115,37 @@ impl PlatformDownloader for P2pDownloader {
 
         let _ = progress.send(-2.0).await;
 
-        let (node_id_str, _words) = parse_share_code(code)?;
+        tracing::info!("[p2p] connecting to relay for code: {}", code);
 
-        let node_id: NodeId = node_id_str
-            .parse()
-            .map_err(|e| anyhow!("Invalid node ID in share code: {}", e))?;
+        let stream = connect_relay().await?;
+        let (read_half, mut write_half) = tokio::io::split(stream);
+        let mut reader = BufReader::new(read_half);
 
-        tracing::info!("[p2p] connecting to sender: {}", node_id.fmt_short());
+        write_half
+            .write_all(format!("RECV {}\n", code).as_bytes())
+            .await?;
+        write_half.flush().await?;
 
-        let ep = Endpoint::builder()
-            .alpns(vec![ALPN.to_vec()])
-            .bind()
-            .await
-            .map_err(|e| anyhow!("Failed to create endpoint: {}", e))?;
-
-        let addr = NodeAddr::new(node_id);
-
-        let conn = tokio::time::timeout(
-            std::time::Duration::from_secs(60),
-            ep.connect(addr, ALPN),
-        )
-        .await
-        .map_err(|_| anyhow!("Connection timed out (60s). The sender may be offline."))?
-        .map_err(|e| anyhow!("Connection failed: {}", e))?;
-
-        tracing::info!("[p2p] connected to sender");
-
-        let (mut send, mut recv) = conn.open_bi().await
-            .map_err(|e| anyhow!("Failed to open stream: {}", e))?;
-
-        send.write_all(b"REQUEST").await?;
-        send.flush().await?;
-
-        let mut header_buf = vec![0u8; 8192];
-        let n = recv.read(&mut header_buf).await?
-            .ok_or_else(|| anyhow!("Sender closed connection before sending file info"))?;
-        let header_str = String::from_utf8_lossy(&header_buf[..n]);
-
-        let parts: Vec<&str> = header_str.splitn(3, '\n').collect();
-        if parts.len() < 2 {
-            anyhow::bail!("Invalid file header from sender");
+        let response = read_line(&mut reader).await?;
+        check_relay_error(&response)?;
+        if response != "READY" {
+            anyhow::bail!("Unexpected relay response: {}", response);
         }
 
-        let file_name = parts[0].to_string();
-        let file_size: u64 = parts[1].parse().unwrap_or(0);
+        tracing::info!("[p2p] connected to sender via relay");
+
+        let file_name = read_line(&mut reader).await?;
+        let file_size_str = read_line(&mut reader).await?;
+        let file_size: u64 = file_size_str
+            .parse()
+            .map_err(|_| anyhow!("Invalid file size from sender: {}", file_size_str))?;
 
         tracing::info!("[p2p] receiving: {} ({} bytes)", file_name, file_size);
-        let _ = progress.send(0.0).await;
 
-        send.write_all(b"ACCEPT").await?;
-        send.flush().await?;
+        write_half.write_all(b"OK\n").await?;
+        write_half.flush().await?;
+
+        let _ = progress.send(0.0).await;
 
         let sanitized = sanitize_filename::sanitize(&file_name);
         let output_path = opts.output_dir.join(&sanitized);
@@ -145,24 +157,24 @@ impl PlatformDownloader for P2pDownloader {
         let mut received: u64 = 0;
         let mut buf = vec![0u8; CHUNK_SIZE];
 
-        loop {
+        while received < file_size {
             if opts.cancel_token.is_cancelled() {
                 let _ = tokio::fs::remove_file(&output_path).await;
-                conn.close(1u8.into(), b"cancelled");
-                ep.close().await;
                 anyhow::bail!("Download cancelled");
             }
 
-            match recv.read(&mut buf).await? {
-                Some(0) | None => break,
-                Some(n) => {
-                    file.write_all(&buf[..n]).await?;
-                    received += n as u64;
-                    if file_size > 0 {
-                        let pct = (received as f64 / file_size as f64) * 100.0;
-                        let _ = progress.send(pct).await;
-                    }
-                }
+            let to_read = ((file_size - received) as usize).min(CHUNK_SIZE);
+            let n = reader.read(&mut buf[..to_read]).await?;
+            if n == 0 {
+                break;
+            }
+
+            file.write_all(&buf[..n]).await?;
+            received += n as u64;
+
+            if file_size > 0 {
+                let pct = (received as f64 / file_size as f64) * 100.0;
+                let _ = progress.send(pct).await;
             }
         }
 
@@ -170,8 +182,6 @@ impl PlatformDownloader for P2pDownloader {
         drop(file);
 
         let _ = progress.send(100.0).await;
-        conn.close(0u8.into(), b"done");
-        ep.close().await;
 
         tracing::info!("[p2p] download complete: {}", output_path.display());
 
@@ -194,7 +204,6 @@ pub struct P2pSendSession {
     pub status: Arc<tokio::sync::Mutex<String>>,
     pub sent_bytes: Arc<tokio::sync::Mutex<u64>>,
     pub paused: Arc<std::sync::atomic::AtomicBool>,
-    endpoint: Endpoint,
 }
 
 pub async fn start_send(
@@ -215,21 +224,9 @@ pub async fn start_send(
         .map(|n| n.to_string_lossy().to_string())
         .unwrap_or_else(|| "file".to_string());
 
-    let ep = Endpoint::builder()
-        .alpns(vec![ALPN.to_vec()])
-        .bind()
-        .await
-        .map_err(|e| anyhow!("Failed to create iroh endpoint: {}", e))?;
+    let code = words::generate_code();
 
-    let node_id = ep.node_id();
-    let word_code = words::generate_code();
-    let code = format!("{}@{}", word_code, node_id);
-
-    tracing::info!(
-        "[p2p] iroh endpoint created: node_id={}, code={}",
-        node_id.fmt_short(),
-        code
-    );
+    tracing::info!("[p2p] share code generated: {}", code);
 
     Ok(P2pSendSession {
         code,
@@ -241,70 +238,62 @@ pub async fn start_send(
         status: Arc::new(tokio::sync::Mutex::new("waiting".to_string())),
         sent_bytes: Arc::new(tokio::sync::Mutex::new(0)),
         paused: Arc::new(std::sync::atomic::AtomicBool::new(false)),
-        endpoint: ep,
     })
 }
 
 pub async fn run_sender(session: &P2pSendSession) -> anyhow::Result<()> {
     let cancel = session.cancel_token.clone();
 
+    *session.status.lock().await = "connecting".to_string();
+
+    tracing::info!("[p2p] connecting to relay...");
+
+    let stream = connect_relay().await?;
+    let (read_half, mut write_half) = tokio::io::split(stream);
+    let mut reader = BufReader::new(read_half);
+
+    write_half
+        .write_all(format!("SEND {}\n", session.code).as_bytes())
+        .await?;
+    write_half.flush().await?;
+
+    let response = read_line(&mut reader).await?;
+    check_relay_error(&response)?;
+    if response != "WAIT" {
+        anyhow::bail!("Unexpected relay response: {}", response);
+    }
+
     *session.status.lock().await = "waiting_for_receiver".to_string();
+    tracing::info!("[p2p] waiting for receiver... code: {}", session.code);
 
-    tracing::info!(
-        "[p2p] waiting for receiver connection... code: {}",
-        session.code
-    );
-
-    let incoming = tokio::select! {
-        result = session.endpoint.accept() => {
-            result.ok_or_else(|| anyhow!("Endpoint closed while waiting for receiver"))?
-        }
+    let ready = tokio::select! {
+        line = read_line(&mut reader) => line?,
         _ = cancel.cancelled() => {
             anyhow::bail!("Send cancelled while waiting for receiver");
         }
     };
 
-    let mut incoming_conn = incoming.accept()
-        .map_err(|e| anyhow!("Failed to accept connection: {}", e))?;
-
-    let alpn = incoming_conn.alpn().await?;
-    if alpn.as_slice() != ALPN {
-        anyhow::bail!("Unknown ALPN: {:?}", alpn);
+    check_relay_error(&ready)?;
+    if ready != "READY" {
+        anyhow::bail!("Unexpected relay response: {}", ready);
     }
-
-    let conn = incoming_conn.await
-        .map_err(|e| anyhow!("Connection handshake failed: {}", e))?;
-
-    let remote = conn.remote_node_id()
-        .map(|id| id.fmt_short())
-        .unwrap_or_else(|_| "unknown".to_string());
-    tracing::info!("[p2p] receiver connected: {}", remote);
 
     *session.status.lock().await = "connected".to_string();
-
-    let (mut send, mut recv) = conn.accept_bi().await
-        .map_err(|e| anyhow!("Failed to accept stream: {}", e))?;
-
-    let mut req_buf = vec![0u8; 64];
-    let n = recv.read(&mut req_buf).await?
-        .ok_or_else(|| anyhow!("Receiver closed stream before request"))?;
-    let request = String::from_utf8_lossy(&req_buf[..n]);
-
-    if !request.starts_with("REQUEST") {
-        anyhow::bail!("Unexpected request from receiver: {}", request);
-    }
+    tracing::info!("[p2p] receiver connected");
 
     let header = format!("{}\n{}\n", session.file_name, session.file_size);
-    send.write_all(header.as_bytes()).await?;
-    send.flush().await?;
+    write_half.write_all(header.as_bytes()).await?;
+    write_half.flush().await?;
 
-    let mut accept_buf = vec![0u8; 64];
-    let n = recv.read(&mut accept_buf).await?
-        .ok_or_else(|| anyhow!("Receiver closed before accepting"))?;
-    let accept = String::from_utf8_lossy(&accept_buf[..n]);
+    let ok_response = tokio::select! {
+        line = read_line(&mut reader) => line?,
+        _ = cancel.cancelled() => {
+            anyhow::bail!("Send cancelled while waiting for OK");
+        }
+    };
 
-    if !accept.starts_with("ACCEPT") {
-        anyhow::bail!("Receiver rejected transfer: {}", accept);
+    if ok_response != "OK" {
+        anyhow::bail!("Receiver rejected transfer: {}", ok_response);
     }
 
     *session.status.lock().await = "transferring".to_string();
@@ -320,14 +309,12 @@ pub async fn run_sender(session: &P2pSendSession) -> anyhow::Result<()> {
 
     loop {
         if cancel.is_cancelled() {
-            conn.close(1u8.into(), b"cancelled");
             anyhow::bail!("Send cancelled during transfer");
         }
 
         while session.paused.load(std::sync::atomic::Ordering::Relaxed) {
             tokio::time::sleep(std::time::Duration::from_millis(100)).await;
             if cancel.is_cancelled() {
-                conn.close(1u8.into(), b"cancelled");
                 anyhow::bail!("Send cancelled while paused");
             }
         }
@@ -337,7 +324,7 @@ pub async fn run_sender(session: &P2pSendSession) -> anyhow::Result<()> {
             break;
         }
 
-        send.write_all(&buf[..n]).await?;
+        write_half.write_all(&buf[..n]).await?;
         sent += n as u64;
 
         *session.sent_bytes.lock().await = sent;
@@ -346,24 +333,13 @@ pub async fn run_sender(session: &P2pSendSession) -> anyhow::Result<()> {
         }
     }
 
-    send.finish()
-        .map_err(|e| anyhow!("Failed to finish stream: {}", e))?;
+    write_half.flush().await?;
+    drop(write_half);
 
     *session.progress.lock().await = 100.0;
     *session.status.lock().await = "complete".to_string();
 
     tracing::info!("[p2p] transfer complete: {} bytes sent", sent);
 
-    conn.close(0u8.into(), b"done");
-    session.endpoint.close().await;
-
     Ok(())
-}
-
-fn parse_share_code(code: &str) -> anyhow::Result<(String, String)> {
-    let parts: Vec<&str> = code.splitn(2, '@').collect();
-    if parts.len() != 2 {
-        anyhow::bail!("Share code must contain words@node_id, got: {}", code);
-    }
-    Ok((parts[1].to_string(), parts[0].to_string()))
 }
