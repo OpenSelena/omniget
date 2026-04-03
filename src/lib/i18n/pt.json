@@ -545,7 +545,10 @@
     "connection_failed": "Falha na conexão",
     "connected_as": "Conectado como {{email}}",
     "back": "Voltar para Cursos",
-    "coming_soon": "Em breve"
+    "coming_soon": "Em breve",
+    "update_plugin_hint": "Atualize o plugin de Cursos para a melhor experiência.",
+    "update_plugin_for_platform": "Esta plataforma requer uma versão atualizada do plugin de Cursos. Verifique o Marketplace.",
+    "search_btn": "Buscar"
   },
   "hotmart": {
     "title": "Hotmart",
