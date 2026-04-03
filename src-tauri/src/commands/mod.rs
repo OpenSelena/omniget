@@ -1,3 +1,4 @@
+pub mod auth_webview;
 pub mod autostart;
 pub mod diagnostics;
 pub mod downloads;
