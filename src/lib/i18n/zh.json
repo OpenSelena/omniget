@@ -502,6 +502,9 @@
     "connected_as": "已以 {{email}} 登录",
     "back": "返回课程",
     "coming_soon": "即将推出",
+    "update_plugin_hint": "请更新课程插件以获得最佳体验。",
+    "update_plugin_for_platform": "此平台需要更新课程插件。请在市场中检查更新。",
+    "search_btn": "搜索",
     "search_placeholder": "搜索平台...",
     "connection_failed": "连接失败"
   },
