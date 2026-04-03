@@ -12,7 +12,7 @@ const MEDIA_CONTENT_TYPES = [
 ];
 
 const MEDIA_EXTENSIONS = [
-  ".mp4", ".webm", ".m3u8", ".mpd", ".ts",
+  ".mp4", ".webm", ".m3u8", ".mpd",
   ".flv", ".ogg", ".mp3", ".m4a", ".m4v",
   ".mkv", ".avi", ".mov",
 ];
@@ -89,6 +89,23 @@ function formatSize(bytes) {
   return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
 }
 
+function isHlsSegment(url, contentType) {
+  const ct = contentType.toLowerCase();
+  if (ct.includes("mp2t") || ct.includes("mpeg2-ts") || ct.includes("mpeg-ts")) {
+    return true;
+  }
+  try {
+    const path = new URL(url).pathname.toLowerCase();
+    if (path.endsWith(".ts") || path.match(/\.ts\?/)) {
+      return true;
+    }
+    if (/\/video\d+\.ts/.test(path)) {
+      return true;
+    }
+  } catch {}
+  return false;
+}
+
 export function registerSnifferListeners(onMediaDetected) {
   chrome.webRequest.onSendHeaders.addListener(
     (details) => {
@@ -117,6 +134,11 @@ export function registerSnifferListeners(onMediaDetected) {
       const isMedia = isMediaByContentType(contentType) || isMediaByExtension(url);
 
       if (!isMedia) {
+        pendingRequests.delete(details.requestId);
+        return;
+      }
+
+      if (isHlsSegment(url, contentType)) {
         pendingRequests.delete(details.requestId);
         return;
       }
