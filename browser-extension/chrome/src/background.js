@@ -1,8 +1,8 @@
 import { extractCookiesForPlatform } from "./cookies.js";
 import { detectSupportedMediaUrl } from "./detect.js";
-import { handleSupportedActionClick } from "./action-click.js";
 import { createActionFeedbackController } from "./action-feedback.js";
-import { resolveActionTitle } from "./action-title.js";
+import { registerSnifferListeners, getMediaCount, getDetectedMedia } from "./media-sniffer.js";
+import { loadSnifferState, isSnifferEnabled, setSnifferEnabled } from "./sniffer-toggle.js";
 
 const HOST_NAME = "wtf.tonho.omniget";
 const INSTALL_URL = "https://github.com/tonhowtf/omniget/releases/latest";
@@ -35,6 +35,15 @@ const actionFeedback = createActionFeedbackController({
   setBadgeBackgroundColor: (details) => chrome.action.setBadgeBackgroundColor(details),
 });
 
+let snifferRegistered = false;
+
+loadSnifferState().then((enabled) => {
+  if (enabled) {
+    registerSnifferListeners(onMediaDetected);
+    snifferRegistered = true;
+  }
+});
+
 chrome.runtime.onInstalled.addListener(() => {
   refreshActiveTab().catch(() => {});
 });
@@ -65,24 +74,99 @@ chrome.windows.onFocusChanged.addListener((windowId) => {
   }
 });
 
-chrome.action.onClicked.addListener(async (tab) => {
-  const detected = detectSupportedMediaUrl(tab?.url);
-  if (!detected?.supported) {
-    return;
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg.type === "getDetectedMedia") {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      const tabId = tabs[0]?.id;
+      if (!tabId) { sendResponse({ media: [], snifferEnabled: isSnifferEnabled() }); return; }
+
+      const media = getDetectedMedia(tabId);
+      const list = Array.from(media.values()).sort((a, b) => b.detectedAt - a.detectedAt);
+
+      const pageUrl = tabs[0]?.url;
+      const pageDetected = detectSupportedMediaUrl(pageUrl);
+
+      sendResponse({
+        media: list,
+        pageDetected,
+        snifferEnabled: isSnifferEnabled(),
+        tabUrl: pageUrl,
+      });
+    });
+    return true;
   }
 
-  await handleSupportedActionClick({
-    tabId: tab?.id,
-    url: detected.url,
-    platform: detected.platform,
-    getCookies: extractCookiesForPlatform,
-    sendNativeMessage,
-    clearBadge: (tabId) => actionFeedback.clearBadge(tabId),
-    showSuccessBadge: (tabId) => actionFeedback.showSuccessBadge(tabId),
-    openErrorPage,
-    mapChromeErrorCode,
-  });
+  if (msg.type === "toggleSniffer") {
+    setSnifferEnabled(msg.enabled).then(() => {
+      if (msg.enabled && !snifferRegistered) {
+        registerSnifferListeners(onMediaDetected);
+        snifferRegistered = true;
+      }
+      sendResponse({ ok: true, enabled: msg.enabled });
+    });
+    return true;
+  }
+
+  if (msg.type === "sendToOmniGet") {
+    handleSendToApp(msg).then(sendResponse);
+    return true;
+  }
 });
+
+function onMediaDetected(tabId, _entry) {
+  if (!isSnifferEnabled()) return;
+  updateBadge(tabId);
+}
+
+function updateBadge(tabId) {
+  const count = getMediaCount(tabId);
+  chrome.action.setBadgeText({
+    tabId,
+    text: count > 0 ? String(count) : "",
+  }).catch(() => {});
+  chrome.action.setBadgeBackgroundColor({
+    tabId,
+    color: "#F04E23",
+  }).catch(() => {});
+}
+
+async function handleSendToApp(msg) {
+  const url = msg.url;
+  const platform = msg.platform || "generic";
+
+  let cookies = null;
+  try {
+    const platformCookies = await extractCookiesForPlatform(platform);
+    if (platformCookies && platformCookies.length > 0) {
+      cookies = platformCookies;
+    } else {
+      const urlObj = new URL(url);
+      const allCookies = await chrome.cookies.getAll({ domain: urlObj.hostname });
+      if (allCookies.length > 0) {
+        cookies = allCookies.map(c => ({
+          domain: c.domain,
+          httpOnly: c.httpOnly,
+          path: c.path,
+          secure: c.secure,
+          expires: c.expirationDate ? Math.floor(c.expirationDate) : 0,
+          name: c.name,
+          value: c.value,
+        }));
+      }
+    }
+  } catch {}
+
+  const message = { type: "enqueue", url };
+  if (cookies) message.cookies = cookies;
+  if (msg.referer) message.referer = msg.referer;
+
+  try {
+    const response = await sendNativeMessage(message);
+    return { ok: response?.ok ?? false };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+}
 
 async function refreshActiveTab() {
   const [tab] = await chrome.tabs.query({
@@ -96,49 +180,25 @@ async function refreshActiveTab() {
 }
 
 async function refreshTabAction(tabId, tab) {
-  try {
-    await actionFeedback.clearBadge(tabId);
-  } catch (error) {
-    if (isTabGoneError(error)) return;
-    console.error("[OmniGet] Failed to clear badge:", error);
-  }
-
   if (!tab?.url) {
     return;
   }
 
   const detected = detectSupportedMediaUrl(tab.url);
   const supported = Boolean(detected?.supported);
+  const mediaCount = getMediaCount(tabId);
 
   try {
-    await chrome.action.setIcon({
-      tabId,
-      path: supported ? getIconPath(ACTIVE_ICON_PATHS) : getIconPath(INACTIVE_ICON_PATHS),
-    });
+    const iconSet = supported ? ACTIVE_ICON_PATHS : INACTIVE_ICON_PATHS;
+    await chrome.action.setIcon({ tabId, path: getIconPath(iconSet) });
   } catch (error) {
     if (isTabGoneError(error)) return;
-    console.error("[OmniGet] Failed to set icon:", error);
   }
 
-  try {
-    await chrome.action.setTitle({
-      tabId,
-      title: resolveActionTitle(supported),
-    });
-  } catch (error) {
-    if (isTabGoneError(error)) return;
-    console.error("[OmniGet] Failed to set title:", error);
-  }
-
-  try {
-    if (supported) {
-      await chrome.action.enable(tabId);
-    } else {
-      await chrome.action.disable(tabId);
-    }
-  } catch (error) {
-    if (isTabGoneError(error)) return;
-    console.error("[OmniGet] Failed to set enabled state:", error);
+  if (mediaCount > 0) {
+    updateBadge(tabId);
+  } else {
+    try { await actionFeedback.clearBadge(tabId); } catch {}
   }
 }
 
@@ -156,33 +216,5 @@ function sendNativeMessage(message) {
       }
       resolve(response);
     });
-  });
-}
-
-function mapChromeErrorCode(error) {
-  const message = error instanceof Error ? error.message : String(error);
-  if (message.includes("Specified native messaging host not found")) {
-    return "HOST_MISSING";
-  }
-  if (message.includes("Access to the specified native messaging host is forbidden")) {
-    return "HOST_MISSING";
-  }
-  return "LAUNCH_FAILED";
-}
-
-function openErrorPage({ code, message, url }) {
-  const params = new URLSearchParams({
-    code,
-    url,
-  });
-
-  if (message) {
-    params.set("message", message);
-  }
-
-  params.set("installUrl", INSTALL_URL);
-
-  return chrome.tabs.create({
-    url: `${chrome.runtime.getURL("pages/error.html")}?${params.toString()}`,
   });
 }
