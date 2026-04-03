@@ -37,6 +37,10 @@
         pluginStatus = "not-installed";
         return;
       }
+      if (!courses.loaded) {
+        pluginStatus = "needs-restart";
+        return;
+      }
       pluginStatus = "ready";
     } catch {
       pluginStatus = "ready";
@@ -44,7 +48,8 @@
 
     try {
       platforms = await pluginInvoke<PlatformConfig[]>("courses", "get_platforms");
-    } catch {
+    } catch (e) {
+      console.error("Failed to load platforms:", e);
       platforms = [];
     }
 
