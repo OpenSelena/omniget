@@ -159,6 +159,9 @@ async function handleSendToApp(msg) {
   const message = { type: "enqueue", url };
   if (cookies) message.cookies = cookies;
   if (msg.referer) message.referer = msg.referer;
+  if (msg.mediaType) message.mediaType = msg.mediaType;
+  if (msg.contentType) message.contentType = msg.contentType;
+  if (msg.headers) message.headers = msg.headers;
 
   try {
     const response = await sendNativeMessage(message);
