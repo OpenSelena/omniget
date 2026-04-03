@@ -26,6 +26,11 @@ const BACKEND_ERROR_MAP: Record<string, string> = {
   "Failed to access the page. Check the link and your connection.":
     "errors.page_access_failed",
   "No video formats found for this link.": "errors.no_formats",
+  "TikTok is blocking requests. Try again in a few minutes.":
+    "errors.tiktok_blocked",
+  "Download timeout — no data received for 30 seconds":
+    "errors.download_timeout",
+  "Write error (disk full?)": "errors.disk_full",
 };
 
 /**
@@ -45,6 +50,11 @@ export function translateBackendError(
   const key = BACKEND_ERROR_MAP[stripped];
   if (key) return t(key);
 
-  // Fallback: return the message as-is (may be an unrecognized yt-dlp error)
+  const lower = stripped.toLowerCase();
+  if (lower.includes("could not copy") && lower.includes("cookie")) return t("errors.cookie_database");
+  if (lower.includes("size mismatch")) return t("errors.size_mismatch");
+  if (lower.includes("disk full") || lower.includes("write error")) return t("errors.disk_full");
+  if (lower.includes("tiktok") && lower.includes("blocking")) return t("errors.tiktok_blocked");
+
   return stripped || msg;
 }
