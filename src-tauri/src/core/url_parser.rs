@@ -43,7 +43,12 @@ pub fn parse_url(url_str: &str) -> Option<ParsedUrl> {
         Platform::Vimeo => parse_vimeo(&segments),
         Platform::Udemy => parse_udemy(&segments),
         Platform::Bilibili => parse_bilibili(&segments),
-        Platform::Other(_) => (None, ParsedContentType::Unknown),
+        Platform::Other(ref name) => match name.as_str() {
+            "douyin" => parse_douyin(&segments),
+            "tencentvideo" => parse_tencent(&segments),
+            "xiaohongshu" => parse_xiaohongshu(&segments),
+            _ => (None, ParsedContentType::Unknown),
+        },
     };
 
     Some(ParsedUrl {
@@ -278,4 +283,34 @@ fn parse_telegram(segments: &[&str]) -> (Option<String>, ParsedContentType) {
     }
 
     (None, ParsedContentType::Unknown)
+}
+
+fn parse_douyin(segments: &[&str]) -> (Option<String>, ParsedContentType) {
+    if segments.len() >= 2 && segments[0] == "video" {
+        return (Some(segments[1].to_string()), ParsedContentType::Video);
+    }
+    if segments.len() == 1 {
+        return (Some(segments[0].to_string()), ParsedContentType::Video);
+    }
+    (None, ParsedContentType::Video)
+}
+
+fn parse_tencent(segments: &[&str]) -> (Option<String>, ParsedContentType) {
+    for seg in segments {
+        if seg.ends_with(".html") {
+            let id = seg.trim_end_matches(".html");
+            return (Some(id.to_string()), ParsedContentType::Video);
+        }
+    }
+    (None, ParsedContentType::Video)
+}
+
+fn parse_xiaohongshu(segments: &[&str]) -> (Option<String>, ParsedContentType) {
+    if segments.first() == Some(&"explore") {
+        return (segments.get(1).map(|s| s.to_string()), ParsedContentType::Post);
+    }
+    if segments.len() >= 3 && segments[0] == "discovery" && segments[1] == "item" {
+        return (Some(segments[2].to_string()), ParsedContentType::Post);
+    }
+    (None, ParsedContentType::Post)
 }
