@@ -45,6 +45,60 @@ pub fn load_extension_cookies_for_domain(domain: &str) -> Option<Arc<reqwest::co
     Some(Arc::new(jar))
 }
 
+pub fn load_extension_cookies_for_url(url: &str) -> Option<Arc<reqwest::cookie::Jar>> {
+    let domains = normalize_cookie_domains(url);
+    for domain in &domains {
+        if let Some(jar) = load_extension_cookies_for_domain(domain) {
+            return Some(jar);
+        }
+    }
+    None
+}
+
+fn normalize_cookie_domains(url: &str) -> Vec<String> {
+    let parsed = match url::Url::parse(url) {
+        Ok(p) => p,
+        Err(_) => return vec![],
+    };
+    let host = match parsed.host_str() {
+        Some(h) => h.to_lowercase(),
+        None => return vec![],
+    };
+
+    let mut domains = vec![];
+
+    let parts: Vec<&str> = host.split('.').collect();
+    if parts.len() >= 2 {
+        domains.push(format!("{}.{}", parts[parts.len() - 2], parts[parts.len() - 1]));
+    }
+
+    if host.contains("cdninstagram.com") || host.contains("fbcdn.net") {
+        domains.push("instagram.com".to_string());
+    }
+    if host.contains("twimg.com") {
+        domains.push("x.com".to_string());
+        domains.push("twitter.com".to_string());
+    }
+    if host.contains("redd.it") || host.contains("redditstatic.com") {
+        domains.push("reddit.com".to_string());
+    }
+    if host.contains("pstatic.net") || host.contains("pinimg.com") {
+        domains.push("pinterest.com".to_string());
+    }
+    if host.contains("tiktokcdn.com") || host.contains("tiktokv.com") {
+        domains.push("tiktok.com".to_string());
+    }
+    if host.contains("biliapi.net") || host.contains("bilivideo.com") || host.contains("hdslb.com") {
+        domains.push("bilibili.com".to_string());
+    }
+    if host.contains("googlevideo.com") || host.contains("ytimg.com") {
+        domains.push("youtube.com".to_string());
+        domains.push("google.com".to_string());
+    }
+
+    domains
+}
+
 pub struct ParsedInput {
     pub token: String,
     pub cookie_string: String,
