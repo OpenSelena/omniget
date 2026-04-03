@@ -519,9 +519,9 @@
     "accept_transfer": "Accept & Download",
     "reject_transfer": "Decline",
     "searching_sender": "Searching for sender...",
-    "searching_hint": "Make sure both devices are on the same network.",
+    "searching_hint": "Connecting to relay server...",
     "sender_not_found": "Sender not found",
-    "sender_not_found_hint": "The sender may not be active yet. Make sure both devices are on the same Wi-Fi network and the sender has shared the code."
+    "sender_not_found_hint": "Code not found. Make sure the sender is active and the code is correct."
   },
   "mascot": {
     "idle": "Paste a link or search to get started!",
