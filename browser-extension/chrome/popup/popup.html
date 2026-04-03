@@ -13,28 +13,15 @@
         <span class="title">OmniGet</span>
       </div>
       <label class="toggle" title="Media detection">
-        <input type="checkbox" id="sniffer-toggle">
+        <input type="checkbox" id="sniffer-toggle" role="switch" aria-label="Media detection">
         <span class="toggle-slider"></span>
       </label>
     </header>
-
-    <div id="page-action" class="page-action hidden">
-      <button id="send-page" class="send-page-btn">
-        <span id="page-platform" class="platform-name"></span>
-        <span class="send-label">Send to OmniGet</span>
-      </button>
-    </div>
-
-    <div id="media-list" class="media-list">
-      <div id="empty-state" class="empty-state">
-        <p>No media detected on this page.</p>
-        <p class="hint">Play a video or load media to detect it.</p>
+    <div id="content" class="content">
+      <div class="state-empty">
+        <div class="listening-dot"></div>
       </div>
     </div>
-
-    <footer class="footer">
-      <span id="status" class="status"></span>
-    </footer>
   </div>
   <script type="module" src="popup.js"></script>
 </body>
