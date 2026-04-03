@@ -408,13 +408,22 @@ fn detect_cookies_browser() -> Option<String> {
     let result = (|| -> Option<String> {
         #[cfg(target_os = "windows")]
         {
+            if let Some(local) = dirs::data_local_dir() {
+                if local.join("Google").join("Chrome").join("User Data").is_dir() {
+                    return Some("chrome".to_string());
+                }
+                if local.join("Microsoft").join("Edge").join("User Data").is_dir() {
+                    return Some("edge".to_string());
+                }
+                if local.join("BraveSoftware").join("Brave-Browser").join("User Data").is_dir() {
+                    return Some("brave".to_string());
+                }
+                if local.join("Vivaldi").join("User Data").is_dir() {
+                    return Some("vivaldi".to_string());
+                }
+            }
             if let Some(roaming) = dirs::data_dir() {
-                if roaming
-                    .join("Mozilla")
-                    .join("Firefox")
-                    .join("Profiles")
-                    .is_dir()
-                {
+                if roaming.join("Mozilla").join("Firefox").join("Profiles").is_dir() {
                     return Some("firefox".to_string());
                 }
             }
