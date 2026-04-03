@@ -73,21 +73,28 @@
   let browseFetched = $state(false);
 
   onMount(async () => {
+    console.log("[marketplace] onMount start");
     try {
       plugins = await invoke<PluginInfo[]>("list_plugins");
-    } catch {
+      console.log("[marketplace] list_plugins:", JSON.stringify(plugins));
+    } catch (e) {
+      console.error("[marketplace] list_plugins FAILED:", e);
       plugins = [];
     }
     loadingInstalled = false;
 
     if (plugins.length > 0) {
+      console.log("[marketplace] checking updates for", plugins.length, "plugins");
       invoke<UpdateInfo[]>("check_plugin_updates")
         .then((updateList) => {
+          console.log("[marketplace] check_plugin_updates:", JSON.stringify(updateList));
           for (const u of updateList) {
             if (u.has_update) updates[u.id] = u;
           }
         })
-        .catch(() => {});
+        .catch((e) => {
+          console.error("[marketplace] check_plugin_updates FAILED:", e);
+        });
     }
   });
 
@@ -95,6 +102,7 @@
     if (browseFetched) return;
     loadingBrowse = true;
     browseError = false;
+    console.log("[marketplace] fetching registry...");
     try {
       const timeout = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error("timeout")), 15000)
@@ -103,8 +111,10 @@
         invoke<MarketplaceEntry[]>("fetch_marketplace_registry"),
         timeout,
       ]);
+      console.log("[marketplace] registry fetched:", registry.length, "entries", JSON.stringify(registry.map(r => r.id)));
       browseFetched = true;
-    } catch {
+    } catch (e) {
+      console.error("[marketplace] fetch_marketplace_registry FAILED:", e);
       browseError = true;
     }
     loadingBrowse = false;
@@ -118,11 +128,15 @@
   }
 
   async function uninstallPlugin(id: string) {
+    console.log("[marketplace] uninstalling plugin:", id);
     try {
       await invoke("uninstall_plugin", { pluginId: id });
+      console.log("[marketplace] uninstall success:", id);
       plugins = plugins.filter((p) => p.id !== id);
       window.location.reload();
-    } catch {}
+    } catch (e) {
+      console.error("[marketplace] uninstall FAILED:", id, e);
+    }
   }
 
   let installingId = $state<string | null>(null);
