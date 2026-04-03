@@ -32,6 +32,7 @@ impl PluginManager {
     }
 
     pub fn load_all(&mut self, host: Arc<dyn PluginHost>) {
+        tracing::info!("[plugins] load_all: {} installed, {} enabled", self.installed.len(), self.installed.iter().filter(|p| p.enabled).count());
         let enabled: Vec<_> = self
             .installed
             .iter()
@@ -62,6 +63,7 @@ impl PluginManager {
     }
 
     pub fn installed_plugins(&self) -> &[InstalledPlugin] {
+        tracing::debug!("[plugins] installed_plugins() called, count={}, ids={:?}", self.installed.len(), self.installed.iter().map(|p| &p.id).collect::<Vec<_>>());
         &self.installed
     }
 
@@ -186,20 +188,33 @@ fn find_native_lib(dir: &Path) -> Option<PathBuf> {
 
 fn load_installed_list(plugins_dir: &Path) -> Vec<InstalledPlugin> {
     let path = plugins_dir.join("installed.json");
+    tracing::info!("[plugins] reading installed.json from: {}", path.display());
     let content = match fs::read_to_string(&path) {
         Ok(c) => c,
-        Err(_) => return Vec::new(),
+        Err(e) => {
+            tracing::warn!("[plugins] cannot read installed.json: {e}");
+            return Vec::new();
+        }
     };
     let content = content.strip_prefix('\u{FEFF}').unwrap_or(&content);
+    tracing::debug!("[plugins] installed.json raw ({} bytes): {}", content.len(), &content[..content.len().min(200)]);
 
     #[derive(serde::Deserialize)]
     struct InstalledFile {
         plugins: Vec<InstalledPlugin>,
     }
 
-    serde_json::from_str::<InstalledFile>(content)
-        .map(|f| f.plugins)
-        .unwrap_or_default()
+    match serde_json::from_str::<InstalledFile>(content) {
+        Ok(f) => {
+            tracing::info!("[plugins] parsed {} installed plugins: {:?}", f.plugins.len(), f.plugins.iter().map(|p| &p.id).collect::<Vec<_>>());
+            f.plugins
+        }
+        Err(e) => {
+            tracing::error!("[plugins] FAILED to parse installed.json: {e}");
+            tracing::error!("[plugins] content was: {}", &content[..content.len().min(500)]);
+            Vec::new()
+        }
+    }
 }
 
 fn save_installed_list(plugins_dir: &Path, plugins: &[InstalledPlugin]) -> anyhow::Result<()> {
