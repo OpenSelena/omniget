@@ -40,6 +40,7 @@ export type AppSettings = {
     concurrent_fragments: number;
     stagger_delay_ms: number;
     torrent_listen_port: number;
+    cookies_from_browser: string;
   };
   telegram: {
     concurrent_downloads: number;
