@@ -7,7 +7,7 @@ use omniget_plugin_sdk::{OmnigetPlugin, PluginHost, PluginManifest, InstalledPlu
 use tracing;
 
 pub struct LoadedPlugin {
-    _lib: libloading::Library,
+    _lib: Option<libloading::Library>,
     pub plugin: Box<dyn OmnigetPlugin>,
     pub manifest: PluginManifest,
 }
@@ -47,7 +47,7 @@ impl PluginManager {
                     self.loaded.insert(entry.id.clone(), loaded);
                 }
                 Err(e) => {
-                    tracing::debug!("Plugin {} not loaded dynamically: {e}", entry.id);
+                    tracing::warn!("Plugin {} not loaded: {e}", entry.id);
                 }
             }
         }
@@ -94,7 +94,11 @@ impl PluginManager {
     }
 
     pub fn unregister(&mut self, plugin_id: &str) -> anyhow::Result<()> {
-        self.loaded.remove(plugin_id);
+        if let Some(mut loaded) = self.loaded.remove(plugin_id) {
+            loaded.plugin.shutdown();
+            let _leaked_lib = loaded._lib.take();
+            std::mem::forget(_leaked_lib);
+        }
         self.installed.retain(|p| p.id != plugin_id);
         self.save_installed()?;
 
@@ -154,7 +158,7 @@ fn load_single_plugin(
     plugin.initialize(host)?;
 
     Ok(LoadedPlugin {
-        _lib: lib,
+        _lib: Some(lib),
         plugin,
         manifest,
     })
@@ -186,13 +190,14 @@ fn load_installed_list(plugins_dir: &Path) -> Vec<InstalledPlugin> {
         Ok(c) => c,
         Err(_) => return Vec::new(),
     };
+    let content = content.strip_prefix('\u{FEFF}').unwrap_or(&content);
 
     #[derive(serde::Deserialize)]
     struct InstalledFile {
         plugins: Vec<InstalledPlugin>,
     }
 
-    serde_json::from_str::<InstalledFile>(&content)
+    serde_json::from_str::<InstalledFile>(content)
         .map(|f| f.plugins)
         .unwrap_or_default()
 }
