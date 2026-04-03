@@ -108,6 +108,31 @@ pub fn reset_cookies_browser_cache() {
     }
 }
 
+pub async fn check_ytdlp_update(ytdlp: &Path) -> anyhow::Result<bool> {
+    if YTDLP_UPDATE_CHECKED.swap(true, Ordering::Relaxed) {
+        return Ok(false);
+    }
+
+    let output = crate::core::process::command(ytdlp)
+        .args(["--update-to", "nightly"])
+        .stdout(Stdio::piped())
+        .stderr(Stdio::piped())
+        .output()
+        .await?;
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    let combined = format!("{}{}", stdout, stderr);
+
+    if combined.contains("Updated yt-dlp") || combined.contains("Updating to") {
+        tracing::info!("[ytdlp] updated: {}", combined.trim());
+        reset_ytdlp_cache();
+        Ok(true)
+    } else {
+        Ok(false)
+    }
+}
+
 fn proxy_args() -> Vec<String> {
     match crate::core::http_client::proxy_url() {
         Some(url) => vec!["--proxy".to_string(), url],
