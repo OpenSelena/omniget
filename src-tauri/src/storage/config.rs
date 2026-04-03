@@ -19,8 +19,8 @@ pub fn load_settings(app: &AppHandle) -> AppSettings {
 }
 
 pub fn load_settings_standalone() -> AppSettings {
-    let data_dir = match dirs::data_dir() {
-        Some(d) => d.join("wtf.tonho.omniget"),
+    let data_dir = match crate::core::paths::app_data_dir() {
+        Some(d) => d,
         None => return AppSettings::default(),
     };
 
