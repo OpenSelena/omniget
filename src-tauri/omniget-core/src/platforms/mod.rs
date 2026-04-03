@@ -124,68 +124,12 @@ impl Platform {
             Some(Platform::Other("kajabi".to_string()))
         } else if matches("skool.com") {
             Some(Platform::Other("skool".to_string()))
-        } else if matches("pluralsight.com") {
-            Some(Platform::Other("pluralsight".to_string()))
         } else if matches("thegreatcoursesplus.com") || matches("wondrium.com") {
             Some(Platform::Other("greatcourses".to_string()))
-        } else if matches("masterclass.com") {
-            Some(Platform::Other("masterclass".to_string()))
         } else if matches("thinkific.com") {
             Some(Platform::Other("thinkific".to_string()))
-        } else if matches("curseduca.pro") || matches("curseduca.com") {
-            Some(Platform::Other("curseduca".to_string()))
-        } else if matches("cademi.com.br") {
-            Some(Platform::Other("cademi".to_string()))
-        } else if host == "app.cakto.com.br" {
-            Some(Platform::Other("caktomembers".to_string()))
-        } else if matches("cakto.com.br") {
-            Some(Platform::Other("cakto".to_string()))
-        } else if matches("kirvano.com") {
-            Some(Platform::Other("kirvano".to_string()))
-        } else if matches("memberkit.com.br") {
-            Some(Platform::Other("memberkit".to_string()))
         } else if matches("rocketseat.com.br") {
             Some(Platform::Other("rocketseat".to_string()))
-        } else if matches("grancursosonline.com.br") {
-            Some(Platform::Other("grancursos".to_string()))
-        } else if matches("fluency.io") {
-            Some(Platform::Other("fluencyacademy".to_string()))
-        } else if matches("datascienceacademy.com.br") {
-            Some(Platform::Other("datascienceacademy".to_string()))
-        } else if matches("medcel.com.br") {
-            Some(Platform::Other("medcel".to_string()))
-        } else if matches("medcof.com.br") {
-            Some(Platform::Other("medcof".to_string()))
-        } else if matches("medway.com.br") {
-            Some(Platform::Other("medway".to_string()))
-        } else if matches("afya.com.br") {
-            Some(Platform::Other("afyainternato".to_string()))
-        } else if matches("alpaclass.com") {
-            Some(Platform::Other("alpaclass".to_string()))
-        } else if matches("areademembros.com") {
-            Some(Platform::Other("areademembros".to_string()))
-        } else if matches("astronmembers.com") {
-            Some(Platform::Other("astronmembers".to_string()))
-        } else if matches("nutror.com") || matches("eduzz.com") {
-            Some(Platform::Other("eduzznutror".to_string()))
-        } else if matches("entregadigital.app.br") {
-            Some(Platform::Other("entregadigital".to_string()))
-        } else if matches("greenn.club") {
-            Some(Platform::Other("greennclub".to_string()))
-        } else if matches("themembers.com.br") {
-            Some(Platform::Other("themembers".to_string()))
-        } else if matches("voompplay.com.br") {
-            Some(Platform::Other("voompplay".to_string()))
-        } else if matches("estrategiaconcursos.com.br") {
-            Some(Platform::Other("estrategia_concursos".to_string()))
-        } else if host == "concursos.estrategia.com" {
-            Some(Platform::Other("estrategia_ldi".to_string()))
-        } else if host == "militares.estrategia.com" {
-            Some(Platform::Other("estrategia_militares".to_string()))
-        } else if matches("estrategia.com") && parsed.path().contains("concursos") {
-            Some(Platform::Other("estrategia_concursos".to_string()))
-        } else if matches("matematicaprapassar.com.br") {
-            Some(Platform::Other("matematicaprapassar".to_string()))
         } else if matches("douyin.com") {
             Some(Platform::Other("douyin".to_string()))
         } else if matches("kuaishou.com") {
