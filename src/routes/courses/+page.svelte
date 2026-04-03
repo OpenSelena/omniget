@@ -14,12 +14,26 @@
     commands: { check_session: string };
   };
 
+  const FALLBACK_PLATFORMS: PlatformConfig[] = [
+    { id: "hotmart", name: "Hotmart", color: "#F04E23", icon: "hotmart", commands: { check_session: "hotmart_check_session" } },
+    { id: "udemy", name: "Udemy", color: "#A435F0", icon: "udemy", commands: { check_session: "udemy_check_session" } },
+    { id: "kiwify", name: "Kiwify", color: "#22C55E", icon: "kiwify", commands: { check_session: "kiwify_check_session" } },
+    { id: "teachable", name: "Teachable", color: "#4B5563", icon: "teachable", commands: { check_session: "teachable_check_session" } },
+    { id: "kajabi", name: "Kajabi", color: "#2563EB", icon: "kajabi", commands: { check_session: "kajabi_check_session" } },
+    { id: "gumroad", name: "Gumroad", color: "#FF90E8", icon: "gumroad", commands: { check_session: "gumroad_check_session" } },
+    { id: "skool", name: "Skool", color: "#5865F2", icon: "skool", commands: { check_session: "skool_check_session" } },
+    { id: "greatcourses", name: "Wondrium", color: "#1E3A5F", icon: "greatcourses", commands: { check_session: "wondrium_check_session" } },
+    { id: "thinkific", name: "Thinkific", color: "#4A90D9", icon: "thinkific", commands: { check_session: "thinkific_check_session" } },
+    { id: "rocketseat", name: "Rocketseat", color: "#8257E5", icon: "rocketseat", commands: { check_session: "rocketseat_check_session" } },
+  ];
+
   type PluginStatus = "checking" | "ready" | "not-installed" | "needs-restart";
   let pluginStatus = $state<PluginStatus>("checking");
 
   let platforms: PlatformConfig[] = $state([]);
   let searchQuery = $state("");
   let authStatus: Record<string, { checked: boolean; email: string | null; error: boolean }> = $state({});
+  let usingFallback = $state(false);
 
   let filteredPlatforms = $derived(
     searchQuery.trim() === ""
@@ -30,38 +44,51 @@
   );
 
   onMount(async () => {
+    console.log("[courses] onMount start");
     try {
       const plugins = await invoke<{ id: string; enabled: boolean; loaded: boolean }[]>("list_plugins");
+      console.log("[courses] list_plugins:", JSON.stringify(plugins));
       const courses = plugins.find((p) => p.id === "courses");
       if (!courses || !courses.enabled) {
+        console.log("[courses] plugin not installed or disabled");
         pluginStatus = "not-installed";
         return;
       }
       if (!courses.loaded) {
+        console.log("[courses] plugin enabled but not loaded — needs restart");
         pluginStatus = "needs-restart";
         return;
       }
+      console.log("[courses] plugin ready");
       pluginStatus = "ready";
-    } catch {
+    } catch (e) {
+      console.error("[courses] list_plugins failed:", e);
       pluginStatus = "ready";
     }
 
     try {
+      console.log("[courses] calling get_platforms...");
       platforms = await pluginInvoke<PlatformConfig[]>("courses", "get_platforms");
+      console.log("[courses] get_platforms returned:", platforms.length, "platforms", JSON.stringify(platforms.map(p => p.id)));
     } catch (e) {
-      console.error("Failed to load platforms:", e);
-      platforms = [];
+      console.error("[courses] get_platforms FAILED, using fallback:", e);
+      platforms = FALLBACK_PLATFORMS;
+      usingFallback = true;
     }
 
-    for (const platform of platforms) {
-      authStatus[platform.id] = { checked: false, email: null, error: false };
-      pluginInvoke<string>("courses", platform.commands.check_session)
-        .then((email) => {
-          authStatus[platform.id] = { checked: true, email, error: false };
-        })
-        .catch(() => {
-          authStatus[platform.id] = { checked: true, email: null, error: true };
-        });
+    if (!usingFallback) {
+      for (const platform of platforms) {
+        authStatus[platform.id] = { checked: false, email: null, error: false };
+        pluginInvoke<string>("courses", platform.commands.check_session)
+          .then((email) => {
+            console.log(`[courses] ${platform.id} session:`, email);
+            authStatus[platform.id] = { checked: true, email, error: false };
+          })
+          .catch((e) => {
+            console.log(`[courses] ${platform.id} session check failed:`, e);
+            authStatus[platform.id] = { checked: true, email: null, error: true };
+          });
+      }
     }
   });
 
@@ -101,6 +128,12 @@
 {:else}
 <div class="courses-page">
   <h1>{$t("courses.title")}</h1>
+
+  {#if usingFallback}
+    <div class="fallback-banner">
+      {$t("courses.update_plugin_hint")}
+    </div>
+  {/if}
 
   <input
     class="search-input"
@@ -178,6 +211,17 @@
   }
 
   .search-input::placeholder { color: var(--gray); }
+
+  .fallback-banner {
+    width: 100%;
+    max-width: 900px;
+    padding: 8px 14px;
+    font-size: 12px;
+    color: var(--gray);
+    background: color-mix(in srgb, var(--cta) 8%, transparent);
+    border-radius: var(--border-radius);
+    text-align: center;
+  }
 
   .platform-grid {
     display: grid;
