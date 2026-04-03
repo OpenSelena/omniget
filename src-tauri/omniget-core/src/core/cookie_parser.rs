@@ -1,4 +1,49 @@
 use std::collections::HashMap;
+use std::sync::Arc;
+
+pub fn load_extension_cookies_for_domain(domain: &str) -> Option<Arc<reqwest::cookie::Jar>> {
+    let cookie_path = crate::core::ytdlp::ext_cookie_path_if_fresh()?;
+    let content = std::fs::read_to_string(&cookie_path).ok()?;
+
+    let jar = reqwest::cookie::Jar::default();
+    let mut count = 0usize;
+
+    for line in content.lines() {
+        let line = line.trim();
+        if line.is_empty() || line.starts_with('#') {
+            continue;
+        }
+
+        let parts: Vec<&str> = line.split('\t').collect();
+        if parts.len() < 7 {
+            continue;
+        }
+
+        let cookie_domain = parts[0].trim_start_matches('.');
+
+        if !cookie_domain.contains(domain) && !domain.contains(cookie_domain) {
+            continue;
+        }
+
+        let name = parts[5];
+        let value = parts[6];
+        let url_scheme = if parts[3] == "TRUE" { "https" } else { "http" };
+        let url_str = format!("{}://{}/", url_scheme, cookie_domain);
+
+        if let Ok(url) = url_str.parse::<reqwest::Url>() {
+            let cookie_str = format!("{}={}", name, value);
+            jar.add_cookie_str(&cookie_str, &url);
+            count += 1;
+        }
+    }
+
+    if count == 0 {
+        return None;
+    }
+
+    tracing::debug!("[cookies] loaded {} extension cookies for {}", count, domain);
+    Some(Arc::new(jar))
+}
 
 pub struct ParsedInput {
     pub token: String,
