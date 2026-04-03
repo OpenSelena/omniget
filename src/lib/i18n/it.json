@@ -502,6 +502,9 @@
     "connected_as": "Connesso come {{email}}",
     "back": "Torna ai Corsi",
     "coming_soon": "In arrivo",
+    "update_plugin_hint": "Aggiorna il plugin Corsi per la migliore esperienza.",
+    "update_plugin_for_platform": "Questa piattaforma richiede un aggiornamento del plugin Corsi. Controlla il Marketplace.",
+    "search_btn": "Cerca",
     "search_placeholder": "Cerca piattaforme...",
     "connection_failed": "Connessione fallita"
   },
