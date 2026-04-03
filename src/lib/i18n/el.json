@@ -505,6 +505,9 @@
     "update_plugin_hint": "Ενημερώστε το plugin μαθημάτων για την καλύτερη εμπειρία.",
     "update_plugin_for_platform": "Αυτή η πλατφόρμα απαιτεί ενημερωμένο plugin μαθημάτων. Ελέγξτε το Marketplace.",
     "search_btn": "Αναζήτηση",
+    "login_with_browser": "Σύνδεση μέσω Browser",
+    "browser": "Browser",
+    "browser_hint": "Θα ανοίξει ένα παράθυρο browser για να συνδεθείτε. Μετά τη σύνδεση, η συνεδρία σας θα ανιχνευθεί αυτόματα.",
     "search_placeholder": "Αναζητηση πλατφορμων...",
     "connection_failed": "Αποτυχια συνδεσης"
   },

@@ -505,6 +505,9 @@
     "update_plugin_hint": "请更新课程插件以获得最佳体验。",
     "update_plugin_for_platform": "此平台需要更新课程插件。请在市场中检查更新。",
     "search_btn": "搜索",
+    "login_with_browser": "通过浏览器登录",
+    "browser": "浏览器",
+    "browser_hint": "将打开一个浏览器窗口供您登录。登录后，您的会话将被自动检测。",
     "search_placeholder": "搜索平台...",
     "connection_failed": "连接失败"
   },

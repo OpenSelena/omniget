@@ -505,6 +505,9 @@
     "update_plugin_hint": "Mettez à jour le plugin Cours pour une meilleure expérience.",
     "update_plugin_for_platform": "Cette plateforme nécessite une mise à jour du plugin Cours. Vérifiez le Marketplace.",
     "search_btn": "Rechercher",
+    "login_with_browser": "Se connecter via le navigateur",
+    "browser": "Navigateur",
+    "browser_hint": "Une fenêtre de navigateur s'ouvrira pour vous connecter. Après la connexion, votre session sera détectée automatiquement.",
     "search_placeholder": "Rechercher des plateformes...",
     "connection_failed": "Echec de connexion"
   },

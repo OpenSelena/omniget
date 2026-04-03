@@ -548,7 +548,10 @@
     "coming_soon": "Coming soon",
     "update_plugin_hint": "Update the Courses plugin for the best experience.",
     "update_plugin_for_platform": "This platform requires an updated Courses plugin. Check the Marketplace for updates.",
-    "search_btn": "Search"
+    "search_btn": "Search",
+    "login_with_browser": "Login with Browser",
+    "browser": "Browser",
+    "browser_hint": "A browser window will open for you to log in. After logging in, your session will be detected automatically."
   },
   "hotmart": {
     "title": "Hotmart",

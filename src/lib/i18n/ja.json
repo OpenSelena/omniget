@@ -505,6 +505,9 @@
     "update_plugin_hint": "最適な体験のためにコースプラグインを更新してください。",
     "update_plugin_for_platform": "このプラットフォームにはコースプラグインの更新が必要です。マーケットプレイスで更新を確認してください。",
     "search_btn": "検索",
+    "login_with_browser": "ブラウザでログイン",
+    "browser": "ブラウザ",
+    "browser_hint": "ログイン用のブラウザウィンドウが開きます。ログイン後、セッションは自動的に検出されます。",
     "search_placeholder": "プラットフォームを検索...",
     "connection_failed": "接続に失敗しました"
   },
