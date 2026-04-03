@@ -480,7 +480,12 @@
     "ffmpeg_missing": "FFmpeg not found — install it in Settings",
     "unsupported_url": "Unsupported URL — check the link",
     "page_access_failed": "Could not access the page — check the link and connection",
-    "no_formats": "No video formats found for this link"
+    "no_formats": "No video formats found for this link",
+    "cookie_database": "Browser cookie access failed. Download will continue without authentication.",
+    "tiktok_blocked": "TikTok is temporarily blocking requests. Try again in a few minutes.",
+    "download_timeout": "Download timed out. Check your internet connection.",
+    "size_mismatch": "Downloaded file size doesn't match. Try again.",
+    "disk_full": "Write error — your disk may be full."
   },
   "debug": {
     "title": "Activity Log",
