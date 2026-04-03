@@ -447,6 +447,118 @@ impl PlatformDownloader for TwitterDownloader {
     }
 
     async fn get_media_info(&self, url: &str) -> anyhow::Result<MediaInfo> {
+        match self.native_get_media_info(url).await {
+            Ok(info) => Ok(info),
+            Err(native_err) => {
+                tracing::warn!("[twitter] native failed: {}, trying yt-dlp fallback", native_err);
+                self.fallback_ytdlp(url).await.map_err(|_| native_err)
+            }
+        }
+    }
+
+    async fn download(
+        &self,
+        info: &MediaInfo,
+        opts: &DownloadOptions,
+        progress: mpsc::Sender<f64>,
+    ) -> anyhow::Result<DownloadResult> {
+        if let Some(quality) = info.available_qualities.first() {
+            if quality.format == "ytdlp" {
+                let ytdlp_path = crate::core::ytdlp::ensure_ytdlp().await?;
+                return crate::core::ytdlp::download_video(
+                    &ytdlp_path,
+                    &quality.url,
+                    &opts.output_dir,
+                    None,
+                    progress,
+                    opts.download_mode.as_deref(),
+                    opts.format_id.as_deref(),
+                    opts.filename_template.as_deref(),
+                    None,
+                    opts.cancel_token.clone(),
+                    None,
+                    opts.concurrent_fragments,
+                    false,
+                    &[],
+                )
+                .await;
+            }
+        }
+
+        let count = info.available_qualities.len();
+
+        if count == 1 {
+            let quality = info.available_qualities.first().unwrap();
+            let filename = format!(
+                "{}.{}",
+                sanitize_filename::sanitize(&info.title),
+                quality.format
+            );
+            let output = opts.output_dir.join(&filename);
+
+            let bytes = direct_downloader::download_direct(
+                &self.client,
+                &quality.url,
+                &output,
+                progress,
+                None,
+            )
+            .await?;
+
+            return Ok(DownloadResult {
+                file_path: output,
+                file_size_bytes: bytes,
+                duration_seconds: 0.0,
+                torrent_id: None,
+            });
+        }
+
+        let mut total_bytes = 0u64;
+        let mut last_path = opts.output_dir.clone();
+
+        for (i, quality) in info.available_qualities.iter().enumerate() {
+            let filename = format!(
+                "{}_{}.{}",
+                sanitize_filename::sanitize(&info.title),
+                i + 1,
+                quality.format
+            );
+            let output = opts.output_dir.join(&filename);
+            let (tx, _rx) = mpsc::channel(8);
+
+            let bytes = direct_downloader::download_direct(
+                &self.client,
+                &quality.url,
+                &output,
+                tx,
+                None,
+            )
+            .await?;
+
+            total_bytes += bytes;
+            last_path = output;
+
+            let percent = ((i + 1) as f64 / count as f64) * 100.0;
+            let _ = progress.send(percent).await;
+        }
+
+        Ok(DownloadResult {
+            file_path: last_path,
+            file_size_bytes: total_bytes,
+            duration_seconds: 0.0,
+            torrent_id: None,
+        })
+    }
+}
+
+impl TwitterDownloader {
+    async fn fallback_ytdlp(&self, url: &str) -> anyhow::Result<MediaInfo> {
+        let ytdlp_path = crate::core::ytdlp::ensure_ytdlp().await?;
+        let json = crate::core::ytdlp::get_video_info(&ytdlp_path, url, &[]).await?;
+        crate::platforms::generic_ytdlp::GenericYtdlpDownloader::parse_video_info(&json)
+    }
+
+    async fn native_get_media_info(&self, url: &str) -> anyhow::Result<MediaInfo> {
         let tweet_id = Self::extract_tweet_id(url)
             .ok_or_else(|| anyhow!("Could not extract tweet ID"))?;
 
@@ -519,79 +631,6 @@ impl PlatformDownloader for TwitterDownloader {
         }
     }
 
-    async fn download(
-        &self,
-        info: &MediaInfo,
-        opts: &DownloadOptions,
-        progress: mpsc::Sender<f64>,
-    ) -> anyhow::Result<DownloadResult> {
-        let count = info.available_qualities.len();
-
-        if count == 1 {
-            let quality = info.available_qualities.first().unwrap();
-            let filename = format!(
-                "{}.{}",
-                sanitize_filename::sanitize(&info.title),
-                quality.format
-            );
-            let output = opts.output_dir.join(&filename);
-
-            let bytes = direct_downloader::download_direct(
-                &self.client,
-                &quality.url,
-                &output,
-                progress,
-                None,
-            )
-            .await?;
-
-            return Ok(DownloadResult {
-                file_path: output,
-                file_size_bytes: bytes,
-                duration_seconds: 0.0,
-                torrent_id: None,
-            });
-        }
-
-        let mut total_bytes = 0u64;
-        let mut last_path = opts.output_dir.clone();
-
-        for (i, quality) in info.available_qualities.iter().enumerate() {
-            let filename = format!(
-                "{}_{}.{}",
-                sanitize_filename::sanitize(&info.title),
-                i + 1,
-                quality.format
-            );
-            let output = opts.output_dir.join(&filename);
-            let (tx, _rx) = mpsc::channel(8);
-
-            let bytes = direct_downloader::download_direct(
-                &self.client,
-                &quality.url,
-                &output,
-                tx,
-                None,
-            )
-            .await?;
-
-            total_bytes += bytes;
-            last_path = output;
-
-            let percent = ((i + 1) as f64 / count as f64) * 100.0;
-            let _ = progress.send(percent).await;
-        }
-
-        Ok(DownloadResult {
-            file_path: last_path,
-            file_size_bytes: total_bytes,
-            duration_seconds: 0.0,
-            torrent_id: None,
-        })
-    }
-}
-
-impl TwitterDownloader {
     async fn try_graphql(
         &self,
         tweet_id: &str,
