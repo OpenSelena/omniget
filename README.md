@@ -12,10 +12,12 @@
 
 <h3 align="center">Paste a link. Get your file.</h3>
 
-OmniGet is a free, open-source desktop app that downloads videos, courses, and media from the internet. It handles YouTube, Instagram, TikTok, and dozens more platforms out of the box — plus torrents, P2P file transfers, and [1000+ sites via yt-dlp](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md). Built with Rust and Tauri for speed and a small footprint.
+OmniGet downloads videos, courses, and media from the internet. YouTube, Instagram, TikTok — paste a link and it handles the rest, including [1000+ sites via yt-dlp](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md). Free, open source, built with Rust.
 
 <p align="center">
-  <img src="assets/screenshot.png" alt="OmniGet screenshot" width="800" />
+  <img src="assets/screenshot.png" alt="OmniGet downloading a YouTube video" width="800" />
+  <br>
+  <sub>Paste a link. Pick a quality. Download.</sub>
 </p>
 
 ## Download
@@ -28,21 +30,19 @@ OmniGet is a free, open-source desktop app that downloads videos, courses, and m
 
 Also available as a Flatpak on Linux and a portable `.exe` on Windows.
 
-## Features
+## What can it download?
 
-- 📥 Downloads from YouTube, Instagram, TikTok, Twitter/X, Reddit, and [10+ more platforms](#media-platforms) with native downloaders
-- 🎓 Downloads full courses from [10 education platforms](#course-platforms) — log in once, download all lessons
-- 🧲 Built-in torrent client for magnet links and `.torrent` files (drag-and-drop supported)
-- 📡 P2P file transfer between devices via relay — no port forwarding needed
-- 🔍 Search YouTube directly from the omnibox
-- 🧩 Plugin marketplace for courses, Telegram, format conversion, and more
-- 🌐 Chrome extension detects videos on pages and sends them to the app
-- ⚡ Auto-manages yt-dlp and FFmpeg — no manual setup required
-- 🎨 Dark, light, and system themes in 8 languages
-- ⌨️ Global hotkey — copy a URL anywhere, press a key, download starts instantly
-- 🔄 Built-in auto-updater on all platforms
+**Videos** from YouTube, Instagram, TikTok, Twitter/X, Reddit, Twitch, Pinterest, Vimeo, Bluesky, and Bilibili.
 
-## Supported Platforms
+**Courses** from Hotmart, Udemy, Kiwify, Teachable, and [6 more platforms](#course-platforms). Log in once, download all lessons, attachments, and descriptions.
+
+**Torrents** — drag a `.torrent` file or paste a magnet link. Built-in client, no extra software needed.
+
+**Files between devices** — send a file to another computer with a 4-word share code. Works across different networks.
+
+**Anything else** — if [yt-dlp supports it](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md), OmniGet downloads it. That's over 1000 additional sites.
+
+No setup required beyond the app itself. OmniGet downloads yt-dlp and FFmpeg when it needs them, keeps itself up to date, and runs in dark or light mode across 8 languages.
 
 ### Media Platforms
 
@@ -62,7 +62,7 @@ Also available as a Flatpak on Linux and a portable `.exe` on Windows.
 | Torrent / Magnet | Any `.torrent` file or magnet link |
 
 <details>
-<summary><strong>Chinese platforms</strong> (supported via yt-dlp with URL detection)</summary>
+<summary><strong>Chinese platforms</strong> (supported via yt-dlp)</summary>
 
 | Platform | Content |
 |----------|---------|
@@ -78,11 +78,8 @@ These platforms may require a Chinese IP address.
 
 </details>
 
-Any other URL falls back to [yt-dlp](https://github.com/yt-dlp/yt-dlp), covering **1000+ additional sites**.
-
-### Course Platforms
-
-Downloads full courses (videos, attachments, descriptions) via the courses plugin. Log in with your account, browse your library, and batch-download everything.
+<details>
+<summary><strong>Course platforms</strong></summary>
 
 | Platform | Auth | Region |
 |----------|------|--------|
@@ -97,39 +94,37 @@ Downloads full courses (videos, attachments, descriptions) via the courses plugi
 | Thinkific | Browser Cookies | Global |
 | Rocketseat | Token | BR |
 
-## How It Works
+</details>
 
-1. **Paste a URL** (or drag a `.torrent`, or search YouTube) into the omnibox
-2. OmniGet detects the platform and shows a preview with quality options
-3. Click download — progress, speed, and ETA update in real time
+## How it works
 
-For courses: log in to the platform, browse your library, and batch-download entire courses with one click.
+1. **Paste a link** into the omnibox — or drag a file, or search YouTube right there
+2. OmniGet figures out the platform and shows you a preview with quality options
+3. Hit download — progress, speed, and ETA update as it goes
 
-## Global Hotkey
+For courses: log in to the platform, browse your library, pick what you want, and download it all at once.
 
-Copy any video URL to your clipboard, then press **Ctrl+Shift+D** (or **Cmd+Shift+D** on macOS). OmniGet grabs the URL and starts downloading immediately — even if the app is in the background or minimized. No need to switch windows or paste anything.
+## Copy. Press. Done.
 
-Change the hotkey or disable it in **Settings → Download → Hotkey**.
+Copy a video link from anywhere — Discord, Twitter, a group chat. Press **Ctrl+Shift+D** (or **Cmd+Shift+D** on macOS). That's it.
+
+OmniGet grabs the URL from your clipboard and downloads it in the background. You don't even need to open the app. Change the hotkey in **Settings → Download → Hotkey**.
 
 ## Browser Extension
 
-The Chrome extension detects supported pages and sends them to OmniGet with one click.
+Install the [Chrome extension](browser-extension/chrome/README.md) and stop copying links. When you're on a page with a video, click the OmniGet icon — it sends the URL, cookies, and everything the app needs to start downloading.
 
-1. Install OmniGet and launch it once (registers the native messaging host)
-2. Load the extension from `browser-extension/chrome/` in `chrome://extensions` (developer mode)
-3. Click the OmniGet icon on any supported page
-
-See the [extension README](browser-extension/chrome/README.md) for details.
+The extension also detects video streams on any website, even ones OmniGet doesn't officially support. If your browser can play it, OmniGet can probably download it.
 
 ## Plugins
 
-OmniGet has a plugin system with a built-in marketplace. Plugins are Rust DLLs loaded at startup:
+OmniGet ships lean. Extra features live in plugins you can install from the built-in marketplace:
 
-- **Courses** — 10 education platforms with login, browsing, and batch download
-- **Telegram** — browse chats and download media with QR code or phone login
-- **Convert** — convert media between formats using FFmpeg
+- **Courses** — download full courses from 10 education platforms
+- **Telegram** — browse chats and download media
+- **Convert** — convert between video and audio formats
 
-See the [Plugin SDK](src-tauri/omniget-plugin-sdk/) to build your own.
+Want to build one? Check out the [Plugin SDK](src-tauri/omniget-plugin-sdk/).
 
 ## Building from Source
 
@@ -177,7 +172,7 @@ If you represent a listed platform and have concerns, email **tonhowtf@gmail.com
 
 ## Legal
 
-OmniGet is a personal-use tool. You are responsible for how you use it — respect copyright and each platform's terms of service.
+Use it for personal stuff. Respect copyright and platform rules.
 
 ## License
 
