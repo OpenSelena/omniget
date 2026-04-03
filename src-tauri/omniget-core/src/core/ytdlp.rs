@@ -13,9 +13,11 @@ use crate::models::media::{DownloadResult, FormatInfo};
 
 type ExtCookiePathFn = Box<dyn Fn() -> PathBuf + Send + Sync>;
 type GlobalCookieFileFn = Box<dyn Fn() -> Option<String> + Send + Sync>;
+type CookiesFromBrowserFn = Box<dyn Fn() -> String + Send + Sync>;
 
 static EXT_COOKIE_PATH_FN: OnceLock<ExtCookiePathFn> = OnceLock::new();
 static GLOBAL_COOKIE_FILE_FN: OnceLock<GlobalCookieFileFn> = OnceLock::new();
+static COOKIES_FROM_BROWSER_FN: OnceLock<CookiesFromBrowserFn> = OnceLock::new();
 
 pub fn set_ext_cookie_path_fn(f: impl Fn() -> PathBuf + Send + Sync + 'static) {
     let _ = EXT_COOKIE_PATH_FN.set(Box::new(f));
@@ -23,6 +25,14 @@ pub fn set_ext_cookie_path_fn(f: impl Fn() -> PathBuf + Send + Sync + 'static) {
 
 pub fn set_global_cookie_file_fn(f: impl Fn() -> Option<String> + Send + Sync + 'static) {
     let _ = GLOBAL_COOKIE_FILE_FN.set(Box::new(f));
+}
+
+pub fn set_cookies_from_browser_fn(f: impl Fn() -> String + Send + Sync + 'static) {
+    let _ = COOKIES_FROM_BROWSER_FN.set(Box::new(f));
+}
+
+fn cookies_from_browser_setting() -> String {
+    COOKIES_FROM_BROWSER_FN.get().map(|f| f()).unwrap_or_default()
 }
 
 pub fn ext_cookie_path() -> PathBuf {
@@ -54,8 +64,6 @@ static YTDLP_UPDATE_CHECKED: AtomicBool = AtomicBool::new(false);
 static YTDLP_PATH_CACHE: std::sync::RwLock<Option<Option<PathBuf>>> =
     std::sync::RwLock::new(None);
 static FFMPEG_LOCATION_CACHE: std::sync::RwLock<Option<Option<String>>> =
-    std::sync::RwLock::new(None);
-static COOKIES_BROWSER_CACHE: std::sync::RwLock<Option<Option<String>>> =
     std::sync::RwLock::new(None);
 static JS_RUNTIME_CACHE: std::sync::RwLock<Option<Option<String>>> =
     std::sync::RwLock::new(None);
@@ -115,11 +123,6 @@ pub fn reset_js_runtime_cache() {
     }
 }
 
-pub fn reset_cookies_browser_cache() {
-    if let Ok(mut cache) = COOKIES_BROWSER_CACHE.write() {
-        *cache = None;
-    }
-}
 
 pub async fn check_ytdlp_update(ytdlp: &Path) -> anyhow::Result<bool> {
     if YTDLP_UPDATE_CHECKED.swap(true, Ordering::Relaxed) {
@@ -442,148 +445,6 @@ fn extension_cookie_file() -> Option<std::path::PathBuf> {
     Some(copy)
 }
 
-fn detect_cookies_browser() -> Option<String> {
-    let _timer_start = std::time::Instant::now();
-    let result = (|| -> Option<String> {
-        #[cfg(target_os = "windows")]
-        {
-            if let Some(local) = dirs::data_local_dir() {
-                if local.join("Google").join("Chrome").join("User Data").is_dir() {
-                    return Some("chrome".to_string());
-                }
-                if local.join("Microsoft").join("Edge").join("User Data").is_dir() {
-                    return Some("edge".to_string());
-                }
-                if local.join("BraveSoftware").join("Brave-Browser").join("User Data").is_dir() {
-                    return Some("brave".to_string());
-                }
-                if local.join("Vivaldi").join("User Data").is_dir() {
-                    return Some("vivaldi".to_string());
-                }
-            }
-            if let Some(roaming) = dirs::data_dir() {
-                if roaming.join("Mozilla").join("Firefox").join("Profiles").is_dir() {
-                    return Some("firefox".to_string());
-                }
-            }
-        }
-        #[cfg(target_os = "macos")]
-        {
-            if let Some(home) = dirs::home_dir() {
-                let support = home.join("Library").join("Application Support");
-                if support.join("Firefox").join("Profiles").is_dir() {
-                    return Some("firefox".to_string());
-                }
-                if support.join("Google").join("Chrome").is_dir() {
-                    return Some("chrome".to_string());
-                }
-            }
-        }
-        #[cfg(target_os = "linux")]
-        {
-            if let Some(config) = dirs::config_dir() {
-                if config.join("google-chrome").is_dir() {
-                    return Some("chrome".to_string());
-                }
-                if config.join("chromium").is_dir() {
-                    return Some("chromium".to_string());
-                }
-                if config.join("BraveSoftware").join("Brave-Browser").is_dir() {
-                    return Some("brave".to_string());
-                }
-                if config.join("microsoft-edge").is_dir() {
-                    return Some("edge".to_string());
-                }
-                if config.join("vivaldi").is_dir() {
-                    return Some("vivaldi".to_string());
-                }
-            }
-            if let Some(home) = dirs::home_dir() {
-                let fp = home.join(".var").join("app");
-
-                if fp
-                    .join("com.google.Chrome")
-                    .join("config")
-                    .join("google-chrome")
-                    .is_dir()
-                {
-                    return Some("chrome".to_string());
-                }
-                if fp
-                    .join("org.chromium.Chromium")
-                    .join("config")
-                    .join("chromium")
-                    .is_dir()
-                {
-                    return Some("chromium".to_string());
-                }
-                if fp
-                    .join("com.brave.Browser")
-                    .join("config")
-                    .join("BraveSoftware")
-                    .join("Brave-Browser")
-                    .is_dir()
-                {
-                    return Some("brave".to_string());
-                }
-
-                if home
-                    .join("snap")
-                    .join("chromium")
-                    .join("common")
-                    .join("chromium")
-                    .is_dir()
-                {
-                    return Some("chromium".to_string());
-                }
-
-                if home.join(".mozilla").join("firefox").is_dir() {
-                    return Some("firefox".to_string());
-                }
-                if fp
-                    .join("org.mozilla.firefox")
-                    .join(".mozilla")
-                    .join("firefox")
-                    .is_dir()
-                {
-                    return Some("firefox".to_string());
-                }
-                if home
-                    .join("snap")
-                    .join("firefox")
-                    .join("common")
-                    .join(".mozilla")
-                    .join("firefox")
-                    .is_dir()
-                {
-                    return Some("firefox".to_string());
-                }
-            }
-        }
-        None
-    })();
-    tracing::debug!(
-        "[perf] detect_cookies_browser took {:?}",
-        _timer_start.elapsed()
-    );
-    result
-}
-
-async fn detect_cookies_browser_cached() -> Option<String> {
-    if let Ok(cache) = COOKIES_BROWSER_CACHE.read() {
-        if let Some(ref cached) = *cache {
-            return cached.clone();
-        }
-    }
-    let result = tokio::task::spawn_blocking(detect_cookies_browser)
-        .await
-        .unwrap_or(None);
-    if let Ok(mut cache) = COOKIES_BROWSER_CACHE.write() {
-        *cache = Some(result.clone());
-    }
-    result
-}
-
 /// Detect a JavaScript runtime for yt-dlp's nsig challenge solver.
 /// yt-dlp standalone binaries cannot discover runtimes from PATH on their
 /// own, so we locate the binary and pass it via `--js-runtimes runtime:path`.
@@ -748,14 +609,18 @@ pub async fn get_video_info(
         }
 
         let extension_cookies = extension_cookie_file();
+        let global_cf = global_cookie_file();
         if let Some(ref cf) = extension_cookies {
             args.push("--cookies".to_string());
             args.push(cf.to_string_lossy().to_string());
+        } else if let Some(ref cf) = global_cf {
+            args.push("--cookies".to_string());
+            args.push(cf.clone());
         } else {
-            let browser_cookies = detect_cookies_browser_cached().await;
-            if let Some(ref browser) = browser_cookies {
+            let cfb = cookies_from_browser_setting();
+            if !cfb.is_empty() {
                 args.push("--cookies-from-browser".to_string());
-                args.push(browser.clone());
+                args.push(cfb);
             }
         }
 
@@ -812,13 +677,6 @@ pub async fn get_video_info(
                 attempt + 1,
                 clients.len()
             );
-        }
-
-        if stderr_lower.contains("could not copy") && stderr_lower.contains("cookie") && attempt < clients.len() - 1 {
-            tracing::warn!("[yt-dlp] Chrome cookie database locked, retrying in 2s");
-            tokio::time::sleep(std::time::Duration::from_secs(2)).await;
-            last_error = stderr;
-            continue;
         }
 
         let is_retryable = is_yt
@@ -1095,16 +953,12 @@ pub async fn download_video(
         None
     };
 
-    let browser_cookies = if cookie_file.is_none() && global_cookie_file.is_none() && ext_cookies.is_none() {
-        detect_cookies_browser_cached().await
-    } else {
-        None
-    };
-
     let effective_cookie_file = cookie_file
         .map(|p| p.to_path_buf())
         .or_else(|| global_cookie_file.map(std::path::PathBuf::from))
         .or(ext_cookies);
+
+    let cfb_setting = cookies_from_browser_setting();
     let mut base_args = vec!["-f".to_string(), format_selector];
     base_args.extend(js_runtime_args());
 
@@ -1174,7 +1028,7 @@ pub async fn download_video(
     let mut use_aria2c = aria2c_path.is_some()
         && mode != "audio"
         && effective_cookie_file.is_none()
-        && browser_cookies.is_none();
+        && cfb_setting.is_empty();
 
     base_args.extend([
         "--no-check-certificate".to_string(),
@@ -1233,7 +1087,7 @@ pub async fn download_video(
     let mut extra_args: Vec<String> = Vec::new();
     let mut last_error = String::new();
     let mut use_subtitles = should_download_subs;
-    let mut use_browser_cookies = false;
+    let mut use_cfb = !cfb_setting.is_empty();
     let mut format_already_simplified = false;
     let mut last_was_429 = false;
 
@@ -1271,14 +1125,12 @@ pub async fn download_video(
             args.extend(subtitle_args.iter().cloned());
         }
 
-        if use_browser_cookies {
-            if let Some(ref browser) = browser_cookies {
-                args.push("--cookies-from-browser".to_string());
-                args.push(browser.clone());
-            }
+        if use_cfb {
+            args.push("--cookies-from-browser".to_string());
+            args.push(cfb_setting.clone());
         }
 
-        if use_aria2c && !use_browser_cookies {
+        if use_aria2c && !use_cfb {
             if let Some(ref a2_path) = aria2c_path {
                 let conns = if is_youtube_url(url) {
                     effective_fragments.max(1)
@@ -1464,12 +1316,6 @@ pub async fn download_video(
         let stderr_lower = last_error.to_lowercase();
 
         if attempt < max_attempts - 1 {
-            if stderr_lower.contains("could not copy") && stderr_lower.contains("cookie") {
-                tracing::warn!("[yt-dlp] Chrome cookie database locked, retrying in 2s");
-                tokio::time::sleep(std::time::Duration::from_secs(2)).await;
-                continue;
-            }
-
             if use_aria2c
                 && (stderr_lower.contains("aria2") || stderr_lower.contains("external downloader"))
             {
@@ -1503,7 +1349,7 @@ pub async fn download_video(
                     } else {
                         "n/a"
                     };
-                    let cookies_enabled = use_browser_cookies || effective_cookie_file.is_some();
+                    let cookies_enabled = use_cfb || effective_cookie_file.is_some();
                     tracing::warn!(
                         "[yt-429] rate limit in download_video: url={} attempt={}/{} player_client={} cookies={} aria2c={}",
                         sanitized_url,
@@ -1589,19 +1435,18 @@ pub async fn download_video(
                 || stderr_lower.contains("failed to decrypt")
                 || stderr_lower.contains("keyring")
                 || stderr_lower.contains("permission denied"))
-                && use_browser_cookies
+                && use_cfb
             {
-                use_browser_cookies = false;
-                tracing::warn!("[yt-dlp] cookies-from-browser failed (Chrome/Edge cookie encryption). Use Firefox or set a cookie file in Settings.");
+                use_cfb = false;
+                tracing::warn!("[yt-dlp] cookies-from-browser failed. Use the browser extension or set a cookie file in Settings.");
                 COOKIE_ERROR_FLAG.store(true, std::sync::atomic::Ordering::Relaxed);
             }
 
             if (stderr_lower.contains("sign in") || stderr_lower.contains("login required"))
-                && !use_browser_cookies
-                && browser_cookies.is_some()
+                && !use_cfb
+                && effective_cookie_file.is_none()
             {
-                use_browser_cookies = true;
-                tracing::warn!("[yt-dlp] login required, enabling cookies-from-browser");
+                tracing::warn!("[yt-dlp] login required. Install the browser extension and visit the site while logged in.");
             }
 
             if stderr_lower.contains("requested format") && stderr_lower.contains("not available")
