@@ -502,6 +502,9 @@
     "connected_as": "{{email}} でログイン中",
     "back": "コースに戻る",
     "coming_soon": "近日公開",
+    "update_plugin_hint": "最適な体験のためにコースプラグインを更新してください。",
+    "update_plugin_for_platform": "このプラットフォームにはコースプラグインの更新が必要です。マーケットプレイスで更新を確認してください。",
+    "search_btn": "検索",
     "search_placeholder": "プラットフォームを検索...",
     "connection_failed": "接続に失敗しました"
   },
