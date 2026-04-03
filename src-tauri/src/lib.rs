@@ -342,6 +342,7 @@ pub fn run() {
             }
         })
         .invoke_handler(tauri::generate_handler![
+            commands::auth_webview::open_auth_webview,
             commands::diagnostics::get_rate_limit_stats,
             commands::downloads::detect_platform,
             commands::downloads::check_cookie_error,
