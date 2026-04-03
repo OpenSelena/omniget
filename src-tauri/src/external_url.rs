@@ -88,7 +88,13 @@ pub async fn queue_url_with_defaults(
 
     let ytdlp_path = crate::core::ytdlp::find_ytdlp_cached().await;
 
-    if platform_name == "youtube" || platform_name == "generic" {
+    let ext_meta = crate::native_host::read_extension_metadata(&url);
+
+    let has_ext_media = ext_meta.as_ref()
+        .and_then(|m| m.media_type.as_deref())
+        .is_some();
+
+    if !has_ext_media && (platform_name == "youtube" || platform_name == "generic") {
         let url_clone = url.clone();
         let downloader_clone = downloader.clone();
         let platform_clone = platform_name.clone();
@@ -109,8 +115,51 @@ pub async fn queue_url_with_defaults(
         .default_output_dir
         .to_string_lossy()
         .to_string();
+    let ext_referer = ext_meta.as_ref().and_then(|m| m.referer.clone());
 
-    let ext_referer = crate::native_host::read_extension_metadata(&url);
+    let ext_media_info = ext_meta.as_ref().and_then(|m| {
+        let mt = m.media_type.as_deref()?;
+        let ct = m.content_type.as_deref().unwrap_or("");
+        let format = if mt == "hls" || ct.contains("mpegurl") {
+            "hls"
+        } else if mt == "video" || ct.contains("video/") {
+            "direct_video"
+        } else if mt == "audio" || ct.contains("audio/") {
+            "direct_audio"
+        } else {
+            return None;
+        };
+        let title = url::Url::parse(&url).ok()
+            .and_then(|u| {
+                let path = u.path();
+                let last = path.rsplit('/').next()?;
+                if last.is_empty() { return None; }
+                Some(urlencoding::decode(last).unwrap_or_else(|_| last.into()).to_string())
+            })
+            .map(|n| sanitize_filename::sanitize(&n))
+            .unwrap_or_else(|| "download".to_string());
+
+        Some(crate::models::media::MediaInfo {
+            title,
+            author: String::new(),
+            platform: "generic".to_string(),
+            duration_seconds: None,
+            thumbnail_url: None,
+            available_qualities: vec![crate::models::media::VideoQuality {
+                label: "original".to_string(),
+                width: 0,
+                height: 0,
+                url: url.clone(),
+                format: format.to_string(),
+            }],
+            media_type: if format == "direct_audio" {
+                crate::models::media::MediaType::Audio
+            } else {
+                crate::models::media::MediaType::Video
+            },
+            file_size_bytes: None,
+        })
+    });
 
     {
         let mut q = download_queue.lock().await;
@@ -124,7 +173,7 @@ pub async fn queue_url_with_defaults(
             None,
             None,
             ext_referer,
-            None,
+            ext_media_info,
             None,
             None,
             downloader,
