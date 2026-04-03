@@ -45,12 +45,16 @@ impl Default for RedditDownloader {
 
 impl RedditDownloader {
     pub fn new() -> Self {
-        let client = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
+        let mut builder = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
             .user_agent(USER_AGENT)
             .timeout(std::time::Duration::from_secs(120))
-            .connect_timeout(std::time::Duration::from_secs(15))
-            .build()
-            .unwrap_or_default();
+            .connect_timeout(std::time::Duration::from_secs(15));
+
+        if let Some(jar) = crate::core::cookie_parser::load_extension_cookies_for_domain("reddit.com") {
+            builder = builder.cookie_provider(jar);
+        }
+
+        let client = builder.build().unwrap_or_default();
         Self { client }
     }
 
@@ -340,6 +344,56 @@ impl PlatformDownloader for RedditDownloader {
     }
 
     async fn get_media_info(&self, url: &str) -> anyhow::Result<MediaInfo> {
+        match self.native_get_media_info(url).await {
+            Ok(info) => Ok(info),
+            Err(native_err) => {
+                tracing::warn!("[reddit] native failed: {}, trying yt-dlp fallback", native_err);
+                self.fallback_ytdlp(url).await.map_err(|_| native_err)
+            }
+        }
+    }
+
+    async fn download(
+        &self,
+        info: &MediaInfo,
+        opts: &DownloadOptions,
+        progress: mpsc::Sender<f64>,
+    ) -> anyhow::Result<DownloadResult> {
+        if let Some(quality) = info.available_qualities.first() {
+            if quality.format == "ytdlp" {
+                let ytdlp_path = crate::core::ytdlp::ensure_ytdlp().await?;
+                return crate::core::ytdlp::download_video(
+                    &ytdlp_path,
+                    &quality.url,
+                    &opts.output_dir,
+                    None,
+                    progress,
+                    opts.download_mode.as_deref(),
+                    opts.format_id.as_deref(),
+                    opts.filename_template.as_deref(),
+                    None,
+                    opts.cancel_token.clone(),
+                    None,
+                    opts.concurrent_fragments,
+                    false,
+                    &[],
+                )
+                .await;
+            }
+        }
+
+        self.native_download(info, opts, progress).await
+    }
+}
+
+impl RedditDownloader {
+    async fn fallback_ytdlp(&self, url: &str) -> anyhow::Result<MediaInfo> {
+        let ytdlp_path = crate::core::ytdlp::ensure_ytdlp().await?;
+        let json = crate::core::ytdlp::get_video_info(&ytdlp_path, url, &[]).await?;
+        crate::platforms::generic_ytdlp::GenericYtdlpDownloader::parse_video_info(&json)
+    }
+
+    async fn native_get_media_info(&self, url: &str) -> anyhow::Result<MediaInfo> {
         let canonical = self.resolve_to_canonical(url).await?;
 
         let post_id = Self::extract_post_id(&canonical)
@@ -461,7 +515,7 @@ impl PlatformDownloader for RedditDownloader {
         }
     }
 
-    async fn download(
+    async fn native_download(
         &self,
         info: &MediaInfo,
         opts: &DownloadOptions,
@@ -482,6 +536,10 @@ impl PlatformDownloader for RedditDownloader {
 
                 let has_audio = audio_quality.is_some();
                 let ffmpeg_available = ffmpeg::is_ffmpeg_available().await;
+
+                if has_audio && !ffmpeg_available {
+                    tracing::warn!("[reddit] Video has separate audio but FFmpeg is not installed — downloading video without audio");
+                }
 
                 if has_audio {
                     let video_tmp = opts.output_dir.join(format!(
