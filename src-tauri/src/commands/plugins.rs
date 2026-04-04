@@ -29,9 +29,9 @@ pub struct PluginNavInfo {
 
 #[tauri::command]
 pub fn list_plugins(
-    state: tauri::State<'_, Arc<tokio::sync::Mutex<PluginManager>>>,
+    state: tauri::State<'_, Arc<tokio::sync::RwLock<PluginManager>>>,
 ) -> Result<Vec<PluginInfo>, String> {
-    let manager = state.blocking_lock();
+    let manager = state.blocking_read();
     let installed = manager.installed_plugins();
 
     let infos: Vec<PluginInfo> = installed
@@ -112,10 +112,10 @@ pub fn list_plugins(
 
 #[tauri::command]
 pub fn get_plugin_frontend_path(
-    state: tauri::State<'_, Arc<tokio::sync::Mutex<PluginManager>>>,
+    state: tauri::State<'_, Arc<tokio::sync::RwLock<PluginManager>>>,
     plugin_id: String,
 ) -> Result<String, String> {
-    let manager = state.blocking_lock();
+    let manager = state.blocking_read();
     let frontend_dir = manager.plugins_dir().join(&plugin_id).join("frontend");
     if !frontend_dir.exists() {
         return Err(format!("Plugin '{}' has no frontend", plugin_id));
@@ -125,11 +125,11 @@ pub fn get_plugin_frontend_path(
 
 #[tauri::command]
 pub fn set_plugin_enabled(
-    state: tauri::State<'_, Arc<tokio::sync::Mutex<PluginManager>>>,
+    state: tauri::State<'_, Arc<tokio::sync::RwLock<PluginManager>>>,
     plugin_id: String,
     enabled: bool,
 ) -> Result<(), String> {
-    let mut manager = state.blocking_lock();
+    let mut manager = state.blocking_write();
     manager
         .set_enabled(&plugin_id, enabled)
         .map_err(|e| e.to_string())
@@ -137,28 +137,28 @@ pub fn set_plugin_enabled(
 
 #[tauri::command]
 pub fn uninstall_plugin(
-    state: tauri::State<'_, Arc<tokio::sync::Mutex<PluginManager>>>,
+    state: tauri::State<'_, Arc<tokio::sync::RwLock<PluginManager>>>,
     plugin_id: String,
 ) -> Result<(), String> {
-    let mut manager = state.blocking_lock();
+    let mut manager = state.blocking_write();
     manager.unregister(&plugin_id).map_err(|e| e.to_string())
 }
 
 #[tauri::command]
 pub fn get_loaded_plugin_manifests(
-    state: tauri::State<'_, Arc<tokio::sync::Mutex<PluginManager>>>,
+    state: tauri::State<'_, Arc<tokio::sync::RwLock<PluginManager>>>,
 ) -> Result<Vec<PluginManifest>, String> {
-    let manager = state.blocking_lock();
+    let manager = state.blocking_read();
     Ok(manager.loaded_manifests().into_iter().cloned().collect())
 }
 
 #[tauri::command]
 pub fn get_plugin_i18n(
-    state: tauri::State<'_, Arc<tokio::sync::Mutex<PluginManager>>>,
+    state: tauri::State<'_, Arc<tokio::sync::RwLock<PluginManager>>>,
     plugin_id: String,
     locale: String,
 ) -> Result<serde_json::Value, String> {
-    let manager = state.blocking_lock();
+    let manager = state.blocking_read();
     let i18n_dir = manager.plugins_dir().join(&plugin_id).join("i18n");
     let locale_file = i18n_dir.join(format!("{}.json", locale));
     if !locale_file.exists() {
@@ -175,12 +175,12 @@ pub fn get_plugin_i18n(
 
 #[tauri::command]
 pub async fn plugin_command(
-    state: tauri::State<'_, Arc<tokio::sync::Mutex<PluginManager>>>,
+    state: tauri::State<'_, Arc<tokio::sync::RwLock<PluginManager>>>,
     plugin_id: String,
     command: String,
     args: serde_json::Value,
 ) -> Result<serde_json::Value, String> {
-    let manager = state.lock().await;
+    let manager = state.read().await;
     manager.handle_command(&plugin_id, &command, args).await
 }
 
@@ -204,7 +204,7 @@ pub struct MarketplaceEntry {
 
 #[tauri::command]
 pub async fn fetch_marketplace_registry(
-    state: tauri::State<'_, Arc<tokio::sync::Mutex<PluginManager>>>,
+    state: tauri::State<'_, Arc<tokio::sync::RwLock<PluginManager>>>,
 ) -> Result<Vec<MarketplaceEntry>, String> {
     let client = reqwest::Client::builder()
         .user_agent("OmniGet")
@@ -230,7 +230,7 @@ pub async fn fetch_marketplace_registry(
         serde_json::from_str(&body).map_err(|e| format!("Invalid registry: {}", e))?;
 
     let installed = {
-        let manager = state.lock().await;
+        let manager = state.read().await;
         manager.installed_plugins().to_vec()
     };
 
@@ -286,7 +286,7 @@ struct GitHubAsset {
 
 #[tauri::command]
 pub async fn install_plugin_from_registry(
-    state: tauri::State<'_, Arc<tokio::sync::Mutex<PluginManager>>>,
+    state: tauri::State<'_, Arc<tokio::sync::RwLock<PluginManager>>>,
     plugin_id: String,
     repo: String,
 ) -> Result<String, String> {
@@ -325,8 +325,10 @@ pub async fn install_plugin_from_registry(
         .await
         .map_err(|e| format!("Failed to read download: {}", e))?;
 
-    let manager = state.lock().await;
-    let plugin_dir = manager.plugins_dir().join(&plugin_id);
+    let plugin_dir = {
+        let manager = state.read().await;
+        manager.plugins_dir().join(&plugin_id)
+    };
     std::fs::create_dir_all(&plugin_dir).map_err(|e| e.to_string())?;
 
     let cursor = std::io::Cursor::new(zip_bytes);
@@ -352,9 +354,8 @@ pub async fn install_plugin_from_registry(
     }
 
     let version = release.tag_name.trim_start_matches('v').to_string();
-    drop(manager);
 
-    let mut manager = state.lock().await;
+    let mut manager = state.write().await;
     manager
         .register_installed(omniget_plugin_sdk::InstalledPlugin {
             id: plugin_id.clone(),
@@ -381,11 +382,12 @@ pub struct PluginUpdateInfo {
 
 #[tauri::command]
 pub async fn check_plugin_updates(
-    state: tauri::State<'_, Arc<tokio::sync::Mutex<PluginManager>>>,
+    state: tauri::State<'_, Arc<tokio::sync::RwLock<PluginManager>>>,
 ) -> Result<Vec<PluginUpdateInfo>, String> {
-    let manager = state.lock().await;
-    let installed = manager.installed_plugins().to_vec();
-    drop(manager);
+    let installed = {
+        let manager = state.read().await;
+        manager.installed_plugins().to_vec()
+    };
 
     let client = reqwest::Client::builder()
         .user_agent("OmniGet")
@@ -427,7 +429,7 @@ pub async fn check_plugin_updates(
 
 #[tauri::command]
 pub async fn update_plugin(
-    state: tauri::State<'_, Arc<tokio::sync::Mutex<PluginManager>>>,
+    state: tauri::State<'_, Arc<tokio::sync::RwLock<PluginManager>>>,
     plugin_id: String,
     repo: String,
 ) -> Result<String, String> {
