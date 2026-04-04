@@ -133,6 +133,7 @@ function parseInstagram(segments) {
     case "p":
       return segments[1] ? "post" : "unknown";
     case "reel":
+    case "reels":
       return segments[1] ? "reel" : "unknown";
     case "stories":
       return segments[2] ? "image" : "unknown";

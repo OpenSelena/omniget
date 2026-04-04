@@ -38,7 +38,7 @@ async function init() {
 
 function determineState(data) {
   if (!data) return "loading";
-  if (data.pageDetected?.supported) return "known_platform";
+  if (data.pageDetected?.platform) return "known_platform";
   if (data.media?.length > 0) return "media_detected";
   if (!data.snifferEnabled) return "sniffer_off";
   return "listening";
@@ -433,7 +433,7 @@ function getDownloadLabel(contentType) {
     case "image": return "Send image to OmniGet";
     case "audio": return "Send audio to OmniGet";
     case "profile": return "Send profile to OmniGet";
-    default: return "Send to OmniGet";
+    default: return "Send page to OmniGet";
   }
 }
 
