@@ -240,11 +240,9 @@
     error = "";
 
     try {
-      const urlField = currentMethod.extra_fields?.find((f) => f.key === "url");
-      const successField = currentMethod.extra_fields?.find((f) => f.key === "success_url");
-      const domainsField = currentMethod.extra_fields?.find((f) => f.key === "cookie_domains");
+      const getField = (key: string) => currentMethod.extra_fields?.find((f) => f.key === key)?.placeholder || "";
 
-      const loginUrl = urlField?.placeholder || "";
+      const loginUrl = getField("url");
       if (!loginUrl) {
         error = "No login URL configured for this platform";
         loading = false;
@@ -255,8 +253,10 @@
         request: {
           url: loginUrl,
           title: `Login - ${config.name}`,
-          cookieDomains: domainsField?.placeholder?.split(",").map((d) => d.trim()) || [],
-          successUrlContains: successField?.placeholder || null,
+          cookieDomains: getField("cookie_domains").split(",").map((d: string) => d.trim()).filter(Boolean),
+          successUrlContains: getField("success_url") || null,
+          waitForCookie: getField("wait_for_cookie") || null,
+          initializationScript: getField("init_script") || null,
         },
       });
 
