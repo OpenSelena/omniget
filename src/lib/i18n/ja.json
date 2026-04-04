@@ -551,6 +551,7 @@
     "downloading": "ダウンロード中...",
     "downloaded": "ダウンロード済み",
     "download_retry": "エラー — 再試行",
+    "cancel_download": "キャンセル",
     "unavailable": "利用不可",
     "external_platform": "外部プラットフォーム",
     "choose_folder": "ダウンロードフォルダを選択",

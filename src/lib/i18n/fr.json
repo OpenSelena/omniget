@@ -551,6 +551,7 @@
     "downloading": "Téléchargement...",
     "downloaded": "Téléchargé",
     "download_retry": "Erreur — Réessayer",
+    "cancel_download": "Annuler",
     "unavailable": "Indisponible",
     "external_platform": "Plateforme externe",
     "choose_folder": "Choisir le dossier de téléchargement",

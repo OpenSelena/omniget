@@ -551,6 +551,7 @@
     "downloading": "Download in corso...",
     "downloaded": "Scaricato",
     "download_retry": "Errore — Riprova",
+    "cancel_download": "Annulla",
     "unavailable": "Non disponibile",
     "external_platform": "Piattaforma esterna",
     "choose_folder": "Scegli cartella di download",
