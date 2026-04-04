@@ -15,4 +15,5 @@ pub mod redirect;
 pub mod dependencies;
 pub mod errors;
 pub mod ffmpeg;
+pub mod pokemon_names;
 pub mod ytdlp;

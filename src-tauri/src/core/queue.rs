@@ -588,6 +588,12 @@ async fn spawn_download_inner(
     };
     tracing::info!("[queue] info fetch for {} took {:?}", item_id, info_start.elapsed());
 
+    let mut info = info;
+    if is_generic_title(&info.title) {
+        let pokemon = omniget_core::core::pokemon_names::random_pokemon_name();
+        info.title = format!("video_{}", pokemon);
+    }
+
     let state = {
         let mut q = queue.lock().await;
         if let Some(item) = q.items.iter_mut().find(|i| i.id == item_id) {
@@ -973,4 +979,16 @@ pub async fn try_start_next(app: tauri::AppHandle, queue: Arc<tokio::sync::Mutex
         });
     }
     tracing::debug!("[perf] try_start_next took {:?}", _timer_start.elapsed());
+}
+
+fn is_generic_title(title: &str) -> bool {
+    let t = title.to_lowercase();
+    let t = t.trim();
+    t.is_empty()
+        || t == "video"
+        || t == "media"
+        || t == "untitled"
+        || t == "unknown"
+        || t.starts_with("video [video]")
+        || t.starts_with("media [media]")
 }
