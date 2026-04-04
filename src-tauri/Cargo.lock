@@ -3501,7 +3501,9 @@ dependencies = [
  "url",
  "urlencoding",
  "uuid",
+ "webview2-com",
  "which",
+ "windows",
  "xz2",
  "zip 2.4.2",
 ]

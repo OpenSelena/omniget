@@ -508,6 +508,9 @@
     "login_with_browser": "Se connecter via le navigateur",
     "browser": "Navigateur",
     "browser_hint": "Une fenêtre de navigateur s'ouvrira pour vous connecter. Après la connexion, votre session sera détectée automatiquement.",
+    "otp_check_email": "Vérifiez votre email pour le code de vérification.",
+    "otp_code_label": "Code de Vérification",
+    "verify_code": "Vérifier le Code",
     "search_placeholder": "Rechercher des plateformes...",
     "connection_failed": "Echec de connexion"
   },

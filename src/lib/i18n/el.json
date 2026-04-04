@@ -508,6 +508,9 @@
     "login_with_browser": "Σύνδεση μέσω Browser",
     "browser": "Browser",
     "browser_hint": "Θα ανοίξει ένα παράθυρο browser για να συνδεθείτε. Μετά τη σύνδεση, η συνεδρία σας θα ανιχνευθεί αυτόματα.",
+    "otp_check_email": "Ελέγξτε το email σας για τον κωδικό επαλήθευσης.",
+    "otp_code_label": "Κωδικός Επαλήθευσης",
+    "verify_code": "Επαλήθευση",
     "search_placeholder": "Αναζητηση πλατφορμων...",
     "connection_failed": "Αποτυχια συνδεσης"
   },

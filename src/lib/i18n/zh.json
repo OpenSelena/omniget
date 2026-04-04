@@ -508,6 +508,9 @@
     "login_with_browser": "通过浏览器登录",
     "browser": "浏览器",
     "browser_hint": "将打开一个浏览器窗口供您登录。登录后，您的会话将被自动检测。",
+    "otp_check_email": "请检查您的邮箱获取验证码。",
+    "otp_code_label": "验证码",
+    "verify_code": "验证",
     "search_placeholder": "搜索平台...",
     "connection_failed": "连接失败"
   },

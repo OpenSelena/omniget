@@ -41,6 +41,8 @@
   let loading = $state(false);
   let error = $state("");
   let captchaWarning = $state(false);
+  let otpSent = $state(false);
+  let otpCode = $state("");
 
   let checking = $state(true);
   let loggedIn = $state(false);
@@ -177,6 +179,16 @@
     loading = true;
 
     try {
+      if (currentMethod.method_type === "email_only" && otpSent) {
+        const result = await pluginInvoke<string>("courses", `${platformId}_verify_otp`, { email, otpCode });
+        sessionEmail = result || email;
+        loggedIn = true;
+        otpSent = false;
+        otpCode = "";
+        loadItems();
+        return;
+      }
+
       const args: Record<string, any> = {};
 
       if (currentMethod.method_type === "email_password") {
@@ -199,11 +211,24 @@
       }
 
       const result = await pluginInvoke<string>("courses", currentMethod.command, args);
+
+      if (typeof result === "string" && result === "otp_sent") {
+        otpSent = true;
+        loading = false;
+        return;
+      }
+
       sessionEmail = result || email || "OK";
       loggedIn = true;
       loadItems();
     } catch (e: any) {
-      error = typeof e === "string" ? e : e.message ?? $t("common.error");
+      const msg = typeof e === "string" ? e : e.message ?? "";
+      if (msg.includes("otp_sent") || msg.includes("OTP sent") || msg.includes("verification code")) {
+        otpSent = true;
+        error = "";
+      } else {
+        error = msg || $t("common.error");
+      }
     } finally {
       loading = false;
     }
@@ -546,8 +571,15 @@
           {:else if currentMethod.method_type === "email_only"}
             <label class="field">
               <span class="field-label">{$t("hotmart.email_label")}</span>
-              <input type="email" placeholder={$t("hotmart.email_placeholder")} bind:value={email} class="input" disabled={loading} required />
+              <input type="email" placeholder={$t("hotmart.email_placeholder")} bind:value={email} class="input" disabled={loading || otpSent} required />
             </label>
+            {#if otpSent}
+              <p class="otp-hint">{$t("courses.otp_check_email")}</p>
+              <label class="field">
+                <span class="field-label">{$t("courses.otp_code_label")}</span>
+                <input type="text" inputmode="numeric" maxlength="6" placeholder="000000" bind:value={otpCode} class="input otp-input" disabled={loading} required />
+              </label>
+            {/if}
           {:else if currentMethod.method_type === "token"}
             <label class="field">
               <span class="field-label">Token</span>
@@ -576,9 +608,11 @@
             <p class="captcha-warning">{$t("hotmart.captcha_detected")}</p>
           {/if}
 
-          <button type="submit" class="button" disabled={loading}>
+          <button type="submit" class="button" disabled={loading || (otpSent && otpCode.length < 4)}>
             {#if loading}
               {$t("hotmart.authenticating")}
+            {:else if otpSent}
+              {$t("courses.verify_code")}
             {:else}
               {$t("hotmart.login")}
             {/if}
@@ -808,6 +842,20 @@
     resize: vertical;
     font-family: var(--font-mono);
     font-size: 12.5px;
+  }
+
+  .otp-hint {
+    font-size: 12.5px;
+    color: var(--green);
+    text-align: center;
+    font-weight: 500;
+  }
+
+  .otp-input {
+    text-align: center;
+    font-size: 20px;
+    letter-spacing: 6px;
+    font-family: var(--font-mono);
   }
 
   .browser-hint {

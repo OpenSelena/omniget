@@ -551,7 +551,10 @@
     "search_btn": "Buscar",
     "login_with_browser": "Login pelo Navegador",
     "browser": "Navegador",
-    "browser_hint": "Uma janela do navegador vai abrir para fazer login. Depois de logar, a sessão será detectada automaticamente."
+    "browser_hint": "Uma janela do navegador vai abrir para fazer login. Depois de logar, a sessão será detectada automaticamente.",
+    "otp_check_email": "Verifique seu email para o código de verificação.",
+    "otp_code_label": "Código de Verificação",
+    "verify_code": "Verificar Código"
   },
   "hotmart": {
     "title": "Hotmart",

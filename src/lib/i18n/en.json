@@ -551,7 +551,10 @@
     "search_btn": "Search",
     "login_with_browser": "Login with Browser",
     "browser": "Browser",
-    "browser_hint": "A browser window will open for you to log in. After logging in, your session will be detected automatically."
+    "browser_hint": "A browser window will open for you to log in. After logging in, your session will be detected automatically.",
+    "otp_check_email": "Check your email for the verification code.",
+    "otp_code_label": "Verification Code",
+    "verify_code": "Verify Code"
   },
   "hotmart": {
     "title": "Hotmart",
