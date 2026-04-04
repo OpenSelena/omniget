@@ -1,8 +1,7 @@
 <script lang="ts">
-  type MascotEmotion = "idle" | "downloading" | "error" | "stalled" | "queue";
+  type MascotEmotion = "idle" | "downloading" | "error" | "stalled" | "queue" | "complete" | "amazed";
 
   function emotionToSrc(e: MascotEmotion): string {
-    if (e === "queue") return "/mascot/downloading.png";
     return `/mascot/${e}.png`;
   }
 

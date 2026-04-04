@@ -41,6 +41,8 @@
     return codec.split(".")[0];
   }
 
+  let showAllFormats = $state(false);
+
   let bestVA = $derived([...formats].reverse().find(f => f.has_video && f.has_audio) ?? null);
   let bestAudio = $derived([...formats].reverse().find(f => f.has_audio && !f.has_video) ?? null);
   let bestVideo = $derived([...formats].reverse().find(f => f.has_video && !f.has_audio) ?? null);
@@ -133,48 +135,54 @@
           </span>
         </div>
 
-        <div class="formats-list">
-          <div class="format-header">
-            <span>ID</span>
-            <span>{$t('omnibox.fmt_type')}</span>
-            <span>{$t('omnibox.fmt_quality')}</span>
-            <span>{$t('omnibox.fmt_streams')}</span>
-            <span>{$t('omnibox.fmt_video')}</span>
-            <span>{$t('omnibox.fmt_audio')}</span>
-            <span>{$t('omnibox.fmt_size')}</span>
-            <span>{$t('omnibox.fmt_speed')}</span>
-          </div>
-          {#each formats as fmt (fmt.format_id)}
-            <button
-              class="format-row"
-              class:format-row-selected={selectedFormatId === fmt.format_id}
-              onclick={() => onSelectFormat(fmt.format_id)}
-            >
-              <span class="format-id">{fmt.format_id}</span>
-              <span class="format-ext">{fmt.ext}</span>
-              <span class="format-res">{fmt.resolution ?? "—"}</span>
-              <span class="format-codec">
-                {#if fmt.has_video && fmt.has_audio}
-                  V+A
-                {:else if fmt.has_video}
-                  V
-                {:else if fmt.has_audio}
-                  A
+        <button class="button formats-show-all-btn" onclick={() => { showAllFormats = !showAllFormats; }}>
+          {showAllFormats ? $t('omnibox.hide_all_formats') : $t('omnibox.show_all_formats')}
+        </button>
+
+        {#if showAllFormats}
+          <div class="formats-list">
+            <div class="format-header">
+              <span>ID</span>
+              <span>{$t('omnibox.fmt_type')}</span>
+              <span>{$t('omnibox.fmt_quality')}</span>
+              <span>{$t('omnibox.fmt_streams')}</span>
+              <span>{$t('omnibox.fmt_video')}</span>
+              <span>{$t('omnibox.fmt_audio')}</span>
+              <span>{$t('omnibox.fmt_size')}</span>
+              <span>{$t('omnibox.fmt_speed')}</span>
+            </div>
+            {#each formats as fmt (fmt.format_id)}
+              <button
+                class="format-row"
+                class:format-row-selected={selectedFormatId === fmt.format_id}
+                onclick={() => onSelectFormat(fmt.format_id)}
+              >
+                <span class="format-id">{fmt.format_id}</span>
+                <span class="format-ext">{fmt.ext}</span>
+                <span class="format-res">{fmt.resolution ?? "—"}</span>
+                <span class="format-codec">
+                  {#if fmt.has_video && fmt.has_audio}
+                    V+A
+                  {:else if fmt.has_video}
+                    V
+                  {:else if fmt.has_audio}
+                    A
+                  {:else}
+                    —
+                  {/if}
+                </span>
+                <span class="format-vcodec">{formatCodec(fmt.vcodec)}</span>
+                <span class="format-acodec">{formatCodec(fmt.acodec)}</span>
+                <span class="format-size">{formatFilesize(fmt.filesize)}</span>
+                {#if fmt.tbr}
+                  <span class="format-tbr">{fmt.tbr.toFixed(0)}k</span>
                 {:else}
-                  —
+                  <span class="format-tbr">—</span>
                 {/if}
-              </span>
-              <span class="format-vcodec">{formatCodec(fmt.vcodec)}</span>
-              <span class="format-acodec">{formatCodec(fmt.acodec)}</span>
-              <span class="format-size">{formatFilesize(fmt.filesize)}</span>
-              {#if fmt.tbr}
-                <span class="format-tbr">{fmt.tbr.toFixed(0)}k</span>
-              {:else}
-                <span class="format-tbr">—</span>
-              {/if}
-            </button>
-          {/each}
-        </div>
+              </button>
+            {/each}
+          </div>
+        {/if}
       </div>
     {:else}
       <div class="format-selected">
@@ -266,6 +274,12 @@
     color: var(--gray);
     text-align: center;
     line-height: 1.4;
+  }
+
+  .formats-show-all-btn {
+    font-size: 12px;
+    padding: 4px 10px;
+    opacity: 0.7;
   }
 
   .formats-list {

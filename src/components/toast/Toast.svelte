@@ -109,9 +109,12 @@
     font-weight: 500;
     color: var(--secondary);
     min-width: 0;
+    word-break: break-word;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
   }
 
   .toast-close {
