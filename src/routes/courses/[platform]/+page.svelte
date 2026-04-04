@@ -142,6 +142,7 @@
       if (config.features.captcha_event) {
         const evt = config.features.captcha_event;
         const unlisten = listen(evt, () => { captchaWarning = true; });
+        checkSession();
         return () => { unlisten.then((fn) => fn()); };
       }
     } catch (e: any) {
