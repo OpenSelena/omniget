@@ -183,6 +183,16 @@ async fn download_ffmpeg() -> anyhow::Result<PathBuf> {
             .await
             .map_err(|e| anyhow!("spawn_blocking failed: {}", e))??;
 
+        let file_size = std::fs::metadata(&temp_path)?.len();
+        if file_size < 1_000_000 {
+            let _ = std::fs::remove_file(&temp_path);
+            return Err(anyhow!(
+                "Downloaded file from {} is too small ({}B) — likely an error page",
+                url,
+                file_size
+            ));
+        }
+
         match archive_type {
             ArchiveType::Zip => extract_zip_ffmpeg(&temp_path, &bin_dir, &ffmpeg_name, &ffprobe_name).await?,
             ArchiveType::TarXz => extract_tar_xz_ffmpeg(&temp_path, &bin_dir, &ffmpeg_name, &ffprobe_name).await?,
@@ -273,17 +283,10 @@ fn ffmpeg_download_urls() -> Vec<(&'static str, ArchiveType)> {
             ArchiveType::Zip,
         )]
     } else if cfg!(target_os = "macos") {
-        if cfg!(target_arch = "aarch64") {
-            vec![
-                ("https://www.osxexperts.net/ffmpeg80arm.zip", ArchiveType::Zip),
-                ("https://www.osxexperts.net/ffprobe80arm.zip", ArchiveType::Zip),
-            ]
-        } else {
-            vec![
-                ("https://www.osxexperts.net/ffmpeg80intel.zip", ArchiveType::Zip),
-                ("https://www.osxexperts.net/ffprobe80intel.zip", ArchiveType::Zip),
-            ]
-        }
+        vec![
+            ("https://evermeet.cx/ffmpeg/getrelease/zip", ArchiveType::Zip),
+            ("https://evermeet.cx/ffmpeg/getrelease/ffprobe/zip", ArchiveType::Zip),
+        ]
     } else if cfg!(target_arch = "aarch64") {
         vec![(
             "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linuxarm64-gpl.tar.xz",
