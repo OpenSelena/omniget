@@ -148,15 +148,15 @@ pub async fn open_auth_webview(
         if final_url == "__CLOSE_REQUESTED__" { "close" } else { &final_url }
     );
 
-    tracing::info!("[auth_webview] waiting 1.5s for page to settle...");
-    tokio::time::sleep(std::time::Duration::from_millis(1500)).await;
+    tracing::info!("[auth_webview] waiting 2s for page to settle...");
+    tokio::time::sleep(std::time::Duration::from_secs(2)).await;
 
     let default_domain = request.cookie_domains.first().cloned().unwrap_or_default();
     let cookies = extract_cookies(&webview_window, &default_domain, &request.cookie_domains).await;
 
     let cookies = if cookies.is_empty() {
-        tracing::warn!("[auth_webview] no cookies on first attempt, retrying in 2s...");
-        tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+        tracing::warn!("[auth_webview] no cookies on first attempt, retrying in 3s...");
+        tokio::time::sleep(std::time::Duration::from_secs(3)).await;
         extract_cookies(&webview_window, &default_domain, &request.cookie_domains).await
     } else {
         cookies
@@ -202,39 +202,51 @@ async fn extract_cookies_js(
 ) -> Vec<AuthCookie> {
     let js = r#"
 (function() {
-    var result = { cookies: document.cookie, storage: {} };
     try {
-        for (var i = 0; i < localStorage.length; i++) {
-            var key = localStorage.key(i);
-            if (/token|auth|access|session|jwt|csrf/i.test(key)) {
-                result.storage[key] = localStorage.getItem(key);
+        var result = { cookies: document.cookie || '', storage: {} };
+        try {
+            for (var i = 0; i < localStorage.length; i++) {
+                var key = localStorage.key(i);
+                if (/token|auth|access|session|jwt|csrf/i.test(key)) {
+                    result.storage[key] = localStorage.getItem(key);
+                }
             }
-        }
-    } catch(e) {}
-    try {
-        for (var i = 0; i < sessionStorage.length; i++) {
-            var key = sessionStorage.key(i);
-            if (/token|auth|access|session|jwt|csrf/i.test(key)) {
-                result.storage['ss:' + key] = sessionStorage.getItem(key);
+        } catch(e) {}
+        try {
+            for (var i = 0; i < sessionStorage.length; i++) {
+                var key = sessionStorage.key(i);
+                if (/token|auth|access|session|jwt|csrf/i.test(key)) {
+                    result.storage['ss:' + key] = sessionStorage.getItem(key);
+                }
             }
-        }
-    } catch(e) {}
-    document.title = '__OMNIGET_COOKIES__' + JSON.stringify(result);
+        } catch(e) {}
+        document.title = '__OMNIGET_COOKIES__' + JSON.stringify(result);
+    } catch(err) {
+        document.title = '__OMNIGET_COOKIES__{"cookies":"","storage":{}}';
+    }
 })()
 "#;
 
-    for attempt in 0..3 {
-        tracing::info!("[auth_webview] JS eval attempt {}/3", attempt + 1);
+    for attempt in 0..4 {
+        let delay_ms = match attempt {
+            0 => 500,
+            1 => 1500,
+            2 => 2500,
+            _ => 3000,
+        };
+
+        tracing::info!("[auth_webview] JS eval attempt {}/4 (wait {}ms)", attempt + 1, delay_ms);
+
         match window.eval(js) {
             Ok(()) => tracing::info!("[auth_webview] eval() returned Ok"),
             Err(e) => {
                 tracing::error!("[auth_webview] eval() returned Err: {}", e);
-                tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+                tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
                 continue;
             }
         }
 
-        tokio::time::sleep(std::time::Duration::from_millis(800)).await;
+        tokio::time::sleep(std::time::Duration::from_millis(delay_ms)).await;
 
         match window.title() {
             Ok(title) => {
@@ -328,6 +340,7 @@ async fn extract_cookies_native(
         unsafe {
             use webview2_com::Microsoft::Web::WebView2::Win32::*;
             use windows::core::{Interface, PWSTR, BOOL};
+            use windows::Win32::UI::WindowsAndMessaging::*;
 
             let core: ICoreWebView2 = match controller.CoreWebView2() {
                 Ok(c) => c,
@@ -425,21 +438,35 @@ async fn extract_cookies_native(
                     continue;
                 }
 
-                match cookie_rx.recv_timeout(std::time::Duration::from_secs(5)) {
-                    Ok(batch) => {
-                        tracing::info!(
-                            "[auth_webview] native cookies from {}: {} cookies",
-                            uri_for_log,
-                            batch.len()
-                        );
-                        for c in batch {
-                            if !all_cookies.iter().any(|existing| existing.name == c.name && existing.domain == c.domain) {
-                                all_cookies.push(c);
+                let deadline = std::time::Instant::now() + std::time::Duration::from_millis(2000);
+                loop {
+                    match cookie_rx.try_recv() {
+                        Ok(batch) => {
+                            tracing::info!(
+                                "[auth_webview] native cookies from {}: {} cookies",
+                                uri_for_log,
+                                batch.len()
+                            );
+                            for c in batch {
+                                if !all_cookies.iter().any(|existing| existing.name == c.name && existing.domain == c.domain) {
+                                    all_cookies.push(c);
+                                }
                             }
+                            break;
                         }
-                    }
-                    Err(_) => {
-                        tracing::warn!("[auth_webview] GetCookies({}) timed out", uri_for_log);
+                        Err(std::sync::mpsc::TryRecvError::Disconnected) => break,
+                        Err(std::sync::mpsc::TryRecvError::Empty) => {
+                            if std::time::Instant::now() >= deadline {
+                                tracing::warn!("[auth_webview] GetCookies({}) timed out after 2s", uri_for_log);
+                                break;
+                            }
+                            let mut msg = std::mem::zeroed();
+                            while PeekMessageW(&mut msg, None, 0, 0, PM_REMOVE).as_bool() {
+                                let _ = TranslateMessage(&msg);
+                                DispatchMessageW(&msg);
+                            }
+                            std::thread::sleep(std::time::Duration::from_millis(5));
+                        }
                     }
                 }
             }
