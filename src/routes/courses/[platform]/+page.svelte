@@ -334,7 +334,15 @@
     if (!config) return;
     const status = getDownloadStatus(item);
     if (status === "downloading") {
-      showToast("info", $t("toast.download_already_active"));
+      if (config.commands.cancel) {
+        try {
+          const id = getItemId(item);
+          await pluginInvoke("courses", config.commands.cancel, { courseId: id });
+          showToast("info", "Download cancelled");
+        } catch (e: any) {
+          showToast("error", typeof e === "string" ? e : e.message ?? "Cancel failed");
+        }
+      }
       return;
     }
     if (status === "complete") return;
@@ -479,6 +487,7 @@
             name={getItemName(item)}
             price={getItemSubtitle(item)}
             imageUrl={getItemImage(item)}
+            externalPlatform={item.external_platform === true}
             downloadStatus={getDownloadStatus(item)}
             downloadPercent={getDownloadPercent(item)}
             onDownload={() => downloadItem(item)}
