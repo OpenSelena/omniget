@@ -700,34 +700,25 @@
     <SupportedServices />
   {/if}
 
-  <details class="more-actions">
-    <summary class="more-actions-toggle">
-      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="1" />
-        <circle cx="19" cy="12" r="1" />
-        <circle cx="5" cy="12" r="1" />
+  <div class="quick-actions">
+    <button class="quick-action-btn" onclick={() => { showP2pSendDialog = true; }}>
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 2L11 13" />
+        <path d="M22 2L15 22 11 13 2 9z" />
       </svg>
-    </summary>
-    <div class="more-actions-content">
-      <button class="action-btn" onclick={() => { showP2pSendDialog = true; }}>
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M22 2L11 13" />
-          <path d="M22 2L15 22 11 13 2 9z" />
-        </svg>
-        {$t("p2p.send_file")}
-      </button>
-      <button class="action-btn" onclick={openTorrentFile}>
-        <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="3" />
-          <circle cx="5" cy="6" r="2" />
-          <circle cx="19" cy="6" r="2" />
-          <path d="M9.5 10.5L6.5 7.5" />
-          <path d="M14.5 10.5l3-3" />
-        </svg>
-        Open .torrent
-      </button>
-    </div>
-  </details>
+      {$t("p2p.send_file")}
+    </button>
+    <button class="quick-action-btn" onclick={openTorrentFile}>
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="3" />
+        <circle cx="5" cy="6" r="2" />
+        <circle cx="19" cy="6" r="2" />
+        <path d="M9.5 10.5L6.5 7.5" />
+        <path d="M14.5 10.5l3-3" />
+      </svg>
+      {$t("torrent.open_file")}
+    </button>
+  </div>
 
   <div class="terms-note">
     {$t('terms_note.agreement')}
@@ -1075,70 +1066,38 @@
     color: var(--gray);
   }
 
-  .more-actions {
-    margin-top: calc(var(--padding) * -0.5);
-  }
-
-  .more-actions-toggle {
+  .quick-actions {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    list-style: none;
-    color: var(--gray);
-    padding: 4px;
-    user-select: none;
+    gap: 8px;
+    margin-bottom: var(--padding);
   }
 
-  .more-actions-toggle::-webkit-details-marker {
-    display: none;
-  }
-
-  .more-actions-toggle::marker {
-    content: "";
-  }
-
-  @media (hover: hover) {
-    .more-actions-toggle:hover {
-      color: var(--secondary);
-    }
-  }
-
-  .more-actions-content {
-    display: flex;
-    gap: calc(var(--padding) / 2);
-    flex-wrap: wrap;
-    justify-content: center;
-    padding-top: calc(var(--padding) / 2);
-  }
-
-  .action-btn {
+  .quick-action-btn {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 16px;
+    padding: 8px 14px;
     font-size: 13px;
-    font-weight: 500;
-    background: var(--button-elevated);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
+    background: var(--button);
     color: var(--secondary);
     cursor: pointer;
+    box-shadow: var(--button-box-shadow);
+    transition: background 0.15s;
   }
 
-  @media (hover: hover) {
-    .action-btn:hover {
-      background: var(--button-hover);
-    }
+  .quick-action-btn:hover {
+    background: var(--button-hover);
   }
 
-  .action-btn:active {
+  .quick-action-btn:active {
     background: var(--button-press);
   }
 
-  .action-btn svg {
-    pointer-events: none;
-    color: var(--accent);
+  .quick-action-btn svg {
+    opacity: 0.7;
+    flex-shrink: 0;
   }
 
   .terms-note {
