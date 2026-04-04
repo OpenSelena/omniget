@@ -23,9 +23,7 @@
     onDownload,
   }: CourseCardProps = $props();
 
-  let isDisabled = $derived(
-    downloadStatus === "downloading" || downloadStatus === "complete"
-  );
+  let isDisabled = $derived(downloadStatus === "complete");
 
   function handleClick() {
     if (isDisabled) return;
@@ -81,9 +79,11 @@
         {$t("hotmart.unavailable")}
       </button>
     {:else if downloadStatus === "downloading"}
-      <button class="button elevated card-download status-downloading" disabled>
-        <span class="btn-spinner"></span>
-        {$t("hotmart.downloading")}
+      <button class="button elevated card-download status-downloading" onclick={handleClick}>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="6" y="6" width="12" height="12" rx="2" />
+        </svg>
+        {$t("hotmart.cancel_download")}
       </button>
       <div class="mini-progress-track">
         <div
