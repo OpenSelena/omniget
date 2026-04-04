@@ -48,7 +48,8 @@
     "external_url_ready": "已收到 URL，可以开始下载",
     "external_url_queued": "已从 Chrome 扩展添加下载",
     "file_copied_to_clipboard": "文件已复制到剪贴板",
-    "drm_skipped": "{{count}} 个视频已跳过 — 受DRM保护（FairPlay/SAMPLE-AES）"
+    "drm_skipped": "{{count}} 个视频已跳过 — 受DRM保护（FairPlay/SAMPLE-AES）",
+    "generic_download_complete": "{{name}} — 下载完成！"
   },
   "telegram": {
     "title": "Telegram",
@@ -255,6 +256,8 @@
     "quality_360p": "低清 (360p) — 极小",
     "view_formats": "查看格式",
     "hide_formats": "隐藏格式",
+    "show_all_formats": "显示所有格式",
+    "hide_all_formats": "隐藏所有格式",
     "no_formats": "该视频没有可用格式",
     "formats_error": "加载格式失败",
     "best_va": "最佳画音",
@@ -312,7 +315,7 @@
     "feature_hotmart": "支持 Hotmart 课程下载，可登录获取视频、附件和描述",
     "feature_progress": "实时下载进度，显示预计时间和速度",
     "feature_mascot": "Loop，会对你的下载做出反应的吉祥物",
-    "feature_themes": "深色和浅色主题",
+    "feature_themes": "11 个主题：Dark、Light、Catppuccin（4 种风味）、One Dark Pro、Dracula、NyxVamp（3 种变体）",
     "feature_i18n": "支持英语、葡萄牙语、中文、日语、意大利语和法语",
     "feature_tech": "使用 Tauri + Rust 构建，快速且轻量",
     "roadmap_intro": "以下是 OmniGet 后续版本的规划。",
@@ -322,7 +325,9 @@
     "roadmap_community_title": "有想法？",
     "roadmap_community_text": "我们欢迎意见和建议！这是请求新平台或功能的好方式。",
     "roadmap_community_discord": "在 Discord 上联系我们：",
-    "roadmap_community_issue": "或在代码仓库中提交 Issue："
+    "roadmap_community_issue": "或在代码仓库中提交 Issue：",
+    "tagline": "随时随地，下载一切。",
+    "credit": "由 tonho.wtf 用心打造"
   },
   "services": {
     "title": "支持 YouTube、Instagram 及 1000+ 网站",
@@ -489,12 +494,14 @@
     "sender_not_found_hint": "未找到代码。请确保发送方处于活动状态且代码正确。"
   },
   "mascot": {
-    "idle": "粘贴链接或搜索开始！",
-    "detecting": "检查中...",
-    "detected": "找到了！准备下载？",
-    "preparing": "准备中...",
-    "search": "看看我找到了什么！",
-    "error": "出了点问题。要重试吗？"
+    "idle": "粘贴链接或搜索试试！|今天下载什么呢？|随时准备好了！",
+    "detecting": "嗯，让我看看...|正在分析链接...|稍等一下...",
+    "detected": "找到了！要开始下载吗？|发现了！走起？|一切就绪！",
+    "preparing": "正在准备中...|快好了...|正在整理你的下载...",
+    "search": "看看我找到了什么！|来看看吧！|看看这些！",
+    "error": "哎呀，出了点问题。再试一次？|没成功，再来一次？|嗯，出了点故障...",
+    "complete": "搞定了！|下载完成！|给你搞定了！",
+    "queue": "排队等待中...|耐心点，快了...|马上就轮到你了！"
   },
   "courses": {
     "title": "课程",

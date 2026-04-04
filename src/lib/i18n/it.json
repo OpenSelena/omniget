@@ -48,7 +48,8 @@
     "external_url_ready": "URL ricevuto e pronto per il download",
     "external_url_queued": "Download aggiunto dall'estensione Chrome",
     "file_copied_to_clipboard": "File copiato negli appunti",
-    "drm_skipped": "{{count}} video ignorati — protetti da DRM (FairPlay/SAMPLE-AES)"
+    "drm_skipped": "{{count}} video ignorati — protetti da DRM (FairPlay/SAMPLE-AES)",
+    "generic_download_complete": "{{name}} — download completato!"
   },
   "telegram": {
     "title": "Telegram",
@@ -255,6 +256,8 @@
     "quality_360p": "Basso (360p) — molto leggero",
     "view_formats": "Mostra formati",
     "hide_formats": "Nascondi formati",
+    "show_all_formats": "Mostra tutti i formati",
+    "hide_all_formats": "Nascondi tutti i formati",
     "no_formats": "Nessun formato disponibile per questo video",
     "formats_error": "Impossibile caricare i formati",
     "best_va": "Best V+A",
@@ -312,7 +315,7 @@
     "feature_hotmart": "download di corsi Hotmart con accesso (video, allegati, descrizioni)",
     "feature_progress": "avanzamento download in tempo reale con tempo stimato e velocità",
     "feature_mascot": "Loop, la mascotte che reagisce ai tuoi download",
-    "feature_themes": "tema chiaro e scuro",
+    "feature_themes": "11 temi: Dark, Light, Catppuccin (4 varianti), One Dark Pro, Dracula, NyxVamp (3 varianti)",
     "feature_i18n": "disponibile in inglese, portoghese, cinese, giapponese, italiano e francese",
     "feature_tech": "realizzato con Tauri + Rust. veloce e leggero",
     "roadmap_intro": "cosa è previsto per le prossime versioni di OmniGet.",
@@ -322,7 +325,9 @@
     "roadmap_community_title": "hai un'idea?",
     "roadmap_community_text": "accettiamo idee e suggerimenti! è un ottimo modo per richiedere una nuova piattaforma o funzionalità.",
     "roadmap_community_discord": "scrivici su Discord:",
-    "roadmap_community_issue": "oppure apri una issue nel repository:"
+    "roadmap_community_issue": "oppure apri una issue nel repository:",
+    "tagline": "Scarica qualsiasi cosa, da qualsiasi luogo.",
+    "credit": "Fatto con amore da tonho.wtf"
   },
   "services": {
     "title": "Supporta YouTube, Instagram e oltre 1000 siti",
@@ -489,12 +494,14 @@
     "sender_not_found_hint": "Codice non trovato. Assicurati che il mittente sia attivo e che il codice sia corretto."
   },
   "mascot": {
-    "idle": "Incolla un link o cerca per iniziare!",
-    "detecting": "Verifica...",
-    "detected": "Trovato! Vuoi scaricarlo?",
-    "preparing": "Preparazione...",
-    "search": "Ecco cosa ho trovato!",
-    "error": "Qualcosa è andato storto. Riprovare?"
+    "idle": "Incolla un link o cerca qualcosa!|Cosa scarichiamo oggi?|Pronto quando vuoi!",
+    "detecting": "Hmm, fammi controllare...|Analizzo il link...|Un attimo...",
+    "detected": "Trovato! Pronti a scaricare?|Eccolo! Si parte?|Tutto pronto!",
+    "preparing": "Sto preparando tutto...|Quasi pronto...|Preparo il download...",
+    "search": "Guarda cosa ho trovato!|Dai un'occhiata!|Guarda qui!",
+    "error": "Oops, qualcosa è andato storto. Riproviamo?|Non ha funzionato. Riproviamo?|Hmm, qualcosa si è rotto...",
+    "complete": "Fatto!|Download completato!|Ecco fatto!",
+    "queue": "In attesa...|Pazienza, quasi ci siamo...|Il tuo turno sta arrivando!"
   },
   "courses": {
     "title": "Corsi",

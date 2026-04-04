@@ -48,7 +48,8 @@
     "external_url_ready": "URL recebida e pronta para download",
     "external_url_queued": "Download adicionado pela extensão do Chrome",
     "file_copied_to_clipboard": "Arquivo copiado para o clipboard",
-    "drm_skipped": "{{count}} vídeo(s) ignorados — protegidos por DRM (FairPlay/SAMPLE-AES)"
+    "drm_skipped": "{{count}} vídeo(s) ignorados — protegidos por DRM (FairPlay/SAMPLE-AES)",
+    "generic_download_complete": "{{name}} — download concluído!"
   },
   "telegram": {
     "title": "Telegram",
@@ -259,6 +260,8 @@
     "quality_360p": "Baixo (360p) — muito leve",
     "view_formats": "Ver formatos",
     "hide_formats": "Ocultar formatos",
+    "show_all_formats": "Mostrar todos os formatos",
+    "hide_all_formats": "Esconder formatos",
     "no_formats": "Nenhum formato disponível para este vídeo",
     "formats_error": "Falha ao carregar formatos",
     "best_va": "Melhor V+A",
@@ -314,7 +317,7 @@
     "feature_hotmart": "download de cursos Hotmart com login (vídeos, anexos, descrições)",
     "feature_progress": "progresso em tempo real com ETA e velocidade",
     "feature_mascot": "Loop, o mascote que reage aos seus downloads",
-    "feature_themes": "tema escuro e claro",
+    "feature_themes": "11 temas: Dark, Light, Catppuccin (4 sabores), One Dark Pro, Dracula, NyxVamp (3 variantes)",
     "feature_i18n": "disponível em Inglês, Português, Chinês, Japonês, Italiano e Francês",
     "feature_tech": "feito com Tauri + Rust. rápido e leve",
     "roadmap_intro": "o que está planejado para as próximas versões do OmniGet.",
@@ -324,7 +327,9 @@
     "roadmap_community_title": "tem uma ideia?",
     "roadmap_community_text": "estamos aceitando ideias e sugestões! é uma ótima forma de pedir por uma plataforma nova ou funcionalidade.",
     "roadmap_community_discord": "me chama no discord:",
-    "roadmap_community_issue": "ou abra uma issue no repositório:"
+    "roadmap_community_issue": "ou abra uma issue no repositório:",
+    "tagline": "Baixe qualquer coisa, de qualquer lugar.",
+    "credit": "Feito com amor por tonho.wtf"
   },
   "marketplace": {
     "title": "Marketplace",
@@ -531,12 +536,14 @@
     "sender_not_found_hint": "Código não encontrado. Verifique se o remetente está ativo e o código está correto."
   },
   "mascot": {
-    "idle": "Cole um link ou pesquise para começar!",
-    "detecting": "Verificando...",
-    "detected": "Encontrei! Quer baixar?",
-    "preparing": "Preparando...",
-    "search": "Olha o que eu encontrei!",
-    "error": "Algo deu errado. Quer tentar de novo?"
+    "idle": "Cola um link ou pesquise algo!|O que vamos baixar hoje?|Pronto quando quiser!",
+    "detecting": "Hmm, deixa eu ver...|Analisando o link...|Um momento...",
+    "detected": "Achei! Bora baixar?|Encontrei! Vamos?|Tudo pronto!",
+    "preparing": "Preparando tudo...|Quase lá...|Organizando seu download...",
+    "search": "Olha o que achei!|Dá uma olhada!|Veja isso!",
+    "error": "Ops, algo deu errado. Quer tentar de novo?|Não rolou. Bora tentar de novo?|Hmm, algo quebrou...",
+    "complete": "Pronto!|Download concluído!|Tá na mão!",
+    "queue": "Esperando na fila...|Calma, já já chega!|Sua vez tá chegando!"
   },
   "courses": {
     "title": "Cursos",

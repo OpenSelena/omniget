@@ -48,7 +48,8 @@
     "external_url_ready": "URL reçue et prête à être téléchargée",
     "external_url_queued": "Téléchargement ajouté depuis l'extension Chrome",
     "file_copied_to_clipboard": "Fichier copié dans le presse-papiers",
-    "drm_skipped": "{{count}} vidéo(s) ignorée(s) — protégée(s) par DRM (FairPlay/SAMPLE-AES)"
+    "drm_skipped": "{{count}} vidéo(s) ignorée(s) — protégée(s) par DRM (FairPlay/SAMPLE-AES)",
+    "generic_download_complete": "{{name}} — téléchargement terminé !"
   },
   "telegram": {
     "title": "Telegram",
@@ -255,6 +256,8 @@
     "quality_360p": "Bas (360p) — tres leger",
     "view_formats": "Voir les formats",
     "hide_formats": "Masquer les formats",
+    "show_all_formats": "Afficher tous les formats",
+    "hide_all_formats": "Masquer tous les formats",
     "no_formats": "Aucun format disponible pour cette vidéo",
     "formats_error": "Échec du chargement des formats",
     "best_va": "Meilleur V+A",
@@ -312,7 +315,7 @@
     "feature_hotmart": "téléchargement de cours Hotmart avec connexion (vidéos, pièces jointes, descriptions)",
     "feature_progress": "progression en temps réel avec ETA et vitesse",
     "feature_mascot": "Loop, la mascotte qui réagit à vos téléchargements",
-    "feature_themes": "thème sombre et clair",
+    "feature_themes": "11 thèmes : Dark, Light, Catppuccin (4 saveurs), One Dark Pro, Dracula, NyxVamp (3 variantes)",
     "feature_i18n": "disponible en anglais, portugais, chinois, japonais, italien et français",
     "feature_tech": "développé avec Tauri + Rust. rapide et léger",
     "roadmap_intro": "ce qui est prévu pour les prochaines versions d'OmniGet.",
@@ -322,7 +325,9 @@
     "roadmap_community_title": "une idée ?",
     "roadmap_community_text": "nous acceptons les idées et suggestions ! c'est un excellent moyen de demander une nouvelle plateforme ou fonctionnalité.",
     "roadmap_community_discord": "contactez-nous sur discord :",
-    "roadmap_community_issue": "ou ouvrez une issue sur le dépôt :"
+    "roadmap_community_issue": "ou ouvrez une issue sur le dépôt :",
+    "tagline": "Téléchargez tout, de partout.",
+    "credit": "Fait avec amour par tonho.wtf"
   },
   "services": {
     "title": "YouTube, Instagram et plus de 1000 sites pris en charge",
@@ -489,12 +494,14 @@
     "sender_not_found_hint": "Code introuvable. Vérifiez que l'expéditeur est actif et que le code est correct."
   },
   "mascot": {
-    "idle": "Collez un lien ou recherchez pour commencer !",
-    "detecting": "Vérification...",
-    "detected": "Trouvé ! Prêt à télécharger ?",
-    "preparing": "Préparation...",
-    "search": "Voici ce que j'ai trouvé !",
-    "error": "Quelque chose s'est mal passé. Réessayer ?"
+    "idle": "Collez un lien ou cherchez quelque chose !|Qu'est-ce qu'on télécharge aujourd'hui ?|Prêt quand vous voulez !",
+    "detecting": "Hmm, laissez-moi vérifier...|Analyse du lien...|Un instant...",
+    "detected": "Trouvé ! On y va ?|Je l'ai trouvé ! On lance ?|Tout est prêt !",
+    "preparing": "Je prépare tout...|Presque prêt...|Préparation du téléchargement...",
+    "search": "Regardez ce que j'ai trouvé !|Jetez un œil !|Regardez ça !",
+    "error": "Oups, quelque chose a mal tourné. On réessaie ?|Ça n'a pas marché. On retente ?|Hmm, quelque chose a cassé...",
+    "complete": "C'est fait !|Téléchargement terminé !|Voilà pour vous !",
+    "queue": "En file d'attente...|Patience, bientôt...|Votre tour arrive !"
   },
   "courses": {
     "title": "Cours",

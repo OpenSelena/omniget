@@ -46,7 +46,8 @@
     "download_cancelled": "下載已取消",
     "clipboard_url_detected": "在剪貼簿中偵測到 URL",
     "file_copied_to_clipboard": "檔案已複製到剪貼簿",
-    "drm_skipped": "已略過 {{count}} 部影片 — 受 DRM (FairPlay/SAMPLE-AES) 保護"
+    "drm_skipped": "已略過 {{count}} 部影片 — 受 DRM (FairPlay/SAMPLE-AES) 保護",
+    "generic_download_complete": "{{name}} — 下載完成！"
   },
   "hotmart": {
     "title": "Hotmart",
@@ -310,6 +311,8 @@
     "quality_360p": "360p",
     "view_formats": "檢視格式",
     "hide_formats": "隱藏格式",
+    "show_all_formats": "顯示所有格式",
+    "hide_all_formats": "隱藏所有格式",
     "no_formats": "此影片沒有可用格式",
     "formats_error": "載入格式失敗",
     "best_va": "最佳影片與音訊",
@@ -357,7 +360,7 @@
     "feature_hotmart": "支援 Hotmart 課程下載 (登入後可下載影片、附件與描述)",
     "feature_progress": "即時顯示下載進度、預估時間與速度",
     "feature_mascot": "Loop 吉祥物會隨您的下載狀態做出反應",
-    "feature_themes": "支援深色與淺色主題",
+    "feature_themes": "11 個主題：Dark、Light、Catppuccin（4 種風味）、One Dark Pro、Dracula、NyxVamp（3 種變體）",
     "feature_i18n": "提供英文、葡萄牙文、中文、日文、義大利文、法文",
     "feature_tech": "使用 Tauri + Rust 建構，快速且輕量",
     "roadmap_intro": "以下是 OmniGet 未來版本的開發計畫。",
@@ -367,7 +370,9 @@
     "roadmap_community_title": "有想法嗎？",
     "roadmap_community_text": "我們正在收集想法與建議！這是提出新平台或功能需求的好方式。",
     "roadmap_community_discord": "可透過 Discord 聯絡：",
-    "roadmap_community_issue": "或在專案儲存庫建立 Issue："
+    "roadmap_community_issue": "或在專案儲存庫建立 Issue：",
+    "tagline": "隨時隨地，下載一切。",
+    "credit": "由 tonho.wtf 用心打造"
   },
   "services": {
     "title": "支援的服務",
