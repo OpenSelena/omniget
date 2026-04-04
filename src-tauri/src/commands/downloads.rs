@@ -176,6 +176,7 @@ pub async fn download_from_url(
             quality,
             format_id,
             referer,
+            None,
             cached_info,
             None,
             None,

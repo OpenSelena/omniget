@@ -289,6 +289,21 @@ impl PlatformDownloader for GenericYtdlpDownloader {
             let mut builder = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
                 .timeout(std::time::Duration::from_secs(600));
 
+            if let Some(ref hdrs) = opts.extra_headers {
+                let mut default_headers = reqwest::header::HeaderMap::new();
+                for (name, value) in hdrs {
+                    if let (Ok(hname), Ok(hval)) = (
+                        reqwest::header::HeaderName::from_bytes(name.as_bytes()),
+                        reqwest::header::HeaderValue::from_str(value),
+                    ) {
+                        default_headers.insert(hname, hval);
+                    }
+                }
+                if !default_headers.is_empty() {
+                    builder = builder.default_headers(default_headers);
+                }
+            }
+
             let jar = crate::core::cookie_parser::load_extension_cookies_for_url(&selected.url)
                 .or_else(|| opts.referer.as_deref().and_then(crate::core::cookie_parser::load_extension_cookies_for_url));
             if let Some(jar) = jar {
@@ -334,6 +349,16 @@ impl PlatformDownloader for GenericYtdlpDownloader {
                     headers.insert(reqwest::header::REFERER, val);
                 }
             }
+            if let Some(ref hdrs) = opts.extra_headers {
+                for (name, value) in hdrs {
+                    if let (Ok(hname), Ok(hval)) = (
+                        reqwest::header::HeaderName::from_bytes(name.as_bytes()),
+                        reqwest::header::HeaderValue::from_str(value),
+                    ) {
+                        headers.insert(hname, hval);
+                    }
+                }
+            }
 
             let bytes = direct_downloader::download_direct_with_headers(
                 &client,
@@ -365,6 +390,18 @@ impl PlatformDownloader for GenericYtdlpDownloader {
         let referer = opts.referer.as_deref()
             .or_else(|| platform_referer(video_url));
 
+        let mut extra_flags = Vec::new();
+        if let Some(ref hdrs) = opts.extra_headers {
+            for (name, value) in hdrs {
+                let lower = name.to_lowercase();
+                if lower == "referer" || lower == "cookie" {
+                    continue;
+                }
+                extra_flags.push("--add-headers".to_string());
+                extra_flags.push(format!("{}:{}", name, value));
+            }
+        }
+
         ytdlp::download_video(
             &ytdlp_path,
             video_url,
@@ -379,7 +416,7 @@ impl PlatformDownloader for GenericYtdlpDownloader {
             None,
             opts.concurrent_fragments,
             opts.download_subtitles,
-            &[],
+            &extra_flags,
         )
         .await
     }

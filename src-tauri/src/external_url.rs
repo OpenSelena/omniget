@@ -116,6 +116,7 @@ pub async fn queue_url_with_defaults(
         .to_string_lossy()
         .to_string();
     let ext_referer = ext_meta.as_ref().and_then(|m| m.referer.clone());
+    let ext_headers = ext_meta.as_ref().and_then(|m| m.headers.clone());
 
     let ext_media_info = ext_meta.as_ref().and_then(|m| {
         let mt = m.media_type.as_deref()?;
@@ -173,6 +174,7 @@ pub async fn queue_url_with_defaults(
             None,
             None,
             ext_referer,
+            ext_headers,
             ext_media_info,
             None,
             None,

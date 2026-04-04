@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
@@ -45,6 +46,7 @@ pub struct DownloadOptions {
     pub download_mode: Option<String>,
     pub format_id: Option<String>,
     pub referer: Option<String>,
+    pub extra_headers: Option<HashMap<String, String>>,
     pub cancel_token: CancellationToken,
     pub concurrent_fragments: u32,
     pub ytdlp_path: Option<PathBuf>,

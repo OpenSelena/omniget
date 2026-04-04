@@ -93,6 +93,7 @@ pub struct QueueItem {
     pub quality: Option<String>,
     pub format_id: Option<String>,
     pub referer: Option<String>,
+    pub extra_headers: Option<std::collections::HashMap<String, String>>,
     pub percent: f64,
     pub speed_bytes_per_sec: f64,
     pub downloaded_bytes: u64,
@@ -154,6 +155,7 @@ impl DownloadQueue {
         quality: Option<String>,
         format_id: Option<String>,
         referer: Option<String>,
+        extra_headers: Option<std::collections::HashMap<String, String>>,
         media_info: Option<MediaInfo>,
         total_bytes: Option<u64>,
         file_count: Option<u32>,
@@ -173,6 +175,7 @@ impl DownloadQueue {
             quality,
             format_id,
             referer,
+            extra_headers,
             percent: 0.0,
             speed_bytes_per_sec: 0.0,
             downloaded_bytes: 0,
@@ -514,7 +517,7 @@ async fn spawn_download_inner(
         phase: "preparing".to_string(),
     });
 
-    let (url, output_dir, download_mode, quality, format_id, referer, cancel_token, media_info, platform_name, downloader, ytdlp_path, from_hotkey) = {
+    let (url, output_dir, download_mode, quality, format_id, referer, extra_headers, cancel_token, media_info, platform_name, downloader, ytdlp_path, from_hotkey) = {
         let q = queue.lock().await;
         let item = match q.items.iter().find(|i| i.id == item_id) {
             Some(i) => i,
@@ -527,6 +530,7 @@ async fn spawn_download_inner(
             item.quality.clone(),
             item.format_id.clone(),
             item.referer.clone(),
+            item.extra_headers.clone(),
             item.cancel_token.clone(),
             item.media_info.clone(),
             item.platform.clone(),
@@ -639,6 +643,7 @@ async fn spawn_download_inner(
         download_mode,
         format_id,
         referer,
+        extra_headers,
         cancel_token: cancel_token.clone(),
         concurrent_fragments: settings.advanced.concurrent_fragments,
         ytdlp_path,

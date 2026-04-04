@@ -379,6 +379,7 @@ fn write_extension_metadata(request: &NativeHostRequest) -> anyhow::Result<()> {
 
 pub struct ExtensionMetadata {
     pub referer: Option<String>,
+    pub headers: Option<std::collections::HashMap<String, String>>,
     pub media_type: Option<String>,
     pub content_type: Option<String>,
 }
@@ -402,8 +403,15 @@ pub fn read_extension_metadata(url: &str) -> Option<ExtensionMetadata> {
         return None;
     }
 
+    let headers = meta.get("headers").and_then(|v| v.as_object()).map(|obj| {
+        obj.iter()
+            .filter_map(|(k, v)| Some((k.clone(), v.as_str()?.to_string())))
+            .collect::<std::collections::HashMap<String, String>>()
+    });
+
     let result = ExtensionMetadata {
         referer: meta.get("referer").and_then(|v| v.as_str()).map(String::from),
+        headers,
         media_type: meta.get("mediaType").and_then(|v| v.as_str()).map(String::from),
         content_type: meta.get("contentType").and_then(|v| v.as_str()).map(String::from),
     };
