@@ -85,13 +85,12 @@ pub async fn open_auth_webview(
     let webview_window = builder
         .on_navigation(move |url| {
             let url_str = url.to_string();
-            tracing::info!("[auth_webview] navigation: {}", url_str);
+            tracing::debug!("[auth_webview] navigation: {}", url_str);
 
             let mut is_success = false;
 
             if let Some(ref pattern) = success_pattern {
                 if url_str.contains(pattern) {
-                    tracing::info!("[auth_webview] success pattern matched: {}", pattern);
                     is_success = true;
                 }
             }
@@ -109,11 +108,6 @@ pub async fn open_auth_webview(
                             && !nav_path.contains("signup")
                             && !nav_path.contains("register")
                         {
-                            tracing::info!(
-                                "[auth_webview] redirect away from login detected: {} -> {}",
-                                login_path,
-                                nav_path
-                            );
                             is_success = true;
                         }
                     }
@@ -135,7 +129,6 @@ pub async fn open_auth_webview(
     let ww_clone = webview_window.clone();
     webview_window.on_window_event(move |event| {
         if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-            tracing::info!("[auth_webview] close requested by user");
             api.prevent_close();
             let _ = tx_close.try_send("__CLOSE_REQUESTED__".to_string());
         }
@@ -153,17 +146,15 @@ pub async fn open_auth_webview(
     };
 
     tracing::info!(
-        "[auth_webview] signal received: {}",
-        if final_url == "__CLOSE_REQUESTED__" { "close" } else { &final_url }
+        "[auth_webview] signal: {}",
+        if final_url == "__CLOSE_REQUESTED__" { "user closed window" } else { &final_url }
     );
 
     let default_domain = request.cookie_domains.first().cloned().unwrap_or_default();
 
     let cookies = if let Some(ref target_cookie) = request.wait_for_cookie {
-        tracing::info!("[auth_webview] polling for cookie: {}", target_cookie);
         poll_for_cookie(&webview_window, &default_domain, &request.cookie_domains, target_cookie).await
     } else {
-        tracing::info!("[auth_webview] waiting 2s for page to settle...");
         tokio::time::sleep(std::time::Duration::from_secs(2)).await;
         let cookies = extract_cookies(&webview_window, &default_domain, &request.cookie_domains).await;
         if cookies.is_empty() {
@@ -177,10 +168,9 @@ pub async fn open_auth_webview(
 
     tracing::info!("[auth_webview] extracted {} cookies", cookies.len());
     for c in &cookies {
-        tracing::info!(
-            "[auth_webview]   cookie: {}={} (httpOnly={}, domain={})",
+        tracing::debug!(
+            "[auth_webview]   {} (httpOnly={}, domain={})",
             c.name,
-            &c.value[..c.value.len().min(20)],
             c.http_only,
             c.domain
         );
@@ -225,7 +215,7 @@ async fn poll_for_cookie(
         }
 
         if attempt % 4 == 0 {
-            tracing::info!(
+            tracing::debug!(
                 "[auth_webview] polling at {:.1}s, {} cookies, waiting for '{}'",
                 elapsed.as_secs_f64(),
                 cookies.len(),
@@ -248,7 +238,7 @@ async fn extract_cookies(
         if !native.is_empty() {
             return native;
         }
-        tracing::warn!("[auth_webview] native cookie extraction returned empty, falling back to JS");
+        tracing::debug!("[auth_webview] native extraction empty, falling back to JS");
     }
 
     extract_cookies_js(window, default_domain).await
@@ -393,7 +383,7 @@ async fn extract_cookies_native(
     for uri in &uris {
         match extract_cookies_for_uri(window, uri).await {
             Ok(batch) => {
-                tracing::info!("[auth_webview] native cookies from {}: {}", uri, batch.len());
+                tracing::debug!("[auth_webview] native cookies from {}: {}", uri, batch.len());
                 for c in batch {
                     if !all_cookies
                         .iter()
