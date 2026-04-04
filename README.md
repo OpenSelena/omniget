@@ -12,7 +12,7 @@
 
 <h3 align="center">Paste a link. Get your file.</h3>
 
-OmniGet downloads videos, courses, and media from the internet. YouTube, Instagram, TikTok — paste a link and it handles the rest, including [1000+ sites via yt-dlp](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md). Free, open source, built with Rust.
+OmniGet downloads videos, courses, and files from the internet. Paste a link from YouTube, Instagram, TikTok, or any of [1000+ supported sites](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md). It figures out what you want and downloads it. Free and open source.
 
 <p align="center">
   <img src="assets/screenshot.png" alt="OmniGet downloading a YouTube video" width="800" />
@@ -36,13 +36,15 @@ Also available as a Flatpak on Linux and a portable `.exe` on Windows.
 
 **Courses** from Hotmart, Udemy, Kiwify, Teachable, and [6 more platforms](#course-platforms). Log in once, download all lessons, attachments, and descriptions.
 
-**Torrents** — drag a `.torrent` file or paste a magnet link. Built-in client, no extra software needed.
+**Torrents.** Drag a `.torrent` file or paste a magnet link. Built-in client, no extra software needed.
 
-**Files between devices** — send a file to another computer with a 4-word share code. Works across different networks.
+**Files between devices.** Send a file to another computer using a 4-word share code. Works across different networks.
 
-**Anything else** — if [yt-dlp supports it](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md), OmniGet downloads it. That's over 1000 additional sites.
+**Anything else.** If a site is [supported by yt-dlp](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md), OmniGet can download from it. That covers over 1000 sites.
 
-No setup required beyond the app itself. OmniGet downloads yt-dlp and FFmpeg when it needs them, keeps itself up to date, and runs in dark or light mode across 8 languages.
+No setup required beyond the app itself. OmniGet handles [yt-dlp](https://github.com/yt-dlp/yt-dlp) (the engine that supports 1000+ sites) and FFmpeg (used to merge video and audio) automatically, stays up to date on its own, and comes with 11 color themes and 8 languages.
+
+The app also includes Loop, a mascot that reacts to your downloads in real time. The themes include Catppuccin, Dracula, and NyxVamp variants.
 
 ### Media Platforms
 
@@ -84,49 +86,49 @@ These platforms may require a Chinese IP address.
 | Platform | Auth | Region |
 |----------|------|--------|
 | Hotmart | Email + Password | BR / Global |
-| Udemy | Email + Cookies | Global |
-| Kiwify | Email + Password / Token | BR |
-| Gumroad | Email + Password / Token | Global |
-| Teachable | Token | Global |
-| Kajabi | Token | Global |
-| Skool | Email + Password / Token | Global |
-| Wondrium / Great Courses | Email + Password / Token | US |
-| Thinkific | Browser Cookies | Global |
-| Rocketseat | Token | BR |
+| Udemy | Email + Browser Login | Global |
+| Kiwify | Email + Password / Access Token | BR |
+| Gumroad | Email + Password / Access Token | Global |
+| Teachable | Access Token | Global |
+| Kajabi | Access Token | Global |
+| Skool | Email + Password / Access Token | Global |
+| Wondrium / Great Courses | Email + Password / Access Token | US |
+| Thinkific | Browser Login | Global |
+| Rocketseat | Access Token | BR |
 
 </details>
 
 ## How it works
 
-1. **Paste a link** into the omnibox — or drag a file, or search YouTube right there
-2. OmniGet figures out the platform and shows you a preview with quality options
-3. Hit download — progress, speed, and ETA update as it goes
+1. **Paste a link** into the omnibox. Or drag a file, or search YouTube right there.
+2. OmniGet figures out the platform and shows you a preview with quality options.
+3. Hit download. Progress, speed, and ETA update as it goes.
 
 For courses: log in to the platform, browse your library, pick what you want, and download it all at once.
 
 ## Copy. Press. Done.
 
-Copy a video link from anywhere — Discord, Twitter, a group chat. Press **Ctrl+Shift+D** (or **Cmd+Shift+D** on macOS). That's it.
+Copy a video link from anywhere. Discord, Twitter, a group chat. Press **Ctrl+Shift+D** (or **Cmd+Shift+D** on macOS). That's it.
 
-OmniGet grabs the URL from your clipboard and downloads it in the background. You don't even need to open the app. Change the hotkey in **Settings → Download → Hotkey**.
+OmniGet grabs the URL from your clipboard and downloads it in the background. You don't even need to open the app. Change the hotkey in **Settings > Downloads > Hotkey**.
 
 ## Browser Extension
 
-Install the [Chrome extension](browser-extension/chrome/README.md) and stop copying links. When you're on a page with a video, click the OmniGet icon — it sends the URL, cookies, and everything the app needs to start downloading.
+Install the [Chrome extension](browser-extension/chrome/README.md) to skip the copy-paste step. When you're on a page with a video, click the OmniGet icon. It sends the link and login info the app needs to start downloading.
 
 The extension also detects video streams on any website, even ones OmniGet doesn't officially support. If your browser can play it, OmniGet can probably download it.
 
 ## Plugins
 
-OmniGet ships lean. Extra features live in plugins you can install from the built-in marketplace:
+OmniGet starts simple. Extra features are available as plugins you can install from the built-in marketplace:
 
-- **Courses** — download full courses from 10 education platforms
-- **Telegram** — browse chats and download media
-- **Convert** — convert between video and audio formats
+- **Courses.** Download full courses from 10 education platforms.
+- **Telegram.** Browse chats and download media.
+- **Convert.** Convert between video and audio formats.
 
 Want to build one? Check out the [Plugin SDK](src-tauri/omniget-plugin-sdk/).
 
-## Building from Source
+## Building from Source (for developers)
 
 **Prerequisites:** [Rust](https://rustup.rs/), [Node.js](https://nodejs.org/) 18+, [pnpm](https://pnpm.io/)
 
@@ -151,7 +153,7 @@ Production build: `pnpm tauri build`
 <details>
 <summary><strong>Windows SmartScreen / macOS Gatekeeper</strong></summary>
 
-**Windows:** SmartScreen may warn you on first run — click **More info** → **Run anyway**. This is normal for open-source apps without a paid code signing certificate.
+**Windows:** SmartScreen may warn you on first run. Click **More info**, then **Run anyway**. This is normal for open-source apps without a paid code signing certificate.
 
 **macOS:** If Gatekeeper blocks the app, run in Terminal:
 
@@ -168,11 +170,11 @@ Found a bug or want a feature? [Open an issue](https://github.com/tonhowtf/omnig
 
 ## Notice to Platform Owners
 
-If you represent a listed platform and have concerns, email **tonhowtf@gmail.com** from an official domain — the platform will be removed promptly.
+If you represent a listed platform and have concerns, reach out at **tonhowtf@gmail.com** from a company email. We'll remove the platform right away.
 
 ## Legal
 
-Use it for personal stuff. Respect copyright and platform rules.
+OmniGet is meant for personal use. Please respect copyright and each platform's terms of service. You're responsible for what you download.
 
 ## License
 
