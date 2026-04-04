@@ -25,6 +25,9 @@ pub struct AuthCookie {
     pub value: String,
     pub domain: String,
     pub path: String,
+    #[serde(rename = "httpOnly")]
+    pub http_only: bool,
+    pub secure: bool,
 }
 
 #[tauri::command]
@@ -93,6 +96,9 @@ pub async fn open_auth_webview(
                         && !nav_path.contains("login")
                         && !nav_path.contains("signin")
                         && !nav_path.contains("auth")
+                        && !nav_path.contains("oauth")
+                        && !nav_path.contains("signup")
+                        && !nav_path.contains("register")
                     {
                         tracing::info!(
                             "[auth_webview] redirect away from login detected: {} -> {}",
@@ -137,14 +143,34 @@ pub async fn open_auth_webview(
         }
     };
 
-    tracing::info!("[auth_webview] signal received: {}", if final_url == "__CLOSE_REQUESTED__" { "close" } else { &final_url });
+    tracing::info!(
+        "[auth_webview] signal received: {}",
+        if final_url == "__CLOSE_REQUESTED__" { "close" } else { &final_url }
+    );
+
+    tracing::info!("[auth_webview] waiting 1.5s for page to settle...");
+    tokio::time::sleep(std::time::Duration::from_millis(1500)).await;
 
     let default_domain = request.cookie_domains.first().cloned().unwrap_or_default();
-    let cookies = extract_cookies(&webview_window, &default_domain).await;
+    let cookies = extract_cookies(&webview_window, &default_domain, &request.cookie_domains).await;
+
+    let cookies = if cookies.is_empty() {
+        tracing::warn!("[auth_webview] no cookies on first attempt, retrying in 2s...");
+        tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+        extract_cookies(&webview_window, &default_domain, &request.cookie_domains).await
+    } else {
+        cookies
+    };
 
     tracing::info!("[auth_webview] extracted {} cookies", cookies.len());
     for c in &cookies {
-        tracing::info!("[auth_webview]   cookie: {}={}", c.name, &c.value[..c.value.len().min(20)]);
+        tracing::info!(
+            "[auth_webview]   cookie: {}={} (httpOnly={}, domain={})",
+            c.name,
+            &c.value[..c.value.len().min(20)],
+            c.http_only,
+            c.domain
+        );
     }
 
     let _ = webview_window.destroy();
@@ -153,6 +179,24 @@ pub async fn open_auth_webview(
 }
 
 async fn extract_cookies(
+    window: &tauri::WebviewWindow,
+    default_domain: &str,
+    domains: &[String],
+) -> Vec<AuthCookie> {
+    #[cfg(windows)]
+    {
+        let native = extract_cookies_native(window, domains).await;
+        if !native.is_empty() {
+            tracing::info!("[auth_webview] native extraction got {} cookies", native.len());
+            return native;
+        }
+        tracing::warn!("[auth_webview] native cookie extraction returned empty, falling back to JS");
+    }
+
+    extract_cookies_js(window, default_domain).await
+}
+
+async fn extract_cookies_js(
     window: &tauri::WebviewWindow,
     default_domain: &str,
 ) -> Vec<AuthCookie> {
@@ -179,69 +223,241 @@ async fn extract_cookies(
 })()
 "#;
 
-    if let Err(e) = window.eval(js) {
-        tracing::error!("[auth_webview] eval failed: {}", e);
+    for attempt in 0..3 {
+        tracing::info!("[auth_webview] JS eval attempt {}/3", attempt + 1);
+        match window.eval(js) {
+            Ok(()) => tracing::info!("[auth_webview] eval() returned Ok"),
+            Err(e) => {
+                tracing::error!("[auth_webview] eval() returned Err: {}", e);
+                tokio::time::sleep(std::time::Duration::from_millis(500)).await;
+                continue;
+            }
+        }
+
+        tokio::time::sleep(std::time::Duration::from_millis(800)).await;
+
+        match window.title() {
+            Ok(title) => {
+                tracing::info!(
+                    "[auth_webview] title (len={}): {}",
+                    title.len(),
+                    &title[..title.len().min(200)]
+                );
+                if let Some(data_str) = title.strip_prefix("__OMNIGET_COOKIES__") {
+                    return parse_cookie_data(data_str, default_domain);
+                }
+                tracing::warn!("[auth_webview] title does not have cookie prefix (attempt {})", attempt + 1);
+            }
+            Err(e) => {
+                tracing::error!("[auth_webview] failed to read title: {}", e);
+            }
+        }
     }
-    tokio::time::sleep(std::time::Duration::from_millis(500)).await;
 
+    Vec::new()
+}
+
+fn parse_cookie_data(data_str: &str, default_domain: &str) -> Vec<AuthCookie> {
     let mut cookies = Vec::new();
-    match window.title() {
-        Ok(title) => {
-            tracing::info!(
-                "[auth_webview] title after eval: {}",
-                &title[..title.len().min(200)]
-            );
-            if let Some(data_str) = title.strip_prefix("__OMNIGET_COOKIES__") {
-                if let Ok(data) = serde_json::from_str::<serde_json::Value>(data_str) {
-                    if let Some(cookie_str) = data["cookies"].as_str() {
-                        for part in cookie_str.split(';') {
-                            let part = part.trim();
-                            if let Some((name, value)) = part.split_once('=') {
-                                cookies.push(AuthCookie {
-                                    name: name.trim().to_string(),
-                                    value: value.trim().to_string(),
-                                    domain: default_domain.to_string(),
-                                    path: "/".to_string(),
-                                });
-                            }
-                        }
-                    }
 
-                    if let Some(storage) = data["storage"].as_object() {
-                        for (key, value) in storage {
-                            if let Some(val) = value.as_str() {
-                                if !val.is_empty() {
-                                    cookies.push(AuthCookie {
-                                        name: key.clone(),
-                                        value: val.to_string(),
-                                        domain: default_domain.to_string(),
-                                        path: "/".to_string(),
-                                    });
+    if let Ok(data) = serde_json::from_str::<serde_json::Value>(data_str) {
+        if let Some(cookie_str) = data["cookies"].as_str() {
+            for part in cookie_str.split(';') {
+                let part = part.trim();
+                if let Some((name, value)) = part.split_once('=') {
+                    cookies.push(AuthCookie {
+                        name: name.trim().to_string(),
+                        value: value.trim().to_string(),
+                        domain: default_domain.to_string(),
+                        path: "/".to_string(),
+                        http_only: false,
+                        secure: false,
+                    });
+                }
+            }
+        }
+
+        if let Some(storage) = data["storage"].as_object() {
+            for (key, value) in storage {
+                if let Some(val) = value.as_str() {
+                    if !val.is_empty() {
+                        cookies.push(AuthCookie {
+                            name: key.clone(),
+                            value: val.to_string(),
+                            domain: default_domain.to_string(),
+                            path: "/".to_string(),
+                            http_only: false,
+                            secure: false,
+                        });
+                    }
+                }
+            }
+        }
+    } else {
+        tracing::warn!("[auth_webview] failed to parse JSON, trying plain cookie format");
+        for part in data_str.split(';') {
+            let part = part.trim();
+            if let Some((name, value)) = part.split_once('=') {
+                cookies.push(AuthCookie {
+                    name: name.trim().to_string(),
+                    value: value.trim().to_string(),
+                    domain: default_domain.to_string(),
+                    path: "/".to_string(),
+                    http_only: false,
+                    secure: false,
+                });
+            }
+        }
+    }
+
+    cookies
+}
+
+#[cfg(windows)]
+async fn extract_cookies_native(
+    window: &tauri::WebviewWindow,
+    domains: &[String],
+) -> Vec<AuthCookie> {
+    let (tx, rx) = tokio::sync::oneshot::channel::<Vec<AuthCookie>>();
+    let domains = domains.to_vec();
+
+    let result = window.with_webview(move |platform_webview| {
+        let controller = platform_webview.controller();
+        let mut all_cookies: Vec<AuthCookie> = Vec::new();
+
+        unsafe {
+            use webview2_com::Microsoft::Web::WebView2::Win32::*;
+            use windows::core::{Interface, PWSTR, BOOL};
+
+            let core: ICoreWebView2 = match controller.CoreWebView2() {
+                Ok(c) => c,
+                Err(e) => {
+                    tracing::error!("[auth_webview] CoreWebView2() failed: {:?}", e);
+                    let _ = tx.send(Vec::new());
+                    return;
+                }
+            };
+
+            let core2: ICoreWebView2_2 = match core.cast() {
+                Ok(c) => c,
+                Err(e) => {
+                    tracing::error!("[auth_webview] cast to ICoreWebView2_2 failed: {:?}", e);
+                    let _ = tx.send(Vec::new());
+                    return;
+                }
+            };
+
+            let manager: ICoreWebView2CookieManager = match core2.CookieManager() {
+                Ok(m) => m,
+                Err(e) => {
+                    tracing::error!("[auth_webview] CookieManager() failed: {:?}", e);
+                    let _ = tx.send(Vec::new());
+                    return;
+                }
+            };
+
+            let uris: Vec<String> = if domains.is_empty() {
+                vec!["".to_string()]
+            } else {
+                domains.iter().map(|d| {
+                    if d.starts_with("http") {
+                        d.clone()
+                    } else {
+                        format!("https://{}", d.trim_start_matches('.'))
+                    }
+                }).collect()
+            };
+
+            for uri in &uris {
+                let (cookie_tx, cookie_rx) = std::sync::mpsc::channel::<Vec<AuthCookie>>();
+                let uri_for_log = uri.clone();
+
+                let handler = webview2_com::GetCookiesCompletedHandler::create(
+                    Box::new(move |hr, cookie_list| {
+                        let mut cookies = Vec::new();
+                        if hr.is_ok() {
+                            if let Some(list) = cookie_list {
+                                let mut count: u32 = 0;
+                                let _ = list.Count(&mut count);
+                                for i in 0..count {
+                                    if let Ok(cookie) = list.GetValueAtIndex(i) {
+                                        let mut name_pw = PWSTR::null();
+                                        let mut value_pw = PWSTR::null();
+                                        let mut domain_pw = PWSTR::null();
+                                        let mut path_pw = PWSTR::null();
+                                        let mut http_only_b = BOOL::default();
+                                        let mut secure_b = BOOL::default();
+
+                                        let _ = cookie.Name(&mut name_pw);
+                                        let _ = cookie.Value(&mut value_pw);
+                                        let _ = cookie.Domain(&mut domain_pw);
+                                        let _ = cookie.Path(&mut path_pw);
+                                        let _ = cookie.IsHttpOnly(&mut http_only_b);
+                                        let _ = cookie.IsSecure(&mut secure_b);
+
+                                        let name = name_pw.to_string().unwrap_or_default();
+                                        let value = value_pw.to_string().unwrap_or_default();
+                                        let domain = domain_pw.to_string().unwrap_or_default();
+                                        let path = path_pw.to_string().unwrap_or_default();
+
+                                        if !name.is_empty() && !value.is_empty() {
+                                            cookies.push(AuthCookie {
+                                                name,
+                                                value,
+                                                domain,
+                                                path,
+                                                http_only: http_only_b.as_bool(),
+                                                secure: secure_b.as_bool(),
+                                            });
+                                        }
+                                    }
                                 }
                             }
                         }
-                    }
-                } else {
-                    tracing::warn!("[auth_webview] failed to parse JSON from title, trying plain cookie format");
-                    for part in data_str.split(';') {
-                        let part = part.trim();
-                        if let Some((name, value)) = part.split_once('=') {
-                            cookies.push(AuthCookie {
-                                name: name.trim().to_string(),
-                                value: value.trim().to_string(),
-                                domain: default_domain.to_string(),
-                                path: "/".to_string(),
-                            });
+                        let _ = cookie_tx.send(cookies);
+                        Ok(())
+                    }),
+                );
+
+                let uri_hstring: windows::core::HSTRING = uri.into();
+                if let Err(e) = manager.GetCookies(&uri_hstring, &handler) {
+                    tracing::error!("[auth_webview] GetCookies({}) failed: {:?}", uri_for_log, e);
+                    continue;
+                }
+
+                match cookie_rx.recv_timeout(std::time::Duration::from_secs(5)) {
+                    Ok(batch) => {
+                        tracing::info!(
+                            "[auth_webview] native cookies from {}: {} cookies",
+                            uri_for_log,
+                            batch.len()
+                        );
+                        for c in batch {
+                            if !all_cookies.iter().any(|existing| existing.name == c.name && existing.domain == c.domain) {
+                                all_cookies.push(c);
+                            }
                         }
                     }
+                    Err(_) => {
+                        tracing::warn!("[auth_webview] GetCookies({}) timed out", uri_for_log);
+                    }
                 }
-            } else {
-                tracing::warn!("[auth_webview] title does not have cookie prefix");
             }
         }
-        Err(e) => {
-            tracing::error!("[auth_webview] failed to read title: {}", e);
+
+        let _ = tx.send(all_cookies);
+    });
+
+    if let Err(e) = result {
+        tracing::error!("[auth_webview] with_webview failed: {}", e);
+        return Vec::new();
+    }
+
+    match rx.await {
+        Ok(cookies) => cookies,
+        Err(_) => {
+            tracing::error!("[auth_webview] cookie channel dropped");
+            Vec::new()
         }
     }
-    cookies
 }
