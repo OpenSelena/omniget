@@ -11,6 +11,7 @@
     type CourseDownloadItem,
     type GenericDownloadItem,
   } from "$lib/stores/download-store.svelte";
+  import { getDownloadStats } from "$lib/stores/download-stats.svelte";
   import PlatformIcon from "$components/icons/PlatformIcon.svelte";
   import Mascot from "$components/mascot/Mascot.svelte";
   import ContextHint from "$components/hints/ContextHint.svelte";
@@ -48,6 +49,7 @@
 
   let hasDownloads = $derived(courseList.length > 0 || genericList.length > 0);
   let finishedCount = $derived(getFinishedCount());
+  let dlStats = $derived(getDownloadStats());
 
   async function cancelDownload(courseId: number) {
     try {
@@ -139,7 +141,12 @@
 {#if hasDownloads}
   <div class="downloads-page">
     <div class="downloads-header">
-      <h2>{$t('downloads.title')}</h2>
+      <div class="downloads-title-row">
+        <h2>{$t('downloads.title')}</h2>
+        {#if dlStats.totalDownloads > 0}
+          <span class="downloads-stats">{$t('downloads.stats_line', { count: String(dlStats.totalDownloads), size: formatBytes(dlStats.totalBytes) })}</span>
+        {/if}
+      </div>
       {#if finishedCount > 0}
         <button class="clear-btn" onclick={clearFinished}>
           {$t('downloads.clear_finished')}
@@ -529,6 +536,18 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--padding);
+  }
+
+  .downloads-title-row {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .downloads-stats {
+    font-size: 12px;
+    color: var(--tertiary);
+    font-weight: 400;
   }
 
   .clear-btn {

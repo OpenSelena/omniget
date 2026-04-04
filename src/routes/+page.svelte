@@ -191,6 +191,8 @@
     let key: string;
     if (mascotEmotion === "complete") key = "complete";
     else if (mascotEmotion === "queue") key = "queue";
+    else if (mascotEmotion === "downloading") key = "downloading";
+    else if (mascotEmotion === "stalled") key = "stalled";
     else {
       switch (omniState.kind) {
         case "idle": key = "idle"; break;
