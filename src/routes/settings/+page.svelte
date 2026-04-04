@@ -403,6 +403,22 @@
         </div>
       </div>
     </section>
+
+    <section class="section">
+      <div class="card">
+        <div class="setting-row">
+          <div class="setting-col">
+            <span class="setting-label">{$t('settings.general.reset_hints')}</span>
+            <span class="setting-path">{$t('settings.general.reset_hints_desc')}</span>
+          </div>
+          <button class="button" onclick={() => {
+            const keys = Object.keys(localStorage).filter(k => k.startsWith('hint_dismissed_'));
+            for (const k of keys) localStorage.removeItem(k);
+            showToast('info', $t('settings.general.hints_restored'));
+          }}>{$t('settings.general.restore')}</button>
+        </div>
+      </div>
+    </section>
     {/if}
 
     {#if activeCategory === "downloads"}

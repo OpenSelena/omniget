@@ -241,6 +241,8 @@ export async function initDownloadListener(): Promise<() => void> {
         } else if (item.status.type === "Complete") {
           loggedQueueTerminal.add(item.id);
           addLog("info", "download", `Download complete: ${item.title}`, item.file_path ?? undefined);
+          const tr = get(t);
+          showToast("success", tr("toast.generic_download_complete", { name: item.title }));
         }
       }
       throttledSyncQueueState(payload);

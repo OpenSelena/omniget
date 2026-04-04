@@ -146,7 +146,7 @@
         title={itemTitle}
       >
         <span class="indicator"></span>
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           {#if item.iconSvg}
             {#each item.iconSvg.split(' M').map((d, i) => i === 0 ? d : 'M' + d) as pathD}
               <path d={pathD} />
@@ -173,6 +173,7 @@
             <path d="M12 8v4m0 4h.01" />
           {/if}
         </svg>
+        <span class="nav-label">{itemTitle}</span>
         {#if item.badge === "downloads" && counts.badge > 0}
           <span class="badge">{badgeLabel}</span>
         {/if}
@@ -192,7 +193,7 @@
         title={itemTitle}
       >
         <span class="indicator"></span>
-        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           {#if item.iconSvg}
             {#each item.iconSvg.split(' M').map((d, i) => i === 0 ? d : 'M' + d) as pathD}
               <path d={pathD} />
@@ -204,6 +205,7 @@
             <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
           {/if}
         </svg>
+        <span class="nav-label">{itemTitle}</span>
       </a>
     {/each}
   </nav>
@@ -262,13 +264,26 @@
 
   .nav-item {
     position: relative;
-    width: 44px;
-    height: 44px;
+    width: 60px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 2px;
+    padding: 6px 0;
     border-radius: var(--border-radius);
     color: var(--gray);
+  }
+
+  .nav-label {
+    font-size: 9px;
+    font-weight: 500;
+    line-height: 1;
+    text-align: center;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   @media (hover: hover) {

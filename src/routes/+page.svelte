@@ -108,6 +108,18 @@
   const STALL_THRESHOLD = 30_000;
   let downloads = $derived(getDownloads());
   let stallTick = $state(0);
+  let lastCompletionAt = $state(0);
+  let completionSeenIds = new Set<string | number>();
+
+  $effect(() => {
+    for (const [id, item] of downloads.entries()) {
+      if (item.status === "complete" && !completionSeenIds.has(id)) {
+        completionSeenIds.add(id);
+        lastCompletionAt = Date.now();
+        break;
+      }
+    }
+  });
 
   $effect(() => {
     const interval = setInterval(() => { stallTick++; }, 5000);
@@ -134,8 +146,10 @@
     handleInput();
   });
 
-  let mascotEmotion = $derived.by((): "idle" | "downloading" | "error" | "stalled" | "queue" => {
+  let mascotEmotion = $derived.by((): "idle" | "downloading" | "error" | "stalled" | "queue" | "complete" | "amazed" => {
     void stallTick;
+
+    if (lastCompletionAt > 0 && Date.now() - lastCompletionAt < 5000) return "complete";
 
     if (omniState.kind === "preparing") return "downloading";
     if (omniState.kind === "error") return "error";
@@ -162,16 +176,39 @@
 
   let mascotCompact = $derived(omniState.kind !== "idle");
 
-  let mascotBubble = $derived.by((): string | undefined => {
-    switch (omniState.kind) {
-      case "idle": return $t("mascot.idle");
-      case "detecting": return $t("mascot.detecting");
-      case "detected": return $t("mascot.detected");
-      case "preparing": return $t("mascot.preparing");
-      case "searching":
-      case "search-results": return $t("mascot.search");
-      case "error": return $t("mascot.error");
-      default: return undefined;
+  function pickRandom(raw: string): string {
+    if (raw.includes("|")) {
+      const opts = raw.split("|");
+      return opts[Math.floor(Math.random() * opts.length)];
+    }
+    return raw;
+  }
+
+  let lastBubbleKey = $state("");
+  let bubbleText = $state("");
+
+  $effect(() => {
+    let key: string;
+    if (mascotEmotion === "complete") key = "complete";
+    else if (mascotEmotion === "queue") key = "queue";
+    else {
+      switch (omniState.kind) {
+        case "idle": key = "idle"; break;
+        case "detecting": key = "detecting"; break;
+        case "detected": key = "detected"; break;
+        case "preparing": key = "preparing"; break;
+        case "searching":
+        case "search-results": key = "search"; break;
+        case "error": key = "error"; break;
+        default: key = ""; break;
+      }
+    }
+    if (key && key !== lastBubbleKey) {
+      lastBubbleKey = key;
+      bubbleText = pickRandom($t(`mascot.${key}`));
+    } else if (!key) {
+      lastBubbleKey = "";
+      bubbleText = "";
     }
   });
 
@@ -515,7 +552,7 @@
 </script>
 
 <div class="home">
-  <Mascot emotion={mascotEmotion} compact={mascotCompact} bubbleText={mascotBubble} />
+  <Mascot emotion={mascotEmotion} compact={mascotCompact} bubbleText={bubbleText || undefined} />
 
   <div class="omnibox-area">
     {#if externalNotice}

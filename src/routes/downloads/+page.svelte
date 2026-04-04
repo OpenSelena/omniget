@@ -94,16 +94,30 @@
     }
   }
 
-  async function removeItem(id: number) {
-    try {
-      await invoke("remove_download", { downloadId: id });
-    } catch (e: any) {
-      const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
-      showToast("error", msg);
+  let pendingRemove = $state<number | null>(null);
+  let pendingRemoveTimer = $state<ReturnType<typeof setTimeout> | null>(null);
+
+  function removeItem(id: number) {
+    if (pendingRemove === id) {
+      if (pendingRemoveTimer) clearTimeout(pendingRemoveTimer);
+      pendingRemove = null;
+      pendingRemoveTimer = null;
+      invoke("remove_download", { downloadId: id }).catch((e: any) => {
+        const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
+        showToast("error", msg);
+      });
+    } else {
+      if (pendingRemoveTimer) clearTimeout(pendingRemoveTimer);
+      pendingRemove = id;
+      pendingRemoveTimer = setTimeout(() => {
+        pendingRemove = null;
+        pendingRemoveTimer = null;
+      }, 3000);
     }
   }
 
   async function clearFinished() {
+    if (!confirm($t("downloads.clear_confirm"))) return;
     try {
       await invoke("clear_finished_downloads");
     } catch (e: any) {
@@ -269,12 +283,20 @@
           </button>
           <button
             class="action-icon-btn"
+            class:confirm-remove={pendingRemove === item.id}
             onclick={() => removeItem(item.id)}
-            aria-label={$t('common.close')}
+            aria-label={pendingRemove === item.id ? $t('downloads.confirm_remove') : $t('common.close')}
+            title={pendingRemove === item.id ? $t('downloads.confirm_remove') : undefined}
           >
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
+            {#if pendingRemove === item.id}
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12l5 5L20 7" />
+              </svg>
+            {:else}
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            {/if}
           </button>
         {:else if item.status === "complete" && item.filePath}
           <button
@@ -289,22 +311,38 @@
           </button>
           <button
             class="action-icon-btn"
+            class:confirm-remove={pendingRemove === item.id}
             onclick={() => removeItem(item.id)}
-            aria-label={$t('common.close')}
+            aria-label={pendingRemove === item.id ? $t('downloads.confirm_remove') : $t('common.close')}
+            title={pendingRemove === item.id ? $t('downloads.confirm_remove') : undefined}
           >
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
+            {#if pendingRemove === item.id}
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12l5 5L20 7" />
+              </svg>
+            {:else}
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            {/if}
           </button>
         {:else if item.status === "complete"}
           <button
             class="action-icon-btn"
+            class:confirm-remove={pendingRemove === item.id}
             onclick={() => removeItem(item.id)}
-            aria-label={$t('common.close')}
+            aria-label={pendingRemove === item.id ? $t('downloads.confirm_remove') : $t('common.close')}
+            title={pendingRemove === item.id ? $t('downloads.confirm_remove') : undefined}
           >
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
+            {#if pendingRemove === item.id}
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M5 12l5 5L20 7" />
+              </svg>
+            {:else}
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M18 6L6 18M6 6l12 12" />
+              </svg>
+            {/if}
           </button>
         {:else if item.status === "queued"}
           <button
@@ -622,6 +660,17 @@
 
   .action-icon-btn svg {
     pointer-events: none;
+  }
+
+  .action-icon-btn.confirm-remove {
+    color: var(--red);
+    background: color-mix(in srgb, var(--red) 12%, transparent);
+    animation: confirm-pulse 1s ease-in-out infinite;
+  }
+
+  @keyframes confirm-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.6; }
   }
 
   .item-status {
