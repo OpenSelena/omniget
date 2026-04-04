@@ -249,7 +249,7 @@ pub fn run() {
             }
         }))
         .manage(state)
-        .manage(Arc::new(tokio::sync::Mutex::new(
+        .manage(Arc::new(tokio::sync::RwLock::new(
             plugin_loader::PluginManager::new(
                 core::paths::app_data_dir()
                     .unwrap_or_else(|| std::path::PathBuf::from("."))
@@ -298,8 +298,8 @@ pub fn run() {
                     app.handle().clone(),
                     plugins_dir,
                 ));
-                let plugin_mgr = app.handle().state::<std::sync::Arc<tokio::sync::Mutex<plugin_loader::PluginManager>>>();
-                let mut mgr = plugin_mgr.blocking_lock();
+                let plugin_mgr = app.handle().state::<std::sync::Arc<tokio::sync::RwLock<plugin_loader::PluginManager>>>();
+                let mut mgr = plugin_mgr.blocking_write();
                 mgr.load_all(host);
             }
 
