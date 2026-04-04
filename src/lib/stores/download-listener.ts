@@ -16,6 +16,7 @@ import {
 } from "./convert-store.svelte";
 import { setMediaPreview } from "./media-preview-store.svelte";
 import { addLog } from "./debug-store.svelte";
+import { recordDownloadComplete } from "./download-stats.svelte";
 
 type ProgressPayload = {
   course_id: number;
@@ -170,6 +171,7 @@ export async function initDownloadListener(): Promise<() => void> {
     if (d.success) {
       showToast("success", tr("toast.download_complete", { name: d.course_name }));
       addLog("info", "download", `Course download complete: ${d.course_name}`);
+      recordDownloadComplete(0);
     } else {
       let msg = tr("toast.download_error", { name: d.course_name });
       if (d.error) msg += ` — ${d.error}`;
@@ -214,6 +216,7 @@ export async function initDownloadListener(): Promise<() => void> {
     if (d.success) {
       showToast("success", tr("toast.download_complete", { name: d.course_name }));
       addLog("info", "download", `Udemy download complete: ${d.course_name}`);
+      recordDownloadComplete(0);
       if (d.drm_skipped > 0) {
         showToast("info", tr("toast.drm_skipped", { count: String(d.drm_skipped) }));
         addLog("warn", "download", `${d.drm_skipped} DRM-protected video(s) skipped`, d.course_name);
@@ -243,6 +246,7 @@ export async function initDownloadListener(): Promise<() => void> {
           addLog("info", "download", `Download complete: ${item.title}`, item.file_path ?? undefined);
           const tr = get(t);
           showToast("success", tr("toast.generic_download_complete", { name: item.title }));
+          recordDownloadComplete(item.file_size_bytes ?? 0);
         }
       }
       throttledSyncQueueState(payload);
