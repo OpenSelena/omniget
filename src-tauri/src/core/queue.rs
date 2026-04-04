@@ -555,12 +555,28 @@ async fn spawn_download_inner(
                 phase: "fetching_info".to_string(),
             });
 
-            match fetch_and_cache_info(&url, &*downloader, &platform_name, ytdlp_path.as_deref()).await {
-                Ok(i) => i,
-                Err(e) => {
+            let info_result = tokio::time::timeout(
+                std::time::Duration::from_secs(60),
+                fetch_and_cache_info(&url, &*downloader, &platform_name, ytdlp_path.as_deref())
+            ).await;
+
+            match info_result {
+                Ok(Ok(i)) => i,
+                Ok(Err(e)) => {
                     let state = {
                         let mut q = queue.lock().await;
                         q.mark_complete(item_id, false, Some(e.to_string()), None, None);
+                        q.get_state()
+                    };
+                    emit_queue_state_from_state(&app, state);
+                    try_start_next(app, queue).await;
+                    return;
+                }
+                Err(_) => {
+                    tracing::warn!("[queue] info fetch timed out for {} after 60s", item_id);
+                    let state = {
+                        let mut q = queue.lock().await;
+                        q.mark_complete(item_id, false, Some("Timed out fetching video info".to_string()), None, None);
                         q.get_state()
                     };
                     emit_queue_state_from_state(&app, state);
@@ -921,13 +937,31 @@ pub async fn try_start_next(app: tauri::AppHandle, queue: Arc<tokio::sync::Mutex
         emit_queue_state_from_state(&app, state);
     }
 
+    let batch_size = next_ids.len();
     for (i, nid) in next_ids.into_iter().enumerate() {
+        let _ = app.emit("queue-item-progress", &QueueItemProgress {
+            id: nid,
+            title: String::new(),
+            platform: String::new(),
+            percent: 0.0,
+            speed_bytes_per_sec: 0.0,
+            downloaded_bytes: 0,
+            total_bytes: None,
+            phase: "queued_starting".to_string(),
+        });
+
         if i > 0 {
             let item_platform = {
                 let q = queue.lock().await;
                 q.items.iter().find(|item| item.id == nid).map(|item| item.platform.clone())
             };
-            let delay_ms = if item_platform.as_deref() == Some("youtube") { 2000 } else { stagger };
+            let delay_ms = if item_platform.as_deref() == Some("youtube") {
+                2000
+            } else if batch_size > 3 {
+                stagger.max(1000)
+            } else {
+                stagger
+            };
             if delay_ms > 0 {
                 tokio::time::sleep(std::time::Duration::from_millis(delay_ms)).await;
             }

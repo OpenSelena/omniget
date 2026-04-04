@@ -1718,10 +1718,39 @@ async fn find_downloaded_file(output_dir: &Path, url: &str) -> anyhow::Result<Pa
 
     candidates.sort_by(|a, b| b.2.cmp(&a.2).then_with(|| b.1.cmp(&a.1)));
 
-    candidates
-        .into_iter()
-        .next()
-        .map(|(p, _, _)| p)
+    if let Some((p, _, _)) = candidates.into_iter().next() {
+        return Ok(p);
+    }
+
+    let fallback_limit = std::time::Duration::from_secs(120);
+    let mut newest: Option<(PathBuf, std::time::SystemTime)> = None;
+    if let Ok(entries) = std::fs::read_dir(output_dir) {
+        for entry in entries.flatten() {
+            let path = entry.path();
+            if !path.is_file() {
+                continue;
+            }
+            let name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
+            if name.ends_with(".part") || name.ends_with(".ytdl") || name.starts_with('.') {
+                continue;
+            }
+            if let Ok(meta) = entry.metadata() {
+                if meta.len() == 0 {
+                    continue;
+                }
+                if let Ok(modified) = meta.modified() {
+                    if now.duration_since(modified).unwrap_or_default() < fallback_limit {
+                        if newest.as_ref().map_or(true, |(_, t)| modified > *t) {
+                            newest = Some((path, modified));
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    newest
+        .map(|(p, _)| p)
         .ok_or_else(|| anyhow!("Downloaded file not found in {:?}", output_dir))
 }
 

@@ -88,7 +88,7 @@ impl InstagramDownloader {
         let segments: Vec<&str> = parsed.path().split('/').filter(|s| !s.is_empty()).collect();
 
         match segments.first() {
-            Some(&"p") | Some(&"reel") | Some(&"tv") => {
+            Some(&"p") | Some(&"reel") | Some(&"reels") | Some(&"tv") => {
                 segments.get(1).map(|s| s.to_string())
             }
             _ => None,
