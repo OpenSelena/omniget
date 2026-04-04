@@ -551,6 +551,7 @@
     "downloading": "下载中...",
     "downloaded": "已下载",
     "download_retry": "出错 — 重试",
+    "cancel_download": "取消",
     "unavailable": "不可用",
     "external_platform": "外部平台",
     "choose_folder": "选择下载文件夹",

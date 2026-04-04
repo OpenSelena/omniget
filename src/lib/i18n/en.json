@@ -593,6 +593,7 @@
     "downloading": "Downloading...",
     "downloaded": "Downloaded",
     "download_retry": "Error — Retry",
+    "cancel_download": "Cancel",
     "unavailable": "Unavailable",
     "external_platform": "External platform",
     "choose_folder": "Choose download folder",
