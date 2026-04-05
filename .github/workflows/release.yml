@@ -80,7 +80,7 @@ jobs:
           TAG="${GITHUB_REF#refs/tags/}"
           for appimage in src-tauri/target/release/bundle/appimage/*.AppImage; do
             if [ -f "$appimage" ]; then
-              zsyncmake "$appimage" -u "$(basename "$appimage")"
+              zsyncmake "$appimage" -o "${appimage}.zsync" -u "$(basename "$appimage")"
               gh release upload "$TAG" "${appimage}.zsync" --repo "${{ github.repository }}" --clobber
             fi
           done
