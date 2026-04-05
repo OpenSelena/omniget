@@ -224,6 +224,17 @@ pub async fn find_ytdlp() -> Option<PathBuf> {
         }
     }
 
+    // Prefer the managed binary — it bundles yt-dlp-ejs (required for
+    // YouTube nsig challenge). System-installed yt-dlp (dnf, apt) often
+    // lacks this plugin, causing "Requested format is not available".
+    let managed = managed_ytdlp_path()?;
+    if managed.exists() {
+        tracing::debug!("[perf] find_ytdlp took {:?}", _timer_start.elapsed());
+        return Some(managed);
+    }
+
+    // Fall back to system PATH. Resolve to an absolute path so the cache
+    // check (`path.exists()`) works — a bare "yt-dlp" would always fail.
     let bin_name_owned = bin_name.to_string();
     let found = tokio::task::spawn_blocking(move || {
         crate::core::process::std_command(&bin_name_owned)
@@ -239,18 +250,35 @@ pub async fn find_ytdlp() -> Option<PathBuf> {
     .flatten();
 
     if found.is_some() {
+        let abs = resolve_absolute_path(bin_name);
         tracing::debug!("[perf] find_ytdlp took {:?}", _timer_start.elapsed());
-        return Some(PathBuf::from(bin_name));
-    }
-
-    let managed = managed_ytdlp_path()?;
-    if managed.exists() {
-        tracing::debug!("[perf] find_ytdlp took {:?}", _timer_start.elapsed());
-        return Some(managed);
+        return Some(abs);
     }
 
     tracing::debug!("[perf] find_ytdlp took {:?}", _timer_start.elapsed());
     None
+}
+
+/// Resolve a bare binary name to its absolute path via `where` (Windows)
+/// or `which` (Unix). Returns the original name as fallback.
+fn resolve_absolute_path(bin_name: &str) -> PathBuf {
+    let finder = if cfg!(target_os = "windows") { "where" } else { "which" };
+    if let Ok(output) = std::process::Command::new(finder)
+        .arg(bin_name)
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::null())
+        .output()
+    {
+        if output.status.success() {
+            if let Some(line) = String::from_utf8_lossy(&output.stdout).lines().next() {
+                let path = line.trim();
+                if !path.is_empty() {
+                    return PathBuf::from(path);
+                }
+            }
+        }
+    }
+    PathBuf::from(bin_name)
 }
 
 pub async fn find_ytdlp_cached() -> Option<PathBuf> {
@@ -288,6 +316,38 @@ fn managed_ytdlp_path() -> Option<PathBuf> {
 
 pub async fn ensure_ytdlp() -> anyhow::Result<PathBuf> {
     let _timer_start = std::time::Instant::now();
+
+    // Always ensure the managed binary exists — it bundles yt-dlp-ejs and
+    // works reliably with --js-runtimes and --ffmpeg-location.
+    if !crate::core::dependencies::is_flatpak() {
+        let managed = managed_ytdlp_path();
+        if managed.as_ref().map_or(true, |p| !p.exists()) {
+            tracing::info!("[ytdlp] managed binary missing, downloading...");
+            match download_ytdlp_binary().await {
+                Ok(path) => {
+                    reset_ytdlp_cache();
+                    std::thread::Builder::new()
+                        .name("js-runtime-check".into())
+                        .spawn(|| {
+                            let rt = tokio::runtime::Builder::new_current_thread()
+                                .enable_all()
+                                .build()
+                                .expect("js-runtime runtime");
+                            rt.block_on(async {
+                                crate::core::dependencies::ensure_js_runtime().await;
+                            });
+                        })
+                        .ok();
+                    tracing::debug!("[perf] ensure_ytdlp took {:?}", _timer_start.elapsed());
+                    return Ok(path);
+                }
+                Err(e) => {
+                    tracing::warn!("[ytdlp] failed to download managed binary, falling back to system: {}", e);
+                }
+            }
+        }
+    }
+
     if let Some(path) = find_ytdlp_cached().await {
         let path_clone = path.clone();
         std::thread::Builder::new()
@@ -1017,13 +1077,9 @@ pub async fn download_video(
     let mut base_args = vec!["-f".to_string(), format_selector];
     base_args.extend(js_runtime_args());
 
-    if format_id.is_none() {
+    if format_id.is_none() && mode == "audio" {
         base_args.push("-S".to_string());
-        if mode == "audio" {
-            base_args.push("+codec:aac:m4a".to_string());
-        } else {
-            base_args.push("+codec:avc:m4a".to_string());
-        }
+        base_args.push("+codec:aac:m4a".to_string());
     }
 
     if format_id.is_none() && mode != "audio" && ffmpeg_available {
