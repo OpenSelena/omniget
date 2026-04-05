@@ -71,6 +71,20 @@ jobs:
           includeUpdaterJson: false
           args: ${{ matrix.args }}
 
+      - name: Generate and upload AppImage zsync files
+        if: contains(matrix.platform, 'ubuntu')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          sudo apt-get install -y zsync
+          TAG="${GITHUB_REF#refs/tags/}"
+          for appimage in src-tauri/target/release/bundle/appimage/*.AppImage; do
+            if [ -f "$appimage" ]; then
+              zsyncmake "$appimage" -u "$(basename "$appimage")"
+              gh release upload "$TAG" "${appimage}.zsync" --repo "${{ github.repository }}" --clobber
+            fi
+          done
+
       - name: Upload Windows portable binary
         if: matrix.platform == 'windows-latest'
         env:
