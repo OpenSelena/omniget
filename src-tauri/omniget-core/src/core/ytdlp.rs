@@ -513,7 +513,7 @@ fn detect_js_runtime() -> Option<String> {
     // Try system PATH via `where` (Windows) or `which` (Unix).
     for &(runtime, bin) in runtimes {
         let finder = if cfg!(target_os = "windows") { "where" } else { "which" };
-        if let Ok(output) = std::process::Command::new(finder)
+        if let Ok(output) = crate::core::process::std_command(finder)
             .arg(bin)
             .stdout(std::process::Stdio::piped())
             .stderr(std::process::Stdio::null())
