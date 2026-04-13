@@ -350,7 +350,16 @@
       "terms": "使用條款",
       "project": "專案",
       "roadmap": "開發計畫",
-      "changelog": "更新紀錄"
+      "changelog": "更新紀錄",
+      "debug": "除錯資訊"
+    },
+    "debug": {
+      "title": "除錯資訊",
+      "description": "可貼到錯誤回報的環境資訊。不包含任何敏感資料。",
+      "copy_button": "複製到剪貼簿",
+      "copied_short": "已複製",
+      "copied": "除錯資訊已複製到剪貼簿",
+      "copy_failed": "無法複製到剪貼簿"
     },
     "description": "您的媒體下載好幫手。開源且免費。",
     "terms_title": "使用條款",
@@ -489,7 +498,8 @@
     "ffmpeg_missing": "找不到 FFmpeg — 請在 [設定] 中安裝",
     "unsupported_url": "不支援的 URL — 請檢查連結",
     "page_access_failed": "無法存取頁面 — 請檢查連結與網路連線",
-    "no_formats": "此連結找不到可用的影片格式"
+    "no_formats": "此連結找不到可用的影片格式",
+    "path_too_long": "下載資料夾路徑過長 ({{current}}/{{limit}} 字元)。請選擇更短的資料夾。"
   },
   "debug": {
     "title": "活動記錄",

@@ -310,7 +310,16 @@
       "terms": "termini",
       "project": "progetto",
       "roadmap": "roadmap",
-      "changelog": "changelog"
+      "changelog": "changelog",
+      "debug": "debug info"
+    },
+    "debug": {
+      "title": "Info di debug",
+      "description": "Dettagli dell'ambiente da incollare in una segnalazione di bug. Non include dati sensibili.",
+      "copy_button": "Copia negli appunti",
+      "copied_short": "Copiato",
+      "copied": "Info di debug copiate negli appunti",
+      "copy_failed": "Impossibile copiare negli appunti"
     },
     "description": "il tuo media downloader. open source e gratuito.",
     "terms_title": "termini di utilizzo",
@@ -464,7 +473,8 @@
     "ffmpeg_missing": "FFmpeg non trovato — installalo nelle Impostazioni",
     "unsupported_url": "URL non supportato — controlla il link",
     "page_access_failed": "Impossibile accedere alla pagina — controlla il link e la connessione",
-    "no_formats": "Nessun formato video trovato per questo link"
+    "no_formats": "Nessun formato video trovato per questo link",
+    "path_too_long": "Il percorso della cartella è troppo lungo ({{current}}/{{limit}} caratteri). Scegli una cartella più corta."
   },
   "debug": {
     "title": "Registro attività",

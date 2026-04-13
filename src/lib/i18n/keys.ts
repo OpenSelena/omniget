@@ -20,6 +20,12 @@
 
 export type TranslationKeys =
   | 'about.credit'
+  | 'about.debug.copied'
+  | 'about.debug.copied_short'
+  | 'about.debug.copy_button'
+  | 'about.debug.copy_failed'
+  | 'about.debug.description'
+  | 'about.debug.title'
   | 'about.description'
   | 'about.feature_hotmart'
   | 'about.feature_i18n'
@@ -48,6 +54,7 @@ export type TranslationKeys =
   | 'about.star_button'
   | 'about.star_description'
   | 'about.tab.changelog'
+  | 'about.tab.debug'
   | 'about.tab.project'
   | 'about.tab.roadmap'
   | 'about.tab.terms'
@@ -187,6 +194,7 @@ export type TranslationKeys =
   | 'errors.login_required'
   | 'errors.no_formats'
   | 'errors.page_access_failed'
+  | 'errors.path_too_long'
   | 'errors.rate_limited'
   | 'errors.size_mismatch'
   | 'errors.tiktok_blocked'

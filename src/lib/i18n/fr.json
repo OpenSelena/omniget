@@ -310,7 +310,16 @@
       "terms": "conditions",
       "project": "projet",
       "roadmap": "roadmap",
-      "changelog": "changelog"
+      "changelog": "changelog",
+      "debug": "infos debug"
+    },
+    "debug": {
+      "title": "Infos de debug",
+      "description": "Détails d'environnement à coller dans un rapport de bug. Ne contient aucun secret.",
+      "copy_button": "Copier dans le presse-papiers",
+      "copied_short": "Copié",
+      "copied": "Infos de debug copiées",
+      "copy_failed": "Impossible de copier"
     },
     "description": "votre gestionnaire de téléchargement. open source et gratuit.",
     "terms_title": "conditions d'utilisation",
@@ -464,7 +473,8 @@
     "ffmpeg_missing": "FFmpeg introuvable — installez-le dans Paramètres",
     "unsupported_url": "URL non supportée — vérifiez le lien",
     "page_access_failed": "Impossible d'accéder à la page — vérifiez le lien et la connexion",
-    "no_formats": "Aucun format vidéo trouvé pour ce lien"
+    "no_formats": "Aucun format vidéo trouvé pour ce lien",
+    "path_too_long": "Le chemin du dossier est trop long ({{current}}/{{limit}} caractères). Choisissez un dossier plus court."
   },
   "debug": {
     "title": "Journal d'activité",

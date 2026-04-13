@@ -312,7 +312,16 @@
       "terms": "terms",
       "project": "project",
       "roadmap": "roadmap",
-      "changelog": "changelog"
+      "changelog": "changelog",
+      "debug": "debug info"
+    },
+    "debug": {
+      "title": "Debug info",
+      "description": "Environment details to paste in a bug report. Does not include any secrets.",
+      "copy_button": "Copy to clipboard",
+      "copied_short": "Copied",
+      "copied": "Debug info copied to clipboard",
+      "copy_failed": "Could not copy to clipboard"
     },
     "description": "your media downloader. open source and free.",
     "terms_title": "terms of use",
@@ -506,7 +515,8 @@
     "tiktok_blocked": "TikTok is temporarily blocking requests. Try again in a few minutes.",
     "download_timeout": "Download timed out. Check your internet connection.",
     "size_mismatch": "Downloaded file size doesn't match. Try again.",
-    "disk_full": "Write error — your disk may be full."
+    "disk_full": "Write error — your disk may be full.",
+    "path_too_long": "Download folder path is too long ({{current}}/{{limit}} chars). Choose a shorter folder."
   },
   "debug": {
     "title": "Activity Log",

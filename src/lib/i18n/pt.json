@@ -312,7 +312,16 @@
       "terms": "termos",
       "project": "projeto",
       "roadmap": "roadmap",
-      "changelog": "changelog"
+      "changelog": "changelog",
+      "debug": "debug info"
+    },
+    "debug": {
+      "title": "Informações de debug",
+      "description": "Detalhes do ambiente para colar em um report de bug. Não inclui dados sensíveis.",
+      "copy_button": "Copiar para área de transferência",
+      "copied_short": "Copiado",
+      "copied": "Informações de debug copiadas",
+      "copy_failed": "Não foi possível copiar"
     },
     "description": "o seu downloader de mídia. código aberto e gratuito.",
     "terms_title": "termos de uso",
@@ -506,7 +515,8 @@
     "tiktok_blocked": "TikTok está bloqueando requisições temporariamente. Tente novamente em alguns minutos.",
     "download_timeout": "Download expirou. Verifique sua conexão.",
     "size_mismatch": "Tamanho do arquivo não confere. Tente novamente.",
-    "disk_full": "Erro de escrita — seu disco pode estar cheio."
+    "disk_full": "Erro de escrita — seu disco pode estar cheio.",
+    "path_too_long": "Caminho da pasta é muito longo ({{current}}/{{limit}} caracteres). Escolha uma pasta mais curta."
   },
   "debug": {
     "title": "Registro de Atividade",
