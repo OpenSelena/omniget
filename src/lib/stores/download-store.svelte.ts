@@ -36,10 +36,34 @@ export type GenericDownloadItem = BaseItem & {
 
 export type DownloadItem = CourseDownloadItem | GenericDownloadItem;
 
+export type SpeedPoint = { t: number; bps: number };
+
 const SPEED_SMOOTHING = 0.3;
+const SPEED_HISTORY_MAX = 60;
 
 let downloads = $state(new Map<number, DownloadItem>());
+const speedHistory = new Map<number, SpeedPoint[]>();
 let flushScheduled = false;
+
+function pushSpeedPoint(id: number, bps: number) {
+  let arr = speedHistory.get(id);
+  if (!arr) {
+    arr = [];
+    speedHistory.set(id, arr);
+  }
+  arr.push({ t: Date.now(), bps });
+  if (arr.length > SPEED_HISTORY_MAX) {
+    arr.splice(0, arr.length - SPEED_HISTORY_MAX);
+  }
+}
+
+export function getSpeedHistory(id: number): SpeedPoint[] {
+  return speedHistory.get(id) ?? [];
+}
+
+function clearSpeedHistory(id: number) {
+  speedHistory.delete(id);
+}
 
 function scheduleFlush() {
   if (flushScheduled) return;
@@ -143,6 +167,7 @@ export function upsertProgress(
     totalModules,
     currentModuleIndex,
   });
+  pushSpeedPoint(courseId, speed);
   scheduleFlush();
 }
 
@@ -161,6 +186,7 @@ export function markComplete(courseName: string, success: boolean, error?: strin
       } else {
         downloads.set(id, base as GenericDownloadItem);
       }
+      clearSpeedHistory(id);
       flushNow();
       break;
     }
@@ -172,6 +198,7 @@ export function clearFinished() {
   for (const [id, item] of downloads) {
     if (item.status === "complete" || item.status === "error") {
       downloads.delete(id);
+      clearSpeedHistory(id);
       changed = true;
     }
   }
@@ -229,6 +256,7 @@ export function syncQueueState(items: QueueItemInfo[]) {
   for (const [id, item] of downloads) {
     if (item.kind === "generic" && !queueIds.has(id)) {
       downloads.delete(id);
+      clearSpeedHistory(id);
     }
   }
 
@@ -241,13 +269,15 @@ export function syncQueueState(items: QueueItemInfo[]) {
       speed = existing.speed * (1 - SPEED_SMOOTHING) + qi.speed_bytes_per_sec * SPEED_SMOOTHING;
     }
 
+    const effectiveSpeed = (dlStatus === "downloading" || dlStatus === "seeding") ? speed : 0;
+
     downloads.set(qi.id, {
       kind: "generic",
       id: qi.id,
       name: qi.title,
       platform: qi.platform,
       percent: Math.max(0, qi.percent),
-      speed: (dlStatus === "downloading" || dlStatus === "seeding") ? speed : 0,
+      speed: effectiveSpeed,
       downloadedBytes: qi.downloaded_bytes,
       totalBytes: qi.total_bytes,
       phase: (existing?.kind === "generic" ? existing.phase : undefined) ?? "queued",
@@ -259,6 +289,12 @@ export function syncQueueState(items: QueueItemInfo[]) {
       fileCount: qi.file_count ?? undefined,
       thumbnail_url: qi.thumbnail_url,
     });
+
+    if (dlStatus === "downloading" || dlStatus === "seeding") {
+      pushSpeedPoint(qi.id, effectiveSpeed);
+    } else if (dlStatus === "complete" || dlStatus === "error") {
+      clearSpeedHistory(qi.id);
+    }
   }
 
   flushNow();
@@ -267,6 +303,7 @@ export function syncQueueState(items: QueueItemInfo[]) {
 export function removeDownload(id: number) {
   if (downloads.has(id)) {
     downloads.delete(id);
+    clearSpeedHistory(id);
     flushNow();
   }
 }
@@ -286,6 +323,7 @@ export function markGenericComplete(id: number, success: boolean, error?: string
     speed: 0,
     lastUpdateAt: Date.now(),
   });
+  clearSpeedHistory(id);
   flushNow();
 }
 
@@ -313,13 +351,15 @@ export function upsertGenericProgress(
     && (existing.status === "paused" || existing.status === "seeding" || existing.status === "complete" || existing.status === "error");
   const resolvedStatus: DownloadStatus = keepStatus ? existing!.status : "downloading";
 
+  const effectiveSpeed = resolvedStatus === "downloading" ? speed : 0;
+
   downloads.set(id, {
     kind: "generic",
     id,
     name: title,
     platform,
     percent: Math.max(0, percent),
-    speed: resolvedStatus === "downloading" ? speed : 0,
+    speed: effectiveSpeed,
     downloadedBytes,
     totalBytes,
     phase,
@@ -327,6 +367,11 @@ export function upsertGenericProgress(
     startedAt: existing?.startedAt ?? now,
     lastUpdateAt: now,
   });
+
+  if (resolvedStatus === "downloading") {
+    pushSpeedPoint(id, effectiveSpeed);
+  }
+
   scheduleFlush();
 }
 

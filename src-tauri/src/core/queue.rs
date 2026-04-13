@@ -498,6 +498,80 @@ pub fn emit_queue_state(app: &tauri::AppHandle, queue: &DownloadQueue) {
     emit_queue_state_from_state(app, state);
 }
 
+/// RAII guard that ensures an Active queue item never leaks a slot.
+///
+/// If the download future panics or is dropped before reaching `mark_complete`
+/// / `mark_seeding`, the Drop impl spawns a task that transitions the item to
+/// Error("Download interrupted") and calls `try_start_next`, unblocking the
+/// queue.
+///
+/// When the download reaches a terminal state through the normal paths, the
+/// guard sees the item is no longer Active and does nothing (idempotent).
+struct ActiveJobSlot {
+    app: tauri::AppHandle,
+    queue: Arc<tokio::sync::Mutex<DownloadQueue>>,
+    item_id: u64,
+    armed: bool,
+}
+
+impl ActiveJobSlot {
+    fn new(
+        app: tauri::AppHandle,
+        queue: Arc<tokio::sync::Mutex<DownloadQueue>>,
+        item_id: u64,
+    ) -> Self {
+        Self {
+            app,
+            queue,
+            item_id,
+            armed: true,
+        }
+    }
+
+    fn disarm(mut self) {
+        self.armed = false;
+    }
+}
+
+impl Drop for ActiveJobSlot {
+    fn drop(&mut self) {
+        if !self.armed {
+            return;
+        }
+        let app = self.app.clone();
+        let queue = self.queue.clone();
+        let item_id = self.item_id;
+        tokio::spawn(async move {
+            let state = {
+                let mut q = queue.lock().await;
+                let still_active = q
+                    .items
+                    .iter()
+                    .find(|i| i.id == item_id)
+                    .map(|i| i.status == QueueStatus::Active)
+                    .unwrap_or(false);
+                if !still_active {
+                    return;
+                }
+                tracing::warn!(
+                    "[queue] ActiveJobSlot guard firing for {} — download ended without clean release",
+                    item_id
+                );
+                q.mark_complete(
+                    item_id,
+                    false,
+                    Some("Download interrupted".to_string()),
+                    None,
+                    None,
+                );
+                q.get_state()
+            };
+            emit_queue_state_from_state(&app, state);
+            try_start_next(app, queue).await;
+        });
+    }
+}
+
 pub fn spawn_download(
     app: tauri::AppHandle,
     queue: Arc<tokio::sync::Mutex<DownloadQueue>>,
@@ -505,7 +579,9 @@ pub fn spawn_download(
 ) -> std::pin::Pin<Box<dyn std::future::Future<Output = ()> + Send>> {
     Box::pin(async move {
         let _timer_start = std::time::Instant::now();
+        let slot = ActiveJobSlot::new(app.clone(), queue.clone(), item_id);
         spawn_download_inner(app, queue, item_id).await;
+        slot.disarm();
         tracing::debug!(
             "[perf] spawn_download {} took {:?}",
             item_id,
