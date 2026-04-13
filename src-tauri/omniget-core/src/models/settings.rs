@@ -17,6 +17,8 @@ pub struct AppSettings {
     pub start_with_windows: bool,
     #[serde(default)]
     pub portable_mode: bool,
+    #[serde(default)]
+    pub legal_acknowledged: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -181,6 +183,7 @@ impl Default for AppSettings {
             onboarding_completed: false,
             start_with_windows: false,
             portable_mode: false,
+            legal_acknowledged: false,
         }
     }
 }

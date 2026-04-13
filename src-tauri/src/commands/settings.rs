@@ -54,6 +54,14 @@ pub fn mark_onboarding_complete(app: tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+#[tauri::command]
+pub fn mark_legal_acknowledged(app: tauri::AppHandle) -> Result<(), String> {
+    let mut current = config::load_settings(&app);
+    current.legal_acknowledged = true;
+    config::save_settings(&app, &current).map_err(|e| format!("Save: {}", e))?;
+    Ok(())
+}
+
 fn merge_json(base: &mut serde_json::Value, patch: &serde_json::Value) {
     if let (Some(base_obj), Some(patch_obj)) = (base.as_object_mut(), patch.as_object()) {
         for (key, value) in patch_obj {

@@ -237,6 +237,7 @@ pub fn run() {
             commands::settings::update_settings,
             commands::settings::reset_settings,
             commands::settings::mark_onboarding_complete,
+            commands::settings::mark_legal_acknowledged,
             commands::autostart::set_autostart,
             commands::autostart::get_autostart_status,
             commands::dependencies::check_dependencies,
