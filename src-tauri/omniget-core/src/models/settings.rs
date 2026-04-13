@@ -60,6 +60,10 @@ pub struct DownloadSettings {
     #[serde(default)]
     pub include_auto_subtitles: bool,
     #[serde(default)]
+    pub translate_metadata: bool,
+    #[serde(default)]
+    pub youtube_sponsorblock: bool,
+    #[serde(default)]
     pub hotkey_enabled: bool,
     #[serde(default = "default_hotkey_binding")]
     pub hotkey_binding: String,
@@ -176,6 +180,8 @@ impl Default for AppSettings {
                 organize_by_platform: false,
                 download_subtitles: false,
                 include_auto_subtitles: false,
+                translate_metadata: false,
+                youtube_sponsorblock: false,
                 hotkey_enabled: false,
                 hotkey_binding: default_hotkey_binding(),
                 extra_ytdlp_flags: Vec::new(),

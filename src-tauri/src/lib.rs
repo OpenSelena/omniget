@@ -143,6 +143,19 @@ pub fn run() {
                     .download
                     .include_auto_subtitles
             });
+            core::ytdlp::set_translate_metadata_fn(|| {
+                let s = storage::config::load_settings_standalone();
+                if s.download.translate_metadata {
+                    let lang = s.appearance.language.trim();
+                    if lang.is_empty() {
+                        None
+                    } else {
+                        Some(lang.to_string())
+                    }
+                } else {
+                    None
+                }
+            });
             {
                 let app_handle = app.handle().clone();
                 omniget_core::core::log_hook::set_log_sink(std::sync::Arc::new(

@@ -16,12 +16,16 @@ type GlobalCookieFileFn = Box<dyn Fn() -> Option<String> + Send + Sync>;
 type CookiesFromBrowserFn = Box<dyn Fn() -> String + Send + Sync>;
 type ExtRefererFn = Box<dyn Fn(&str) -> Option<String> + Send + Sync>;
 type IncludeAutoSubsFn = Box<dyn Fn() -> bool + Send + Sync>;
+type TranslateMetadataFn = Box<dyn Fn() -> Option<String> + Send + Sync>;
+type SponsorBlockFn = Box<dyn Fn() -> bool + Send + Sync>;
 
 static EXT_COOKIE_PATH_FN: OnceLock<ExtCookiePathFn> = OnceLock::new();
 static GLOBAL_COOKIE_FILE_FN: OnceLock<GlobalCookieFileFn> = OnceLock::new();
 static COOKIES_FROM_BROWSER_FN: OnceLock<CookiesFromBrowserFn> = OnceLock::new();
 static EXT_REFERER_FN: OnceLock<ExtRefererFn> = OnceLock::new();
 static INCLUDE_AUTO_SUBS_FN: OnceLock<IncludeAutoSubsFn> = OnceLock::new();
+static TRANSLATE_METADATA_FN: OnceLock<TranslateMetadataFn> = OnceLock::new();
+static SPONSORBLOCK_FN: OnceLock<SponsorBlockFn> = OnceLock::new();
 
 pub fn set_ext_cookie_path_fn(f: impl Fn() -> PathBuf + Send + Sync + 'static) {
     let _ = EXT_COOKIE_PATH_FN.set(Box::new(f));
@@ -48,6 +52,22 @@ fn include_auto_subs_setting() -> bool {
         .get()
         .map(|f| f())
         .unwrap_or(false)
+}
+
+pub fn set_translate_metadata_fn(f: impl Fn() -> Option<String> + Send + Sync + 'static) {
+    let _ = TRANSLATE_METADATA_FN.set(Box::new(f));
+}
+
+fn translate_metadata_lang() -> Option<String> {
+    TRANSLATE_METADATA_FN.get().and_then(|f| f())
+}
+
+pub fn set_sponsorblock_fn(f: impl Fn() -> bool + Send + Sync + 'static) {
+    let _ = SPONSORBLOCK_FN.set(Box::new(f));
+}
+
+fn sponsorblock_enabled() -> bool {
+    SPONSORBLOCK_FN.get().map(|f| f()).unwrap_or(false)
 }
 
 fn ext_referer_for_url(url: &str) -> Option<String> {
@@ -1212,6 +1232,11 @@ pub async fn download_video(
 
     base_args.extend(proxy_args());
     base_args.extend(extra_flags.iter().cloned());
+
+    if let Some(lang) = translate_metadata_lang() {
+        base_args.push("--extractor-args".to_string());
+        base_args.push(format!("youtube:lang={}", lang));
+    }
 
     if cfg!(target_os = "windows") {
         base_args.push("--windows-filenames".to_string());
