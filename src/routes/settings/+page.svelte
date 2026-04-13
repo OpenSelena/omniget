@@ -602,6 +602,14 @@
         <div class="divider"></div>
         <div class="setting-row">
           <div class="setting-col">
+            <span class="setting-label">{$t('settings.download.translate_metadata')}</span>
+            <span class="setting-path">{$t('settings.download.translate_metadata_desc')}</span>
+          </div>
+          <button class="toggle" class:on={settings.download.translate_metadata} onclick={() => toggleBool("download", "translate_metadata", settings!.download.translate_metadata)} role="switch" aria-checked={settings.download.translate_metadata} aria-label={$t('settings.download.translate_metadata')}><span class="toggle-knob"></span></button>
+        </div>
+        <div class="divider"></div>
+        <div class="setting-row">
+          <div class="setting-col">
             <span class="setting-label">{$t('settings.download.embed_metadata')}</span>
             <span class="setting-path">{$t('settings.download.embed_metadata_desc')}</span>
           </div>
