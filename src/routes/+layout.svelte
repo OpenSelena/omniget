@@ -16,6 +16,7 @@
   import { startClipboardMonitor, stopClipboardMonitor } from "$lib/stores/clipboard-monitor";
   import { initChangelog } from "$lib/stores/changelog-store.svelte";
   import ChangelogDialog from "$components/dialog/ChangelogDialog.svelte";
+  import ConfirmCloseDialog from "$components/dialog/ConfirmCloseDialog.svelte";
   import OnboardingWizard from "$components/onboarding/OnboardingWizard.svelte";
   import { needsOnboarding } from "$lib/stores/onboarding-store.svelte";
   import { isYtdlpAvailable, isDepsChecked, refreshYtdlpStatus } from "$lib/stores/dependency-store.svelte";
@@ -239,6 +240,7 @@
 <Toast />
 <DebugPanel />
 <ChangelogDialog />
+<ConfirmCloseDialog />
 {#if showOnboarding}
   <OnboardingWizard />
 {/if}
