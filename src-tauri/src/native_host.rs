@@ -33,6 +33,12 @@ struct NativeHostRequest {
     media_type: Option<String>,
     #[serde(default, rename = "contentType")]
     content_type: Option<String>,
+    #[serde(default)]
+    title: Option<String>,
+    #[serde(default)]
+    thumbnail: Option<String>,
+    #[serde(default, rename = "openApp")]
+    open_app: Option<bool>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -462,6 +468,9 @@ fn write_extension_metadata(request: &NativeHostRequest) -> anyhow::Result<()> {
         "headers": request.headers,
         "mediaType": request.media_type,
         "contentType": request.content_type,
+        "title": request.title,
+        "thumbnail": request.thumbnail,
+        "openApp": request.open_app,
         "timestamp": now,
     });
 
@@ -474,6 +483,9 @@ pub struct ExtensionMetadata {
     pub headers: Option<std::collections::HashMap<String, String>>,
     pub media_type: Option<String>,
     pub content_type: Option<String>,
+    pub title: Option<String>,
+    pub thumbnail: Option<String>,
+    pub open_app: Option<bool>,
 }
 
 pub fn read_extension_metadata(url: &str) -> Option<ExtensionMetadata> {
@@ -515,11 +527,44 @@ pub fn read_extension_metadata(url: &str) -> Option<ExtensionMetadata> {
             .get("contentType")
             .and_then(|v| v.as_str())
             .map(String::from),
+        title: meta
+            .get("title")
+            .and_then(|v| v.as_str())
+            .filter(|s| !s.is_empty())
+            .map(String::from),
+        thumbnail: meta
+            .get("thumbnail")
+            .and_then(|v| v.as_str())
+            .filter(|s| !s.is_empty())
+            .map(String::from),
+        open_app: meta.get("openApp").and_then(|v| v.as_bool()),
     };
 
     let _ = fs::remove_file(&path);
 
     Some(result)
+}
+
+pub fn peek_extension_open_app(url: &str) -> Option<bool> {
+    let path = extension_metadata_path();
+    let content = fs::read_to_string(&path).ok()?;
+    let meta: serde_json::Value = serde_json::from_str(&content).ok()?;
+
+    let meta_url = meta.get("url")?.as_str()?;
+    if meta_url != url {
+        return None;
+    }
+
+    let timestamp = meta.get("timestamp")?.as_u64()?;
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs();
+    if now.saturating_sub(timestamp) > 60 {
+        return None;
+    }
+
+    meta.get("openApp").and_then(|v| v.as_bool())
 }
 
 fn handle_request(request: NativeHostRequest) -> NativeHostResponse {
@@ -547,7 +592,13 @@ fn handle_request(request: NativeHostRequest) -> NativeHostResponse {
         }
     }
 
-    if request.referer.is_some() || request.headers.is_some() || request.media_type.is_some() {
+    if request.referer.is_some()
+        || request.headers.is_some()
+        || request.media_type.is_some()
+        || request.title.is_some()
+        || request.thumbnail.is_some()
+        || request.open_app.is_some()
+    {
         if let Err(e) = write_extension_metadata(&request) {
             eprintln!("[OmniGet] Warning: failed to write extension metadata: {e}");
         }

@@ -8,6 +8,7 @@
     formatBytes,
     formatSpeed,
     getFinishedCount,
+    getSpeedHistory,
     type CourseDownloadItem,
     type GenericDownloadItem,
   } from "$lib/stores/download-store.svelte";
@@ -15,6 +16,7 @@
   import PlatformIcon from "$components/icons/PlatformIcon.svelte";
   import Mascot from "$components/mascot/Mascot.svelte";
   import ContextHint from "$components/hints/ContextHint.svelte";
+  import DownloadSpeedGraph from "$components/download/DownloadSpeedGraph.svelte";
 
   let downloads = $derived(getDownloads());
   let courseList = $derived(
@@ -388,6 +390,7 @@
           {/if}
           {#if item.speed > 0}
             <span>{formatSpeed(item.speed)}</span>
+            <DownloadSpeedGraph points={getSpeedHistory(item.id)} />
           {/if}
         </div>
       {/if}
@@ -400,6 +403,7 @@
         {/if}
         {#if item.speed > 0}
           <span>{formatSpeed(item.speed)}</span>
+          <DownloadSpeedGraph points={getSpeedHistory(item.id)} />
         {/if}
       </div>
     {:else if item.status === "paused"}
@@ -479,6 +483,9 @@
 
       <div class="item-stats">
         <span>{formatSpeed(item.speed)}</span>
+        {#if item.speed > 0}
+          <DownloadSpeedGraph points={getSpeedHistory(item.id)} />
+        {/if}
       </div>
     {/if}
 

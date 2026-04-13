@@ -1,12 +1,19 @@
 <script lang="ts">
     import { t } from "$lib/i18n";
     import { getVersion } from "@tauri-apps/api/app";
+    import { BUILD_INFO } from "$lib/build-info";
 
     let version = $state("");
 
     $effect(() => {
         getVersion().then(v => { version = v; }).catch(() => {});
     });
+
+    const buildDetails = $derived(
+        [BUILD_INFO.commitShort, BUILD_INFO.branch, BUILD_INFO.date]
+            .filter((part) => part && part !== "unknown")
+            .join(" · ")
+    );
 </script>
 
 <div class="about-page">
@@ -17,6 +24,9 @@
         <p class="about-desc">{$t("about.description")}</p>
         {#if version}
             <span class="about-version">{$t("about.version")} {version}</span>
+        {/if}
+        {#if buildDetails}
+            <span class="about-build">{buildDetails}</span>
         {/if}
     </div>
 
@@ -96,6 +106,15 @@
         background: var(--button);
         padding: 3px 10px;
         border-radius: var(--border-radius);
+    }
+
+    .about-build {
+        font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
+        font-size: 10.5px;
+        color: var(--tertiary);
+        opacity: 0.75;
+        letter-spacing: 0.3px;
+        user-select: all;
     }
 
     .about-links {

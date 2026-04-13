@@ -131,21 +131,25 @@ pub async fn queue_url_with_defaults(
         } else {
             return None;
         };
-        let title = url::Url::parse(&url)
-            .ok()
-            .and_then(|u| {
-                let path = u.path();
-                let last = path.rsplit('/').next()?;
-                if last.is_empty() {
-                    return None;
-                }
-                Some(
-                    urlencoding::decode(last)
-                        .unwrap_or_else(|_| last.into())
-                        .to_string(),
-                )
+        let title = m
+            .title
+            .as_deref()
+            .filter(|s| !s.is_empty())
+            .map(|s| sanitize_filename::sanitize(s))
+            .or_else(|| {
+                url::Url::parse(&url).ok().and_then(|u| {
+                    let path = u.path();
+                    let last = path.rsplit('/').next()?;
+                    if last.is_empty() {
+                        return None;
+                    }
+                    Some(sanitize_filename::sanitize(
+                        &urlencoding::decode(last)
+                            .unwrap_or_else(|_| last.into())
+                            .to_string(),
+                    ))
+                })
             })
-            .map(|n| sanitize_filename::sanitize(&n))
             .unwrap_or_else(|| "download".to_string());
 
         Some(crate::models::media::MediaInfo {
@@ -153,7 +157,7 @@ pub async fn queue_url_with_defaults(
             author: String::new(),
             platform: "generic".to_string(),
             duration_seconds: None,
-            thumbnail_url: None,
+            thumbnail_url: m.thumbnail.clone(),
             available_qualities: vec![crate::models::media::VideoQuality {
                 label: "original".to_string(),
                 width: 0,
@@ -170,20 +174,45 @@ pub async fn queue_url_with_defaults(
         })
     });
 
+    let ext_title = ext_meta
+        .as_ref()
+        .and_then(|m| m.title.as_deref())
+        .filter(|s| !s.is_empty())
+        .map(String::from);
+    let ext_thumbnail = ext_meta.as_ref().and_then(|m| m.thumbnail.clone());
+
+    let preview_media_info = ext_media_info.or_else(|| {
+        if ext_title.is_none() && ext_thumbnail.is_none() {
+            return None;
+        }
+        Some(crate::models::media::MediaInfo {
+            title: ext_title.clone().unwrap_or_else(|| url.clone()),
+            author: String::new(),
+            platform: "generic".to_string(),
+            duration_seconds: None,
+            thumbnail_url: ext_thumbnail.clone(),
+            available_qualities: Vec::new(),
+            media_type: crate::models::media::MediaType::Video,
+            file_size_bytes: None,
+        })
+    });
+
+    let queue_title = ext_title.clone().unwrap_or_else(|| url.clone());
+
     {
         let mut q = download_queue.lock().await;
         q.enqueue(
             download_id,
             url.clone(),
             platform_name,
-            url.clone(),
+            queue_title,
             output_dir,
             None,
             None,
             None,
             ext_referer,
             ext_headers,
-            ext_media_info,
+            preview_media_info,
             None,
             None,
             downloader,
@@ -246,8 +275,14 @@ pub async fn handle_external_url(
     let can_queue_directly = !settings.download.always_ask_path
         && has_valid_output_dir(&settings.download.default_output_dir);
 
+    let open_app_flag = crate::native_host::peek_extension_open_app(&url);
+
     let action = if can_queue_directly {
-        match queue_url_with_defaults(app, url.clone(), false).await? {
+        let outcome = queue_url_with_defaults(app, url.clone(), false).await?;
+        if open_app_flag == Some(true) {
+            crate::tray::show_window(app);
+        }
+        match outcome {
             QueueUrlOutcome::Queued => ExternalUrlAction::Queued,
             QueueUrlOutcome::AlreadyQueued => ExternalUrlAction::AlreadyQueued,
         }

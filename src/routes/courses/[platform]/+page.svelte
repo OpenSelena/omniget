@@ -323,7 +323,7 @@
   }
 
   function getDownloadStatus(item: any): "idle" | "downloading" | "complete" | "error" {
-    const id = getItemId(item);
+    const id = Number(getItemId(item));
     const dl = downloads.get(id);
     if (!dl) return "idle";
     const s = dl.status;
@@ -332,7 +332,7 @@
   }
 
   function getDownloadPercent(item: any): number {
-    return downloads.get(getItemId(item))?.percent ?? 0;
+    return downloads.get(Number(getItemId(item)))?.percent ?? 0;
   }
 
   async function downloadItem(item: any) {

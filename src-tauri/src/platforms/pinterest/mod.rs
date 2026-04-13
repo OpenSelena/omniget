@@ -1,3 +1,5 @@
+use std::sync::LazyLock;
+
 use anyhow::anyhow;
 use async_trait::async_trait;
 use regex::Regex;
@@ -9,6 +11,18 @@ use crate::models::media::{DownloadOptions, DownloadResult, MediaInfo, MediaType
 use crate::platforms::traits::PlatformDownloader;
 
 const USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
+
+static PIN_NOT_FOUND_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#""__typename"\s*:\s*"PinNotFound""#).expect("valid PIN_NOT_FOUND_RE")
+});
+
+static VIDEO_URL_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#""url":"(https://v1\.pinimg\.com/videos/.*?)""#).expect("valid VIDEO_URL_RE")
+});
+
+static IMAGE_URL_RE: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r#"src="(https://i\.pinimg\.com/.*?\.(jpg|gif))""#).expect("valid IMAGE_URL_RE")
+});
 
 pub struct PinterestDownloader {
     client: reqwest::Client,
@@ -102,24 +116,20 @@ impl PinterestDownloader {
     }
 
     fn check_pin_not_found(html: &str) -> bool {
-        let re = Regex::new(r#""__typename"\s*:\s*"PinNotFound""#).unwrap();
-        re.is_match(html)
+        PIN_NOT_FOUND_RE.is_match(html)
     }
 
     fn extract_video_url(html: &str) -> Option<String> {
-        let re = Regex::new(r#""url":"(https://v1\.pinimg\.com/videos/.*?)""#).unwrap();
-        let result = re
+        VIDEO_URL_RE
             .captures_iter(html)
             .filter_map(|cap| cap.get(1).map(|m| m.as_str().to_string()))
-            .find(|url| url.ends_with(".mp4"));
-        result
+            .find(|url| url.ends_with(".mp4"))
     }
 
     fn extract_image_url(html: &str) -> Option<(String, bool)> {
-        let re = Regex::new(r#"src="(https://i\.pinimg\.com/.*?\.(jpg|gif))""#).unwrap();
         let mut best: Option<(String, bool)> = None;
 
-        for cap in re.captures_iter(html) {
+        for cap in IMAGE_URL_RE.captures_iter(html) {
             if let Some(url_match) = cap.get(1) {
                 let url = url_match.as_str().to_string();
                 let is_gif = url.ends_with(".gif");

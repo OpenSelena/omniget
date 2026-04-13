@@ -242,6 +242,30 @@ pub fn run() {
             commands::p2p::p2p_get_active_sends,
             commands::p2p::p2p_validate_code,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|app_handle, event| {
+            if let tauri::RunEvent::ExitRequested { .. } = &event {
+                let state = app_handle.state::<AppState>();
+                let session_mutex = state.torrent_session.clone();
+                tauri::async_runtime::block_on(async move {
+                    let session_guard = session_mutex.lock().await;
+                    let session = session_guard.as_ref().cloned();
+                    drop(session_guard);
+                    if let Some(session) = session {
+                        match tokio::time::timeout(
+                            std::time::Duration::from_secs(5),
+                            session.stop(),
+                        )
+                        .await
+                        {
+                            Ok(()) => tracing::info!("torrent session stopped cleanly"),
+                            Err(_) => tracing::warn!(
+                                "torrent session stop timed out after 5s; exiting anyway"
+                            ),
+                        }
+                    }
+                });
+            }
+        });
 }
