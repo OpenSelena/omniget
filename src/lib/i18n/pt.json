@@ -5,6 +5,15 @@
     "cancel": "Manter rodando",
     "confirm": "Fechar mesmo assim"
   },
+  "legal": {
+    "title": "Use o OmniGet com responsabilidade",
+    "body_paragraph_1": "OmniGet é uma ferramenta para baixar mídia à qual você tem direito de acesso. Você é responsável por respeitar os direitos autorais e os termos de serviço de cada plataforma em que faz download.",
+    "body_paragraph_2": "Ao continuar, você reconhece que:",
+    "rule_copyright": "Só vou baixar conteúdo que eu possuo, para o qual tenho licença, ou que é explicitamente livre para reutilização.",
+    "rule_tos": "Vou respeitar os termos de serviço da plataforma de origem.",
+    "rule_personal_use": "Entendo que esta ferramenta é oferecida como está e os mantenedores não são responsáveis por uso indevido.",
+    "acknowledge": "Entendi"
+  },
   "shortcuts": {
     "title": "Atalhos de teclado",
     "section_application": "Aplicativo",
@@ -58,6 +67,14 @@
     "stop": "Parar",
     "confirm_remove": "Remover este download?",
     "stats_line": "{{count}} downloads · {{size}} salvos",
+    "filter_label": "Filtrar downloads por status",
+    "filter": {
+      "all": "Todos",
+      "active": "Ativos",
+      "queued": "Na fila",
+      "completed": "Concluídos",
+      "failed": "Falharam"
+    },
     "log": {
       "show": "Ver log",
       "hide": "Ocultar log",

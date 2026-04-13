@@ -5,6 +5,20 @@
     "cancel": "繼續執行",
     "confirm": "仍然關閉"
   },
+  "shortcuts": {
+    "title": "鍵盤快速鍵",
+    "section_application": "應用程式",
+    "section_downloads": "下載",
+    "section_navigation": "導覽",
+    "paste_url": "貼上 URL 並下載",
+    "show_shortcuts": "顯示此對話框",
+    "open_settings": "開啟設定",
+    "search_settings": "搜尋設定",
+    "start_download": "開始下載",
+    "cancel_dialog": "關閉對話框或取消",
+    "nav_home": "前往首頁",
+    "nav_downloads": "前往下載"
+  },
   "nav": {
     "home": "首頁",
     "downloads": "下載",
@@ -42,6 +56,14 @@
     "show_more": "顯示另外 {{count}} 項",
     "open_folder": "在資料夾中顯示",
     "stop": "停止",
+    "filter_label": "依狀態篩選下載",
+    "filter": {
+      "all": "全部",
+      "active": "進行中",
+      "queued": "佇列中",
+      "completed": "已完成",
+      "failed": "失敗"
+    },
     "log": {
       "show": "顯示日誌",
       "hide": "隱藏日誌",

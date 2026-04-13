@@ -5,6 +5,29 @@
     "cancel": "继续运行",
     "confirm": "仍然关闭"
   },
+  "legal": {
+    "title": "请负责任地使用 OmniGet",
+    "body_paragraph_1": "OmniGet 是用于下载您有权访问的媒体的工具。您有责任尊重您下载的每个平台的版权和服务条款。",
+    "body_paragraph_2": "继续即表示您确认：",
+    "rule_copyright": "我只会下载我拥有、有许可或明确允许再利用的内容。",
+    "rule_tos": "我会遵守来源平台的服务条款。",
+    "rule_personal_use": "我理解此工具按原样提供，维护者不对滥用行为负责。",
+    "acknowledge": "我已了解"
+  },
+  "shortcuts": {
+    "title": "键盘快捷键",
+    "section_application": "应用",
+    "section_downloads": "下载",
+    "section_navigation": "导航",
+    "paste_url": "粘贴 URL 并下载",
+    "show_shortcuts": "显示此对话框",
+    "open_settings": "打开设置",
+    "search_settings": "搜索设置",
+    "start_download": "开始下载",
+    "cancel_dialog": "关闭对话框或取消",
+    "nav_home": "前往首页",
+    "nav_downloads": "前往下载"
+  },
   "nav": {
     "home": "首页",
     "downloads": "下载",
@@ -44,6 +67,14 @@
     "stop": "停止",
     "confirm_remove": "移除此下载？",
     "stats_line": "{{count}} 次下载 · 已保存 {{size}}",
+    "filter_label": "按状态筛选下载",
+    "filter": {
+      "all": "全部",
+      "active": "进行中",
+      "queued": "队列中",
+      "completed": "已完成",
+      "failed": "失败"
+    },
     "log": {
       "show": "显示日志",
       "hide": "隐藏日志",

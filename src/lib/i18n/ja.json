@@ -5,6 +5,29 @@
     "cancel": "続行する",
     "confirm": "それでも閉じる"
   },
+  "legal": {
+    "title": "OmniGet を責任を持って使用してください",
+    "body_paragraph_1": "OmniGet は、アクセス権のあるメディアをダウンロードするためのツールです。ダウンロード元の各プラットフォームの著作権と利用規約を尊重する責任はあなたにあります。",
+    "body_paragraph_2": "続行すると、次の点に同意したことになります：",
+    "rule_copyright": "自分が所有する、ライセンスを持っている、または明示的に再利用が許可されているコンテンツのみをダウンロードします。",
+    "rule_tos": "ソースプラットフォームの利用規約を尊重します。",
+    "rule_personal_use": "このツールは現状のまま提供され、誤用について開発者は責任を負わないことを理解しています。",
+    "acknowledge": "了解しました"
+  },
+  "shortcuts": {
+    "title": "キーボードショートカット",
+    "section_application": "アプリ",
+    "section_downloads": "ダウンロード",
+    "section_navigation": "ナビゲーション",
+    "paste_url": "URL を貼り付けてダウンロード",
+    "show_shortcuts": "このダイアログを表示",
+    "open_settings": "設定を開く",
+    "search_settings": "設定を検索",
+    "start_download": "ダウンロードを開始",
+    "cancel_dialog": "ダイアログを閉じる / キャンセル",
+    "nav_home": "ホームへ移動",
+    "nav_downloads": "ダウンロードへ移動"
+  },
   "nav": {
     "home": "ホーム",
     "downloads": "ダウンロード",
@@ -44,6 +67,14 @@
     "stop": "停止",
     "confirm_remove": "このダウンロードを削除しますか？",
     "stats_line": "{{count}} 件のダウンロード · {{size}} 保存済み",
+    "filter_label": "ステータスでダウンロードを絞り込む",
+    "filter": {
+      "all": "すべて",
+      "active": "進行中",
+      "queued": "キュー",
+      "completed": "完了",
+      "failed": "失敗"
+    },
     "log": {
       "show": "ログを表示",
       "hide": "ログを非表示",

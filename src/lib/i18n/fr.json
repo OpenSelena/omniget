@@ -5,6 +5,20 @@
     "cancel": "Continuer",
     "confirm": "Fermer quand même"
   },
+  "shortcuts": {
+    "title": "Raccourcis clavier",
+    "section_application": "Application",
+    "section_downloads": "Téléchargements",
+    "section_navigation": "Navigation",
+    "paste_url": "Coller l'URL et télécharger",
+    "show_shortcuts": "Afficher cette fenêtre",
+    "open_settings": "Ouvrir les paramètres",
+    "search_settings": "Rechercher dans les paramètres",
+    "start_download": "Démarrer le téléchargement",
+    "cancel_dialog": "Fermer la fenêtre ou annuler",
+    "nav_home": "Aller à l'Accueil",
+    "nav_downloads": "Aller aux Téléchargements"
+  },
   "nav": {
     "home": "Accueil",
     "downloads": "Téléchargements",
@@ -44,6 +58,14 @@
     "stop": "Arrêter",
     "confirm_remove": "Supprimer ce téléchargement ?",
     "stats_line": "{{count}} téléchargements · {{size}} enregistrés",
+    "filter_label": "Filtrer les téléchargements par statut",
+    "filter": {
+      "all": "Tous",
+      "active": "En cours",
+      "queued": "En file",
+      "completed": "Terminés",
+      "failed": "Échoués"
+    },
     "log": {
       "show": "Afficher le journal",
       "hide": "Masquer le journal",

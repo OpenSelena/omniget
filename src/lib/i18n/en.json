@@ -5,6 +5,15 @@
     "cancel": "Keep running",
     "confirm": "Close anyway"
   },
+  "legal": {
+    "title": "Use OmniGet responsibly",
+    "body_paragraph_1": "OmniGet is a tool to download media you are entitled to access. You are responsible for respecting the copyright and terms of service of every platform you download from.",
+    "body_paragraph_2": "By continuing you acknowledge the following:",
+    "rule_copyright": "I will only download content that I own, have a licence for, or that is explicitly free to reuse.",
+    "rule_tos": "I will respect the terms of service of the source platform.",
+    "rule_personal_use": "I understand this tool is provided as-is and the maintainers are not responsible for misuse.",
+    "acknowledge": "I understand"
+  },
   "shortcuts": {
     "title": "Keyboard shortcuts",
     "section_application": "Application",
@@ -58,6 +67,14 @@
     "stop": "Stop",
     "confirm_remove": "Remove this download?",
     "stats_line": "{{count}} downloads · {{size}} saved",
+    "filter_label": "Filter downloads by status",
+    "filter": {
+      "all": "All",
+      "active": "Active",
+      "queued": "Queued",
+      "completed": "Completed",
+      "failed": "Failed"
+    },
     "log": {
       "show": "Show log",
       "hide": "Hide log",

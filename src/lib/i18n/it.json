@@ -5,6 +5,20 @@
     "cancel": "Continua",
     "confirm": "Chiudi comunque"
   },
+  "shortcuts": {
+    "title": "Scorciatoie da tastiera",
+    "section_application": "Applicazione",
+    "section_downloads": "Download",
+    "section_navigation": "Navigazione",
+    "paste_url": "Incolla URL e scarica",
+    "show_shortcuts": "Mostra questo dialogo",
+    "open_settings": "Apri impostazioni",
+    "search_settings": "Cerca nelle impostazioni",
+    "start_download": "Avvia download",
+    "cancel_dialog": "Chiudi dialogo o annulla",
+    "nav_home": "Vai alla Home",
+    "nav_downloads": "Vai ai Download"
+  },
   "nav": {
     "home": "Home",
     "downloads": "Download",
@@ -44,6 +58,14 @@
     "stop": "Ferma",
     "confirm_remove": "Rimuovere questo download?",
     "stats_line": "{{count}} download · {{size}} salvati",
+    "filter_label": "Filtra download per stato",
+    "filter": {
+      "all": "Tutti",
+      "active": "Attivi",
+      "queued": "In coda",
+      "completed": "Completati",
+      "failed": "Falliti"
+    },
     "log": {
       "show": "Mostra log",
       "hide": "Nascondi log",
