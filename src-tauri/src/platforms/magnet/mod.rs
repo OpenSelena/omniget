@@ -2,8 +2,8 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use async_trait::async_trait;
+use librqbit::{api::TorrentIdOrHash, AddTorrent, AddTorrentOptions, Session, SessionOptions};
 use tokio::sync::mpsc;
-use librqbit::{Session, SessionOptions, AddTorrent, AddTorrentOptions, api::TorrentIdOrHash};
 
 use crate::models::media::{DownloadOptions, DownloadResult, MediaInfo, MediaType, VideoQuality};
 use crate::platforms::traits::PlatformDownloader;
@@ -112,7 +112,11 @@ impl PlatformDownloader for MagnetDownloader {
                     tracing::info!("[magnet] output dir changed, recreating session");
                 }
                 let listen_port = opts.torrent_listen_port.unwrap_or(6881).min(65525);
-                tracing::info!("[magnet] creating shared session, port: {}, output: {}", listen_port, output_dir.display());
+                tracing::info!(
+                    "[magnet] creating shared session, port: {}, output: {}",
+                    listen_port,
+                    output_dir.display()
+                );
                 let session_opts = SessionOptions {
                     listen_port_range: Some(listen_port..listen_port.saturating_add(10)),
                     ..Default::default()
@@ -135,12 +139,16 @@ impl PlatformDownloader for MagnetDownloader {
             }
         };
 
-        let add_torrent = if url.starts_with("magnet:") || url.starts_with("http://") || url.starts_with("https://") {
+        let add_torrent = if url.starts_with("magnet:")
+            || url.starts_with("http://")
+            || url.starts_with("https://")
+        {
             AddTorrent::from_url(url)
         } else {
             let path = std::path::Path::new(url);
             if path.exists() && path.extension().map(|e| e == "torrent").unwrap_or(false) {
-                let bytes = tokio::fs::read(path).await
+                let bytes = tokio::fs::read(path)
+                    .await
                     .map_err(|e| anyhow::anyhow!("Failed to read .torrent file: {}", e))?;
                 AddTorrent::from_bytes(bytes)
             } else {
@@ -153,18 +161,22 @@ impl PlatformDownloader for MagnetDownloader {
         };
 
         tracing::info!("[magnet] adding torrent, output: {}", output_dir.display());
-        let (torrent_id, managed_torrent) = match session.add_torrent(add_torrent, Some(torrent_opts)).await {
-            Ok(resp) => match resp {
-                librqbit::AddTorrentResponse::Added(id, handle) => (id, handle),
-                librqbit::AddTorrentResponse::AlreadyManaged(id, handle) => (id, handle),
-                librqbit::AddTorrentResponse::ListOnly(_) => {
-                    anyhow::bail!("Torrent was added in list-only mode");
-                }
-            },
-            Err(e) => anyhow::bail!("Failed to add torrent: {}", e),
-        };
+        let (torrent_id, managed_torrent) =
+            match session.add_torrent(add_torrent, Some(torrent_opts)).await {
+                Ok(resp) => match resp {
+                    librqbit::AddTorrentResponse::Added(id, handle) => (id, handle),
+                    librqbit::AddTorrentResponse::AlreadyManaged(id, handle) => (id, handle),
+                    librqbit::AddTorrentResponse::ListOnly(_) => {
+                        anyhow::bail!("Torrent was added in list-only mode");
+                    }
+                },
+                Err(e) => anyhow::bail!("Failed to add torrent: {}", e),
+            };
 
-        tracing::info!("[magnet] torrent added (id={}), waiting for download...", torrent_id);
+        tracing::info!(
+            "[magnet] torrent added (id={}), waiting for download...",
+            torrent_id
+        );
 
         if let Some(slot) = &opts.torrent_id_slot {
             *slot.lock().await = Some(torrent_id);
@@ -221,14 +233,23 @@ impl PlatformDownloader for MagnetDownloader {
             }
         }
 
-        let (total_size, torrent_name) = managed_torrent.with_metadata(|meta| {
-            let size = meta.info.iter_file_lengths().ok().map(|iter| iter.sum::<u64>())
-                .unwrap_or_else(|| meta.file_infos.iter().map(|f| f.len).sum());
-            let name = meta.info.name.as_ref()
-                .map(|n| String::from_utf8_lossy(n.as_ref()).to_string())
-                .unwrap_or_default();
-            (size, name)
-        }).unwrap_or((0, String::new()));
+        let (total_size, torrent_name) = managed_torrent
+            .with_metadata(|meta| {
+                let size = meta
+                    .info
+                    .iter_file_lengths()
+                    .ok()
+                    .map(|iter| iter.sum::<u64>())
+                    .unwrap_or_else(|| meta.file_infos.iter().map(|f| f.len).sum());
+                let name = meta
+                    .info
+                    .name
+                    .as_ref()
+                    .map(|n| String::from_utf8_lossy(n.as_ref()).to_string())
+                    .unwrap_or_default();
+                (size, name)
+            })
+            .unwrap_or((0, String::new()));
 
         let file_path = if torrent_name.is_empty() {
             output_dir.clone()

@@ -29,7 +29,10 @@ impl BilibiliDownloader {
             if path.starts_with("/bangumi/") || path.starts_with("/cheese/") {
                 return true;
             }
-            if path.contains("/channel/") || path.contains("/favlist/") || path.contains("/medialist/") {
+            if path.contains("/channel/")
+                || path.contains("/favlist/")
+                || path.contains("/medialist/")
+            {
                 return true;
             }
         }
@@ -54,7 +57,9 @@ impl PlatformDownloader for BilibiliDownloader {
         if let Ok(parsed) = url::Url::parse(url) {
             if let Some(host) = parsed.host_str() {
                 let host = host.to_lowercase();
-                return host.contains("bilibili.com") || host.contains("bilibili.tv") || host == "b23.tv";
+                return host.contains("bilibili.com")
+                    || host.contains("bilibili.tv")
+                    || host == "b23.tv";
             }
         }
         false
@@ -224,11 +229,7 @@ impl PlatformDownloader for BilibiliDownloader {
         let quality_height = opts
             .quality
             .as_ref()
-            .and_then(|q| {
-                q.trim_end_matches('p')
-                    .parse::<u32>()
-                    .ok()
-            });
+            .and_then(|q| q.trim_end_matches('p').parse::<u32>().ok());
 
         let mut extra = Self::bilibili_extra_flags();
         extra.push("--no-playlist".to_string());

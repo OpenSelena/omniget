@@ -102,10 +102,7 @@ impl GenericYtdlpDownloader {
                 for f in formats {
                     let height = f.get("height").and_then(|v| v.as_u64()).unwrap_or(0) as u32;
                     let width = f.get("width").and_then(|v| v.as_u64()).unwrap_or(0) as u32;
-                    let vcodec = f
-                        .get("vcodec")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("none");
+                    let vcodec = f.get("vcodec").and_then(|v| v.as_str()).unwrap_or("none");
 
                     if vcodec == "none" || height == 0 {
                         continue;
@@ -150,9 +147,7 @@ impl GenericYtdlpDownloader {
 }
 
 fn is_direct_media_url(url: &str) -> Option<&'static str> {
-    let path = url::Url::parse(url)
-        .ok()
-        .map(|u| u.path().to_lowercase())?;
+    let path = url::Url::parse(url).ok().map(|u| u.path().to_lowercase())?;
 
     if path.contains(".m3u8") {
         return Some("hls");
@@ -198,8 +193,12 @@ fn build_direct_media_info(url: &str, media_type_hint: &str) -> MediaInfo {
         "hls" => ("hls".to_string(), MediaType::Video),
         _ => {
             let lower = url.to_lowercase();
-            if lower.contains(".mp3") || lower.contains(".m4a") || lower.contains(".ogg")
-                || lower.contains(".wav") || lower.contains(".flac") || lower.contains(".aac")
+            if lower.contains(".mp3")
+                || lower.contains(".m4a")
+                || lower.contains(".ogg")
+                || lower.contains(".wav")
+                || lower.contains(".flac")
+                || lower.contains(".aac")
             {
                 ("direct_audio".to_string(), MediaType::Audio)
             } else {
@@ -245,9 +244,9 @@ impl PlatformDownloader for GenericYtdlpDownloader {
             return Ok(build_direct_media_info(url, media_type));
         }
 
-        let ytdlp_path = ytdlp::ensure_ytdlp().await.map_err(|e| {
-            anyhow!("yt-dlp unavailable: {}", e)
-        })?;
+        let ytdlp_path = ytdlp::ensure_ytdlp()
+            .await
+            .map_err(|e| anyhow!("yt-dlp unavailable: {}", e))?;
 
         let extra = platform_extra_flags(url);
         let json = ytdlp::get_video_info(&ytdlp_path, url, &extra).await?;
@@ -278,16 +277,23 @@ impl PlatformDownloader for GenericYtdlpDownloader {
 
         if selected.format == "hls" {
             let title = sanitize_filename::sanitize(&info.title);
-            let filename = if title.ends_with(".mp4") { title } else { format!("{}.mp4", title) };
+            let filename = if title.ends_with(".mp4") {
+                title
+            } else {
+                format!("{}.mp4", title)
+            };
             let output_path = opts.output_dir.join(&filename);
             let output_str = output_path.to_string_lossy().to_string();
 
-            let referer = opts.referer.as_deref()
+            let referer = opts
+                .referer
+                .as_deref()
                 .or_else(|| platform_referer(&selected.url))
                 .unwrap_or("");
 
-            let mut builder = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
-                .timeout(std::time::Duration::from_secs(600));
+            let mut builder =
+                crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
+                    .timeout(std::time::Duration::from_secs(600));
 
             if let Some(ref hdrs) = opts.extra_headers {
                 let mut default_headers = reqwest::header::HeaderMap::new();
@@ -305,7 +311,11 @@ impl PlatformDownloader for GenericYtdlpDownloader {
             }
 
             let jar = crate::core::cookie_parser::load_extension_cookies_for_url(&selected.url)
-                .or_else(|| opts.referer.as_deref().and_then(crate::core::cookie_parser::load_extension_cookies_for_url));
+                .or_else(|| {
+                    opts.referer
+                        .as_deref()
+                        .and_then(crate::core::cookie_parser::load_extension_cookies_for_url)
+                });
             if let Some(jar) = jar {
                 builder = builder.cookie_provider(jar);
             }
@@ -315,7 +325,15 @@ impl PlatformDownloader for GenericYtdlpDownloader {
             let _ = progress.send(0.0).await;
 
             let result = downloader
-                .download(&selected.url, &output_str, referer, None, opts.cancel_token.clone(), 20, 3)
+                .download(
+                    &selected.url,
+                    &output_str,
+                    referer,
+                    None,
+                    opts.cancel_token.clone(),
+                    20,
+                    3,
+                )
                 .await?;
 
             let _ = progress.send(100.0).await;
@@ -332,11 +350,16 @@ impl PlatformDownloader for GenericYtdlpDownloader {
             let title = sanitize_filename::sanitize(&info.title);
             let output_path = opts.output_dir.join(&title);
 
-            let mut builder = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
-                .timeout(std::time::Duration::from_secs(600));
+            let mut builder =
+                crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
+                    .timeout(std::time::Duration::from_secs(600));
 
             let jar = crate::core::cookie_parser::load_extension_cookies_for_url(&selected.url)
-                .or_else(|| opts.referer.as_deref().and_then(crate::core::cookie_parser::load_extension_cookies_for_url));
+                .or_else(|| {
+                    opts.referer
+                        .as_deref()
+                        .and_then(crate::core::cookie_parser::load_extension_cookies_for_url)
+                });
             if let Some(jar) = jar {
                 builder = builder.cookie_provider(jar);
             }
@@ -387,7 +410,9 @@ impl PlatformDownloader for GenericYtdlpDownloader {
         let quality_height = Self::extract_quality_height(&selected.label);
         let video_url = &selected.url;
 
-        let referer = opts.referer.as_deref()
+        let referer = opts
+            .referer
+            .as_deref()
             .or_else(|| platform_referer(video_url));
 
         let mut extra_flags = Vec::new();

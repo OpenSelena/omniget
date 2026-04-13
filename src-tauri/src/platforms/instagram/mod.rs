@@ -5,9 +5,7 @@ use regex::Regex;
 use tokio::sync::mpsc;
 
 use crate::core::direct_downloader::download_direct_with_headers;
-use crate::models::media::{
-    DownloadOptions, DownloadResult, MediaInfo, MediaType, VideoQuality,
-};
+use crate::models::media::{DownloadOptions, DownloadResult, MediaInfo, MediaType, VideoQuality};
 use crate::platforms::traits::PlatformDownloader;
 
 const USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
@@ -20,13 +18,8 @@ pub struct InstagramDownloader {
 }
 
 enum InstagramMedia {
-    Single {
-        url: String,
-        is_video: bool,
-    },
-    Carousel {
-        items: Vec<CarouselItem>,
-    },
+    Single { url: String, is_video: bool },
+    Carousel { items: Vec<CarouselItem> },
 }
 
 struct CarouselItem {
@@ -64,18 +57,21 @@ impl InstagramDownloader {
             .timeout(std::time::Duration::from_secs(120))
             .connect_timeout(std::time::Duration::from_secs(15));
 
-        if let Some(jar) = crate::core::cookie_parser::load_extension_cookies_for_domain("instagram.com") {
+        if let Some(jar) =
+            crate::core::cookie_parser::load_extension_cookies_for_domain("instagram.com")
+        {
             builder = builder.cookie_provider(jar);
         }
 
         let client = builder.build().unwrap_or_default();
 
-        let redirect_client = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
-            .user_agent("curl/7.88.1")
-            .timeout(std::time::Duration::from_secs(120))
-            .connect_timeout(std::time::Duration::from_secs(15))
-            .build()
-            .unwrap_or_default();
+        let redirect_client =
+            crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
+                .user_agent("curl/7.88.1")
+                .timeout(std::time::Duration::from_secs(120))
+                .connect_timeout(std::time::Duration::from_secs(15))
+                .build()
+                .unwrap_or_default();
 
         Self {
             client,
@@ -159,7 +155,8 @@ impl InstagramDownloader {
 
     fn is_login_redirect(html: &str) -> bool {
         let lower = html.to_lowercase();
-        lower.contains("/accounts/login") || lower.contains("\"loginpage\"")
+        lower.contains("/accounts/login")
+            || lower.contains("\"loginpage\"")
             || (lower.contains("\"require_login\"") && lower.contains("true"))
     }
 
@@ -169,7 +166,10 @@ impl InstagramDownloader {
         let response = self
             .client
             .get(&url)
-            .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+            .header(
+                "Accept",
+                "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            )
             .header("Accept-Language", "en-GB,en;q=0.9")
             .header("Sec-Fetch-Dest", "document")
             .header("Sec-Fetch-Mode", "navigate")
@@ -181,27 +181,45 @@ impl InstagramDownloader {
         let html = response.text().await?;
 
         if Self::is_login_redirect(&html) {
-            return Err(anyhow!("Instagram redirecionou para login — post pode ser privado"));
+            return Err(anyhow!(
+                "Instagram redirecionou para login — post pode ser privado"
+            ));
         }
 
         let csrf = Self::extract_object_entry("InstagramSecurityConfig", &html)
-            .and_then(|v| v.get("csrf_token").and_then(|t| t.as_str()).map(|s| s.to_string()))
+            .and_then(|v| {
+                v.get("csrf_token")
+                    .and_then(|t| t.as_str())
+                    .map(|s| s.to_string())
+            })
             .unwrap_or_default();
 
         let polaris = Self::extract_object_entry("PolarisSiteData", &html);
         let device_id = polaris
             .as_ref()
-            .and_then(|v| v.get("device_id").and_then(|t| t.as_str()).map(|s| s.to_string()))
+            .and_then(|v| {
+                v.get("device_id")
+                    .and_then(|t| t.as_str())
+                    .map(|s| s.to_string())
+            })
             .unwrap_or_default();
         let machine_id = polaris
             .as_ref()
-            .and_then(|v| v.get("machine_id").and_then(|t| t.as_str()).map(|s| s.to_string()))
+            .and_then(|v| {
+                v.get("machine_id")
+                    .and_then(|t| t.as_str())
+                    .map(|s| s.to_string())
+            })
             .unwrap_or_default();
 
         let site_data = Self::extract_object_entry("SiteData", &html);
         let haste_session = site_data
             .as_ref()
-            .and_then(|v| v.get("haste_session").and_then(|t| t.as_str()).map(|s| s.to_string()))
+            .and_then(|v| {
+                v.get("haste_session")
+                    .and_then(|t| t.as_str())
+                    .map(|s| s.to_string())
+            })
             .unwrap_or_else(|| "20126.HYP:instagram_web_pkg.2.1...0".to_string());
         let hsi = site_data
             .as_ref()
@@ -209,11 +227,19 @@ impl InstagramDownloader {
             .unwrap_or_else(|| "7436540909012459023".to_string());
         let spin_r = site_data
             .as_ref()
-            .and_then(|v| v.get("__spin_r").and_then(|t| t.as_str()).map(|s| s.to_string()))
+            .and_then(|v| {
+                v.get("__spin_r")
+                    .and_then(|t| t.as_str())
+                    .map(|s| s.to_string())
+            })
             .unwrap_or_else(|| "1019933358".to_string());
         let spin_b = site_data
             .as_ref()
-            .and_then(|v| v.get("__spin_b").and_then(|t| t.as_str()).map(|s| s.to_string()))
+            .and_then(|v| {
+                v.get("__spin_b")
+                    .and_then(|t| t.as_str())
+                    .map(|s| s.to_string())
+            })
             .unwrap_or_else(|| "trunk".to_string());
         let spin_t = site_data
             .as_ref()
@@ -226,9 +252,9 @@ impl InstagramDownloader {
                     .as_ref()
                     .and_then(|v| {
                         v.get("__spin_t").and_then(|t| {
-                            t.as_str().map(|s| s.to_string()).or_else(|| {
-                                t.as_u64().map(|n| n.to_string())
-                            })
+                            t.as_str()
+                                .map(|s| s.to_string())
+                                .or_else(|| t.as_u64().map(|n| n.to_string()))
                         })
                     })
                     .unwrap_or_default()
@@ -245,33 +271,47 @@ impl InstagramDownloader {
         let app_id = web_config
             .as_ref()
             .and_then(|v| {
-                v.get("appId")
-                    .and_then(|t| t.as_str().map(|s| s.to_string()).or_else(|| t.as_u64().map(|n| n.to_string())))
+                v.get("appId").and_then(|t| {
+                    t.as_str()
+                        .map(|s| s.to_string())
+                        .or_else(|| t.as_u64().map(|n| n.to_string()))
+                })
             })
             .unwrap_or_else(|| IG_APP_ID.to_string());
 
         let lsd = Self::extract_object_entry("LSD", &html)
-            .and_then(|v| v.get("token").and_then(|t| t.as_str()).map(|s| s.to_string()))
+            .and_then(|v| {
+                v.get("token")
+                    .and_then(|t| t.as_str())
+                    .map(|s| s.to_string())
+            })
             .unwrap_or_else(|| Self::random_base64url(8));
 
         let bloks_version_id = Self::extract_object_entry("WebBloksVersioningID", &html)
-            .and_then(|v| v.get("versioningID").and_then(|t| t.as_str()).map(|s| s.to_string()))
+            .and_then(|v| {
+                v.get("versioningID")
+                    .and_then(|t| t.as_str())
+                    .map(|s| s.to_string())
+            })
             .unwrap_or_default();
 
         let push_info = Self::extract_object_entry("InstagramWebPushInfo", &html);
         let rollout_hash = push_info
             .as_ref()
-            .and_then(|v| v.get("rollout_hash").and_then(|t| t.as_str()).map(|s| s.to_string()))
+            .and_then(|v| {
+                v.get("rollout_hash")
+                    .and_then(|t| t.as_str())
+                    .map(|s| s.to_string())
+            })
             .unwrap_or_else(|| "1019933358".to_string());
 
         let comet_req = Self::extract_number_from_query("__comet_req", &html)
             .unwrap_or_else(|| "7".to_string());
 
-        let jazoest = Self::extract_number_from_query("jazoest", &html)
-            .unwrap_or_else(|| {
-                let val: u32 = rand::rng().random_range(1000..10000);
-                val.to_string()
-            });
+        let jazoest = Self::extract_number_from_query("jazoest", &html).unwrap_or_else(|| {
+            let val: u32 = rand::rng().random_range(1000..10000);
+            val.to_string()
+        });
 
         Ok(GqlParams {
             csrf_token: csrf,
@@ -291,10 +331,7 @@ impl InstagramDownloader {
         })
     }
 
-    async fn request_gql(
-        &self,
-        post_id: &str,
-    ) -> anyhow::Result<serde_json::Value> {
+    async fn request_gql(&self, post_id: &str) -> anyhow::Result<serde_json::Value> {
         let params = self.get_gql_params(post_id).await?;
 
         let anon_cookie = [
@@ -393,19 +430,16 @@ impl InstagramDownloader {
         }
     }
 
-    async fn request_embed(
-        &self,
-        post_id: &str,
-    ) -> anyhow::Result<serde_json::Value> {
-        let url = format!(
-            "https://www.instagram.com/p/{}/embed/captioned/",
-            post_id
-        );
+    async fn request_embed(&self, post_id: &str) -> anyhow::Result<serde_json::Value> {
+        let url = format!("https://www.instagram.com/p/{}/embed/captioned/", post_id);
 
         let response = self
             .client
             .get(&url)
-            .header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+            .header(
+                "Accept",
+                "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+            )
             .header("Accept-Language", "en-GB,en;q=0.9")
             .header("Sec-Fetch-Dest", "iframe")
             .header("Sec-Fetch-Mode", "navigate")
@@ -416,15 +450,9 @@ impl InstagramDownloader {
 
         let html = response.text().await?;
 
-        if let Some(json_str) = Self::regex_extract(
-            r#""init",\[\],\[(.*?)\]\],"#,
-            &html,
-        ) {
+        if let Some(json_str) = Self::regex_extract(r#""init",\[\],\[(.*?)\]\],"#, &html) {
             if let Ok(embed_data) = serde_json::from_str::<serde_json::Value>(&json_str) {
-                if let Some(context_json) = embed_data
-                    .get("contextJSON")
-                    .and_then(|v| v.as_str())
-                {
+                if let Some(context_json) = embed_data.get("contextJSON").and_then(|v| v.as_str()) {
                     let context: serde_json::Value = serde_json::from_str(context_json)?;
                     return Ok(context);
                 }
@@ -500,19 +528,22 @@ impl InstagramDownloader {
 
     fn instagram_headers() -> reqwest::header::HeaderMap {
         let mut headers = reqwest::header::HeaderMap::new();
-        headers.insert(reqwest::header::REFERER, "https://www.instagram.com/".parse().unwrap());
-        headers.insert(reqwest::header::ORIGIN, "https://www.instagram.com".parse().unwrap());
+        headers.insert(
+            reqwest::header::REFERER,
+            "https://www.instagram.com/".parse().unwrap(),
+        );
+        headers.insert(
+            reqwest::header::ORIGIN,
+            "https://www.instagram.com".parse().unwrap(),
+        );
         headers
     }
 
     fn extract_media_from_embed(data: &serde_json::Value) -> anyhow::Result<InstagramMedia> {
-        if let Some(video_url) = data
-            .get("gql_data")
-            .and_then(|g| {
-                g.get("shortcode_media")
-                    .or_else(|| g.get("xdt_shortcode_media"))
-            })
-        {
+        if let Some(video_url) = data.get("gql_data").and_then(|g| {
+            g.get("shortcode_media")
+                .or_else(|| g.get("xdt_shortcode_media"))
+        }) {
             return Self::extract_media_from_gql(video_url);
         }
 
@@ -565,16 +596,16 @@ impl PlatformDownloader for InstagramDownloader {
 
     async fn get_media_info(&self, url: &str) -> anyhow::Result<MediaInfo> {
         if Self::is_story_url(url) {
-            return Err(anyhow!("Instagram Stories are not supported. Only public posts, reels and carousels."));
+            return Err(anyhow!(
+                "Instagram Stories are not supported. Only public posts, reels and carousels."
+            ));
         }
 
         let post_id = if let Some(share_id) = Self::extract_share_id(url) {
             let resolved = self.resolve_share_link(&share_id).await?;
-            Self::extract_post_id(&resolved)
-                .ok_or_else(|| anyhow!("Could not extract post ID"))?
+            Self::extract_post_id(&resolved).ok_or_else(|| anyhow!("Could not extract post ID"))?
         } else {
-            Self::extract_post_id(url)
-                .ok_or_else(|| anyhow!("Could not extract post ID"))?
+            Self::extract_post_id(url).ok_or_else(|| anyhow!("Could not extract post ID"))?
         };
 
         let filename_base = format!("instagram_{}", post_id);
@@ -582,14 +613,12 @@ impl PlatformDownloader for InstagramDownloader {
         let embed_result = self.request_embed(&post_id).await;
         let media = match embed_result {
             Ok(data) => Self::extract_media_from_embed(&data),
-            Err(_embed_err) => {
-                match self.request_gql(&post_id).await {
-                    Ok(data) => Self::extract_media_from_gql(&data),
-                    Err(_gql_err) => {
-                        return self.fallback_ytdlp(url).await;
-                    }
+            Err(_embed_err) => match self.request_gql(&post_id).await {
+                Ok(data) => Self::extract_media_from_gql(&data),
+                Err(_gql_err) => {
+                    return self.fallback_ytdlp(url).await;
                 }
-            }
+            },
         };
 
         let media = match media {

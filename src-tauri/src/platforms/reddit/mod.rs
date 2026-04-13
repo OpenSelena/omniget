@@ -5,9 +5,7 @@ use tokio::sync::mpsc;
 use crate::core::direct_downloader;
 use crate::core::ffmpeg;
 use crate::core::redirect;
-use crate::models::media::{
-    DownloadOptions, DownloadResult, MediaInfo, MediaType, VideoQuality,
-};
+use crate::models::media::{DownloadOptions, DownloadResult, MediaInfo, MediaType, VideoQuality};
 use crate::platforms::traits::PlatformDownloader;
 
 const USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36";
@@ -50,7 +48,9 @@ impl RedditDownloader {
             .timeout(std::time::Duration::from_secs(120))
             .connect_timeout(std::time::Duration::from_secs(15));
 
-        if let Some(jar) = crate::core::cookie_parser::load_extension_cookies_for_domain("reddit.com") {
+        if let Some(jar) =
+            crate::core::cookie_parser::load_extension_cookies_for_domain("reddit.com")
+        {
             builder = builder.cookie_provider(jar);
         }
 
@@ -62,10 +62,7 @@ impl RedditDownloader {
         let parsed = url::Url::parse(url).ok()?;
         let segments: Vec<&str> = parsed.path().split('/').filter(|s| !s.is_empty()).collect();
 
-        if segments.len() >= 4
-            && segments[0] == "r"
-            && segments[2] == "comments"
-        {
+        if segments.len() >= 4 && segments[0] == "r" && segments[2] == "comments" {
             return Some(segments[3].to_string());
         }
 
@@ -185,7 +182,12 @@ impl RedditDownloader {
     }
 
     fn get_resolution_variants(video_url: &str) -> Vec<String> {
-        let resolutions = ["DASH_720.mp4", "DASH_480.mp4", "DASH_360.mp4", "DASH_240.mp4"];
+        let resolutions = [
+            "DASH_720.mp4",
+            "DASH_480.mp4",
+            "DASH_360.mp4",
+            "DASH_240.mp4",
+        ];
         let mut variants = vec![video_url.to_string()];
         for res in &resolutions {
             if !video_url.contains(res) {
@@ -230,7 +232,10 @@ impl RedditDownloader {
     }
 
     fn parse_media(data: &serde_json::Value) -> Option<RedditMedia> {
-        let is_gallery = data.get("is_gallery").and_then(|v| v.as_bool()).unwrap_or(false);
+        let is_gallery = data
+            .get("is_gallery")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false);
         if is_gallery {
             if let Some(gallery) = Self::parse_gallery(data) {
                 return Some(gallery);
@@ -246,12 +251,8 @@ impl RedditDownloader {
         }
 
         if let Some(reddit_video) = data.pointer("/secure_media/reddit_video") {
-            let fallback = reddit_video
-                .get("fallback_url")
-                .and_then(|v| v.as_str())?;
-            let duration = reddit_video
-                .get("duration")
-                .and_then(|v| v.as_f64());
+            let fallback = reddit_video.get("fallback_url").and_then(|v| v.as_str())?;
+            let duration = reddit_video.get("duration").and_then(|v| v.as_f64());
             let video_url = fallback.split('?').next().unwrap_or(fallback).to_string();
 
             return Some(RedditMedia::Video {
@@ -290,7 +291,10 @@ impl RedditDownloader {
             let media_id = item.get("media_id").and_then(|v| v.as_str())?;
             let meta = media_metadata.get(media_id)?;
 
-            let mime = meta.get("m").and_then(|v| v.as_str()).unwrap_or("image/jpeg");
+            let mime = meta
+                .get("m")
+                .and_then(|v| v.as_str())
+                .unwrap_or("image/jpeg");
             let ext = match mime {
                 "image/png" => "png",
                 "image/gif" => "gif",
@@ -347,7 +351,10 @@ impl PlatformDownloader for RedditDownloader {
         match self.native_get_media_info(url).await {
             Ok(info) => Ok(info),
             Err(native_err) => {
-                tracing::warn!("[reddit] native failed: {}, trying yt-dlp fallback", native_err);
+                tracing::warn!(
+                    "[reddit] native failed: {}, trying yt-dlp fallback",
+                    native_err
+                );
                 self.fallback_ytdlp(url).await.map_err(|_| native_err)
             }
         }
@@ -403,8 +410,7 @@ impl RedditDownloader {
 
         let data = self.fetch_post_data(&post_id).await?;
 
-        let media = Self::parse_media(&data)
-            .ok_or_else(|| anyhow!("No media found in post"))?;
+        let media = Self::parse_media(&data).ok_or_else(|| anyhow!("No media found in post"))?;
 
         let source_id = if subreddit.is_empty() {
             post_id.clone()
@@ -529,10 +535,7 @@ impl RedditDownloader {
                     .find(|q| q.label == "video")
                     .ok_or_else(|| anyhow!("No video URL"))?;
 
-                let audio_quality = info
-                    .available_qualities
-                    .iter()
-                    .find(|q| q.label == "audio");
+                let audio_quality = info.available_qualities.iter().find(|q| q.label == "audio");
 
                 let has_audio = audio_quality.is_some();
                 let ffmpeg_available = ffmpeg::is_ffmpeg_available().await;
@@ -550,10 +553,9 @@ impl RedditDownloader {
                         "{}_audio_tmp.mp4",
                         sanitize_filename::sanitize(&info.title)
                     ));
-                    let output = opts.output_dir.join(format!(
-                        "{}.mp4",
-                        sanitize_filename::sanitize(&info.title)
-                    ));
+                    let output = opts
+                        .output_dir
+                        .join(format!("{}.mp4", sanitize_filename::sanitize(&info.title)));
 
                     let _ = progress.send(0.0).await;
 
@@ -567,11 +569,7 @@ impl RedditDownloader {
                     });
 
                     let video_bytes = self
-                        .download_video_with_fallback(
-                            &video_quality.url,
-                            &video_tmp,
-                            vtx,
-                        )
+                        .download_video_with_fallback(&video_quality.url, &video_tmp, vtx)
                         .await?;
 
                     let _ = progress.send(60.0).await;
@@ -639,16 +637,11 @@ impl RedditDownloader {
                         })
                     }
                 } else {
-                    let output = opts.output_dir.join(format!(
-                        "{}.mp4",
-                        sanitize_filename::sanitize(&info.title)
-                    ));
+                    let output = opts
+                        .output_dir
+                        .join(format!("{}.mp4", sanitize_filename::sanitize(&info.title)));
                     let bytes = self
-                        .download_video_with_fallback(
-                            &video_quality.url,
-                            &output,
-                            progress,
-                        )
+                        .download_video_with_fallback(&video_quality.url, &output, progress)
                         .await?;
 
                     Ok(DownloadResult {
@@ -665,10 +658,9 @@ impl RedditDownloader {
                     .first()
                     .ok_or_else(|| anyhow!("Nenhum URL GIF"))?
                     .url;
-                let output = opts.output_dir.join(format!(
-                    "{}.gif",
-                    sanitize_filename::sanitize(&info.title)
-                ));
+                let output = opts
+                    .output_dir
+                    .join(format!("{}.gif", sanitize_filename::sanitize(&info.title)));
                 let bytes =
                     direct_downloader::download_direct(&self.client, url, &output, progress, None)
                         .await?;
@@ -691,9 +683,14 @@ impl RedditDownloader {
                     sanitize_filename::sanitize(&info.title),
                     ext
                 ));
-                let bytes =
-                    direct_downloader::download_direct(&self.client, &quality.url, &output, progress, None)
-                        .await?;
+                let bytes = direct_downloader::download_direct(
+                    &self.client,
+                    &quality.url,
+                    &output,
+                    progress,
+                    None,
+                )
+                .await?;
 
                 Ok(DownloadResult {
                     file_path: output,

@@ -5,9 +5,7 @@ use tokio::sync::mpsc;
 
 use crate::core::direct_downloader;
 use crate::core::redirect;
-use crate::models::media::{
-    DownloadOptions, DownloadResult, MediaInfo, MediaType, VideoQuality,
-};
+use crate::models::media::{DownloadOptions, DownloadResult, MediaInfo, MediaType, VideoQuality};
 use crate::platforms::traits::PlatformDownloader;
 
 const USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
@@ -29,7 +27,9 @@ impl PinterestDownloader {
             .timeout(std::time::Duration::from_secs(120))
             .connect_timeout(std::time::Duration::from_secs(15));
 
-        if let Some(jar) = crate::core::cookie_parser::load_extension_cookies_for_domain("pinterest.com") {
+        if let Some(jar) =
+            crate::core::cookie_parser::load_extension_cookies_for_domain("pinterest.com")
+        {
             builder = builder.cookie_provider(jar);
         }
 
@@ -91,7 +91,11 @@ impl PinterestDownloader {
             .await?;
 
         if !response.status().is_success() {
-            return Err(anyhow!("HTTP {} ao acessar pin {}", response.status(), pin_id));
+            return Err(anyhow!(
+                "HTTP {} ao acessar pin {}",
+                response.status(),
+                pin_id
+            ));
         }
 
         response.text().await.map_err(Into::into)
@@ -173,7 +177,10 @@ impl PlatformDownloader for PinterestDownloader {
         match self.native_get_media_info(url).await {
             Ok(info) => Ok(info),
             Err(native_err) => {
-                tracing::warn!("[pinterest] native failed: {}, trying yt-dlp fallback", native_err);
+                tracing::warn!(
+                    "[pinterest] native failed: {}, trying yt-dlp fallback",
+                    native_err
+                );
                 self.fallback_ytdlp(url).await.map_err(|_| native_err)
             }
         }
@@ -246,8 +253,8 @@ impl PinterestDownloader {
     async fn native_get_media_info(&self, url: &str) -> anyhow::Result<MediaInfo> {
         let canonical = self.resolve_pin_url(url).await?;
 
-        let pin_id = Self::extract_pin_id(&canonical)
-            .ok_or_else(|| anyhow!("Could not extract pin ID"))?;
+        let pin_id =
+            Self::extract_pin_id(&canonical).ok_or_else(|| anyhow!("Could not extract pin ID"))?;
 
         let html = self.fetch_pin_html(&pin_id).await?;
 
@@ -275,7 +282,11 @@ impl PinterestDownloader {
         }
 
         if let Some((image_url, is_gif)) = Self::extract_image_url(&html) {
-            let media_type = if is_gif { MediaType::Gif } else { MediaType::Photo };
+            let media_type = if is_gif {
+                MediaType::Gif
+            } else {
+                MediaType::Photo
+            };
             let format = if is_gif { "gif" } else { "jpg" };
 
             return Ok(MediaInfo {

@@ -32,7 +32,9 @@ async fn connect_relay() -> anyhow::Result<TcpStream> {
     Ok(stream)
 }
 
-async fn read_line(reader: &mut BufReader<tokio::io::ReadHalf<TcpStream>>) -> anyhow::Result<String> {
+async fn read_line(
+    reader: &mut BufReader<tokio::io::ReadHalf<TcpStream>>,
+) -> anyhow::Result<String> {
     let mut line = String::new();
     let n = reader.read_line(&mut line).await?;
     if n == 0 {

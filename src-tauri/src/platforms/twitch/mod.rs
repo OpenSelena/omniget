@@ -3,9 +3,7 @@ use async_trait::async_trait;
 use tokio::sync::mpsc;
 
 use crate::core::direct_downloader;
-use crate::models::media::{
-    DownloadOptions, DownloadResult, MediaInfo, MediaType, VideoQuality,
-};
+use crate::models::media::{DownloadOptions, DownloadResult, MediaInfo, MediaType, VideoQuality};
 use crate::platforms::traits::PlatformDownloader;
 
 const GQL_URL: &str = "https://gql.twitch.tv/gql";
@@ -48,8 +46,8 @@ impl TwitchClipsDownloader {
     }
 
     async fn native_get_media_info(&self, url: &str) -> anyhow::Result<MediaInfo> {
-        let slug = Self::extract_clip_slug(url)
-            .ok_or_else(|| anyhow!("Could not extract clip slug"))?;
+        let slug =
+            Self::extract_clip_slug(url).ok_or_else(|| anyhow!("Could not extract clip slug"))?;
 
         let clip = self.fetch_clip_metadata(&slug).await?;
 
@@ -57,7 +55,9 @@ impl TwitchClipsDownloader {
             return Err(anyhow!("No video quality available"));
         }
 
-        let broadcaster = clip.broadcaster_login.as_deref()
+        let broadcaster = clip
+            .broadcaster_login
+            .as_deref()
             .ok_or_else(|| anyhow!("Dados do clip incompletos"))?;
 
         let token = self.fetch_access_token(&slug).await?;
@@ -148,31 +148,39 @@ impl TwitchClipsDownloader {
             return Err(anyhow!("Clip not found: {}", slug));
         }
 
-        let title = clip.get("title")
+        let title = clip
+            .get("title")
             .and_then(|v| v.as_str())
             .unwrap_or("Untitled")
             .to_string();
 
-        let duration_seconds = clip.get("durationSeconds")
+        let duration_seconds = clip
+            .get("durationSeconds")
             .and_then(|v| v.as_f64())
             .unwrap_or(0.0);
 
-        let thumbnail_url = clip.get("medium")
+        let thumbnail_url = clip
+            .get("medium")
             .and_then(|v| v.as_str())
             .map(|s| s.to_string());
 
-        let broadcaster_login = clip.pointer("/broadcaster/login")
+        let broadcaster_login = clip
+            .pointer("/broadcaster/login")
             .and_then(|v| v.as_str())
             .map(|s| s.to_string());
 
-        let video_qualities = clip.get("videoQualities")
+        let video_qualities = clip
+            .get("videoQualities")
             .and_then(|v| v.as_array())
             .map(|arr| {
                 arr.iter()
                     .filter_map(|q| {
                         let quality = q.get("quality")?.as_str()?.to_string();
                         let source_url = q.get("sourceURL")?.as_str()?.to_string();
-                        Some(ClipQuality { quality, source_url })
+                        Some(ClipQuality {
+                            quality,
+                            source_url,
+                        })
                     })
                     .collect()
             })
@@ -208,7 +216,10 @@ impl TwitchClipsDownloader {
             .await?;
 
         if !response.status().is_success() {
-            return Err(anyhow!("Twitch GQL token retornou HTTP {}", response.status()));
+            return Err(anyhow!(
+                "Twitch GQL token retornou HTTP {}",
+                response.status()
+            ));
         }
 
         let json: serde_json::Value = response.json().await?;
@@ -219,12 +230,14 @@ impl TwitchClipsDownloader {
             .and_then(|r| r.pointer("/data/clip/playbackAccessToken"))
             .ok_or_else(|| anyhow!("Access token not available for clip: {}", slug))?;
 
-        let signature = token_obj.get("signature")
+        let signature = token_obj
+            .get("signature")
             .and_then(|v| v.as_str())
             .ok_or_else(|| anyhow!("Token sem signature"))?
             .to_string();
 
-        let value = token_obj.get("value")
+        let value = token_obj
+            .get("value")
             .and_then(|v| v.as_str())
             .ok_or_else(|| anyhow!("Token sem value"))?
             .to_string();
@@ -252,8 +265,7 @@ impl PlatformDownloader for TwitchClipsDownloader {
         if let Ok(parsed) = url::Url::parse(url) {
             if let Some(host) = parsed.host_str() {
                 let host = host.to_lowercase();
-                let is_twitch = host == "twitch.tv"
-                    || host.ends_with(".twitch.tv");
+                let is_twitch = host == "twitch.tv" || host.ends_with(".twitch.tv");
 
                 if !is_twitch {
                     return false;
@@ -269,7 +281,10 @@ impl PlatformDownloader for TwitchClipsDownloader {
         match self.native_get_media_info(url).await {
             Ok(info) => Ok(info),
             Err(native_err) => {
-                tracing::warn!("[twitch] native failed: {}, trying yt-dlp fallback", native_err);
+                tracing::warn!(
+                    "[twitch] native failed: {}, trying yt-dlp fallback",
+                    native_err
+                );
                 self.fallback_ytdlp(url).await.map_err(|_| native_err)
             }
         }

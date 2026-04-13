@@ -65,10 +65,7 @@ impl VimeoDownloader {
             for f in formats {
                 let height = f.get("height").and_then(|v| v.as_u64()).unwrap_or(0) as u32;
                 let width = f.get("width").and_then(|v| v.as_u64()).unwrap_or(0) as u32;
-                let vcodec = f
-                    .get("vcodec")
-                    .and_then(|v| v.as_str())
-                    .unwrap_or("none");
+                let vcodec = f.get("vcodec").and_then(|v| v.as_str()).unwrap_or("none");
 
                 if vcodec == "none" || height == 0 {
                     continue;
@@ -121,8 +118,7 @@ impl PlatformDownloader for VimeoDownloader {
         if let Ok(parsed) = url::Url::parse(url) {
             if let Some(host) = parsed.host_str() {
                 let host = host.to_lowercase();
-                return host == "vimeo.com"
-                    || host.ends_with(".vimeo.com");
+                return host == "vimeo.com" || host.ends_with(".vimeo.com");
             }
         }
         false

@@ -6,13 +6,12 @@ use reqwest::header::{HeaderMap, HeaderValue, COOKIE, REFERER};
 use tokio::sync::mpsc;
 
 use crate::core::direct_downloader;
-use crate::models::media::{
-    DownloadOptions, DownloadResult, MediaInfo, MediaType, VideoQuality,
-};
+use crate::models::media::{DownloadOptions, DownloadResult, MediaInfo, MediaType, VideoQuality};
 use crate::platforms::traits::PlatformDownloader;
 
 const USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36";
-const SHORT_LINK_UA: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)";
+const SHORT_LINK_UA: &str =
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)";
 
 pub struct TikTokDownloader {
     client: reqwest::Client,
@@ -31,7 +30,9 @@ impl TikTokDownloader {
             .user_agent(USER_AGENT)
             .timeout(std::time::Duration::from_secs(30));
 
-        if let Some(jar) = crate::core::cookie_parser::load_extension_cookies_for_domain("tiktok.com") {
+        if let Some(jar) =
+            crate::core::cookie_parser::load_extension_cookies_for_domain("tiktok.com")
+        {
             builder = builder.cookie_provider(jar);
         } else {
             builder = builder.cookie_store(true);
@@ -78,11 +79,12 @@ impl TikTokDownloader {
     }
 
     async fn resolve_short_link(&self, url: &str) -> anyhow::Result<String> {
-        let redirect_client = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
-            .user_agent(SHORT_LINK_UA)
-            .redirect(reqwest::redirect::Policy::none())
-            .build()
-            .unwrap_or_default();
+        let redirect_client =
+            crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
+                .user_agent(SHORT_LINK_UA)
+                .redirect(reqwest::redirect::Policy::none())
+                .build()
+                .unwrap_or_default();
 
         let response = redirect_client.get(url).send().await?;
 
@@ -113,7 +115,8 @@ impl TikTokDownloader {
             || html.contains("captcha_verify")
             || html.contains("tiktok-verify-page")
             || html.contains("verify/page")
-            || (html.contains("Verify to continue") && !html.contains("__UNIVERSAL_DATA_FOR_REHYDRATION__"))
+            || (html.contains("Verify to continue")
+                && !html.contains("__UNIVERSAL_DATA_FOR_REHYDRATION__"))
     }
 
     fn is_valid_play_addr(url: &str) -> bool {
@@ -152,13 +155,13 @@ impl TikTokDownloader {
         let html = response.text().await?;
 
         if Self::is_captcha_page(&html) {
-            return Err(anyhow!("TikTok is blocking requests. Try again in a few minutes."));
+            return Err(anyhow!(
+                "TikTok is blocking requests. Try again in a few minutes."
+            ));
         }
 
         let json_str = html
-            .split(
-                "<script id=\"__UNIVERSAL_DATA_FOR_REHYDRATION__\" type=\"application/json\">",
-            )
+            .split("<script id=\"__UNIVERSAL_DATA_FOR_REHYDRATION__\" type=\"application/json\">")
             .nth(1)
             .and_then(|s| s.split("</script>").next())
             .ok_or_else(|| anyhow!("TikTok is blocking requests. Try again in a few minutes."))?;
@@ -243,9 +246,15 @@ impl TikTokDownloader {
             }
         }
 
-        if let Some(bitrate_info) = detail.pointer("/video/bitrateInfo").and_then(|v| v.as_array()) {
+        if let Some(bitrate_info) = detail
+            .pointer("/video/bitrateInfo")
+            .and_then(|v| v.as_array())
+        {
             for bitrate in bitrate_info {
-                if let Some(url_list) = bitrate.pointer("/PlayAddr/UrlList").and_then(|v| v.as_array()) {
+                if let Some(url_list) = bitrate
+                    .pointer("/PlayAddr/UrlList")
+                    .and_then(|v| v.as_array())
+                {
                     for u in url_list {
                         if let Some(url) = u.as_str() {
                             if Self::is_valid_play_addr(url) {
@@ -291,7 +300,8 @@ impl TikTokDownloader {
             "https://www.tiktok.com/".to_string(),
         ];
         let json = crate::core::ytdlp::get_video_info(&ytdlp_path, url, &extra_flags).await?;
-        let mut info = crate::platforms::generic_ytdlp::GenericYtdlpDownloader::parse_video_info(&json)?;
+        let mut info =
+            crate::platforms::generic_ytdlp::GenericYtdlpDownloader::parse_video_info(&json)?;
         for q in &mut info.available_qualities {
             q.url = url.to_string();
             q.format = "ytdlp".to_string();
@@ -299,7 +309,11 @@ impl TikTokDownloader {
         Ok(info)
     }
 
-    async fn get_media_info_via_ytdlp(&self, url: &str, post_id: &str) -> anyhow::Result<MediaInfo> {
+    async fn get_media_info_via_ytdlp(
+        &self,
+        url: &str,
+        post_id: &str,
+    ) -> anyhow::Result<MediaInfo> {
         let ytdlp_path = crate::core::ytdlp::find_ytdlp_cached()
             .await
             .ok_or_else(|| anyhow!("yt-dlp not found — install it in Settings"))?;
@@ -384,10 +398,11 @@ impl PlatformDownloader for TikTokDownloader {
         let post_id = match Self::extract_post_id(url) {
             Some(id) => id,
             None => {
-                let canonical = self.resolve_short_link(url).await
+                let canonical = self
+                    .resolve_short_link(url)
+                    .await
                     .unwrap_or_else(|_| url.to_string());
-                Self::extract_post_id(&canonical)
-                    .unwrap_or_else(|| "unknown".to_string())
+                Self::extract_post_id(&canonical).unwrap_or_else(|| "unknown".to_string())
             }
         };
 
@@ -395,7 +410,9 @@ impl PlatformDownloader for TikTokDownloader {
             Ok(d) => d,
             Err(first_err) => {
                 tracing::warn!("[tiktok] native failed: {}, trying yt-dlp", first_err);
-                return self.get_media_info_via_ytdlp(&original_url, &post_id).await
+                return self
+                    .get_media_info_via_ytdlp(&original_url, &post_id)
+                    .await
                     .or_else(|_| Err(first_err));
             }
         };
@@ -543,7 +560,10 @@ impl PlatformDownloader for TikTokDownloader {
                             });
                         }
                         Err(e) => {
-                            tracing::warn!("[tiktok] direct download failed: {}, falling back to yt-dlp", e);
+                            tracing::warn!(
+                                "[tiktok] direct download failed: {}, falling back to yt-dlp",
+                                e
+                            );
                             let _ = tokio::fs::remove_file(&output).await;
                         }
                     }
