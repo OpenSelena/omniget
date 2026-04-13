@@ -242,6 +242,9 @@ pub fn run() {
             commands::p2p::p2p_resume_send,
             commands::p2p::p2p_get_active_sends,
             commands::p2p::p2p_validate_code,
+            commands::app_lifecycle::get_active_download_count,
+            commands::app_lifecycle::request_app_quit,
+            commands::app_lifecycle::force_exit_app,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

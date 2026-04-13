@@ -9,7 +9,7 @@ use tauri::{
     image::Image,
     menu::{MenuBuilder, MenuItem, MenuItemBuilder},
     tray::TrayIconBuilder,
-    AppHandle, Manager, Wry,
+    AppHandle, Emitter, Manager, Wry,
 };
 
 static DOWNLOADS_ITEM: OnceLock<MenuItem<Wry>> = OnceLock::new();
@@ -84,7 +84,7 @@ pub fn setup(app: &AppHandle) -> tauri::Result<()> {
         .on_menu_event(|app, event| match event.id().as_ref() {
             "open" => show_window(app),
             "quit" => {
-                app.exit(0);
+                request_quit(app);
             }
             _ => {}
         })
@@ -172,6 +172,16 @@ pub fn show_window(app: &AppHandle) {
         let _ = window.unminimize();
         let _ = window.set_focus();
     }
+}
+
+pub fn request_quit(app: &AppHandle) {
+    let active = compute_total_active(app);
+    if active == 0 {
+        app.exit(0);
+        return;
+    }
+    show_window(app);
+    let _ = app.emit("exit-confirm-required", active);
 }
 
 fn glyph(ch: char) -> [[bool; 3]; 5] {
