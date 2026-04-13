@@ -15,11 +15,13 @@ type ExtCookiePathFn = Box<dyn Fn() -> PathBuf + Send + Sync>;
 type GlobalCookieFileFn = Box<dyn Fn() -> Option<String> + Send + Sync>;
 type CookiesFromBrowserFn = Box<dyn Fn() -> String + Send + Sync>;
 type ExtRefererFn = Box<dyn Fn(&str) -> Option<String> + Send + Sync>;
+type IncludeAutoSubsFn = Box<dyn Fn() -> bool + Send + Sync>;
 
 static EXT_COOKIE_PATH_FN: OnceLock<ExtCookiePathFn> = OnceLock::new();
 static GLOBAL_COOKIE_FILE_FN: OnceLock<GlobalCookieFileFn> = OnceLock::new();
 static COOKIES_FROM_BROWSER_FN: OnceLock<CookiesFromBrowserFn> = OnceLock::new();
 static EXT_REFERER_FN: OnceLock<ExtRefererFn> = OnceLock::new();
+static INCLUDE_AUTO_SUBS_FN: OnceLock<IncludeAutoSubsFn> = OnceLock::new();
 
 pub fn set_ext_cookie_path_fn(f: impl Fn() -> PathBuf + Send + Sync + 'static) {
     let _ = EXT_COOKIE_PATH_FN.set(Box::new(f));
@@ -35,6 +37,17 @@ pub fn set_cookies_from_browser_fn(f: impl Fn() -> String + Send + Sync + 'stati
 
 pub fn set_ext_referer_fn(f: impl Fn(&str) -> Option<String> + Send + Sync + 'static) {
     let _ = EXT_REFERER_FN.set(Box::new(f));
+}
+
+pub fn set_include_auto_subs_fn(f: impl Fn() -> bool + Send + Sync + 'static) {
+    let _ = INCLUDE_AUTO_SUBS_FN.set(Box::new(f));
+}
+
+fn include_auto_subs_setting() -> bool {
+    INCLUDE_AUTO_SUBS_FN
+        .get()
+        .map(|f| f())
+        .unwrap_or(false)
 }
 
 fn ext_referer_for_url(url: &str) -> Option<String> {
@@ -1206,16 +1219,19 @@ pub async fn download_video(
 
     let should_download_subs = download_subtitles && rate_limit_429_count() < 2;
     let subtitle_args = if should_download_subs {
-        vec![
-            "--write-sub".to_string(),
-            "--write-auto-sub".to_string(),
+        let mut args = vec!["--write-sub".to_string()];
+        if include_auto_subs_setting() {
+            args.push("--write-auto-sub".to_string());
+        }
+        args.extend([
             "--sub-lang".to_string(),
             "en,pt,es".to_string(),
             "--sub-format".to_string(),
             "best".to_string(),
             "--convert-subs".to_string(),
             "srt".to_string(),
-        ]
+        ]);
+        args
     } else {
         Vec::new()
     };

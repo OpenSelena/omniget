@@ -810,6 +810,7 @@ async fn spawn_download_inner(
         output_dir: final_output_dir,
         filename_template: Some(tmpl),
         download_subtitles: settings.download.download_subtitles,
+        include_auto_subtitles: settings.download.include_auto_subtitles,
         download_mode,
         format_id,
         referer,

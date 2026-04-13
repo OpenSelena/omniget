@@ -589,6 +589,16 @@
           </div>
           <button class="toggle" class:on={settings.download.download_subtitles} onclick={() => toggleBool("download", "download_subtitles", settings!.download.download_subtitles)} role="switch" aria-checked={settings.download.download_subtitles} aria-label={$t('settings.download.download_subtitles')}><span class="toggle-knob"></span></button>
         </div>
+        {#if settings.download.download_subtitles}
+          <div class="divider"></div>
+          <div class="setting-row">
+            <div class="setting-col">
+              <span class="setting-label">{$t('settings.download.include_auto_subtitles')}</span>
+              <span class="setting-path">{$t('settings.download.include_auto_subtitles_desc')}</span>
+            </div>
+            <button class="toggle" class:on={settings.download.include_auto_subtitles} onclick={() => toggleBool("download", "include_auto_subtitles", settings!.download.include_auto_subtitles)} role="switch" aria-checked={settings.download.include_auto_subtitles} aria-label={$t('settings.download.include_auto_subtitles')}><span class="toggle-knob"></span></button>
+          </div>
+        {/if}
         <div class="divider"></div>
         <div class="setting-row">
           <div class="setting-col">
@@ -986,7 +996,7 @@
     width: 100%;
     padding: calc(var(--padding) / 1.5) var(--padding);
     background: var(--button);
-    color: var(--foreground);
+    color: var(--secondary);
     border: 1px solid var(--input-border);
     border-radius: var(--border-radius);
     font-size: 0.95rem;

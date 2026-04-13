@@ -43,6 +43,7 @@ pub struct DownloadOptions {
     pub output_dir: PathBuf,
     pub filename_template: Option<String>,
     pub download_subtitles: bool,
+    pub include_auto_subtitles: bool,
     pub download_mode: Option<String>,
     pub format_id: Option<String>,
     pub referer: Option<String>,

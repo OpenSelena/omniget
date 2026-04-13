@@ -138,6 +138,11 @@ pub fn run() {
             core::ytdlp::set_ext_referer_fn(|url| {
                 native_host::read_extension_metadata(url).and_then(|m| m.referer)
             });
+            core::ytdlp::set_include_auto_subs_fn(|| {
+                storage::config::load_settings_standalone()
+                    .download
+                    .include_auto_subtitles
+            });
             {
                 let app_handle = app.handle().clone();
                 omniget_core::core::log_hook::set_log_sink(std::sync::Arc::new(

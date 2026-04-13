@@ -670,14 +670,14 @@
     border: 1px solid var(--content-border);
     border-radius: 9999px;
     background: var(--button);
-    color: var(--foreground-secondary);
+    color: var(--tertiary);
     cursor: pointer;
     transition: background-color 0.12s, color 0.12s, border-color 0.12s;
   }
 
   .filter-pill:hover {
     background: var(--button-elevated);
-    color: var(--foreground);
+    color: var(--secondary);
   }
 
   .filter-pill.active {

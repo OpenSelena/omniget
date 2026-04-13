@@ -19,6 +19,7 @@ export type AppSettings = {
     filename_template: string;
     organize_by_platform: boolean;
     download_subtitles: boolean;
+    include_auto_subtitles: boolean;
     hotkey_enabled: boolean;
     hotkey_binding: string;
     copy_to_clipboard_on_hotkey: boolean;
