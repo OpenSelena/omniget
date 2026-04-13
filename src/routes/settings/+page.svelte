@@ -111,6 +111,53 @@
   type SettingsCategory = "general" | "downloads" | "content" | "shortcuts" | "network" | "tools" | "advanced";
   let activeCategory = $state<SettingsCategory>("general");
 
+  let searchQuery = $state("");
+  let normalizedQuery = $derived(searchQuery.trim().toLowerCase());
+  let isSearching = $derived(normalizedQuery.length > 0);
+
+  $effect(() => {
+    const q = normalizedQuery;
+    if (typeof document === "undefined") return;
+    const rows = document.querySelectorAll<HTMLElement>(
+      ".settings-content .setting-row, .settings-content .section-title",
+    );
+    if (!q) {
+      rows.forEach((row) => {
+        row.style.display = "";
+      });
+      document
+        .querySelectorAll<HTMLElement>(".settings-content .card")
+        .forEach((card) => (card.style.display = ""));
+      document
+        .querySelectorAll<HTMLElement>(".settings-content .section")
+        .forEach((section) => (section.style.display = ""));
+      return;
+    }
+    rows.forEach((row) => {
+      const text = (row.textContent || "").toLowerCase();
+      row.style.display = text.includes(q) ? "" : "none";
+    });
+    document
+      .querySelectorAll<HTMLElement>(".settings-content .card")
+      .forEach((card) => {
+        const hasVisibleRow = Array.from(
+          card.querySelectorAll<HTMLElement>(".setting-row"),
+        ).some((r) => r.style.display !== "none");
+        card.style.display = hasVisibleRow ? "" : "none";
+      });
+    document
+      .querySelectorAll<HTMLElement>(".settings-content .section")
+      .forEach((section) => {
+        const titleEl = section.querySelector<HTMLElement>(".section-title");
+        const hasVisibleCard = Array.from(
+          section.querySelectorAll<HTMLElement>(".card"),
+        ).some((c) => c.style.display !== "none");
+        const hasMatchingTitle =
+          (titleEl?.textContent || "").toLowerCase().includes(q);
+        section.style.display = hasVisibleCard || hasMatchingTitle ? "" : "none";
+      });
+  });
+
   let templateInput = $state("");
   let templateTimer = $state<ReturnType<typeof setTimeout> | null>(null);
   let hotkeyInput = $state("");
@@ -307,7 +354,19 @@
       </div>
     {/if}
 
-    <div class="category-tabs">
+    <div class="settings-search-row">
+      <input
+        type="search"
+        class="settings-search"
+        placeholder={$t('settings.search_placeholder')}
+        value={searchQuery}
+        oninput={(e) => searchQuery = (e.target as HTMLInputElement).value}
+        spellcheck="false"
+        aria-label={$t('settings.search_placeholder')}
+      />
+    </div>
+
+    <div class="category-tabs" class:searching={isSearching}>
       {#each [
         ["general", "settings.cat_general"],
         ["downloads", "settings.cat_downloads"],
@@ -315,13 +374,15 @@
         ["tools", "settings.cat_tools"],
         ["advanced", "settings.cat_advanced"],
       ] as [cat, key] (cat)}
-        <button class="cat-tab" class:active={activeCategory === cat} onclick={() => { activeCategory = cat as SettingsCategory; }}>
+        <button class="cat-tab" class:active={!isSearching && activeCategory === cat} onclick={() => { activeCategory = cat as SettingsCategory; searchQuery = ""; }}>
           {$t(key)}
         </button>
       {/each}
     </div>
 
-    {#if activeCategory === "general"}
+    <div class="settings-content">
+
+    {#if isSearching || activeCategory === "general"}
     {#if isWindows}
       <section class="section">
         <h5 class="section-title">{$t('settings.general.title')}</h5>
@@ -421,7 +482,7 @@
     </section>
     {/if}
 
-    {#if activeCategory === "downloads"}
+    {#if isSearching || activeCategory === "downloads"}
     <section class="section">
       <h5 class="section-title">{$t('settings.download.hotkey_enabled')}</h5>
       <div class="card">
@@ -593,7 +654,7 @@
 
     {/if}
 
-    {#if activeCategory === "tools"}
+    {#if isSearching || activeCategory === "tools"}
     <section class="section">
       <h5 class="section-title">{$t('settings.telegram.title')}</h5>
       <div class="card">
@@ -670,7 +731,7 @@
 
     {/if}
 
-    {#if activeCategory === "network"}
+    {#if isSearching || activeCategory === "network"}
     <section class="section">
       <h5 class="section-title">{$t('settings.proxy.title')}</h5>
       <div class="card">
@@ -749,7 +810,7 @@
 
     {/if}
 
-    {#if activeCategory === "advanced"}
+    {#if isSearching || activeCategory === "advanced"}
     <section class="section">
       <h5 class="section-title">{$t('settings.advanced.title')}</h5>
       <div class="card">
@@ -887,6 +948,7 @@
       </div>
     </section>
     {/if}
+    </div>
   </div>
 {:else}
   <div class="settings-loading">
@@ -914,6 +976,37 @@
     align-items: center;
     justify-content: center;
     min-height: calc(100vh - var(--padding) * 4);
+  }
+
+  .settings-search-row {
+    display: flex;
+  }
+
+  .settings-search {
+    width: 100%;
+    padding: calc(var(--padding) / 1.5) var(--padding);
+    background: var(--button);
+    color: var(--foreground);
+    border: 1px solid var(--input-border);
+    border-radius: var(--border-radius);
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.15s ease;
+  }
+
+  .settings-search:focus {
+    border-color: var(--blue);
+  }
+
+  .category-tabs.searching {
+    opacity: 0.5;
+    pointer-events: auto;
+  }
+
+  .settings-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--padding);
   }
 
   .spinner {
