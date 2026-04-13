@@ -9,6 +9,9 @@ const i18nDir = path.join(__dirname, "..", "src", "lib", "i18n");
 const enPath = path.join(i18nDir, "en.json");
 const outputFile = path.join(i18nDir, "keys.ts");
 
+const STRICT =
+  process.argv.includes("--strict") || process.env.GENERATE_I18N_KEYS_STRICT === "1";
+
 function extractKeys(obj, prefix = "") {
   const keys = [];
   for (const [key, value] of Object.entries(obj)) {
@@ -105,6 +108,9 @@ export type TranslationKeys =\n`;
   }
   if (!hadMismatch) {
     console.log(`All ${otherLocales.length} other locales in sync with en.json`);
+  } else if (STRICT) {
+    console.error("i18n strict mode: locales out of sync with en.json — aborting.");
+    process.exit(1);
   }
 }
 

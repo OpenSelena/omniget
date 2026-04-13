@@ -132,15 +132,6 @@ writeJson(tauriConfPath, (conf) => {
   conf.version = version;
 });
 
-const metainfoPath = path.join(root, "flatpak", "wtf.tonho.omniget.metainfo.xml");
-writeText(metainfoPath, (content) => {
-  let updated = content.replace(
-    /(raw\.githubusercontent\.com\/tonhowtf\/omniget\/v)(\d+\.\d+\.\d+(?:-[\w.]+)?)(\/)/g,
-    (_, a, _b, c) => `${a}${version}${c}`
-  );
-  return updated;
-});
-
 const changelogStorePath = path.join(root, "src", "lib", "stores", "changelog-store.svelte.ts");
 if (fs.existsSync(changelogStorePath)) {
   writeText(changelogStorePath, (content) =>

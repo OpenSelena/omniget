@@ -1,9 +1,12 @@
 import { defineConfig } from "vite";
 import { sveltekit } from "@sveltejs/kit/vite";
-import { execSync } from "child_process";
-import { readFileSync } from "fs";
+import { execSync, spawnSync } from "child_process";
+import { readFileSync, existsSync } from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
 
 const host = process.env.TAURI_DEV_HOST;
+const configDir = path.dirname(fileURLToPath(import.meta.url));
 
 function getGitInfo() {
   try {
@@ -24,12 +27,36 @@ function getVersion() {
   }
 }
 
+function i18nKeysPlugin() {
+  return {
+    name: "omniget-i18n-keys",
+    buildStart() {
+      const script = path.join(configDir, "scripts", "generate-i18n-keys.js");
+      if (!existsSync(script)) {
+        return;
+      }
+      const strict = process.env.OMNIGET_I18N_STRICT !== "0";
+      const args = strict ? [script, "--strict"] : [script];
+      const result = spawnSync(process.execPath, args, {
+        cwd: configDir,
+        stdio: "inherit",
+      });
+      if (result.status !== 0) {
+        this.error(
+          `generate-i18n-keys.js exited with code ${result.status}. ` +
+            `Fix locale keys or set OMNIGET_I18N_STRICT=0 to bypass.`,
+        );
+      }
+    },
+  };
+}
+
 // https://vite.dev/config/
 export default defineConfig(async () => {
   const gitInfo = getGitInfo();
 
   return {
-    plugins: [sveltekit()],
+    plugins: [i18nKeysPlugin(), sveltekit()],
 
     define: {
       __COMMIT_HASH__: JSON.stringify(gitInfo.hash),

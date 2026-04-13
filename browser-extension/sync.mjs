@@ -18,6 +18,7 @@ const SHARED = [
   "src/detect.js",
   "src/media-sniffer.js",
   "src/open-app-toggle.js",
+  "src/send-via-scheme.js",
   "src/sniffer-toggle.js",
   "popup/popup.js",
   "popup/popup.css",
