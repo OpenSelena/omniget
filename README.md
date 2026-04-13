@@ -3,6 +3,7 @@
 </p>
 
 <p align="center">
+  <a href="https://github.com/tonhowtf/omniget/actions/workflows/ci.yml"><img src="https://img.shields.io/github/actions/workflow/status/tonhowtf/omniget/ci.yml?branch=main&style=for-the-badge&label=CI" alt="CI" /></a>
   <a href="https://github.com/tonhowtf/omniget/releases/latest"><img src="https://img.shields.io/github/v/release/tonhowtf/omniget?style=for-the-badge&label=release" alt="Latest Release" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-green?style=for-the-badge" alt="License GPL-3.0" /></a>
   <a href="https://github.com/tonhowtf/omniget/stargazers"><img src="https://img.shields.io/github/stars/tonhowtf/omniget?style=for-the-badge" alt="Stars" /></a>
