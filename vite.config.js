@@ -27,7 +27,7 @@ function getVersion() {
   }
 }
 
-function i18nKeysPlugin() {
+function i18nKeysPlugin({ strict } = { strict: false }) {
   return {
     name: "omniget-i18n-keys",
     buildStart() {
@@ -35,14 +35,13 @@ function i18nKeysPlugin() {
       if (!existsSync(script)) {
         return;
       }
-      const strict = process.env.OMNIGET_I18N_STRICT !== "0";
       const args = strict ? [script, "--strict"] : [script];
       const result = spawnSync(process.execPath, args, {
         cwd: configDir,
         stdio: "inherit",
       });
       if (result.status !== 0) {
-        this.error(
+        throw new Error(
           `generate-i18n-keys.js exited with code ${result.status}. ` +
             `Fix locale keys or set OMNIGET_I18N_STRICT=0 to bypass.`,
         );
@@ -51,12 +50,15 @@ function i18nKeysPlugin() {
   };
 }
 
-// https://vite.dev/config/
-export default defineConfig(async () => {
+export default defineConfig(async ({ command }) => {
   const gitInfo = getGitInfo();
+  const isBuild = command === "build";
+  const strictI18n =
+    process.env.OMNIGET_I18N_STRICT === "1" ||
+    (isBuild && process.env.OMNIGET_I18N_STRICT !== "0");
 
   return {
-    plugins: [i18nKeysPlugin(), sveltekit()],
+    plugins: [i18nKeysPlugin({ strict: strictI18n }), sveltekit()],
 
     define: {
       __COMMIT_HASH__: JSON.stringify(gitInfo.hash),
