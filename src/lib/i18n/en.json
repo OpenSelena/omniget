@@ -43,7 +43,15 @@
     "open_folder": "Show in folder",
     "stop": "Stop",
     "confirm_remove": "Remove this download?",
-    "stats_line": "{{count}} downloads · {{size}} saved"
+    "stats_line": "{{count}} downloads · {{size}} saved",
+    "log": {
+      "show": "Show log",
+      "hide": "Hide log",
+      "copy": "Copy",
+      "copied": "Log copied to clipboard",
+      "copy_failed": "Couldn't copy log",
+      "empty": "No log lines yet"
+    }
   },
   "toast": {
     "download_preparing": "Preparing download...",

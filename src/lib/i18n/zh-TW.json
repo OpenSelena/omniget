@@ -41,7 +41,15 @@
     "clear_finished": "清除已完成項目",
     "show_more": "顯示另外 {{count}} 項",
     "open_folder": "在資料夾中顯示",
-    "stop": "停止"
+    "stop": "停止",
+    "log": {
+      "show": "顯示日誌",
+      "hide": "隱藏日誌",
+      "copy": "複製",
+      "copied": "日誌已複製",
+      "copy_failed": "無法複製日誌",
+      "empty": "尚無日誌"
+    }
   },
   "toast": {
     "download_preparing": "正在準備下載...",

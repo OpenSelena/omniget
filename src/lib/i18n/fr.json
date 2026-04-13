@@ -43,7 +43,15 @@
     "open_folder": "Afficher dans le dossier",
     "stop": "Arrêter",
     "confirm_remove": "Supprimer ce téléchargement ?",
-    "stats_line": "{{count}} téléchargements · {{size}} enregistrés"
+    "stats_line": "{{count}} téléchargements · {{size}} enregistrés",
+    "log": {
+      "show": "Afficher le journal",
+      "hide": "Masquer le journal",
+      "copy": "Copier",
+      "copied": "Journal copié",
+      "copy_failed": "Impossible de copier le journal",
+      "empty": "Aucune ligne dans le journal pour l'instant"
+    }
   },
   "toast": {
     "download_preparing": "Préparation du téléchargement...",

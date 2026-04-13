@@ -43,7 +43,15 @@
     "open_folder": "在文件夹中显示",
     "stop": "停止",
     "confirm_remove": "移除此下载？",
-    "stats_line": "{{count}} 次下载 · 已保存 {{size}}"
+    "stats_line": "{{count}} 次下载 · 已保存 {{size}}",
+    "log": {
+      "show": "显示日志",
+      "hide": "隐藏日志",
+      "copy": "复制",
+      "copied": "日志已复制",
+      "copy_failed": "无法复制日志",
+      "empty": "暂无日志"
+    }
   },
   "toast": {
     "download_preparing": "正在准备下载...",
@@ -310,7 +318,16 @@
       "terms": "条款",
       "project": "项目",
       "roadmap": "路线图",
-      "changelog": "更新日志"
+      "changelog": "更新日志",
+      "debug": "调试信息"
+    },
+    "debug": {
+      "title": "调试信息",
+      "description": "用于粘贴到错误报告中的环境详情。不包含任何敏感信息。",
+      "copy_button": "复制到剪贴板",
+      "copied_short": "已复制",
+      "copied": "调试信息已复制到剪贴板",
+      "copy_failed": "无法复制到剪贴板"
     },
     "description": "你的媒体下载器。开源且免费。",
     "terms_title": "使用条款",
@@ -464,7 +481,8 @@
     "ffmpeg_missing": "未找到 FFmpeg — 请在设置中安装",
     "unsupported_url": "不支持的 URL — 请检查链接",
     "page_access_failed": "无法访问该页面 — 请检查链接和连接",
-    "no_formats": "此链接未找到视频格式"
+    "no_formats": "此链接未找到视频格式",
+    "path_too_long": "下载文件夹路径过长 ({{current}}/{{limit}} 字符)。请选择更短的文件夹。"
   },
   "debug": {
     "title": "活动日志",

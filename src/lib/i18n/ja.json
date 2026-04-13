@@ -43,7 +43,15 @@
     "open_folder": "フォルダーで表示",
     "stop": "停止",
     "confirm_remove": "このダウンロードを削除しますか？",
-    "stats_line": "{{count}} 件のダウンロード · {{size}} 保存済み"
+    "stats_line": "{{count}} 件のダウンロード · {{size}} 保存済み",
+    "log": {
+      "show": "ログを表示",
+      "hide": "ログを非表示",
+      "copy": "コピー",
+      "copied": "ログをコピーしました",
+      "copy_failed": "ログをコピーできませんでした",
+      "empty": "まだログがありません"
+    }
   },
   "toast": {
     "download_preparing": "ダウンロードを準備中...",

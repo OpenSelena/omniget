@@ -40,11 +40,23 @@ const BACKEND_ERROR_MAP: Record<string, string> = {
  */
 export function translateBackendError(
   msg: string,
-  t: (key: string) => string
+  t: (key: string) => string,
+  tWithValues?: (key: string, opts: { values: Record<string, string | number> }) => string
 ): string {
   if (!msg) return t("common.unknown_error");
 
-  // Strip prefix added in downloads.rs ("Failed to get formats: ...")
+  if (msg.startsWith("PathTooLong|")) {
+    const parts = msg.split("|");
+    const limit = Number(parts[1] ?? 0);
+    const current = Number(parts[2] ?? 0);
+    if (tWithValues) {
+      return tWithValues("errors.path_too_long", {
+        values: { limit, current },
+      });
+    }
+    return t("errors.path_too_long");
+  }
+
   const stripped = msg.replace(/^Failed to get formats:\s*/, "").trim();
 
   const key = BACKEND_ERROR_MAP[stripped];

@@ -43,7 +43,15 @@
     "open_folder": "Abrir pasta",
     "stop": "Parar",
     "confirm_remove": "Remover este download?",
-    "stats_line": "{{count}} downloads · {{size}} salvos"
+    "stats_line": "{{count}} downloads · {{size}} salvos",
+    "log": {
+      "show": "Ver log",
+      "hide": "Ocultar log",
+      "copy": "Copiar",
+      "copied": "Log copiado",
+      "copy_failed": "Não foi possível copiar o log",
+      "empty": "Nenhuma linha no log ainda"
+    }
   },
   "toast": {
     "download_preparing": "Preparando download...",

@@ -43,7 +43,15 @@
     "open_folder": "Mostra nella cartella",
     "stop": "Ferma",
     "confirm_remove": "Rimuovere questo download?",
-    "stats_line": "{{count}} download · {{size}} salvati"
+    "stats_line": "{{count}} download · {{size}} salvati",
+    "log": {
+      "show": "Mostra log",
+      "hide": "Nascondi log",
+      "copy": "Copia",
+      "copied": "Log copiato",
+      "copy_failed": "Impossibile copiare il log",
+      "empty": "Nessuna riga di log ancora"
+    }
   },
   "toast": {
     "download_preparing": "Preparazione download...",
