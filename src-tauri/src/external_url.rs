@@ -44,13 +44,34 @@ pub fn is_external_url(value: &str) -> bool {
         return false;
     }
 
-    if trimmed.starts_with("magnet:") || trimmed.starts_with("p2p:") {
+    let normalized = normalize_external_url(trimmed);
+    let target: &str = normalized.as_deref().unwrap_or(trimmed);
+
+    if target.starts_with("magnet:") || target.starts_with("p2p:") {
         return true;
     }
 
-    url::Url::parse(trimmed)
+    url::Url::parse(target)
         .map(|url| matches!(url.scheme(), "http" | "https"))
         .unwrap_or(false)
+}
+
+pub fn normalize_external_url(value: &str) -> Option<String> {
+    let trimmed = value.trim();
+    let rest = trimmed
+        .strip_prefix("omniget://")
+        .or_else(|| trimmed.strip_prefix("omniget:"))?;
+    let rest = rest.trim_start_matches('/');
+    if rest.is_empty() {
+        return None;
+    }
+    if rest.starts_with("magnet:") || rest.starts_with("p2p:") {
+        return Some(rest.to_string());
+    }
+    if rest.starts_with("http://") || rest.starts_with("https://") {
+        return Some(rest.to_string());
+    }
+    Some(format!("https://{}", rest))
 }
 
 pub async fn queue_url_with_defaults(
@@ -267,6 +288,7 @@ pub async fn handle_external_url(
     url: String,
     source: &str,
 ) -> Result<ExternalUrlAction, String> {
+    let url = normalize_external_url(&url).unwrap_or(url);
     if !is_external_url(&url) {
         return Err("Invalid external URL".to_string());
     }
@@ -326,6 +348,7 @@ where
     args.into_iter()
         .map(|arg| arg.as_ref().trim().to_string())
         .find(|arg| is_external_url(arg))
+        .map(|arg| normalize_external_url(&arg).unwrap_or(arg))
 }
 
 async fn push_or_emit_event(app: &AppHandle, event: ExternalUrlEvent) {
