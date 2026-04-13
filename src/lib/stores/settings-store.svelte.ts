@@ -48,6 +48,7 @@ export type AppSettings = {
   };
   onboarding_completed: boolean;
   start_with_windows: boolean;
+  legal_acknowledged?: boolean;
 };
 
 let settings = $state<AppSettings | null>(null);
