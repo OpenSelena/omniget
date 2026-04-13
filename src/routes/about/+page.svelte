@@ -35,6 +35,7 @@
         <a href="/about/changelog" class="about-link">{$t("about.tab.changelog")}</a>
         <a href="/about/terms" class="about-link">{$t("about.tab.terms")}</a>
         <a href="/about/roadmap" class="about-link">{$t("about.tab.roadmap")}</a>
+        <a href="/about/debug" class="about-link">{$t("about.tab.debug")}</a>
     </div>
 
     <div class="about-external">

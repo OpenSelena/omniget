@@ -17,6 +17,7 @@
   import Mascot from "$components/mascot/Mascot.svelte";
   import ContextHint from "$components/hints/ContextHint.svelte";
   import DownloadSpeedGraph from "$components/download/DownloadSpeedGraph.svelte";
+  import DownloadLog from "$components/download/DownloadLog.svelte";
 
   let downloads = $derived(getDownloads());
   let courseList = $derived(
@@ -436,6 +437,10 @@
         ></div>
       </div>
       <span class="item-percent">{Math.max(0, item.percent).toFixed(0)}%</span>
+    {/if}
+
+    {#if item.status !== "queued"}
+      <DownloadLog id={item.id} />
     {/if}
   </div>
 {/snippet}
