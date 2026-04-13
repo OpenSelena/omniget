@@ -4,8 +4,7 @@ use std::process::Stdio;
 use anyhow::anyhow;
 
 pub fn is_flatpak() -> bool {
-    std::path::Path::new("/.flatpak-info").exists()
-        || std::env::var("FLATPAK_ID").is_ok()
+    std::path::Path::new("/.flatpak-info").exists() || std::env::var("FLATPAK_ID").is_ok()
 }
 
 fn managed_bin_dir() -> Option<PathBuf> {
@@ -29,7 +28,11 @@ pub async fn find_tool(tool: &str) -> Option<PathBuf> {
     {
         let flatpak_path = PathBuf::from("/app/bin").join(&name);
         if flatpak_path.exists() {
-            tracing::debug!("[perf] find_tool({}) took {:?}", tool, _timer_start.elapsed());
+            tracing::debug!(
+                "[perf] find_tool({}) took {:?}",
+                tool,
+                _timer_start.elapsed()
+            );
             return Some(flatpak_path);
         }
     }
@@ -56,10 +59,18 @@ pub async fn find_tool(tool: &str) -> Option<PathBuf> {
             };
 
             if check.is_some() {
-                tracing::debug!("[perf] find_tool({}) took {:?}", tool, _timer_start.elapsed());
+                tracing::debug!(
+                    "[perf] find_tool({}) took {:?}",
+                    tool,
+                    _timer_start.elapsed()
+                );
                 return Some(managed_path.clone());
             }
-            tracing::warn!("find_tool({}): binary exists at {} but failed to execute", tool, managed_path.display());
+            tracing::warn!(
+                "find_tool({}): binary exists at {} but failed to execute",
+                tool,
+                managed_path.display()
+            );
         }
     }
 
@@ -84,18 +95,30 @@ pub async fn find_tool(tool: &str) -> Option<PathBuf> {
 
     if result.is_some() {
         let abs = resolve_absolute_path(&name);
-        tracing::debug!("[perf] find_tool({}) took {:?}", tool, _timer_start.elapsed());
+        tracing::debug!(
+            "[perf] find_tool({}) took {:?}",
+            tool,
+            _timer_start.elapsed()
+        );
         return Some(abs);
     }
 
-    tracing::debug!("[perf] find_tool({}) took {:?}", tool, _timer_start.elapsed());
+    tracing::debug!(
+        "[perf] find_tool({}) took {:?}",
+        tool,
+        _timer_start.elapsed()
+    );
     None
 }
 
 /// Resolve a bare binary name to its absolute path via `where` (Windows)
 /// or `which` (Unix). Returns the original name as fallback.
 fn resolve_absolute_path(bin_name: &str) -> PathBuf {
-    let finder = if cfg!(target_os = "windows") { "where" } else { "which" };
+    let finder = if cfg!(target_os = "windows") {
+        "where"
+    } else {
+        "which"
+    };
     if let Ok(output) = std::process::Command::new(finder)
         .arg(bin_name)
         .stdout(std::process::Stdio::piped())
@@ -141,7 +164,11 @@ pub async fn check_version(tool: &str) -> Option<String> {
     };
 
     if !output.status.success() {
-        tracing::debug!("[perf] check_version({}) took {:?}", tool, _timer_start.elapsed());
+        tracing::debug!(
+            "[perf] check_version({}) took {:?}",
+            tool,
+            _timer_start.elapsed()
+        );
         return None;
     }
 
@@ -149,22 +176,20 @@ pub async fn check_version(tool: &str) -> Option<String> {
     let first_line = stdout.lines().next().unwrap_or("");
 
     let result = if tool == "ffmpeg" || tool == "ffprobe" {
-        first_line
-            .split_whitespace()
-            .nth(2)
-            .map(|s| s.to_string())
+        first_line.split_whitespace().nth(2).map(|s| s.to_string())
     } else if tool == "yt-dlp" {
         Some(first_line.trim().to_string())
     } else if tool == "aria2c" {
-        first_line
-            .split_whitespace()
-            .nth(2)
-            .map(|s| s.to_string())
+        first_line.split_whitespace().nth(2).map(|s| s.to_string())
     } else {
         Some(first_line.trim().to_string())
     };
 
-    tracing::debug!("[perf] check_version({}) took {:?}", tool, _timer_start.elapsed());
+    tracing::debug!(
+        "[perf] check_version({}) took {:?}",
+        tool,
+        _timer_start.elapsed()
+    );
     result
 }
 
@@ -193,8 +218,7 @@ pub async fn ensure_ffmpeg() -> anyhow::Result<PathBuf> {
 }
 
 async fn download_ffmpeg() -> anyhow::Result<PathBuf> {
-    let bin_dir = managed_bin_dir()
-        .ok_or_else(|| anyhow!("Could not determine data directory"))?;
+    let bin_dir = managed_bin_dir().ok_or_else(|| anyhow!("Could not determine data directory"))?;
     std::fs::create_dir_all(&bin_dir)?;
 
     let ffmpeg_name = bin_name("ffmpeg");
@@ -211,7 +235,11 @@ async fn download_ffmpeg() -> anyhow::Result<PathBuf> {
         tracing::info!("Downloading FFmpeg component from {}", url);
         let response = client.get(url).send().await?;
         if !response.status().is_success() {
-            return Err(anyhow!("Failed to download FFmpeg from {}: HTTP {}", url, response.status()));
+            return Err(anyhow!(
+                "Failed to download FFmpeg from {}: HTTP {}",
+                url,
+                response.status()
+            ));
         }
 
         let temp_path = bin_dir.join(".ffmpeg_download.tmp");
@@ -233,8 +261,12 @@ async fn download_ffmpeg() -> anyhow::Result<PathBuf> {
         }
 
         match archive_type {
-            ArchiveType::Zip => extract_zip_ffmpeg(&temp_path, &bin_dir, &ffmpeg_name, &ffprobe_name).await?,
-            ArchiveType::TarXz => extract_tar_xz_ffmpeg(&temp_path, &bin_dir, &ffmpeg_name, &ffprobe_name).await?,
+            ArchiveType::Zip => {
+                extract_zip_ffmpeg(&temp_path, &bin_dir, &ffmpeg_name, &ffprobe_name).await?
+            }
+            ArchiveType::TarXz => {
+                extract_tar_xz_ffmpeg(&temp_path, &bin_dir, &ffmpeg_name, &ffprobe_name).await?
+            }
         }
 
         let _ = std::fs::remove_file(&temp_path);
@@ -302,7 +334,12 @@ async fn download_ffmpeg() -> anyhow::Result<PathBuf> {
     };
     match verify {
         Ok(s) if s.success() => {}
-        Ok(s) => return Err(anyhow!("FFmpeg installed but failed to execute (exit code {})", s)),
+        Ok(s) => {
+            return Err(anyhow!(
+                "FFmpeg installed but failed to execute (exit code {})",
+                s
+            ))
+        }
         Err(e) => return Err(anyhow!("FFmpeg installed but failed to execute: {}", e)),
     }
 
@@ -323,8 +360,14 @@ fn ffmpeg_download_urls() -> Vec<(&'static str, ArchiveType)> {
         )]
     } else if cfg!(target_os = "macos") {
         vec![
-            ("https://evermeet.cx/ffmpeg/getrelease/zip", ArchiveType::Zip),
-            ("https://evermeet.cx/ffmpeg/getrelease/ffprobe/zip", ArchiveType::Zip),
+            (
+                "https://evermeet.cx/ffmpeg/getrelease/zip",
+                ArchiveType::Zip,
+            ),
+            (
+                "https://evermeet.cx/ffmpeg/getrelease/ffprobe/zip",
+                ArchiveType::Zip,
+            ),
         ]
     } else if cfg!(target_arch = "aarch64") {
         vec![(
@@ -353,8 +396,8 @@ async fn extract_zip_ffmpeg(
     tokio::task::spawn_blocking(move || {
         let file = std::fs::File::open(&archive_path)
             .map_err(|e| anyhow!("Failed to open archive: {}", e))?;
-        let mut archive = zip::ZipArchive::new(file)
-            .map_err(|e| anyhow!("Failed to open zip: {}", e))?;
+        let mut archive =
+            zip::ZipArchive::new(file).map_err(|e| anyhow!("Failed to open zip: {}", e))?;
 
         let targets = [ffmpeg_name.as_str(), ffprobe_name.as_str()];
 
@@ -400,16 +443,15 @@ async fn extract_tar_xz_ffmpeg(
         let mut archive = tar::Archive::new(decompressor);
         let targets = [ffmpeg_name.as_str(), ffprobe_name.as_str()];
 
-        for entry_result in archive.entries()
+        for entry_result in archive
+            .entries()
             .map_err(|e| anyhow!("Failed to read tar entries: {}", e))?
         {
-            let mut entry = entry_result
-                .map_err(|e| anyhow!("Failed to read tar entry: {}", e))?;
-            let path = entry.path()
+            let mut entry = entry_result.map_err(|e| anyhow!("Failed to read tar entry: {}", e))?;
+            let path = entry
+                .path()
                 .map_err(|e| anyhow!("Failed to read entry path: {}", e))?;
-            let file_name = path.file_name()
-                .and_then(|n| n.to_str())
-                .unwrap_or("");
+            let file_name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
             for target in &targets {
                 if file_name == *target {
                     let dest = bin_dir.join(target);
@@ -470,8 +512,7 @@ pub async fn ensure_js_runtime() -> Option<PathBuf> {
 }
 
 async fn download_deno() -> anyhow::Result<PathBuf> {
-    let bin_dir = managed_bin_dir()
-        .ok_or_else(|| anyhow!("Could not determine data directory"))?;
+    let bin_dir = managed_bin_dir().ok_or_else(|| anyhow!("Could not determine data directory"))?;
     std::fs::create_dir_all(&bin_dir)?;
 
     let deno_name = bin_name("deno");
@@ -503,7 +544,10 @@ async fn download_deno() -> anyhow::Result<PathBuf> {
 
     let response = client.get(url).send().await?;
     if !response.status().is_success() {
-        return Err(anyhow!("Failed to download Deno: HTTP {}", response.status()));
+        return Err(anyhow!(
+            "Failed to download Deno: HTTP {}",
+            response.status()
+        ));
     }
 
     let bytes = response.bytes().await?;
@@ -513,8 +557,8 @@ async fn download_deno() -> anyhow::Result<PathBuf> {
 
     tokio::task::spawn_blocking(move || {
         let cursor = std::io::Cursor::new(&data);
-        let mut archive = zip::ZipArchive::new(cursor)
-            .map_err(|e| anyhow!("Failed to open Deno zip: {}", e))?;
+        let mut archive =
+            zip::ZipArchive::new(cursor).map_err(|e| anyhow!("Failed to open Deno zip: {}", e))?;
 
         for i in 0..archive.len() {
             let mut file = archive
@@ -583,8 +627,7 @@ pub async fn ensure_aria2c() -> Option<PathBuf> {
 
 #[cfg(target_os = "windows")]
 async fn download_aria2c() -> anyhow::Result<PathBuf> {
-    let bin_dir = managed_bin_dir()
-        .ok_or_else(|| anyhow!("Could not determine data directory"))?;
+    let bin_dir = managed_bin_dir().ok_or_else(|| anyhow!("Could not determine data directory"))?;
     std::fs::create_dir_all(&bin_dir)?;
 
     let aria2c_name = bin_name("aria2c");
@@ -598,7 +641,10 @@ async fn download_aria2c() -> anyhow::Result<PathBuf> {
 
     let response = client.get(url).send().await?;
     if !response.status().is_success() {
-        return Err(anyhow!("Failed to download aria2c: HTTP {}", response.status()));
+        return Err(anyhow!(
+            "Failed to download aria2c: HTTP {}",
+            response.status()
+        ));
     }
 
     let bytes = response.bytes().await?;

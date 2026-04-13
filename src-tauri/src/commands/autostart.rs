@@ -11,14 +11,24 @@ const REG_KEY: &str = r"HKCU\Software\Microsoft\Windows\CurrentVersion\Run";
 const APP_NAME: &str = "OmniGet";
 
 pub fn apply_autostart(enabled: bool) -> Result<(), String> {
-    if std::env::var("OMNIGET_PORTABLE").is_ok() { return Ok(()); }
+    if std::env::var("OMNIGET_PORTABLE").is_ok() {
+        return Ok(());
+    }
     #[cfg(windows)]
     {
         if enabled {
-            let exe = std::env::current_exe()
-                .map_err(|e| format!("Failed to get exe path: {e}"))?;
+            let exe =
+                std::env::current_exe().map_err(|e| format!("Failed to get exe path: {e}"))?;
             let output = std::process::Command::new("reg")
-                .args(["add", REG_KEY, "/v", APP_NAME, "/d", &exe.to_string_lossy(), "/f"])
+                .args([
+                    "add",
+                    REG_KEY,
+                    "/v",
+                    APP_NAME,
+                    "/d",
+                    &exe.to_string_lossy(),
+                    "/f",
+                ])
                 .creation_flags(CREATE_NO_WINDOW)
                 .output()
                 .map_err(|e| format!("reg add failed: {e}"))?;
@@ -59,8 +69,7 @@ pub fn set_autostart(app: tauri::AppHandle, enabled: bool) -> Result<(), String>
     apply_autostart(enabled)?;
     let mut current = crate::storage::config::load_settings(&app);
     current.start_with_windows = enabled;
-    crate::storage::config::save_settings(&app, &current)
-        .map_err(|e| format!("Save: {e}"))?;
+    crate::storage::config::save_settings(&app, &current).map_err(|e| format!("Save: {e}"))?;
     Ok(())
 }
 

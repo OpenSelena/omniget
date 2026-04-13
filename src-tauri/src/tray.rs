@@ -1,9 +1,9 @@
-use std::sync::atomic::{AtomicU32, Ordering};
-use std::sync::OnceLock;
-use std::collections::HashMap;
-use std::sync::Mutex;
 use std::collections::hash_map::DefaultHasher;
+use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
+use std::sync::atomic::{AtomicU32, Ordering};
+use std::sync::Mutex;
+use std::sync::OnceLock;
 
 use tauri::{
     image::Image,
@@ -54,10 +54,9 @@ impl BadgeCache {
 
 pub fn setup(app: &AppHandle) -> tauri::Result<()> {
     let open_item = MenuItemBuilder::with_id("open", "OmniGet").build(app)?;
-    let downloads_item =
-        MenuItemBuilder::with_id("downloads", active_label(0))
-            .enabled(false)
-            .build(app)?;
+    let downloads_item = MenuItemBuilder::with_id("downloads", active_label(0))
+        .enabled(false)
+        .build(app)?;
     DOWNLOADS_ITEM.set(downloads_item.clone()).ok();
     let quit_item = MenuItemBuilder::with_id("quit", "Quit").build(app)?;
 
@@ -175,7 +174,6 @@ pub fn show_window(app: &AppHandle) {
     }
 }
 
-
 fn glyph(ch: char) -> [[bool; 3]; 5] {
     match ch {
         '0' => [
@@ -262,7 +260,6 @@ fn glyph(ch: char) -> [[bool; 3]; 5] {
 const GLYPH_W: u32 = 3;
 const GLYPH_H: u32 = 5;
 
-
 fn render_badge(base: &[u8], w: u32, h: u32, count: u32) -> Vec<u8> {
     let mut buf = base.to_vec();
     let size = w.min(h) as f32;
@@ -331,11 +328,7 @@ fn render_badge(base: &[u8], w: u32, h: u32, count: u32) -> Vec<u8> {
                         for sx in 0..scale {
                             let px = ox + (col * scale + sx) as i32;
                             let py = text_y + (row * scale + sy) as i32;
-                            if px >= 0
-                                && py >= 0
-                                && (px as u32) < w
-                                && (py as u32) < h
-                            {
+                            if px >= 0 && py >= 0 && (px as u32) < w && (py as u32) < h {
                                 let idx = ((py as u32 * w + px as u32) * 4) as usize;
                                 if idx + 3 < buf.len() {
                                     buf[idx] = 255;
@@ -423,11 +416,7 @@ fn render_overlay_badge(_base: &[u8], w: u32, h: u32, count: u32) -> Vec<u8> {
                         for sx in 0..scale {
                             let px = ox + (col * scale + sx) as i32;
                             let py = text_y + (row * scale + sy) as i32;
-                            if px >= 0
-                                && py >= 0
-                                && (px as u32) < w
-                                && (py as u32) < h
-                            {
+                            if px >= 0 && py >= 0 && (px as u32) < w && (py as u32) < h {
                                 let idx = ((py as u32 * w + px as u32) * 4) as usize;
                                 if idx + 3 < buf.len() {
                                     buf[idx] = 255;

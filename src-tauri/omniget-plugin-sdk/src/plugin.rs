@@ -13,7 +13,9 @@ pub trait OmnigetPlugin: Send + Sync {
         &self,
         command: String,
         args: serde_json::Value,
-    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<serde_json::Value, String>> + Send + 'static>>;
+    ) -> std::pin::Pin<
+        Box<dyn std::future::Future<Output = Result<serde_json::Value, String>> + Send + 'static>,
+    >;
 
     fn commands(&self) -> Vec<String>;
 }

@@ -74,9 +74,6 @@ async fn enqueue_from_clipboard(app: &tauri::AppHandle, url: String) {
         crate::external_url::queue_url_with_defaults(app, url.clone(), true).await,
         Ok(crate::external_url::QueueUrlOutcome::Queued)
     ) {
-        let _ = app.emit(
-            "hotkey-download-queued",
-            serde_json::json!({ "url": url }),
-        );
+        let _ = app.emit("hotkey-download-queued", serde_json::json!({ "url": url }));
     }
 }

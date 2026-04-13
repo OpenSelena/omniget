@@ -41,7 +41,11 @@ pub fn load_extension_cookies_for_domain(domain: &str) -> Option<Arc<reqwest::co
         return None;
     }
 
-    tracing::debug!("[cookies] loaded {} extension cookies for {}", count, domain);
+    tracing::debug!(
+        "[cookies] loaded {} extension cookies for {}",
+        count,
+        domain
+    );
     Some(Arc::new(jar))
 }
 
@@ -69,7 +73,11 @@ fn normalize_cookie_domains(url: &str) -> Vec<String> {
 
     let parts: Vec<&str> = host.split('.').collect();
     if parts.len() >= 2 {
-        domains.push(format!("{}.{}", parts[parts.len() - 2], parts[parts.len() - 1]));
+        domains.push(format!(
+            "{}.{}",
+            parts[parts.len() - 2],
+            parts[parts.len() - 1]
+        ));
     }
 
     if host.contains("cdninstagram.com") || host.contains("fbcdn.net") {
@@ -88,7 +96,8 @@ fn normalize_cookie_domains(url: &str) -> Vec<String> {
     if host.contains("tiktokcdn.com") || host.contains("tiktokv.com") {
         domains.push("tiktok.com".to_string());
     }
-    if host.contains("biliapi.net") || host.contains("bilivideo.com") || host.contains("hdslb.com") {
+    if host.contains("biliapi.net") || host.contains("bilivideo.com") || host.contains("hdslb.com")
+    {
         domains.push("bilibili.com".to_string());
     }
     if host.contains("googlevideo.com") || host.contains("ytimg.com") {
@@ -217,7 +226,13 @@ pub fn parse_bearer_input(input: &str) -> String {
 
     if trimmed.starts_with('{') || trimmed.starts_with('[') {
         if let Ok(val) = serde_json::from_str::<serde_json::Value>(trimmed) {
-            for key in &["access_token", "token", "idToken", "bearerToken", "bearer_token"] {
+            for key in &[
+                "access_token",
+                "token",
+                "idToken",
+                "bearerToken",
+                "bearer_token",
+            ] {
                 if let Some(t) = val.get(*key).and_then(|v| v.as_str()) {
                     return t.to_string();
                 }
@@ -245,7 +260,11 @@ pub fn parse_bearer_input(input: &str) -> String {
                     cookie_obj.get("value").and_then(|v| v.as_str()),
                 ) {
                     let lower = name.to_lowercase();
-                    if lower.contains("token") || lower.contains("auth") || lower.contains("session") || lower.contains("sid") {
+                    if lower.contains("token")
+                        || lower.contains("auth")
+                        || lower.contains("session")
+                        || lower.contains("sid")
+                    {
                         if value.len() > 20 {
                             return value.to_string();
                         }

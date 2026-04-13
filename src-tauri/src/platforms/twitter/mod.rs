@@ -5,13 +5,10 @@ use async_trait::async_trait;
 use tokio::sync::{mpsc, Mutex};
 
 use crate::core::direct_downloader;
-use crate::models::media::{
-    DownloadOptions, DownloadResult, MediaInfo, MediaType, VideoQuality,
-};
+use crate::models::media::{DownloadOptions, DownloadResult, MediaInfo, MediaType, VideoQuality};
 use crate::platforms::traits::PlatformDownloader;
 
-const GRAPHQL_URL: &str =
-    "https://api.x.com/graphql/4Siu98E55GquhG52zHdY5w/TweetDetail";
+const GRAPHQL_URL: &str = "https://api.x.com/graphql/4Siu98E55GquhG52zHdY5w/TweetDetail";
 const TOKEN_URL: &str = "https://api.x.com/1.1/guest/activate.json";
 const BEARER: &str = "Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA";
 const USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
@@ -99,7 +96,10 @@ impl TwitterDownloader {
             .await?;
 
         if !response.status().is_success() {
-            return Err(anyhow!("Falha ao obter guest token: HTTP {}", response.status()));
+            return Err(anyhow!(
+                "Falha ao obter guest token: HTTP {}",
+                response.status()
+            ));
         }
 
         let json: serde_json::Value = response.json().await?;
@@ -138,7 +138,10 @@ impl TwitterDownloader {
             urlencoding::encode(TWEET_FIELD_TOGGLES),
         );
 
-        let cookie_val = format!("guest_id={}", urlencoding::encode(&format!("v1:{}", guest_token)));
+        let cookie_val = format!(
+            "guest_id={}",
+            urlencoding::encode(&format!("v1:{}", guest_token))
+        );
 
         let response = self
             .client
@@ -243,7 +246,10 @@ impl TwitterDownloader {
         let response = self.client.get(&url).send().await?;
 
         if !response.status().is_success() {
-            return Err(anyhow!("Syndication API retornou HTTP {}", response.status()));
+            return Err(anyhow!(
+                "Syndication API retornou HTTP {}",
+                response.status()
+            ));
         }
 
         response.json().await.map_err(Into::into)
@@ -310,15 +316,15 @@ impl TwitterDownloader {
                     tweet_result.get("legacy")
                 };
 
-                let base_tweet =
-                    base_tweet.ok_or_else(|| anyhow!("Post not available"))?;
+                let base_tweet = base_tweet.ok_or_else(|| anyhow!("Post not available"))?;
 
                 let reposted_media = if typename == "TweetWithVisibilityResults" {
                     tweet_result
                         .pointer("/tweet/legacy/retweeted_status_result/result/tweet/legacy/extended_entities/media")
                 } else {
-                    tweet_result
-                        .pointer("/legacy/retweeted_status_result/result/legacy/extended_entities/media")
+                    tweet_result.pointer(
+                        "/legacy/retweeted_status_result/result/legacy/extended_entities/media",
+                    )
                 };
 
                 let media = reposted_media
@@ -350,14 +356,8 @@ impl TwitterDownloader {
 
         variants
             .iter()
-            .filter(|v| {
-                v.get("content_type").and_then(|c| c.as_str()) == Some("video/mp4")
-            })
-            .max_by_key(|v| {
-                v.get("bitrate")
-                    .and_then(|b| b.as_u64())
-                    .unwrap_or(0)
-            })
+            .filter(|v| v.get("content_type").and_then(|c| c.as_str()) == Some("video/mp4"))
+            .max_by_key(|v| v.get("bitrate").and_then(|b| b.as_u64()).unwrap_or(0))
             .and_then(|v| v.get("url").and_then(|u| u.as_str()))
             .map(|s| s.to_string())
     }
@@ -370,15 +370,9 @@ impl TwitterDownloader {
 
                 match media_type_str {
                     "photo" => {
-                        let base_url = m
-                            .get("media_url_https")
-                            .and_then(|v| v.as_str())?;
+                        let base_url = m.get("media_url_https").and_then(|v| v.as_str())?;
                         let url = format!("{}?name=4096x4096", base_url);
-                        let ext = base_url
-                            .rsplit('.')
-                            .next()
-                            .unwrap_or("jpg")
-                            .to_string();
+                        let ext = base_url.rsplit('.').next().unwrap_or("jpg").to_string();
                         Some(TwitterMediaItem {
                             media_type: TwitterMediaType::Photo,
                             url,
@@ -453,7 +447,10 @@ impl PlatformDownloader for TwitterDownloader {
         match self.native_get_media_info(url).await {
             Ok(info) => Ok(info),
             Err(native_err) => {
-                tracing::warn!("[twitter] native failed: {}, trying yt-dlp fallback", native_err);
+                tracing::warn!(
+                    "[twitter] native failed: {}, trying yt-dlp fallback",
+                    native_err
+                );
                 self.fallback_ytdlp(url).await.map_err(|_| native_err)
             }
         }
@@ -529,14 +526,9 @@ impl PlatformDownloader for TwitterDownloader {
             let output = opts.output_dir.join(&filename);
             let (tx, _rx) = mpsc::channel(8);
 
-            let bytes = direct_downloader::download_direct(
-                &self.client,
-                &quality.url,
-                &output,
-                tx,
-                None,
-            )
-            .await?;
+            let bytes =
+                direct_downloader::download_direct(&self.client, &quality.url, &output, tx, None)
+                    .await?;
 
             total_bytes += bytes;
             last_path = output;
@@ -562,8 +554,8 @@ impl TwitterDownloader {
     }
 
     async fn native_get_media_info(&self, url: &str) -> anyhow::Result<MediaInfo> {
-        let tweet_id = Self::extract_tweet_id(url)
-            .ok_or_else(|| anyhow!("Could not extract tweet ID"))?;
+        let tweet_id =
+            Self::extract_tweet_id(url).ok_or_else(|| anyhow!("Could not extract tweet ID"))?;
 
         let filename_base = format!("twitter_{}", tweet_id);
 
@@ -598,9 +590,12 @@ impl TwitterDownloader {
                 })
             }
             TwitterMedia::Multiple(items) => {
-                let has_video = items
-                    .iter()
-                    .any(|i| matches!(i.media_type, TwitterMediaType::Video | TwitterMediaType::AnimatedGif));
+                let has_video = items.iter().any(|i| {
+                    matches!(
+                        i.media_type,
+                        TwitterMediaType::Video | TwitterMediaType::AnimatedGif
+                    )
+                });
 
                 let media_type = if has_video {
                     MediaType::Video
@@ -634,10 +629,7 @@ impl TwitterDownloader {
         }
     }
 
-    async fn try_graphql(
-        &self,
-        tweet_id: &str,
-    ) -> anyhow::Result<Vec<serde_json::Value>> {
+    async fn try_graphql(&self, tweet_id: &str) -> anyhow::Result<Vec<serde_json::Value>> {
         let token = self.get_guest_token(false).await?;
 
         match self.request_tweet(tweet_id, &token).await {

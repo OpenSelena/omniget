@@ -1,10 +1,7 @@
 use anyhow::anyhow;
 
 pub async fn resolve_redirect(client: &reqwest::Client, url: &str) -> anyhow::Result<String> {
-    let response = client
-        .get(url)
-        .send()
-        .await?;
+    let response = client.get(url).send().await?;
 
     let final_url = response.url().to_string();
 

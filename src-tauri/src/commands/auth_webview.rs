@@ -69,14 +69,11 @@ pub async fn open_auth_webview(
     let success_pattern = request.success_url_contains.clone();
     let tx_nav = tx.clone();
 
-    let mut builder = tauri::WebviewWindowBuilder::new(
-        &app,
-        &label,
-        tauri::WebviewUrl::External(parsed_url),
-    )
-    .title(&request.title)
-    .inner_size(width, height)
-    .center();
+    let mut builder =
+        tauri::WebviewWindowBuilder::new(&app, &label, tauri::WebviewUrl::External(parsed_url))
+            .title(&request.title)
+            .inner_size(width, height)
+            .center();
 
     if let Some(ref script) = request.initialization_script {
         builder = builder.initialization_script(script);
@@ -147,16 +144,27 @@ pub async fn open_auth_webview(
 
     tracing::info!(
         "[auth_webview] signal: {}",
-        if final_url == "__CLOSE_REQUESTED__" { "user closed window" } else { &final_url }
+        if final_url == "__CLOSE_REQUESTED__" {
+            "user closed window"
+        } else {
+            &final_url
+        }
     );
 
     let default_domain = request.cookie_domains.first().cloned().unwrap_or_default();
 
     let cookies = if let Some(ref target_cookie) = request.wait_for_cookie {
-        poll_for_cookie(&webview_window, &default_domain, &request.cookie_domains, target_cookie).await
+        poll_for_cookie(
+            &webview_window,
+            &default_domain,
+            &request.cookie_domains,
+            target_cookie,
+        )
+        .await
     } else {
         tokio::time::sleep(std::time::Duration::from_secs(2)).await;
-        let cookies = extract_cookies(&webview_window, &default_domain, &request.cookie_domains).await;
+        let cookies =
+            extract_cookies(&webview_window, &default_domain, &request.cookie_domains).await;
         if cookies.is_empty() {
             tracing::warn!("[auth_webview] no cookies on first attempt, retrying in 3s...");
             tokio::time::sleep(std::time::Duration::from_secs(3)).await;
@@ -196,13 +204,18 @@ async fn poll_for_cookie(
         attempt += 1;
         let elapsed = start.elapsed();
         if elapsed > timeout {
-            tracing::warn!("[auth_webview] cookie polling timed out after {:.1}s", elapsed.as_secs_f64());
+            tracing::warn!(
+                "[auth_webview] cookie polling timed out after {:.1}s",
+                elapsed.as_secs_f64()
+            );
             return extract_cookies(window, default_domain, domains).await;
         }
 
         let cookies = extract_cookies(window, default_domain, domains).await;
 
-        let found = cookies.iter().any(|c| c.name.to_lowercase() == target_lower);
+        let found = cookies
+            .iter()
+            .any(|c| c.name.to_lowercase() == target_lower);
         if found {
             tracing::info!(
                 "[auth_webview] target cookie '{}' found after {:.1}s ({} attempts, {} total cookies)",
@@ -383,7 +396,11 @@ async fn extract_cookies_native(
     for uri in &uris {
         match extract_cookies_for_uri(window, uri).await {
             Ok(batch) => {
-                tracing::debug!("[auth_webview] native cookies from {}: {}", uri, batch.len());
+                tracing::debug!(
+                    "[auth_webview] native cookies from {}: {}",
+                    uri,
+                    batch.len()
+                );
                 for c in batch {
                     if !all_cookies
                         .iter()
@@ -411,85 +428,83 @@ async fn extract_cookies_for_uri(
     let uri_owned = uri.to_string();
 
     window
-        .with_webview(move |platform_webview| {
-            unsafe {
-                use webview2_com::Microsoft::Web::WebView2::Win32::*;
-                use windows::core::{Interface, HSTRING, PCWSTR, PWSTR, BOOL};
+        .with_webview(move |platform_webview| unsafe {
+            use webview2_com::Microsoft::Web::WebView2::Win32::*;
+            use windows::core::{Interface, BOOL, HSTRING, PCWSTR, PWSTR};
 
-                let core = match platform_webview.controller().CoreWebView2() {
-                    Ok(c) => c,
-                    Err(_) => {
-                        let _ = tx.send(Vec::new());
-                        return;
-                    }
-                };
-                let core2: ICoreWebView2_2 = match core.cast() {
-                    Ok(c) => c,
-                    Err(_) => {
-                        let _ = tx.send(Vec::new());
-                        return;
-                    }
-                };
-                let manager = match core2.CookieManager() {
-                    Ok(m) => m,
-                    Err(_) => {
-                        let _ = tx.send(Vec::new());
-                        return;
-                    }
-                };
+            let core = match platform_webview.controller().CoreWebView2() {
+                Ok(c) => c,
+                Err(_) => {
+                    let _ = tx.send(Vec::new());
+                    return;
+                }
+            };
+            let core2: ICoreWebView2_2 = match core.cast() {
+                Ok(c) => c,
+                Err(_) => {
+                    let _ = tx.send(Vec::new());
+                    return;
+                }
+            };
+            let manager = match core2.CookieManager() {
+                Ok(m) => m,
+                Err(_) => {
+                    let _ = tx.send(Vec::new());
+                    return;
+                }
+            };
 
-                let uri_hstring = HSTRING::from(uri_owned);
+            let uri_hstring = HSTRING::from(uri_owned);
 
-                let _ = manager.GetCookies(
-                    PCWSTR::from_raw(uri_hstring.as_ptr()),
-                    &webview2_com::GetCookiesCompletedHandler::create(Box::new(
-                        move |hr, cookie_list| {
-                            let mut cookies = Vec::new();
-                            if hr.is_ok() {
-                                if let Some(list) = cookie_list {
-                                    let mut count: u32 = 0;
-                                    let _ = list.Count(&mut count);
-                                    for i in 0..count {
-                                        if let Ok(cookie) = list.GetValueAtIndex(i) {
-                                            let mut name_pw = PWSTR::null();
-                                            let mut value_pw = PWSTR::null();
-                                            let mut domain_pw = PWSTR::null();
-                                            let mut path_pw = PWSTR::null();
-                                            let mut http_only_b = BOOL::default();
-                                            let mut secure_b = BOOL::default();
+            let _ = manager.GetCookies(
+                PCWSTR::from_raw(uri_hstring.as_ptr()),
+                &webview2_com::GetCookiesCompletedHandler::create(Box::new(
+                    move |hr, cookie_list| {
+                        let mut cookies = Vec::new();
+                        if hr.is_ok() {
+                            if let Some(list) = cookie_list {
+                                let mut count: u32 = 0;
+                                let _ = list.Count(&mut count);
+                                for i in 0..count {
+                                    if let Ok(cookie) = list.GetValueAtIndex(i) {
+                                        let mut name_pw = PWSTR::null();
+                                        let mut value_pw = PWSTR::null();
+                                        let mut domain_pw = PWSTR::null();
+                                        let mut path_pw = PWSTR::null();
+                                        let mut http_only_b = BOOL::default();
+                                        let mut secure_b = BOOL::default();
 
-                                            let _ = cookie.Name(&mut name_pw);
-                                            let _ = cookie.Value(&mut value_pw);
-                                            let _ = cookie.Domain(&mut domain_pw);
-                                            let _ = cookie.Path(&mut path_pw);
-                                            let _ = cookie.IsHttpOnly(&mut http_only_b);
-                                            let _ = cookie.IsSecure(&mut secure_b);
+                                        let _ = cookie.Name(&mut name_pw);
+                                        let _ = cookie.Value(&mut value_pw);
+                                        let _ = cookie.Domain(&mut domain_pw);
+                                        let _ = cookie.Path(&mut path_pw);
+                                        let _ = cookie.IsHttpOnly(&mut http_only_b);
+                                        let _ = cookie.IsSecure(&mut secure_b);
 
-                                            let name = name_pw.to_string().unwrap_or_default();
-                                            let value = value_pw.to_string().unwrap_or_default();
-                                            let domain = domain_pw.to_string().unwrap_or_default();
-                                            let path = path_pw.to_string().unwrap_or_default();
+                                        let name = name_pw.to_string().unwrap_or_default();
+                                        let value = value_pw.to_string().unwrap_or_default();
+                                        let domain = domain_pw.to_string().unwrap_or_default();
+                                        let path = path_pw.to_string().unwrap_or_default();
 
-                                            if !name.is_empty() && !value.is_empty() {
-                                                cookies.push(AuthCookie {
-                                                    name,
-                                                    value,
-                                                    domain,
-                                                    path,
-                                                    http_only: http_only_b.as_bool(),
-                                                    secure: secure_b.as_bool(),
-                                                });
-                                            }
+                                        if !name.is_empty() && !value.is_empty() {
+                                            cookies.push(AuthCookie {
+                                                name,
+                                                value,
+                                                domain,
+                                                path,
+                                                http_only: http_only_b.as_bool(),
+                                                secure: secure_b.as_bool(),
+                                            });
                                         }
                                     }
                                 }
                             }
-                            let _ = tx.send(cookies);
-                            Ok(())
-                        },
-                    )),
-                );
-            }
+                        }
+                        let _ = tx.send(cookies);
+                        Ok(())
+                    },
+                )),
+            );
         })
         .map_err(|e| format!("{}", e))?;
 

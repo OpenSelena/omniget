@@ -1,8 +1,9 @@
-pub use omniget_core::core::registry;
 pub use omniget_core::core::clipboard;
 pub use omniget_core::core::cookie_parser;
 pub use omniget_core::core::course_utils;
+pub use omniget_core::core::dependencies;
 pub use omniget_core::core::direct_downloader;
+pub use omniget_core::core::ffmpeg;
 pub use omniget_core::core::filename;
 pub use omniget_core::core::hls_downloader;
 pub use omniget_core::core::http_client;
@@ -11,10 +12,9 @@ pub use omniget_core::core::media_processor;
 pub use omniget_core::core::paths;
 pub use omniget_core::core::process;
 pub use omniget_core::core::redirect;
-pub use omniget_core::core::dependencies;
-pub use omniget_core::core::ffmpeg;
+pub use omniget_core::core::registry;
 pub use omniget_core::core::ytdlp;
 
 pub mod events;
-pub mod url_parser;
 pub mod queue;
+pub mod url_parser;

@@ -19,8 +19,7 @@ pub fn update_settings(app: tauri::AppHandle, partial: String) -> Result<AppSett
     let mut current_val =
         serde_json::to_value(&current).map_err(|e| format!("Serialize: {}", e))?;
     merge_json(&mut current_val, &patch);
-    current =
-        serde_json::from_value(current_val).map_err(|e| format!("Deserialize: {}", e))?;
+    current = serde_json::from_value(current_val).map_err(|e| format!("Deserialize: {}", e))?;
     config::save_settings(&app, &current).map_err(|e| format!("Save: {}", e))?;
 
     crate::core::http_client::init_proxy(current.proxy.clone());

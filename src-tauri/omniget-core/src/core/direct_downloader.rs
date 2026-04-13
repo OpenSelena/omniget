@@ -102,8 +102,7 @@ fn part_path_for(output: &Path) -> PathBuf {
 fn is_fatal_error(err: &anyhow::Error) -> bool {
     let msg = err.to_string();
     for code in &[
-        "HTTP 400", "HTTP 401", "HTTP 403", "HTTP 404", "HTTP 405",
-        "HTTP 410", "HTTP 451",
+        "HTTP 400", "HTTP 401", "HTTP 403", "HTTP 404", "HTTP 405", "HTTP 410", "HTTP 451",
     ] {
         if msg.contains(code) {
             return true;
@@ -163,14 +162,20 @@ async fn download_attempt(
 
     let probe = probe_url(client, url, headers.as_ref()).await;
 
-    let use_chunked = probe.accept_ranges
-        && probe.content_length.is_some_and(|s| s > CHUNK_THRESHOLD);
+    let use_chunked =
+        probe.accept_ranges && probe.content_length.is_some_and(|s| s > CHUNK_THRESHOLD);
 
     if use_chunked {
         let total = probe.content_length.unwrap();
         let _ = std::fs::remove_file(&part_path);
         if let Err(chunked_err) = download_chunked(
-            client, url, &part_path, total, progress_tx, headers.clone(), cancel,
+            client,
+            url,
+            &part_path,
+            total,
+            progress_tx,
+            headers.clone(),
+            cancel,
         )
         .await
         {
@@ -180,7 +185,14 @@ async fn download_attempt(
             let _ = std::fs::remove_file(&part_path);
             tracing::warn!("[direct] chunked failed, falling back: {}", chunked_err);
             download_single_stream(
-                client, url, &part_path, 0, probe.content_length, progress_tx, headers, cancel,
+                client,
+                url,
+                &part_path,
+                0,
+                probe.content_length,
+                progress_tx,
+                headers,
+                cancel,
             )
             .await?;
         }
@@ -190,7 +202,14 @@ async fn download_attempt(
             _ => 0,
         };
         download_single_stream(
-            client, url, &part_path, existing, probe.content_length, progress_tx, headers, cancel,
+            client,
+            url,
+            &part_path,
+            existing,
+            probe.content_length,
+            progress_tx,
+            headers,
+            cancel,
         )
         .await?;
     }
@@ -253,8 +272,10 @@ async fn download_chunked(
             if ct.is_cancelled() {
                 return Err(anyhow!("Download cancelled"));
             }
-            download_chunk(&client, &url, &path, start, end, &dl, total_size, &ptx, hdrs, &ct)
-                .await
+            download_chunk(
+                &client, &url, &path, start, end, &dl, total_size, &ptx, hdrs, &ct,
+            )
+            .await
         });
     }
 
@@ -304,8 +325,16 @@ async fn download_chunk(
         }
 
         match download_chunk_attempt(
-            client, url, part_path, start, end, downloaded, total_size, progress_tx,
-            headers.clone(), cancel,
+            client,
+            url,
+            part_path,
+            start,
+            end,
+            downloaded,
+            total_size,
+            progress_tx,
+            headers.clone(),
+            cancel,
         )
         .await
         {
@@ -319,7 +348,10 @@ async fn download_chunk(
                 downloaded.fetch_sub(chunk_bytes.min(current), Ordering::Relaxed);
                 tracing::warn!(
                     "[direct] chunk {}-{} attempt {}/3 failed: {}",
-                    start, end, attempt + 1, e
+                    start,
+                    end,
+                    attempt + 1,
+                    e
                 );
                 last_err = Some(e);
             }
@@ -361,9 +393,7 @@ async fn download_chunk_attempt(
     }
 
     use std::io::{Seek, Write};
-    let mut file = std::fs::OpenOptions::new()
-        .write(true)
-        .open(part_path)?;
+    let mut file = std::fs::OpenOptions::new().write(true).open(part_path)?;
     file.seek(std::io::SeekFrom::Start(start))?;
 
     let expected_size = end - start + 1;
@@ -378,9 +408,8 @@ async fn download_chunk_attempt(
         let chunk_result = tokio::time::timeout(CHUNK_TIMEOUT, stream.next()).await;
         match chunk_result {
             Ok(Some(Ok(data))) => {
-                file.write_all(&data).map_err(|e| {
-                    anyhow!("Write error (disk full?): {}", e)
-                })?;
+                file.write_all(&data)
+                    .map_err(|e| anyhow!("Write error (disk full?): {}", e))?;
                 chunk_written += data.len() as u64;
                 let total_dl =
                     downloaded.fetch_add(data.len() as u64, Ordering::Relaxed) + data.len() as u64;
@@ -389,11 +418,7 @@ async fn download_chunk_attempt(
             }
             Ok(Some(Err(e))) => return Err(anyhow!("Chunk stream error: {}", e)),
             Ok(None) => break,
-            Err(_) => {
-                return Err(anyhow!(
-                    "Chunk timeout — no data received for 30 seconds"
-                ))
-            }
+            Err(_) => return Err(anyhow!("Chunk timeout — no data received for 30 seconds")),
         }
     }
 
@@ -462,9 +487,7 @@ async fn download_single_stream(
 
     use std::io::Write;
     let raw_file = if offset > 0 {
-        std::fs::OpenOptions::new()
-            .append(true)
-            .open(part_path)?
+        std::fs::OpenOptions::new().append(true).open(part_path)?
     } else {
         std::fs::File::create(part_path)?
     };
@@ -484,9 +507,8 @@ async fn download_single_stream(
         let chunk_result = tokio::time::timeout(CHUNK_TIMEOUT, stream.next()).await;
         match chunk_result {
             Ok(Some(Ok(chunk))) => {
-                file.write_all(&chunk).map_err(|e| {
-                    anyhow!("Write error (disk full?): {}", e)
-                })?;
+                file.write_all(&chunk)
+                    .map_err(|e| anyhow!("Write error (disk full?): {}", e))?;
                 downloaded += chunk.len() as u64;
 
                 if let Some(total) = total_size {
@@ -495,8 +517,7 @@ async fn download_single_stream(
                         let _ = progress_tx.send(percent).await;
                     }
                 } else {
-                    let percent =
-                        (downloaded as f64 / (downloaded as f64 + 500_000.0)) * 100.0;
+                    let percent = (downloaded as f64 / (downloaded as f64 + 500_000.0)) * 100.0;
                     let _ = progress_tx.send(percent.min(95.0)).await;
                 }
             }

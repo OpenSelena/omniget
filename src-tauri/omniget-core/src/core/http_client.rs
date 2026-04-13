@@ -13,10 +13,7 @@ pub fn init_proxy(proxy: ProxySettings) {
 }
 
 pub fn get_proxy_snapshot() -> ProxySettings {
-    GLOBAL_PROXY
-        .read()
-        .map(|g| g.clone())
-        .unwrap_or_default()
+    GLOBAL_PROXY.read().map(|g| g.clone()).unwrap_or_default()
 }
 
 pub fn proxy_url() -> Option<String> {

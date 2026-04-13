@@ -48,7 +48,11 @@ pub async fn detect_platform(url: String) -> Result<PlatformInfo, String> {
                 .map(|u| u.scheme() == "http" || u.scheme() == "https")
                 .unwrap_or(false);
             let result = Ok(PlatformInfo {
-                platform: if is_valid_url { "generic".to_string() } else { "unknown".to_string() },
+                platform: if is_valid_url {
+                    "generic".to_string()
+                } else {
+                    "unknown".to_string()
+                },
                 supported: is_valid_url,
                 content_id: None,
                 content_type: None,
@@ -247,7 +251,9 @@ pub async fn cancel_generic_download(
     };
     if let Some(tid) = seeding_torrent_id {
         if let Some(session) = state.torrent_session.lock().await.as_ref() {
-            let _ = session.delete(librqbit::api::TorrentIdOrHash::Id(tid), false).await;
+            let _ = session
+                .delete(librqbit::api::TorrentIdOrHash::Id(tid), false)
+                .await;
         }
     }
     if let Some(s) = state_to_emit {
@@ -268,7 +274,11 @@ pub async fn pause_download(
     let (state_to_emit, torrent_id) = {
         let mut q = state.download_queue.lock().await;
         if q.pause(download_id) {
-            let tid = q.items.iter().find(|i| i.id == download_id).and_then(|i| i.torrent_id);
+            let tid = q
+                .items
+                .iter()
+                .find(|i| i.id == download_id)
+                .and_then(|i| i.torrent_id);
             (Some(q.get_state()), tid)
         } else {
             (None, None)
@@ -299,7 +309,11 @@ pub async fn resume_download(
     let (state_to_emit, torrent_id) = {
         let mut q = state.download_queue.lock().await;
         if q.resume(download_id) {
-            let tid = q.items.iter().find(|i| i.id == download_id).and_then(|i| i.torrent_id);
+            let tid = q
+                .items
+                .iter()
+                .find(|i| i.id == download_id)
+                .and_then(|i| i.torrent_id);
             (Some(q.get_state()), tid)
         } else {
             (None, None)
@@ -359,7 +373,9 @@ pub async fn remove_download(
     };
     if let Some(tid) = seeding_torrent_id {
         if let Some(session) = state.torrent_session.lock().await.as_ref() {
-            let _ = session.delete(librqbit::api::TorrentIdOrHash::Id(tid), false).await;
+            let _ = session
+                .delete(librqbit::api::TorrentIdOrHash::Id(tid), false)
+                .await;
         }
     }
     if let Some(s) = state_to_emit {
@@ -455,8 +471,10 @@ pub async fn reveal_file(path: String) -> Result<(), String> {
             .map(|u| u.to_string())
             .unwrap_or_else(|_| format!("file://{}", dir_path.display()));
 
-        let gdbus_show_items_arg =
-            format!("[\"{}\"]", item_uri.replace('\\', "\\\\").replace('"', "\\\""));
+        let gdbus_show_items_arg = format!(
+            "[\"{}\"]",
+            item_uri.replace('\\', "\\\\").replace('"', "\\\"")
+        );
         let show_items_with_gdbus = tokio::process::Command::new("gdbus")
             .args([
                 "call",
@@ -534,4 +552,3 @@ pub async fn reveal_file(path: String) -> Result<(), String> {
 
     Ok(())
 }
-

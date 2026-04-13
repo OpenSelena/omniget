@@ -18,10 +18,7 @@ impl PlatformRegistry {
     }
 
     pub fn find_platform(&self, url: &str) -> Option<Arc<dyn PlatformDownloader>> {
-        self.platforms
-            .iter()
-            .find(|p| p.can_handle(url))
-            .cloned()
+        self.platforms.iter().find(|p| p.can_handle(url)).cloned()
     }
 }
 

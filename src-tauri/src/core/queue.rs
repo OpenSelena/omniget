@@ -37,8 +37,9 @@ fn info_cache() -> &'static tokio::sync::Mutex<HashMap<String, CachedInfo>> {
 
 const INFO_CACHE_TTL: std::time::Duration = std::time::Duration::from_secs(600);
 
-static IN_FLIGHT_FETCHES: OnceLock<tokio::sync::Mutex<HashMap<String, Arc<tokio::sync::Mutex<()>>>>> =
-    OnceLock::new();
+static IN_FLIGHT_FETCHES: OnceLock<
+    tokio::sync::Mutex<HashMap<String, Arc<tokio::sync::Mutex<()>>>>,
+> = OnceLock::new();
 
 fn in_flight_map() -> &'static tokio::sync::Mutex<HashMap<String, Arc<tokio::sync::Mutex<()>>>> {
     IN_FLIGHT_FETCHES.get_or_init(|| tokio::sync::Mutex::new(HashMap::new()))
@@ -123,7 +124,10 @@ impl QueueItem {
             file_path: self.file_path.clone(),
             file_size_bytes: self.file_size_bytes,
             file_count: self.file_count,
-            thumbnail_url: self.media_info.as_ref().and_then(|m| m.thumbnail_url.clone()),
+            thumbnail_url: self
+                .media_info
+                .as_ref()
+                .and_then(|m| m.thumbnail_url.clone()),
         }
     }
 }
@@ -332,7 +336,11 @@ impl DownloadQueue {
                     // so we must cancel it now to stop the background download loop.
                     // Also return the torrent_id for session cleanup.
                     item.cancel_token.cancel();
-                    let tid = if item.platform == "magnet" { item.torrent_id } else { None };
+                    let tid = if item.platform == "magnet" {
+                        item.torrent_id
+                    } else {
+                        None
+                    };
                     item.status = QueueStatus::Error {
                         message: "Cancelled".to_string(),
                     };
@@ -409,7 +417,10 @@ impl DownloadQueue {
             i.url == url
                 && matches!(
                     i.status,
-                    QueueStatus::Queued | QueueStatus::Active | QueueStatus::Paused | QueueStatus::Seeding
+                    QueueStatus::Queued
+                        | QueueStatus::Active
+                        | QueueStatus::Paused
+                        | QueueStatus::Seeding
                 )
         })
     }
@@ -493,9 +504,13 @@ pub fn spawn_download(
     item_id: u64,
 ) -> std::pin::Pin<Box<dyn std::future::Future<Output = ()> + Send>> {
     Box::pin(async move {
-    let _timer_start = std::time::Instant::now();
-    spawn_download_inner(app, queue, item_id).await;
-    tracing::debug!("[perf] spawn_download {} took {:?}", item_id, _timer_start.elapsed());
+        let _timer_start = std::time::Instant::now();
+        spawn_download_inner(app, queue, item_id).await;
+        tracing::debug!(
+            "[perf] spawn_download {} took {:?}",
+            item_id,
+            _timer_start.elapsed()
+        );
     })
 }
 
@@ -506,18 +521,35 @@ async fn spawn_download_inner(
 ) {
     tracing::info!("[queue] download {} started", item_id);
 
-    let _ = app.emit("queue-item-progress", &QueueItemProgress {
-        id: item_id,
-        title: "".to_string(),
-        platform: "".to_string(),
-        percent: 0.0,
-        speed_bytes_per_sec: 0.0,
-        downloaded_bytes: 0,
-        total_bytes: None,
-        phase: "preparing".to_string(),
-    });
+    let _ = app.emit(
+        "queue-item-progress",
+        &QueueItemProgress {
+            id: item_id,
+            title: "".to_string(),
+            platform: "".to_string(),
+            percent: 0.0,
+            speed_bytes_per_sec: 0.0,
+            downloaded_bytes: 0,
+            total_bytes: None,
+            phase: "preparing".to_string(),
+        },
+    );
 
-    let (url, output_dir, download_mode, quality, format_id, referer, extra_headers, cancel_token, media_info, platform_name, downloader, ytdlp_path, from_hotkey) = {
+    let (
+        url,
+        output_dir,
+        download_mode,
+        quality,
+        format_id,
+        referer,
+        extra_headers,
+        cancel_token,
+        media_info,
+        platform_name,
+        downloader,
+        ytdlp_path,
+        from_hotkey,
+    ) = {
         let q = queue.lock().await;
         let item = match q.items.iter().find(|i| i.id == item_id) {
             Some(i) => i,
@@ -543,26 +575,37 @@ async fn spawn_download_inner(
     let info_start = std::time::Instant::now();
     let info = match media_info {
         Some(i) => {
-            tracing::info!("[queue] info for {} from cache/pre-fetched in {:?}", item_id, info_start.elapsed());
+            tracing::info!(
+                "[queue] info for {} from cache/pre-fetched in {:?}",
+                item_id,
+                info_start.elapsed()
+            );
             i
         }
         None => {
-            tracing::debug!("[perf] spawn_download_inner {}: media_info is None, fetching info", item_id);
-            let _ = app.emit("queue-item-progress", &QueueItemProgress {
-                id: item_id,
-                title: url.clone(),
-                platform: platform_name.clone(),
-                percent: 0.0,
-                speed_bytes_per_sec: 0.0,
-                downloaded_bytes: 0,
-                total_bytes: None,
-                phase: "fetching_info".to_string(),
-            });
+            tracing::debug!(
+                "[perf] spawn_download_inner {}: media_info is None, fetching info",
+                item_id
+            );
+            let _ = app.emit(
+                "queue-item-progress",
+                &QueueItemProgress {
+                    id: item_id,
+                    title: url.clone(),
+                    platform: platform_name.clone(),
+                    percent: 0.0,
+                    speed_bytes_per_sec: 0.0,
+                    downloaded_bytes: 0,
+                    total_bytes: None,
+                    phase: "fetching_info".to_string(),
+                },
+            );
 
             let info_result = tokio::time::timeout(
                 std::time::Duration::from_secs(60),
-                fetch_and_cache_info(&url, &*downloader, &platform_name, ytdlp_path.as_deref())
-            ).await;
+                fetch_and_cache_info(&url, &*downloader, &platform_name, ytdlp_path.as_deref()),
+            )
+            .await;
 
             match info_result {
                 Ok(Ok(i)) => i,
@@ -580,7 +623,13 @@ async fn spawn_download_inner(
                     tracing::warn!("[queue] info fetch timed out for {} after 60s", item_id);
                     let state = {
                         let mut q = queue.lock().await;
-                        q.mark_complete(item_id, false, Some("Timed out fetching video info".to_string()), None, None);
+                        q.mark_complete(
+                            item_id,
+                            false,
+                            Some("Timed out fetching video info".to_string()),
+                            None,
+                            None,
+                        );
                         q.get_state()
                     };
                     emit_queue_state_from_state(&app, state);
@@ -590,7 +639,11 @@ async fn spawn_download_inner(
             }
         }
     };
-    tracing::info!("[queue] info fetch for {} took {:?}", item_id, info_start.elapsed());
+    tracing::info!(
+        "[queue] info fetch for {} took {:?}",
+        item_id,
+        info_start.elapsed()
+    );
 
     let mut info = info;
     if is_generic_title(&info.title) {
@@ -617,16 +670,19 @@ async fn spawn_download_inner(
     };
     emit_queue_state_from_state(&app, state);
 
-    let _ = app.emit("queue-item-progress", &QueueItemProgress {
-        id: item_id,
-        title: info.title.clone(),
-        platform: platform_name.clone(),
-        percent: 0.5,
-        speed_bytes_per_sec: 0.0,
-        downloaded_bytes: 0,
-        total_bytes: info.file_size_bytes,
-        phase: "starting".to_string(),
-    });
+    let _ = app.emit(
+        "queue-item-progress",
+        &QueueItemProgress {
+            id: item_id,
+            title: info.title.clone(),
+            platform: platform_name.clone(),
+            percent: 0.5,
+            speed_bytes_per_sec: 0.0,
+            downloaded_bytes: 0,
+            total_bytes: info.file_size_bytes,
+            phase: "starting".to_string(),
+        },
+    );
 
     let settings = config::load_settings(&app);
     let tmpl = settings.download.filename_template.clone();
@@ -701,19 +757,29 @@ async fn spawn_download_inner(
             {
                 let mut q = queue_progress.lock().await;
                 let tid = { *torrent_id_slot_progress.lock().await };
-                q.update_progress(item_id, clamped, current_speed, downloaded_bytes, total_bytes, tid);
+                q.update_progress(
+                    item_id,
+                    clamped,
+                    current_speed,
+                    downloaded_bytes,
+                    total_bytes,
+                    tid,
+                );
             }
 
-            let _ = app_progress.emit("queue-item-progress", &QueueItemProgress {
-                id: item_id,
-                title: item_title.clone(),
-                platform: item_platform.clone(),
-                percent: clamped,
-                speed_bytes_per_sec: current_speed,
-                downloaded_bytes,
-                total_bytes,
-                phase: phase.to_string(),
-            });
+            let _ = app_progress.emit(
+                "queue-item-progress",
+                &QueueItemProgress {
+                    id: item_id,
+                    title: item_title.clone(),
+                    platform: item_platform.clone(),
+                    percent: clamped,
+                    speed_bytes_per_sec: current_speed,
+                    downloaded_bytes,
+                    total_bytes,
+                    phase: phase.to_string(),
+                },
+            );
         }
     });
 
@@ -724,7 +790,11 @@ async fn spawn_download_inner(
             Err(anyhow::anyhow!("Download cancelado"))
         }
     };
-    tracing::info!("[queue] download {} completed in {:?}", item_id, dl_start.elapsed());
+    tracing::info!(
+        "[queue] download {} completed in {:?}",
+        item_id,
+        dl_start.elapsed()
+    );
 
     let _ = progress_forwarder.await;
 
@@ -749,7 +819,10 @@ async fn spawn_download_inner(
 
     match result {
         Ok(dl) => {
-            if settings.download.embed_metadata && platform_name != "magnet" && ffmpeg::is_ffmpeg_available().await {
+            if settings.download.embed_metadata
+                && platform_name != "magnet"
+                && ffmpeg::is_ffmpeg_available().await
+            {
                 let metadata = MetadataEmbed {
                     title: Some(info.title.clone()),
                     artist: Some(info.author.clone()),
@@ -773,9 +846,12 @@ async fn spawn_download_inner(
                 {
                     match crate::core::clipboard::copy_file_to_clipboard(&dl.file_path).await {
                         Ok(()) => {
-                            let _ = app.emit("file-copied-to-clipboard", serde_json::json!({
-                                "path": dl.file_path.to_string_lossy(),
-                            }));
+                            let _ = app.emit(
+                                "file-copied-to-clipboard",
+                                serde_json::json!({
+                                    "path": dl.file_path.to_string_lossy(),
+                                }),
+                            );
                         }
                         Err(e) => {
                             tracing::warn!("[clipboard] failed to copy file: {}", e);
@@ -814,7 +890,12 @@ async fn spawn_download_inner(
             } else {
                 raw_err.clone()
             };
-            tracing::error!("Download error '{}' [{}]: {}", platform_name, category, raw_err);
+            tracing::error!(
+                "Download error '{}' [{}]: {}",
+                platform_name,
+                category,
+                raw_err
+            );
             let state = {
                 let mut q = queue.lock().await;
                 q.mark_complete(item_id, false, Some(user_msg), None, None);
@@ -855,7 +936,10 @@ async fn fetch_and_cache_info(
         let cache = info_cache().lock().await;
         if let Some(entry) = cache.get(url) {
             if entry.cached_at.elapsed() < INFO_CACHE_TTL {
-                tracing::debug!("[perf] fetch_and_cache_info: dedup cache hit for {}", platform);
+                tracing::debug!(
+                    "[perf] fetch_and_cache_info: dedup cache hit for {}",
+                    platform
+                );
                 return Ok(entry.info.clone());
             }
         }
@@ -878,10 +962,13 @@ async fn fetch_and_cache_info(
     };
 
     let mut cache = info_cache().lock().await;
-    cache.insert(url.to_string(), CachedInfo {
-        info: info.clone(),
-        cached_at: std::time::Instant::now(),
-    });
+    cache.insert(
+        url.to_string(),
+        CachedInfo {
+            info: info.clone(),
+            cached_at: std::time::Instant::now(),
+        },
+    );
     if cache.len() > 50 {
         cache.retain(|_, v| v.cached_at.elapsed() < INFO_CACHE_TTL);
     }
@@ -916,7 +1003,11 @@ pub async fn prefetch_info_with_emit(
     tracing::debug!("[perf] prefetch_info: started");
     match fetch_and_cache_info(url, downloader, platform, ytdlp_path).await {
         Ok(info) => {
-            tracing::debug!("[perf] prefetch_info: completed in {:?} — {}", _timer_start.elapsed(), info.title);
+            tracing::debug!(
+                "[perf] prefetch_info: completed in {:?} — {}",
+                _timer_start.elapsed(),
+                info.title
+            );
             if let Some(app) = app {
                 let preview = MediaPreviewEvent {
                     url: url.to_string(),
@@ -928,7 +1019,11 @@ pub async fn prefetch_info_with_emit(
                 let _ = app.emit("media-info-preview", preview);
             }
         }
-        Err(e) => tracing::warn!("[perf] prefetch_info: failed in {:?} — {}", _timer_start.elapsed(), e),
+        Err(e) => tracing::warn!(
+            "[perf] prefetch_info: failed in {:?} — {}",
+            _timer_start.elapsed(),
+            e
+        ),
     }
 }
 
@@ -940,7 +1035,11 @@ pub async fn try_start_next(app: tauri::AppHandle, queue: Arc<tokio::sync::Mutex
         for nid in &ids {
             q.mark_active(*nid);
         }
-        let state = if !ids.is_empty() { Some(q.get_state()) } else { None };
+        let state = if !ids.is_empty() {
+            Some(q.get_state())
+        } else {
+            None
+        };
         (ids, q.stagger_delay_ms, state)
     };
 
@@ -950,21 +1049,27 @@ pub async fn try_start_next(app: tauri::AppHandle, queue: Arc<tokio::sync::Mutex
 
     let batch_size = next_ids.len();
     for (i, nid) in next_ids.into_iter().enumerate() {
-        let _ = app.emit("queue-item-progress", &QueueItemProgress {
-            id: nid,
-            title: String::new(),
-            platform: String::new(),
-            percent: 0.0,
-            speed_bytes_per_sec: 0.0,
-            downloaded_bytes: 0,
-            total_bytes: None,
-            phase: "queued_starting".to_string(),
-        });
+        let _ = app.emit(
+            "queue-item-progress",
+            &QueueItemProgress {
+                id: nid,
+                title: String::new(),
+                platform: String::new(),
+                percent: 0.0,
+                speed_bytes_per_sec: 0.0,
+                downloaded_bytes: 0,
+                total_bytes: None,
+                phase: "queued_starting".to_string(),
+            },
+        );
 
         if i > 0 {
             let item_platform = {
                 let q = queue.lock().await;
-                q.items.iter().find(|item| item.id == nid).map(|item| item.platform.clone())
+                q.items
+                    .iter()
+                    .find(|item| item.id == nid)
+                    .map(|item| item.platform.clone())
             };
             let delay_ms = if item_platform.as_deref() == Some("youtube") {
                 2000

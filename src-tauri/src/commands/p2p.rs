@@ -2,8 +2,8 @@ use serde::Serialize;
 use tauri::Emitter;
 use tokio_util::sync::CancellationToken;
 
-use crate::{AppState, P2pSendHandle};
 use crate::platforms::p2p;
+use crate::{AppState, P2pSendHandle};
 
 #[derive(Clone, Serialize)]
 pub struct P2pSendStarted {
@@ -46,10 +46,13 @@ pub async fn p2p_send_file(
     let paused_ref = session.paused.clone();
     {
         let mut sends = state.active_p2p_sends.lock().await;
-        sends.insert(code.clone(), P2pSendHandle {
-            cancel_token,
-            paused: paused_ref,
-        });
+        sends.insert(
+            code.clone(),
+            P2pSendHandle {
+                cancel_token,
+                paused: paused_ref,
+            },
+        );
     }
 
     let app_clone = app.clone();
@@ -128,19 +131,25 @@ pub async fn p2p_send_file(
 
         match result {
             Ok(()) => {
-                let _ = app_clone.emit("p2p-send-complete", serde_json::json!({
-                    "code": code_for_task,
-                    "success": true,
-                }));
+                let _ = app_clone.emit(
+                    "p2p-send-complete",
+                    serde_json::json!({
+                        "code": code_for_task,
+                        "success": true,
+                    }),
+                );
             }
             Err(e) => {
                 let err = e.to_string();
                 tracing::error!("[p2p] send failed: {}", err);
-                let _ = app_clone.emit("p2p-send-complete", serde_json::json!({
-                    "code": code_for_task,
-                    "success": false,
-                    "error": err,
-                }));
+                let _ = app_clone.emit(
+                    "p2p-send-complete",
+                    serde_json::json!({
+                        "code": code_for_task,
+                        "success": false,
+                        "error": err,
+                    }),
+                );
             }
         }
     });
@@ -173,7 +182,9 @@ pub async fn p2p_pause_send(
     let sends = state.active_p2p_sends.lock().await;
     match sends.get(&code) {
         Some(handle) => {
-            handle.paused.store(true, std::sync::atomic::Ordering::Relaxed);
+            handle
+                .paused
+                .store(true, std::sync::atomic::Ordering::Relaxed);
             Ok("Send paused".to_string())
         }
         None => Err("No active send with this code".to_string()),
@@ -189,7 +200,9 @@ pub async fn p2p_resume_send(
     let sends = state.active_p2p_sends.lock().await;
     match sends.get(&code) {
         Some(handle) => {
-            handle.paused.store(false, std::sync::atomic::Ordering::Relaxed);
+            handle
+                .paused
+                .store(false, std::sync::atomic::Ordering::Relaxed);
             Ok("Send resumed".to_string())
         }
         None => Err("No active send with this code".to_string()),

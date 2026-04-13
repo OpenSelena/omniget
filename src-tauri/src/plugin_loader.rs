@@ -3,7 +3,7 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
-use omniget_plugin_sdk::{OmnigetPlugin, PluginHost, PluginManifest, InstalledPlugin, ABI_VERSION};
+use omniget_plugin_sdk::{InstalledPlugin, OmnigetPlugin, PluginHost, PluginManifest, ABI_VERSION};
 use tracing;
 
 pub struct LoadedPlugin {
@@ -32,7 +32,11 @@ impl PluginManager {
     }
 
     pub fn load_all(&mut self, host: Arc<dyn PluginHost>) {
-        tracing::info!("[plugins] load_all: {} installed, {} enabled", self.installed.len(), self.installed.iter().filter(|p| p.enabled).count());
+        tracing::info!(
+            "[plugins] load_all: {} installed, {} enabled",
+            self.installed.len(),
+            self.installed.iter().filter(|p| p.enabled).count()
+        );
         let enabled: Vec<_> = self
             .installed
             .iter()
@@ -44,7 +48,11 @@ impl PluginManager {
             let plugin_dir = self.plugins_dir.join(&entry.id);
             match load_single_plugin(&plugin_dir, host.clone()) {
                 Ok(loaded) => {
-                    tracing::info!("Loaded plugin: {} v{}", loaded.manifest.id, loaded.manifest.version);
+                    tracing::info!(
+                        "Loaded plugin: {} v{}",
+                        loaded.manifest.id,
+                        loaded.manifest.version
+                    );
                     self.loaded.insert(entry.id.clone(), loaded);
                 }
                 Err(e) => {
@@ -63,7 +71,11 @@ impl PluginManager {
     }
 
     pub fn installed_plugins(&self) -> &[InstalledPlugin] {
-        tracing::debug!("[plugins] installed_plugins() called, count={}, ids={:?}", self.installed.len(), self.installed.iter().map(|p| &p.id).collect::<Vec<_>>());
+        tracing::debug!(
+            "[plugins] installed_plugins() called, count={}, ids={:?}",
+            self.installed.len(),
+            self.installed.iter().map(|p| &p.id).collect::<Vec<_>>()
+        );
         &self.installed
     }
 
@@ -82,7 +94,10 @@ impl PluginManager {
             .get(plugin_id)
             .ok_or_else(|| format!("Plugin '{}' not loaded", plugin_id))?;
 
-        loaded.plugin.handle_command(command.to_string(), args).await
+        loaded
+            .plugin
+            .handle_command(command.to_string(), args)
+            .await
     }
 
     pub fn save_installed(&self) -> anyhow::Result<()> {
@@ -197,7 +212,11 @@ fn load_installed_list(plugins_dir: &Path) -> Vec<InstalledPlugin> {
         }
     };
     let content = content.strip_prefix('\u{FEFF}').unwrap_or(&content);
-    tracing::debug!("[plugins] installed.json raw ({} bytes): {}", content.len(), &content[..content.len().min(200)]);
+    tracing::debug!(
+        "[plugins] installed.json raw ({} bytes): {}",
+        content.len(),
+        &content[..content.len().min(200)]
+    );
 
     #[derive(serde::Deserialize)]
     struct InstalledFile {
@@ -206,12 +225,19 @@ fn load_installed_list(plugins_dir: &Path) -> Vec<InstalledPlugin> {
 
     match serde_json::from_str::<InstalledFile>(content) {
         Ok(f) => {
-            tracing::info!("[plugins] parsed {} installed plugins: {:?}", f.plugins.len(), f.plugins.iter().map(|p| &p.id).collect::<Vec<_>>());
+            tracing::info!(
+                "[plugins] parsed {} installed plugins: {:?}",
+                f.plugins.len(),
+                f.plugins.iter().map(|p| &p.id).collect::<Vec<_>>()
+            );
             f.plugins
         }
         Err(e) => {
             tracing::error!("[plugins] FAILED to parse installed.json: {e}");
-            tracing::error!("[plugins] content was: {}", &content[..content.len().min(500)]);
+            tracing::error!(
+                "[plugins] content was: {}",
+                &content[..content.len().min(500)]
+            );
             Vec::new()
         }
     }

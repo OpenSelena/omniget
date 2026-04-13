@@ -7,9 +7,7 @@ use anyhow::Context;
 use serde::{Deserialize, Serialize};
 
 pub const CHROME_HOST_NAME: &str = "wtf.tonho.omniget";
-pub const CHROME_EXTENSION_IDS: &[&str] = &[
-    "dkjelkhaaakffpghdfalobccaaipajip",
-];
+pub const CHROME_EXTENSION_IDS: &[&str] = &["dkjelkhaaakffpghdfalobccaaipajip"];
 const FIREFOX_EXTENSION_ID: &str = "omniget@tonho.wtf";
 
 #[cfg(target_os = "windows")]
@@ -66,7 +64,10 @@ struct NativeHostConfig {
 pub fn should_run_as_native_host() -> bool {
     std::env::current_exe()
         .ok()
-        .and_then(|path| path.file_stem().map(|stem| stem.to_string_lossy().to_string()))
+        .and_then(|path| {
+            path.file_stem()
+                .map(|stem| stem.to_string_lossy().to_string())
+        })
         .map(|stem| stem.eq_ignore_ascii_case(HOST_BINARY_STEM))
         .unwrap_or(false)
 }
@@ -166,7 +167,10 @@ fn write_host_config(config_path: &Path, app_path: &Path) -> anyhow::Result<()> 
 }
 
 fn write_host_manifest(manifest_path: &Path, host_exe: &Path) -> anyhow::Result<()> {
-    fs::write(manifest_path, serde_json::to_vec_pretty(&build_host_manifest(host_exe))?)?;
+    fs::write(
+        manifest_path,
+        serde_json::to_vec_pretty(&build_host_manifest(host_exe))?,
+    )?;
     Ok(())
 }
 
@@ -194,8 +198,9 @@ fn chrome_manifest_path(integration_dir: &Path) -> anyhow::Result<PathBuf> {
 
 #[cfg(target_os = "linux")]
 fn chrome_manifest_path(_integration_dir: &Path) -> anyhow::Result<PathBuf> {
-    let base_dir = dirs::config_dir()
-        .context("Could not resolve the Linux config directory for Chrome native host registration")?;
+    let base_dir = dirs::config_dir().context(
+        "Could not resolve the Linux config directory for Chrome native host registration",
+    )?;
     Ok(chrome_manifest_path_from_base(&base_dir))
 }
 
@@ -280,7 +285,10 @@ fn build_firefox_manifest(host_exe: &Path) -> serde_json::Value {
 }
 
 fn write_firefox_manifest(manifest_path: &Path, host_exe: &Path) -> anyhow::Result<()> {
-    fs::write(manifest_path, serde_json::to_vec_pretty(&build_firefox_manifest(host_exe))?)?;
+    fs::write(
+        manifest_path,
+        serde_json::to_vec_pretty(&build_firefox_manifest(host_exe))?,
+    )?;
     Ok(())
 }
 
@@ -403,19 +411,20 @@ fn write_extension_cookies(cookies: &[NativeCookie]) -> anyhow::Result<()> {
         let name = sanitize_cookie_field(&c.name);
         let value = sanitize_cookie_field(&c.value);
         let http_only_prefix = if c.http_only { "#HttpOnly_" } else { "" };
-        let include_subdomains = if domain.starts_with('.') { "TRUE" } else { "FALSE" };
+        let include_subdomains = if domain.starts_with('.') {
+            "TRUE"
+        } else {
+            "FALSE"
+        };
         let secure = if c.secure { "TRUE" } else { "FALSE" };
-        let expires = if c.expires == 0 { session_ttl } else { c.expires as u64 };
+        let expires = if c.expires == 0 {
+            session_ttl
+        } else {
+            c.expires as u64
+        };
         content.push_str(&format!(
             "{}{}\t{}\t{}\t{}\t{}\t{}\t{}\n",
-            http_only_prefix,
-            domain,
-            include_subdomains,
-            path_field,
-            secure,
-            expires,
-            name,
-            value,
+            http_only_prefix, domain, include_subdomains, path_field, secure, expires, name, value,
         ));
     }
 
@@ -493,10 +502,19 @@ pub fn read_extension_metadata(url: &str) -> Option<ExtensionMetadata> {
     });
 
     let result = ExtensionMetadata {
-        referer: meta.get("referer").and_then(|v| v.as_str()).map(String::from),
+        referer: meta
+            .get("referer")
+            .and_then(|v| v.as_str())
+            .map(String::from),
         headers,
-        media_type: meta.get("mediaType").and_then(|v| v.as_str()).map(String::from),
-        content_type: meta.get("contentType").and_then(|v| v.as_str()).map(String::from),
+        media_type: meta
+            .get("mediaType")
+            .and_then(|v| v.as_str())
+            .map(String::from),
+        content_type: meta
+            .get("contentType")
+            .and_then(|v| v.as_str())
+            .map(String::from),
     };
 
     let _ = fs::remove_file(&path);
@@ -579,9 +597,7 @@ fn read_message() -> anyhow::Result<NativeHostRequest> {
     let length = u32::from_le_bytes(length_bytes) as usize;
 
     if length > MAX_MESSAGE_LENGTH {
-        anyhow::bail!(
-            "Native message too large ({length} bytes, max {MAX_MESSAGE_LENGTH})"
-        );
+        anyhow::bail!("Native message too large ({length} bytes, max {MAX_MESSAGE_LENGTH})");
     }
 
     let mut payload = vec![0u8; length];
@@ -656,8 +672,14 @@ mod tests {
         let manifest = build_host_manifest(host_exe);
 
         assert_eq!(manifest["name"].as_str(), Some(CHROME_HOST_NAME));
-        assert_eq!(manifest["description"].as_str(), Some("OmniGet native host for Chrome"));
-        assert_eq!(manifest["path"].as_str(), Some(host_exe.to_string_lossy().as_ref()));
+        assert_eq!(
+            manifest["description"].as_str(),
+            Some("OmniGet native host for Chrome")
+        );
+        assert_eq!(
+            manifest["path"].as_str(),
+            Some(host_exe.to_string_lossy().as_ref())
+        );
         assert_eq!(manifest["type"].as_str(), Some("stdio"));
         let allowed_origins = manifest["allowed_origins"]
             .as_array()

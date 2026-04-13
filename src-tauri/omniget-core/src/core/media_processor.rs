@@ -19,7 +19,17 @@ impl MediaProcessor {
             Some(c) => crate::core::hls_downloader::HlsDownloader::with_client(c),
             None => crate::core::hls_downloader::HlsDownloader::new(),
         };
-        downloader.download(m3u8_url, output, referer, bytes_tx, cancel_token, max_concurrent, max_retries).await
+        downloader
+            .download(
+                m3u8_url,
+                output,
+                referer,
+                bytes_tx,
+                cancel_token,
+                max_concurrent,
+                max_retries,
+            )
+            .await
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -38,7 +48,18 @@ impl MediaProcessor {
             Some(c) => crate::core::hls_downloader::HlsDownloader::with_client(c),
             None => crate::core::hls_downloader::HlsDownloader::new(),
         };
-        downloader.download_with_quality(m3u8_url, output, referer, bytes_tx, cancel_token, max_concurrent, max_retries, max_height).await
+        downloader
+            .download_with_quality(
+                m3u8_url,
+                output,
+                referer,
+                bytes_tx,
+                cancel_token,
+                max_concurrent,
+                max_retries,
+                max_height,
+            )
+            .await
     }
 
     pub async fn remux(input: &str, output: &str) -> anyhow::Result<()> {
@@ -56,15 +77,10 @@ impl MediaProcessor {
         Ok(())
     }
 
-    pub async fn merge_audio_video(
-        video: &str,
-        audio: &str,
-        output: &str,
-    ) -> anyhow::Result<()> {
+    pub async fn merge_audio_video(video: &str, audio: &str, output: &str) -> anyhow::Result<()> {
         let status = crate::core::process::command("ffmpeg")
             .args([
-                "-y", "-i", video, "-i", audio, "-map", "0:v", "-map", "1:a", "-c", "copy",
-                output,
+                "-y", "-i", video, "-i", audio, "-map", "0:v", "-map", "1:a", "-c", "copy", output,
             ])
             .stdout(std::process::Stdio::null())
             .stderr(std::process::Stdio::piped())

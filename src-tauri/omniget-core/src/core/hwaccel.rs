@@ -19,12 +19,8 @@ const GPU_ENCODER_PRIORITY: &[&str] = &[
     "h264_vaapi",
 ];
 
-const GPU_DECODER_PRIORITY: &[&str] = &[
-    "h264_cuvid",
-    "h264_qsv",
-    "h264_videotoolbox",
-    "h264_vaapi",
-];
+const GPU_DECODER_PRIORITY: &[&str] =
+    &["h264_cuvid", "h264_qsv", "h264_videotoolbox", "h264_vaapi"];
 
 pub async fn detect_hwaccel() -> HwAccelInfo {
     HW_ACCEL_CACHE
@@ -70,7 +66,13 @@ async fn query_codecs(flag: &str) -> Vec<String> {
 
     let text = String::from_utf8_lossy(&output.stdout);
     let gpu_keywords = [
-        "nvenc", "qsv", "amf", "videotoolbox", "vaapi", "cuvid", "cuda",
+        "nvenc",
+        "qsv",
+        "amf",
+        "videotoolbox",
+        "vaapi",
+        "cuvid",
+        "cuda",
     ];
 
     text.lines()

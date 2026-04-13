@@ -1,8 +1,8 @@
 pub mod traits;
 
+use serde::{Deserialize, Serialize};
 use std::fmt;
 use std::str::FromStr;
-use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
@@ -84,9 +84,8 @@ impl Platform {
         let parsed = url::Url::parse(url_str).ok()?;
         let host = parsed.host_str()?.to_lowercase();
 
-        let matches = |domain: &str| -> bool {
-            host == domain || host.ends_with(&format!(".{}", domain))
-        };
+        let matches =
+            |domain: &str| -> bool { host == domain || host.ends_with(&format!(".{}", domain)) };
 
         if matches("hotmart.com") {
             Some(Platform::Hotmart)
@@ -96,7 +95,11 @@ impl Platform {
             Some(Platform::Instagram)
         } else if matches("tiktok.com") {
             Some(Platform::TikTok)
-        } else if matches("twitter.com") || matches("x.com") || matches("vxtwitter.com") || matches("fixvx.com") {
+        } else if matches("twitter.com")
+            || matches("x.com")
+            || matches("vxtwitter.com")
+            || matches("fixvx.com")
+        {
             Some(Platform::Twitter)
         } else if matches("reddit.com") || host == "v.redd.it" || host == "redd.it" {
             Some(Platform::Reddit)

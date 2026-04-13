@@ -140,10 +140,7 @@ async fn copy_file_linux(path: &str) -> anyhow::Result<()> {
     .map_err(|e| anyhow::anyhow!("{}", e))?;
 
     if let Ok(true) = wl_result {
-        tracing::info!(
-            "[clipboard] copied file to clipboard (wl-copy): {}",
-            path
-        );
+        tracing::info!("[clipboard] copied file to clipboard (wl-copy): {}", path);
         return Ok(());
     }
 
@@ -154,10 +151,7 @@ async fn copy_file_linux(path: &str) -> anyhow::Result<()> {
 
 #[cfg(target_os = "windows")]
 async fn copy_file_windows(path: &str) -> anyhow::Result<()> {
-    let ps_script = format!(
-        "Set-Clipboard -LiteralPath '{}'",
-        path.replace('\'', "''")
-    );
+    let ps_script = format!("Set-Clipboard -LiteralPath '{}'", path.replace('\'', "''"));
 
     let output = tokio::task::spawn_blocking(move || {
         crate::core::process::std_command("powershell")
@@ -169,7 +163,10 @@ async fn copy_file_windows(path: &str) -> anyhow::Result<()> {
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(anyhow::anyhow!("PowerShell Set-Clipboard failed: {}", stderr));
+        return Err(anyhow::anyhow!(
+            "PowerShell Set-Clipboard failed: {}",
+            stderr
+        ));
     }
 
     tracing::info!("[clipboard] copied file to clipboard (Windows): {}", path);

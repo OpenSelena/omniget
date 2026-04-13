@@ -66,9 +66,10 @@ pub fn list_plugins(
                 },
                 None => {
                     let manifest_path = manager.plugins_dir().join(&entry.id).join("plugin.json");
-                    let manifest: Option<omniget_plugin_sdk::PluginManifest> = std::fs::read_to_string(&manifest_path)
-                        .ok()
-                        .and_then(|s| serde_json::from_str(&s).ok());
+                    let manifest: Option<omniget_plugin_sdk::PluginManifest> =
+                        std::fs::read_to_string(&manifest_path)
+                            .ok()
+                            .and_then(|s| serde_json::from_str(&s).ok());
                     match manifest {
                         Some(m) => PluginInfo {
                             id: entry.id.clone(),
@@ -79,16 +80,22 @@ pub fn list_plugins(
                             enabled: entry.enabled,
                             loaded: false,
                             icon: m.icon,
-                            nav: m.nav.iter().map(|n| PluginNavInfo {
-                                route: n.route.clone(),
-                                label: n.label.clone(),
-                                icon_svg: n.icon_svg.clone(),
-                                group: match n.group {
-                                    omniget_plugin_sdk::NavGroup::Primary => "primary".into(),
-                                    omniget_plugin_sdk::NavGroup::Secondary => "secondary".into(),
-                                },
-                                order: n.order,
-                            }).collect(),
+                            nav: m
+                                .nav
+                                .iter()
+                                .map(|n| PluginNavInfo {
+                                    route: n.route.clone(),
+                                    label: n.label.clone(),
+                                    icon_svg: n.icon_svg.clone(),
+                                    group: match n.group {
+                                        omniget_plugin_sdk::NavGroup::Primary => "primary".into(),
+                                        omniget_plugin_sdk::NavGroup::Secondary => {
+                                            "secondary".into()
+                                        }
+                                    },
+                                    order: n.order,
+                                })
+                                .collect(),
                         },
                         None => PluginInfo {
                             id: entry.id.clone(),
@@ -102,7 +109,7 @@ pub fn list_plugins(
                             nav: Vec::new(),
                         },
                     }
-                },
+                }
             }
         })
         .collect();
@@ -212,7 +219,9 @@ pub async fn fetch_marketplace_registry(
         .build()
         .map_err(|e| e.to_string())?;
 
-    let response = client.get(REGISTRY_URL).send()
+    let response = client
+        .get(REGISTRY_URL)
+        .send()
         .await
         .map_err(|e| format!("Failed to fetch registry: {}", e))?;
 

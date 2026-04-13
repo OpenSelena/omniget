@@ -135,7 +135,9 @@ pub async fn probe(path: &Path) -> anyhow::Result<MediaProbeInfo> {
     let json: serde_json::Value = serde_json::from_slice(&output.stdout)
         .map_err(|e| anyhow!("Failed to parse ffprobe JSON: {}", e))?;
 
-    let format = json.get("format").ok_or_else(|| anyhow!("Missing 'format' field"))?;
+    let format = json
+        .get("format")
+        .ok_or_else(|| anyhow!("Missing 'format' field"))?;
 
     let duration_seconds = format
         .get("duration")
@@ -441,15 +443,8 @@ pub async fn embed_metadata(
     }
 
     let temp_dir = file.parent().unwrap_or(Path::new("."));
-    let ext = file
-        .extension()
-        .and_then(|e| e.to_str())
-        .unwrap_or("mp4");
-    let temp_output = temp_dir.join(format!(
-        ".omniget_meta_{}.{}",
-        uuid::Uuid::new_v4(),
-        ext
-    ));
+    let ext = file.extension().and_then(|e| e.to_str()).unwrap_or("mp4");
+    let temp_output = temp_dir.join(format!(".omniget_meta_{}.{}", uuid::Uuid::new_v4(), ext));
 
     let is_audio_only = matches!(
         ext.to_lowercase().as_str(),
@@ -472,7 +467,11 @@ pub async fn embed_metadata(
         None
     };
 
-    let mut args: Vec<String> = vec!["-y".to_string(), "-i".to_string(), file.to_string_lossy().to_string()];
+    let mut args: Vec<String> = vec![
+        "-y".to_string(),
+        "-i".to_string(),
+        file.to_string_lossy().to_string(),
+    ];
 
     if let Some(ref thumb) = thumbnail_path {
         args.extend(["-i".to_string(), thumb.to_string_lossy().to_string()]);
@@ -481,10 +480,14 @@ pub async fn embed_metadata(
     if let Some(ref thumb) = thumbnail_path {
         let _ = thumb;
         args.extend([
-            "-map".to_string(), "0:a".to_string(),
-            "-map".to_string(), "1:v".to_string(),
-            "-c".to_string(), "copy".to_string(),
-            "-disposition:v:0".to_string(), "attached_pic".to_string(),
+            "-map".to_string(),
+            "0:a".to_string(),
+            "-map".to_string(),
+            "1:v".to_string(),
+            "-c".to_string(),
+            "copy".to_string(),
+            "-disposition:v:0".to_string(),
+            "attached_pic".to_string(),
         ]);
     } else {
         args.extend(["-c".to_string(), "copy".to_string()]);

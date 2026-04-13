@@ -2,10 +2,6 @@ use std::collections::HashMap;
 use std::sync::Arc;
 use tauri::Manager;
 
-
-
-
-
 use tokio_util::sync::CancellationToken;
 
 pub struct P2pSendHandle {
@@ -26,149 +22,10 @@ pub mod plugin_loader;
 pub mod storage;
 pub mod tray;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 pub struct AppState {
     pub active_downloads: Arc<tokio::sync::Mutex<HashMap<u64, CancellationToken>>>,
-    pub active_generic_downloads: Arc<tokio::sync::Mutex<HashMap<u64, (String, CancellationToken)>>>,
+    pub active_generic_downloads:
+        Arc<tokio::sync::Mutex<HashMap<u64, (String, CancellationToken)>>>,
     pub registry: core::registry::PlatformRegistry,
     pub download_queue: Arc<tokio::sync::Mutex<core::queue::DownloadQueue>>,
     pub torrent_session: Arc<tokio::sync::Mutex<Option<Arc<librqbit::Session>>>>,
@@ -182,44 +39,22 @@ pub fn run() {
     tracing_subscriber::fmt::init();
 
     let mut registry = core::registry::PlatformRegistry::new();
-    registry.register(Arc::new(
-        platforms::instagram::InstagramDownloader::new(),
-    ));
-    registry.register(Arc::new(
-        platforms::pinterest::PinterestDownloader::new(),
-    ));
-    registry.register(Arc::new(
-        platforms::tiktok::TikTokDownloader::new(),
-    ));
-    registry.register(Arc::new(
-        platforms::twitter::TwitterDownloader::new(),
-    ));
-    registry.register(Arc::new(
-        platforms::twitch::TwitchClipsDownloader::new(),
-    ));
-    registry.register(Arc::new(
-        platforms::bluesky::BlueskyDownloader::new(),
-    ));
-    registry.register(Arc::new(
-        platforms::reddit::RedditDownloader::new(),
-    ));
-    registry.register(Arc::new(
-        platforms::youtube::YouTubeDownloader::new(),
-    ));
-    registry.register(Arc::new(
-        platforms::vimeo::VimeoDownloader::new(),
-    ));
-    registry.register(Arc::new(
-        platforms::bilibili::BilibiliDownloader::new(),
-    ));
+    registry.register(Arc::new(platforms::instagram::InstagramDownloader::new()));
+    registry.register(Arc::new(platforms::pinterest::PinterestDownloader::new()));
+    registry.register(Arc::new(platforms::tiktok::TikTokDownloader::new()));
+    registry.register(Arc::new(platforms::twitter::TwitterDownloader::new()));
+    registry.register(Arc::new(platforms::twitch::TwitchClipsDownloader::new()));
+    registry.register(Arc::new(platforms::bluesky::BlueskyDownloader::new()));
+    registry.register(Arc::new(platforms::reddit::RedditDownloader::new()));
+    registry.register(Arc::new(platforms::youtube::YouTubeDownloader::new()));
+    registry.register(Arc::new(platforms::vimeo::VimeoDownloader::new()));
+    registry.register(Arc::new(platforms::bilibili::BilibiliDownloader::new()));
     let torrent_session: Arc<tokio::sync::Mutex<Option<Arc<librqbit::Session>>>> =
         Arc::new(tokio::sync::Mutex::new(None));
-    registry.register(Arc::new(
-        platforms::magnet::MagnetDownloader::new(torrent_session.clone()),
-    ));
-    registry.register(Arc::new(
-        platforms::p2p::P2pDownloader::new(),
-    ));
+    registry.register(Arc::new(platforms::magnet::MagnetDownloader::new(
+        torrent_session.clone(),
+    )));
+    registry.register(Arc::new(platforms::p2p::P2pDownloader::new()));
     registry.register(Arc::new(
         platforms::generic_ytdlp::GenericYtdlpDownloader::new(),
     ));
@@ -237,11 +72,18 @@ pub fn run() {
 
     tauri::Builder::default()
         .plugin(tauri_plugin_single_instance::init(|app, argv, _cwd| {
-            if let Some(url) = external_url::find_external_url_arg(argv.iter().skip(1).map(|arg| arg.as_str())) {
+            if let Some(url) =
+                external_url::find_external_url_arg(argv.iter().skip(1).map(|arg| arg.as_str()))
+            {
                 let app_handle = app.clone();
                 tauri::async_runtime::spawn(async move {
-                    if let Err(error) = external_url::handle_external_url(&app_handle, url, "command-line").await {
-                        tracing::warn!("Failed to handle external URL from second instance: {}", error);
+                    if let Err(error) =
+                        external_url::handle_external_url(&app_handle, url, "command-line").await
+                    {
+                        tracing::warn!(
+                            "Failed to handle external URL from second instance: {}",
+                            error
+                        );
                     }
                 });
             } else {
@@ -280,14 +122,19 @@ pub fn run() {
             core::ytdlp::set_global_cookie_file_fn(|| {
                 let s = storage::config::load_settings_standalone();
                 let cf = s.download.cookie_file.clone();
-                if !cf.is_empty() && std::path::Path::new(&cf).exists() { Some(cf) } else { None }
+                if !cf.is_empty() && std::path::Path::new(&cf).exists() {
+                    Some(cf)
+                } else {
+                    None
+                }
             });
             core::ytdlp::set_cookies_from_browser_fn(|| {
-                storage::config::load_settings_standalone().advanced.cookies_from_browser
+                storage::config::load_settings_standalone()
+                    .advanced
+                    .cookies_from_browser
             });
             core::ytdlp::set_ext_referer_fn(|url| {
-                native_host::read_extension_metadata(url)
-                    .and_then(|m| m.referer)
+                native_host::read_extension_metadata(url).and_then(|m| m.referer)
             });
             tray::setup(app.handle())?;
             hotkey::register_from_settings(app.handle());
@@ -302,7 +149,9 @@ pub fn run() {
                     app.handle().clone(),
                     plugins_dir,
                 ));
-                let plugin_mgr = app.handle().state::<std::sync::Arc<tokio::sync::RwLock<plugin_loader::PluginManager>>>();
+                let plugin_mgr = app
+                    .handle()
+                    .state::<std::sync::Arc<tokio::sync::RwLock<plugin_loader::PluginManager>>>();
                 let mut mgr = plugin_mgr.blocking_write();
                 mgr.load_all(host);
             }
@@ -330,7 +179,9 @@ pub fn run() {
             if let Some(url) = external_url::find_external_url_arg(std::env::args().skip(1)) {
                 let app_handle = app.handle().clone();
                 tauri::async_runtime::spawn(async move {
-                    if let Err(error) = external_url::handle_external_url(&app_handle, url, "command-line").await {
+                    if let Err(error) =
+                        external_url::handle_external_url(&app_handle, url, "command-line").await
+                    {
                         tracing::warn!("Failed to handle startup external URL: {}", error);
                     }
                 });

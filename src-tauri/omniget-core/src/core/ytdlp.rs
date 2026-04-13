@@ -41,7 +41,10 @@ fn ext_referer_for_url(url: &str) -> Option<String> {
 }
 
 fn cookies_from_browser_setting() -> String {
-    COOKIES_FROM_BROWSER_FN.get().map(|f| f()).unwrap_or_default()
+    COOKIES_FROM_BROWSER_FN
+        .get()
+        .map(|f| f())
+        .unwrap_or_default()
 }
 
 pub fn ext_cookie_path() -> PathBuf {
@@ -70,12 +73,10 @@ fn global_cookie_file() -> Option<String> {
 
 static YTDLP_UPDATING: AtomicBool = AtomicBool::new(false);
 static YTDLP_UPDATE_CHECKED: AtomicBool = AtomicBool::new(false);
-static YTDLP_PATH_CACHE: std::sync::RwLock<Option<Option<PathBuf>>> =
-    std::sync::RwLock::new(None);
+static YTDLP_PATH_CACHE: std::sync::RwLock<Option<Option<PathBuf>>> = std::sync::RwLock::new(None);
 static FFMPEG_LOCATION_CACHE: std::sync::RwLock<Option<Option<String>>> =
     std::sync::RwLock::new(None);
-static JS_RUNTIME_CACHE: std::sync::RwLock<Option<Option<String>>> =
-    std::sync::RwLock::new(None);
+static JS_RUNTIME_CACHE: std::sync::RwLock<Option<Option<String>>> = std::sync::RwLock::new(None);
 static RATE_LIMIT_429_COUNT: AtomicU64 = AtomicU64::new(0);
 static RATE_LIMIT_429_LAST_TS: AtomicU64 = AtomicU64::new(0);
 static COOKIE_ERROR_FLAG: AtomicBool = AtomicBool::new(false);
@@ -131,7 +132,6 @@ pub fn reset_js_runtime_cache() {
         *cache = None;
     }
 }
-
 
 pub async fn check_ytdlp_update(ytdlp: &Path) -> anyhow::Result<bool> {
     if YTDLP_UPDATE_CHECKED.swap(true, Ordering::Relaxed) {
@@ -262,7 +262,11 @@ pub async fn find_ytdlp() -> Option<PathBuf> {
 /// Resolve a bare binary name to its absolute path via `where` (Windows)
 /// or `which` (Unix). Returns the original name as fallback.
 fn resolve_absolute_path(bin_name: &str) -> PathBuf {
-    let finder = if cfg!(target_os = "windows") { "where" } else { "which" };
+    let finder = if cfg!(target_os = "windows") {
+        "where"
+    } else {
+        "which"
+    };
     if let Ok(output) = std::process::Command::new(finder)
         .arg(bin_name)
         .stdout(std::process::Stdio::piped())
@@ -287,7 +291,10 @@ pub async fn find_ytdlp_cached() -> Option<PathBuf> {
         if let Some(ref cached) = *cache {
             if let Some(ref path) = cached {
                 if path.exists() {
-                    tracing::debug!("[perf] find_ytdlp_cached (hit): {:?}", _timer_start.elapsed());
+                    tracing::debug!(
+                        "[perf] find_ytdlp_cached (hit): {:?}",
+                        _timer_start.elapsed()
+                    );
                     return cached.clone();
                 }
                 tracing::warn!("[ytdlp] cached path no longer exists: {}", path.display());
@@ -300,7 +307,10 @@ pub async fn find_ytdlp_cached() -> Option<PathBuf> {
     if let Ok(mut cache) = YTDLP_PATH_CACHE.write() {
         *cache = Some(result.clone());
     }
-    tracing::debug!("[perf] find_ytdlp_cached (miss): {:?}", _timer_start.elapsed());
+    tracing::debug!(
+        "[perf] find_ytdlp_cached (miss): {:?}",
+        _timer_start.elapsed()
+    );
     result
 }
 
@@ -342,7 +352,10 @@ pub async fn ensure_ytdlp() -> anyhow::Result<PathBuf> {
                     return Ok(path);
                 }
                 Err(e) => {
-                    tracing::warn!("[ytdlp] failed to download managed binary, falling back to system: {}", e);
+                    tracing::warn!(
+                        "[ytdlp] failed to download managed binary, falling back to system: {}",
+                        e
+                    );
                 }
             }
         }
@@ -523,7 +536,8 @@ async fn find_ffmpeg_location_cached() -> Option<String> {
     if let Ok(cache) = FFMPEG_LOCATION_CACHE.read() {
         if let Some(ref cached) = *cache {
             if let Some(ref dir) = cached {
-                let check_path = std::path::Path::new(dir).join(crate::core::dependencies::bin_name("ffmpeg"));
+                let check_path =
+                    std::path::Path::new(dir).join(crate::core::dependencies::bin_name("ffmpeg"));
                 if check_path.exists() {
                     return cached.clone();
                 }
@@ -565,14 +579,22 @@ fn extension_cookie_file() -> Option<std::path::PathBuf> {
 /// own, so we locate the binary and pass it via `--js-runtimes runtime:path`.
 fn detect_js_runtime() -> Option<String> {
     let runtimes: &[(&str, &str)] = if cfg!(target_os = "windows") {
-        &[("node", "node.exe"), ("deno", "deno.exe"), ("bun", "bun.exe")]
+        &[
+            ("node", "node.exe"),
+            ("deno", "deno.exe"),
+            ("bun", "bun.exe"),
+        ]
     } else {
         &[("node", "node"), ("deno", "deno"), ("bun", "bun")]
     };
 
     // Try system PATH via `where` (Windows) or `which` (Unix).
     for &(runtime, bin) in runtimes {
-        let finder = if cfg!(target_os = "windows") { "where" } else { "which" };
+        let finder = if cfg!(target_os = "windows") {
+            "where"
+        } else {
+            "which"
+        };
         if let Ok(output) = crate::core::process::std_command(finder)
             .arg(bin)
             .stdout(std::process::Stdio::piped())
@@ -781,7 +803,11 @@ pub async fn get_video_info(
         }
 
         let stderr = String::from_utf8_lossy(&result.stderr).to_string();
-        tracing::debug!("[yt-dlp info] stderr ({} bytes): {}", stderr.len(), stderr.trim());
+        tracing::debug!(
+            "[yt-dlp info] stderr ({} bytes): {}",
+            stderr.len(),
+            stderr.trim()
+        );
         let stderr_lower = stderr.to_lowercase();
         if stderr_lower.contains("http error 429") {
             rate_limit_429_increment();
@@ -887,7 +913,10 @@ pub async fn get_playlist_info(
                 player_client
             );
         }
-        return Err(anyhow!("yt-dlp playlist failed: {}", extract_error_message(&stderr)));
+        return Err(anyhow!(
+            "yt-dlp playlist failed: {}",
+            extract_error_message(&stderr)
+        ));
     }
 
     let stdout = String::from_utf8_lossy(&output.stdout);
@@ -1036,10 +1065,7 @@ pub async fn download_video(
                 } else {
                     tracing::warn!("[yt-dlp] ffmpeg not available, using fallback format selector");
                     match quality_height {
-                        Some(h) if h > 0 => format!(
-                            "b[height<={}]/bv*[height<={}]/b",
-                            h, h
-                        ),
+                        Some(h) if h > 0 => format!("b[height<={}]/bv*[height<={}]/b", h, h),
                         _ => "b/bv*".to_string(),
                     }
                 }
@@ -1177,8 +1203,7 @@ pub async fn download_video(
         base_args.push("--windows-filenames".to_string());
     }
 
-    let should_download_subs =
-        download_subtitles && rate_limit_429_count() < 2;
+    let should_download_subs = download_subtitles && rate_limit_429_count() < 2;
     let subtitle_args = if should_download_subs {
         vec![
             "--write-sub".to_string(),
@@ -1308,10 +1333,8 @@ pub async fn download_video(
                         .and_then(|e| e.to_str())
                         .unwrap_or("")
                         .to_lowercase();
-                    let is_subtitle = matches!(
-                        ext.as_str(),
-                        "vtt" | "srt" | "ass" | "ssa" | "sub" | "lrc"
-                    );
+                    let is_subtitle =
+                        matches!(ext.as_str(), "vtt" | "srt" | "ass" | "ssa" | "sub" | "lrc");
                     if !is_subtitle {
                         phase += 1;
                         let mut guard = captured_path_writer.lock().unwrap();
@@ -1584,7 +1607,9 @@ pub async fn download_video(
                 || stderr_lower.contains("postprocessing")
             {
                 if format_already_simplified {
-                    tracing::warn!("[yt-dlp] format/postprocessing error after simplification, giving up");
+                    tracing::warn!(
+                        "[yt-dlp] format/postprocessing error after simplification, giving up"
+                    );
                     break;
                 }
 

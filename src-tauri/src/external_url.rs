@@ -90,7 +90,8 @@ pub async fn queue_url_with_defaults(
 
     let ext_meta = crate::native_host::read_extension_metadata(&url);
 
-    let has_ext_media = ext_meta.as_ref()
+    let has_ext_media = ext_meta
+        .as_ref()
         .and_then(|m| m.media_type.as_deref())
         .is_some();
 
@@ -130,12 +131,19 @@ pub async fn queue_url_with_defaults(
         } else {
             return None;
         };
-        let title = url::Url::parse(&url).ok()
+        let title = url::Url::parse(&url)
+            .ok()
             .and_then(|u| {
                 let path = u.path();
                 let last = path.rsplit('/').next()?;
-                if last.is_empty() { return None; }
-                Some(urlencoding::decode(last).unwrap_or_else(|_| last.into()).to_string())
+                if last.is_empty() {
+                    return None;
+                }
+                Some(
+                    urlencoding::decode(last)
+                        .unwrap_or_else(|_| last.into())
+                        .to_string(),
+                )
             })
             .map(|n| sanitize_filename::sanitize(&n))
             .unwrap_or_else(|| "download".to_string());

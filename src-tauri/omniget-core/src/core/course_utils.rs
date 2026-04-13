@@ -20,7 +20,10 @@ pub async fn save_description(dir: &str, content: &str, format: &str) -> anyhow:
         return Ok(());
     }
 
-    let wrapped = if ext == "html" && !content.trim_start().starts_with("<!") && !content.trim_start().starts_with("<html") {
+    let wrapped = if ext == "html"
+        && !content.trim_start().starts_with("<!")
+        && !content.trim_start().starts_with("<html")
+    {
         format!(
             "<!DOCTYPE html>\n<html>\n<head><meta charset=\"utf-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1\"><style>body{{max-width:800px;margin:40px auto;padding:0 20px;font-family:system-ui,sans-serif;line-height:1.6;color:#333}}img{{max-width:100%;height:auto}}a{{color:#0066cc}}</style></head>\n<body>\n{}\n</body>\n</html>",
             content

@@ -57,7 +57,17 @@ impl HlsDownloader {
         max_concurrent: u32,
         max_retries: u32,
     ) -> anyhow::Result<HlsDownloadResult> {
-        self.download_with_quality(m3u8_url, output_path, referer, bytes_tx, cancel_token, max_concurrent, max_retries, None).await
+        self.download_with_quality(
+            m3u8_url,
+            output_path,
+            referer,
+            bytes_tx,
+            cancel_token,
+            max_concurrent,
+            max_retries,
+            None,
+        )
+        .await
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -84,14 +94,30 @@ impl HlsDownloader {
             if let Some(variant) = select_best_variant(&master, max_height.unwrap_or(720)) {
                 let variant_url = resolve_url(m3u8_url, &variant.uri);
                 return self
-                    .download_media_playlist(&variant_url, output_path, referer, bytes_tx, cancel_token, max_concurrent, max_retries)
+                    .download_media_playlist(
+                        &variant_url,
+                        output_path,
+                        referer,
+                        bytes_tx,
+                        cancel_token,
+                        max_concurrent,
+                        max_retries,
+                    )
                     .await;
             }
         }
 
         if parse_media_playlist(m3u8_bytes).is_ok() {
             return self
-                .download_media_playlist(m3u8_url, output_path, referer, bytes_tx, cancel_token, max_concurrent, max_retries)
+                .download_media_playlist(
+                    m3u8_url,
+                    output_path,
+                    referer,
+                    bytes_tx,
+                    cancel_token,
+                    max_concurrent,
+                    max_retries,
+                )
                 .await;
         }
 
@@ -176,13 +202,21 @@ impl HlsDownloader {
         let writer_output = part_path.clone();
         let media_sequence = playlist.media_sequence;
         let writer = tokio::spawn(async move {
-            write_segments_ordered(seg_rx, &writer_output, &encryption, media_sequence, total_segments).await
+            write_segments_ordered(
+                seg_rx,
+                &writer_output,
+                &encryption,
+                media_sequence,
+                total_segments,
+            )
+            .await
         });
 
         let semaphore = Arc::new(Semaphore::new(max_concurrent as usize));
         let completed = Arc::new(AtomicUsize::new(0));
         let fail_token = cancel_token.child_token();
-        let errors: Arc<tokio::sync::Mutex<HashMap<String, u32>>> = Arc::new(tokio::sync::Mutex::new(HashMap::new()));
+        let errors: Arc<tokio::sync::Mutex<HashMap<String, u32>>> =
+            Arc::new(tokio::sync::Mutex::new(HashMap::new()));
 
         let segment_urls: Vec<(usize, String)> = playlist
             .segments
@@ -207,7 +241,9 @@ impl HlsDownloader {
                     if fail_ref.is_cancelled() {
                         return;
                     }
-                    match download_segment_with_retry(client, &url, &referer, max_retries, fail_ref).await {
+                    match download_segment_with_retry(client, &url, &referer, max_retries, fail_ref)
+                        .await
+                    {
                         Ok(data) => {
                             if let Some(ref btx) = bytes_tx {
                                 let _ = btx.send(data.len() as u64);
@@ -231,7 +267,8 @@ impl HlsDownloader {
 
         drop(seg_tx);
 
-        let writer_result = writer.await
+        let writer_result = writer
+            .await
             .map_err(|e| anyhow::anyhow!("Writer task panicked: {:?}", e))?;
 
         if cancel_token.is_cancelled() {
@@ -342,11 +379,7 @@ struct EncryptionInfo {
 }
 
 fn select_best_variant(master: &MasterPlaylist, max_height: u32) -> Option<&VariantStream> {
-    let real: Vec<&VariantStream> = master
-        .variants
-        .iter()
-        .filter(|v| !v.is_i_frame)
-        .collect();
+    let real: Vec<&VariantStream> = master.variants.iter().filter(|v| !v.is_i_frame).collect();
 
     if real.is_empty() {
         return None;
@@ -400,10 +433,8 @@ async fn write_segments_ordered(
     total_segments: usize,
 ) -> anyhow::Result<()> {
     use std::io::Write;
-    let mut file = std::io::BufWriter::with_capacity(
-        256 * 1024,
-        std::fs::File::create(output_path)?,
-    );
+    let mut file =
+        std::io::BufWriter::with_capacity(256 * 1024, std::fs::File::create(output_path)?);
     let mut next_expected: usize = 0;
     let mut pending: BTreeMap<usize, Vec<u8>> = BTreeMap::new();
 
@@ -475,7 +506,10 @@ async fn download_segment_with_retry(
                 return Err(anyhow::anyhow!("HTTP {} downloading segment", code));
             }
 
-            resp.bytes().await.map(|b| b.to_vec()).map_err(|e| anyhow::anyhow!(e))
+            resp.bytes()
+                .await
+                .map(|b| b.to_vec())
+                .map_err(|e| anyhow::anyhow!(e))
         })
         .await;
 
@@ -492,12 +526,12 @@ async fn download_segment_with_retry(
         if attempt < max_retries - 1 {
             let base = 500 * (attempt as u64 + 1);
             let jitter = rand::random::<u64>() % (base / 2 + 1);
-            tokio::time::sleep(std::time::Duration::from_millis(base + jitter))
-                .await;
+            tokio::time::sleep(std::time::Duration::from_millis(base + jitter)).await;
         }
     }
-    Err(last_err
-        .unwrap_or_else(|| anyhow::anyhow!("Segment download failed after {} attempts", max_retries)))
+    Err(last_err.unwrap_or_else(|| {
+        anyhow::anyhow!("Segment download failed after {} attempts", max_retries)
+    }))
 }
 
 fn compute_iv(encryption: &EncryptionInfo, segment_index: usize, media_sequence: u64) -> [u8; 16] {
@@ -511,9 +545,7 @@ fn compute_iv(encryption: &EncryptionInfo, segment_index: usize, media_sequence:
 }
 
 fn parse_hex_iv(iv_str: &str) -> [u8; 16] {
-    let hex = iv_str
-        .trim_start_matches("0x")
-        .trim_start_matches("0X");
+    let hex = iv_str.trim_start_matches("0x").trim_start_matches("0X");
     let mut result = [0u8; 16];
     let padded = format!("{:0>32}", hex);
     for i in 0..16 {
