@@ -7,7 +7,7 @@
   let isOpen = $state(false);
 
   const settings = $derived(getSettings());
-  const globalHotkey = $derived(settings?.download.hotkey || "Ctrl+Shift+V");
+  const globalHotkey = $derived(settings?.download.hotkey_binding || "Ctrl+Shift+V");
 
   type Shortcut = { keysKey?: string; keys?: string; labelKey: string };
   type Section = { titleKey: string; items: Shortcut[] };
