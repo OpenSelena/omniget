@@ -539,6 +539,44 @@ impl InstagramDownloader {
         headers
     }
 
+    fn post_url_from_title(title: &str) -> Option<String> {
+        let post_id = title.strip_prefix("instagram_")?;
+        if post_id.is_empty() {
+            return None;
+        }
+        Some(format!("https://www.instagram.com/p/{}/", post_id))
+    }
+
+    fn is_html_block_error(err: &anyhow::Error) -> bool {
+        let msg = err.to_string();
+        msg.contains("HTML instead of media")
+    }
+
+    async fn ytdlp_download_post(
+        post_url: &str,
+        opts: &DownloadOptions,
+        progress: mpsc::Sender<f64>,
+    ) -> anyhow::Result<DownloadResult> {
+        let ytdlp_path = crate::core::ytdlp::ensure_ytdlp().await?;
+        crate::core::ytdlp::download_video(
+            &ytdlp_path,
+            post_url,
+            &opts.output_dir,
+            None,
+            progress,
+            opts.download_mode.as_deref(),
+            opts.format_id.as_deref(),
+            opts.filename_template.as_deref(),
+            Some("https://www.instagram.com/"),
+            opts.cancel_token.clone(),
+            None,
+            opts.concurrent_fragments,
+            false,
+            &[],
+        )
+        .await
+    }
+
     fn extract_media_from_embed(data: &serde_json::Value) -> anyhow::Result<InstagramMedia> {
         if let Some(video_url) = data.get("gql_data").and_then(|g| {
             g.get("shortcode_media")
@@ -695,24 +733,7 @@ impl PlatformDownloader for InstagramDownloader {
             let quality = info.available_qualities.first().unwrap();
 
             if quality.format == "ytdlp" {
-                let ytdlp_path = crate::core::ytdlp::ensure_ytdlp().await?;
-                return crate::core::ytdlp::download_video(
-                    &ytdlp_path,
-                    &quality.url,
-                    &opts.output_dir,
-                    None,
-                    progress,
-                    opts.download_mode.as_deref(),
-                    opts.format_id.as_deref(),
-                    opts.filename_template.as_deref(),
-                    Some("https://www.instagram.com/"),
-                    opts.cancel_token.clone(),
-                    None,
-                    opts.concurrent_fragments,
-                    false,
-                    &[],
-                )
-                .await;
+                return Self::ytdlp_download_post(&quality.url, opts, progress).await;
             }
 
             let filename = format!(
@@ -724,22 +745,37 @@ impl PlatformDownloader for InstagramDownloader {
 
             let headers = Some(Self::instagram_headers());
 
-            let bytes = download_direct_with_headers(
+            match download_direct_with_headers(
                 &self.client,
                 &quality.url,
                 &output,
-                progress,
+                progress.clone(),
                 headers,
                 None,
             )
-            .await?;
-
-            return Ok(DownloadResult {
-                file_path: output,
-                file_size_bytes: bytes,
-                duration_seconds: 0.0,
-                torrent_id: None,
-            });
+            .await
+            {
+                Ok(bytes) => {
+                    return Ok(DownloadResult {
+                        file_path: output,
+                        file_size_bytes: bytes,
+                        duration_seconds: 0.0,
+                        torrent_id: None,
+                    });
+                }
+                Err(e) => {
+                    if Self::is_html_block_error(&e) {
+                        if let Some(post_url) = Self::post_url_from_title(&info.title) {
+                            tracing::warn!(
+                                "[instagram] direct CDN fetch returned HTML for {}; falling back to yt-dlp",
+                                post_url
+                            );
+                            return Self::ytdlp_download_post(&post_url, opts, progress).await;
+                        }
+                    }
+                    return Err(e);
+                }
+            }
         }
 
         let mut total_bytes = 0u64;
@@ -757,7 +793,7 @@ impl PlatformDownloader for InstagramDownloader {
 
             let headers = Some(Self::instagram_headers());
 
-            let bytes = download_direct_with_headers(
+            match download_direct_with_headers(
                 &self.client,
                 &quality.url,
                 &output,
@@ -765,13 +801,30 @@ impl PlatformDownloader for InstagramDownloader {
                 headers,
                 None,
             )
-            .await?;
+            .await
+            {
+                Ok(bytes) => {
+                    total_bytes += bytes;
+                    last_path = output;
 
-            total_bytes += bytes;
-            last_path = output;
-
-            let percent = ((i + 1) as f64 / count as f64) * 100.0;
-            let _ = progress.send(percent).await;
+                    let percent = ((i + 1) as f64 / count as f64) * 100.0;
+                    let _ = progress.send(percent).await;
+                }
+                Err(e) => {
+                    if Self::is_html_block_error(&e) {
+                        if let Some(post_url) = Self::post_url_from_title(&info.title) {
+                            tracing::warn!(
+                                "[instagram] carousel item {}/{} returned HTML for {}; falling back to yt-dlp for full post",
+                                i + 1,
+                                count,
+                                post_url
+                            );
+                            return Self::ytdlp_download_post(&post_url, opts, progress).await;
+                        }
+                    }
+                    return Err(e);
+                }
+            }
         }
 
         Ok(DownloadResult {

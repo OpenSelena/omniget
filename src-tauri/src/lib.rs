@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 use tauri::Manager;
+use tauri_plugin_deep_link::DeepLinkExt;
 
 use tokio_util::sync::CancellationToken;
 
@@ -166,6 +167,22 @@ pub fn run() {
                         );
                     });
                 }
+            }
+            {
+                let app_handle = app.handle().clone();
+                app.deep_link().on_open_url(move |event| {
+                    for url in event.urls() {
+                        let raw = url.to_string();
+                        let handle = app_handle.clone();
+                        tauri::async_runtime::spawn(async move {
+                            if let Err(error) =
+                                external_url::handle_external_url(&handle, raw, "deep-link").await
+                            {
+                                tracing::warn!("Failed to handle deep-link URL: {}", error);
+                            }
+                        });
+                    }
+                });
             }
             tray::setup(app.handle())?;
             hotkey::register_from_settings(app.handle());

@@ -15,7 +15,7 @@
   import P2pSendDialog from "$components/p2p/P2pSendDialog.svelte";
   import P2pReceiveDialog from "$components/p2p/P2pReceiveDialog.svelte";
   import { getDownloads } from "$lib/stores/download-store.svelte";
-  import { getSettings } from "$lib/stores/settings-store.svelte";
+  import { getSettings, updateSettings } from "$lib/stores/settings-store.svelte";
   import { showToast } from "$lib/stores/toast-store.svelte";
   import { onClipboardUrl } from "$lib/stores/clipboard-monitor";
   import { getMediaPreview, clearMediaPreview } from "$lib/stores/media-preview-store.svelte";
@@ -238,7 +238,11 @@
   function handleInput() {
     if (debounceTimer) clearTimeout(debounceTimer);
     clearMediaPreview();
-    selectedQuality = "best";
+    const saved = getSettings()?.last_download_options;
+    const savedQuality = saved?.quality;
+    const savedMode = saved?.mode;
+    selectedQuality = savedQuality && typeof savedQuality === "string" ? savedQuality : "best";
+    downloadMode = savedMode === "audio" || savedMode === "mute" ? savedMode : "auto";
     selectedFormatId = null;
     formats = [];
     loadingFormats = false;
@@ -395,6 +399,19 @@
     selectedFormatId = null;
   }
 
+  function persistLastDownloadOptions() {
+    const saved = getSettings()?.last_download_options;
+    const nextMode = downloadMode;
+    const nextQuality = selectedQuality;
+    if (saved?.mode === nextMode && saved?.quality === nextQuality) return;
+    updateSettings({
+      last_download_options: {
+        mode: nextMode,
+        quality: nextQuality,
+      },
+    }).catch(() => {});
+  }
+
   async function handleAction() {
     if (omniState.kind !== "detected") return;
     const info = omniState.info;
@@ -438,6 +455,7 @@
         formatId: selectedFormatId,
         referer: referer.trim() || null,
       });
+      persistLastDownloadOptions();
       omniState = { kind: "idle" };
     } catch (e: any) {
       const msg = typeof e === "string" ? e : e.message ?? $t("omnibox.error");
@@ -483,6 +501,7 @@
     const queued = results.filter(r => r.status === "fulfilled").length;
     if (queued > 0) {
       showToast("info", $t("omnibox.batch_queued", { count: queued }));
+      persistLastDownloadOptions();
     }
   }
 
@@ -543,6 +562,32 @@
     if (selected && typeof selected === "string") {
       url = selected;
       handleInput();
+    }
+  }
+
+  async function openBatchFile() {
+    const selected = await open({
+      title: $t("omnibox.batch_file_title"),
+      filters: [{ name: "Text", extensions: ["txt"] }],
+      multiple: false,
+    });
+    if (!selected || typeof selected !== "string") return;
+    try {
+      const urls = await invoke<string[]>("parse_batch_file", { path: selected });
+      if (urls.length === 0) {
+        showToast("info", $t("omnibox.batch_file_empty"));
+        return;
+      }
+      if (urls.length === 1) {
+        url = urls[0];
+        handleInput();
+        return;
+      }
+      url = urls.join("\n");
+      omniState = { kind: "batch", urls };
+    } catch (e: any) {
+      const msg = typeof e === "string" ? e : e.message ?? $t("omnibox.error");
+      showToast("error", msg);
     }
   }
 
@@ -756,6 +801,15 @@
         <path d="M14.5 10.5l3-3" />
       </svg>
       {$t("torrent.open_file")}
+    </button>
+    <button class="quick-action-btn" onclick={openBatchFile}>
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <line x1="8" y1="13" x2="16" y2="13" />
+        <line x1="8" y1="17" x2="16" y2="17" />
+      </svg>
+      {$t("omnibox.batch_file_open")}
     </button>
   </div>
 

@@ -49,6 +49,10 @@ export type AppSettings = {
   onboarding_completed: boolean;
   start_with_windows: boolean;
   legal_acknowledged?: boolean;
+  last_download_options?: {
+    mode?: "auto" | "audio" | "mute" | null;
+    quality?: string | null;
+  };
 };
 
 let settings = $state<AppSettings | null>(null);
