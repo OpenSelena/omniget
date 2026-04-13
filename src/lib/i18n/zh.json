@@ -14,6 +14,14 @@
     "rule_personal_use": "我理解此工具按原样提供，维护者不对滥用行为负责。",
     "acknowledge": "我已了解"
   },
+  "recovery": {
+    "title": "未完成的下载",
+    "message": "OmniGet 发现上一次会话有 {{count}} 个下载未完成。是否要恢复？",
+    "more": "还有 {{count}} 个...",
+    "restore": "恢复下载",
+    "discard": "丢弃",
+    "restored": "已恢复 {{count}} 个下载"
+  },
   "shortcuts": {
     "title": "键盘快捷键",
     "section_application": "应用",
@@ -296,6 +304,9 @@
     "batch_detected": "检测到 {{count}} 个链接",
     "batch_download_all": "全部下载",
     "batch_queued": "已添加 {{count}} 个下载到队列",
+    "batch_file_open": "从文件加载",
+    "batch_file_title": "选择一个包含 URL 的 .txt 文件",
+    "batch_file_empty": "文件中未找到有效的 URL",
     "mode_auto": "自动",
     "mode_audio": "仅音频 (MP3)",
     "mode_mute": "无声",

@@ -14,6 +14,14 @@
     "rule_personal_use": "I understand this tool is provided as-is and the maintainers are not responsible for misuse.",
     "acknowledge": "I understand"
   },
+  "recovery": {
+    "title": "Unfinished downloads",
+    "message": "OmniGet found {{count}} download(s) that didn't finish last session. Would you like to resume them?",
+    "more": "and {{count}} more...",
+    "restore": "Resume downloads",
+    "discard": "Discard",
+    "restored": "{{count}} download(s) resumed"
+  },
   "shortcuts": {
     "title": "Keyboard shortcuts",
     "section_application": "Application",
@@ -300,6 +308,9 @@
     "batch_detected": "{{count}} URLs detected",
     "batch_download_all": "Download all",
     "batch_queued": "{{count}} downloads added to queue",
+    "batch_file_open": "Load from file",
+    "batch_file_title": "Select a .txt file with URLs",
+    "batch_file_empty": "No valid URLs found in the file",
     "mode_auto": "Auto",
     "mode_audio": "Audio Only (MP3)",
     "mode_mute": "No Sound",

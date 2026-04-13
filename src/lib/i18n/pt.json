@@ -14,6 +14,14 @@
     "rule_personal_use": "Entendo que esta ferramenta é oferecida como está e os mantenedores não são responsáveis por uso indevido.",
     "acknowledge": "Entendi"
   },
+  "recovery": {
+    "title": "Downloads não concluídos",
+    "message": "O OmniGet encontrou {{count}} download(s) que não terminaram na última sessão. Deseja retomá-los?",
+    "more": "e mais {{count}}...",
+    "restore": "Retomar downloads",
+    "discard": "Descartar",
+    "restored": "{{count}} download(s) retomado(s)"
+  },
   "shortcuts": {
     "title": "Atalhos de teclado",
     "section_application": "Aplicativo",
@@ -300,6 +308,9 @@
     "batch_detected": "{{count}} URLs detectadas",
     "batch_download_all": "Baixar todos",
     "batch_queued": "{{count}} downloads adicionados à fila",
+    "batch_file_open": "Carregar de arquivo",
+    "batch_file_title": "Selecione um arquivo .txt com URLs",
+    "batch_file_empty": "Nenhuma URL válida encontrada no arquivo",
     "mode_auto": "Automático",
     "mode_audio": "Só Áudio (MP3)",
     "mode_mute": "Sem Som",

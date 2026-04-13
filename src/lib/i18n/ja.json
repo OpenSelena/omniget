@@ -14,6 +14,14 @@
     "rule_personal_use": "このツールは現状のまま提供され、誤用について開発者は責任を負わないことを理解しています。",
     "acknowledge": "了解しました"
   },
+  "recovery": {
+    "title": "未完了のダウンロード",
+    "message": "OmniGet は前回のセッションで完了しなかったダウンロードを {{count}} 件見つけました。再開しますか？",
+    "more": "他 {{count}} 件...",
+    "restore": "ダウンロードを再開",
+    "discard": "破棄",
+    "restored": "{{count}} 件のダウンロードを再開しました"
+  },
   "shortcuts": {
     "title": "キーボードショートカット",
     "section_application": "アプリ",
@@ -296,6 +304,9 @@
     "batch_detected": "{{count}} 件のURLを検出しました",
     "batch_download_all": "すべてダウンロード",
     "batch_queued": "{{count}} 件のダウンロードをキューに追加しました",
+    "batch_file_open": "ファイルから読み込む",
+    "batch_file_title": "URL を含む .txt ファイルを選択",
+    "batch_file_empty": "ファイル内に有効な URL が見つかりません",
     "mode_auto": "自動",
     "mode_audio": "音声のみ (MP3)",
     "mode_mute": "音声なし",

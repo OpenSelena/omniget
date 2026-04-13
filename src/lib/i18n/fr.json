@@ -5,6 +5,23 @@
     "cancel": "Continuer",
     "confirm": "Fermer quand même"
   },
+  "legal": {
+    "title": "Utilisez OmniGet de manière responsable",
+    "body_paragraph_1": "OmniGet est un outil pour télécharger des médias. Vous êtes responsable de l'usage que vous en faites.",
+    "body_paragraph_2": "Avant de continuer, gardez à l'esprit :",
+    "rule_copyright": "Respectez le droit d'auteur et la propriété intellectuelle des créateurs.",
+    "rule_tos": "Respectez les conditions d'utilisation de chaque plateforme que vous utilisez.",
+    "rule_personal_use": "Utilisez les fichiers téléchargés uniquement à des fins personnelles et licites.",
+    "acknowledge": "J'ai compris"
+  },
+  "recovery": {
+    "title": "Téléchargements non terminés",
+    "message": "OmniGet a trouvé {{count}} téléchargement(s) non terminé(s) lors de la session précédente. Voulez-vous les reprendre ?",
+    "more": "et {{count}} autres...",
+    "restore": "Reprendre les téléchargements",
+    "discard": "Abandonner",
+    "restored": "{{count}} téléchargement(s) repris"
+  },
   "shortcuts": {
     "title": "Raccourcis clavier",
     "section_application": "Application",
@@ -287,6 +304,9 @@
     "batch_detected": "{{count}} URLs détectées",
     "batch_download_all": "Tout télécharger",
     "batch_queued": "{{count}} téléchargements ajoutés à la file d'attente",
+    "batch_file_open": "Charger depuis un fichier",
+    "batch_file_title": "Sélectionner un fichier .txt avec des URL",
+    "batch_file_empty": "Aucune URL valide trouvée dans le fichier",
     "mode_auto": "Auto",
     "mode_audio": "Audio uniquement (MP3)",
     "mode_mute": "Sans son",

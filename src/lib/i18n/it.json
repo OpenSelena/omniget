@@ -5,6 +5,23 @@
     "cancel": "Continua",
     "confirm": "Chiudi comunque"
   },
+  "legal": {
+    "title": "Usa OmniGet in modo responsabile",
+    "body_paragraph_1": "OmniGet è uno strumento per scaricare contenuti multimediali. Sei responsabile di come lo utilizzi.",
+    "body_paragraph_2": "Prima di continuare, ricorda:",
+    "rule_copyright": "Rispetta il diritto d'autore e la proprietà intellettuale dei creatori.",
+    "rule_tos": "Segui i termini di servizio di ogni piattaforma da cui scarichi.",
+    "rule_personal_use": "Usa i file scaricati solo per scopi personali e leciti.",
+    "acknowledge": "Ho capito"
+  },
+  "recovery": {
+    "title": "Download non completati",
+    "message": "OmniGet ha trovato {{count}} download non completati dalla sessione precedente. Vuoi riprenderli?",
+    "more": "e altri {{count}}...",
+    "restore": "Riprendi download",
+    "discard": "Scarta",
+    "restored": "{{count}} download ripresi"
+  },
   "shortcuts": {
     "title": "Scorciatoie da tastiera",
     "section_application": "Applicazione",
@@ -287,6 +304,9 @@
     "batch_detected": "{{count}} URL rilevati",
     "batch_download_all": "Scarica tutto",
     "batch_queued": "{{count}} download aggiunti alla coda",
+    "batch_file_open": "Carica da file",
+    "batch_file_title": "Seleziona un file .txt con URL",
+    "batch_file_empty": "Nessun URL valido trovato nel file",
     "mode_auto": "Auto",
     "mode_audio": "Solo audio (MP3)",
     "mode_mute": "Senza audio",

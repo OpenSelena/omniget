@@ -5,6 +5,23 @@
     "cancel": "繼續執行",
     "confirm": "仍然關閉"
   },
+  "legal": {
+    "title": "請負責任地使用 OmniGet",
+    "body_paragraph_1": "OmniGet 是一個媒體下載工具。您需要為使用方式負責。",
+    "body_paragraph_2": "在繼續之前，請記住：",
+    "rule_copyright": "尊重創作者的著作權和智慧財產權。",
+    "rule_tos": "遵守您下載內容的每個平台的服務條款。",
+    "rule_personal_use": "下載的檔案僅用於個人和合法用途。",
+    "acknowledge": "我了解了"
+  },
+  "recovery": {
+    "title": "未完成的下載",
+    "message": "OmniGet 發現上次工作階段有 {{count}} 個未完成的下載。要恢復嗎？",
+    "more": "還有 {{count}} 個...",
+    "restore": "恢復下載",
+    "discard": "捨棄",
+    "restored": "已恢復 {{count}} 個下載"
+  },
   "shortcuts": {
     "title": "鍵盤快速鍵",
     "section_application": "應用程式",
@@ -337,6 +354,9 @@
     "batch_detected": "偵測到 {{count}} 個 URL",
     "batch_download_all": "全部下載",
     "batch_queued": "已將 {{count}} 個下載加入佇列",
+    "batch_file_open": "從檔案載入",
+    "batch_file_title": "選擇包含 URL 的 .txt 檔案",
+    "batch_file_empty": "檔案中找不到有效的 URL",
     "mode_auto": "自動",
     "mode_audio": "音訊",
     "mode_mute": "靜音",
