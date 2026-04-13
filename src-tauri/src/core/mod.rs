@@ -15,6 +15,7 @@ pub use omniget_core::core::redirect;
 pub use omniget_core::core::registry;
 pub use omniget_core::core::ytdlp;
 
+pub mod download_log;
 pub mod events;
 pub mod path_limits;
 pub mod queue;

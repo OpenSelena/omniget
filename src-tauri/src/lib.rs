@@ -137,6 +137,21 @@ pub fn run() {
             core::ytdlp::set_ext_referer_fn(|url| {
                 native_host::read_extension_metadata(url).and_then(|m| m.referer)
             });
+            {
+                let app_handle = app.handle().clone();
+                omniget_core::core::log_hook::set_log_sink(std::sync::Arc::new(
+                    move |id, line| {
+                        let should_emit = core::download_log::push_line(id, line);
+                        if should_emit {
+                            let _ = tauri::Emitter::emit(
+                                &app_handle,
+                                "download-log-update",
+                                serde_json::json!({ "id": id }),
+                            );
+                        }
+                    },
+                ));
+            }
             tray::setup(app.handle())?;
             hotkey::register_from_settings(app.handle());
             if let Err(error) = native_host::ensure_registered() {
@@ -214,6 +229,8 @@ pub fn run() {
             commands::downloads::get_queue_state,
             commands::downloads::update_max_concurrent,
             commands::downloads::clear_finished_downloads,
+            commands::downloads::get_download_log,
+            commands::downloads::clear_download_log,
             commands::downloads::reveal_file,
             commands::integration::register_external_frontend,
             commands::settings::get_settings,

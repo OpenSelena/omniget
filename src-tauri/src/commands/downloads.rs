@@ -412,12 +412,23 @@ pub async fn remove_download(
         }
     }
     if let Some(s) = state_to_emit {
+        crate::core::download_log::clear(download_id);
         emit_queue_state_from_state(&app, s);
         queue::try_start_next(app, state.download_queue.clone()).await;
         Ok("Download removed".to_string())
     } else {
         Err("Download not found".to_string())
     }
+}
+
+#[tauri::command]
+pub fn get_download_log(download_id: u64) -> Vec<String> {
+    crate::core::download_log::get(download_id)
+}
+
+#[tauri::command]
+pub fn clear_download_log(download_id: u64) {
+    crate::core::download_log::clear(download_id);
 }
 
 #[tauri::command]
@@ -452,11 +463,26 @@ pub async fn clear_finished_downloads(
     app: tauri::AppHandle,
     state: tauri::State<'_, AppState>,
 ) -> Result<String, String> {
-    let state_to_emit = {
+    let (state_to_emit, finished_ids) = {
         let mut q = state.download_queue.lock().await;
+        let ids = q
+            .items
+            .iter()
+            .filter(|i| {
+                matches!(
+                    i.status,
+                    crate::core::queue::QueueStatus::Complete { .. }
+                        | crate::core::queue::QueueStatus::Error { .. }
+                )
+            })
+            .map(|i| i.id)
+            .collect::<Vec<_>>();
         q.clear_finished();
-        q.get_state()
+        (q.get_state(), ids)
     };
+    for id in finished_ids {
+        crate::core::download_log::clear(id);
+    }
     emit_queue_state_from_state(&app, state_to_emit);
     Ok("Finished downloads cleared".to_string())
 }

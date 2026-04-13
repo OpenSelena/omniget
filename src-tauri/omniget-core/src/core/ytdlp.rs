@@ -8,6 +8,7 @@ use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 
+use crate::core::log_hook;
 use crate::models::media::{DownloadResult, FormatInfo};
 
 type ExtCookiePathFn = Box<dyn Fn() -> PathBuf + Send + Sync>;
@@ -1310,6 +1311,7 @@ pub async fn download_video(
         let progress_tx = progress.clone();
         let captured_path: Arc<Mutex<Option<PathBuf>>> = Arc::new(Mutex::new(None));
         let captured_path_writer = captured_path.clone();
+        let log_id = log_hook::current_download_id();
 
         let line_reader = tokio::spawn(async move {
             let mut phase = 0u32;
@@ -1319,6 +1321,9 @@ pub async fn download_video(
             let mut last_send = std::time::Instant::now();
             let throttle = std::time::Duration::from_millis(250);
             while let Ok(Some(line)) = lines.next_line().await {
+                if let Some(id) = log_id {
+                    log_hook::emit_log(id, &line);
+                }
                 if !first_line_logged {
                     first_line_logged = true;
                     tracing::debug!(
@@ -1380,11 +1385,15 @@ pub async fn download_video(
             }
         });
 
+        let stderr_log_id = log_hook::current_download_id();
         let stderr_reader = tokio::spawn(async move {
             let mut buf = String::new();
             let stderr_buf = BufReader::new(stderr_pipe);
             let mut stderr_lines = stderr_buf.lines();
             while let Ok(Some(line)) = stderr_lines.next_line().await {
+                if let Some(id) = stderr_log_id {
+                    log_hook::emit_log(id, &line);
+                }
                 buf.push_str(&line);
                 buf.push('\n');
             }

@@ -860,12 +860,17 @@ async fn spawn_download_inner(
     });
 
     let dl_start = std::time::Instant::now();
-    let result = tokio::select! {
-        r = downloader.download(&info, &opts, tx) => r,
-        _ = cancel_token.cancelled() => {
-            Err(anyhow::anyhow!("Download cancelado"))
+    let dl_future = async {
+        tokio::select! {
+            r = downloader.download(&info, &opts, tx) => r,
+            _ = cancel_token.cancelled() => {
+                Err(anyhow::anyhow!("Download cancelado"))
+            }
         }
     };
+    let result = omniget_core::core::log_hook::CURRENT_DOWNLOAD_ID
+        .scope(item_id, dl_future)
+        .await;
     tracing::info!(
         "[queue] download {} completed in {:?}",
         item_id,
