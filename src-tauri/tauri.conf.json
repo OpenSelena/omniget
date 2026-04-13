@@ -4,7 +4,7 @@
   "version": "0.4.0",
   "identifier": "wtf.tonho.omniget",
   "build": {
-    "beforeDevCommand": "pnpm dev",
+    "beforeDevCommand": "pnpm plugins:deploy && pnpm dev",
     "devUrl": "http://localhost:1420",
     "beforeBuildCommand": "pnpm build",
     "frontendDist": "../build"
