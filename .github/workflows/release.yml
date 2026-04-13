@@ -145,9 +145,6 @@ jobs:
             --arg d "$PUB_DATE" \
             '{version: $v, notes: "", pub_date: $d, platforms: {}}')
 
-          ASSETS=$(gh release view "$TAG" --repo "$REPO" --json assets -q '.assets[].name')
-          TMPDIR=$(mktemp -d)
-
           declare -A PLATFORM_MAP=(
             ["aarch64.app.tar.gz.sig"]="darwin-aarch64"
             ["x64.app.tar.gz.sig"]="darwin-x86_64"
@@ -156,13 +153,44 @@ jobs:
             ["x64-setup.exe.sig"]="windows-x86_64"
           )
 
+          ASSETS=""
+          for attempt in $(seq 1 10); do
+            ASSETS=$(gh release view "$TAG" --repo "$REPO" --json assets -q '.assets[].name' || true)
+            MISSING=0
+            for SUFFIX in "${!PLATFORM_MAP[@]}"; do
+              if ! echo "$ASSETS" | grep -q "${SUFFIX}$"; then
+                MISSING=$((MISSING + 1))
+              fi
+            done
+            if [ "$MISSING" -eq 0 ]; then
+              echo "All expected .sig assets are visible (attempt $attempt)."
+              break
+            fi
+            echo "Attempt $attempt: $MISSING .sig asset(s) not yet visible, retrying in 30s..."
+            sleep 30
+          done
+
+          TMPDIR=$(mktemp -d)
+
           for SUFFIX in "${!PLATFORM_MAP[@]}"; do
             PLATFORM="${PLATFORM_MAP[$SUFFIX]}"
             SIG_FILE=$(echo "$ASSETS" | grep "${SUFFIX}$" || true)
 
             if [ -n "$SIG_FILE" ]; then
               BUNDLE="${SIG_FILE%.sig}"
-              gh release download "$TAG" --repo "$REPO" --pattern "$SIG_FILE" --dir "$TMPDIR" --clobber
+              DOWNLOADED=0
+              for dl_attempt in $(seq 1 10); do
+                if gh release download "$TAG" --repo "$REPO" --pattern "$SIG_FILE" --dir "$TMPDIR" --clobber; then
+                  DOWNLOADED=1
+                  break
+                fi
+                echo "Download attempt $dl_attempt for $SIG_FILE failed, retrying in 30s..."
+                sleep 30
+              done
+              if [ "$DOWNLOADED" -ne 1 ]; then
+                echo "Failed to download $SIG_FILE after 10 attempts" >&2
+                exit 1
+              fi
               SIG_CONTENT=$(cat "$TMPDIR/$SIG_FILE")
               URL="https://github.com/${REPO}/releases/download/${TAG}/${BUNDLE}"
 

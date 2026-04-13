@@ -1,3 +1,5 @@
+import { loadOpenAppState, isOpenAppEnabled, setOpenAppEnabled } from "../src/open-app-toggle.js";
+
 const APP_URL = "https://github.com/tonhowtf/omniget/releases/latest";
 
 const SVG = {
@@ -11,14 +13,23 @@ const SVG = {
 
 let currentData = null;
 let pageTitle = "";
+let pageThumbnail = "";
 
 async function init() {
   const toggle = document.getElementById("sniffer-toggle");
+  const openAppToggle = document.getElementById("open-app-toggle");
 
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     pageTitle = tab?.title || "";
+    pageThumbnail = tab?.favIconUrl || "";
   } catch {}
+
+  await loadOpenAppState();
+  openAppToggle.checked = isOpenAppEnabled();
+  openAppToggle.addEventListener("change", () => {
+    setOpenAppEnabled(openAppToggle.checked);
+  });
 
   chrome.runtime.sendMessage({ type: "getDetectedMedia" }, (response) => {
     if (!response) return;
@@ -309,9 +320,11 @@ function sendToApp(url, platform, mediaEntry) {
     const msg = { type: "sendToOmniGet", url, platform };
 
     if (pageTitle) msg.title = pageTitle;
+    if (pageThumbnail) msg.thumbnail = pageThumbnail;
     if (currentData?.tabUrl) msg.referer = currentData.tabUrl;
     if (mediaEntry?.mediaType) msg.mediaType = mediaEntry.mediaType;
     if (mediaEntry?.contentType) msg.contentType = mediaEntry.contentType;
+    msg.openApp = isOpenAppEnabled();
 
     if (mediaEntry?.requestHeaders) {
       const skip = ["host", "connection", "accept-encoding", "sec-ch-ua", "sec-ch-ua-mobile", "sec-ch-ua-platform", "sec-fetch-dest", "sec-fetch-mode", "sec-fetch-site", "upgrade-insecure-requests"];
@@ -344,6 +357,7 @@ async function sendBatch(groups) {
     if (currentData?.tabUrl) msg.referer = currentData.tabUrl;
     if (group.master.mediaType) msg.mediaType = group.master.mediaType;
     if (group.master.contentType) msg.contentType = group.master.contentType;
+    msg.openApp = isOpenAppEnabled();
 
     try {
       await new Promise((resolve) => {

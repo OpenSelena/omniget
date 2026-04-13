@@ -10,7 +10,12 @@
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "tauri": "tauri"
+    "tauri": "tauri",
+    "version:set": "node scripts/bump-version.js",
+    "generate:i18n-keys": "node scripts/generate-i18n-keys.js",
+    "extension:sync": "node browser-extension/sync.mjs",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "license": "GPL-3.0",
   "dependencies": {
@@ -29,9 +34,11 @@
     "@sveltejs/kit": "^2.9.0",
     "@sveltejs/vite-plugin-svelte": "^5.0.0",
     "@tauri-apps/cli": "^2",
+    "@types/node": "^25.6.0",
     "svelte": "^5.0.0",
     "svelte-check": "^4.0.0",
     "typescript": "~5.6.2",
-    "vite": "^6.0.3"
+    "vite": "^6.0.3",
+    "vitest": "^4.1.4"
   }
 }

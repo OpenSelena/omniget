@@ -71,6 +71,18 @@ const PLATFORM_CDN_HOSTS = [
   "tiktokcdn-us.com",
 ];
 
+const BLOCKED_PATH_PATTERNS = [
+  /\/analytics(\/|\?|$)/i,
+  /\/pixel(\/|\?|\.|$)/i,
+  /\/collect(\/|\?|$)/i,
+  /\/beacon(\/|\?|$)/i,
+  /\/telemetry(\/|\?|$)/i,
+  /\/track(\/|\?|$|er)/i,
+  /1x1\.gif$/i,
+  /\/spacer\.gif$/i,
+  /\/transparent\.gif$/i,
+];
+
 const MIN_CONTENT_LENGTH = 50 * 1024;
 
 const detectedMedia = new Map();
@@ -93,6 +105,14 @@ function isBlockedHost(url) {
   try {
     const host = new URL(url).hostname;
     return BLOCKED_HOSTS.some(b => host.includes(b));
+  } catch { return false; }
+}
+
+function isBlockedPath(url) {
+  try {
+    const u = new URL(url);
+    const target = u.pathname + u.search;
+    return BLOCKED_PATH_PATTERNS.some(rx => rx.test(target));
   } catch { return false; }
 }
 
@@ -168,16 +188,18 @@ function isPlatformCdnFragment(url, contentType, contentLength) {
   } catch { return false; }
 }
 
+const storageArea = chrome.storage.session ?? chrome.storage.local;
+
 function persistMedia(tabId) {
   const media = detectedMedia.get(tabId);
   if (!media || media.size === 0) return;
   const arr = Array.from(media.entries());
-  chrome.storage.session.set({ [`media_${tabId}`]: arr }).catch(() => {});
+  storageArea.set({ [`media_${tabId}`]: arr }).catch(() => {});
 }
 
 export async function restoreMedia() {
   try {
-    const data = await chrome.storage.session.get(null);
+    const data = await storageArea.get(null);
     for (const [key, value] of Object.entries(data)) {
       if (!key.startsWith("media_")) continue;
       const tabId = parseInt(key.replace("media_", ""));
@@ -214,7 +236,10 @@ export function registerSnifferListeners(onMediaDetected) {
       if (details.statusCode < 200 || details.statusCode >= 300) return;
 
       const url = details.url;
-      if (isBlockedHost(url)) return;
+      if (isBlockedHost(url) || isBlockedPath(url)) {
+        pendingRequests.delete(details.requestId);
+        return;
+      }
 
       const contentType = getContentType(details.responseHeaders);
       const contentLength = getContentLength(details.responseHeaders);
@@ -280,13 +305,13 @@ export function registerSnifferListeners(onMediaDetected) {
 
   chrome.tabs.onRemoved.addListener((tabId) => {
     detectedMedia.delete(tabId);
-    chrome.storage.session.remove(`media_${tabId}`).catch(() => {});
+    storageArea.remove(`media_${tabId}`).catch(() => {});
   });
 
   chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
     if (changeInfo.url) {
       detectedMedia.delete(tabId);
-      chrome.storage.session.remove(`media_${tabId}`).catch(() => {});
+      storageArea.remove(`media_${tabId}`).catch(() => {});
     }
   });
 }

@@ -156,9 +156,11 @@ async function handleSendToApp(msg) {
   const platform = msg.platform || "generic";
 
   let pageTitle = "";
+  let pageThumbnail = "";
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
     pageTitle = tab?.title || "";
+    pageThumbnail = tab?.favIconUrl || "";
   } catch {}
 
   let cookies = null;
@@ -204,9 +206,12 @@ async function handleSendToApp(msg) {
   if (msg.referer) message.referer = msg.referer;
   if (msg.title) message.title = msg.title;
   else if (pageTitle) message.title = pageTitle;
+  if (msg.thumbnail) message.thumbnail = msg.thumbnail;
+  else if (pageThumbnail) message.thumbnail = pageThumbnail;
   if (msg.mediaType) message.mediaType = msg.mediaType;
   if (msg.contentType) message.contentType = msg.contentType;
   if (msg.headers) message.headers = msg.headers;
+  if (typeof msg.openApp === "boolean") message.openApp = msg.openApp;
   message.pageUrl = msg.referer || "";
   message.userAgent = navigator.userAgent;
 
