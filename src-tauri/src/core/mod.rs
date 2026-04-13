@@ -19,4 +19,5 @@ pub mod download_log;
 pub mod events;
 pub mod path_limits;
 pub mod queue;
+pub mod recovery;
 pub mod url_parser;

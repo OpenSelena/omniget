@@ -152,6 +152,21 @@ pub fn run() {
                     },
                 ));
             }
+            core::recovery::init_from_disk();
+            {
+                let pending = core::recovery::list();
+                if !pending.is_empty() {
+                    let app_handle = app.handle().clone();
+                    tauri::async_runtime::spawn(async move {
+                        tokio::time::sleep(std::time::Duration::from_millis(800)).await;
+                        let _ = tauri::Emitter::emit(
+                            &app_handle,
+                            "recovery-available",
+                            serde_json::json!({ "count": pending.len() }),
+                        );
+                    });
+                }
+            }
             tray::setup(app.handle())?;
             hotkey::register_from_settings(app.handle());
             if let Err(error) = native_host::ensure_registered() {
@@ -231,6 +246,10 @@ pub fn run() {
             commands::downloads::clear_finished_downloads,
             commands::downloads::get_download_log,
             commands::downloads::clear_download_log,
+            commands::downloads::parse_batch_file,
+            commands::downloads::get_recovery_items,
+            commands::downloads::discard_recovery,
+            commands::downloads::restore_recovery,
             commands::downloads::reveal_file,
             commands::integration::register_external_frontend,
             commands::settings::get_settings,

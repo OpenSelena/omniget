@@ -19,6 +19,16 @@ pub struct AppSettings {
     pub portable_mode: bool,
     #[serde(default)]
     pub legal_acknowledged: bool,
+    #[serde(default)]
+    pub last_download_options: LastDownloadOptions,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct LastDownloadOptions {
+    #[serde(default)]
+    pub mode: Option<String>,
+    #[serde(default)]
+    pub quality: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -184,6 +194,7 @@ impl Default for AppSettings {
             start_with_windows: false,
             portable_mode: false,
             legal_acknowledged: false,
+            last_download_options: LastDownloadOptions::default(),
         }
     }
 }

@@ -432,6 +432,66 @@ pub fn clear_download_log(download_id: u64) {
 }
 
 #[tauri::command]
+pub fn get_recovery_items() -> Vec<crate::core::recovery::RecoveryItem> {
+    crate::core::recovery::list()
+}
+
+#[tauri::command]
+pub fn discard_recovery() {
+    crate::core::recovery::clear_all();
+}
+
+#[tauri::command]
+pub async fn restore_recovery(
+    app: tauri::AppHandle,
+    state: tauri::State<'_, AppState>,
+) -> Result<u32, String> {
+    let items = crate::core::recovery::list();
+    crate::core::recovery::clear_all();
+    let mut restored: u32 = 0;
+    for item in items {
+        match download_from_url(
+            app.clone(),
+            state.clone(),
+            item.url,
+            item.output_dir,
+            item.download_mode,
+            item.quality,
+            item.format_id,
+            item.referer,
+        )
+        .await
+        {
+            Ok(_) => restored += 1,
+            Err(e) => tracing::warn!("[recovery] restore failed: {}", e),
+        }
+    }
+    Ok(restored)
+}
+
+#[tauri::command]
+pub fn parse_batch_file(path: String) -> Result<Vec<String>, String> {
+    let content = std::fs::read_to_string(&path)
+        .map_err(|e| format!("Read error: {}", e))?;
+    let mut urls = Vec::new();
+    for raw in content.lines() {
+        let line = raw.trim();
+        if line.is_empty() || line.starts_with('#') {
+            continue;
+        }
+        let candidate = line.split('|').next().unwrap_or(line).trim();
+        if candidate.starts_with("http://")
+            || candidate.starts_with("https://")
+            || candidate.starts_with("magnet:")
+            || candidate.starts_with("p2p:")
+        {
+            urls.push(candidate.to_string());
+        }
+    }
+    Ok(urls)
+}
+
+#[tauri::command]
 pub async fn get_queue_state(
     state: tauri::State<'_, AppState>,
 ) -> Result<Vec<QueueItemInfo>, String> {

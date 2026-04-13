@@ -193,6 +193,17 @@ impl DownloadQueue {
             from_hotkey,
             torrent_id: None,
         };
+        crate::core::recovery::persist(crate::core::recovery::RecoveryItem {
+            id: item.id,
+            url: item.url.clone(),
+            title: item.title.clone(),
+            platform: item.platform.clone(),
+            output_dir: item.output_dir.clone(),
+            download_mode: item.download_mode.clone(),
+            quality: item.quality.clone(),
+            format_id: item.format_id.clone(),
+            referer: item.referer.clone(),
+        });
         self.items.push(item);
     }
 
@@ -240,6 +251,7 @@ impl DownloadQueue {
             item.file_path = file_path;
             item.file_size_bytes = file_size_bytes;
             item.speed_bytes_per_sec = 0.0;
+            crate::core::recovery::remove(id);
         }
     }
 
@@ -257,6 +269,7 @@ impl DownloadQueue {
             item.file_size_bytes = file_size_bytes;
             item.speed_bytes_per_sec = 0.0;
             item.torrent_id = torrent_id;
+            crate::core::recovery::remove(id);
         }
     }
 
@@ -313,6 +326,14 @@ impl DownloadQueue {
 
     /// Cancel an item. Returns the torrent_id if the item needs torrent cleanup (caller should delete from session).
     pub fn cancel(&mut self, id: u64) -> (bool, Option<usize>) {
+        let result = self.cancel_inner(id);
+        if result.0 {
+            crate::core::recovery::remove(id);
+        }
+        result
+    }
+
+    fn cancel_inner(&mut self, id: u64) -> (bool, Option<usize>) {
         if let Some(item) = self.items.iter_mut().find(|i| i.id == id) {
             match &item.status {
                 QueueStatus::Active => {
@@ -377,6 +398,14 @@ impl DownloadQueue {
 
     /// Remove an item. Returns the torrent_id if the item needs torrent cleanup (caller should delete from session).
     pub fn remove(&mut self, id: u64) -> Option<Option<usize>> {
+        let result = self.remove_inner(id);
+        if result.is_some() {
+            crate::core::recovery::remove(id);
+        }
+        result
+    }
+
+    fn remove_inner(&mut self, id: u64) -> Option<Option<usize>> {
         if let Some(pos) = self.items.iter().position(|i| i.id == id) {
             let item = &self.items[pos];
             if item.status == QueueStatus::Active {
@@ -400,6 +429,15 @@ impl DownloadQueue {
     }
 
     pub fn clear_finished(&mut self) {
+        let to_remove: Vec<u64> = self
+            .items
+            .iter()
+            .filter(|i| matches!(i.status, QueueStatus::Complete { .. } | QueueStatus::Error { .. }))
+            .map(|i| i.id)
+            .collect();
+        for id in &to_remove {
+            crate::core::recovery::remove(*id);
+        }
         self.items.retain(|i| {
             !matches!(
                 i.status,
