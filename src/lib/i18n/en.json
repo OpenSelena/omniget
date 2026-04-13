@@ -230,7 +230,8 @@
     "cat_shortcuts": "Shortcuts",
     "cat_network": "Network",
     "cat_tools": "Tools",
-    "cat_advanced": "Advanced"
+    "cat_advanced": "Advanced",
+    "search_placeholder": "Search settings..."
   },
   "omnibox": {
     "placeholder": "Paste a URL, magnet link, .torrent, or search",
