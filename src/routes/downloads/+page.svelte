@@ -32,22 +32,52 @@
     const paused: GenericDownloadItem[] = [];
     const queued: GenericDownloadItem[] = [];
     const finished: GenericDownloadItem[] = [];
+    const errored: GenericDownloadItem[] = [];
+    const completed: GenericDownloadItem[] = [];
     for (const d of genericList) {
       if (d.status === "downloading" || d.status === "seeding") active.push(d);
       else if (d.status === "paused") paused.push(d);
       else if (d.status === "queued") queued.push(d);
-      else finished.push(d);
+      else {
+        finished.push(d);
+        if (d.status === "error") errored.push(d);
+        else if (d.status === "complete") completed.push(d);
+      }
     }
-    return { active, paused, queued, finished };
+    return { active, paused, queued, finished, errored, completed };
+  });
+
+  type StatusFilter = "all" | "active" | "queued" | "completed" | "failed";
+  let statusFilter = $state<StatusFilter>("all");
+
+  let filterCounts = $derived({
+    all: genericList.length,
+    active: grouped.active.length + grouped.paused.length,
+    queued: grouped.queued.length,
+    completed: grouped.completed.length,
+    failed: grouped.errored.length,
+  });
+
+  let showSection = $derived({
+    active: statusFilter === "all" || statusFilter === "active",
+    queued: statusFilter === "all" || statusFilter === "queued",
+    completed: statusFilter === "all" || statusFilter === "completed",
+    failed: statusFilter === "all" || statusFilter === "failed",
+  });
+
+  let finishedFiltered = $derived.by(() => {
+    if (statusFilter === "completed") return grouped.completed;
+    if (statusFilter === "failed") return grouped.errored;
+    return grouped.finished;
   });
 
   const FINISHED_PAGE_SIZE = 20;
   let finishedVisibleCount = $state(FINISHED_PAGE_SIZE);
 
   let visibleFinished = $derived(
-    grouped.finished.length <= finishedVisibleCount
-      ? grouped.finished
-      : grouped.finished.slice(0, finishedVisibleCount)
+    finishedFiltered.length <= finishedVisibleCount
+      ? finishedFiltered
+      : finishedFiltered.slice(0, finishedVisibleCount)
   );
 
   let hasDownloads = $derived(courseList.length > 0 || genericList.length > 0);
@@ -156,37 +186,62 @@
         </button>
       {/if}
     </div>
+
+    <div class="filter-pills" role="tablist" aria-label={$t('downloads.filter_label')}>
+      {#each [
+        { value: 'all', labelKey: 'downloads.filter.all', count: filterCounts.all },
+        { value: 'active', labelKey: 'downloads.filter.active', count: filterCounts.active },
+        { value: 'queued', labelKey: 'downloads.filter.queued', count: filterCounts.queued },
+        { value: 'completed', labelKey: 'downloads.filter.completed', count: filterCounts.completed },
+        { value: 'failed', labelKey: 'downloads.filter.failed', count: filterCounts.failed },
+      ] as pill}
+        <button
+          type="button"
+          class="filter-pill"
+          class:active={statusFilter === pill.value}
+          role="tab"
+          aria-selected={statusFilter === pill.value}
+          onclick={() => { statusFilter = pill.value as StatusFilter; finishedVisibleCount = FINISHED_PAGE_SIZE; }}
+        >
+          <span>{$t(pill.labelKey)}</span>
+          <span class="filter-count">{pill.count}</span>
+        </button>
+      {/each}
+    </div>
+
     <div class="download-list">
-      {#each grouped.active as item (item.id)}
-        {@render genericItem(item)}
-      {/each}
+      {#if showSection.active}
+        {#each grouped.active as item (item.id)}
+          {@render genericItem(item)}
+        {/each}
 
-      {#each grouped.paused as item (item.id)}
-        {@render genericItem(item)}
-      {/each}
+        {#each grouped.paused as item (item.id)}
+          {@render genericItem(item)}
+        {/each}
 
-      {#each courseList as item (item.id)}
-        {@render courseItem(item)}
-      {/each}
+        {#each courseList as item (item.id)}
+          {@render courseItem(item)}
+        {/each}
+      {/if}
 
-      {#if grouped.queued.length > 0}
+      {#if showSection.queued && grouped.queued.length > 0}
         <h5 class="section-label">{$t('downloads.section_queued')}</h5>
         {#each grouped.queued as item (item.id)}
           {@render genericItem(item)}
         {/each}
       {/if}
 
-      {#if grouped.finished.length > 0}
+      {#if (showSection.completed || showSection.failed) && finishedFiltered.length > 0}
         <h5 class="section-label">{$t('downloads.section_finished')}</h5>
         {#each visibleFinished as item (item.id)}
           {@render genericItem(item)}
         {/each}
-        {#if grouped.finished.length > finishedVisibleCount}
+        {#if finishedFiltered.length > finishedVisibleCount}
           <button
             class="button show-more-btn"
             onclick={() => { finishedVisibleCount += FINISHED_PAGE_SIZE; }}
           >
-            {$t('downloads.show_more', { count: grouped.finished.length - finishedVisibleCount })}
+            {$t('downloads.show_more', { count: finishedFiltered.length - finishedVisibleCount })}
           </button>
         {/if}
       {/if}
@@ -596,6 +651,60 @@
     letter-spacing: 0.5px;
     margin-block: 0;
     padding-top: calc(var(--padding) / 2);
+  }
+
+  .filter-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: var(--padding);
+  }
+
+  .filter-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    border: 1px solid var(--content-border);
+    border-radius: 9999px;
+    background: var(--button);
+    color: var(--foreground-secondary);
+    cursor: pointer;
+    transition: background-color 0.12s, color 0.12s, border-color 0.12s;
+  }
+
+  .filter-pill:hover {
+    background: var(--button-elevated);
+    color: var(--foreground);
+  }
+
+  .filter-pill.active {
+    background: var(--blue);
+    color: var(--on-accent);
+    border-color: var(--blue);
+  }
+
+  .filter-pill:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .filter-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    padding: 0 5px;
+    font-size: 10px;
+    font-weight: 600;
+    background: rgba(0, 0, 0, 0.18);
+    border-radius: 9999px;
+  }
+
+  .filter-pill.active .filter-count {
+    background: rgba(255, 255, 255, 0.22);
   }
 
   .download-list {

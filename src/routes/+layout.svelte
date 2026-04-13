@@ -18,6 +18,7 @@
   import ChangelogDialog from "$components/dialog/ChangelogDialog.svelte";
   import ConfirmCloseDialog from "$components/dialog/ConfirmCloseDialog.svelte";
   import ShortcutsDialog from "$components/dialog/ShortcutsDialog.svelte";
+  import LegalDialog from "$components/dialog/LegalDialog.svelte";
   import OnboardingWizard from "$components/onboarding/OnboardingWizard.svelte";
   import { needsOnboarding } from "$lib/stores/onboarding-store.svelte";
   import { isYtdlpAvailable, isDepsChecked, refreshYtdlpStatus } from "$lib/stores/dependency-store.svelte";
@@ -243,6 +244,7 @@
 <ChangelogDialog />
 <ConfirmCloseDialog />
 <ShortcutsDialog />
+<LegalDialog />
 {#if showOnboarding}
   <OnboardingWizard />
 {/if}
