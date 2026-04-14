@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "OmniGet",
   "description": "Detect supported media pages and send them to OmniGet with one click.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "default_locale": "en",
   "browser_specific_settings": {
     "gecko": {

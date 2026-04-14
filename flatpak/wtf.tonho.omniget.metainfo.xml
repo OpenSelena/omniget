@@ -42,6 +42,11 @@
   </branding>
   <content_rating type="oars-1.1" />
   <releases>
+    <release version="0.4.1" date="2026-04-13">
+      <description>
+        <p>Fix Instagram downloads failing with "Server returned HTML instead of media" when the primary extractors fell back to yt-dlp. The browser extension now requests wildcard host permissions only when the media sniffer is enabled, ships with an explicit allowlist for 13 supported platforms, and distinguishes the two popup toggles (open app vs. media detection) with separate icons. Native host logging redacts cookie values; cookie-domain mappings are now data-driven.</p>
+      </description>
+    </release>
     <release version="0.4.0" date="2026-04-05">
       <description>
         <p>Plugin system release: courses, telegram, and convert plugins now ship independently via Marketplace. Version 0.4.0 enables the new plugin architecture.</p>
