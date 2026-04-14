@@ -19,6 +19,62 @@
     "menus"
   ],
   "host_permissions": [
+    "*://*.hotmart.com/*",
+    "*://*.youtube.com/*",
+    "*://*.youtube-nocookie.com/*",
+    "*://youtu.be/*",
+    "*://*.googlevideo.com/*",
+    "*://*.ytimg.com/*",
+    "*://*.instagram.com/*",
+    "*://*.ddinstagram.com/*",
+    "*://*.cdninstagram.com/*",
+    "*://*.fbcdn.net/*",
+    "*://*.tiktok.com/*",
+    "*://*.tiktokcdn.com/*",
+    "*://*.tiktokcdn-us.com/*",
+    "*://*.twitter.com/*",
+    "*://*.x.com/*",
+    "*://*.vxtwitter.com/*",
+    "*://*.fixvx.com/*",
+    "*://*.twimg.com/*",
+    "*://*.reddit.com/*",
+    "*://v.redd.it/*",
+    "*://redd.it/*",
+    "*://*.redditmedia.com/*",
+    "*://*.twitch.tv/*",
+    "*://*.jtvnw.net/*",
+    "*://*.ttvnw.net/*",
+    "*://pin.it/*",
+    "*://*.pinterest.com/*",
+    "*://*.pinterest.ca/*",
+    "*://*.pinterest.co.uk/*",
+    "*://*.pinterest.com.au/*",
+    "*://*.pinterest.de/*",
+    "*://*.pinterest.fr/*",
+    "*://*.pinterest.jp/*",
+    "*://*.pinterest.es/*",
+    "*://*.pinterest.it/*",
+    "*://*.pinterest.mx/*",
+    "*://*.pinterest.nz/*",
+    "*://*.pinterest.ph/*",
+    "*://*.pinterest.pt/*",
+    "*://*.pinterest.se/*",
+    "*://*.pinimg.com/*",
+    "*://bsky.app/*",
+    "*://*.bsky.app/*",
+    "*://*.bsky.social/*",
+    "*://t.me/*",
+    "*://*.telegram.me/*",
+    "*://*.telegram.org/*",
+    "*://*.vimeo.com/*",
+    "*://*.vimeocdn.com/*",
+    "*://*.udemy.com/*",
+    "*://*.udemycdn.com/*",
+    "*://*.bilibili.com/*",
+    "*://*.bilivideo.com/*",
+    "*://b23.tv/*"
+  ],
+  "optional_host_permissions": [
     "*://*/*"
   ],
   "background": {
@@ -41,5 +97,13 @@
     "32": "icons/active-32.png",
     "48": "icons/active-48.png",
     "128": "icons/active-128.png"
+  },
+  "commands": {
+    "send-to-omniget": {
+      "suggested_key": {
+        "default": "Alt+O"
+      },
+      "description": "Send current page to OmniGet"
+    }
   }
 }

@@ -38,8 +38,56 @@ test("declares storage permission for sniffer toggle", async () => {
   assert.ok(manifest.permissions.includes("storage"));
 });
 
-test("declares wildcard host_permissions for media detection", async () => {
+test("declares platform-scoped host_permissions instead of a wildcard", async () => {
   const manifest = await readManifest();
 
-  assert.ok(manifest.host_permissions.includes("*://*/*"));
+  assert.ok(Array.isArray(manifest.host_permissions), "host_permissions must be an array");
+  assert.ok(
+    !manifest.host_permissions.includes("*://*/*"),
+    "host_permissions must not ship a wildcard by default",
+  );
+
+  const requiredPatterns = [
+    "*://*.hotmart.com/*",
+    "*://*.youtube.com/*",
+    "*://youtu.be/*",
+    "*://*.instagram.com/*",
+    "*://*.tiktok.com/*",
+    "*://*.twitter.com/*",
+    "*://*.x.com/*",
+    "*://*.reddit.com/*",
+    "*://*.twitch.tv/*",
+    "*://*.pinterest.com/*",
+    "*://bsky.app/*",
+    "*://t.me/*",
+    "*://*.vimeo.com/*",
+    "*://*.udemy.com/*",
+    "*://*.bilibili.com/*",
+  ];
+  for (const pattern of requiredPatterns) {
+    assert.ok(
+      manifest.host_permissions.includes(pattern),
+      `host_permissions missing required pattern ${pattern}`,
+    );
+  }
+});
+
+test("declares wildcard host access in optional_host_permissions for media sniffer", async () => {
+  const manifest = await readManifest();
+
+  assert.ok(
+    Array.isArray(manifest.optional_host_permissions),
+    "optional_host_permissions must be an array",
+  );
+  assert.ok(manifest.optional_host_permissions.includes("*://*/*"));
+});
+
+test("declares the send-to-omniget command with Alt+O default shortcut", async () => {
+  const manifest = await readManifest();
+
+  assert.ok(manifest.commands, "manifest.commands block missing");
+  const command = manifest.commands["send-to-omniget"];
+  assert.ok(command, "send-to-omniget command missing");
+  assert.equal(command.suggested_key?.default, "Alt+O");
+  assert.ok(typeof command.description === "string" && command.description.length > 0);
 });

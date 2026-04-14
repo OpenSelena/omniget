@@ -1,7 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 
-import { extractCookiesForPlatform } from "../src/cookies.js";
+import {
+  COOKIE_DOMAINS_RESOURCE_PATH,
+  DEFAULT_PLATFORM_COOKIE_DOMAINS,
+  extractCookiesForPlatform,
+  getPlatformCookieDomainsCacheSource,
+  loadPlatformCookieDomains,
+  resetPlatformCookieDomainsCacheForTesting,
+} from "../src/cookies.js";
 
 function mockGetAllCookies(cookieStore) {
   return async ({ domain }) => cookieStore[domain] ?? [];
@@ -128,4 +136,103 @@ test("extracts cookies from multiple domains for twitter", async () => {
 test("uses default fallback when chrome.cookies is unavailable", async () => {
   const cookies = await extractCookiesForPlatform("youtube");
   assert.equal(cookies, null);
+});
+
+test("loadPlatformCookieDomains returns the default map when no chrome resource is available", async () => {
+  resetPlatformCookieDomainsCacheForTesting();
+  const domains = await loadPlatformCookieDomains();
+
+  assert.deepEqual(domains, DEFAULT_PLATFORM_COOKIE_DOMAINS);
+  assert.equal(getPlatformCookieDomainsCacheSource(), "default");
+});
+
+test("loadPlatformCookieDomains is cached after the first call", async () => {
+  resetPlatformCookieDomainsCacheForTesting();
+  const first = await loadPlatformCookieDomains();
+  const second = await loadPlatformCookieDomains();
+
+  assert.equal(first, second);
+});
+
+test("default domains include all currently detectable platforms", async () => {
+  const required = [
+    "youtube",
+    "instagram",
+    "tiktok",
+    "twitter",
+    "reddit",
+    "twitch",
+    "vimeo",
+    "bilibili",
+    "pinterest",
+    "hotmart",
+    "udemy",
+    "bluesky",
+    "telegram",
+  ];
+  for (const key of required) {
+    assert.ok(
+      Array.isArray(DEFAULT_PLATFORM_COOKIE_DOMAINS[key]) &&
+        DEFAULT_PLATFORM_COOKIE_DOMAINS[key].length > 0,
+      `DEFAULT_PLATFORM_COOKIE_DOMAINS missing platform ${key}`,
+    );
+  }
+});
+
+test("shipped cookies-domains.json matches DEFAULT_PLATFORM_COOKIE_DOMAINS", async () => {
+  const jsonUrl = new URL(`../${COOKIE_DOMAINS_RESOURCE_PATH}`, import.meta.url);
+  const json = JSON.parse(await readFile(jsonUrl, "utf8"));
+
+  assert.deepEqual(
+    json,
+    Object.fromEntries(
+      Object.entries(DEFAULT_PLATFORM_COOKIE_DOMAINS).map(([k, v]) => [k, [...v]]),
+    ),
+  );
+});
+
+test("extractCookiesForPlatform accepts a domainsOverride for injection testing", async () => {
+  const cookies = await extractCookiesForPlatform(
+    "mynewplatform",
+    mockGetAllCookies({
+      ".mynewplatform.com": [
+        { domain: ".mynewplatform.com", httpOnly: false, path: "/", secure: true, expirationDate: 1, name: "n", value: "v" },
+      ],
+    }),
+    { mynewplatform: [".mynewplatform.com"] },
+  );
+
+  assert.ok(cookies);
+  assert.equal(cookies.length, 1);
+  assert.equal(cookies[0].domain, ".mynewplatform.com");
+});
+
+test("bluesky platform is now data-driven and resolves to bsky domains", async () => {
+  const cookies = await extractCookiesForPlatform(
+    "bluesky",
+    mockGetAllCookies({
+      ".bsky.app": [
+        { domain: ".bsky.app", httpOnly: true, path: "/", secure: true, expirationDate: 42, name: "auth", value: "x" },
+      ],
+    }),
+  );
+
+  assert.ok(cookies);
+  assert.equal(cookies.length, 1);
+  assert.equal(cookies[0].domain, ".bsky.app");
+});
+
+test("telegram platform is now data-driven and resolves to telegram.org", async () => {
+  const cookies = await extractCookiesForPlatform(
+    "telegram",
+    mockGetAllCookies({
+      ".telegram.org": [
+        { domain: ".telegram.org", httpOnly: false, path: "/", secure: true, expirationDate: 0, name: "stel", value: "y" },
+      ],
+    }),
+  );
+
+  assert.ok(cookies);
+  assert.equal(cookies.length, 1);
+  assert.equal(cookies[0].domain, ".telegram.org");
 });

@@ -28,7 +28,7 @@ test("clears the previous badge and shows success feedback after a successful se
   assert.equal(result, true);
   assert.deepEqual(calls, [
     ["clear", 12],
-    ["send", { type: "enqueue", url: "https://example.com/watch?v=123" }],
+    ["send", { type: "enqueue", url: "https://example.com/watch?v=123", protocolVersion: 1 }],
     ["success", 12],
   ]);
 });
@@ -148,5 +148,64 @@ test("does not show success feedback when native messaging throws", async () => 
   assert.deepEqual(calls, [
     ["clear", 3],
     ["error", { code: "HOST_MISSING", message: "host missing", url: "https://example.com/post/xyz" }],
+  ]);
+});
+
+test("falls back to scheme handler when native messaging throws and scheme succeeds", async () => {
+  const calls = [];
+
+  const result = await handleSupportedActionClick({
+    tabId: 42,
+    url: "https://example.com/video/abc",
+    sendNativeMessage: async () => {
+      throw new Error("host missing");
+    },
+    clearBadge: async (tabId) => {
+      calls.push(["clear", tabId]);
+    },
+    showSuccessBadge: async (tabId) => {
+      calls.push(["success", tabId]);
+    },
+    openErrorPage: async (details) => {
+      calls.push(["error", details]);
+    },
+    mapChromeErrorCode: () => "HOST_MISSING",
+    openSchemeUrl: async (url) => {
+      calls.push(["scheme", url]);
+      return { ok: true, schemeUrl: `omniget://${url}` };
+    },
+  });
+
+  assert.equal(result, true);
+  assert.deepEqual(calls, [
+    ["clear", 42],
+    ["scheme", "https://example.com/video/abc"],
+    ["success", 42],
+  ]);
+});
+
+test("opens error page when both native messaging and scheme fallback fail", async () => {
+  const calls = [];
+
+  const result = await handleSupportedActionClick({
+    tabId: 5,
+    url: "https://example.com/v/xyz",
+    sendNativeMessage: async () => {
+      throw new Error("host missing");
+    },
+    clearBadge: async () => {},
+    showSuccessBadge: async () => {
+      calls.push(["success"]);
+    },
+    openErrorPage: async (details) => {
+      calls.push(["error", details]);
+    },
+    mapChromeErrorCode: () => "HOST_MISSING",
+    openSchemeUrl: async () => ({ ok: false, reason: "tabs-update-failed" }),
+  });
+
+  assert.equal(result, false);
+  assert.deepEqual(calls, [
+    ["error", { code: "HOST_MISSING", message: "host missing", url: "https://example.com/v/xyz" }],
   ]);
 });
