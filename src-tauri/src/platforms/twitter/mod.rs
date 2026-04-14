@@ -474,7 +474,7 @@ impl PlatformDownloader for TwitterDownloader {
                     opts.download_mode.as_deref(),
                     opts.format_id.as_deref(),
                     opts.filename_template.as_deref(),
-                    None,
+                    opts.referer.as_deref().or(Some("https://x.com/")),
                     opts.cancel_token.clone(),
                     None,
                     opts.concurrent_fragments,

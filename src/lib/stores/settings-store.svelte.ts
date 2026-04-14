@@ -21,6 +21,8 @@ export type AppSettings = {
     download_subtitles: boolean;
     include_auto_subtitles: boolean;
     translate_metadata: boolean;
+    youtube_sponsorblock: boolean;
+    split_by_chapters: boolean;
     hotkey_enabled: boolean;
     hotkey_binding: string;
     copy_to_clipboard_on_hotkey: boolean;

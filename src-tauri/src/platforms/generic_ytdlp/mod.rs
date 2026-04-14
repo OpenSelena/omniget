@@ -415,18 +415,6 @@ impl PlatformDownloader for GenericYtdlpDownloader {
             .as_deref()
             .or_else(|| platform_referer(video_url));
 
-        let mut extra_flags = Vec::new();
-        if let Some(ref hdrs) = opts.extra_headers {
-            for (name, value) in hdrs {
-                let lower = name.to_lowercase();
-                if lower == "referer" || lower == "cookie" {
-                    continue;
-                }
-                extra_flags.push("--add-headers".to_string());
-                extra_flags.push(format!("{}:{}", name, value));
-            }
-        }
-
         ytdlp::download_video(
             &ytdlp_path,
             video_url,
@@ -441,7 +429,7 @@ impl PlatformDownloader for GenericYtdlpDownloader {
             None,
             opts.concurrent_fragments,
             opts.download_subtitles,
-            &extra_flags,
+            &[],
         )
         .await
     }

@@ -231,8 +231,7 @@ impl PlatformDownloader for BilibiliDownloader {
             .as_ref()
             .and_then(|q| q.trim_end_matches('p').parse::<u32>().ok());
 
-        let mut extra = Self::bilibili_extra_flags();
-        extra.push("--no-playlist".to_string());
+        let extra = vec!["--no-playlist".to_string()];
 
         ytdlp::download_video(
             &ytdlp_path,
@@ -243,7 +242,7 @@ impl PlatformDownloader for BilibiliDownloader {
             opts.download_mode.as_deref(),
             opts.format_id.as_deref(),
             opts.filename_template.as_deref(),
-            None,
+            opts.referer.as_deref().or(Some("https://www.bilibili.com")),
             opts.cancel_token.clone(),
             None,
             opts.concurrent_fragments,
@@ -287,8 +286,7 @@ impl BilibiliDownloader {
                 }
             });
 
-            let mut extra = Self::bilibili_extra_flags();
-            extra.push("--no-playlist".to_string());
+            let extra = vec!["--no-playlist".to_string()];
 
             match ytdlp::download_video(
                 ytdlp_path,
@@ -299,7 +297,7 @@ impl BilibiliDownloader {
                 opts.download_mode.as_deref(),
                 None,
                 opts.filename_template.as_deref(),
-                None,
+                opts.referer.as_deref().or(Some("https://www.bilibili.com")),
                 opts.cancel_token.clone(),
                 None,
                 opts.concurrent_fragments,

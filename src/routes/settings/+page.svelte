@@ -610,6 +610,22 @@
         <div class="divider"></div>
         <div class="setting-row">
           <div class="setting-col">
+            <span class="setting-label">{$t('settings.download.youtube_sponsorblock')}</span>
+            <span class="setting-path">{$t('settings.download.youtube_sponsorblock_desc')}</span>
+          </div>
+          <button class="toggle" class:on={settings.download.youtube_sponsorblock} onclick={() => toggleBool("download", "youtube_sponsorblock", settings!.download.youtube_sponsorblock)} role="switch" aria-checked={settings.download.youtube_sponsorblock} aria-label={$t('settings.download.youtube_sponsorblock')}><span class="toggle-knob"></span></button>
+        </div>
+        <div class="divider"></div>
+        <div class="setting-row">
+          <div class="setting-col">
+            <span class="setting-label">{$t('settings.download.split_by_chapters')}</span>
+            <span class="setting-path">{$t('settings.download.split_by_chapters_desc')}</span>
+          </div>
+          <button class="toggle" class:on={settings.download.split_by_chapters} onclick={() => toggleBool("download", "split_by_chapters", settings!.download.split_by_chapters)} role="switch" aria-checked={settings.download.split_by_chapters} aria-label={$t('settings.download.split_by_chapters')}><span class="toggle-knob"></span></button>
+        </div>
+        <div class="divider"></div>
+        <div class="setting-row">
+          <div class="setting-col">
             <span class="setting-label">{$t('settings.download.embed_metadata')}</span>
             <span class="setting-path">{$t('settings.download.embed_metadata_desc')}</span>
           </div>
