@@ -13,13 +13,28 @@
         <span class="title">OmniGet</span>
       </div>
       <div class="header-toggles">
-        <label class="toggle" title="Open app when downloading">
-          <input type="checkbox" id="open-app-toggle" role="switch" aria-label="Open app when downloading">
-          <span class="toggle-slider"></span>
+        <label class="toggle-group" title="Open app when downloading">
+          <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M15 3h6v6"/>
+            <path d="M10 14 21 3"/>
+            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>
+          </svg>
+          <span class="toggle">
+            <input type="checkbox" id="open-app-toggle" role="switch" aria-label="Open app when downloading">
+            <span class="toggle-slider"></span>
+          </span>
         </label>
-        <label class="toggle" title="Media detection">
-          <input type="checkbox" id="sniffer-toggle" role="switch" aria-label="Media detection">
-          <span class="toggle-slider"></span>
+        <label class="toggle-group" title="Media detection">
+          <svg class="toggle-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+            <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+            <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+            <line x1="12" y1="20" x2="12.01" y2="20"/>
+          </svg>
+          <span class="toggle">
+            <input type="checkbox" id="sniffer-toggle" role="switch" aria-label="Media detection">
+            <span class="toggle-slider"></span>
+          </span>
         </label>
       </div>
     </header>

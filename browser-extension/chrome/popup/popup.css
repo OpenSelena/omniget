@@ -37,11 +37,29 @@ body {
 }
 
 .header-left { display: flex; align-items: center; gap: 8px; }
-.header-toggles { display: flex; align-items: center; gap: 10px; }
+.header-toggles { display: flex; align-items: center; gap: 14px; }
 .logo { width: 16px; height: 16px; }
 .title { font-weight: 600; font-size: 14px; }
 
-.toggle { position: relative; display: inline-block; width: 36px; height: 20px; cursor: pointer; }
+.toggle-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  transition: color 0.2s ease;
+}
+
+.toggle-group:hover { color: var(--text-primary); }
+.toggle-group:has(input:checked) { color: var(--text-primary); }
+
+.toggle-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+.toggle { position: relative; display: inline-block; width: 36px; height: 20px; }
 .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
 
 .toggle-slider {
