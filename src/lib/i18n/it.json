@@ -42,9 +42,9 @@
     "convert": "Converti",
     "courses": "Corsi",
     "telegram": "Telegram",
+    "marketplace": "Marketplace",
     "settings": "Impostazioni",
-    "about": "Info",
-    "marketplace": "Marketplace"
+    "about": "Info"
   },
   "downloads": {
     "title": "Download",
@@ -256,6 +256,18 @@
       "update": "Aggiorna",
       "installing": "Installazione..."
     },
+    "proxy": {
+      "title": "Proxy",
+      "enabled": "Abilita proxy",
+      "type": "Tipo",
+      "host": "Host",
+      "port": "Porta",
+      "username": "Nome utente",
+      "password": "Password"
+    },
+    "ytdlp_flags": {
+      "title": "Flag di yt-dlp"
+    },
     "advanced": {
       "title": "Avanzate",
       "max_concurrent_downloads": "Download simultanei",
@@ -269,19 +281,9 @@
       "reset": "Ripristina predefiniti",
       "reset_confirm": "Sei sicuro? Tutte le impostazioni verranno ripristinate.",
       "torrent_listen_port": "Porta di ascolto torrent",
-      "torrent_listen_port_desc": "Porta TCP per le connessioni BitTorrent in entrata"
-    },
-    "proxy": {
-      "title": "Proxy",
-      "enabled": "Abilita proxy",
-      "type": "Tipo",
-      "host": "Host",
-      "port": "Porta",
-      "username": "Nome utente",
-      "password": "Password"
-    },
-    "ytdlp_flags": {
-      "title": "Flag di yt-dlp"
+      "torrent_listen_port_desc": "Porta TCP per le connessioni BitTorrent in entrata",
+      "cookies_from_browser": "Cookie del browser (avanzato)",
+      "cookies_from_browser_desc": "Configura solo se l'estensione del browser non funziona. La maggior parte degli utenti dovrebbe lasciare vuoto."
     },
     "cat_general": "Generale",
     "cat_downloads": "Download",
@@ -302,6 +304,8 @@
     "unsupported": "Piattaforma non ancora supportata",
     "go_to_hotmart": "Vai a Hotmart",
     "download": "Scarica",
+    "options": "Opzioni",
+    "advanced": "Avanzato",
     "downloading": "Download in corso...",
     "preparing": "Preparazione download...",
     "complete": "Download completato",
@@ -353,8 +357,6 @@
       "course": "Corso",
       "unknown": "Media"
     },
-    "options": "Opzioni",
-    "advanced": "Avanzato",
     "fmt_type": "Tipo",
     "fmt_quality": "Qualita",
     "fmt_streams": "A/V",
@@ -411,6 +413,41 @@
     "roadmap_community_issue": "oppure apri una issue nel repository:",
     "tagline": "Scarica qualsiasi cosa, da qualsiasi luogo.",
     "credit": "Fatto con amore da tonho.wtf"
+  },
+  "marketplace": {
+    "title": "Marketplace",
+    "installed": "Installati",
+    "browse": "Scopri",
+    "no_plugins": "Nessun plugin installato",
+    "enable": "Attiva",
+    "disable": "Disattiva",
+    "enabled": "Attivo",
+    "disabled": "Disattivato",
+    "version": "v{{version}}",
+    "by_author": "di {{author}}",
+    "uninstall": "Disinstalla",
+    "restart_required": "Riavvia OmniGet per applicare",
+    "browse_loading": "Caricamento plugin...",
+    "browse_error": "Impossibile caricare i plugin",
+    "browse_empty": "Nessun plugin disponibile",
+    "official_badge": "Ufficiale",
+    "community_badge": "Comunita",
+    "installed_badge": "Installato",
+    "capabilities": "Permessi",
+    "cap_events": "Inviare eventi all'app",
+    "cap_toast": "Mostrare notifiche",
+    "cap_settings": "Leggere e salvare impostazioni",
+    "cap_filesystem": "Accedere alle cartelle di download",
+    "cap_proxy": "Utilizzare la configurazione proxy",
+    "cap_tools": "Utilizzare gli strumenti (yt-dlp, FFmpeg)",
+    "cap_download_queue": "Inviare download alla coda",
+    "install": "Installa",
+    "update_available": "Aggiorna",
+    "update_hint": "v{{version}} disponibile",
+    "plugin_not_installed": "Plugin non installato",
+    "plugin_install_hint": "Installa questo plugin dal Marketplace.",
+    "go_to_marketplace": "Vai al Marketplace",
+    "plugin_restart_hint": "Riavvia OmniGet per caricare questo plugin."
   },
   "services": {
     "title": "Supporta YouTube, Instagram e oltre 1000 siti",
@@ -532,6 +569,11 @@
     "unsupported_url": "URL non supportato — controlla il link",
     "page_access_failed": "Impossibile accedere alla pagina — controlla il link e la connessione",
     "no_formats": "Nessun formato video trovato per questo link",
+    "cookie_database": "Accesso ai cookie del browser non riuscito. Il download continuerà senza autenticazione.",
+    "tiktok_blocked": "TikTok sta bloccando temporaneamente le richieste. Riprova tra qualche minuto.",
+    "download_timeout": "Download scaduto. Controlla la tua connessione internet.",
+    "size_mismatch": "La dimensione del file scaricato non corrisponde. Riprova.",
+    "disk_full": "Errore di scrittura — il disco potrebbe essere pieno.",
     "path_too_long": "Il percorso della cartella è troppo lungo ({{current}}/{{limit}} caratteri). Scegli una cartella più corta."
   },
   "debug": {
@@ -591,7 +633,9 @@
   },
   "courses": {
     "title": "Corsi",
+    "search_placeholder": "Cerca piattaforme...",
     "not_connected": "Non connesso",
+    "connection_failed": "Connessione fallita",
     "connected_as": "Connesso come {{email}}",
     "back": "Torna ai Corsi",
     "coming_soon": "In arrivo",
@@ -603,9 +647,7 @@
     "browser_hint": "Si aprirà una finestra del browser per effettuare l'accesso. Dopo il login, la sessione verrà rilevata automaticamente.",
     "otp_check_email": "Controlla la tua email per il codice di verifica.",
     "otp_code_label": "Codice di Verifica",
-    "verify_code": "Verifica Codice",
-    "search_placeholder": "Cerca piattaforme...",
-    "connection_failed": "Connessione fallita"
+    "verify_code": "Verifica Codice"
   },
   "hotmart": {
     "title": "Hotmart",
@@ -674,40 +716,5 @@
     "cookies_load_file": "Carica file JSON",
     "cookies_login": "Accedi con i Cookies",
     "logged_as_enterprise": "Connesso come {{email}} ({{portal}}.udemy.com)"
-  },
-  "marketplace": {
-    "title": "Marketplace",
-    "installed": "Installati",
-    "browse": "Scopri",
-    "no_plugins": "Nessun plugin installato",
-    "enable": "Attiva",
-    "disable": "Disattiva",
-    "enabled": "Attivo",
-    "disabled": "Disattivato",
-    "version": "v{{version}}",
-    "by_author": "di {{author}}",
-    "uninstall": "Disinstalla",
-    "restart_required": "Riavvia OmniGet per applicare",
-    "browse_loading": "Caricamento plugin...",
-    "browse_error": "Impossibile caricare i plugin",
-    "browse_empty": "Nessun plugin disponibile",
-    "official_badge": "Ufficiale",
-    "community_badge": "Comunita",
-    "installed_badge": "Installato",
-    "capabilities": "Permessi",
-    "cap_events": "Inviare eventi all'app",
-    "cap_toast": "Mostrare notifiche",
-    "cap_settings": "Leggere e salvare impostazioni",
-    "cap_filesystem": "Accedere alle cartelle di download",
-    "cap_proxy": "Utilizzare la configurazione proxy",
-    "cap_tools": "Utilizzare gli strumenti (yt-dlp, FFmpeg)",
-    "cap_download_queue": "Inviare download alla coda",
-    "install": "Installa",
-    "update_available": "Aggiorna",
-    "update_hint": "v{{version}} disponibile",
-    "plugin_not_installed": "Plugin non installato",
-    "plugin_install_hint": "Installa questo plugin dal Marketplace.",
-    "go_to_marketplace": "Vai al Marketplace",
-    "plugin_restart_hint": "Riavvia OmniGet per caricare questo plugin."
   }
 }

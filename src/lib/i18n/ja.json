@@ -42,9 +42,9 @@
     "convert": "変換",
     "courses": "コース",
     "telegram": "Telegram",
+    "marketplace": "マーケットプレイス",
     "settings": "設定",
-    "about": "このアプリについて",
-    "marketplace": "マーケットプレイス"
+    "about": "このアプリについて"
   },
   "downloads": {
     "title": "ダウンロード",
@@ -256,6 +256,18 @@
       "update": "更新",
       "installing": "インストール中..."
     },
+    "proxy": {
+      "title": "プロキシ",
+      "enabled": "プロキシを有効にする",
+      "type": "タイプ",
+      "host": "ホスト",
+      "port": "ポート",
+      "username": "ユーザー名",
+      "password": "パスワード"
+    },
+    "ytdlp_flags": {
+      "title": "yt-dlp フラグ"
+    },
     "advanced": {
       "title": "詳細設定",
       "max_concurrent_downloads": "同時ダウンロード数",
@@ -269,19 +281,9 @@
       "reset": "既定値にリセット",
       "reset_confirm": "本当によろしいですか？すべての設定がリセットされます。",
       "torrent_listen_port": "Torrent待ち受けポート",
-      "torrent_listen_port_desc": "BitTorrent接続を受け付けるTCPポート"
-    },
-    "proxy": {
-      "title": "プロキシ",
-      "enabled": "プロキシを有効にする",
-      "type": "タイプ",
-      "host": "ホスト",
-      "port": "ポート",
-      "username": "ユーザー名",
-      "password": "パスワード"
-    },
-    "ytdlp_flags": {
-      "title": "yt-dlp フラグ"
+      "torrent_listen_port_desc": "BitTorrent接続を受け付けるTCPポート",
+      "cookies_from_browser": "ブラウザのCookie（詳細）",
+      "cookies_from_browser_desc": "ブラウザ拡張機能が動作しない場合のみ設定してください。通常は空のままにしてください。"
     },
     "cat_general": "一般",
     "cat_downloads": "ダウンロード",
@@ -302,6 +304,8 @@
     "unsupported": "このプラットフォームはまだサポートされていません",
     "go_to_hotmart": "Hotmartへ移動",
     "download": "ダウンロード",
+    "options": "オプション",
+    "advanced": "詳細",
     "downloading": "ダウンロード中...",
     "preparing": "ダウンロードを準備中...",
     "complete": "ダウンロード完了",
@@ -353,8 +357,6 @@
       "course": "コース",
       "unknown": "メディア"
     },
-    "options": "オプション",
-    "advanced": "詳細",
     "fmt_type": "タイプ",
     "fmt_quality": "画質",
     "fmt_streams": "A/V",
@@ -411,6 +413,41 @@
     "roadmap_community_issue": "またはリポジトリでIssueを作成してください：",
     "tagline": "どこからでも、何でもダウンロード。",
     "credit": "tonho.wtf が愛を込めて作りました"
+  },
+  "marketplace": {
+    "title": "マーケットプレイス",
+    "installed": "インストール済み",
+    "browse": "探す",
+    "no_plugins": "プラグインがインストールされていません",
+    "enable": "有効化",
+    "disable": "無効化",
+    "enabled": "有効",
+    "disabled": "無効",
+    "version": "v{{version}}",
+    "by_author": "{{author}} 作",
+    "uninstall": "アンインストール",
+    "restart_required": "変更を適用するにはOmniGetを再起動してください",
+    "browse_loading": "プラグインを読み込み中...",
+    "browse_error": "プラグインを読み込めませんでした",
+    "browse_empty": "利用可能なプラグインはありません",
+    "official_badge": "公式",
+    "community_badge": "コミュニティ",
+    "installed_badge": "インストール済み",
+    "capabilities": "権限",
+    "cap_events": "アプリにイベントを送信",
+    "cap_toast": "通知を表示",
+    "cap_settings": "設定の読み書き",
+    "cap_filesystem": "ダウンロードフォルダにアクセス",
+    "cap_proxy": "プロキシ設定を使用",
+    "cap_tools": "管理ツールを使用 (yt-dlp, FFmpeg)",
+    "cap_download_queue": "ダウンロードキューに送信",
+    "install": "インストール",
+    "update_available": "更新",
+    "update_hint": "v{{version}} が利用可能",
+    "plugin_not_installed": "プラグイン未インストール",
+    "plugin_install_hint": "マーケットプレイスからインストールしてください。",
+    "go_to_marketplace": "マーケットプレイスへ",
+    "plugin_restart_hint": "このプラグインを読み込むにはOmniGetを再起動してください。"
   },
   "services": {
     "title": "YouTube、Instagram、1000以上のサイトに対応",
@@ -532,6 +569,11 @@
     "unsupported_url": "サポートされていないURL — リンクを確認してください",
     "page_access_failed": "ページにアクセスできませんでした — リンクと接続を確認してください",
     "no_formats": "このリンクには動画フォーマットが見つかりません",
+    "cookie_database": "ブラウザのCookieへのアクセスに失敗しました。認証なしでダウンロードを続行します。",
+    "tiktok_blocked": "TikTokが一時的にリクエストをブロックしています。数分後にもう一度お試しください。",
+    "download_timeout": "ダウンロードがタイムアウトしました。インターネット接続を確認してください。",
+    "size_mismatch": "ダウンロードしたファイルのサイズが一致しません。もう一度お試しください。",
+    "disk_full": "書き込みエラー — ディスクが満杯の可能性があります。",
     "path_too_long": "ダウンロードフォルダのパスが長すぎます ({{current}}/{{limit}} 文字)。より短いフォルダを選択してください。"
   },
   "debug": {
@@ -591,7 +633,9 @@
   },
   "courses": {
     "title": "コース",
+    "search_placeholder": "プラットフォームを検索...",
     "not_connected": "未接続",
+    "connection_failed": "接続に失敗しました",
     "connected_as": "{{email}} でログイン中",
     "back": "コースに戻る",
     "coming_soon": "近日公開",
@@ -603,9 +647,7 @@
     "browser_hint": "ログイン用のブラウザウィンドウが開きます。ログイン後、セッションは自動的に検出されます。",
     "otp_check_email": "メールで確認コードを確認してください。",
     "otp_code_label": "確認コード",
-    "verify_code": "確認する",
-    "search_placeholder": "プラットフォームを検索...",
-    "connection_failed": "接続に失敗しました"
+    "verify_code": "確認する"
   },
   "hotmart": {
     "title": "Hotmart",
@@ -674,40 +716,5 @@
     "cookies_load_file": "JSONファイルを読み込む",
     "cookies_login": "Cookieでログイン",
     "logged_as_enterprise": "{{email}} でログイン中 ({{portal}}.udemy.com)"
-  },
-  "marketplace": {
-    "title": "マーケットプレイス",
-    "installed": "インストール済み",
-    "browse": "探す",
-    "no_plugins": "プラグインがインストールされていません",
-    "enable": "有効化",
-    "disable": "無効化",
-    "enabled": "有効",
-    "disabled": "無効",
-    "version": "v{{version}}",
-    "by_author": "{{author}} 作",
-    "uninstall": "アンインストール",
-    "restart_required": "変更を適用するにはOmniGetを再起動してください",
-    "browse_loading": "プラグインを読み込み中...",
-    "browse_error": "プラグインを読み込めませんでした",
-    "browse_empty": "利用可能なプラグインはありません",
-    "official_badge": "公式",
-    "community_badge": "コミュニティ",
-    "installed_badge": "インストール済み",
-    "capabilities": "権限",
-    "cap_events": "アプリにイベントを送信",
-    "cap_toast": "通知を表示",
-    "cap_settings": "設定の読み書き",
-    "cap_filesystem": "ダウンロードフォルダにアクセス",
-    "cap_proxy": "プロキシ設定を使用",
-    "cap_tools": "管理ツールを使用 (yt-dlp, FFmpeg)",
-    "cap_download_queue": "ダウンロードキューに送信",
-    "install": "インストール",
-    "update_available": "更新",
-    "update_hint": "v{{version}} が利用可能",
-    "plugin_not_installed": "プラグイン未インストール",
-    "plugin_install_hint": "マーケットプレイスからインストールしてください。",
-    "go_to_marketplace": "マーケットプレイスへ",
-    "plugin_restart_hint": "このプラグインを読み込むにはOmniGetを再起動してください。"
   }
 }

@@ -42,9 +42,9 @@
     "convert": "转换",
     "courses": "课程",
     "telegram": "Telegram",
+    "marketplace": "插件市场",
     "settings": "设置",
-    "about": "关于",
-    "marketplace": "插件市场"
+    "about": "关于"
   },
   "downloads": {
     "title": "下载",
@@ -256,6 +256,18 @@
       "update": "更新",
       "installing": "正在安装..."
     },
+    "proxy": {
+      "title": "代理",
+      "enabled": "启用代理",
+      "type": "类型",
+      "host": "主机",
+      "port": "端口",
+      "username": "用户名",
+      "password": "密码"
+    },
+    "ytdlp_flags": {
+      "title": "yt-dlp 参数"
+    },
     "advanced": {
       "title": "高级",
       "max_concurrent_downloads": "并发下载数",
@@ -269,19 +281,9 @@
       "reset": "恢复默认",
       "reset_confirm": "确定要恢复吗？所有设置将被重置。",
       "torrent_listen_port": "Torrent 监听端口",
-      "torrent_listen_port_desc": "用于接收 BitTorrent 连接的 TCP 端口"
-    },
-    "proxy": {
-      "title": "代理",
-      "enabled": "启用代理",
-      "type": "类型",
-      "host": "主机",
-      "port": "端口",
-      "username": "用户名",
-      "password": "密码"
-    },
-    "ytdlp_flags": {
-      "title": "yt-dlp 参数"
+      "torrent_listen_port_desc": "用于接收 BitTorrent 连接的 TCP 端口",
+      "cookies_from_browser": "浏览器 Cookie（高级）",
+      "cookies_from_browser_desc": "仅在浏览器扩展无法工作时设置。大多数用户应保持为空。"
     },
     "cat_general": "常规",
     "cat_downloads": "下载",
@@ -302,6 +304,8 @@
     "unsupported": "暂不支持该平台",
     "go_to_hotmart": "前往 Hotmart",
     "download": "下载",
+    "options": "选项",
+    "advanced": "高级",
     "downloading": "下载中...",
     "preparing": "正在准备下载...",
     "complete": "下载完成",
@@ -353,8 +357,6 @@
       "course": "课程",
       "unknown": "媒体"
     },
-    "options": "选项",
-    "advanced": "高级",
     "fmt_type": "类型",
     "fmt_quality": "画质",
     "fmt_streams": "音/视",
@@ -411,6 +413,41 @@
     "roadmap_community_issue": "或在代码仓库中提交 Issue：",
     "tagline": "随时随地，下载一切。",
     "credit": "由 tonho.wtf 用心打造"
+  },
+  "marketplace": {
+    "title": "插件市场",
+    "installed": "已安装",
+    "browse": "发现",
+    "no_plugins": "还没有安装任何插件",
+    "enable": "启用",
+    "disable": "停用",
+    "enabled": "已启用",
+    "disabled": "已停用",
+    "version": "v{{version}}",
+    "by_author": "由 {{author}} 开发",
+    "uninstall": "卸载",
+    "restart_required": "重启 OmniGet 以应用更改",
+    "browse_loading": "正在加载插件...",
+    "browse_error": "无法加载插件列表",
+    "browse_empty": "暂无可用插件",
+    "official_badge": "官方",
+    "community_badge": "社区",
+    "installed_badge": "已安装",
+    "capabilities": "权限",
+    "cap_events": "向应用发送事件",
+    "cap_toast": "显示通知",
+    "cap_settings": "读写设置",
+    "cap_filesystem": "访问下载文件夹",
+    "cap_proxy": "使用代理配置",
+    "cap_tools": "使用管理工具 (yt-dlp, FFmpeg)",
+    "cap_download_queue": "提交下载任务",
+    "install": "安装",
+    "update_available": "更新",
+    "update_hint": "v{{version}} 可用",
+    "plugin_not_installed": "插件未安装",
+    "plugin_install_hint": "从 Marketplace 安装此插件即可使用。",
+    "go_to_marketplace": "前往 Marketplace",
+    "plugin_restart_hint": "重启 OmniGet 以加载此插件。"
   },
   "services": {
     "title": "支持 YouTube、Instagram 及 1000+ 网站",
@@ -532,6 +569,11 @@
     "unsupported_url": "不支持的 URL — 请检查链接",
     "page_access_failed": "无法访问该页面 — 请检查链接和连接",
     "no_formats": "此链接未找到视频格式",
+    "cookie_database": "浏览器 Cookie 访问失败。下载将在没有身份验证的情况下继续。",
+    "tiktok_blocked": "TikTok 暂时屏蔽了请求。请几分钟后重试。",
+    "download_timeout": "下载超时。请检查您的互联网连接。",
+    "size_mismatch": "下载的文件大小不匹配。请重试。",
+    "disk_full": "写入错误 — 您的磁盘可能已满。",
     "path_too_long": "下载文件夹路径过长 ({{current}}/{{limit}} 字符)。请选择更短的文件夹。"
   },
   "debug": {
@@ -591,7 +633,9 @@
   },
   "courses": {
     "title": "课程",
+    "search_placeholder": "搜索平台...",
     "not_connected": "未连接",
+    "connection_failed": "连接失败",
     "connected_as": "已以 {{email}} 登录",
     "back": "返回课程",
     "coming_soon": "即将推出",
@@ -603,9 +647,7 @@
     "browser_hint": "将打开一个浏览器窗口供您登录。登录后，您的会话将被自动检测。",
     "otp_check_email": "请检查您的邮箱获取验证码。",
     "otp_code_label": "验证码",
-    "verify_code": "验证",
-    "search_placeholder": "搜索平台...",
-    "connection_failed": "连接失败"
+    "verify_code": "验证"
   },
   "hotmart": {
     "title": "Hotmart",
@@ -674,40 +716,5 @@
     "cookies_load_file": "加载 JSON 文件",
     "cookies_login": "使用 Cookies 登录",
     "logged_as_enterprise": "已登录为 {{email}} ({{portal}}.udemy.com)"
-  },
-  "marketplace": {
-    "title": "插件市场",
-    "installed": "已安装",
-    "browse": "发现",
-    "no_plugins": "还没有安装任何插件",
-    "enable": "启用",
-    "disable": "停用",
-    "enabled": "已启用",
-    "disabled": "已停用",
-    "version": "v{{version}}",
-    "by_author": "由 {{author}} 开发",
-    "uninstall": "卸载",
-    "restart_required": "重启 OmniGet 以应用更改",
-    "browse_loading": "正在加载插件...",
-    "browse_error": "无法加载插件列表",
-    "browse_empty": "暂无可用插件",
-    "official_badge": "官方",
-    "community_badge": "社区",
-    "installed_badge": "已安装",
-    "capabilities": "权限",
-    "cap_events": "向应用发送事件",
-    "cap_toast": "显示通知",
-    "cap_settings": "读写设置",
-    "cap_filesystem": "访问下载文件夹",
-    "cap_proxy": "使用代理配置",
-    "cap_tools": "使用管理工具 (yt-dlp, FFmpeg)",
-    "cap_download_queue": "提交下载任务",
-    "install": "安装",
-    "update_available": "更新",
-    "update_hint": "v{{version}} 可用",
-    "plugin_not_installed": "插件未安装",
-    "plugin_install_hint": "从 Marketplace 安装此插件即可使用。",
-    "go_to_marketplace": "前往 Marketplace",
-    "plugin_restart_hint": "重启 OmniGet 以加载此插件。"
   }
 }
