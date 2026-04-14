@@ -9,6 +9,9 @@ use serde::{Deserialize, Serialize};
 pub const CHROME_HOST_NAME: &str = "wtf.tonho.omniget";
 pub const CHROME_EXTENSION_IDS: &[&str] = &["dkjelkhaaakffpghdfalobccaaipajip"];
 const FIREFOX_EXTENSION_ID: &str = "omniget@tonho.wtf";
+const HOST_MAX_PROTOCOL_VERSION: u32 = 1;
+const MAX_MESSAGE_LENGTH: usize = 1_048_576;
+const MAX_COOKIES_PER_REQUEST: usize = 500;
 
 #[cfg(target_os = "windows")]
 const HOST_COPY_NAME: &str = "omniget-native-host.exe";
@@ -23,6 +26,8 @@ struct NativeHostRequest {
     #[serde(rename = "type")]
     kind: String,
     url: String,
+    #[serde(default, rename = "protocolVersion")]
+    protocol_version: Option<u32>,
     #[serde(default)]
     cookies: Option<Vec<NativeCookie>>,
     #[serde(default)]
@@ -39,6 +44,10 @@ struct NativeHostRequest {
     thumbnail: Option<String>,
     #[serde(default, rename = "openApp")]
     open_app: Option<bool>,
+    #[serde(default, rename = "pageUrl")]
+    page_url: Option<String>,
+    #[serde(default, rename = "userAgent")]
+    user_agent: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -51,6 +60,11 @@ struct NativeCookie {
     expires: i64,
     name: String,
     value: String,
+    #[serde(default, rename = "hostOnly")]
+    host_only: Option<bool>,
+    #[serde(default, rename = "sameSite")]
+    #[allow(dead_code)]
+    same_site: Option<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -80,10 +94,100 @@ pub fn should_run_as_native_host() -> bool {
 
 pub fn run_native_host() -> anyhow::Result<()> {
     detect_portable_mode();
-    let request = read_message()?;
-    let response = handle_request(request);
+    let response = match read_message()? {
+        ReadOutcome::Ok(request) => handle_request(request),
+        ReadOutcome::TooLarge(length) => {
+            log_host_event(
+                "PAYLOAD_TOO_LARGE",
+                &format!("payload_len={length} limit={MAX_MESSAGE_LENGTH}"),
+            );
+            NativeHostResponse {
+                ok: false,
+                code: Some("PAYLOAD_TOO_LARGE"),
+                message: Some(format!(
+                    "Native message ({length} bytes) exceeds {MAX_MESSAGE_LENGTH} bytes limit"
+                )),
+            }
+        }
+        ReadOutcome::MalformedJson(details) => {
+            log_host_event("INVALID_PAYLOAD", &details);
+            NativeHostResponse {
+                ok: false,
+                code: Some("INVALID_PAYLOAD"),
+                message: Some(format!("Failed to parse native message: {details}")),
+            }
+        }
+    };
     write_message(&response)?;
     Ok(())
+}
+
+enum ReadOutcome {
+    Ok(NativeHostRequest),
+    TooLarge(usize),
+    MalformedJson(String),
+}
+
+fn host_log_path() -> Option<PathBuf> {
+    crate::core::paths::app_data_dir().map(|dir| dir.join("native-host.log"))
+}
+
+fn log_host_event(kind: &str, detail: &str) {
+    let ts = current_unix_timestamp();
+    let line = format!("{ts} [{kind}] {detail}\n");
+    eprintln!("[native-host] {kind} {detail}");
+    if let Some(path) = host_log_path() {
+        if let Some(parent) = path.parent() {
+            let _ = fs::create_dir_all(parent);
+        }
+        let _ = fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(&path)
+            .and_then(|mut f| f.write_all(line.as_bytes()));
+    }
+}
+
+pub(crate) fn safe_payload_summary(payload: &[u8]) -> String {
+    let payload_len = payload.len();
+    let parsed: Result<serde_json::Value, _> = serde_json::from_slice(payload);
+    match parsed {
+        Ok(serde_json::Value::Object(map)) => {
+            let type_ = map
+                .get("type")
+                .and_then(|v| v.as_str())
+                .unwrap_or("<missing>");
+            let has_url = map.get("url").is_some();
+            let cookie_count = map
+                .get("cookies")
+                .and_then(|v| v.as_array())
+                .map(|a| a.len())
+                .unwrap_or(0);
+            let protocol_version = map
+                .get("protocolVersion")
+                .and_then(|v| v.as_u64())
+                .map(|v| v.to_string())
+                .unwrap_or_else(|| "<none>".to_string());
+            let mut keys: Vec<&str> = map.keys().map(|s| s.as_str()).collect();
+            keys.sort_unstable();
+            format!(
+                "payload_len={payload_len} type=\"{type_}\" has_url={has_url} cookie_count={cookie_count} protocolVersion={protocol_version} keys={keys:?}"
+            )
+        }
+        Ok(_) => format!("payload_len={payload_len} not_a_json_object"),
+        Err(_) => format!("payload_len={payload_len} unparseable"),
+    }
+}
+
+fn build_deserialize_error_detail(payload: &[u8], err: &serde_json::Error) -> String {
+    format!(
+        "err=\"{}\" line={} column={} category={:?} | {}",
+        err,
+        err.line(),
+        err.column(),
+        err.classify(),
+        safe_payload_summary(payload)
+    )
 }
 
 /// Detect portable mode by reading the native-host config to locate the main
@@ -412,15 +516,24 @@ fn write_extension_cookies(cookies: &[NativeCookie]) -> anyhow::Result<()> {
 
     let mut content = String::from("# Netscape HTTP Cookie File\n");
     for c in cookies {
-        let domain = sanitize_cookie_field(&c.domain);
+        let raw_domain = sanitize_cookie_field(&c.domain);
         let path_field = sanitize_cookie_field(&c.path);
         let name = sanitize_cookie_field(&c.name);
         let value = sanitize_cookie_field(&c.value);
         let http_only_prefix = if c.http_only { "#HttpOnly_" } else { "" };
-        let include_subdomains = if domain.starts_with('.') {
-            "TRUE"
+        let is_host_only = c
+            .host_only
+            .unwrap_or_else(|| !raw_domain.starts_with('.'));
+        let (domain, include_subdomains) = if is_host_only {
+            let stripped = raw_domain
+                .strip_prefix('.')
+                .unwrap_or(&raw_domain)
+                .to_string();
+            (stripped, "FALSE")
+        } else if raw_domain.starts_with('.') {
+            (raw_domain.clone(), "TRUE")
         } else {
-            "FALSE"
+            (format!(".{}", raw_domain), "TRUE")
         };
         let secure = if c.secure { "TRUE" } else { "FALSE" };
         let expires = if c.expires == 0 {
@@ -451,19 +564,66 @@ fn extension_metadata_path() -> PathBuf {
         .join("extension-metadata.json")
 }
 
+const METADATA_TTL_SECS: u64 = 60;
+
+fn current_unix_timestamp() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_secs()
+}
+
+fn load_metadata_map(path: &std::path::Path) -> serde_json::Map<String, serde_json::Value> {
+    let content = match fs::read_to_string(path) {
+        Ok(c) => c,
+        Err(_) => return serde_json::Map::new(),
+    };
+    let parsed: serde_json::Value = match serde_json::from_str(&content) {
+        Ok(v) => v,
+        Err(_) => return serde_json::Map::new(),
+    };
+    match parsed {
+        serde_json::Value::Object(map) => map,
+        _ => serde_json::Map::new(),
+    }
+}
+
+fn prune_expired_metadata(
+    map: &mut serde_json::Map<String, serde_json::Value>,
+    now: u64,
+) {
+    map.retain(|_, v| {
+        v.get("timestamp")
+            .and_then(|t| t.as_u64())
+            .map(|ts| now.saturating_sub(ts) <= METADATA_TTL_SECS)
+            .unwrap_or(false)
+    });
+}
+
+fn write_metadata_map(
+    path: &std::path::Path,
+    map: &serde_json::Map<String, serde_json::Value>,
+) -> anyhow::Result<()> {
+    if map.is_empty() {
+        let _ = fs::remove_file(path);
+        return Ok(());
+    }
+    let serialized = serde_json::to_string(&serde_json::Value::Object(map.clone()))?;
+    fs::write(path, serialized)?;
+    Ok(())
+}
+
 fn write_extension_metadata(request: &NativeHostRequest) -> anyhow::Result<()> {
     let path = extension_metadata_path();
     if let Some(parent) = path.parent() {
         fs::create_dir_all(parent)?;
     }
 
-    let now = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap_or_default()
-        .as_secs();
+    let now = current_unix_timestamp();
+    let mut map = load_metadata_map(&path);
+    prune_expired_metadata(&mut map, now);
 
-    let meta = serde_json::json!({
-        "url": request.url,
+    let entry = serde_json::json!({
         "referer": request.referer,
         "headers": request.headers,
         "mediaType": request.media_type,
@@ -471,10 +631,13 @@ fn write_extension_metadata(request: &NativeHostRequest) -> anyhow::Result<()> {
         "title": request.title,
         "thumbnail": request.thumbnail,
         "openApp": request.open_app,
+        "pageUrl": request.page_url,
+        "userAgent": request.user_agent,
         "timestamp": now,
     });
 
-    fs::write(&path, serde_json::to_string(&meta)?)?;
+    map.insert(request.url.clone(), entry);
+    write_metadata_map(&path, &map)?;
     Ok(())
 }
 
@@ -486,34 +649,18 @@ pub struct ExtensionMetadata {
     pub title: Option<String>,
     pub thumbnail: Option<String>,
     pub open_app: Option<bool>,
+    pub page_url: Option<String>,
+    pub user_agent: Option<String>,
 }
 
-pub fn read_extension_metadata(url: &str) -> Option<ExtensionMetadata> {
-    let path = extension_metadata_path();
-    let content = fs::read_to_string(&path).ok()?;
-    let meta: serde_json::Value = serde_json::from_str(&content).ok()?;
-
-    let meta_url = meta.get("url")?.as_str()?;
-    if meta_url != url {
-        return None;
-    }
-
-    let timestamp = meta.get("timestamp")?.as_u64()?;
-    let now = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap_or_default()
-        .as_secs();
-    if now.saturating_sub(timestamp) > 60 {
-        return None;
-    }
-
+fn parse_metadata_entry(meta: &serde_json::Value) -> ExtensionMetadata {
     let headers = meta.get("headers").and_then(|v| v.as_object()).map(|obj| {
         obj.iter()
             .filter_map(|(k, v)| Some((k.clone(), v.as_str()?.to_string())))
             .collect::<std::collections::HashMap<String, String>>()
     });
 
-    let result = ExtensionMetadata {
+    ExtensionMetadata {
         referer: meta
             .get("referer")
             .and_then(|v| v.as_str())
@@ -538,36 +685,61 @@ pub fn read_extension_metadata(url: &str) -> Option<ExtensionMetadata> {
             .filter(|s| !s.is_empty())
             .map(String::from),
         open_app: meta.get("openApp").and_then(|v| v.as_bool()),
-    };
+        page_url: meta
+            .get("pageUrl")
+            .and_then(|v| v.as_str())
+            .filter(|s| !s.is_empty())
+            .map(String::from),
+        user_agent: meta
+            .get("userAgent")
+            .and_then(|v| v.as_str())
+            .filter(|s| !s.is_empty())
+            .map(String::from),
+    }
+}
 
-    let _ = fs::remove_file(&path);
+pub fn read_extension_metadata(url: &str) -> Option<ExtensionMetadata> {
+    let path = extension_metadata_path();
+    let now = current_unix_timestamp();
+    let mut map = load_metadata_map(&path);
+    prune_expired_metadata(&mut map, now);
+
+    let entry = map.remove(url)?;
+    let result = parse_metadata_entry(&entry);
+
+    let _ = write_metadata_map(&path, &map);
 
     Some(result)
 }
 
 pub fn peek_extension_open_app(url: &str) -> Option<bool> {
     let path = extension_metadata_path();
-    let content = fs::read_to_string(&path).ok()?;
-    let meta: serde_json::Value = serde_json::from_str(&content).ok()?;
+    let now = current_unix_timestamp();
+    let mut map = load_metadata_map(&path);
+    prune_expired_metadata(&mut map, now);
 
-    let meta_url = meta.get("url")?.as_str()?;
-    if meta_url != url {
+    let entry = map.get(url)?;
+    let timestamp = entry.get("timestamp").and_then(|v| v.as_u64())?;
+    if now.saturating_sub(timestamp) > METADATA_TTL_SECS {
         return None;
     }
-
-    let timestamp = meta.get("timestamp")?.as_u64()?;
-    let now = std::time::SystemTime::now()
-        .duration_since(std::time::UNIX_EPOCH)
-        .unwrap_or_default()
-        .as_secs();
-    if now.saturating_sub(timestamp) > 60 {
-        return None;
-    }
-
-    meta.get("openApp").and_then(|v| v.as_bool())
+    entry.get("openApp").and_then(|v| v.as_bool())
 }
 
 fn handle_request(request: NativeHostRequest) -> NativeHostResponse {
+    if let Some(client_version) = request.protocol_version {
+        if client_version > HOST_MAX_PROTOCOL_VERSION {
+            return NativeHostResponse {
+                ok: false,
+                code: Some("UNSUPPORTED_PROTOCOL"),
+                message: Some(format!(
+                    "Extension protocol v{} is newer than host v{}. Please update OmniGet.",
+                    client_version, HOST_MAX_PROTOCOL_VERSION
+                )),
+            };
+        }
+    }
+
     if request.kind != "enqueue" {
         return NativeHostResponse {
             ok: false,
@@ -585,6 +757,16 @@ fn handle_request(request: NativeHostRequest) -> NativeHostResponse {
     }
 
     if let Some(ref cookies) = request.cookies {
+        if cookies.len() > MAX_COOKIES_PER_REQUEST {
+            return NativeHostResponse {
+                ok: false,
+                code: Some("TOO_MANY_COOKIES"),
+                message: Some(format!(
+                    "Request contains {} cookies; max allowed is {MAX_COOKIES_PER_REQUEST}",
+                    cookies.len()
+                )),
+            };
+        }
         if !cookies.is_empty() {
             if let Err(e) = write_extension_cookies(cookies) {
                 eprintln!("[OmniGet] Warning: failed to write extension cookies: {e}");
@@ -598,6 +780,8 @@ fn handle_request(request: NativeHostRequest) -> NativeHostResponse {
         || request.title.is_some()
         || request.thumbnail.is_some()
         || request.open_app.is_some()
+        || request.page_url.is_some()
+        || request.user_agent.is_some()
     {
         if let Err(e) = write_extension_metadata(&request) {
             eprintln!("[OmniGet] Warning: failed to write extension metadata: {e}");
@@ -640,20 +824,21 @@ fn launch_omniget(url: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn read_message() -> anyhow::Result<NativeHostRequest> {
-    const MAX_MESSAGE_LENGTH: usize = 1_048_576; // 1 MB — Chrome's own limit
-
+fn read_message() -> anyhow::Result<ReadOutcome> {
     let mut length_bytes = [0u8; 4];
     std::io::stdin().read_exact(&mut length_bytes)?;
     let length = u32::from_le_bytes(length_bytes) as usize;
 
     if length > MAX_MESSAGE_LENGTH {
-        anyhow::bail!("Native message too large ({length} bytes, max {MAX_MESSAGE_LENGTH})");
+        return Ok(ReadOutcome::TooLarge(length));
     }
 
     let mut payload = vec![0u8; length];
     std::io::stdin().read_exact(&mut payload)?;
-    Ok(serde_json::from_slice(&payload)?)
+    match serde_json::from_slice(&payload) {
+        Ok(request) => Ok(ReadOutcome::Ok(request)),
+        Err(err) => Ok(ReadOutcome::MalformedJson(err.to_string())),
+    }
 }
 
 fn write_message(response: &NativeHostResponse) -> anyhow::Result<()> {
@@ -713,6 +898,40 @@ mod tests {
     }
 
     #[test]
+    fn rejects_protocol_version_newer_than_host() {
+        let payload = serde_json::json!({
+            "type": "enqueue",
+            "url": "https://example.com/video",
+            "protocolVersion": HOST_MAX_PROTOCOL_VERSION + 1,
+        });
+        let request: NativeHostRequest = serde_json::from_value(payload).unwrap();
+        let response = handle_request(request);
+        assert!(!response.ok);
+        assert_eq!(response.code, Some("UNSUPPORTED_PROTOCOL"));
+    }
+
+    #[test]
+    fn accepts_missing_protocol_version_for_backwards_compat() {
+        let payload = serde_json::json!({
+            "type": "enqueue",
+            "url": "not a url",
+        });
+        let request: NativeHostRequest = serde_json::from_value(payload).unwrap();
+        assert!(request.protocol_version.is_none());
+    }
+
+    #[test]
+    fn accepts_current_protocol_version() {
+        let payload = serde_json::json!({
+            "type": "enqueue",
+            "url": "not a url",
+            "protocolVersion": HOST_MAX_PROTOCOL_VERSION,
+        });
+        let request: NativeHostRequest = serde_json::from_value(payload).unwrap();
+        assert_eq!(request.protocol_version, Some(HOST_MAX_PROTOCOL_VERSION));
+    }
+
+    #[test]
     fn build_host_manifest_contains_expected_fields() {
         #[cfg(target_os = "windows")]
         let host_exe = Path::new(r"C:\tmp\omniget-native-host.exe");
@@ -744,5 +963,110 @@ mod tests {
                 Some(format!("chrome-extension://{extension_id}/").as_str())
             );
         }
+    }
+
+    #[test]
+    fn prune_expired_metadata_drops_entries_past_ttl() {
+        let mut map = serde_json::Map::new();
+        map.insert(
+            "https://a".to_string(),
+            serde_json::json!({"timestamp": 100_u64, "referer": "r1"}),
+        );
+        map.insert(
+            "https://b".to_string(),
+            serde_json::json!({"timestamp": 200_u64, "referer": "r2"}),
+        );
+        let now = 100 + METADATA_TTL_SECS + 1;
+        prune_expired_metadata(&mut map, now);
+        assert!(!map.contains_key("https://a"));
+        assert!(map.contains_key("https://b"));
+    }
+
+    #[test]
+    fn metadata_map_roundtrip_preserves_multiple_urls() {
+        let tmp = std::env::temp_dir().join(format!(
+            "omniget-meta-test-{}.json",
+            current_unix_timestamp()
+        ));
+        let _ = fs::remove_file(&tmp);
+
+        let mut map = serde_json::Map::new();
+        map.insert(
+            "https://a".to_string(),
+            serde_json::json!({"timestamp": 1_u64, "referer": "ra"}),
+        );
+        map.insert(
+            "https://b".to_string(),
+            serde_json::json!({"timestamp": 2_u64, "referer": "rb"}),
+        );
+        write_metadata_map(&tmp, &map).unwrap();
+        let loaded = load_metadata_map(&tmp);
+        assert_eq!(loaded.len(), 2);
+        assert_eq!(
+            loaded.get("https://a").and_then(|v| v.get("referer")).and_then(|v| v.as_str()),
+            Some("ra")
+        );
+        assert_eq!(
+            loaded.get("https://b").and_then(|v| v.get("referer")).and_then(|v| v.as_str()),
+            Some("rb")
+        );
+
+        let _ = fs::remove_file(&tmp);
+    }
+
+    fn sample_cookie(name: &str) -> serde_json::Value {
+        serde_json::json!({
+            "domain": ".example.com",
+            "httpOnly": false,
+            "path": "/",
+            "secure": true,
+            "expires": 0,
+            "name": name,
+            "value": "v",
+        })
+    }
+
+    #[test]
+    fn rejects_request_with_too_many_cookies() {
+        let cookies: Vec<_> = (0..MAX_COOKIES_PER_REQUEST + 1)
+            .map(|i| sample_cookie(&format!("c{i}")))
+            .collect();
+        let payload = serde_json::json!({
+            "type": "enqueue",
+            "url": "https://example.com/v",
+            "cookies": cookies,
+        });
+        let request: NativeHostRequest = serde_json::from_value(payload).unwrap();
+        let response = handle_request(request);
+        assert!(!response.ok);
+        assert_eq!(response.code, Some("TOO_MANY_COOKIES"));
+    }
+
+    #[test]
+    fn accepts_request_at_cookie_limit() {
+        let cookies: Vec<_> = (0..MAX_COOKIES_PER_REQUEST)
+            .map(|i| sample_cookie(&format!("c{i}")))
+            .collect();
+        let payload = serde_json::json!({
+            "type": "enqueue",
+            "url": "not a real url",
+            "cookies": cookies,
+        });
+        let request: NativeHostRequest = serde_json::from_value(payload).unwrap();
+        let response = handle_request(request);
+        assert_ne!(response.code, Some("TOO_MANY_COOKIES"));
+    }
+
+    #[test]
+    fn write_empty_metadata_map_removes_file() {
+        let tmp = std::env::temp_dir().join(format!(
+            "omniget-meta-empty-{}.json",
+            current_unix_timestamp()
+        ));
+        fs::write(&tmp, "{}").unwrap();
+        assert!(tmp.exists());
+        let empty: serde_json::Map<String, serde_json::Value> = serde_json::Map::new();
+        write_metadata_map(&tmp, &empty).unwrap();
+        assert!(!tmp.exists());
     }
 }

@@ -139,6 +139,8 @@ pub async fn queue_url_with_defaults(
         .to_string();
     let ext_referer = ext_meta.as_ref().and_then(|m| m.referer.clone());
     let ext_headers = ext_meta.as_ref().and_then(|m| m.headers.clone());
+    let ext_page_url = ext_meta.as_ref().and_then(|m| m.page_url.clone());
+    let ext_user_agent = ext_meta.as_ref().and_then(|m| m.user_agent.clone());
 
     let ext_media_info = ext_meta.as_ref().and_then(|m| {
         let mt = m.media_type.as_deref()?;
@@ -233,6 +235,8 @@ pub async fn queue_url_with_defaults(
             None,
             ext_referer,
             ext_headers,
+            ext_page_url,
+            ext_user_agent,
             preview_media_info,
             None,
             None,

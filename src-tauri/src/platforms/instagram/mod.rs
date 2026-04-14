@@ -743,7 +743,9 @@ impl PlatformDownloader for InstagramDownloader {
             );
             let output = opts.output_dir.join(&filename);
 
-            let headers = Some(Self::instagram_headers());
+            let mut hdr_map = Self::instagram_headers();
+            crate::core::http_client::inject_ua_header(&mut hdr_map, opts.user_agent.as_deref());
+            let headers = Some(hdr_map);
 
             match download_direct_with_headers(
                 &self.client,
@@ -791,7 +793,9 @@ impl PlatformDownloader for InstagramDownloader {
             let output = opts.output_dir.join(&filename);
             let (tx, _rx) = mpsc::channel(8);
 
-            let headers = Some(Self::instagram_headers());
+            let mut hdr_map = Self::instagram_headers();
+            crate::core::http_client::inject_ua_header(&mut hdr_map, opts.user_agent.as_deref());
+            let headers = Some(hdr_map);
 
             match download_direct_with_headers(
                 &self.client,

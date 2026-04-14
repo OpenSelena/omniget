@@ -295,6 +295,10 @@ impl PlatformDownloader for GenericYtdlpDownloader {
                 crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
                     .timeout(std::time::Duration::from_secs(600));
 
+            if let Some(ua) = opts.user_agent.as_deref() {
+                builder = builder.user_agent(ua);
+            }
+
             if let Some(ref hdrs) = opts.extra_headers {
                 let mut default_headers = reqwest::header::HeaderMap::new();
                 for (name, value) in hdrs {
@@ -321,7 +325,8 @@ impl PlatformDownloader for GenericYtdlpDownloader {
             }
 
             let client = builder.build().unwrap_or_default();
-            let downloader = HlsDownloader::with_client(client);
+            let downloader = HlsDownloader::with_client(client)
+                .with_user_agent_override(opts.user_agent.clone());
             let _ = progress.send(0.0).await;
 
             let result = downloader
@@ -354,6 +359,10 @@ impl PlatformDownloader for GenericYtdlpDownloader {
                 crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
                     .timeout(std::time::Duration::from_secs(600));
 
+            if let Some(ua) = opts.user_agent.as_deref() {
+                builder = builder.user_agent(ua);
+            }
+
             let jar = crate::core::cookie_parser::load_extension_cookies_for_url(&selected.url)
                 .or_else(|| {
                     opts.referer
@@ -382,6 +391,7 @@ impl PlatformDownloader for GenericYtdlpDownloader {
                     }
                 }
             }
+            crate::core::http_client::inject_ua_header(&mut headers, opts.user_agent.as_deref());
 
             let bytes = direct_downloader::download_direct_with_headers(
                 &client,

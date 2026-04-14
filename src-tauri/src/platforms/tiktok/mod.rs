@@ -527,7 +527,8 @@ impl PlatformDownloader for TikTokDownloader {
         }
 
         let cookies = self.captured_cookies.lock().await.clone();
-        let headers = self.download_headers(&cookies);
+        let mut headers = self.download_headers(&cookies);
+        crate::core::http_client::inject_ua_header(&mut headers, opts.user_agent.as_deref());
 
         match info.media_type {
             MediaType::Video => {

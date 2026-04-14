@@ -95,6 +95,8 @@ pub struct QueueItem {
     pub format_id: Option<String>,
     pub referer: Option<String>,
     pub extra_headers: Option<std::collections::HashMap<String, String>>,
+    pub page_url: Option<String>,
+    pub user_agent: Option<String>,
     pub percent: f64,
     pub speed_bytes_per_sec: f64,
     pub downloaded_bytes: u64,
@@ -160,6 +162,8 @@ impl DownloadQueue {
         format_id: Option<String>,
         referer: Option<String>,
         extra_headers: Option<std::collections::HashMap<String, String>>,
+        page_url: Option<String>,
+        user_agent: Option<String>,
         media_info: Option<MediaInfo>,
         total_bytes: Option<u64>,
         file_count: Option<u32>,
@@ -180,6 +184,8 @@ impl DownloadQueue {
             format_id,
             referer,
             extra_headers,
+            page_url,
+            user_agent,
             percent: 0.0,
             speed_bytes_per_sec: 0.0,
             downloaded_bytes: 0,
@@ -657,6 +663,8 @@ async fn spawn_download_inner(
         format_id,
         referer,
         extra_headers,
+        page_url,
+        user_agent,
         cancel_token,
         media_info,
         platform_name,
@@ -677,6 +685,8 @@ async fn spawn_download_inner(
             item.format_id.clone(),
             item.referer.clone(),
             item.extra_headers.clone(),
+            item.page_url.clone(),
+            item.user_agent.clone(),
             item.cancel_token.clone(),
             item.media_info.clone(),
             item.platform.clone(),
@@ -815,6 +825,8 @@ async fn spawn_download_inner(
         format_id,
         referer,
         extra_headers,
+        page_url,
+        user_agent,
         cancel_token: cancel_token.clone(),
         concurrent_fragments: settings.advanced.concurrent_fragments,
         ytdlp_path,
@@ -898,6 +910,13 @@ async fn spawn_download_inner(
         }
     });
 
+    if let Some(ua) = opts.user_agent.clone() {
+        omniget_core::core::ytdlp::register_ext_user_agent(url.clone(), ua);
+    }
+    if let Some(hdrs) = opts.extra_headers.clone() {
+        omniget_core::core::ytdlp::register_ext_headers(url.clone(), hdrs);
+    }
+
     let dl_start = std::time::Instant::now();
     let dl_future = async {
         tokio::select! {
@@ -910,6 +929,8 @@ async fn spawn_download_inner(
     let result = omniget_core::core::log_hook::CURRENT_DOWNLOAD_ID
         .scope(item_id, dl_future)
         .await;
+    omniget_core::core::ytdlp::clear_ext_user_agent(&url);
+    omniget_core::core::ytdlp::clear_ext_headers(&url);
     tracing::info!(
         "[queue] download {} completed in {:?}",
         item_id,

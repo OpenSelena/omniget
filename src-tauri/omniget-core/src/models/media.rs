@@ -48,6 +48,8 @@ pub struct DownloadOptions {
     pub format_id: Option<String>,
     pub referer: Option<String>,
     pub extra_headers: Option<HashMap<String, String>>,
+    pub page_url: Option<String>,
+    pub user_agent: Option<String>,
     pub cancel_token: CancellationToken,
     pub concurrent_fragments: u32,
     pub ytdlp_path: Option<PathBuf>,
