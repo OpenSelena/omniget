@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::process::Stdio;
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
@@ -78,6 +79,56 @@ pub fn set_split_chapters_fn(f: impl Fn() -> bool + Send + Sync + 'static) {
 
 fn split_chapters_enabled() -> bool {
     SPLIT_CHAPTERS_FN.get().map(|f| f()).unwrap_or(false)
+}
+
+static EXT_UA_MAP: OnceLock<Mutex<HashMap<String, String>>> = OnceLock::new();
+
+fn ext_ua_map() -> &'static Mutex<HashMap<String, String>> {
+    EXT_UA_MAP.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+pub fn register_ext_user_agent(url: String, ua: String) {
+    if let Ok(mut map) = ext_ua_map().lock() {
+        map.insert(url, ua);
+    }
+}
+
+pub fn clear_ext_user_agent(url: &str) {
+    if let Ok(mut map) = ext_ua_map().lock() {
+        map.remove(url);
+    }
+}
+
+fn ext_user_agent_for_url(url: &str) -> Option<String> {
+    ext_ua_map()
+        .lock()
+        .ok()
+        .and_then(|m| m.get(url).cloned())
+}
+
+static EXT_HEADERS_MAP: OnceLock<Mutex<HashMap<String, HashMap<String, String>>>> = OnceLock::new();
+
+fn ext_headers_map() -> &'static Mutex<HashMap<String, HashMap<String, String>>> {
+    EXT_HEADERS_MAP.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+pub fn register_ext_headers(url: String, headers: HashMap<String, String>) {
+    if let Ok(mut map) = ext_headers_map().lock() {
+        map.insert(url, headers);
+    }
+}
+
+pub fn clear_ext_headers(url: &str) {
+    if let Ok(mut map) = ext_headers_map().lock() {
+        map.remove(url);
+    }
+}
+
+fn ext_headers_for_url(url: &str) -> Option<HashMap<String, String>> {
+    ext_headers_map()
+        .lock()
+        .ok()
+        .and_then(|m| m.get(url).cloned())
 }
 
 fn ext_referer_for_url(url: &str) -> Option<String> {
@@ -1164,6 +1215,17 @@ pub async fn download_video(
         base_args.push(format!("Referer:{}", ref_url));
     }
 
+    if let Some(ext_headers) = ext_headers_for_url(url) {
+        for (name, value) in ext_headers {
+            let lower = name.to_lowercase();
+            if lower == "referer" || lower == "cookie" || lower == "user-agent" {
+                continue;
+            }
+            base_args.push("--add-headers".to_string());
+            base_args.push(format!("{}:{}", name, value));
+        }
+    }
+
     if let Some(ref cf) = effective_cookie_file {
         base_args.push("--cookies".to_string());
         base_args.push(cf.to_string_lossy().to_string());
@@ -1211,12 +1273,13 @@ pub async fn download_video(
         && effective_cookie_file.is_none()
         && cfb_setting.is_empty();
 
+    let effective_ua = ext_user_agent_for_url(url).unwrap_or_else(|| CHROME_UA.to_string());
     base_args.extend([
         "--no-check-certificate".to_string(),
         "--no-warnings".to_string(),
         "--no-mtime".to_string(),
         "--user-agent".to_string(),
-        CHROME_UA.to_string(),
+        effective_ua,
         "--socket-timeout".to_string(),
         "30".to_string(),
         "--retries".to_string(),
