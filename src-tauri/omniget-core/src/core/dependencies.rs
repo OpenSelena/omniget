@@ -119,7 +119,7 @@ fn resolve_absolute_path(bin_name: &str) -> PathBuf {
     } else {
         "which"
     };
-    if let Ok(output) = std::process::Command::new(finder)
+    if let Ok(output) = crate::core::process::std_command(finder)
         .arg(bin_name)
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::null())
