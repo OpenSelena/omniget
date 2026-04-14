@@ -21,6 +21,7 @@ pub struct HlsDownloadResult {
 
 pub struct HlsDownloader {
     client: Client,
+    user_agent_override: Option<String>,
 }
 
 impl Default for HlsDownloader {
@@ -43,7 +44,19 @@ impl HlsDownloader {
     }
 
     pub fn with_client(client: Client) -> Self {
-        Self { client }
+        Self {
+            client,
+            user_agent_override: None,
+        }
+    }
+
+    pub fn with_user_agent_override(mut self, ua: Option<String>) -> Self {
+        self.user_agent_override = ua;
+        self
+    }
+
+    fn effective_user_agent(&self) -> &str {
+        self.user_agent_override.as_deref().unwrap_or(USER_AGENT)
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -136,7 +149,7 @@ impl HlsDownloader {
                 .client
                 .get(url)
                 .header("Referer", referer)
-                .header("User-Agent", USER_AGENT)
+                .header("User-Agent", self.effective_user_agent())
                 .send()
                 .await
             {
@@ -172,7 +185,7 @@ impl HlsDownloader {
             .client
             .get(m3u8_url)
             .header("Referer", referer)
-            .header("User-Agent", USER_AGENT)
+            .header("User-Agent", self.effective_user_agent())
             .send()
             .await?;
 
@@ -230,6 +243,8 @@ impl HlsDownloader {
         let completed_ref = &completed;
         let fail_ref = &fail_token;
         let sem_ref = &semaphore;
+        let user_agent = self.effective_user_agent().to_string();
+        let user_agent_ref = &user_agent;
 
         stream::iter(segment_urls)
             .map(|(i, url)| {
@@ -241,8 +256,15 @@ impl HlsDownloader {
                     if fail_ref.is_cancelled() {
                         return;
                     }
-                    match download_segment_with_retry(client, &url, &referer, max_retries, fail_ref)
-                        .await
+                    match download_segment_with_retry(
+                        client,
+                        &url,
+                        &referer,
+                        user_agent_ref,
+                        max_retries,
+                        fail_ref,
+                    )
+                    .await
                     {
                         Ok(data) => {
                             if let Some(ref btx) = bytes_tx {
@@ -345,7 +367,7 @@ impl HlsDownloader {
                 .client
                 .get(url)
                 .header("Referer", referer)
-                .header("User-Agent", USER_AGENT)
+                .header("User-Agent", self.effective_user_agent())
                 .send()
                 .await
             {
@@ -480,6 +502,7 @@ async fn download_segment_with_retry(
     client: &Client,
     url: &str,
     referer: &str,
+    user_agent: &str,
     max_retries: u32,
     cancel: &CancellationToken,
 ) -> anyhow::Result<Vec<u8>> {
@@ -493,7 +516,7 @@ async fn download_segment_with_retry(
             let resp = client
                 .get(url)
                 .header("Referer", referer)
-                .header("User-Agent", USER_AGENT)
+                .header("User-Agent", user_agent)
                 .send()
                 .await?;
 

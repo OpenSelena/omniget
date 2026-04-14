@@ -729,6 +729,12 @@ pub fn peek_extension_open_app(url: &str) -> Option<bool> {
 fn handle_request(request: NativeHostRequest) -> NativeHostResponse {
     if let Some(client_version) = request.protocol_version {
         if client_version > HOST_MAX_PROTOCOL_VERSION {
+            log_host_event(
+                "UNSUPPORTED_PROTOCOL",
+                &format!(
+                    "client_version={client_version} host_max_version={HOST_MAX_PROTOCOL_VERSION}"
+                ),
+            );
             return NativeHostResponse {
                 ok: false,
                 code: Some("UNSUPPORTED_PROTOCOL"),
@@ -837,7 +843,9 @@ fn read_message() -> anyhow::Result<ReadOutcome> {
     std::io::stdin().read_exact(&mut payload)?;
     match serde_json::from_slice(&payload) {
         Ok(request) => Ok(ReadOutcome::Ok(request)),
-        Err(err) => Ok(ReadOutcome::MalformedJson(err.to_string())),
+        Err(err) => Ok(ReadOutcome::MalformedJson(build_deserialize_error_detail(
+            &payload, &err,
+        ))),
     }
 }
 
@@ -1068,5 +1076,94 @@ mod tests {
         let empty: serde_json::Map<String, serde_json::Value> = serde_json::Map::new();
         write_metadata_map(&tmp, &empty).unwrap();
         assert!(!tmp.exists());
+    }
+
+    #[test]
+    fn safe_payload_summary_extracts_non_sensitive_fields() {
+        let payload = serde_json::to_vec(&serde_json::json!({
+            "type": "enqueue",
+            "url": "https://secret.example.com/path?token=SECRET_TOKEN_VALUE",
+            "protocolVersion": 1,
+            "cookies": [
+                {"domain": "a", "httpOnly": false, "path": "/", "secure": true, "expires": 0, "name": "session", "value": "SECRET_VALUE"},
+                {"domain": "b", "httpOnly": false, "path": "/", "secure": true, "expires": 0, "name": "csrf", "value": "TOP_SECRET"},
+            ],
+        })).unwrap();
+
+        let summary = safe_payload_summary(&payload);
+
+        assert!(summary.contains("type=\"enqueue\""));
+        assert!(summary.contains("has_url=true"));
+        assert!(summary.contains("cookie_count=2"));
+        assert!(summary.contains("protocolVersion=1"));
+    }
+
+    #[test]
+    fn safe_payload_summary_never_leaks_cookie_values() {
+        let payload = serde_json::to_vec(&serde_json::json!({
+            "type": "enqueue",
+            "url": "https://example.com/v",
+            "cookies": [
+                {"domain": "a", "httpOnly": false, "path": "/", "secure": true, "expires": 0, "name": "session", "value": "SECRET_COOKIE_VALUE_XYZ"},
+            ],
+        })).unwrap();
+
+        let summary = safe_payload_summary(&payload);
+
+        assert!(!summary.contains("SECRET_COOKIE_VALUE_XYZ"));
+        assert!(!summary.contains("session"));
+    }
+
+    #[test]
+    fn safe_payload_summary_never_leaks_url_query_contents() {
+        let payload = serde_json::to_vec(&serde_json::json!({
+            "type": "enqueue",
+            "url": "https://example.com/?access_token=AAAA_SECRET_TOKEN",
+        })).unwrap();
+
+        let summary = safe_payload_summary(&payload);
+
+        assert!(!summary.contains("AAAA_SECRET_TOKEN"));
+        assert!(!summary.contains("example.com"));
+    }
+
+    #[test]
+    fn safe_payload_summary_handles_unparseable_input() {
+        let summary = safe_payload_summary(b"{not valid json");
+
+        assert!(summary.contains("unparseable"));
+        assert!(summary.contains("payload_len=15"));
+    }
+
+    #[test]
+    fn safe_payload_summary_handles_non_object_json() {
+        let summary = safe_payload_summary(b"[1,2,3]");
+
+        assert!(summary.contains("not_a_json_object"));
+    }
+
+    #[test]
+    fn safe_payload_summary_marks_missing_type_as_placeholder() {
+        let payload = serde_json::to_vec(&serde_json::json!({
+            "url": "https://example.com/",
+        })).unwrap();
+
+        let summary = safe_payload_summary(&payload);
+
+        assert!(summary.contains("type=\"<missing>\""));
+        assert!(summary.contains("has_url=true"));
+    }
+
+    #[test]
+    fn safe_payload_summary_reports_cookie_count_zero_when_absent() {
+        let payload = serde_json::to_vec(&serde_json::json!({
+            "type": "enqueue",
+            "url": "https://example.com/",
+        })).unwrap();
+
+        let summary = safe_payload_summary(&payload);
+
+        assert!(summary.contains("cookie_count=0"));
+        assert!(summary.contains("protocolVersion=<none>"));
     }
 }

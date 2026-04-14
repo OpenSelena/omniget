@@ -69,3 +69,22 @@ pub fn apply_global_proxy(builder: reqwest::ClientBuilder) -> reqwest::ClientBui
     let proxy = get_proxy_snapshot();
     apply_proxy(builder, &proxy)
 }
+
+pub fn inject_ua_header(
+    headers: &mut reqwest::header::HeaderMap,
+    opts_ua: Option<&str>,
+) {
+    if let Some(ua) = opts_ua {
+        if let Ok(v) = reqwest::header::HeaderValue::from_str(ua) {
+            headers.insert(reqwest::header::USER_AGENT, v);
+        }
+    }
+}
+
+pub fn ua_header_map(opts_ua: Option<&str>) -> Option<reqwest::header::HeaderMap> {
+    let ua = opts_ua?;
+    let value = reqwest::header::HeaderValue::from_str(ua).ok()?;
+    let mut headers = reqwest::header::HeaderMap::new();
+    headers.insert(reqwest::header::USER_AGENT, value);
+    Some(headers)
+}
