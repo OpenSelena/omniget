@@ -7,13 +7,16 @@
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-green?style=for-the-badge" alt="License GPL-3.0" /></a>
   <a href="https://github.com/tonhowtf/omniget/stargazers"><img src="https://img.shields.io/github/stars/tonhowtf/omniget?style=for-the-badge" alt="Stars" /></a>
   <a href="https://github.com/tonhowtf/omniget/releases"><img src="https://img.shields.io/github/downloads/tonhowtf/omniget/total?style=for-the-badge&label=downloads" alt="Downloads" /></a>
+  <a href="https://hosted.weblate.org/engage/omniget/"><img src="https://hosted.weblate.org/widget/omniget/frontend-json/svg-badge.svg" alt="Translation status" /></a>
 </p>
 
 <h1 align="center">OmniGet</h1>
 
 <h3 align="center">Paste a link. Get your file.</h3>
 
-OmniGet downloads videos, courses, and files from the internet. Paste a link from YouTube, Instagram, TikTok, or any of [1000+ supported sites](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md). It figures out what you want and downloads it. Free and open source.
+<p align="center">
+OmniGet is a free, open-source desktop app that downloads videos, courses, music, and files from the sites you already use — YouTube, Instagram, TikTok, Hotmart, Udemy, SoundCloud, and <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">1000+ more</a>. One link in, one file out.
+</p>
 
 <p align="center">
   <img src="assets/screenshot.png" alt="OmniGet downloading a YouTube video" width="800" />
@@ -29,109 +32,170 @@ OmniGet downloads videos, courses, and files from the internet. Paste a link fro
   <a href="https://github.com/tonhowtf/omniget/releases/latest"><img src="https://img.shields.io/badge/-Linux-orange.svg?style=for-the-badge&logo=linux&logoColor=white" alt="Download for Linux" /></a>
 </p>
 
-Also available as a Flatpak on Linux and a portable `.exe` on Windows.
+Also available as a Flatpak on Linux and a portable `.exe` on Windows. No setup: OmniGet bundles [yt-dlp](https://github.com/yt-dlp/yt-dlp) and FFmpeg, keeps them up to date, and handles everything in the background.
 
-## What can it download?
+## What OmniGet does
 
-**Videos** from YouTube, Instagram, TikTok, Twitter/X, Reddit, Twitch, Pinterest, Vimeo, Bluesky, and Bilibili.
+You paste a URL. OmniGet figures out the site, shows you a preview with quality options, and downloads the file. That's the whole loop.
 
-**Courses** from Hotmart, Udemy, Kiwify, Teachable, and [6 more platforms](#course-platforms). Log in once, download all lessons, attachments, and descriptions.
+Underneath, it covers four big jobs:
 
-**Torrents.** Drag a `.torrent` file or paste a magnet link. Built-in client, no extra software needed.
+- **Videos and audio** from 1000+ sites via yt-dlp.
+- **Entire online courses**, login included, every lesson and attachment on disk.
+- **Torrents and magnet links** with a built-in client.
+- **Direct file transfer** between two computers with a 4-word code.
 
-**Files between devices.** Send a file to another computer using a 4-word share code. Works across different networks.
+Around that, the app ships with Loop (a mascot that reacts to your downloads), 11 color themes, 9 languages, a global hotkey, and an optional browser extension.
 
-**Anything else.** If a site is [supported by yt-dlp](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md), OmniGet can download from it. That covers over 1000 sites.
+### Supported video and audio sites
 
-No setup required beyond the app itself. OmniGet handles [yt-dlp](https://github.com/yt-dlp/yt-dlp) (the engine that supports 1000+ sites) and FFmpeg (used to merge video and audio) automatically, stays up to date on its own, and comes with 11 color themes and 8 languages.
-
-The app also includes Loop, a mascot that reacts to your downloads in real time. The themes include Catppuccin, Dracula, and NyxVamp variants.
-
-### Media Platforms
-
-| Platform | Content |
-|----------|---------|
-| YouTube | Videos, Shorts, Playlists, Search |
-| Instagram | Posts, Reels, Stories |
-| TikTok | Videos, Photos |
+| Platform | What you can grab |
+|----------|-------------------|
+| YouTube | Videos, Shorts, playlists, search results |
+| Instagram | Posts, reels, stories |
+| TikTok | Videos, photos |
 | Twitter / X | Videos, GIFs |
-| Reddit | Videos, Images |
+| Reddit | Videos, images |
 | Twitch | Clips |
-| Pinterest | Images, Videos |
+| Pinterest | Images, videos |
 | Vimeo | Videos |
-| Bluesky | Images, Videos |
-| Bilibili (哔哩哔哩) | Videos, Series |
-| Telegram | Photos, Videos, Files (via plugin) |
+| Bluesky | Images, videos |
+| Bilibili (哔哩哔哩) | Videos, series |
+| Telegram | Photos, videos, files (via plugin) |
 | Torrent / Magnet | Any `.torrent` file or magnet link |
 
-<details>
-<summary><strong>Chinese platforms</strong> (supported via yt-dlp)</summary>
+If a site is [supported by yt-dlp](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md), OmniGet can download from it. Roughly 1000 sites in total.
 
-| Platform | Content |
-|----------|---------|
+<details>
+<summary><strong>Chinese platforms</strong> (via yt-dlp)</summary>
+
+| Platform | What you can grab |
+|----------|-------------------|
 | Douyin (抖音) | Videos |
-| Xiaohongshu (小红书) | Videos, Images |
+| Xiaohongshu (小红书) | Videos, images |
 | Kuaishou (快手) | Videos |
 | Youku (优酷) | Videos |
 | Tencent Video (腾讯视频) | Videos |
 | iQiyi (爱奇艺) | Videos |
 | Mango TV (芒果TV) | Videos |
 
-These platforms may require a Chinese IP address.
+Some of these may need a Chinese IP address.
 
 </details>
-
-<details>
-<summary><strong>Course platforms</strong></summary>
-
-| Platform | Auth | Region |
-|----------|------|--------|
-| Hotmart | Email + Password | BR / Global |
-| Udemy | Email + Browser Login | Global |
-| Kiwify | Email + Password / Access Token | BR |
-| Gumroad | Email + Password / Access Token | Global |
-| Teachable | Access Token | Global |
-| Kajabi | Access Token | Global |
-| Skool | Email + Password / Access Token | Global |
-| Wondrium / Great Courses | Email + Password / Access Token | US |
-| Thinkific | Browser Login | Global |
-| Rocketseat | Access Token | BR |
-
-</details>
-
-## How it works
-
-1. **Paste a link** into the omnibox. Or drag a file, or search YouTube right there.
-2. OmniGet figures out the platform and shows you a preview with quality options.
-3. Hit download. Progress, speed, and ETA update as it goes.
-
-For courses: log in to the platform, browse your library, pick what you want, and download it all at once.
-
-## Copy. Press. Done.
-
-Copy a video link from anywhere. Discord, Twitter, a group chat. Press **Ctrl+Shift+D** (or **Cmd+Shift+D** on macOS). That's it.
-
-OmniGet grabs the URL from your clipboard and downloads it in the background. You don't even need to open the app. Change the hotkey in **Settings > Downloads > Hotkey**.
-
-## Browser Extension
-
-Install the [Chrome extension](browser-extension/chrome/README.md) to skip the copy-paste step. When you're on a page with a video, click the OmniGet icon. It sends the link and login info the app needs to start downloading.
-
-The extension also detects video streams on any website, even ones OmniGet doesn't officially support. If your browser can play it, OmniGet can probably download it.
 
 ## Plugins
 
-OmniGet starts simple. Extra features are available as plugins you can install from the built-in marketplace:
+OmniGet starts minimal. Everything beyond plain downloading is an optional plugin you install from the built-in marketplace. Each one drops a new section into the sidebar.
 
-- **Courses.** Download full courses from 10 education platforms.
-- **Telegram.** Browse chats and download media.
-- **Convert.** Convert between video and audio formats.
+### Courses — download entire online courses
 
-Want to build one? Check out the [Plugin SDK](src-tauri/omniget-plugin-sdk/).
+Log in once, pick what you want, walk away. OmniGet downloads every lesson, every attachment, and the lesson descriptions, organized on disk as `Course / Module / Lesson.mp4`.
 
-## Building from Source (for developers)
+Ten platforms supported:
 
-**Prerequisites:** [Rust](https://rustup.rs/), [Node.js](https://nodejs.org/) 18+, [pnpm](https://pnpm.io/)
+| Platform | Login | Region |
+|----------|-------|--------|
+| Hotmart | Email + password | BR / Global |
+| Udemy | Email + browser login | Global |
+| Kiwify | Email + password or token | BR |
+| Gumroad | Email + password or token | Global |
+| Teachable | Access token | Global |
+| Kajabi | Access token | Global |
+| Skool | Email + password or token | Global |
+| Wondrium / Great Courses | Email + password or token | US |
+| Thinkific | Browser login | Global |
+| Rocketseat | Access token | BR |
+
+Repository: [omniget-plugin-courses](https://github.com/tonhowtf/omniget-plugin-courses).
+
+### Study — turn your downloaded courses into a study app
+
+Study reads the courses already on your disk and wraps them in a real learning environment. It doesn't need to re-download anything: it scans the folders, builds a library, and adds the tools you'd expect from a paid study platform.
+
+What it gives you:
+
+- **A proper video player** with 0.5×–2× speed, picture-in-picture, theater mode, auto-resume from where you stopped, auto-play of the next lesson, and subtitles in 9 languages.
+- **Notes tied to timestamps.** Click a note to jump back to the exact second. Markdown and LaTeX supported. Export to Markdown.
+- **Bookmarks** inside any lesson with a single keystroke.
+- **Flashcards with spaced repetition** (SM2 algorithm, the same one Anki uses). Rate each card *Again / Hard / Good / Easy* and Study schedules the next review for you.
+- **Daily streak, goals and a GitHub-style activity heatmap.** A day counts when you watch lessons, review cards, or finish a focus session.
+- **Pomodoro focus timer** with session history.
+- **Unified search** across courses, notes, and flashcards.
+- **Continue-watching** on the home screen.
+
+Repository: [omniget-study](https://github.com/tonhowtf/omniget-study).
+
+### League — a companion for League of Legends
+
+League turns OmniGet into a desk-side helper while you play LoL. Nothing runs until you click *Activate* — the plugin loads inert with no connections, no background threads, no listeners.
+
+Once activated, it can:
+
+- **Auto-accept** queue pops and watch game flow events.
+- **Read champ-select** and show cards for each player: rank, recent games, winrate, warning flags for saved trolls or smurfs.
+- **Install and manage mods** (skins and custom huds) with a single toggle per profile.
+- **Index your replays** (`.rofl` files), run the in-replay camera, and capture clips.
+- **Privacy toggles** for appearing offline, online, or mobile independently of the client.
+- **Inspect the League client traffic** if you're curious about what the LCU is doing.
+
+Everything is optional. Sub-modules turn on and off one by one, and two of them (*Privacy* and *Devtools*) never auto-activate even if you enable auto-start.
+
+Repository: [omniget-plugin-league](https://github.com/tonhowtf/omniget-plugin-league).
+
+### Misc — a grab bag of useful things
+
+Misc is the plugin where small, useful utilities live. Right now it bundles tools for four sites:
+
+- **GitHub.** Find out who stopped following you, who starred (or unstarred) your repos, see a leaderboard of your biggest fans across all repos, and keep an eye on a specific user's public activity with optional toast notifications.
+- **Instagram.** Download posts, reels, and stories from public profiles by username, hashtag, or location.
+- **SoundCloud.** Download tracks and full playlists, embed cover art and metadata into the audio files, mirror a playlist locally (sync both ways), see your charts and trending tracks, and show what you're listening to in your Discord status.
+- **Telegram account lookup.** Paste a `@username` and get public profile info back: photo, bio, account creation estimate, and a quick readability report of the bio (language, hints at age or city, emoji usage).
+
+Think of it as the *miscellaneous* drawer. Features land here when they're useful but don't justify a plugin of their own.
+
+Repository: [omniget-social](https://github.com/tonhowtf/omniget-social) (folder name kept for historical reasons — the plugin surface is called *Misc*).
+
+### Telegram — browse chats and download media
+
+Open your Telegram account inside OmniGet and pull photos, videos, and files out of any chat. 16 commands, covers the common cases.
+
+Repository: [omniget-plugin-telegram](https://github.com/tonhowtf/omniget-plugin-telegram).
+
+### Convert — local media converter
+
+Thin wrapper around FFmpeg: drag a file in, pick the target format, get the output. Works offline, no upload to anything.
+
+Repository: [omniget-plugin-convert](https://github.com/tonhowtf/omniget-plugin-convert).
+
+### Build your own
+
+Plugins are external Rust crates. If you want to add a site or a workflow, start from the [Plugin SDK](src-tauri/omniget-plugin-sdk/).
+
+## How it works in practice
+
+1. **Paste a link** into the omnibox. Or drag a `.torrent` file, or type a search straight into YouTube.
+2. OmniGet recognizes the site and shows a preview with available qualities.
+3. Hit download. Progress, speed, and ETA update live.
+
+For courses: log in to the platform, browse your library, pick what you want, and download it in one pass.
+
+### Copy. Press. Done.
+
+Copy a link anywhere — Discord, a group chat, a tweet. Press **Ctrl+Shift+D** (or **Cmd+Shift+D** on macOS). OmniGet reads the clipboard and downloads in the background. You don't even need to open the window.
+
+Change the hotkey in **Settings > Downloads > Hotkey**.
+
+### Browser extension
+
+Install the [Chrome extension](browser-extension/chrome/README.md) to skip the copy-paste step. When you land on a page with a video, click the OmniGet icon and the extension hands the URL (and any login cookies the app needs) over directly.
+
+The extension also sniffs video streams on sites OmniGet doesn't officially support. If your browser can play it, OmniGet can usually download it.
+
+## Building from source
+
+For developers. If you just want to use OmniGet, [grab a release](#download).
+
+**Prerequisites:** [Rust](https://rustup.rs/), [Node.js](https://nodejs.org/) 18+, [pnpm](https://pnpm.io/).
 
 ```bash
 git clone https://github.com/tonhowtf/omniget.git
@@ -149,12 +213,12 @@ sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file lib
 
 </details>
 
-Production build: `pnpm tauri build`
+Production build: `pnpm tauri build`.
 
 <details>
 <summary><strong>Windows SmartScreen / macOS Gatekeeper</strong></summary>
 
-**Windows:** SmartScreen may warn you on first run. Click **More info**, then **Run anyway**. This is normal for open-source apps without a paid code signing certificate.
+**Windows:** SmartScreen may warn you on first run. Click **More info**, then **Run anyway**. This is normal for open-source apps without a paid code-signing certificate.
 
 **macOS:** If Gatekeeper blocks the app, run in Terminal:
 
@@ -167,11 +231,15 @@ codesign --force --deep --sign - /Applications/omniget.app
 
 ## Contributing
 
-Found a bug or want a feature? [Open an issue](https://github.com/tonhowtf/omniget/issues). Pull requests are welcome.
+Found a bug or want a feature? [Open an issue](https://github.com/tonhowtf/omniget/issues). Pull requests are welcome — check [CONTRIBUTING.md](CONTRIBUTING.md) before you start.
 
-## Notice to Platform Owners
+## Translating
 
-If you represent a listed platform and have concerns, reach out at **tonhowtf@gmail.com** from a company email. We'll remove the platform right away.
+OmniGet ships in 9 languages (English, Portuguese, Chinese, Traditional Chinese, Japanese, Italian, French, Greek) and is hosted on [Weblate](https://hosted.weblate.org/engage/omniget/). Pick a language, translate in the browser, Weblate opens a pull request for you. See [docs/translations.md](docs/translations.md) for details.
+
+## Notice to platform owners
+
+If you represent a listed platform and have concerns, email **tonhowtf@gmail.com** from a company address. We'll remove the platform right away.
 
 ## Legal
 
