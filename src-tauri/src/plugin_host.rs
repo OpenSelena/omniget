@@ -105,4 +105,36 @@ impl<R: Runtime + 'static> PluginHost for PluginHostImpl<R> {
             .or_else(dirs::home_dir)
             .unwrap_or_else(|| PathBuf::from("."))
     }
+
+    fn external_data_cache(&self, plugin_id: &str, namespace: &str) -> anyhow::Result<PathBuf> {
+        if plugin_id.is_empty() {
+            anyhow::bail!("external_data_cache: plugin_id must not be empty");
+        }
+        if namespace.is_empty() {
+            anyhow::bail!("external_data_cache: namespace must not be empty");
+        }
+        if plugin_id.contains(['/', '\\', ':', '\0']) || namespace.contains(['/', '\\', ':', '\0'])
+        {
+            anyhow::bail!(
+                "external_data_cache: plugin_id/namespace must not contain path separators or null bytes"
+            );
+        }
+
+        let base = dirs::cache_dir().ok_or_else(|| {
+            anyhow::anyhow!("external_data_cache: OS cache dir unavailable on this platform")
+        })?;
+        let dir = base
+            .join("wtf.tonho.omniget")
+            .join("external-cache")
+            .join(plugin_id)
+            .join(namespace);
+        std::fs::create_dir_all(&dir).map_err(|e| {
+            anyhow::anyhow!(
+                "external_data_cache: failed to create {}: {}",
+                dir.display(),
+                e
+            )
+        })?;
+        Ok(dir)
+    }
 }

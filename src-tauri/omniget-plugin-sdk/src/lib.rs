@@ -6,4 +6,4 @@ pub use host::*;
 pub use manifest::*;
 pub use plugin::*;
 
-pub const ABI_VERSION: u32 = 1;
+pub const ABI_VERSION: u32 = 2;
