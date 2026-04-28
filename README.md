@@ -12,19 +12,17 @@
 
 <h1 align="center">OmniGet</h1>
 
-<h3 align="center">Paste a link. Get your file.</h3>
+<h3 align="center">Download courses and books, then actually study them.</h3>
 
 <p align="center">
-OmniGet is a free, open-source desktop app that downloads videos, courses, music, and files from the sites you already use — YouTube, Instagram, TikTok, Hotmart, Udemy, SoundCloud, and <a href="https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md">1000+ more</a>. One link in, one file out.
+The free, open source desktop app for people who learn from <strong>online courses</strong> (Hotmart, Udemy, Kiwify, Skool, Teachable) and from <strong>books</strong> (PDF, EPUB, CBZ). You download once, you own the file, and you study without leaving the app.
 </p>
 
 <p align="center">
-  <img src="assets/screenshot.png" alt="OmniGet downloading a YouTube video" width="800" />
-  <br>
-  <sub>Paste a link. Pick a quality. Download.</sub>
+  <img src="assets/screenshot.png" alt="OmniGet home screen" width="800" />
 </p>
 
-## Download
+## Get it
 
 <p align="center">
   <a href="https://github.com/tonhowtf/omniget/releases/latest"><img src="https://img.shields.io/badge/-Windows-blue.svg?style=for-the-badge&logo=windows" alt="Download for Windows" /></a>
@@ -32,170 +30,124 @@ OmniGet is a free, open-source desktop app that downloads videos, courses, music
   <a href="https://github.com/tonhowtf/omniget/releases/latest"><img src="https://img.shields.io/badge/-Linux-orange.svg?style=for-the-badge&logo=linux&logoColor=white" alt="Download for Linux" /></a>
 </p>
 
-Also available as a Flatpak on Linux and a portable `.exe` on Windows. No setup: OmniGet bundles [yt-dlp](https://github.com/yt-dlp/yt-dlp) and FFmpeg, keeps them up to date, and handles everything in the background.
+Portable `.exe` on Windows, Flatpak on Linux, and a regular `.dmg` on macOS. No setup. The app keeps its own dependencies up to date in the background.
 
-## What OmniGet does
+## What is it for
 
-You paste a URL. OmniGet figures out the site, shows you a preview with quality options, and downloads the file. That's the whole loop.
+OmniGet is a downloader that grew up. The downloader half pulls media from the sites you already use. The study half is what makes it different: a real video player and a real book reader, with notes, flashcards and progress tracking, all working on the files you already have on your disk.
 
-Underneath, it covers four big jobs:
+Three things you can do today:
 
-- **Videos and audio** from 1000+ sites via yt-dlp.
-- **Entire online courses**, login included, every lesson and attachment on disk.
-- **Torrents and magnet links** with a built-in client.
-- **Direct file transfer** between two computers with a 4-word code.
+1. **Download an entire online course** from platforms like Hotmart or Udemy and watch every lesson in OmniGet itself.
+2. **Open a PDF or EPUB** and read it with bookmarks, highlights and a focus mode that hides everything except the page.
+3. **Paste any video link** (YouTube, Instagram, TikTok, and friends) and get an MP4 in a few clicks.
 
-Around that, the app ships with Loop (a mascot that reacts to your downloads), 11 color themes, 9 languages, a global hotkey, and an optional browser extension.
+The rest is small things you discover later. Torrents, P2P file transfer, FFmpeg conversion, a Telegram chat browser, a global hotkey, a browser extension, themes, languages.
 
-### Supported video and audio sites
+---
 
-| Platform | What you can grab |
-|----------|-------------------|
-| YouTube | Videos, Shorts, playlists, search results |
-| Instagram | Posts, reels, stories |
-| TikTok | Videos, photos |
-| Twitter / X | Videos, GIFs |
-| Reddit | Videos, images |
-| Twitch | Clips |
-| Pinterest | Images, videos |
-| Vimeo | Videos |
-| Bluesky | Images, videos |
-| Bilibili (哔哩哔哩) | Videos, series |
-| Telegram | Photos, videos, files (via plugin) |
-| Torrent / Magnet | Any `.torrent` file or magnet link |
+## Watch courses inside OmniGet
 
-If a site is [supported by yt-dlp](https://github.com/yt-dlp/yt-dlp/blob/master/supportedsites.md), OmniGet can download from it. Roughly 1000 sites in total.
+Most course downloaders give you a folder full of files and leave you alone. OmniGet does the download (Hotmart, Udemy, Kiwify, Gumroad, Teachable, Kajabi, Skool, Wondrium, Thinkific, Rocketseat) and then opens them in a built in player that turns the folder into a real learning environment.
 
-<details>
-<summary><strong>Chinese platforms</strong> (via yt-dlp)</summary>
+Open the **Library**, scan a folder once, and OmniGet builds a course list with cover art and progress for each course.
 
-| Platform | What you can grab |
-|----------|-------------------|
-| Douyin (抖音) | Videos |
-| Xiaohongshu (小红书) | Videos, images |
-| Kuaishou (快手) | Videos |
-| Youku (优酷) | Videos |
-| Tencent Video (腾讯视频) | Videos |
-| iQiyi (爱奇艺) | Videos |
-| Mango TV (芒果TV) | Videos |
+Inside a lesson you get:
 
-Some of these may need a Chinese IP address.
+- **A real video player** with playback speed (0.5× to 2×), keyboard shortcuts, fullscreen, picture in picture, theater mode, autoplay of the next lesson, and a 5 second countdown you can cancel.
+- **Auto resume** at the exact second you stopped, per lesson.
+- **Subtitles** when the course ships them (`.vtt` files), with a built in toggle.
+- **Notes pinned to timestamps**: write a note at minute 12:34, click it later, the player jumps to that second. Markdown supported.
+- **Attachments panel** that lists every PDF, image, text and code file the course came with. Click to preview right next to the video, no second app needed.
+- **Lesson description** rendered cleanly when the course provides one (`description.html`).
+- **Continue watching** widget on the home screen with the last courses you opened.
 
-</details>
+Around the courses, the **Library** itself has:
 
-## Plugins
+- Tags and collections (group your engineering courses, your design courses).
+- Status filters (not started, in progress, completed) and a search across titles.
+- Health check that finds zero byte videos, missing files and orphan attachments after you move things around on disk.
 
-OmniGet starts minimal. Everything beyond plain downloading is an optional plugin you install from the built-in marketplace. Each one drops a new section into the sidebar.
+Everything lives in the OmniGet database. The original folder on disk is never touched, so you can move files, back them up, or open them in VLC anytime.
 
-### Courses — download entire online courses
+---
 
-Log in once, pick what you want, walk away. OmniGet downloads every lesson, every attachment, and the lesson descriptions, organized on disk as `Course / Module / Lesson.mp4`.
+## Read PDFs and EPUBs inside OmniGet
 
-Ten platforms supported:
+The reader is the part most people don't expect. OmniGet ships a full document reader for **PDF**, **EPUB**, **CBZ**, **TXT** and **HTML**. You don't need Calibre, you don't need Adobe, you don't upload files to a website.
 
-| Platform | Login | Region |
-|----------|-------|--------|
-| Hotmart | Email + password | BR / Global |
-| Udemy | Email + browser login | Global |
-| Kiwify | Email + password or token | BR |
-| Gumroad | Email + password or token | Global |
-| Teachable | Access token | Global |
-| Kajabi | Access token | Global |
-| Skool | Email + password or token | Global |
-| Wondrium / Great Courses | Email + password or token | US |
-| Thinkific | Browser login | Global |
-| Rocketseat | Access token | BR |
+The library:
 
-Repository: [omniget-plugin-courses](https://github.com/tonhowtf/omniget-plugin-courses).
+- **Auto extracts covers** from PDF, EPUB and CBZ files when you scan a folder.
+- **Search Anna's Archive** from inside the app and download books legally available to you. Configure your own sources and domains.
+- **ISBN metadata enrichment** that fills in title, author, publisher and a high quality cover with one click.
+- **Filter** by reading status (all, reading, finished, favorites) or by format (PDF, EPUB, TXT, HTML, CBZ).
+- **Sort** by title, author, recently added, or last opened.
+- **Tags and collections** so your library doesn't drown in 500 books.
+- **Multiple library roots**: keep technical PDFs in one folder and fiction EPUBs in another, OmniGet treats them as one library you can filter.
 
-### Study — turn your downloaded courses into a study app
+Inside a book:
 
-Study reads the courses already on your disk and wraps them in a real learning environment. It doesn't need to re-download anything: it scans the folders, builds a library, and adds the tools you'd expect from a paid study platform.
+- **Two reading modes**: paged (book feel) and scroll (web feel). Your choice is remembered per session.
+- **Outline / table of contents** for PDFs and EPUBs, click any entry to jump.
+- **Bookmarks** with one keystroke, with a panel listing all of them.
+- **Highlights** in different colors, with notes attached.
+- **Notes panel** that lives next to the page, written in Markdown.
+- **Search inside the book** with hits highlighted in context.
+- **Zoom** for PDFs (DPI based, sharper than scaling) and **font size + font family** for EPUBs.
+- **Multiple reader themes**: clean white, sepia paper, dark, plus a paper filter that mimics e ink.
+- **Cursor line guide** that follows your mouse, helpful for long lines and dyslexia.
+- **Focus mode** that hides everything except the page, full keyboard navigation, no chrome.
+- **Reading progress** tracked automatically by page or by location, with last opened time.
+- **Reading sessions** logged so you can see how long you actually spent reading each day.
+- **Manga mode** for CBZ files with right to left page flow.
 
-What it gives you:
+Books and notes are kept in a local SQLite database. Your annotations move with the file when you back up your library.
 
-- **A proper video player** with 0.5×–2× speed, picture-in-picture, theater mode, auto-resume from where you stopped, auto-play of the next lesson, and subtitles in 9 languages.
-- **Notes tied to timestamps.** Click a note to jump back to the exact second. Markdown and LaTeX supported. Export to Markdown.
-- **Bookmarks** inside any lesson with a single keystroke.
-- **Flashcards with spaced repetition** (SM2 algorithm, the same one Anki uses). Rate each card *Again / Hard / Good / Easy* and Study schedules the next review for you.
-- **Daily streak, goals and a GitHub-style activity heatmap.** A day counts when you watch lessons, review cards, or finish a focus session.
-- **Pomodoro focus timer** with session history.
-- **Unified search** across courses, notes, and flashcards.
-- **Continue-watching** on the home screen.
+---
 
-Repository: [omniget-study](https://github.com/tonhowtf/omniget-study).
+## Where you can download from
 
-### League — a companion for League of Legends
+You paste a link, OmniGet figures out the site, shows a preview with quality options, and downloads the file. That is the whole loop.
 
-League turns OmniGet into a desk-side helper while you play LoL. Nothing runs until you click *Activate* — the plugin loads inert with no connections, no background threads, no listeners.
+| What | Examples |
+|------|----------|
+| Online courses | Hotmart, Udemy, Kiwify, Gumroad, Teachable, Kajabi, Skool, Wondrium, Thinkific, Rocketseat |
+| Video and audio | YouTube, Instagram, TikTok, Twitter / X, Reddit, Twitch, Pinterest, Vimeo, Bluesky, Bilibili |
+| Asian platforms | Douyin (抖音), Xiaohongshu (小红书), Kuaishou (快手), Youku (优酷), iQiyi (爱奇艺), Tencent Video, Mango TV |
+| Books | Anna's Archive (in app search), local files |
+| Files | `.torrent` and magnet links, P2P direct transfer between two computers using a 4 word code |
 
-Once activated, it can:
+If yt-dlp supports a site, OmniGet downloads from it. That covers roughly a thousand sites in total.
 
-- **Auto-accept** queue pops and watch game flow events.
-- **Read champ-select** and show cards for each player: rank, recent games, winrate, warning flags for saved trolls or smurfs.
-- **Install and manage mods** (skins and custom huds) with a single toggle per profile.
-- **Index your replays** (`.rofl` files), run the in-replay camera, and capture clips.
-- **Privacy toggles** for appearing offline, online, or mobile independently of the client.
-- **Inspect the League client traffic** if you're curious about what the LCU is doing.
+## What else is inside
 
-Everything is optional. Sub-modules turn on and off one by one, and two of them (*Privacy* and *Devtools*) never auto-activate even if you enable auto-start.
+Things that are there if you need them, easy to ignore if you don't:
 
-Repository: [omniget-plugin-league](https://github.com/tonhowtf/omniget-plugin-league).
+- **Pomodoro focus timer** that pauses your video player when the session ends.
+- **Spaced repetition flashcards** (SM2, the Anki algorithm), with `.apkg` import and AnkiWeb sync.
+- **Notes app** with bidirectional links between pages, daily journal, knowledge graph and templates.
+- **Progress dashboard** with a streak counter, daily goals, GitHub style heatmap, and weekly minutes.
+- **FFmpeg converter** for local file conversion, no upload to anywhere.
+- **Telegram chat browser** that reads your account and lets you save photos, videos and files from any chat.
+- **Browser extension** (Chrome and Firefox) that hands the current page to OmniGet with one click.
+- **Global hotkey** (`Ctrl+Shift+D`) that downloads whatever URL is in your clipboard.
+- **9 languages**: English, Portuguese, Chinese, Traditional Chinese, Japanese, Italian, French, Greek.
+- **14 themes** including Catppuccin (mocha, macchiato, frappé, latte), Dracula, One Dark Pro, NyxVamp and three e ink variants.
 
-### Misc — a grab bag of useful things
+## How it actually feels
 
-Misc is the plugin where small, useful utilities live. Right now it bundles tools for four sites:
+Copy a link anywhere (a tweet, a Discord message, a tab). Press `Ctrl+Shift+D`. The app downloads in the background. You don't even open the window.
 
-- **GitHub.** Find out who stopped following you, who starred (or unstarred) your repos, see a leaderboard of your biggest fans across all repos, and keep an eye on a specific user's public activity with optional toast notifications.
-- **Instagram.** Download posts, reels, and stories from public profiles by username, hashtag, or location.
-- **SoundCloud.** Download tracks and full playlists, embed cover art and metadata into the audio files, mirror a playlist locally (sync both ways), see your charts and trending tracks, and show what you're listening to in your Discord status.
-- **Telegram account lookup.** Paste a `@username` and get public profile info back: photo, bio, account creation estimate, and a quick readability report of the bio (language, hints at age or city, emoji usage).
+Or paste the link in the omnibox, glance at the preview, click download.
 
-Think of it as the *miscellaneous* drawer. Features land here when they're useful but don't justify a plugin of their own.
+For courses, log in once on the platform, browse your library, pick what you want, walk away. The app handles every lesson and attachment.
 
-Repository: [omniget-social](https://github.com/tonhowtf/omniget-social) (folder name kept for historical reasons — the plugin surface is called *Misc*).
+For books, drop them in a folder you already use, scan once, and they show up with covers in the library.
 
-### Telegram — browse chats and download media
+## Build from source
 
-Open your Telegram account inside OmniGet and pull photos, videos, and files out of any chat. 16 commands, covers the common cases.
-
-Repository: [omniget-plugin-telegram](https://github.com/tonhowtf/omniget-plugin-telegram).
-
-### Convert — local media converter
-
-Thin wrapper around FFmpeg: drag a file in, pick the target format, get the output. Works offline, no upload to anything.
-
-Repository: [omniget-plugin-convert](https://github.com/tonhowtf/omniget-plugin-convert).
-
-### Build your own
-
-Plugins are external Rust crates. If you want to add a site or a workflow, start from the [Plugin SDK](src-tauri/omniget-plugin-sdk/).
-
-## How it works in practice
-
-1. **Paste a link** into the omnibox. Or drag a `.torrent` file, or type a search straight into YouTube.
-2. OmniGet recognizes the site and shows a preview with available qualities.
-3. Hit download. Progress, speed, and ETA update live.
-
-For courses: log in to the platform, browse your library, pick what you want, and download it in one pass.
-
-### Copy. Press. Done.
-
-Copy a link anywhere — Discord, a group chat, a tweet. Press **Ctrl+Shift+D** (or **Cmd+Shift+D** on macOS). OmniGet reads the clipboard and downloads in the background. You don't even need to open the window.
-
-Change the hotkey in **Settings > Downloads > Hotkey**.
-
-### Browser extension
-
-Install the [Chrome extension](browser-extension/chrome/README.md) to skip the copy-paste step. When you land on a page with a video, click the OmniGet icon and the extension hands the URL (and any login cookies the app needs) over directly.
-
-The extension also sniffs video streams on sites OmniGet doesn't officially support. If your browser can play it, OmniGet can usually download it.
-
-## Building from source
-
-For developers. If you just want to use OmniGet, [grab a release](#download).
-
-**Prerequisites:** [Rust](https://rustup.rs/), [Node.js](https://nodejs.org/) 18+, [pnpm](https://pnpm.io/).
+For developers. If you just want to use the app, [grab a release](#get-it).
 
 ```bash
 git clone https://github.com/tonhowtf/omniget.git
@@ -204,8 +156,10 @@ pnpm install
 pnpm tauri dev
 ```
 
+Requires [Rust](https://rustup.rs/), [Node.js](https://nodejs.org/) 18+, [pnpm](https://pnpm.io/).
+
 <details>
-<summary>Linux dependencies</summary>
+<summary>Linux build dependencies</summary>
 
 ```bash
 sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file libxdo-dev libssl-dev libayatana-appindicator3-dev librsvg2-dev patchelf
@@ -213,12 +167,10 @@ sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file lib
 
 </details>
 
-Production build: `pnpm tauri build`.
-
 <details>
-<summary><strong>Windows SmartScreen / macOS Gatekeeper</strong></summary>
+<summary>Windows SmartScreen and macOS Gatekeeper warnings</summary>
 
-**Windows:** SmartScreen may warn you on first run. Click **More info**, then **Run anyway**. This is normal for open-source apps without a paid code-signing certificate.
+**Windows:** SmartScreen may warn you on first run. Click **More info**, then **Run anyway**. Standard for open source apps without a paid code signing certificate.
 
 **macOS:** If Gatekeeper blocks the app, run in Terminal:
 
@@ -229,22 +181,22 @@ codesign --force --deep --sign - /Applications/omniget.app
 
 </details>
 
-## Contributing
+Production build: `pnpm tauri build`.
 
-Found a bug or want a feature? [Open an issue](https://github.com/tonhowtf/omniget/issues). Pull requests are welcome — check [CONTRIBUTING.md](CONTRIBUTING.md) before you start.
+## Contribute
 
-## Translating
+Bug or feature idea? [Open an issue](https://github.com/tonhowtf/omniget/issues). Pull requests welcome, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
-OmniGet ships in 9 languages (English, Portuguese, Chinese, Traditional Chinese, Japanese, Italian, French, Greek) and is hosted on [Weblate](https://hosted.weblate.org/engage/omniget/). Pick a language, translate in the browser, Weblate opens a pull request for you. See [docs/translations.md](docs/translations.md) for details.
+OmniGet is translated on [Weblate](https://hosted.weblate.org/engage/omniget/). Pick a language, translate in your browser, Weblate opens a pull request automatically.
 
 ## Notice to platform owners
 
-If you represent a listed platform and have concerns, email **tonhowtf@gmail.com** from a company address. We'll remove the platform right away.
+If you represent a listed platform and have concerns, email **tonhowtf@gmail.com** from a company address. The platform comes off the list right away.
 
 ## Legal
 
-OmniGet is meant for personal use. Please respect copyright and each platform's terms of service. You're responsible for what you download.
+OmniGet is meant for personal use. Respect copyright and each platform's terms of service. You are responsible for what you download.
 
 ## License
 
-[GPL-3.0](LICENSE). The OmniGet name, logo, and Loop mascot are project trademarks not covered by the code license.
+[GPL-3.0](LICENSE). The OmniGet name, logo and Loop mascot are project trademarks not covered by the code license.
