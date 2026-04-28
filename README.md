@@ -30,17 +30,17 @@ The free, open source desktop app for people who learn from <strong>online cours
   <a href="https://github.com/tonhowtf/omniget/releases/latest"><img src="https://img.shields.io/badge/-Linux-orange.svg?style=for-the-badge&logo=linux&logoColor=white" alt="Download for Linux" /></a>
 </p>
 
-Portable `.exe` on Windows, Flatpak on Linux, and a regular `.dmg` on macOS. No setup. The app keeps its own dependencies up to date in the background.
+Portable `.exe` on Windows, Flatpak on Linux, `.dmg` on macOS. No setup. Updates run in the background.
 
-## What is it for
+## What you can do with it
 
-OmniGet is a downloader that grew up. The downloader half pulls media from the sites you already use. The study half is what makes it different: a real video player and a real book reader, with notes, flashcards and progress tracking, all working on the files you already have on your disk.
+OmniGet started as a downloader. It still does that, but the bigger half is what happens after the download: a video player for course videos, a book reader for PDFs and EPUBs, with notes, flashcards and progress tracking, all working on files that live on your computer.
 
-Three things you can do today:
+Three things to try first:
 
-1. **Download an entire online course** from platforms like Hotmart or Udemy and watch every lesson in OmniGet itself.
-2. **Open a PDF or EPUB** and read it with bookmarks, highlights and a focus mode that hides everything except the page.
-3. **Paste any video link** (YouTube, Instagram, TikTok, and friends) and get an MP4 in a few clicks.
+1. **Download an online course** from Hotmart or Udemy and watch every lesson without leaving the app.
+2. **Open a PDF or EPUB** and read it with bookmarks, highlights and a focus mode.
+3. **Paste a video link** (YouTube, Instagram, TikTok, and friends) and get an MP4.
 
 The rest is small things you discover later. Torrents, P2P file transfer, FFmpeg conversion, a Telegram chat browser, a global hotkey, a browser extension, themes, languages.
 
@@ -48,61 +48,60 @@ The rest is small things you discover later. Torrents, P2P file transfer, FFmpeg
 
 ## Watch courses inside OmniGet
 
-Most course downloaders give you a folder full of files and leave you alone. OmniGet does the download (Hotmart, Udemy, Kiwify, Gumroad, Teachable, Kajabi, Skool, Wondrium, Thinkific, Rocketseat) and then opens them in a built in player that turns the folder into a real learning environment.
+Most course downloaders give you a folder full of files and leave you alone. OmniGet does the download (Hotmart, Udemy, Kiwify, Gumroad, Teachable, Kajabi, Skool, Wondrium, Thinkific, Rocketseat) and then opens them in a built in player that turns the folder into a place you actually study from.
 
-Open the **Library**, scan a folder once, and OmniGet builds a course list with cover art and progress for each course.
+Open the **Library**, point it at a folder, and OmniGet builds a course list with covers and progress.
 
-Inside a lesson you get:
+Inside a lesson:
 
-- **A real video player** with playback speed (0.5× to 2×), keyboard shortcuts, fullscreen, picture in picture, theater mode, autoplay of the next lesson, and a 5 second countdown you can cancel.
-- **Auto resume** at the exact second you stopped, per lesson.
-- **Subtitles** when the course ships them (`.vtt` files), with a built in toggle.
-- **Notes pinned to timestamps**: write a note at minute 12:34, click it later, the player jumps to that second. Markdown supported.
-- **Attachments panel** that lists every PDF, image, text and code file the course came with. Click to preview right next to the video, no second app needed.
-- **Lesson description** rendered cleanly when the course provides one (`description.html`).
-- **Continue watching** widget on the home screen with the last courses you opened.
+- **Video player** with playback speed 0.5× to 2×, keyboard shortcuts, fullscreen, picture in picture, theater mode, and autoplay of the next lesson with a 5 second countdown you can cancel.
+- **Auto resume** at the exact second you stopped.
+- **Subtitles** when the course ships them (`.vtt`).
+- **Notes pinned to timestamps.** Write a note at 12:34, click it later, the player jumps to that second. Markdown supported.
+- **Attachments panel** that previews every PDF, image, text or code file the course included, side by side with the video.
+- **Lesson description**, when the course includes one.
+- **Continue watching** on the home screen, with the last courses you opened.
 
-Around the courses, the **Library** itself has:
+The **Library** itself:
 
 - Tags and collections (group your engineering courses, your design courses).
 - Status filters (not started, in progress, completed) and a search across titles.
-- Health check that finds zero byte videos, missing files and orphan attachments after you move things around on disk.
+- Health check that flags zero byte videos, missing files and orphan attachments.
 
-Everything lives in the OmniGet database. The original folder on disk is never touched, so you can move files, back them up, or open them in VLC anytime.
+Annotations and progress live in a local database. The course folder on disk stays untouched, so you can move it, back it up, or open files in VLC anytime.
 
 ---
 
 ## Read PDFs and EPUBs inside OmniGet
 
-The reader is the part most people don't expect. OmniGet ships a full document reader for **PDF**, **EPUB**, **CBZ**, **TXT** and **HTML**. You don't need Calibre, you don't need Adobe, you don't upload files to a website.
+The reader is the part most people don't expect. OmniGet has a full document reader built in, for **PDF**, **EPUB**, **CBZ**, **TXT** and **HTML**. You don't need Calibre, you don't need Adobe, and nothing is uploaded anywhere.
 
 The library:
 
 - **Auto extracts covers** from PDF, EPUB and CBZ files when you scan a folder.
-- **Search Anna's Archive** from inside the app and download books legally available to you. Configure your own sources and domains.
-- **ISBN metadata enrichment** that fills in title, author, publisher and a high quality cover with one click.
+- **ISBN metadata lookup** that fills in title, author, publisher and a sharp cover.
 - **Filter** by reading status (all, reading, finished, favorites) or by format (PDF, EPUB, TXT, HTML, CBZ).
 - **Sort** by title, author, recently added, or last opened.
 - **Tags and collections** so your library doesn't drown in 500 books.
-- **Multiple library roots**: keep technical PDFs in one folder and fiction EPUBs in another, OmniGet treats them as one library you can filter.
+- **Multiple library roots.** Keep technical PDFs in one folder and fiction EPUBs in another. OmniGet treats them as one library you can filter.
 
 Inside a book:
 
-- **Two reading modes**: paged (book feel) and scroll (web feel). Your choice is remembered per session.
-- **Outline / table of contents** for PDFs and EPUBs, click any entry to jump.
-- **Bookmarks** with one keystroke, with a panel listing all of them.
-- **Highlights** in different colors, with notes attached.
-- **Notes panel** that lives next to the page, written in Markdown.
-- **Search inside the book** with hits highlighted in context.
+- **Two reading modes:** paged (book feel) and scroll (web feel).
+- **Outline / table of contents** for PDFs and EPUBs. Click any entry to jump.
+- **Bookmarks** with one keystroke. A panel lists them all.
+- **Highlights** in different colors, each with its own note.
+- **Notes panel** next to the page, written in Markdown.
+- **Search inside the book** with hits in context.
 - **Zoom** for PDFs (DPI based, sharper than scaling) and **font size + font family** for EPUBs.
-- **Multiple reader themes**: clean white, sepia paper, dark, plus a paper filter that mimics e ink.
+- **Multiple reader themes:** clean white, sepia paper, dark, plus a paper filter that mimics e ink.
 - **Cursor line guide** that follows your mouse, helpful for long lines and dyslexia.
-- **Focus mode** that hides everything except the page, full keyboard navigation, no chrome.
-- **Reading progress** tracked automatically by page or by location, with last opened time.
-- **Reading sessions** logged so you can see how long you actually spent reading each day.
-- **Manga mode** for CBZ files with right to left page flow.
+- **Focus mode** that hides everything except the page. Full keyboard navigation, no chrome.
+- **Reading progress** tracked automatically.
+- **Session timer** that logs how long you actually read each day.
+- **Manga mode** for CBZ files, with right to left page flow.
 
-Books and notes are kept in a local SQLite database. Your annotations move with the file when you back up your library.
+Books and notes live in a local SQLite database. Your annotations travel with the files when you back up your library.
 
 ---
 
@@ -115,7 +114,6 @@ You paste a link, OmniGet figures out the site, shows a preview with quality opt
 | Online courses | Hotmart, Udemy, Kiwify, Gumroad, Teachable, Kajabi, Skool, Wondrium, Thinkific, Rocketseat |
 | Video and audio | YouTube, Instagram, TikTok, Twitter / X, Reddit, Twitch, Pinterest, Vimeo, Bluesky, Bilibili |
 | Asian platforms | Douyin (抖音), Xiaohongshu (小红书), Kuaishou (快手), Youku (优酷), iQiyi (爱奇艺), Tencent Video, Mango TV |
-| Books | Anna's Archive (in app search), local files |
 | Files | `.torrent` and magnet links, P2P direct transfer between two computers using a 4 word code |
 
 If yt-dlp supports a site, OmniGet downloads from it. That covers roughly a thousand sites in total.
@@ -128,11 +126,11 @@ Things that are there if you need them, easy to ignore if you don't:
 - **Spaced repetition flashcards** (SM2, the Anki algorithm), with `.apkg` import and AnkiWeb sync.
 - **Notes app** with bidirectional links between pages, daily journal, knowledge graph and templates.
 - **Progress dashboard** with a streak counter, daily goals, GitHub style heatmap, and weekly minutes.
-- **FFmpeg converter** for local file conversion, no upload to anywhere.
+- **FFmpeg converter** for local file conversion. No internet required.
 - **Telegram chat browser** that reads your account and lets you save photos, videos and files from any chat.
 - **Browser extension** (Chrome and Firefox) that hands the current page to OmniGet with one click.
 - **Global hotkey** (`Ctrl+Shift+D`) that downloads whatever URL is in your clipboard.
-- **9 languages**: English, Portuguese, Chinese, Traditional Chinese, Japanese, Italian, French, Greek.
+- **8 languages:** English, Portuguese, Chinese, Traditional Chinese, Japanese, Italian, French, Greek.
 - **14 themes** including Catppuccin (mocha, macchiato, frappé, latte), Dracula, One Dark Pro, NyxVamp and three e ink variants.
 
 ## How it actually feels
