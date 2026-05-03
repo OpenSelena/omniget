@@ -226,7 +226,7 @@
         >
           {$t("study.read.annas_domains_save")}
         </button>
-        <button type="button" class="ghost-btn" onclick={() => { domainsText = settings.domains.join("\n"); domainsDirty = false; }}>
+        <button type="button" class="ghost-btn" onclick={() => { domainsText = settings?.domains?.join("\n") ?? ""; domainsDirty = false; }}>
           {$t("study.read.annas_domains_revert")}
         </button>
       </div>
