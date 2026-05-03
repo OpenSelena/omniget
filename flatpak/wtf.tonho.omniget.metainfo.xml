@@ -42,6 +42,11 @@
   </branding>
   <content_rating type="oars-1.1" />
   <releases>
+    <release version="0.5.0" date="2026-05-03">
+      <description>
+        <p>Visual restructure: refreshed theme grid, reorganized settings, mascot celebrations with new "amazed" state, and gamified pets. Accessibility: aria-live regions on toasts. Reliability: torrent session shuts down gracefully on app exit, Pinterest regex validated at init. Tooling: single-command version bump, i18n keys auto-generated, multi-OS CI matrix.</p>
+      </description>
+    </release>
     <release version="0.4.2" date="2026-04-14">
       <description>
         <p>Bug fixes and improvements.</p>
