@@ -1,0 +1,16 @@
+{
+  "id": "boxcat",
+  "slug": "boxcat",
+  "displayName": "Boxcat",
+  "description": "A tiny cat tucked inside a cardboard box for cozy coding sessions.",
+  "spritesheetPath": "/pets/boxcat/spritesheet.webp",
+  "petJsonPath": "/pets/boxcat/pet.json",
+  "approvalState": "approved",
+  "kind": "creature",
+  "vibes": ["cozy"],
+  "tags": ["cat", "box", "cozy"],
+  "importedAt": "2026-05-02T06:48:36.441Z",
+  "qa": {
+    "contactSheetPath": "/pets/boxcat/contact-sheet.png"
+  }
+}

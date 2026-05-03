@@ -1,0 +1,16 @@
+{
+  "id": "byte-bunny",
+  "slug": "byte-bunny",
+  "displayName": "Byte Bunny",
+  "description": "A tiny rabbit holding a little keyboard key like a lucky charm.",
+  "spritesheetPath": "/pets/byte-bunny/spritesheet.webp",
+  "petJsonPath": "/pets/byte-bunny/pet.json",
+  "approvalState": "approved",
+  "kind": "creature",
+  "vibes": ["focused"],
+  "tags": ["rabbit", "keyboard", "coding"],
+  "importedAt": "2026-05-02T05:50:43.053Z",
+  "qa": {
+    "contactSheetPath": "/pets/byte-bunny/contact-sheet.png"
+  }
+}

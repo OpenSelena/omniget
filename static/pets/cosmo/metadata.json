@@ -1,0 +1,15 @@
+{
+  "id": "cosmo",
+  "slug": "cosmo",
+  "displayName": "Crafternauta",
+  "description": "A tiny yellow astronaut companion with a black visor face and cheerful expression.",
+  "spritesheetPath": "/pets/cosmo/spritesheet.webp",
+  "petJsonPath": "/pets/cosmo/pet.json",
+  "approvalState": "approved",
+  "featured": true,
+  "kind": "character",
+  "vibes": ["cheerful"],
+  "tags": ["astronaut", "space", "yellow", "cheerful"],
+  "importedAt": "2026-05-02T04:13:44.032Z",
+  "qa": {}
+}

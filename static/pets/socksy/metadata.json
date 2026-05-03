@@ -1,0 +1,25 @@
+{
+  "id": "socksy",
+  "slug": "socksy",
+  "displayName": "Socksy",
+  "description": "A tiny loyal sock elf with oversized ears and gentle green eyes.",
+  "spritesheetPath": "/pets/socksy/spritesheet.webp",
+  "petJsonPath": "/pets/socksy/pet.json",
+  "approvalState": "approved",
+  "kind": "creature",
+  "vibes": [
+    "calm",
+    "focused"
+  ],
+  "tags": [
+    "codex-pet",
+    "elf",
+    "loyal",
+    "magic",
+    "sock"
+  ],
+  "importedAt": "2026-05-02T09:10:09.930Z",
+  "qa": {
+    "contactSheetPath": "/pets/socksy/contact-sheet.png"
+  }
+}

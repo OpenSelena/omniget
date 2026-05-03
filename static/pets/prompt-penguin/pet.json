@@ -1,0 +1,6 @@
+{
+  "id": "prompt-penguin",
+  "displayName": "Prompt Penguin",
+  "description": "A small penguin holding a folded prompt scroll.",
+  "spritesheetPath": "spritesheet.webp"
+}

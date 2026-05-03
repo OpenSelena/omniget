@@ -1,0 +1,16 @@
+{
+  "id": "cash-cuy",
+  "slug": "cash-cuy",
+  "displayName": "Cash Cuy",
+  "description": "A tiny magical guinea pig that brings money luck to your Codex workspace.",
+  "spritesheetPath": "/pets/cash-cuy/spritesheet.webp",
+  "petJsonPath": "/pets/cash-cuy/pet.json",
+  "approvalState": "approved",
+  "kind": "creature",
+  "vibes": ["playful", "cheerful"],
+  "tags": ["codex-pet", "cuy", "money", "magic", "peru"],
+  "importedAt": "2026-05-02T08:11:08.332Z",
+  "qa": {
+    "contactSheetPath": "/pets/cash-cuy/contact-sheet.png"
+  }
+}

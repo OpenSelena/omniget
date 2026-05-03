@@ -1,0 +1,16 @@
+{
+  "id": "nukey",
+  "slug": "nukey",
+  "displayName": "Nukey",
+  "description": "A tiny friendly microwave companion for snack-fueled builds.",
+  "spritesheetPath": "/pets/nukey/spritesheet.webp",
+  "petJsonPath": "/pets/nukey/pet.json",
+  "approvalState": "approved",
+  "kind": "object",
+  "vibes": ["cozy"],
+  "tags": ["object-pet", "snacks", "cozy"],
+  "importedAt": "2026-05-02T06:50:07.952Z",
+  "qa": {
+    "contactSheetPath": "/pets/nukey/contact-sheet.png"
+  }
+}

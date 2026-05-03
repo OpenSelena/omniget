@@ -1,0 +1,16 @@
+{
+  "id": "cache-capy",
+  "slug": "cache-capy",
+  "displayName": "Cache Capy",
+  "description": "A calm capybara carrying a tiny cache box for patient builds.",
+  "spritesheetPath": "/pets/cache-capy/spritesheet.webp",
+  "petJsonPath": "/pets/cache-capy/pet.json",
+  "approvalState": "approved",
+  "kind": "creature",
+  "vibes": ["calm"],
+  "tags": ["capybara", "cache", "calm"],
+  "importedAt": "2026-05-02T06:13:26.116Z",
+  "qa": {
+    "contactSheetPath": "/pets/cache-capy/contact-sheet.png"
+  }
+}

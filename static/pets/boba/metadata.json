@@ -1,0 +1,17 @@
+{
+  "id": "boba",
+  "slug": "boba",
+  "displayName": "Boba",
+  "description": "A tiny otter sipping bubble tea while keeping you company in Codex.",
+  "spritesheetPath": "/pets/boba/spritesheet.webp",
+  "petJsonPath": "/pets/boba/pet.json",
+  "approvalState": "approved",
+  "featured": true,
+  "kind": "creature",
+  "vibes": ["cozy", "playful"],
+  "tags": ["otter", "drink", "cozy"],
+  "importedAt": "2026-05-02T06:48:36.386Z",
+  "qa": {
+    "contactSheetPath": "/pets/boba/contact-sheet.png"
+  }
+}

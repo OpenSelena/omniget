@@ -1,0 +1,16 @@
+{
+  "id": "pixel-panda",
+  "slug": "pixel-panda",
+  "displayName": "Pixel Panda",
+  "description": "A gentle panda holding a tiny pixel brush.",
+  "spritesheetPath": "/pets/pixel-panda/spritesheet.webp",
+  "petJsonPath": "/pets/pixel-panda/pet.json",
+  "approvalState": "approved",
+  "kind": "creature",
+  "vibes": ["playful"],
+  "tags": ["panda", "pixel", "art"],
+  "importedAt": "2026-05-02T06:13:26.163Z",
+  "qa": {
+    "contactSheetPath": "/pets/pixel-panda/contact-sheet.png"
+  }
+}

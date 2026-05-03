@@ -1,0 +1,16 @@
+{
+  "id": "prompt-penguin",
+  "slug": "prompt-penguin",
+  "displayName": "Prompt Penguin",
+  "description": "A small penguin holding a folded prompt scroll.",
+  "spritesheetPath": "/pets/prompt-penguin/spritesheet.webp",
+  "petJsonPath": "/pets/prompt-penguin/pet.json",
+  "approvalState": "approved",
+  "kind": "creature",
+  "vibes": ["focused"],
+  "tags": ["penguin", "prompt", "scroll"],
+  "importedAt": "2026-05-02T06:13:26.208Z",
+  "qa": {
+    "contactSheetPath": "/pets/prompt-penguin/contact-sheet.png"
+  }
+}

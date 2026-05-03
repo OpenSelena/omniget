@@ -1,0 +1,17 @@
+{
+  "id": "scoop",
+  "slug": "scoop",
+  "displayName": "Scoop",
+  "description": "A tiny ice cream cone digital pet with a cheerful face.",
+  "spritesheetPath": "/pets/scoop/spritesheet.webp",
+  "petJsonPath": "/pets/scoop/pet.json",
+  "approvalState": "approved",
+  "featured": true,
+  "kind": "object",
+  "vibes": ["cheerful"],
+  "tags": ["sweet", "object-pet", "cute"],
+  "importedAt": "2026-05-02T06:48:36.531Z",
+  "qa": {
+    "contactSheetPath": "/pets/scoop/contact-sheet.png"
+  }
+}

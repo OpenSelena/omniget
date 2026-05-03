@@ -1,0 +1,17 @@
+{
+  "id": "kebo",
+  "slug": "kebo",
+  "displayName": "Kebo",
+  "description": "A tiny white koala fintech companion with purple accents, black shirt, and cheerful money check-in energy.",
+  "spritesheetPath": "/pets/kebo/spritesheet.webp",
+  "petJsonPath": "/pets/kebo/pet.json",
+  "approvalState": "approved",
+  "featured": true,
+  "kind": "creature",
+  "vibes": ["focused", "cheerful"],
+  "tags": ["koala", "fintech", "purple"],
+  "importedAt": "2026-05-02T04:50:35.397Z",
+  "qa": {
+    "contactSheetPath": "/pets/kebo/contact-sheet.png"
+  }
+}
