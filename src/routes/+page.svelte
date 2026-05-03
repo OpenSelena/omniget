@@ -3,7 +3,6 @@
   import { open } from "@tauri-apps/plugin-dialog";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
-  import Mascot from "$components/mascot/Mascot.svelte";
   import SupportedServices from "$components/services/SupportedServices.svelte";
   import OmniboxInput from "$components/omnibox/OmniboxInput.svelte";
   import DownloadModeSelector from "$components/omnibox/DownloadModeSelector.svelte";
@@ -14,6 +13,8 @@
   import SearchResults from "$components/omnibox/SearchResults.svelte";
   import P2pSendDialog from "$components/p2p/P2pSendDialog.svelte";
   import P2pReceiveDialog from "$components/p2p/P2pReceiveDialog.svelte";
+  import HomeHero from "$components/home/HomeHero.svelte";
+  // Mascot is consumed by HomeHero; keep direct import path live for backward compat if needed
   import { getDownloads } from "$lib/stores/download-store.svelte";
   import { getSettings, updateSettings } from "$lib/stores/settings-store.svelte";
   import { showToast } from "$lib/stores/toast-store.svelte";
@@ -22,6 +23,7 @@
   import { clearPendingExternalPrefill, getPendingExternalPrefill, type ExternalUrlEvent } from "$lib/stores/external-url-store.svelte";
   import { t } from "$lib/i18n";
   import { translateBackendError } from "$lib/error-translate";
+  import { platformDisplayName } from "$lib/platform-display-names";
 
   type PlatformInfo = {
     platform: string;
@@ -109,6 +111,7 @@
   let downloads = $derived(getDownloads());
   let stallTick = $state(0);
   let lastCompletionAt = $state(0);
+  let firstCompletionOfSession = $state(false);
   let completionSeenIds = new Set<string | number>();
 
   $effect(() => {
@@ -116,6 +119,9 @@
       if (item.status === "complete" && !completionSeenIds.has(id)) {
         completionSeenIds.add(id);
         lastCompletionAt = Date.now();
+        if (!firstCompletionOfSession) {
+          firstCompletionOfSession = true;
+        }
         break;
       }
     }
@@ -149,7 +155,9 @@
   let mascotEmotion = $derived.by((): "idle" | "downloading" | "error" | "stalled" | "queue" | "complete" | "amazed" => {
     void stallTick;
 
-    if (lastCompletionAt > 0 && Date.now() - lastCompletionAt < 5000) return "complete";
+    if (lastCompletionAt > 0 && Date.now() - lastCompletionAt < 5000) {
+      return firstCompletionOfSession && completionSeenIds.size === 1 ? "amazed" : "complete";
+    }
 
     if (omniState.kind === "preparing") return "downloading";
     if (omniState.kind === "error") return "error";
@@ -189,7 +197,8 @@
 
   $effect(() => {
     let key: string;
-    if (mascotEmotion === "complete") key = "complete";
+    if (mascotEmotion === "amazed") key = "amazed";
+    else if (mascotEmotion === "complete") key = "complete";
     else if (mascotEmotion === "queue") key = "queue";
     else if (mascotEmotion === "downloading") key = "downloading";
     else if (mascotEmotion === "stalled") key = "stalled";
@@ -329,34 +338,6 @@
     return result;
   }
 
-  const PLATFORM_DISPLAY_NAMES: Record<string, string> = {
-    bilibili: "Bilibili (哔哩哔哩)",
-    douyin: "Douyin (抖音)",
-    kuaishou: "Kuaishou (快手)",
-    xiaohongshu: "Xiaohongshu (小红书)",
-    tencentvideo: "Tencent Video (腾讯视频)",
-    iqiyi: "iQiyi (爱奇艺)",
-    mgtv: "Mango TV (芒果TV)",
-    youku: "Youku (优酷)",
-    youtube: "YouTube",
-    instagram: "Instagram",
-    tiktok: "TikTok",
-    twitter: "Twitter / X",
-    reddit: "Reddit",
-    twitch: "Twitch",
-    pinterest: "Pinterest",
-    bluesky: "Bluesky",
-    telegram: "Telegram",
-    vimeo: "Vimeo",
-    hotmart: "Hotmart",
-    udemy: "Udemy",
-    magnet: "BitTorrent",
-    p2p: "P2P",
-  };
-
-  function platformDisplayName(s: string): string {
-    return PLATFORM_DISPLAY_NAMES[s] || s.charAt(0).toUpperCase() + s.slice(1);
-  }
 
   async function loadFormats() {
     if (loadingFormats) return;
@@ -417,7 +398,7 @@
     const info = omniState.info;
 
     if (info.platform === "hotmart") {
-      goto("/courses/hotmart");
+      goto(`/courses?platform=${encodeURIComponent(info.platform)}`);
       return;
     }
 
@@ -599,7 +580,12 @@
 </script>
 
 <div class="home">
-  <Mascot emotion={mascotEmotion} compact={mascotCompact} bubbleText={bubbleText || undefined} />
+  <HomeHero
+    emotion={mascotEmotion}
+    compact={mascotCompact}
+    bubbleText={bubbleText || undefined}
+    celebrate={mascotEmotion === "amazed"}
+  />
 
   <div class="omnibox-area">
     {#if externalNotice}
@@ -825,17 +811,18 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: calc(100vh - var(--padding) * 4);
-    gap: calc(var(--padding) * 1.5);
+    min-height: calc(100vh - var(--space-7));
+    gap: var(--space-6);
+    padding: var(--space-5) var(--space-3);
   }
 
   .omnibox-area {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--padding);
+    gap: var(--space-3);
     width: 100%;
-    max-width: 560px;
+    max-width: 640px;
   }
 
   .loop-icon {
@@ -1161,36 +1148,49 @@
 
   .quick-actions {
     display: flex;
-    gap: 8px;
-    margin-bottom: var(--padding);
+    gap: var(--space-2);
+    margin-bottom: var(--space-3);
   }
 
   .quick-action-btn {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 14px;
-    font-size: 13px;
-    border: none;
-    border-radius: var(--border-radius);
-    background: var(--button);
-    color: var(--secondary);
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--text-sm);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--text);
     cursor: pointer;
-    box-shadow: var(--button-box-shadow);
-    transition: background 0.15s;
+    transition: background var(--duration-fast) var(--ease-out), transform var(--duration-fast) var(--ease-out);
   }
 
-  .quick-action-btn:hover {
-    background: var(--button-hover);
+  @media (hover: hover) {
+    .quick-action-btn:hover {
+      background: var(--surface-hi);
+      transform: translateY(-1px);
+    }
   }
 
   .quick-action-btn:active {
-    background: var(--button-press);
+    transform: scale(0.98);
+    background: var(--surface-hi);
   }
 
   .quick-action-btn svg {
     opacity: 0.7;
     flex-shrink: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .quick-action-btn {
+      transition: none;
+    }
+    .quick-action-btn:hover,
+    .quick-action-btn:active {
+      transform: none;
+    }
   }
 
   .terms-note {

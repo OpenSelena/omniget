@@ -72,37 +72,32 @@
   let browseError = $state(false);
   let browseFetched = $state(false);
 
-  onMount(async () => {
-    console.log("[marketplace] onMount start");
+  async function refreshPlugins() {
     try {
       plugins = await invoke<PluginInfo[]>("list_plugins");
-      console.log("[marketplace] list_plugins:", JSON.stringify(plugins));
-    } catch (e) {
-      console.error("[marketplace] list_plugins FAILED:", e);
+    } catch {
       plugins = [];
     }
+  }
+
+  onMount(async () => {
+    await refreshPlugins();
     loadingInstalled = false;
 
     if (plugins.length > 0) {
-      console.log("[marketplace] checking updates for", plugins.length, "plugins");
       invoke<UpdateInfo[]>("check_plugin_updates")
         .then((updateList) => {
-          console.log("[marketplace] check_plugin_updates:", JSON.stringify(updateList));
           for (const u of updateList) {
             if (u.has_update) updates[u.id] = u;
           }
         })
-        .catch((e) => {
-          console.error("[marketplace] check_plugin_updates FAILED:", e);
-        });
+        .catch(() => {});
     }
   });
 
   async function loadBrowse() {
-    if (browseFetched) return;
     loadingBrowse = true;
     browseError = false;
-    console.log("[marketplace] fetching registry...");
     try {
       const timeout = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error("timeout")), 15000)
@@ -111,10 +106,8 @@
         invoke<MarketplaceEntry[]>("fetch_marketplace_registry"),
         timeout,
       ]);
-      console.log("[marketplace] registry fetched:", registry.length, "entries", JSON.stringify(registry.map(r => r.id)));
       browseFetched = true;
-    } catch (e) {
-      console.error("[marketplace] fetch_marketplace_registry FAILED:", e);
+    } catch {
       browseError = true;
     }
     loadingBrowse = false;
@@ -128,14 +121,13 @@
   }
 
   async function uninstallPlugin(id: string) {
-    console.log("[marketplace] uninstalling plugin:", id);
     try {
       await invoke("uninstall_plugin", { pluginId: id });
-      console.log("[marketplace] uninstall success:", id);
       plugins = plugins.filter((p) => p.id !== id);
-      window.location.reload();
-    } catch (e) {
-      console.error("[marketplace] uninstall FAILED:", id, e);
+      delete updates[id];
+    } catch (e: any) {
+      const msg = typeof e === "string" ? e : e?.message ?? $t("common.error");
+      showToast("error", msg);
     }
   }
 
@@ -160,7 +152,7 @@
     installingId = id;
     try {
       await invoke("install_plugin_from_registry", { pluginId: id, repo });
-      window.location.reload();
+      await refreshPlugins();
     } catch (e: any) {
       const msg = typeof e === "string" ? e : e?.message ?? "Install failed";
       showToast("error", msg);
@@ -171,13 +163,17 @@
   async function togglePlugin(id: string, enabled: boolean) {
     try {
       await invoke("set_plugin_enabled", { pluginId: id, enabled });
-      window.location.reload();
-    } catch {}
+      const idx = plugins.findIndex((p) => p.id === id);
+      if (idx >= 0) plugins[idx] = { ...plugins[idx], enabled };
+    } catch (e: any) {
+      const msg = typeof e === "string" ? e : e?.message ?? $t("common.error");
+      showToast("error", msg);
+    }
   }
 </script>
 
 <div class="marketplace-page">
-  <h1>{$t("marketplace.title")}</h1>
+  <h1 class="page-title">{$t("marketplace.title")}</h1>
 
   <div class="tabs">
     <button
@@ -204,6 +200,9 @@
     {:else if plugins.length === 0}
       <div class="empty">
         <p>{$t("marketplace.no_plugins")}</p>
+        <button class="btn btn-primary retry-btn" onclick={() => switchTab("browse")}>
+          {$t("marketplace.browse")}
+        </button>
       </div>
     {:else}
       <div class="plugin-list">
@@ -262,14 +261,25 @@
 
   {:else}
     {#if loadingBrowse}
-      <div class="loading">
-        <span class="spinner"></span>
-        <span class="loading-text">{$t("marketplace.browse_loading")}</span>
+      <div class="plugin-list">
+        {#each [0, 1, 2] as i (i)}
+          <div class="plugin-card skeleton">
+            <div class="plugin-header">
+              <div class="plugin-info">
+                <span class="skeleton-line skeleton-line-name"></span>
+                <span class="skeleton-line skeleton-line-meta"></span>
+              </div>
+              <span class="skeleton-line skeleton-line-action"></span>
+            </div>
+            <span class="skeleton-line skeleton-line-desc"></span>
+            <span class="skeleton-line skeleton-line-desc-2"></span>
+          </div>
+        {/each}
       </div>
     {:else if browseError}
       <div class="empty">
         <p>{$t("marketplace.browse_error")}</p>
-        <button class="retry-btn" onclick={loadBrowse}>{$t("marketplace.browse")}</button>
+        <button class="btn btn-secondary retry-btn" onclick={loadBrowse}>{$t("marketplace.browse")}</button>
       </div>
     {:else if registry.length === 0}
       <div class="empty">
@@ -298,7 +308,7 @@
                   <span class="installed-badge">{$t("marketplace.installed_badge")}</span>
                 {:else}
                   <button
-                    class="install-btn"
+                    class="btn btn-primary install-btn"
                     disabled={installingId === entry.id}
                     onclick={() => installPlugin(entry.id, entry.repo)}
                   >
@@ -405,11 +415,6 @@
     animation: spin 0.8s linear infinite;
   }
 
-  .loading-text {
-    font-size: 13px;
-    color: var(--gray);
-  }
-
   @keyframes spin {
     to { transform: rotate(360deg); }
   }
@@ -450,12 +455,66 @@
   }
 
   .plugin-card {
-    background: var(--button-elevated);
-    border-radius: var(--border-radius);
-    padding: calc(var(--padding) * 1.5);
+    background: var(--surface);
+    border-radius: var(--radius-md);
+    box-shadow: var(--elev-1);
+    padding: var(--space-5);
     display: flex;
     flex-direction: column;
-    gap: calc(var(--padding) * 0.75);
+    gap: var(--space-3);
+    transition: transform var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
+  }
+
+  .plugin-card.skeleton {
+    pointer-events: none;
+  }
+
+  .skeleton-line {
+    display: block;
+    height: 12px;
+    border-radius: var(--radius-xs);
+    background: linear-gradient(
+      90deg,
+      var(--surface-mut) 0%,
+      var(--surface-hi) 50%,
+      var(--surface-mut) 100%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s ease-in-out infinite;
+  }
+
+  .skeleton-line-name { width: 40%; height: 16px; margin-bottom: var(--space-1); }
+  .skeleton-line-meta { width: 25%; height: 11px; }
+  .skeleton-line-action { width: 80px; height: 28px; border-radius: var(--radius-sm); }
+  .skeleton-line-desc { width: 92%; height: 11px; margin-top: var(--space-2); }
+  .skeleton-line-desc-2 { width: 60%; height: 11px; }
+
+  @keyframes skeleton-shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton-line {
+      animation: none;
+      background: var(--surface-mut);
+    }
+  }
+
+  @media (hover: hover) {
+    .plugin-card:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--elev-2);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .plugin-card {
+      transition: none;
+    }
+    .plugin-card:hover {
+      transform: none;
+    }
   }
 
   .plugin-header {

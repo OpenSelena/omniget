@@ -42,7 +42,7 @@
       nextSrc = "";
       showCurrent = false;
       transitioning = false;
-    }, 300);
+    }, 200);
   });
 
   function onCurrentLoad() {
@@ -110,7 +110,11 @@
     height: 100px;
     width: auto;
     opacity: 0;
-    transition: opacity 0.3s ease, height 0.2s ease;
+    transform: scale(0.85);
+    transition:
+      opacity var(--duration-base) var(--ease-out),
+      transform var(--duration-bounce) var(--ease-spring),
+      height var(--duration-base) var(--ease-out);
     pointer-events: none;
     user-select: none;
   }
@@ -121,6 +125,7 @@
 
   .mascot-img.visible {
     opacity: 1;
+    transform: scale(1);
   }
 
   .mascot-fallback {
@@ -130,17 +135,18 @@
   }
 
   .mascot-bubble {
-    background: var(--button-elevated);
-    border: 1px solid var(--button-stroke);
-    border-radius: 12px;
-    padding: 6px 14px;
-    font-size: 13px;
-    color: var(--secondary);
-    max-width: 260px;
+    background: var(--surface-hi);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-2) var(--space-4);
+    font-size: var(--text-sm);
+    color: var(--text);
+    max-width: 280px;
     text-align: center;
-    margin-top: 8px;
+    margin-top: var(--space-2);
     position: relative;
-    animation: bubbleFadeIn 200ms ease-out;
+    box-shadow: var(--elev-1);
+    animation: bubbleFadeIn var(--duration-base) var(--ease-out);
   }
 
   .mascot-bubble::before {
@@ -151,12 +157,12 @@
     transform: translateX(-50%);
     width: 12px;
     height: 6px;
-    background: var(--button-elevated);
+    background: var(--surface-hi);
     clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
   }
 
   @keyframes bubbleFadeIn {
-    from { opacity: 0; transform: translateY(4px); }
+    from { opacity: 0; transform: translateY(8px); }
     to { opacity: 1; transform: translateY(0); }
   }
 
@@ -167,7 +173,8 @@
 
     .mascot,
     .mascot-img {
-      transition: none;
+      transition: opacity var(--duration-base) var(--ease-out);
+      transform: none;
     }
   }
 </style>

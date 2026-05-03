@@ -1,0 +1,150 @@
+/*
+ * OmniGet button primitives (5 variants per design-system §4.1).
+ * Apply via class: <button class="btn btn-primary">.
+ * Sizes: btn-sm (28px) / default (36px) / btn-lg (44px).
+ * All variants respect prefers-reduced-motion.
+ */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: 36px;
+  padding: 0 var(--space-4);
+  font-family: inherit;
+  font-size: var(--text-md);
+  font-weight: 600;
+  line-height: 1;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition: background var(--duration-fast) var(--ease-out),
+              transform var(--duration-fast) var(--ease-out),
+              box-shadow var(--duration-fast) var(--ease-out),
+              color var(--duration-fast) var(--ease-out);
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.btn-sm {
+  height: 28px;
+  font-size: var(--text-sm);
+  padding: 0 var(--space-3);
+}
+
+.btn-lg {
+  height: 44px;
+  font-size: var(--text-md);
+  font-weight: 600;
+  padding: 0 var(--space-5);
+}
+
+/* primary — one per surface; the action the user came for */
+.btn-primary {
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: var(--elev-1);
+}
+
+@media (hover: hover) {
+  .btn-primary:hover:not(:disabled) {
+    background: var(--accent-hi);
+    box-shadow: var(--elev-glow);
+  }
+}
+
+.btn-primary:active:not(:disabled) {
+  background: var(--accent-lo);
+}
+
+/* secondary — second-most-important action */
+.btn-secondary {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+
+@media (hover: hover) {
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--surface-hi);
+    transform: translateY(-1px);
+  }
+}
+
+/* ghost — tertiary action, low weight */
+.btn-ghost {
+  background: transparent;
+  color: var(--text-muted);
+}
+
+@media (hover: hover) {
+  .btn-ghost:hover:not(:disabled) {
+    background: var(--surface-mut);
+    color: var(--text);
+  }
+}
+
+/* destructive — delete, cancel-with-loss */
+.btn-destructive {
+  background: var(--surface);
+  color: var(--danger);
+  border-color: color-mix(in srgb, var(--danger) 40%, transparent);
+}
+
+@media (hover: hover) {
+  .btn-destructive:hover:not(:disabled) {
+    background: var(--danger);
+    color: var(--on-status);
+    border-color: var(--danger);
+  }
+}
+
+/* pill — filter chips, tag toggles */
+.btn-pill {
+  height: auto;
+  padding: var(--space-2) var(--space-3);
+  font-size: var(--text-sm);
+  font-weight: 500;
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  color: var(--text-dim);
+  border-color: var(--border);
+}
+
+@media (hover: hover) {
+  .btn-pill:hover:not(:disabled) {
+    background: var(--surface-hi);
+    color: var(--text);
+  }
+}
+
+.btn-pill.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .btn-secondary:hover,
+  .btn:active {
+    transition: background var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
+    transform: none !important;
+  }
+}

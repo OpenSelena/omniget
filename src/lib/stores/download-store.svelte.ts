@@ -1,5 +1,16 @@
 export type DownloadStatus = "queued" | "downloading" | "paused" | "complete" | "error" | "seeding";
 
+export type QueueKind =
+  | "video"
+  | "audio"
+  | "image"
+  | "pdf"
+  | "book"
+  | "webpage"
+  | "telegram_media"
+  | "course_lesson"
+  | "generic";
+
 type BaseItem = {
   id: number;
   name: string;
@@ -8,6 +19,8 @@ type BaseItem = {
   error?: string;
   startedAt: number;
   lastUpdateAt: number;
+  queueKind?: QueueKind;
+  external?: boolean;
 };
 
 export type CourseDownloadItem = BaseItem & {
@@ -225,6 +238,8 @@ type QueueItemInfo = {
   file_size_bytes: number | null;
   file_count: number | null;
   thumbnail_url: string | null;
+  kind?: QueueKind;
+  external?: boolean;
 };
 
 function queueStatusToDownloadStatus(status: { type: string; data?: unknown }): DownloadStatus {
@@ -288,6 +303,8 @@ export function syncQueueState(items: QueueItemInfo[]) {
       filePath: qi.file_path ?? undefined,
       fileCount: qi.file_count ?? undefined,
       thumbnail_url: qi.thumbnail_url,
+      queueKind: qi.kind,
+      external: qi.external,
     });
 
     if (dlStatus === "downloading" || dlStatus === "seeding") {

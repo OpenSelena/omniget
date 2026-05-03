@@ -1,12 +1,85 @@
+@import './lib/style/buttons.css';
+@import './lib/style/settings.css';
+@import '@fontsource-variable/bricolage-grotesque';
+@import '@fontsource/inter/400.css';
+@import '@fontsource/inter/500.css';
+@import '@fontsource/inter/600.css';
 @import '@fontsource/dm-sans/400.css';
 @import '@fontsource/dm-sans/500.css';
 @import '@fontsource/dm-sans/600.css';
 @import '@fontsource/ibm-plex-mono/400.css';
 @import '@fontsource/ibm-plex-mono/500.css';
 
+/*
+ * OmniGet design tokens.
+ * Source of truth: docs/design-system.md.
+ *
+ * Spacing/type/radius/elevation/motion are global (don't change per theme).
+ * Colors override per [data-theme="..."] block.
+ * Legacy aliases (--padding, --border-radius, --button*, --primary, etc.)
+ * remain functional pointing at the new tokens; they go away one PR at a time.
+ */
+
 :root {
-  --padding: 10px;
-  --border-radius: 11px;
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+
+  --text-xs: 12px;       --leading-xs: 1.45;
+  --text-sm: 13px;       --leading-sm: 1.5;
+  --text-base: 14px;     --leading-base: 1.55;
+  --text-md: 15px;       --leading-md: 1.5;
+  --text-lg: 17px;       --leading-lg: 1.4;
+  --text-xl: 20px;       --leading-xl: 1.35;
+  --text-2xl: 26px;      --leading-2xl: 1.25;
+  --text-3xl: 34px;      --leading-3xl: 1.15;
+  --text-display: 48px;  --leading-display: 1.05;
+
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-full: 9999px;
+
+  --elev-0: none;
+  --elev-1:
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.04);
+  --elev-2:
+    0 4px 12px rgba(0, 0, 0, 0.45),
+    0 1px 2px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.06);
+  --elev-3:
+    0 24px 48px rgba(0, 0, 0, 0.55),
+    0 8px 16px rgba(0, 0, 0, 0.4),
+    0 0 0 1px rgba(255, 255, 255, 0.08);
+  --elev-glow:
+    0 0 0 1px var(--accent),
+    0 4px 16px var(--accent-glow),
+    0 0 24px var(--accent-glow);
+
+  --duration-fast: 120ms;
+  --duration-base: 200ms;
+  --duration-slow: 320ms;
+  --duration-bounce: 480ms;
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  --font-display: 'Bricolage Grotesque Variable', 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Inter', 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'DejaVu Sans Mono', 'Liberation Mono', 'Noto Sans Mono', 'Ubuntu Mono', 'Courier New', monospace;
+  --font-system: var(--font-body);
+
+  --padding: var(--space-3);
+  --border-radius: var(--radius-sm);
   --sidebar-width: 80px;
   --bottom-nav-height: 44px;
   --mobile-nav-clearance: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom, 0px) + var(--padding));
@@ -15,17 +88,365 @@
   --safe-area-bottom: env(safe-area-inset-bottom, 0px);
   --safe-area-left: env(safe-area-inset-left, 0px);
 
-  --font-system: 'DM Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: 'IBM Plex Mono', 'DejaVu Sans Mono', 'Liberation Mono', 'Noto Sans Mono', 'Ubuntu Mono', 'Courier New', monospace;
-
-  font-family: var(--font-system);
-  font-size: 16px;
-  line-height: 1.5;
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
   font-weight: 400;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "ss01", "cv11";
+}
+
+[data-display],
+.display {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}
+
+[data-surface="notes"] {
+  --font-display: var(--font-body);
+  --leading-base: 1.65;
+}
+[data-surface="notes"] .tiptap {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-base);
+  color: var(--text);
+}
+[data-surface="notes"] .tiptap > * + * {
+  margin-top: var(--space-2);
+}
+[data-surface="notes"] .tiptap h1 {
+  font-family: var(--font-body);
+  font-size: var(--text-2xl);
+  line-height: var(--leading-2xl);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-top: var(--space-5);
+}
+[data-surface="notes"] .tiptap h2 {
+  font-family: var(--font-body);
+  font-size: var(--text-xl);
+  line-height: var(--leading-xl);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-top: var(--space-4);
+}
+[data-surface="notes"] .tiptap h3 {
+  font-family: var(--font-body);
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+  font-weight: 600;
+  margin-top: var(--space-3);
+}
+[data-surface="notes"] .tiptap p {
+  margin: 0;
+}
+[data-surface="notes"] .tiptap ul,
+[data-surface="notes"] .tiptap ol {
+  padding-left: var(--space-5);
+  margin: 0;
+}
+[data-surface="notes"] .tiptap blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: var(--space-3);
+  color: var(--secondary);
+  margin: 0;
+}
+[data-surface="notes"] .tiptap pre {
+  background: color-mix(in oklab, var(--input-border) 30%, transparent);
+  border-radius: var(--border-radius);
+  padding: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  overflow-x: auto;
+  margin: 0;
+}
+[data-surface="notes"] .tiptap code {
+  background: color-mix(in oklab, var(--accent) 8%, transparent);
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.95em;
+}
+[data-surface="notes"] .tiptap pre code {
+  background: transparent;
+  padding: 0;
+  font-size: inherit;
+}
+[data-surface="notes"] .tiptap hr {
+  border: 0;
+  border-top: 1px solid var(--input-border);
+  margin: var(--space-4) 0;
+}
+[data-surface="notes"] .tiptap ul[data-type="taskList"] {
+  list-style: none;
+  padding-left: 0;
+}
+[data-surface="notes"] .tiptap ul[data-type="taskList"] li {
+  display: flex;
+  gap: var(--space-2);
+  align-items: baseline;
+}
+[data-surface="notes"] .tiptap ul[data-type="taskList"] li > label {
+  flex: 0 0 auto;
+}
+[data-surface="notes"] .tiptap ul[data-type="taskList"] li > div {
+  flex: 1 1 auto;
+}
+[data-surface="notes"] .tiptap:focus-visible {
+  outline: none;
+}
+[data-surface="notes"] .tiptap p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--tertiary);
+  pointer-events: none;
+  float: left;
+  height: 0;
+}
+[data-surface="notes"] .tiptap h4 {
+  font-family: var(--font-body);
+  font-size: var(--text-md);
+  font-weight: 600;
+  margin-top: var(--space-3);
+}
+[data-surface="notes"] .tiptap h5 {
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  font-weight: 600;
+  margin-top: var(--space-2);
+}
+[data-surface="notes"] .tiptap h6 {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--secondary);
+  margin-top: var(--space-2);
+}
+[data-surface="notes"] .tiptap img {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--border-radius);
+  display: block;
+}
+[data-surface="notes"] .tiptap .tiptap-table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+  overflow: hidden;
+  margin: 0;
+}
+[data-surface="notes"] .tiptap .tiptap-table th,
+[data-surface="notes"] .tiptap .tiptap-table td {
+  border: 1px solid var(--input-border);
+  padding: var(--space-2);
+  vertical-align: top;
+  position: relative;
+  min-width: 1em;
+}
+[data-surface="notes"] .tiptap .tiptap-table th {
+  background: color-mix(in oklab, var(--input-border) 30%, transparent);
+  font-weight: 600;
+  text-align: left;
+}
+[data-surface="notes"] .tiptap .tiptap-callout {
+  display: flex;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  border-radius: var(--border-radius);
+  border-left: 3px solid;
+  background: color-mix(in oklab, var(--accent) 6%, transparent);
+  margin: 0;
+}
+[data-surface="notes"] .tiptap .tiptap-callout[data-callout-kind="note"] {
+  border-left-color: var(--accent);
+}
+[data-surface="notes"] .tiptap .tiptap-callout[data-callout-kind="tip"] {
+  border-left-color: var(--success, #2ecc71);
+  background: color-mix(in oklab, var(--success, #2ecc71) 8%, transparent);
+}
+[data-surface="notes"] .tiptap .tiptap-callout[data-callout-kind="important"] {
+  border-left-color: var(--accent);
+  background: color-mix(in oklab, var(--accent) 12%, transparent);
+}
+[data-surface="notes"] .tiptap .tiptap-callout[data-callout-kind="warning"] {
+  border-left-color: var(--warning, #e67e22);
+  background: color-mix(in oklab, var(--warning, #e67e22) 8%, transparent);
+}
+[data-surface="notes"] .tiptap .tiptap-callout[data-callout-kind="caution"] {
+  border-left-color: var(--error, #e74c3c);
+  background: color-mix(in oklab, var(--error, #e74c3c) 8%, transparent);
+}
+[data-surface="notes"] .tiptap .tiptap-callout-icon {
+  flex: 0 0 auto;
+  font-size: var(--text-lg);
+  user-select: none;
+}
+[data-surface="notes"] .tiptap .tiptap-callout-body {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+[data-surface="notes"] .tiptap .tiptap-callout-body > * + * {
+  margin-top: var(--space-2);
+}
+[data-surface="notes"] .tiptap .Tiptap-mathematics-render {
+  display: inline-block;
+  padding: 0 var(--space-1);
+}
+[data-surface="notes"] .tiptap .Tiptap-mathematics-editor {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  background: color-mix(in oklab, var(--input-border) 30%, transparent);
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+[data-surface="notes"] .tiptap .tiptap-page-mention {
+  display: inline-block;
+  padding: 0 4px;
+  background: color-mix(in oklab, var(--accent) 14%, transparent);
+  color: var(--accent);
+  border-radius: 4px;
+  font-size: 0.95em;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+[data-surface="notes"] .tiptap .tiptap-page-mention:hover {
+  background: color-mix(in oklab, var(--accent) 24%, transparent);
+}
+[data-surface="notes"] .tiptap .tiptap-page-mention::before {
+  content: "[[";
+  opacity: 0.4;
+  margin-right: 2px;
+}
+[data-surface="notes"] .tiptap .tiptap-page-mention::after {
+  content: "]]";
+  opacity: 0.4;
+  margin-left: 2px;
+}
+[data-surface="notes"] .tiptap .tiptap-tag-mention {
+  display: inline-block;
+  padding: 0 4px;
+  background: color-mix(in oklab, var(--secondary) 14%, transparent);
+  color: var(--secondary);
+  border-radius: 999px;
+  font-size: 0.9em;
+  font-weight: 500;
+  cursor: pointer;
+}
+[data-surface="notes"] .tiptap .tiptap-tag-mention::before {
+  content: "#";
+  opacity: 0.6;
+  margin-right: 1px;
+}
+[data-surface="notes"] .tiptap .tiptap-query-block {
+  margin: var(--space-2) 0;
+  user-select: none;
+}
+[data-surface="notes"] .tiptap .tiptap-query-block.ProseMirror-selectednode {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--border-radius);
+}
+[data-surface="notes"] .tiptap .tiptap-embed-block {
+  margin: var(--space-2) 0;
+  user-select: none;
+}
+[data-surface="notes"] .tiptap .tiptap-embed-block.ProseMirror-selectednode {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: var(--border-radius);
+}
+
+.page-title {
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  line-height: var(--leading-3xl);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin: 0 0 var(--space-5) 0;
+}
+
+.section-title {
+  font-family: var(--font-display);
+  font-size: var(--text-lg);
+  line-height: var(--leading-lg);
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  text-transform: none;
+  margin: 0 0 var(--space-3) 0;
+}
+
+.eyebrow {
+  font-family: var(--font-body);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: var(--space-2);
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+/*
+ * Semantic token system (18 tokens, intended path-forward).
+ * Each per-theme block below still defines the legacy concrete tokens
+ * (--primary, --secondary, --button, etc.) for backwards compatibility.
+ * The semantic tokens below alias them and survive theme switches.
+ *
+ *   surface roles:   --bg, --surface, --surface-hi
+ *   text levels:     --text, --text-muted, --text-dim
+ *   lines:           --border, --focus-ring (theme-defined)
+ *   brand & cta:     --accent, --on-accent, --cta, --on-cta
+ *   status:          --info, --success, --warning, --danger, --on-status
+ *
+ * Interaction states are computed at the call site, NOT stored:
+ *   :hover  -> color-mix(in srgb, var(--surface) 92%, var(--bg-overlay))
+ *   :active -> color-mix(in srgb, var(--surface) 86%, var(--bg-overlay))
+ * --bg-overlay is white in dark themes, black in light themes.
+ */
+
+:root {
+  --bg-overlay: white;
+}
+
+:root, [data-theme] {
+  --bg: var(--primary);
+  --surface: var(--button);
+  --surface-hi: var(--button-elevated);
+  --surface-mut: color-mix(in srgb, var(--button) 70%, var(--primary));
+  --text: var(--secondary);
+  --text-muted: color-mix(in srgb, var(--secondary) 65%, var(--tertiary));
+  --text-dim: var(--tertiary);
+  --border: var(--content-border);
+  --border-hi: color-mix(in srgb, var(--secondary) 14%, transparent);
+  --accent-hi: color-mix(in srgb, var(--accent) 88%, white);
+  --accent-lo: color-mix(in srgb, var(--accent) 88%, black);
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, transparent);
+  --accent-glow: color-mix(in srgb, var(--accent) 25%, transparent);
+  --info: var(--cta);
+  --danger: var(--error);
+  --on-status: #ffffff;
+  --on-warning: #1a1a1a;
+}
+
+[data-theme="light"],
+[data-theme="catppuccin-latte"],
+[data-theme="eink-day"],
+[data-theme="eink-sepia"],
+[data-theme="nyxvamp-radiance"] {
+  --bg-overlay: black;
 }
 
 :root, [data-theme="dark"] {
@@ -89,7 +510,7 @@
   color-scheme: light;
   --primary: #fafafa;
   --secondary: #1a1a1a;
-  --tertiary: #6b6b6b;
+  --tertiary: #595959;
 
   --accent: #E05500;
   --success: #1a7a3a;
@@ -238,7 +659,7 @@
   color-scheme: dark;
   --primary: #303446;
   --secondary: #c6d0f5;
-  --tertiary: #a5adce;
+  --tertiary: #c3cdf1;
   --accent: #8caaee;
   --success: #a6d189;
   --error: #e78284;
@@ -284,7 +705,7 @@
   color-scheme: light;
   --primary: #eff1f5;
   --secondary: #4c4f69;
-  --tertiary: #6c6f85;
+  --tertiary: #3e4159;
   --accent: #1e66f5;
   --success: #40a02b;
   --error: #d20f39;
@@ -330,7 +751,7 @@
   color-scheme: dark;
   --primary: #282c34;
   --secondary: #abb2bf;
-  --tertiary: #7f849c;
+  --tertiary: #a9b0bd;
   --accent: #61afef;
   --success: #98c379;
   --error: #e06c75;
@@ -376,7 +797,7 @@
   color-scheme: dark;
   --primary: #22212C;
   --secondary: #F8F8F2;
-  --tertiary: #7970A9;
+  --tertiary: #b6b1cc;
   --accent: #9580FF;
   --success: #8AFF80;
   --error: #FF9580;
@@ -422,7 +843,7 @@
   color-scheme: dark;
   --primary: #1E1E2E;
   --secondary: #D9E0EE;
-  --tertiary: #6E6A86;
+  --tertiary: #9594ab;
   --accent: #F5C2E7;
   --success: #ABE9B3;
   --error: #E78284;
@@ -468,7 +889,7 @@
   color-scheme: dark;
   --primary: #000A0F;
   --secondary: #C0C0CE;
-  --tertiary: #5E5A76;
+  --tertiary: #87859b;
   --accent: #F5C2E7;
   --success: #8FBF8F;
   --error: #D78284;
@@ -550,6 +971,144 @@
   --cta-hover: #6B46C1;
   --cta-press: #5A3AAF;
   --on-cta: #F7F7FF;
+  --focus-ring: solid 2px var(--accent);
+  --focus-ring-offset: 2px;
+  color: var(--secondary);
+  background-color: var(--primary);
+}
+
+[data-theme="eink-day"] {
+  color-scheme: light;
+  --primary: #f5f2ea;
+  --secondary: #1d1d1b;
+  --tertiary: #5c5a56;
+  --accent: #2b2b28;
+  --success: #3d6e3d;
+  --error: #8a2a2a;
+  --warning: #8a5a1d;
+  --button: #ebe5d7;
+  --button-hover: #dfd6c2;
+  --button-press: #d1c8ae;
+  --button-text: var(--secondary);
+  --button-stroke: rgba(29, 29, 27, 0.15);
+  --button-box-shadow: 0 0 0 1px var(--button-stroke) inset;
+  --button-elevated: #ebe5d7;
+  --button-elevated-hover: #dfd6c2;
+  --button-elevated-press: #d1c8ae;
+  --sidebar-bg: #ebe5d7;
+  --sidebar-highlight: #dfd6c2;
+  --content-border: rgba(29, 29, 27, 0.14);
+  --input-border: #c8bfa7;
+  --input-bg: #ebe5d7;
+  --popup-bg: #f5f2ea;
+  --dialog-backdrop: rgba(29, 29, 27, 0.35);
+  --on-primary: var(--secondary);
+  --on-accent: #f5f2ea;
+  --on-success: #f5f2ea;
+  --on-error: #f5f2ea;
+  --on-button: var(--secondary);
+  --on-button-elevated: var(--secondary);
+  --blue: #2b2b28;
+  --red: #8a2a2a;
+  --green: #3d6e3d;
+  --orange: #8a5a1d;
+  --gray: var(--tertiary);
+  --cta: #2b2b28;
+  --cta-hover: #1d1d1b;
+  --cta-press: #141412;
+  --on-cta: #f5f2ea;
+  --focus-ring: solid 2px var(--accent);
+  --focus-ring-offset: 2px;
+  color: var(--secondary);
+  background-color: var(--primary);
+}
+
+[data-theme="eink-sepia"] {
+  color-scheme: light;
+  --primary: #f0e6d2;
+  --secondary: #3f2e20;
+  --tertiary: #6e5440;
+  --accent: #7a4a22;
+  --success: #3d6e3d;
+  --error: #8a2a2a;
+  --warning: #8a5a1d;
+  --button: #e6dcc3;
+  --button-hover: #dccca8;
+  --button-press: #c9b98d;
+  --button-text: var(--secondary);
+  --button-stroke: rgba(63, 46, 32, 0.15);
+  --button-box-shadow: 0 0 0 1px var(--button-stroke) inset;
+  --button-elevated: #e6dcc3;
+  --button-elevated-hover: #dccca8;
+  --button-elevated-press: #c9b98d;
+  --sidebar-bg: #e6dcc3;
+  --sidebar-highlight: #dccca8;
+  --content-border: rgba(63, 46, 32, 0.14);
+  --input-border: #c6b993;
+  --input-bg: #e6dcc3;
+  --popup-bg: #f0e6d2;
+  --dialog-backdrop: rgba(63, 46, 32, 0.35);
+  --on-primary: var(--secondary);
+  --on-accent: #f0e6d2;
+  --on-success: #f0e6d2;
+  --on-error: #f0e6d2;
+  --on-button: var(--secondary);
+  --on-button-elevated: var(--secondary);
+  --blue: #7a4a22;
+  --red: #8a2a2a;
+  --green: #3d6e3d;
+  --orange: #8a5a1d;
+  --gray: var(--tertiary);
+  --cta: #7a4a22;
+  --cta-hover: #5b3418;
+  --cta-press: #452710;
+  --on-cta: #f0e6d2;
+  --focus-ring: solid 2px var(--accent);
+  --focus-ring-offset: 2px;
+  color: var(--secondary);
+  background-color: var(--primary);
+}
+
+[data-theme="eink-night"] {
+  color-scheme: dark;
+  --primary: #0a0a0a;
+  --secondary: #d4d4d0;
+  --tertiary: #8e8e88;
+  --accent: #b0b0ab;
+  --success: #7eaa7e;
+  --error: #c96060;
+  --warning: #d0a060;
+  --button: #121212;
+  --button-hover: #1c1c1c;
+  --button-press: #262626;
+  --button-text: var(--secondary);
+  --button-stroke: rgba(212, 212, 208, 0.10);
+  --button-box-shadow: 0 0 0 1px var(--button-stroke) inset;
+  --button-elevated: #121212;
+  --button-elevated-hover: #1c1c1c;
+  --button-elevated-press: #262626;
+  --sidebar-bg: #121212;
+  --sidebar-highlight: #1c1c1c;
+  --content-border: rgba(212, 212, 208, 0.10);
+  --input-border: #2c2c2c;
+  --input-bg: #121212;
+  --popup-bg: #121212;
+  --dialog-backdrop: rgba(0, 0, 0, 0.6);
+  --on-primary: var(--secondary);
+  --on-accent: #0a0a0a;
+  --on-success: #0a0a0a;
+  --on-error: #0a0a0a;
+  --on-button: var(--secondary);
+  --on-button-elevated: var(--secondary);
+  --blue: #b0b0ab;
+  --red: #c96060;
+  --green: #7eaa7e;
+  --orange: #d0a060;
+  --gray: var(--tertiary);
+  --cta: #d4d4d0;
+  --cta-hover: #c0c0bc;
+  --cta-press: #a8a8a4;
+  --on-cta: #0a0a0a;
   --focus-ring: solid 2px var(--accent);
   --focus-ring-offset: 2px;
   color: var(--secondary);
@@ -679,3 +1238,39 @@ img, svg {
 .button:disabled {
   cursor: default;
 }
+
+/* Hide WebView2 / Edge / Chromium native video controls (we use custom UI in PlayerShell). */
+video::-webkit-media-controls,
+video::-webkit-media-controls-enclosure,
+video::-webkit-media-controls-overlay-enclosure,
+video::-webkit-media-controls-panel,
+video::-webkit-media-controls-loading-panel,
+video::-webkit-media-controls-overlay-play-button,
+video::-webkit-media-controls-overlay-cast-button,
+video::-webkit-media-controls-play-button,
+video::-webkit-media-controls-pause-button,
+video::-webkit-media-controls-start-playback-button,
+video::-webkit-media-controls-fullscreen-button,
+video::-webkit-media-controls-picture-in-picture-button,
+video::-webkit-media-controls-volume-slider,
+video::-webkit-media-controls-mute-button,
+video::-webkit-media-controls-timeline,
+video::-webkit-media-controls-current-time-display,
+video::-webkit-media-controls-time-remaining-display,
+video::-internal-media-controls-overlay-cast-button,
+video::-internal-media-controls-button-panel-spacer {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+  pointer-events: none !important;
+}
+
+video {
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+}
+

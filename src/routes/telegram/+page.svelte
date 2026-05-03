@@ -7,6 +7,14 @@
   import { getSettings } from "$lib/stores/settings-store.svelte";
   import { onBatchFileStatus, type BatchFileStatusPayload } from "$lib/stores/download-listener";
   import ContextHint from "$components/hints/ContextHint.svelte";
+  import TelegramChannelDrawer from "$lib/study-components/TelegramChannelDrawer.svelte";
+  import TelegramPerfPanel from "$lib/study-components/TelegramPerfPanel.svelte";
+  import TelegramGlobalSearchModal from "$lib/study-components/TelegramGlobalSearchModal.svelte";
+  import TelegramTransferPanel from "$lib/study-components/TelegramTransferPanel.svelte";
+  import TelegramCloneWizard from "$lib/study-components/TelegramCloneWizard.svelte";
+  import TelegramAccountPanel from "$lib/study-components/TelegramAccountPanel.svelte";
+  import TelegramSyncIndicator from "$lib/study-components/TelegramSyncIndicator.svelte";
+  import { telegramCreateFolder, isOmnigetFolder, type TelegramGlobalSearchHit } from "$lib/study-telegram-bridge";
   import { onMount } from "svelte";
   import { t } from "$lib/i18n";
 
@@ -83,23 +91,151 @@
 
   let chatPhotos: Map<number, string> = $state(new Map());
   let thumbnails: Map<number, string> = $state(new Map());
+
+  let drawerOpen = $state(false);
+  let drawerChat: TelegramChat | null = $state(null);
+  let perfPanelOpen = $state(false);
+
+  type ChatViewMode = "all" | "drive";
+  let chatViewMode = $state<ChatViewMode>("all");
+  let createFolderOpen = $state(false);
+  let createFolderName = $state("");
+  let createFolderBusy = $state(false);
+  let createFolderError = $state("");
+  let globalSearchOpen = $state(false);
+
+  type TransferRecord = {
+    id: number;
+    fileName: string;
+    sizeBytes?: number;
+    percent: number;
+    status: "downloading" | "done" | "error";
+    error?: string;
+    completedAt?: number;
+    path?: string;
+  };
+  const TRANSFER_HISTORY_KEY = "tg-transfer-history";
+  let transferHistory = $state<TransferRecord[]>(loadHistoryFromStorage());
+  let transferPanelOpen = $state(false);
+
+  function loadHistoryFromStorage(): TransferRecord[] {
+    if (typeof localStorage === "undefined") return [];
+    try {
+      const raw = localStorage.getItem(TRANSFER_HISTORY_KEY);
+      if (!raw) return [];
+      const arr = JSON.parse(raw);
+      if (!Array.isArray(arr)) return [];
+      return arr.slice(0, 50);
+    } catch {
+      return [];
+    }
+  }
+
+  function saveHistoryToStorage(list: TransferRecord[]) {
+    if (typeof localStorage === "undefined") return;
+    try {
+      localStorage.setItem(TRANSFER_HISTORY_KEY, JSON.stringify(list.slice(0, 50)));
+    } catch {
+      /* noop */
+    }
+  }
+
+  function pushHistory(rec: TransferRecord) {
+    transferHistory = [rec, ...transferHistory].slice(0, 50);
+    saveHistoryToStorage(transferHistory);
+  }
+
+  function clearTransferHistory() {
+    transferHistory = [];
+    saveHistoryToStorage(transferHistory);
+  }
+
+  let activeTransfers = $derived<TransferRecord[]>(
+    [...downloadingIds].map((mid) => {
+      const item = mediaItems.find((m) => m.message_id === mid);
+      return {
+        id: mid,
+        fileName: item?.file_name ?? `Mensagem ${mid}`,
+        sizeBytes: item?.file_size,
+        percent: downloadProgress.get(mid) ?? 0,
+        status: "downloading" as const,
+      };
+    })
+  );
+
+  let activeTransferCount = $derived(activeTransfers.length);
+  let cloneWizardOpen = $state(false);
+  let accountPanelOpen = $state(false);
+
+  function onGlobalSearchPick(hit: TelegramGlobalSearchHit) {
+    const existing = chats.find((c) => c.id === hit.chat_id);
+    if (existing) {
+      selectChat(existing);
+    } else {
+      selectChat({
+        id: hit.chat_id,
+        title: hit.chat_title,
+        chat_type: hit.chat_type,
+      } as TelegramChat);
+    }
+  }
+
+  function openDrawer(chat: TelegramChat, e: Event) {
+    e.stopPropagation();
+    drawerChat = chat;
+    drawerOpen = true;
+  }
+
+  function onChatRemoved(removedId: number) {
+    chats = chats.filter((c) => c.id !== removedId);
+    if (selectedChat?.id === removedId) {
+      backToChats();
+    }
+  }
+
   let thumbGeneration = 0;
   let thumbActive = 0;
   const THUMB_MAX_CONCURRENT = 5;
   const thumbQueue: (() => void)[] = [];
 
   let filteredChats = $derived(
-    chatSearch.trim()
-      ? chats.filter((c) =>
-          c.title.toLowerCase().includes(chatSearch.trim().toLowerCase())
-        )
-      : chats
+    (() => {
+      let base = chats;
+      if (chatViewMode === "drive") {
+        base = base.filter((c) => isOmnigetFolder(c as any));
+      }
+      const q = chatSearch.trim().toLowerCase();
+      if (q) base = base.filter((c) => c.title.toLowerCase().includes(q));
+      return base;
+    })()
   );
+
+  async function commitCreateFolder() {
+    const name = createFolderName.trim();
+    if (!name || createFolderBusy) return;
+    createFolderBusy = true;
+    createFolderError = "";
+    try {
+      const folder = await telegramCreateFolder(name);
+      chats = [folder as any, ...chats];
+      chatViewMode = "drive";
+      createFolderOpen = false;
+      createFolderName = "";
+    } catch (e: any) {
+      createFolderError = typeof e === "string" ? e : (e?.message ?? "Erro ao criar pasta");
+    } finally {
+      createFolderBusy = false;
+    }
+  }
 
   function handleKeydown(e: KeyboardEvent) {
     if ((e.ctrlKey || e.metaKey) && e.key === "f" && view === "media" && searchInputRef) {
       e.preventDefault();
       searchInputRef.focus();
+    }
+    if ((e.ctrlKey || e.metaKey) && e.key === "k") {
+      e.preventDefault();
+      globalSearchOpen = true;
     }
   }
 
@@ -170,6 +306,17 @@
       downloadIdToMessageId = new Map(downloadIdToMessageId);
       downloadProgress.delete(msgId);
       downloadProgress = new Map(downloadProgress);
+
+      pushHistory({
+        id: msgId,
+        fileName: d.title,
+        sizeBytes: d.file_size_bytes ?? undefined,
+        percent: 100,
+        status: d.success ? "done" : "error",
+        error: d.error ?? undefined,
+        completedAt: Date.now(),
+        path: d.file_path ?? undefined,
+      });
 
       if (d.success) {
         showToast("success", $t("toast.download_complete", { name: d.title }));
@@ -631,6 +778,26 @@
     }
   }
 
+  let pendingThumbs: Array<[number, string]> = [];
+  let pendingThumbFlushScheduled = false;
+
+  function flushPendingThumbs() {
+    pendingThumbFlushScheduled = false;
+    if (pendingThumbs.length === 0) return;
+    const next = new Map(thumbnails);
+    for (const [id, t] of pendingThumbs) {
+      next.set(id, t);
+    }
+    pendingThumbs = [];
+    thumbnails = next;
+  }
+
+  function scheduleThumbFlush() {
+    if (pendingThumbFlushScheduled) return;
+    pendingThumbFlushScheduled = true;
+    requestAnimationFrame(flushPendingThumbs);
+  }
+
   async function getThumbnail(chatId: number, chatType: string, messageId: number): Promise<string | null> {
     if (thumbnails.has(messageId)) return thumbnails.get(messageId)!;
 
@@ -643,8 +810,8 @@
       const result = await pluginInvoke<string>("telegram", "telegram_get_thumbnail", { chatId, chatType, messageId });
       if (gen !== thumbGeneration) return null;
 
-      thumbnails.set(messageId, result);
-      thumbnails = new Map(thumbnails);
+      pendingThumbs.push([messageId, result]);
+      scheduleThumbFlush();
       return result;
     } catch {
       return null;
@@ -659,13 +826,60 @@
     thumbQueue.length = 0;
   }
 
+  const CHAT_PHOTO_MAX_CONCURRENT = 4;
+  let chatPhotoActive = 0;
+  const chatPhotoQueue: (() => void)[] = [];
+  let pendingPhotos: Array<[number, string]> = [];
+  let pendingPhotoFlushScheduled = false;
+
+  function chatPhotoAcquire(): Promise<void> {
+    if (chatPhotoActive < CHAT_PHOTO_MAX_CONCURRENT) {
+      chatPhotoActive++;
+      return Promise.resolve();
+    }
+    return new Promise((resolve) => {
+      chatPhotoQueue.push(() => {
+        chatPhotoActive++;
+        resolve();
+      });
+    });
+  }
+
+  function chatPhotoRelease() {
+    chatPhotoActive--;
+    if (chatPhotoQueue.length > 0) {
+      chatPhotoQueue.shift()!();
+    }
+  }
+
+  function flushPendingPhotos() {
+    pendingPhotoFlushScheduled = false;
+    if (pendingPhotos.length === 0) return;
+    const next = new Map(chatPhotos);
+    for (const [id, photo] of pendingPhotos) {
+      next.set(id, photo);
+    }
+    pendingPhotos = [];
+    chatPhotos = next;
+  }
+
+  function schedulePhotoFlush() {
+    if (pendingPhotoFlushScheduled) return;
+    pendingPhotoFlushScheduled = true;
+    requestAnimationFrame(flushPendingPhotos);
+  }
+
   async function getChatPhoto(chatId: number, chatType: string) {
     if (chatPhotos.has(chatId)) return;
+    await chatPhotoAcquire();
     try {
+      if (chatPhotos.has(chatId)) return;
       const result = await pluginInvoke<string>("telegram", "telegram_get_chat_photo", { chatId, chatType });
-      chatPhotos.set(chatId, result);
-      chatPhotos = new Map(chatPhotos);
+      pendingPhotos.push([chatId, result]);
+      schedulePhotoFlush();
     } catch {
+    } finally {
+      chatPhotoRelease();
     }
   }
 
@@ -867,6 +1081,64 @@
         {$t("telegram.logged_as", { phone: sessionPhone || "\u2014" })}
       </span>
       <div class="session-actions">
+        <TelegramSyncIndicator />
+        <button
+          class="button account-btn"
+          onclick={() => (accountPanelOpen = true)}
+          aria-label="Gerenciar contas"
+          title="Gerenciar contas"
+        >
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+        </button>
+        <button
+          class="button"
+          onclick={() => (cloneWizardOpen = true)}
+          aria-label="Clonar canais"
+          title="Clonar canais"
+        >
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="9" y="9" width="13" height="13" rx="2" />
+            <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
+          </svg>
+        </button>
+        <button
+          class="button transfers-btn"
+          onclick={() => (transferPanelOpen = true)}
+          aria-label="Transferências"
+          title="Transferências"
+        >
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5v14M19 12l-7 7-7-7" />
+          </svg>
+          {#if activeTransferCount > 0}
+            <span class="transfers-badge">{activeTransferCount}</span>
+          {/if}
+        </button>
+        <button
+          class="button"
+          onclick={() => (globalSearchOpen = true)}
+          aria-label="Busca global"
+          title="Busca global (Ctrl+K)"
+        >
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+        </button>
+        <button
+          class="button"
+          onclick={() => (perfPanelOpen = true)}
+          aria-label="Performance"
+          title="Performance de download"
+        >
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33h0a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51h0a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v0a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z" />
+          </svg>
+        </button>
         <button
           class="button"
           onclick={loadChats}
@@ -906,35 +1178,84 @@
         </span>
       </div>
 
+      <div class="view-mode-row">
+        <div class="view-tabs" role="tablist">
+          <button
+            type="button"
+            class="view-tab"
+            class:active={chatViewMode === "all"}
+            role="tab"
+            aria-selected={chatViewMode === "all"}
+            onclick={() => (chatViewMode = "all")}
+          >
+            Todos
+          </button>
+          <button
+            type="button"
+            class="view-tab"
+            class:active={chatViewMode === "drive"}
+            role="tab"
+            aria-selected={chatViewMode === "drive"}
+            onclick={() => (chatViewMode = "drive")}
+          >
+            Drive
+            <span class="view-tab-count">{chats.filter((c) => isOmnigetFolder(c as any)).length}</span>
+          </button>
+        </div>
+        {#if chatViewMode === "drive"}
+          <button type="button" class="button create-folder-btn" onclick={() => (createFolderOpen = true)}>
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 5v14M5 12h14" />
+            </svg>
+            Nova pasta
+          </button>
+        {/if}
+      </div>
+
       <input
         type="text"
         class="input search-input"
-        placeholder="Search..."
+        placeholder={chatViewMode === "drive" ? "Buscar pasta..." : "Search..."}
         bind:value={chatSearch}
       />
 
       <div class="chats-list">
         {#each filteredChats as chat (chat.id)}
-          <button class="chat-item button" onclick={() => selectChat(chat)}>
-            <div class="chat-avatar" class:has-photo={chatPhotos.get(chat.id)} use:observeChatPhoto={{ chatId: chat.id, chatType: chat.chat_type }}>
-              {#if chatPhotos.get(chat.id)}
-                <img
-                  src="data:image/jpeg;base64,{chatPhotos.get(chat.id)}"
-                  alt=""
-                  class="chat-photo-img"
-                />
-              {:else}
-                {chat.title.charAt(0).toUpperCase()}
-              {/if}
-            </div>
-            <div class="chat-info">
-              <span class="chat-title">{chat.title}</span>
-              <span class="chat-type">{chatTypeLabel(chat.chat_type)}</span>
-            </div>
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" class="chat-arrow">
-              <path d="M9 6l6 6-6 6" />
-            </svg>
-          </button>
+          <div class="chat-row">
+            <button class="chat-item button" onclick={() => selectChat(chat)}>
+              <div class="chat-avatar" class:has-photo={chatPhotos.get(chat.id)} use:observeChatPhoto={{ chatId: chat.id, chatType: chat.chat_type }}>
+                {#if chatPhotos.get(chat.id)}
+                  <img
+                    src="data:image/jpeg;base64,{chatPhotos.get(chat.id)}"
+                    alt=""
+                    class="chat-photo-img"
+                  />
+                {:else}
+                  {chat.title.charAt(0).toUpperCase()}
+                {/if}
+              </div>
+              <div class="chat-info">
+                <span class="chat-title">{chat.title}</span>
+                <span class="chat-type">{chatTypeLabel(chat.chat_type)}</span>
+              </div>
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" class="chat-arrow">
+                <path d="M9 6l6 6-6 6" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              class="chat-info-btn"
+              onclick={(e) => openDrawer(chat, e)}
+              aria-label="Gerenciar {chat.title}"
+              title="Gerenciar"
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="5" r="1.5" />
+                <circle cx="12" cy="12" r="1.5" />
+                <circle cx="12" cy="19" r="1.5" />
+              </svg>
+            </button>
+          </div>
         {/each}
       </div>
     {/if}
@@ -949,6 +1270,19 @@
         {$t("telegram.back_to_chats")}
       </button>
       <span class="session-info">{selectedChat.title}</span>
+      <button
+        type="button"
+        class="button manage-btn"
+        onclick={(e) => openDrawer(selectedChat!, e)}
+        aria-label="Gerenciar canal"
+      >
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="5" r="1.5" />
+          <circle cx="12" cy="12" r="1.5" />
+          <circle cx="12" cy="19" r="1.5" />
+        </svg>
+        Gerenciar
+      </button>
     </div>
 
     <div class="filters">
@@ -1144,6 +1478,64 @@
 {/if}
 {/if}
 
+<TelegramChannelDrawer
+  bind:open={drawerOpen}
+  chat={drawerChat}
+  onChatRemoved={onChatRemoved}
+/>
+
+<TelegramPerfPanel bind:open={perfPanelOpen} />
+
+<TelegramGlobalSearchModal
+  bind:open={globalSearchOpen}
+  onPickResult={onGlobalSearchPick}
+/>
+
+<TelegramTransferPanel
+  bind:open={transferPanelOpen}
+  active={activeTransfers}
+  history={transferHistory}
+  onClearHistory={clearTransferHistory}
+/>
+
+<TelegramCloneWizard bind:open={cloneWizardOpen} chats={chats} />
+
+<TelegramAccountPanel bind:open={accountPanelOpen} sessionPhone={sessionPhone} />
+
+{#if createFolderOpen}
+  <div
+    class="create-folder-overlay"
+    role="presentation"
+    onclick={(e) => { if (e.target === e.currentTarget && !createFolderBusy) createFolderOpen = false; }}
+    onkeydown={(e) => { if (e.key === "Escape" && !createFolderBusy) createFolderOpen = false; }}
+  >
+    <div class="create-folder-dialog" role="dialog" aria-modal="true">
+      <h3>Nova pasta Drive</h3>
+      <p class="dialog-hint">Cria um canal Telegram com sufixo <code>[og]</code> para você usar como pasta privada de mídias.</p>
+      <form onsubmit={(e) => { e.preventDefault(); commitCreateFolder(); }}>
+        <input
+          type="text"
+          class="input"
+          placeholder="Nome da pasta"
+          bind:value={createFolderName}
+          disabled={createFolderBusy}
+          autofocus
+          required
+        />
+        {#if createFolderError}
+          <p class="dialog-error">{createFolderError}</p>
+        {/if}
+        <div class="dialog-actions">
+          <button type="button" class="button" onclick={() => (createFolderOpen = false)} disabled={createFolderBusy}>Cancelar</button>
+          <button type="submit" class="button primary" disabled={createFolderBusy || !createFolderName.trim()}>
+            {createFolderBusy ? "Criando..." : "Criar"}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+{/if}
+
 <style>
   .plugin-guard { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: calc(100vh - var(--padding) * 4); gap: calc(var(--padding) * 1.5); text-align: center; color: var(--gray); }
   .plugin-guard h2 { font-size: 18px; color: var(--secondary); }
@@ -1177,17 +1569,25 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
+    gap: calc(var(--padding) / 2);
   }
 
   .session-info {
     font-size: 12.5px;
     font-weight: 500;
     color: var(--gray);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1 1 auto;
+    min-width: 0;
   }
 
   .session-actions {
     display: flex;
     gap: calc(var(--padding) / 2);
+    flex-wrap: wrap;
   }
 
   .session-bar :global(.button) {
@@ -1406,6 +1806,140 @@
     margin-block: 0;
   }
 
+  .view-mode-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--padding);
+  }
+
+  .view-tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--button-elevated);
+    padding: 3px;
+    border-radius: var(--border-radius);
+  }
+
+  .view-tab {
+    padding: 6px 14px;
+    background: transparent;
+    border: none;
+    color: var(--gray);
+    font-family: inherit;
+    font-size: 12.5px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: calc(var(--border-radius) - 2px);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 150ms, color 150ms;
+  }
+
+  .view-tab.active {
+    background: var(--button);
+    color: var(--secondary);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  }
+
+  .view-tab:not(.active):hover {
+    color: var(--secondary);
+  }
+
+  .view-tab-count {
+    font-size: 10.5px;
+    background: var(--input-border);
+    color: var(--gray);
+    padding: 1px 6px;
+    border-radius: 8px;
+    font-weight: 600;
+  }
+
+  .view-tab.active .view-tab-count {
+    background: var(--blue);
+    color: #fff;
+  }
+
+  .create-folder-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: calc(var(--padding) / 2) calc(var(--padding) * 1.25);
+    font-size: 12.5px;
+  }
+
+  .create-folder-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 200;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--padding);
+  }
+
+  .create-folder-dialog {
+    width: min(420px, 100%);
+    background: var(--surface, var(--button));
+    padding: calc(var(--padding) * 1.5);
+    border-radius: var(--border-radius);
+    display: flex;
+    flex-direction: column;
+    gap: var(--padding);
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+  }
+
+  .create-folder-dialog h3 {
+    margin: 0;
+    font-size: 16px;
+    color: var(--secondary);
+  }
+
+  .dialog-hint {
+    margin: 0;
+    font-size: 12px;
+    color: var(--gray);
+    line-height: 1.5;
+  }
+
+  .dialog-hint code {
+    font-family: monospace;
+    background: var(--button-elevated);
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-size: 11px;
+    color: var(--blue);
+  }
+
+  .create-folder-dialog form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--padding);
+  }
+
+  .dialog-error {
+    margin: 0;
+    color: var(--red);
+    font-size: 12px;
+  }
+
+  .dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .button.primary {
+    background: var(--blue);
+    color: #fff;
+  }
+
+  .button.primary:hover:not(:disabled) {
+    background: color-mix(in oklab, var(--blue) 90%, #000);
+  }
+
   .subtext {
     font-size: 12.5px;
     font-weight: 500;
@@ -1416,6 +1950,66 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
+  }
+
+  .chat-row {
+    display: flex;
+    align-items: stretch;
+    gap: 4px;
+    position: relative;
+  }
+
+  .chat-row > .chat-item {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .chat-info-btn {
+    background: transparent;
+    border: none;
+    color: var(--gray);
+    cursor: pointer;
+    padding: 0 12px;
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 150ms, color 150ms;
+    flex-shrink: 0;
+  }
+
+  .chat-info-btn:hover {
+    background: var(--button-elevated);
+    color: var(--secondary);
+  }
+
+  .manage-btn {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--padding) / 2);
+    padding: calc(var(--padding) / 2) var(--padding);
+    font-size: 12.5px;
+  }
+
+  .transfers-btn {
+    position: relative;
+  }
+
+  .transfers-badge {
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    background: var(--blue);
+    color: #fff;
+    border-radius: 8px;
+    font-size: 10px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .chat-item {
@@ -1625,5 +2219,121 @@
     display: flex;
     align-items: center;
     gap: calc(var(--padding) / 2);
+  }
+
+  @media (max-width: 720px) {
+    .page-logged {
+      padding: var(--padding);
+      gap: var(--padding);
+    }
+
+    .session-bar :global(.button) {
+      padding: 6px 8px;
+      font-size: 12px;
+    }
+
+    .manage-btn {
+      padding: 6px 10px !important;
+    }
+
+    .view-mode-row {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .view-tabs {
+      flex: 1 1 auto;
+    }
+
+    .filters {
+      gap: 4px;
+    }
+
+    .filter-btn {
+      padding: 5px 10px;
+      font-size: 11.5px;
+    }
+
+    .chat-row {
+      gap: 0;
+    }
+
+    .chat-info-btn {
+      padding: 0 8px;
+    }
+
+    .chat-item {
+      padding: 10px;
+      gap: 10px;
+    }
+
+    .chat-avatar {
+      width: 32px;
+      height: 32px;
+      min-width: 32px;
+      font-size: 13px;
+    }
+
+    .media-item {
+      padding: 8px;
+      gap: 8px;
+    }
+
+    .media-icon {
+      width: 40px;
+      height: 40px;
+      min-width: 40px;
+    }
+
+    .media-name {
+      font-size: 12.5px;
+    }
+
+    .media-meta {
+      font-size: 10.5px;
+    }
+
+    .media-download-btn {
+      padding: 5px 10px;
+      font-size: 11.5px;
+    }
+
+    .media-header {
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .login-card {
+      padding: var(--padding);
+    }
+  }
+
+  @media (max-width: 480px) {
+    .session-info {
+      font-size: 11px;
+    }
+
+    .chats-header {
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .chats-header h2 {
+      font-size: 16px;
+    }
+
+    .view-tab {
+      padding: 5px 10px;
+      font-size: 11.5px;
+    }
+
+    .create-folder-btn {
+      padding: 5px 10px;
+      font-size: 11.5px;
+    }
+
+    .chat-info-btn {
+      padding: 0 6px;
+    }
   }
 </style>

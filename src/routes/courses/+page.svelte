@@ -127,7 +127,7 @@
   </div>
 {:else}
 <div class="courses-page">
-  <h1>{$t("courses.title")}</h1>
+  <h1 class="page-title">{$t("courses.title")}</h1>
 
   {#if usingFallback}
     <div class="fallback-banner">

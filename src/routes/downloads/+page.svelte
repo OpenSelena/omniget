@@ -1,5 +1,6 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
+  import { pluginInvoke } from "$lib/plugin-invoke";
   import { t } from "$lib/i18n";
   import { translateBackendError } from "$lib/error-translate";
   import { showToast } from "$lib/stores/toast-store.svelte";
@@ -14,6 +15,7 @@
   } from "$lib/stores/download-store.svelte";
   import { getDownloadStats } from "$lib/stores/download-stats.svelte";
   import PlatformIcon from "$components/icons/PlatformIcon.svelte";
+  import QueueKindBadge from "$lib/study-components/QueueKindBadge.svelte";
   import Mascot from "$components/mascot/Mascot.svelte";
   import ContextHint from "$components/hints/ContextHint.svelte";
   import DownloadSpeedGraph from "$components/download/DownloadSpeedGraph.svelte";
@@ -86,7 +88,7 @@
 
   async function cancelDownload(courseId: number) {
     try {
-      await invoke("cancel_course_download", { courseId });
+      await pluginInvoke("courses", "cancel_download", { course_id: courseId });
     } catch (e: any) {
       const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
       showToast("error", msg);
@@ -175,7 +177,7 @@
   <div class="downloads-page">
     <div class="downloads-header">
       <div class="downloads-title-row">
-        <h2>{$t('downloads.title')}</h2>
+        <h2 class="page-title">{$t('downloads.title')}</h2>
         {#if dlStats.totalDownloads > 0}
           <span class="downloads-stats">{$t('downloads.stats_line', { count: String(dlStats.totalDownloads), size: formatBytes(dlStats.totalBytes) })}</span>
         {/if}
@@ -270,6 +272,7 @@
           />
         {/if}
         <PlatformIcon platform={item.platform} size={16} />
+        <QueueKindBadge kind={item.queueKind} size={14} />
         <span class="item-name">{item.name}</span>
       </div>
       <div class="item-header-actions">
@@ -663,27 +666,35 @@
   .filter-pill {
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    padding: 4px 10px;
-    font-size: 12px;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    font-size: var(--text-sm);
     font-weight: 500;
-    border: 1px solid var(--content-border);
-    border-radius: 9999px;
-    background: var(--button);
-    color: var(--tertiary);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-full);
+    background: var(--surface);
+    color: var(--text-dim);
     cursor: pointer;
-    transition: background-color 0.12s, color 0.12s, border-color 0.12s;
+    transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out);
   }
 
-  .filter-pill:hover {
-    background: var(--button-elevated);
-    color: var(--secondary);
+  @media (hover: hover) {
+    .filter-pill:hover {
+      background: var(--surface-hi);
+      color: var(--text);
+    }
   }
 
   .filter-pill.active {
-    background: var(--blue);
-    color: var(--on-accent);
-    border-color: var(--blue);
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-color: transparent;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .filter-pill {
+      transition: none;
+    }
   }
 
   .filter-pill:focus-visible {
@@ -699,12 +710,12 @@
     padding: 0 5px;
     font-size: 10px;
     font-weight: 600;
-    background: rgba(0, 0, 0, 0.18);
+    background: color-mix(in srgb, var(--surface) 70%, var(--bg-overlay));
     border-radius: 9999px;
   }
 
   .filter-pill.active .filter-count {
-    background: rgba(255, 255, 255, 0.22);
+    background: color-mix(in srgb, var(--on-accent) 22%, transparent);
   }
 
   .download-list {
@@ -714,17 +725,38 @@
   }
 
   .download-item {
-    background: var(--button);
-    border-radius: var(--border-radius);
-    box-shadow: var(--button-box-shadow);
-    padding: var(--padding);
+    background: var(--surface);
+    border-radius: var(--radius-md);
+    box-shadow: var(--elev-1);
+    border-left: 3px solid transparent;
+    padding: var(--space-4);
     display: flex;
     flex-direction: column;
-    gap: calc(var(--padding) / 2);
+    gap: var(--space-2);
+    transition: transform var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
   }
 
-  .download-item[data-status="queued"] {
-    opacity: 0.7;
+  @media (hover: hover) {
+    .download-item:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--elev-2);
+    }
+  }
+
+  .download-item[data-status="downloading"] { border-left-color: var(--accent); }
+  .download-item[data-status="seeding"]     { border-left-color: var(--success); }
+  .download-item[data-status="complete"]    { border-left-color: var(--success); }
+  .download-item[data-status="error"]       { border-left-color: var(--danger); }
+  .download-item[data-status="paused"]      { border-left-color: var(--warning); }
+  .download-item[data-status="queued"]      { opacity: 0.7; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .download-item {
+      transition: none;
+    }
+    .download-item:hover {
+      transform: none;
+    }
   }
 
   .item-header {
@@ -814,43 +846,39 @@
   }
 
   .item-status {
-    font-size: 11px;
+    font-size: var(--text-xs);
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    padding: 2px calc(var(--padding) / 2);
-    border-radius: calc(var(--border-radius) / 2);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-xs);
     flex-shrink: 0;
   }
 
   .item-status[data-status="downloading"] {
-    background: var(--orange);
-    color: var(--on-accent);
+    background: var(--accent-soft);
+    color: var(--accent);
   }
 
-  .item-status[data-status="seeding"] {
-    background: var(--green);
-    color: var(--on-success);
-  }
-
+  .item-status[data-status="seeding"],
   .item-status[data-status="complete"] {
-    background: var(--green);
-    color: var(--on-success);
+    background: color-mix(in srgb, var(--success) 16%, transparent);
+    color: var(--success);
   }
 
   .item-status[data-status="error"] {
-    background: var(--red);
-    color: var(--on-error);
+    background: color-mix(in srgb, var(--danger) 16%, transparent);
+    color: var(--danger);
   }
 
   .item-status[data-status="queued"] {
-    background: var(--button-elevated);
-    color: var(--gray);
+    background: var(--surface-hi);
+    color: var(--text-dim);
   }
 
   .item-status[data-status="paused"] {
-    background: var(--blue);
-    color: var(--on-accent);
+    background: color-mix(in srgb, var(--warning) 16%, transparent);
+    color: var(--warning);
   }
 
   .item-detail {
@@ -884,16 +912,16 @@
 
   .progress-track {
     width: 100%;
-    height: 6px;
-    background: var(--button-elevated);
-    border-radius: 3px;
+    height: 4px;
+    background: var(--surface-hi);
+    border-radius: var(--radius-full);
     overflow: hidden;
   }
 
   .progress-fill {
     height: 100%;
-    border-radius: 3px;
-    transition: width 0.3s ease-out;
+    border-radius: var(--radius-full);
+    transition: width var(--duration-slow) var(--ease-out);
   }
 
   .progress-fill[data-status="downloading"] {

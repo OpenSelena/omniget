@@ -57,6 +57,15 @@
     return d;
   });
 
+  let dArea = $derived.by(() => {
+    if (!dLine) return "";
+    const first = windowPoints[0];
+    const last = windowPoints[windowPoints.length - 1];
+    const x0 = ((first.t - startT) / windowMs) * 100;
+    const x1 = ((last.t - startT) / windowMs) * 100;
+    return `M ${x0.toFixed(3)} 100 ${dLine.replace(/^M/, "L")} L ${x1.toFixed(3)} 100 Z`;
+  });
+
   let currentBps = $derived(windowPoints.length ? windowPoints[windowPoints.length - 1].bps : 0);
   let lastPoint = $derived(windowPoints.length ? windowPoints[windowPoints.length - 1] : undefined);
   let lastX = $derived(lastPoint ? ((lastPoint.t - startT) / windowMs) * 100 : 100);
@@ -71,6 +80,15 @@
   aria-hidden="true"
 >
   <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="speedGraphFill" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.32" />
+        <stop offset="100%" stop-color="var(--accent)" stop-opacity="0" />
+      </linearGradient>
+    </defs>
+    {#if dArea}
+      <path class="area" d={dArea} fill="url(#speedGraphFill)" />
+    {/if}
     {#if dLine}
       <path class="line" d={dLine} vector-effect="non-scaling-stroke" />
     {:else}

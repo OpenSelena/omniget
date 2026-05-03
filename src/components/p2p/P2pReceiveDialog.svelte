@@ -13,9 +13,11 @@
   } = $props();
 
   let dialogEl: HTMLDialogElement | null = $state(null);
+  let acceptBtn: HTMLButtonElement | null = $state(null);
 
   onMount(() => {
     dialogEl?.showModal();
+    acceptBtn?.focus();
   });
 
   function handleAccept() {
@@ -72,7 +74,7 @@
       <p class="hint">{$t("p2p.searching_hint")}</p>
 
       <div class="receive-actions">
-        <button class="button accept-btn" onclick={handleAccept} autofocus>
+        <button class="button accept-btn" onclick={handleAccept} bind:this={acceptBtn}>
           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 3v12m0 0l-4-4m4 4l4-4" />
             <path d="M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2" />

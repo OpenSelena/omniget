@@ -1,12 +1,16 @@
 <script lang="ts">
-  type $$Slots = {
-    default: {};
-  };
+  import type { Snippet } from "svelte";
 
   let {
     isOpen = $bindable(false),
     titleId = "dialog-title",
     onClose,
+    children,
+  }: {
+    isOpen?: boolean;
+    titleId?: string;
+    onClose?: () => void;
+    children?: Snippet;
   } = $props();
 
   let dialogEl = $state<HTMLDialogElement | null>(null);
@@ -52,56 +56,58 @@
   }}
 >
   <div class="dialog-content">
-    <slot />
+    {@render children?.()}
   </div>
 </dialog>
 
 <style>
   .dialog-container {
     border: none;
-    border-radius: var(--border-radius);
-    background: var(--popup-bg);
-    color: var(--secondary);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    color: var(--text);
     padding: 0;
-    width: 90%;
-    max-width: 480px;
+    width: 92%;
+    max-width: 540px;
     max-height: 80vh;
-    animation: dialog-in 0.15s ease-out;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    animation: dialog-in var(--duration-base) var(--ease-out);
+    box-shadow: var(--elev-3);
   }
 
   .dialog-container::backdrop {
-    background: var(--dialog-backdrop);
-    animation: backdrop-in 0.15s ease-out;
+    background: rgba(0, 0, 0, 0.55);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    animation: backdrop-in var(--duration-base) var(--ease-out);
   }
 
   .dialog-container.closing {
-    animation: dialog-out 0.15s ease-in forwards;
+    animation: dialog-out var(--duration-base) var(--ease-out) forwards;
   }
 
   .dialog-container.closing::backdrop {
-    animation: backdrop-out 0.15s ease-in forwards;
+    animation: backdrop-out var(--duration-base) var(--ease-out) forwards;
   }
 
   @keyframes dialog-in {
     from {
       opacity: 0;
-      transform: scale(0.96) translateY(8px);
+      transform: scale(0.95);
     }
     to {
       opacity: 1;
-      transform: scale(1) translateY(0);
+      transform: scale(1);
     }
   }
 
   @keyframes dialog-out {
     from {
       opacity: 1;
-      transform: scale(1) translateY(0);
+      transform: scale(1);
     }
     to {
       opacity: 0;
-      transform: scale(0.96) translateY(8px);
+      transform: scale(0.96);
     }
   }
 

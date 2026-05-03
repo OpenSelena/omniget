@@ -1,6 +1,7 @@
 <script lang="ts">
     import { t } from "$lib/i18n";
     import { getVersion } from "@tauri-apps/api/app";
+    import { open } from "@tauri-apps/plugin-shell";
     import { BUILD_INFO } from "$lib/build-info";
 
     let version = $state("");
@@ -14,6 +15,11 @@
             .filter((part) => part && part !== "unknown")
             .join(" · ")
     );
+
+    async function openAuthorGithub(e: Event) {
+        e.preventDefault();
+        await open("https://github.com/tonhowtf");
+    }
 </script>
 
 <div class="about-page">
@@ -28,14 +34,6 @@
         {#if buildDetails}
             <span class="about-build">{buildDetails}</span>
         {/if}
-    </div>
-
-    <div class="about-links">
-        <a href="/about/project" class="about-link">{$t("about.tab.project")}</a>
-        <a href="/about/changelog" class="about-link">{$t("about.tab.changelog")}</a>
-        <a href="/about/terms" class="about-link">{$t("about.tab.terms")}</a>
-        <a href="/about/roadmap" class="about-link">{$t("about.tab.roadmap")}</a>
-        <a href="/about/debug" class="about-link">{$t("about.tab.debug")}</a>
     </div>
 
     <div class="about-external">
@@ -54,6 +52,10 @@
     </div>
 
     <p class="about-credit">{$t("about.credit")}</p>
+
+    <a href="https://github.com/tonhowtf" class="about-watermark" onclick={openAuthorGithub} title="@tonhowtf">
+        @tonhowtf
+    </a>
 </div>
 
 <style>
@@ -74,70 +76,51 @@
     }
 
     .about-loop {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
+        width: 200px;
+        height: 200px;
+        border-radius: var(--radius-full);
         object-fit: cover;
         pointer-events: none;
         user-select: none;
     }
 
     .about-hero h1 {
-        font-size: 24px;
+        font-family: var(--font-display);
+        font-size: var(--text-display);
+        line-height: var(--leading-display);
         font-weight: 600;
+        letter-spacing: -0.03em;
         margin: 0;
     }
 
     .about-tagline {
-        font-size: 14px;
-        color: var(--tertiary);
+        font-size: var(--text-md);
+        color: var(--text-muted);
         margin: 0;
     }
 
     .about-desc {
-        font-size: 13px;
-        color: var(--secondary);
+        font-size: var(--text-sm);
+        color: var(--text);
         margin: 0;
-        max-width: 340px;
+        max-width: 360px;
     }
 
     .about-version {
-        font-size: 12px;
-        color: var(--tertiary);
-        background: var(--button);
-        padding: 3px 10px;
-        border-radius: var(--border-radius);
+        font-size: var(--text-xs);
+        color: var(--text-dim);
+        background: var(--surface);
+        padding: var(--space-1) var(--space-3);
+        border-radius: var(--radius-full);
     }
 
     .about-build {
-        font-family: var(--font-mono, ui-monospace, SFMono-Regular, Menlo, Consolas, monospace);
-        font-size: 10.5px;
-        color: var(--tertiary);
+        font-family: var(--font-mono);
+        font-size: var(--text-xs);
+        color: var(--text-dim);
         opacity: 0.75;
         letter-spacing: 0.3px;
         user-select: all;
-    }
-
-    .about-links {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        justify-content: center;
-    }
-
-    .about-link {
-        padding: 8px 16px;
-        background: var(--button);
-        border-radius: var(--border-radius);
-        color: var(--secondary);
-        font-size: 13px;
-        font-weight: 500;
-        text-decoration: none;
-        box-shadow: var(--button-box-shadow);
-    }
-
-    .about-link:hover {
-        background: var(--button-hover);
     }
 
     .about-external {
@@ -149,19 +132,31 @@
     .about-ext-link {
         display: flex;
         align-items: center;
-        gap: 6px;
-        padding: 6px 14px;
-        background: var(--button-elevated);
-        border: 1px solid var(--button-stroke);
-        border-radius: var(--border-radius);
-        color: var(--secondary);
-        font-size: 13px;
+        gap: var(--space-2);
+        padding: var(--space-2) var(--space-4);
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        color: var(--text);
+        font-size: var(--text-sm);
         text-decoration: none;
-        transition: background 0.15s ease;
+        transition: background var(--duration-fast) var(--ease-out), transform var(--duration-fast) var(--ease-out);
     }
 
-    .about-ext-link:hover {
-        background: var(--button-hover);
+    @media (hover: hover) {
+        .about-ext-link:hover {
+            background: var(--surface-hi);
+            transform: translateY(-1px);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .about-ext-link {
+            transition: background var(--duration-fast) var(--ease-out);
+        }
+        .about-ext-link:hover {
+            transform: none;
+        }
     }
 
     .about-ext-link svg {
@@ -172,5 +167,21 @@
         font-size: 12px;
         color: var(--tertiary);
         margin: 0;
+    }
+
+    .about-watermark {
+        font-size: var(--text-xs);
+        font-weight: 400;
+        color: var(--text-dim);
+        opacity: 0.5;
+        text-decoration: none;
+        margin-top: var(--space-3);
+        transition: opacity var(--duration-fast) var(--ease-out);
+    }
+
+    @media (hover: hover) {
+        .about-watermark:hover {
+            opacity: 0.9;
+        }
     }
 </style>

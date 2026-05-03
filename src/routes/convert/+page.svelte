@@ -218,7 +218,7 @@
   </div>
 {:else}
 <div class="convert">
-  <h2>{$t('convert.title')}</h2>
+  <h2 class="page-title">{$t('convert.title')}</h2>
 
   {#if hwAccel}
     <div class="hwaccel-info">
@@ -460,12 +460,6 @@
     display: flex;
     flex-direction: column;
     gap: calc(var(--padding) / 2);
-  }
-
-  .section-title {
-    color: var(--gray);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
   }
 
   .actions-row {

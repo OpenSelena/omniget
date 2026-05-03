@@ -1,5 +1,6 @@
 <script lang="ts">
   import "../app.css";
+  import "$lib/style/queue-kinds.css";
   import { page } from "$app/state";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
@@ -11,13 +12,15 @@
   import { queueExternalPrefill, type ExternalUrlEvent } from "$lib/stores/external-url-store.svelte";
   import Toast from "$components/toast/Toast.svelte";
   import DebugPanel from "$components/debug/DebugPanel.svelte";
-  import { open } from "@tauri-apps/plugin-shell";
   import { refreshUpdateInfo } from "$lib/stores/update-store.svelte";
   import { startClipboardMonitor, stopClipboardMonitor } from "$lib/stores/clipboard-monitor";
   import { initChangelog } from "$lib/stores/changelog-store.svelte";
   import ChangelogDialog from "$components/dialog/ChangelogDialog.svelte";
   import ConfirmCloseDialog from "$components/dialog/ConfirmCloseDialog.svelte";
   import ShortcutsDialog from "$components/dialog/ShortcutsDialog.svelte";
+  import BandwidthPill from "$lib/study-components/BandwidthPill.svelte";
+  import NotificationBell from "$lib/study-components/shelves/NotificationBell.svelte";
+  import { studySettingsGet, studyLibraryVacuum } from "$lib/study-bridge";
   import LegalDialog from "$components/dialog/LegalDialog.svelte";
   import RecoveryDialog from "$components/dialog/RecoveryDialog.svelte";
   import OnboardingWizard from "$components/onboarding/OnboardingWizard.svelte";
@@ -38,11 +41,6 @@
   let ytdlpDismissed = $state(false);
   let ytdlpMissing = $derived(isDepsChecked() && !isYtdlpAvailable());
   let showOnboarding = $derived(needsOnboarding());
-
-  async function openAuthorGithub(e: Event) {
-    e.preventDefault();
-    await open("https://github.com/tonhowtf");
-  }
 
   let counts = $derived(getCounts());
   let badgeLabel = $derived(counts.badge > 99 ? "99+" : String(counts.badge));
@@ -76,10 +74,37 @@
 
   let { children }: { children: Snippet } = $props();
 
+  const VACUUM_LAST_RUN_KEY = "study.library.auto_vacuum.last_run";
+
+  async function checkAutoVacuum() {
+    try {
+      const settings = await studySettingsGet();
+      const enabled = settings.library?.auto_vacuum ?? true;
+      if (!enabled) return;
+      const intervalDays = settings.library?.auto_vacuum_interval_days ?? 30;
+      const intervalMs = intervalDays * 86400 * 1000;
+      const last = Number(localStorage.getItem(VACUUM_LAST_RUN_KEY) ?? "0");
+      const now = Date.now();
+      if (now - last < intervalMs) return;
+      const result = await studyLibraryVacuum();
+      localStorage.setItem(VACUUM_LAST_RUN_KEY, String(now));
+      const total =
+        (result.seek_logs_deleted ?? 0)
+        + (result.notifications_deleted ?? 0)
+        + (result.recents_deleted ?? 0);
+      if (total > 0) {
+        console.info(`[study] auto-vacuum: ${total} items cleaned`, result);
+      }
+    } catch (e) {
+      console.warn("auto-vacuum failed", e);
+    }
+  }
+
   onMount(() => {
     let cleanup: (() => void) | undefined;
     let unlistenExternal: (() => void) | undefined;
     initDownloadListener().then((fn) => (cleanup = fn));
+    setTimeout(() => void checkAutoVacuum(), 5000);
 
     invoke<{ id: string; enabled: boolean; nav: { route: string; label: Record<string, string>; icon_svg: string | null; group: string; order: number }[] }[]>("list_plugins")
       .then((plugins) => {
@@ -229,15 +254,15 @@
       </div>
     {/if}
     {@render children()}
-    <a
-      href="https://github.com/tonhowtf"
-      class="watermark"
-      onclick={openAuthorGithub}
-      title="@tonhowtf"
-    >
-      @tonhowtf
-    </a>
   </main>
+</div>
+
+<div class="bandwidth-pill-mount">
+  <BandwidthPill />
+</div>
+
+<div class="notification-bell-mount">
+  <NotificationBell />
 </div>
 
 <Toast />
@@ -256,6 +281,20 @@
     display: flex;
     height: 100vh;
     overflow: hidden;
+  }
+
+  .bandwidth-pill-mount {
+    position: fixed;
+    bottom: 12px;
+    right: 12px;
+    z-index: 50;
+    pointer-events: none;
+  }
+  .notification-bell-mount {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    z-index: 60;
   }
 
   .sidebar {
@@ -279,8 +318,9 @@
     justify-content: center;
     gap: 2px;
     padding: 6px 0;
-    border-radius: var(--border-radius);
-    color: var(--gray);
+    border-radius: var(--radius-md);
+    color: var(--text-dim);
+    transition: color var(--duration-fast) var(--ease-out), background-color var(--duration-fast) var(--ease-out);
   }
 
   .nav-label {
@@ -296,13 +336,13 @@
 
   @media (hover: hover) {
     .nav-item:hover {
-      color: var(--secondary);
-      background-color: var(--sidebar-highlight);
+      color: var(--text);
+      background-color: var(--surface-hi);
     }
   }
 
   .nav-item:active {
-    background-color: var(--sidebar-highlight);
+    background-color: var(--surface-hi);
   }
 
   .nav-item:focus-visible {
@@ -311,7 +351,14 @@
   }
 
   .nav-item.active {
-    color: var(--blue);
+    color: var(--accent);
+    background-color: var(--accent-soft);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .nav-item {
+      transition: none;
+    }
   }
 
   .nav-divider {
@@ -327,13 +374,19 @@
     left: -8px;
     width: 3px;
     height: 0;
-    background: var(--blue);
+    background: var(--accent);
     border-radius: 0 2px 2px 0;
-    transition: height 0.15s;
+    transition: height var(--duration-base) var(--ease-out);
   }
 
   .nav-item.active .indicator {
-    height: 20px;
+    height: 24px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .indicator {
+      transition: none;
+    }
   }
 
   .badge {
@@ -342,15 +395,16 @@
     right: 2px;
     min-width: 16px;
     height: 16px;
-    padding: 0 4px;
-    font-size: 10px;
-    font-weight: 500;
+    padding: 0 var(--space-1);
+    font-size: var(--text-xs);
+    font-weight: 600;
     line-height: 16px;
     text-align: center;
     color: var(--on-accent);
-    background: var(--blue);
-    border-radius: 9999px;
+    background: var(--accent);
+    border-radius: var(--radius-full);
     pointer-events: none;
+    box-shadow: 0 0 0 2px var(--sidebar-bg);
   }
 
   .content {
@@ -360,35 +414,14 @@
     box-shadow: inset 1px 0 0 0 var(--content-border);
   }
 
-  .watermark {
-    position: fixed;
-    bottom: calc(8px + var(--safe-area-bottom));
-    right: calc(12px + var(--safe-area-right));
-    font-size: 10px;
-    font-weight: 400;
-    color: var(--gray);
-    opacity: 0.3;
-    pointer-events: auto;
-    cursor: pointer;
-    z-index: 1;
-    user-select: none;
-    transition: opacity 0.15s;
-  }
-
-  @media (hover: hover) {
-    .watermark:hover {
-      opacity: 0.7;
-    }
-  }
-
   .ytdlp-banner {
     display: flex;
     align-items: center;
     gap: 10px;
     padding: 10px 14px;
     margin-bottom: var(--padding);
-    background: var(--orange);
-    color: #000;
+    background: var(--warning);
+    color: var(--on-warning);
     border-radius: var(--border-radius);
     font-size: 12.5px;
     font-weight: 500;
@@ -399,8 +432,8 @@
   }
 
   .ytdlp-banner-link {
-    background: rgba(0, 0, 0, 0.15);
-    color: #000;
+    background: color-mix(in srgb, var(--warning) 80%, black);
+    color: var(--on-warning);
     border: none;
     font-size: 12px;
     padding: 4px 10px;
@@ -412,7 +445,7 @@
 
   @media (hover: hover) {
     .ytdlp-banner-link:hover {
-      background: rgba(0, 0, 0, 0.25);
+      background: color-mix(in srgb, var(--warning) 65%, black);
     }
   }
 

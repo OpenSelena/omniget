@@ -78,21 +78,30 @@
 
   .omnibox {
     width: 100%;
-    padding: var(--padding) 38px var(--padding) calc(var(--padding) + 4px);
-    font-size: 14.5px;
-    background: var(--button);
-    border-radius: var(--border-radius);
-    color: var(--secondary);
-    border: 1px solid var(--input-border);
+    height: 56px;
+    padding: 0 var(--space-7) 0 var(--space-4);
+    font-size: var(--text-lg);
+    background: var(--surface-mut);
+    border-radius: var(--radius-md);
+    color: var(--text);
+    border: 1px solid var(--border);
+    transition: border-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-base) var(--ease-out);
   }
 
   .omnibox::placeholder {
-    color: var(--gray);
+    color: var(--text-dim);
   }
 
   .omnibox:focus-visible {
-    border-color: var(--secondary);
+    border-color: var(--accent);
     outline: none;
+    box-shadow: var(--elev-glow);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .omnibox {
+      transition: none;
+    }
   }
 
   .clear-btn {

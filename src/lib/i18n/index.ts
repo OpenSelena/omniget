@@ -25,6 +25,11 @@ const config = {
       loader: async () => (await import("./zh.json")).default,
     },
     {
+      locale: "zh-TW",
+      key: "",
+      loader: async () => (await import("./zh-TW.json")).default,
+    },
+    {
       locale: "ja",
       key: "",
       loader: async () => (await import("./ja.json")).default,
