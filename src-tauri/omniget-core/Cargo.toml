@@ -38,5 +38,6 @@ sha2 = "0.10"
 filetime = "0.2.27"
 zip = { version = "2", default-features = false, features = ["deflate"] }
 tar = "0.4"
+flate2 = "1"
 xz2 = "0.1"
 open = "5"
