@@ -17,6 +17,7 @@ pub mod external_url;
 pub mod hotkey;
 pub mod models;
 pub mod native_host;
+pub mod pets;
 pub mod platforms;
 pub mod plugin_host;
 pub mod plugin_loader;
@@ -92,6 +93,7 @@ pub fn run() {
             }
         }))
         .manage(state)
+        .manage(pets::PetsState::default())
         .manage(Arc::new(tokio::sync::RwLock::new(
             plugin_loader::PluginManager::new(
                 core::paths::app_data_dir()
@@ -117,7 +119,12 @@ pub fn run() {
         )
         .plugin(tauri_plugin_clipboard_manager::init())
         .plugin(tauri_plugin_deep_link::init())
+        .plugin(tauri_plugin_autostart::init(
+            tauri_plugin_autostart::MacosLauncher::LaunchAgent,
+            None,
+        ))
         .setup(|app| {
+            commands::host_queue::register_event_listeners(app.handle());
             let settings = storage::config::load_settings(app.handle());
             core::http_client::init_proxy(settings.proxy.clone());
             core::ytdlp::set_ext_cookie_path_fn(|| native_host::extension_cookie_file_path());
@@ -228,6 +235,23 @@ pub fn run() {
                 let plugin_mgr = app
                     .handle()
                     .state::<std::sync::Arc<tokio::sync::RwLock<plugin_loader::PluginManager>>>();
+
+                let mgr_for_default = std::sync::Arc::clone(&*plugin_mgr);
+                std::thread::Builder::new()
+                    .name("default-plugins".into())
+                    .spawn(move || {
+                        let rt = match tokio::runtime::Runtime::new() {
+                            Ok(rt) => rt,
+                            Err(e) => {
+                                tracing::warn!("default-plugins runtime failed: {}", e);
+                                return;
+                            }
+                        };
+                        rt.block_on(commands::plugins::ensure_default_plugins(mgr_for_default));
+                    })
+                    .ok()
+                    .map(|h| h.join().ok());
+
                 let mut mgr = plugin_mgr.blocking_write();
                 mgr.load_all(host);
             }
@@ -262,6 +286,13 @@ pub fn run() {
                     }
                 });
             }
+
+            if settings.start_minimized {
+                if let Some(window) = app.get_webview_window("main") {
+                    let _ = window.hide();
+                }
+            }
+
             Ok(())
         })
         .on_window_event(|window, event| {
@@ -296,6 +327,10 @@ pub fn run() {
             commands::downloads::discard_recovery,
             commands::downloads::restore_recovery,
             commands::downloads::reveal_file,
+            commands::downloads::open_path_default,
+            commands::host_queue::host_queue_enqueue_external,
+            commands::host_queue::host_queue_report_progress,
+            commands::host_queue::host_queue_report_complete,
             commands::integration::register_external_frontend,
             commands::settings::get_settings,
             commands::settings::update_settings,
@@ -307,6 +342,9 @@ pub fn run() {
             commands::dependencies::check_dependencies,
             commands::dependencies::check_ytdlp_available,
             commands::dependencies::install_dependency,
+            commands::dependencies::dependency_variants,
+            commands::dependencies::dependency_install_dir,
+            commands::dependencies::set_dependency_path,
             commands::search::search_videos,
             commands::plugins::list_plugins,
             commands::plugins::get_plugin_frontend_path,
@@ -329,6 +367,19 @@ pub fn run() {
             commands::app_lifecycle::request_app_quit,
             commands::app_lifecycle::force_exit_app,
             commands::app_lifecycle::get_debug_info,
+            pets::pets_get_local_index,
+            pets::pets_fetch_remote_manifest,
+            pets::pets_diff,
+            pets::pets_install_bundle,
+            pets::pets_install_missing,
+            pets::pets_force_refresh,
+            pets::pets_uninstall,
+            pets::pets_open_folder,
+            pets::pets_set_active,
+            pets::pets_get_active,
+            pets::pets_resolve_path,
+            pets::pets_get_display_prefs,
+            pets::pets_set_display_prefs,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

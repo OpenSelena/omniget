@@ -3,6 +3,7 @@ pub mod auth_webview;
 pub mod autostart;
 pub mod diagnostics;
 pub mod downloads;
+pub mod host_queue;
 pub mod integration;
 pub mod p2p;
 pub mod plugins;

@@ -54,6 +54,37 @@ pub struct MediaPreviewEvent {
     pub duration_seconds: Option<f64>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, serde::Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum QueueKind {
+    Video,
+    Audio,
+    Image,
+    Pdf,
+    Book,
+    Webpage,
+    TelegramMedia,
+    CourseLesson,
+    Generic,
+}
+
+pub fn kind_from_platform(platform: &str) -> QueueKind {
+    let p = platform.to_ascii_lowercase();
+    match p.as_str() {
+        "youtube" | "vimeo" | "twitch" | "bilibili" | "tiktok" | "twitter" | "x"
+        | "instagram" | "reddit" | "bluesky" | "facebook" | "generic_ytdlp" => QueueKind::Video,
+        "soundcloud" | "spotify" => QueueKind::Audio,
+        "pinterest" => QueueKind::Image,
+        "magnet" | "p2p" | "torrent" => QueueKind::Generic,
+        "telegram" | "telegram_media" => QueueKind::TelegramMedia,
+        "courses" | "course_lesson" => QueueKind::CourseLesson,
+        "annas_archive" | "book" | "libgen" | "gutendex" => QueueKind::Book,
+        "pdf" => QueueKind::Pdf,
+        "webpage" | "embed" => QueueKind::Webpage,
+        _ => QueueKind::Generic,
+    }
+}
+
 #[derive(Debug, Clone, Serialize, PartialEq)]
 #[serde(tag = "type", content = "data")]
 pub enum QueueStatus {
@@ -80,6 +111,10 @@ pub struct QueueItemInfo {
     pub file_size_bytes: Option<u64>,
     pub file_count: Option<u32>,
     pub thumbnail_url: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub kind: Option<QueueKind>,
+    #[serde(default)]
+    pub external: bool,
 }
 
 pub struct QueueItem {
@@ -109,6 +144,9 @@ pub struct QueueItem {
     pub ytdlp_path: Option<PathBuf>,
     pub from_hotkey: bool,
     pub torrent_id: Option<usize>,
+    pub kind: Option<QueueKind>,
+    pub external: bool,
+    pub thumbnail_url_override: Option<String>,
 }
 
 impl QueueItem {
@@ -127,9 +165,11 @@ impl QueueItem {
             file_size_bytes: self.file_size_bytes,
             file_count: self.file_count,
             thumbnail_url: self
-                .media_info
-                .as_ref()
-                .and_then(|m| m.thumbnail_url.clone()),
+                .thumbnail_url_override
+                .clone()
+                .or_else(|| self.media_info.as_ref().and_then(|m| m.thumbnail_url.clone())),
+            kind: self.kind,
+            external: self.external,
         }
     }
 }
@@ -171,6 +211,7 @@ impl DownloadQueue {
         ytdlp_path: Option<PathBuf>,
         from_hotkey: bool,
     ) {
+        let computed_kind = Some(kind_from_platform(&platform));
         let item = QueueItem {
             id,
             url,
@@ -198,6 +239,9 @@ impl DownloadQueue {
             ytdlp_path,
             from_hotkey,
             torrent_id: None,
+            kind: computed_kind,
+            external: false,
+            thumbnail_url_override: None,
         };
         crate::core::recovery::persist(crate::core::recovery::RecoveryItem {
             id: item.id,
@@ -1242,4 +1286,84 @@ fn is_generic_title(title: &str) -> bool {
         || t == "unknown"
         || t.starts_with("video [video]")
         || t.starts_with("media [media]")
+}
+
+#[cfg(test)]
+mod kind_tests {
+    use super::{kind_from_platform, QueueKind};
+
+    #[test]
+    fn youtube_and_video_platforms_map_to_video() {
+        assert_eq!(kind_from_platform("youtube"), QueueKind::Video);
+        assert_eq!(kind_from_platform("vimeo"), QueueKind::Video);
+        assert_eq!(kind_from_platform("twitch"), QueueKind::Video);
+        assert_eq!(kind_from_platform("bilibili"), QueueKind::Video);
+        assert_eq!(kind_from_platform("tiktok"), QueueKind::Video);
+        assert_eq!(kind_from_platform("instagram"), QueueKind::Video);
+        assert_eq!(kind_from_platform("reddit"), QueueKind::Video);
+        assert_eq!(kind_from_platform("bluesky"), QueueKind::Video);
+        assert_eq!(kind_from_platform("generic_ytdlp"), QueueKind::Video);
+    }
+
+    #[test]
+    fn audio_platforms() {
+        assert_eq!(kind_from_platform("soundcloud"), QueueKind::Audio);
+        assert_eq!(kind_from_platform("spotify"), QueueKind::Audio);
+    }
+
+    #[test]
+    fn pinterest_is_image() {
+        assert_eq!(kind_from_platform("pinterest"), QueueKind::Image);
+    }
+
+    #[test]
+    fn pdf_kind() {
+        assert_eq!(kind_from_platform("pdf"), QueueKind::Pdf);
+    }
+
+    #[test]
+    fn book_platforms() {
+        assert_eq!(kind_from_platform("annas_archive"), QueueKind::Book);
+        assert_eq!(kind_from_platform("libgen"), QueueKind::Book);
+        assert_eq!(kind_from_platform("gutendex"), QueueKind::Book);
+        assert_eq!(kind_from_platform("book"), QueueKind::Book);
+    }
+
+    #[test]
+    fn webpage_kind() {
+        assert_eq!(kind_from_platform("webpage"), QueueKind::Webpage);
+        assert_eq!(kind_from_platform("embed"), QueueKind::Webpage);
+    }
+
+    #[test]
+    fn telegram_kind() {
+        assert_eq!(kind_from_platform("telegram"), QueueKind::TelegramMedia);
+        assert_eq!(kind_from_platform("telegram_media"), QueueKind::TelegramMedia);
+    }
+
+    #[test]
+    fn course_lesson_kind() {
+        assert_eq!(kind_from_platform("courses"), QueueKind::CourseLesson);
+        assert_eq!(kind_from_platform("course_lesson"), QueueKind::CourseLesson);
+    }
+
+    #[test]
+    fn generic_for_torrents_and_p2p() {
+        assert_eq!(kind_from_platform("magnet"), QueueKind::Generic);
+        assert_eq!(kind_from_platform("p2p"), QueueKind::Generic);
+        assert_eq!(kind_from_platform("torrent"), QueueKind::Generic);
+    }
+
+    #[test]
+    fn unknown_platform_falls_back_to_generic() {
+        assert_eq!(kind_from_platform(""), QueueKind::Generic);
+        assert_eq!(kind_from_platform("totally-unknown"), QueueKind::Generic);
+        assert_eq!(kind_from_platform("xyz123"), QueueKind::Generic);
+    }
+
+    #[test]
+    fn case_insensitive() {
+        assert_eq!(kind_from_platform("YouTube"), QueueKind::Video);
+        assert_eq!(kind_from_platform("TELEGRAM"), QueueKind::TelegramMedia);
+    }
 }

@@ -10,6 +10,7 @@ pub use omniget_core::core::http_client;
 pub use omniget_core::core::hwaccel;
 pub use omniget_core::core::media_processor;
 pub use omniget_core::core::paths;
+pub use omniget_core::core::pdfium;
 pub use omniget_core::core::process;
 pub use omniget_core::core::redirect;
 pub use omniget_core::core::registry;

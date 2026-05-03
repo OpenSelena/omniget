@@ -13,14 +13,18 @@ pub struct AppSettings {
     pub proxy: ProxySettings,
     #[serde(default)]
     pub onboarding_completed: bool,
+    #[serde(default, alias = "start_with_windows")]
+    pub start_with_system: bool,
     #[serde(default)]
-    pub start_with_windows: bool,
+    pub start_minimized: bool,
     #[serde(default)]
     pub portable_mode: bool,
     #[serde(default)]
     pub legal_acknowledged: bool,
     #[serde(default)]
     pub last_download_options: LastDownloadOptions,
+    #[serde(default)]
+    pub typography: TypographySettings,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -160,6 +164,55 @@ fn default_proxy_port() -> u16 {
     8080
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct TypographySettings {
+    #[serde(default = "default_font_display")]
+    pub font_display: String,
+    #[serde(default = "default_font_body")]
+    pub font_body: String,
+    #[serde(default = "default_font_mono")]
+    pub font_mono: String,
+    #[serde(default = "default_line_height_base")]
+    pub line_height_base: f32,
+    #[serde(default = "default_spacing_scale")]
+    pub spacing_scale: f32,
+    #[serde(default)]
+    pub preset_name: Option<String>,
+}
+
+fn default_font_display() -> String {
+    "Bricolage Grotesque Variable".into()
+}
+
+fn default_font_body() -> String {
+    "Inter".into()
+}
+
+fn default_font_mono() -> String {
+    "IBM Plex Mono".into()
+}
+
+fn default_line_height_base() -> f32 {
+    1.55
+}
+
+fn default_spacing_scale() -> f32 {
+    1.0
+}
+
+impl Default for TypographySettings {
+    fn default() -> Self {
+        Self {
+            font_display: default_font_display(),
+            font_body: default_font_body(),
+            font_mono: default_font_mono(),
+            line_height_base: default_line_height_base(),
+            spacing_scale: default_spacing_scale(),
+            preset_name: Some("omniget-default".into()),
+        }
+    }
+}
+
 impl Default for AppSettings {
     fn default() -> Self {
         Self {
@@ -203,10 +256,12 @@ impl Default for AppSettings {
             telegram: TelegramSettings::default(),
             proxy: ProxySettings::default(),
             onboarding_completed: false,
-            start_with_windows: false,
+            start_with_system: false,
+            start_minimized: false,
             portable_mode: false,
             legal_acknowledged: false,
             last_download_options: LastDownloadOptions::default(),
+            typography: TypographySettings::default(),
         }
     }
 }

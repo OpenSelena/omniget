@@ -293,9 +293,8 @@ struct GitHubAsset {
     browser_download_url: String,
 }
 
-#[tauri::command]
-pub async fn install_plugin_from_registry(
-    state: tauri::State<'_, Arc<tokio::sync::RwLock<PluginManager>>>,
+pub async fn install_plugin_zip_from_repo(
+    state: &Arc<tokio::sync::RwLock<PluginManager>>,
     plugin_id: String,
     repo: String,
 ) -> Result<String, String> {
@@ -378,6 +377,52 @@ pub async fn install_plugin_from_registry(
         .map_err(|e| e.to_string())?;
 
     Ok(version)
+}
+
+#[tauri::command]
+pub async fn install_plugin_from_registry(
+    state: tauri::State<'_, Arc<tokio::sync::RwLock<PluginManager>>>,
+    plugin_id: String,
+    repo: String,
+) -> Result<String, String> {
+    install_plugin_zip_from_repo(&state.inner().clone(), plugin_id, repo).await
+}
+
+const DEFAULT_PLUGINS: &[(&str, &str)] = &[("study", "tonhowtf/omniget-study-release")];
+
+pub async fn ensure_default_plugins(state: Arc<tokio::sync::RwLock<PluginManager>>) {
+    for (plugin_id, repo) in DEFAULT_PLUGINS {
+        let already_installed = {
+            let manager = state.read().await;
+            manager.installed_plugins().iter().any(|p| p.id == *plugin_id)
+        };
+        if already_installed {
+            tracing::debug!("default plugin '{}' already installed, skipping", plugin_id);
+            continue;
+        }
+        tracing::info!(
+            "default plugin '{}' missing, installing from {}",
+            plugin_id,
+            repo
+        );
+        match install_plugin_zip_from_repo(&state, plugin_id.to_string(), repo.to_string()).await {
+            Ok(version) => {
+                tracing::info!(
+                    "default plugin '{}' installed (version {})",
+                    plugin_id,
+                    version
+                );
+            }
+            Err(e) => {
+                tracing::warn!(
+                    "failed to install default plugin '{}' from {}: {}",
+                    plugin_id,
+                    repo,
+                    e
+                );
+            }
+        }
+    }
 }
 
 #[derive(Debug, Serialize)]

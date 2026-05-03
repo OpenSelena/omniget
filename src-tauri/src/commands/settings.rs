@@ -12,7 +12,7 @@ pub fn update_settings(app: tauri::AppHandle, partial: String) -> Result<AppSett
     let mut current = config::load_settings(&app);
     let old_hotkey_enabled = current.download.hotkey_enabled;
     let old_hotkey_binding = current.download.hotkey_binding.clone();
-    let old_start_with_windows = current.start_with_windows;
+    let old_start_with_system = current.start_with_system;
 
     let patch: serde_json::Value =
         serde_json::from_str(&partial).map_err(|e| format!("Invalid JSON: {}", e))?;
@@ -30,8 +30,8 @@ pub fn update_settings(app: tauri::AppHandle, partial: String) -> Result<AppSett
         hotkey::reregister(&app);
     }
 
-    if old_start_with_windows != current.start_with_windows {
-        crate::commands::autostart::apply_autostart(current.start_with_windows)?;
+    if old_start_with_system != current.start_with_system {
+        crate::commands::autostart::apply_autostart(&app, current.start_with_system)?;
     }
 
     Ok(current)
@@ -42,7 +42,7 @@ pub fn reset_settings(app: tauri::AppHandle) -> Result<AppSettings, String> {
     let defaults = AppSettings::default();
     config::save_settings(&app, &defaults).map_err(|e| format!("Save: {}", e))?;
     hotkey::reregister(&app);
-    let _ = crate::commands::autostart::apply_autostart(defaults.start_with_windows);
+    let _ = crate::commands::autostart::apply_autostart(&app, defaults.start_with_system);
     Ok(defaults)
 }
 

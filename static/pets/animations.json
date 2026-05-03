@@ -1,0 +1,730 @@
+{
+  "boba": [
+    {
+      "name": "idle",
+      "row": 0,
+      "frame_count": 6,
+      "fps": 6
+    },
+    {
+      "name": "walk_right",
+      "row": 1,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "walk_left",
+      "row": 2,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "wave",
+      "row": 3,
+      "frame_count": 4,
+      "fps": 8
+    },
+    {
+      "name": "tiny",
+      "row": 4,
+      "frame_count": 5,
+      "fps": 8
+    },
+    {
+      "name": "sad",
+      "row": 5,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "sleep",
+      "row": 6,
+      "frame_count": 6,
+      "fps": 8
+    },
+    {
+      "name": "happy",
+      "row": 7,
+      "frame_count": 6,
+      "fps": 8
+    },
+    {
+      "name": "extra",
+      "row": 8,
+      "frame_count": 6,
+      "fps": 8
+    }
+  ],
+  "boxcat": [
+    {
+      "name": "idle",
+      "row": 0,
+      "frame_count": 6,
+      "fps": 6
+    },
+    {
+      "name": "walk_right",
+      "row": 1,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "walk_left",
+      "row": 2,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "wave",
+      "row": 3,
+      "frame_count": 4,
+      "fps": 8
+    },
+    {
+      "name": "tiny",
+      "row": 4,
+      "frame_count": 5,
+      "fps": 8
+    },
+    {
+      "name": "sad",
+      "row": 5,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "sleep",
+      "row": 6,
+      "frame_count": 6,
+      "fps": 8
+    },
+    {
+      "name": "happy",
+      "row": 7,
+      "frame_count": 6,
+      "fps": 8
+    },
+    {
+      "name": "extra",
+      "row": 8,
+      "frame_count": 6,
+      "fps": 8
+    }
+  ],
+  "byte-bunny": [
+    {
+      "name": "idle",
+      "row": 0,
+      "frame_count": 6,
+      "fps": 6
+    },
+    {
+      "name": "walk_right",
+      "row": 1,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "walk_left",
+      "row": 2,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "wave",
+      "row": 3,
+      "frame_count": 4,
+      "fps": 8
+    },
+    {
+      "name": "tiny",
+      "row": 4,
+      "frame_count": 5,
+      "fps": 8
+    },
+    {
+      "name": "sad",
+      "row": 5,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "sleep",
+      "row": 6,
+      "frame_count": 6,
+      "fps": 8
+    },
+    {
+      "name": "happy",
+      "row": 7,
+      "frame_count": 6,
+      "fps": 8
+    },
+    {
+      "name": "extra",
+      "row": 8,
+      "frame_count": 6,
+      "fps": 8
+    }
+  ],
+  "cache-capy": [
+    {
+      "name": "idle",
+      "row": 0,
+      "frame_count": 6,
+      "fps": 6
+    },
+    {
+      "name": "walk_right",
+      "row": 1,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "walk_left",
+      "row": 2,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "wave",
+      "row": 3,
+      "frame_count": 4,
+      "fps": 8
+    },
+    {
+      "name": "tiny",
+      "row": 4,
+      "frame_count": 5,
+      "fps": 8
+    },
+    {
+      "name": "sad",
+      "row": 5,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "sleep",
+      "row": 6,
+      "frame_count": 6,
+      "fps": 8
+    },
+    {
+      "name": "happy",
+      "row": 7,
+      "frame_count": 6,
+      "fps": 8
+    },
+    {
+      "name": "extra",
+      "row": 8,
+      "frame_count": 6,
+      "fps": 8
+    }
+  ],
+  "cash-cuy": [
+    {
+      "name": "idle",
+      "row": 0,
+      "frame_count": 6,
+      "fps": 6
+    },
+    {
+      "name": "walk_right",
+      "row": 1,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "walk_left",
+      "row": 2,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "wave",
+      "row": 3,
+      "frame_count": 4,
+      "fps": 8
+    },
+    {
+      "name": "tiny",
+      "row": 4,
+      "frame_count": 5,
+      "fps": 8
+    },
+    {
+      "name": "sad",
+      "row": 5,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "sleep",
+      "row": 6,
+      "frame_count": 6,
+      "fps": 8
+    },
+    {
+      "name": "happy",
+      "row": 7,
+      "frame_count": 6,
+      "fps": 8
+    },
+    {
+      "name": "extra",
+      "row": 8,
+      "frame_count": 6,
+      "fps": 8
+    }
+  ],
+  "cosmo": [
+    {
+      "name": "idle",
+      "row": 0,
+      "frame_count": 6,
+      "fps": 6
+    },
+    {
+      "name": "walk_right",
+      "row": 1,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "walk_left",
+      "row": 2,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "wave",
+      "row": 3,
+      "frame_count": 4,
+      "fps": 8
+    },
+    {
+      "name": "tiny",
+      "row": 4,
+      "frame_count": 5,
+      "fps": 8
+    },
+    {
+      "name": "sad",
+      "row": 5,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "sleep",
+      "row": 6,
+      "frame_count": 6,
+      "fps": 8
+    },
+    {
+      "name": "happy",
+      "row": 7,
+      "frame_count": 6,
+      "fps": 8
+    },
+    {
+      "name": "extra",
+      "row": 8,
+      "frame_count": 6,
+      "fps": 8
+    }
+  ],
+  "kebo": [
+    {
+      "name": "idle",
+      "row": 0,
+      "frame_count": 6,
+      "fps": 6
+    },
+    {
+      "name": "walk_right",
+      "row": 1,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "walk_left",
+      "row": 2,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "wave",
+      "row": 3,
+      "frame_count": 4,
+      "fps": 8
+    },
+    {
+      "name": "tiny",
+      "row": 4,
+      "frame_count": 5,
+      "fps": 8
+    },
+    {
+      "name": "sad",
+      "row": 5,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "sleep",
+      "row": 6,
+      "frame_count": 6,
+      "fps": 8
+    },
+    {
+      "name": "happy",
+      "row": 7,
+      "frame_count": 6,
+      "fps": 8
+    },
+    {
+      "name": "extra",
+      "row": 8,
+      "frame_count": 6,
+      "fps": 8
+    }
+  ],
+  "noir-webling": [
+    {
+      "name": "idle",
+      "row": 0,
+      "frame_count": 6,
+      "fps": 6
+    },
+    {
+      "name": "walk_right",
+      "row": 1,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "walk_left",
+      "row": 2,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "wave",
+      "row": 3,
+      "frame_count": 4,
+      "fps": 8
+    },
+    {
+      "name": "tiny",
+      "row": 4,
+      "frame_count": 5,
+      "fps": 8
+    },
+    {
+      "name": "sad",
+      "row": 5,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "sleep",
+      "row": 6,
+      "frame_count": 6,
+      "fps": 8
+    },
+    {
+      "name": "happy",
+      "row": 7,
+      "frame_count": 6,
+      "fps": 8
+    },
+    {
+      "name": "extra",
+      "row": 8,
+      "frame_count": 6,
+      "fps": 8
+    }
+  ],
+  "nukey": [
+    {
+      "name": "idle",
+      "row": 0,
+      "frame_count": 6,
+      "fps": 6
+    },
+    {
+      "name": "walk_right",
+      "row": 1,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "walk_left",
+      "row": 2,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "wave",
+      "row": 3,
+      "frame_count": 4,
+      "fps": 8
+    },
+    {
+      "name": "tiny",
+      "row": 4,
+      "frame_count": 5,
+      "fps": 8
+    },
+    {
+      "name": "sad",
+      "row": 5,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "sleep",
+      "row": 6,
+      "frame_count": 6,
+      "fps": 8
+    },
+    {
+      "name": "happy",
+      "row": 7,
+      "frame_count": 6,
+      "fps": 8
+    },
+    {
+      "name": "extra",
+      "row": 8,
+      "frame_count": 6,
+      "fps": 8
+    }
+  ],
+  "pixel-panda": [
+    {
+      "name": "idle",
+      "row": 0,
+      "frame_count": 6,
+      "fps": 6
+    },
+    {
+      "name": "walk_right",
+      "row": 1,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "walk_left",
+      "row": 2,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "wave",
+      "row": 3,
+      "frame_count": 4,
+      "fps": 8
+    },
+    {
+      "name": "tiny",
+      "row": 4,
+      "frame_count": 5,
+      "fps": 8
+    },
+    {
+      "name": "sad",
+      "row": 5,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "sleep",
+      "row": 6,
+      "frame_count": 6,
+      "fps": 8
+    },
+    {
+      "name": "happy",
+      "row": 7,
+      "frame_count": 6,
+      "fps": 8
+    },
+    {
+      "name": "extra",
+      "row": 8,
+      "frame_count": 6,
+      "fps": 8
+    }
+  ],
+  "prompt-penguin": [
+    {
+      "name": "idle",
+      "row": 0,
+      "frame_count": 6,
+      "fps": 6
+    },
+    {
+      "name": "walk_right",
+      "row": 1,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "walk_left",
+      "row": 2,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "wave",
+      "row": 3,
+      "frame_count": 4,
+      "fps": 8
+    },
+    {
+      "name": "tiny",
+      "row": 4,
+      "frame_count": 5,
+      "fps": 8
+    },
+    {
+      "name": "sad",
+      "row": 5,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "sleep",
+      "row": 6,
+      "frame_count": 6,
+      "fps": 8
+    },
+    {
+      "name": "happy",
+      "row": 7,
+      "frame_count": 6,
+      "fps": 8
+    },
+    {
+      "name": "extra",
+      "row": 8,
+      "frame_count": 6,
+      "fps": 8
+    }
+  ],
+  "scoop": [
+    {
+      "name": "idle",
+      "row": 0,
+      "frame_count": 6,
+      "fps": 6
+    },
+    {
+      "name": "walk_right",
+      "row": 1,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "walk_left",
+      "row": 2,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "wave",
+      "row": 3,
+      "frame_count": 4,
+      "fps": 8
+    },
+    {
+      "name": "tiny",
+      "row": 4,
+      "frame_count": 5,
+      "fps": 8
+    },
+    {
+      "name": "sad",
+      "row": 5,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "sleep",
+      "row": 6,
+      "frame_count": 6,
+      "fps": 8
+    },
+    {
+      "name": "happy",
+      "row": 7,
+      "frame_count": 6,
+      "fps": 8
+    },
+    {
+      "name": "extra",
+      "row": 8,
+      "frame_count": 6,
+      "fps": 8
+    }
+  ],
+  "socksy": [
+    {
+      "name": "idle",
+      "row": 0,
+      "frame_count": 6,
+      "fps": 6
+    },
+    {
+      "name": "walk_right",
+      "row": 1,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "walk_left",
+      "row": 2,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "wave",
+      "row": 3,
+      "frame_count": 4,
+      "fps": 8
+    },
+    {
+      "name": "tiny",
+      "row": 4,
+      "frame_count": 5,
+      "fps": 8
+    },
+    {
+      "name": "sad",
+      "row": 5,
+      "frame_count": 8,
+      "fps": 8
+    },
+    {
+      "name": "sleep",
+      "row": 6,
+      "frame_count": 6,
+      "fps": 8
+    },
+    {
+      "name": "happy",
+      "row": 7,
+      "frame_count": 6,
+      "fps": 8
+    },
+    {
+      "name": "extra",
+      "row": 8,
+      "frame_count": 6,
+      "fps": 8
+    }
+  ]
+}
