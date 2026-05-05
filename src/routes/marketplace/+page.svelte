@@ -12,6 +12,13 @@
     order: number;
   };
 
+  type PluginLoadError = {
+    message: string;
+    kind: string;
+    plugin_abi?: number | null;
+    expected_abi?: number | null;
+  };
+
   type PluginInfo = {
     id: string;
     name: string;
@@ -22,6 +29,7 @@
     loaded: boolean;
     icon: string | null;
     nav: PluginNavInfo[];
+    load_error?: PluginLoadError | null;
   };
 
   type MarketplaceEntry = {
@@ -250,6 +258,24 @@
             </div>
             {#if updates[plugin.id]}
               <span class="update-hint">{$t("marketplace.update_hint", { version: updates[plugin.id].latest_version })}</span>
+            {/if}
+            {#if plugin.enabled && !plugin.loaded && plugin.load_error}
+              {@const incompatible =
+                plugin.load_error.kind === "abi_mismatch" ||
+                plugin.load_error.kind === "missing_abi_symbol"}
+              <div class="load-error" class:incompatible>
+                <strong>
+                  {incompatible
+                    ? $t("marketplace.plugin_incompatible_title")
+                    : $t("marketplace.plugin_load_failed_title")}
+                </strong>
+                <span>
+                  {incompatible
+                    ? $t("marketplace.plugin_incompatible_hint")
+                    : $t("marketplace.plugin_load_failed_hint")}
+                </span>
+                <code>{plugin.load_error.message}</code>
+              </div>
             {/if}
             {#if plugin.description}
               <p class="plugin-desc">{plugin.description}</p>
@@ -605,6 +631,37 @@
     font-size: 11px;
     color: var(--cta);
     font-weight: 500;
+  }
+
+  .load-error {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 10px 12px;
+    border-radius: var(--border-radius);
+    background: color-mix(in srgb, var(--error, #c1121f) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--error, #c1121f) 35%, transparent);
+    font-size: 12px;
+    color: var(--secondary);
+  }
+
+  .load-error.incompatible {
+    background: color-mix(in srgb, var(--warning, #f59e0b) 12%, transparent);
+    border-color: color-mix(in srgb, var(--warning, #f59e0b) 35%, transparent);
+  }
+
+  .load-error strong {
+    font-size: 12px;
+    color: var(--secondary);
+  }
+
+  .load-error code {
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 11px;
+    word-break: break-word;
+    background: var(--surface);
+    padding: 2px 6px;
+    border-radius: 4px;
   }
 
   .uninstall-btn {

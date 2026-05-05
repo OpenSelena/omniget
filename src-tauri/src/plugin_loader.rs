@@ -4,6 +4,7 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use omniget_plugin_sdk::{InstalledPlugin, OmnigetPlugin, PluginHost, PluginManifest, ABI_VERSION};
+use serde::Serialize;
 use tracing;
 
 pub struct LoadedPlugin {
@@ -15,10 +16,30 @@ pub struct LoadedPlugin {
 unsafe impl Send for LoadedPlugin {}
 unsafe impl Sync for LoadedPlugin {}
 
+#[derive(Debug, Clone, Serialize)]
+pub struct PluginLoadError {
+    pub message: String,
+    pub kind: String,
+    pub plugin_abi: Option<u32>,
+    pub expected_abi: Option<u32>,
+}
+
+impl PluginLoadError {
+    fn simple(kind: &str, message: impl Into<String>) -> Self {
+        Self {
+            message: message.into(),
+            kind: kind.to_string(),
+            plugin_abi: None,
+            expected_abi: None,
+        }
+    }
+}
+
 pub struct PluginManager {
     plugins_dir: PathBuf,
     loaded: HashMap<String, LoadedPlugin>,
     installed: Vec<InstalledPlugin>,
+    load_errors: HashMap<String, PluginLoadError>,
 }
 
 impl PluginManager {
@@ -28,6 +49,7 @@ impl PluginManager {
             plugins_dir,
             loaded: HashMap::new(),
             installed,
+            load_errors: HashMap::new(),
         }
     }
 
@@ -54,9 +76,11 @@ impl PluginManager {
                         loaded.manifest.version
                     );
                     self.loaded.insert(entry.id.clone(), loaded);
+                    self.load_errors.remove(&entry.id);
                 }
                 Err(e) => {
-                    tracing::warn!("Plugin {} not loaded: {e}", entry.id);
+                    tracing::warn!("Plugin {} not loaded ({}): {}", entry.id, e.kind, e.message);
+                    self.load_errors.insert(entry.id.clone(), e);
                 }
             }
         }
@@ -64,6 +88,10 @@ impl PluginManager {
 
     pub fn get(&self, id: &str) -> Option<&LoadedPlugin> {
         self.loaded.get(id)
+    }
+
+    pub fn load_error(&self, id: &str) -> Option<&PluginLoadError> {
+        self.load_errors.get(id)
     }
 
     pub fn loaded_plugins(&self) -> Vec<&LoadedPlugin> {
@@ -116,6 +144,7 @@ impl PluginManager {
             let _leaked_lib = loaded._lib.take();
             std::mem::forget(_leaked_lib);
         }
+        self.load_errors.remove(plugin_id);
         self.installed.retain(|p| p.id != plugin_id);
         self.save_installed()?;
 
@@ -141,38 +170,64 @@ impl PluginManager {
 fn load_single_plugin(
     plugin_dir: &Path,
     host: Arc<dyn PluginHost>,
-) -> anyhow::Result<LoadedPlugin> {
+) -> Result<LoadedPlugin, PluginLoadError> {
     let manifest_path = plugin_dir.join("plugin.json");
-    let manifest_str = fs::read_to_string(&manifest_path)
-        .map_err(|e| anyhow::anyhow!("Cannot read plugin.json: {e}"))?;
-    let manifest: PluginManifest = serde_json::from_str(&manifest_str)
-        .map_err(|e| anyhow::anyhow!("Invalid plugin.json: {e}"))?;
+    let manifest_str = fs::read_to_string(&manifest_path).map_err(|e| {
+        PluginLoadError::simple("manifest_read", format!("Cannot read plugin.json: {e}"))
+    })?;
+    let manifest: PluginManifest = serde_json::from_str(&manifest_str).map_err(|e| {
+        PluginLoadError::simple("manifest_parse", format!("Invalid plugin.json: {e}"))
+    })?;
 
-    let lib_path = find_native_lib(plugin_dir)
-        .ok_or_else(|| anyhow::anyhow!("No native library found in {}", plugin_dir.display()))?;
+    let lib_path = find_native_lib(plugin_dir).ok_or_else(|| {
+        PluginLoadError::simple(
+            "no_native_lib",
+            format!("No native library found in {}", plugin_dir.display()),
+        )
+    })?;
 
-    let lib = unsafe { libloading::Library::new(&lib_path) }
-        .map_err(|e| anyhow::anyhow!("Failed to load {}: {e}", lib_path.display()))?;
+    let lib = unsafe { libloading::Library::new(&lib_path) }.map_err(|e| {
+        PluginLoadError::simple(
+            "library_load",
+            format!("Failed to load {}: {e}", lib_path.display()),
+        )
+    })?;
 
     let abi_fn: libloading::Symbol<extern "C" fn() -> u32> =
-        unsafe { lib.get(b"omniget_plugin_abi_version") }
-            .map_err(|_| anyhow::anyhow!("Missing omniget_plugin_abi_version symbol"))?;
+        unsafe { lib.get(b"omniget_plugin_abi_version") }.map_err(|_| {
+            PluginLoadError {
+                message: format!(
+                    "Missing omniget_plugin_abi_version symbol (plugin built against an older SDK; core expects ABI v{})",
+                    ABI_VERSION
+                ),
+                kind: "missing_abi_symbol".to_string(),
+                plugin_abi: None,
+                expected_abi: Some(ABI_VERSION),
+            }
+        })?;
 
     let plugin_abi = abi_fn();
     if plugin_abi != ABI_VERSION {
-        anyhow::bail!(
-            "ABI mismatch: plugin has v{}, core expects v{}",
-            plugin_abi,
-            ABI_VERSION
-        );
+        return Err(PluginLoadError {
+            message: format!(
+                "ABI mismatch: plugin has v{}, core expects v{}",
+                plugin_abi, ABI_VERSION
+            ),
+            kind: "abi_mismatch".to_string(),
+            plugin_abi: Some(plugin_abi),
+            expected_abi: Some(ABI_VERSION),
+        });
     }
 
     let init_fn: libloading::Symbol<extern "C" fn() -> *mut dyn OmnigetPlugin> =
-        unsafe { lib.get(b"omniget_plugin_init") }
-            .map_err(|_| anyhow::anyhow!("Missing omniget_plugin_init symbol"))?;
+        unsafe { lib.get(b"omniget_plugin_init") }.map_err(|_| {
+            PluginLoadError::simple("missing_init_symbol", "Missing omniget_plugin_init symbol")
+        })?;
 
     let mut plugin = unsafe { Box::from_raw(init_fn()) };
-    plugin.initialize(host)?;
+    plugin.initialize(host).map_err(|e| {
+        PluginLoadError::simple("initialize", format!("Plugin init failed: {e}"))
+    })?;
 
     Ok(LoadedPlugin {
         _lib: Some(lib),

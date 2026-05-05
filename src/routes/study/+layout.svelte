@@ -248,8 +248,8 @@
       ? [
           {
             id: "create-page",
-            label: "Criar página",
-            hint: "Nova página em branco",
+            label: $t("study.palette.action_create_page_label"),
+            hint: $t("study.palette.action_create_page_hint"),
             icon: "+",
             run: () => {
               closePalette();
@@ -258,7 +258,7 @@
           },
           {
             id: "open-daily",
-            label: "Abrir daily de hoje",
+            label: $t("study.palette.action_open_daily_label"),
             hint: "Ctrl+J",
             icon: "📅",
             run: () => {
@@ -268,7 +268,7 @@
           },
           {
             id: "open-templates",
-            label: "Abrir templates",
+            label: $t("study.palette.action_open_templates_label"),
             hint: "/study/notes/templates",
             icon: "▤",
             run: () => {
@@ -278,8 +278,8 @@
           },
           {
             id: "open-graph",
-            label: "Abrir grafo",
-            hint: "Visualização do grafo",
+            label: $t("study.palette.action_open_graph_label"),
+            hint: $t("study.palette.action_open_graph_hint"),
             icon: "◈",
             run: () => {
               closePalette();
@@ -288,8 +288,8 @@
           },
           {
             id: "rebuild-fts",
-            label: "Reindexar busca (FTS)",
-            hint: "Rebuild full-text index",
+            label: $t("study.palette.action_rebuild_fts_label"),
+            hint: $t("study.palette.action_rebuild_fts_hint"),
             icon: "↻",
             run: () => {
               closePalette();
@@ -298,8 +298,8 @@
           },
           {
             id: "export-graph",
-            label: "Exportar grafo (JSON)",
-            hint: "Download notes-graph.json",
+            label: $t("study.palette.action_export_graph_label"),
+            hint: $t("study.palette.action_export_graph_hint"),
             icon: "↓",
             run: () => {
               closePalette();
@@ -313,7 +313,7 @@
       ...notesActions,
       {
         id: "open-settings",
-        label: "Abrir configurações",
+        label: $t("study.palette.action_open_settings_label"),
         hint: "/study/settings",
         icon: "⚙",
         run: () => {
@@ -323,8 +323,8 @@
       },
       {
         id: "vacuum",
-        label: "Compactar banco (vacuum)",
-        hint: "Manutenção do SQLite",
+        label: $t("study.palette.action_vacuum_label"),
+        hint: $t("study.palette.action_vacuum_hint"),
         icon: "▽",
         run: () => {
           closePalette();
@@ -549,7 +549,7 @@
       onclick={(e) => e.stopPropagation()}
       onkeydown={(e) => { if (e.key === "Escape") { e.stopPropagation(); closePalette(); } }}
     >
-      <div class="palette-tabs" role="tablist" aria-label="Modos do palette">
+      <div class="palette-tabs" role="tablist" aria-label={$t("study.palette.aria_modes")}>
         <button
           type="button"
           class="palette-tab"
@@ -557,7 +557,7 @@
           role="tab"
           aria-selected={paletteTab === "search"}
           onclick={() => (paletteTab = "search")}
-        >Buscar</button>
+        >{$t("study.palette.tab_search")}</button>
         {#if STUDY_NOTES_ENABLED}
           <button
             type="button"
@@ -566,7 +566,7 @@
             role="tab"
             aria-selected={paletteTab === "jump"}
             onclick={() => (paletteTab = "jump")}
-          >Ir para</button>
+          >{$t("study.palette.tab_jump")}</button>
         {/if}
         <button
           type="button"
@@ -575,7 +575,7 @@
           role="tab"
           aria-selected={paletteTab === "action"}
           onclick={() => (paletteTab = "action")}
-        >Ações</button>
+        >{$t("study.palette.tab_action")}</button>
       </div>
 
       {#if paletteTab === "search"}
@@ -654,7 +654,7 @@
       {:else if paletteTab === "jump"}
         <div class="palette-body">
           <section>
-            <h4>Atalhos</h4>
+            <h4>{$t("study.palette.heading_shortcuts")}</h4>
             <ul>
               <li>
                 <button
@@ -664,7 +664,7 @@
                     void openJournalToday();
                   }}
                 >
-                  📅 Daily de hoje
+                  📅 {$t("study.palette.shortcut_daily")}
                   <small>Ctrl+J</small>
                 </button>
               </li>
@@ -676,7 +676,7 @@
                     void goto("/study/notes/journal");
                   }}
                 >
-                  📆 Histórico de journal
+                  📆 {$t("study.palette.shortcut_journal_history")}
                 </button>
               </li>
               <li>
@@ -687,7 +687,7 @@
                     void goto("/study/notes/graph");
                   }}
                 >
-                  ◈ Grafo
+                  ◈ {$t("study.palette.shortcut_graph")}
                 </button>
               </li>
               <li>
@@ -698,15 +698,15 @@
                     void goto("/study/notes/templates");
                   }}
                 >
-                  ▤ Templates
+                  ▤ {$t("study.palette.shortcut_templates")}
                 </button>
               </li>
             </ul>
           </section>
           <section>
-            <h4>Páginas recentes</h4>
+            <h4>{$t("study.palette.heading_recent_pages")}</h4>
             {#if jumpRecents.length === 0}
-              <p class="muted">Sem páginas ainda.</p>
+              <p class="muted">{$t("study.palette.empty_pages")}</p>
             {:else}
               <ul>
                 {#each jumpRecents as p (p.id)}
@@ -730,7 +730,7 @@
       {:else}
         <div class="palette-body">
           <section>
-            <h4>Ações</h4>
+            <h4>{$t("study.palette.heading_actions")}</h4>
             <ul>
               {#each sortedActions as a (a.id)}
                 <li>
@@ -754,7 +754,7 @@
             aria-valuenow={xpState.level_progress_pct}
             aria-valuemin="0"
             aria-valuemax="100"
-            aria-label={`${xpState.level_progress_pct}% até nível ${xpState.level + 1}`}
+            aria-label={$t("study.palette.aria_xp_progress", { pct: xpState.level_progress_pct, level: xpState.level + 1 })}
           >
             <div
               class="palette-bar-fill"

@@ -27,8 +27,21 @@
     { id: "rocketseat", name: "Rocketseat", color: "#8257E5", icon: "rocketseat", commands: { check_session: "rocketseat_check_session" } },
   ];
 
-  type PluginStatus = "checking" | "ready" | "not-installed" | "needs-restart";
+  type PluginStatus =
+    | "checking"
+    | "ready"
+    | "not-installed"
+    | "needs-restart"
+    | "incompatible"
+    | "load-failed";
+  type PluginLoadError = {
+    message: string;
+    kind: string;
+    plugin_abi?: number | null;
+    expected_abi?: number | null;
+  };
   let pluginStatus = $state<PluginStatus>("checking");
+  let loadError = $state<PluginLoadError | null>(null);
 
   let platforms: PlatformConfig[] = $state([]);
   let searchQuery = $state("");
@@ -46,7 +59,12 @@
   onMount(async () => {
     console.log("[courses] onMount start");
     try {
-      const plugins = await invoke<{ id: string; enabled: boolean; loaded: boolean }[]>("list_plugins");
+      const plugins = await invoke<{
+        id: string;
+        enabled: boolean;
+        loaded: boolean;
+        load_error?: PluginLoadError | null;
+      }[]>("list_plugins");
       console.log("[courses] list_plugins:", JSON.stringify(plugins));
       const courses = plugins.find((p) => p.id === "courses");
       if (!courses || !courses.enabled) {
@@ -55,8 +73,18 @@
         return;
       }
       if (!courses.loaded) {
-        console.log("[courses] plugin enabled but not loaded — needs restart");
-        pluginStatus = "needs-restart";
+        if (courses.load_error) {
+          loadError = courses.load_error;
+          pluginStatus =
+            courses.load_error.kind === "abi_mismatch" ||
+            courses.load_error.kind === "missing_abi_symbol"
+              ? "incompatible"
+              : "load-failed";
+          console.log("[courses] plugin load failed:", courses.load_error);
+        } else {
+          console.log("[courses] plugin enabled but not loaded — needs restart");
+          pluginStatus = "needs-restart";
+        }
         return;
       }
       console.log("[courses] plugin ready");
@@ -124,6 +152,24 @@
   <div class="plugin-guard">
     <h2>{$t("marketplace.restart_required")}</h2>
     <p>{$t("marketplace.plugin_restart_hint")}</p>
+  </div>
+{:else if pluginStatus === "incompatible"}
+  <div class="plugin-guard">
+    <h2>{$t("marketplace.plugin_incompatible_title")}</h2>
+    <p>{$t("marketplace.plugin_incompatible_hint")}</p>
+    <a href="/marketplace" class="guard-link">{$t("marketplace.go_to_marketplace")}</a>
+    {#if loadError}
+      <p class="guard-detail"><code>{loadError.message}</code></p>
+    {/if}
+  </div>
+{:else if pluginStatus === "load-failed"}
+  <div class="plugin-guard">
+    <h2>{$t("marketplace.plugin_load_failed_title")}</h2>
+    <p>{$t("marketplace.plugin_load_failed_hint")}</p>
+    <a href="/marketplace" class="guard-link">{$t("marketplace.go_to_marketplace")}</a>
+    {#if loadError}
+      <p class="guard-detail"><code>{loadError.message}</code></p>
+    {/if}
   </div>
 {:else}
 <div class="courses-page">
@@ -325,6 +371,8 @@
   .plugin-guard h2 { font-size: 18px; color: var(--secondary); }
   .plugin-guard p { font-size: 14px; max-width: 300px; }
   .guard-link { padding: 10px 24px; font-size: 14px; font-weight: 500; background: var(--cta); color: var(--on-cta); border-radius: var(--border-radius); text-decoration: none; }
+  .guard-detail { font-size: 12px; color: var(--tertiary); max-width: 480px; margin-top: calc(var(--padding) * 0.5); }
+  .guard-detail code { font-family: var(--font-mono, ui-monospace, monospace); font-size: 11px; word-break: break-word; background: var(--surface); padding: 2px 6px; border-radius: 4px; }
   .spinner { width: 24px; height: 24px; border: 2px solid var(--input-border); border-top-color: var(--secondary); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 </style>

@@ -5,8 +5,21 @@
   import { pluginInvoke } from "$lib/plugin-invoke";
   import { t } from "$lib/i18n";
 
-  type PluginStatus = "checking" | "ready" | "not-installed" | "needs-restart";
+  type PluginStatus =
+    | "checking"
+    | "ready"
+    | "not-installed"
+    | "needs-restart"
+    | "incompatible"
+    | "load-failed";
+  type PluginLoadError = {
+    message: string;
+    kind: string;
+    plugin_abi?: number | null;
+    expected_abi?: number | null;
+  };
   let pluginStatus = $state<PluginStatus>("checking");
+  let loadError = $state<PluginLoadError | null>(null);
 
   type Course = {
     id: number;
@@ -137,16 +150,28 @@
 
   onMount(async () => {
     try {
-      const plugins = await invoke<{ id: string; enabled: boolean; loaded: boolean }[]>(
-        "list_plugins",
-      );
+      const plugins = await invoke<{
+        id: string;
+        enabled: boolean;
+        loaded: boolean;
+        load_error?: PluginLoadError | null;
+      }[]>("list_plugins");
       const study = plugins.find((p) => p.id === "study");
       if (!study || !study.enabled) {
         pluginStatus = "not-installed";
         return;
       }
       if (!study.loaded) {
-        pluginStatus = "needs-restart";
+        if (study.load_error) {
+          loadError = study.load_error;
+          pluginStatus =
+            study.load_error.kind === "abi_mismatch" ||
+            study.load_error.kind === "missing_abi_symbol"
+              ? "incompatible"
+              : "load-failed";
+        } else {
+          pluginStatus = "needs-restart";
+        }
         return;
       }
       pluginStatus = "ready";
@@ -215,6 +240,24 @@
   <div class="plugin-guard">
     <h2>{$t("marketplace.restart_required")}</h2>
     <p>{$t("marketplace.plugin_restart_hint")}</p>
+  </div>
+{:else if pluginStatus === "incompatible"}
+  <div class="plugin-guard">
+    <h2>{$t("marketplace.plugin_incompatible_title")}</h2>
+    <p>{$t("marketplace.plugin_incompatible_hint")}</p>
+    <a href="/marketplace" class="guard-link">{$t("marketplace.go_to_marketplace")}</a>
+    {#if loadError}
+      <p class="guard-detail"><code>{loadError.message}</code></p>
+    {/if}
+  </div>
+{:else if pluginStatus === "load-failed"}
+  <div class="plugin-guard">
+    <h2>{$t("marketplace.plugin_load_failed_title")}</h2>
+    <p>{$t("marketplace.plugin_load_failed_hint")}</p>
+    <a href="/marketplace" class="guard-link">{$t("marketplace.go_to_marketplace")}</a>
+    {#if loadError}
+      <p class="guard-detail"><code>{loadError.message}</code></p>
+    {/if}
   </div>
 {:else}
   <section class="hub">
@@ -625,6 +668,20 @@
     color: var(--on-cta);
     border-radius: var(--border-radius);
     text-decoration: none;
+  }
+  .guard-detail {
+    font-size: 12px;
+    color: var(--tertiary);
+    max-width: 480px;
+    margin-top: calc(var(--padding) * 0.5);
+  }
+  .guard-detail code {
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 11px;
+    word-break: break-word;
+    background: var(--surface);
+    padding: 2px 6px;
+    border-radius: 4px;
   }
   .spinner {
     width: 24px;

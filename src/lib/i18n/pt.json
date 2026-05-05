@@ -213,10 +213,10 @@
       "organize_by_platform": "Organizar por plataforma",
       "organize_by_platform_desc": "Salvar arquivos em subpastas com o nome da plataforma",
       "download_subtitles": "Baixar legendas",
+      "download_subtitles_desc": "Baixar legendas disponíveis junto com vídeos (YouTube)",
       "what_to_also_save": "O que também salvar",
       "youtube_specific": "Específico do YouTube",
       "telegram_plugin_section": "Telegram (plugin)",
-      "download_subtitles_desc": "Baixar legendas disponíveis junto com vídeos (YouTube)",
       "include_auto_subtitles": "Incluir legendas auto-geradas",
       "include_auto_subtitles_desc": "Também baixar legendas geradas pelo YouTube quando não há legendas manuais (qualidade varia)",
       "translate_metadata": "Traduzir título e descrição do vídeo para o idioma do app",
@@ -291,6 +291,18 @@
       "preset_tech_minimal_name": "Tech minimal",
       "preset_tech_minimal_desc": "Plex Mono em tudo. Divisivo. Para devs que gostam."
     },
+    "proxy": {
+      "title": "Proxy",
+      "enabled": "Ativar proxy",
+      "type": "Tipo",
+      "host": "Host",
+      "port": "Porta",
+      "username": "Usuário",
+      "password": "Senha"
+    },
+    "ytdlp_flags": {
+      "title": "Flags do yt-dlp"
+    },
     "advanced": {
       "title": "Avançado",
       "max_concurrent_downloads": "Downloads simultâneos",
@@ -307,18 +319,6 @@
       "torrent_listen_port_desc": "Porta TCP para conexões BitTorrent de entrada",
       "cookies_from_browser": "Ler cookies direto de um perfil do navegador (avançado)",
       "cookies_from_browser_desc": "Só configure se a extensão do navegador não funcionar. A maioria dos usuários deve deixar vazio."
-    },
-    "ytdlp_flags": {
-      "title": "Flags do yt-dlp"
-    },
-    "proxy": {
-      "title": "Proxy",
-      "enabled": "Ativar proxy",
-      "type": "Tipo",
-      "host": "Host",
-      "port": "Porta",
-      "username": "Usuário",
-      "password": "Senha"
     },
     "cat_appearance": "Aparência",
     "cat_typography": "Tipografia",
@@ -470,7 +470,13 @@
     "plugin_not_installed": "Plugin nao instalado",
     "plugin_install_hint": "Instale este plugin pelo Marketplace para usa-lo.",
     "go_to_marketplace": "Ir para o Marketplace",
-    "plugin_restart_hint": "Reinicie o OmniGet para carregar este plugin."
+    "plugin_restart_hint": "Reinicie o OmniGet para carregar este plugin.",
+    "plugin_incompatible_title": "Plugin incompativel com esta versao",
+    "plugin_incompatible_hint": "Este plugin foi compilado para uma versao mais antiga do OmniGet e nao pode ser carregado. Reinstale-o pelo Marketplace para obter uma versao compativel — reiniciar nao vai resolver.",
+    "plugin_load_failed_title": "Falha ao carregar o plugin",
+    "plugin_load_failed_hint": "O OmniGet nao conseguiu carregar este plugin. Tente reinstala-lo pelo Marketplace.",
+    "plugin_load_error_details": "Detalhes: {{error}}",
+    "reinstall": "Reinstalar"
   },
   "services": {
     "title": "Suporta YouTube, Instagram e mais 1000 sites",
@@ -805,6 +811,34 @@
       "no_results": "Nenhum resultado para \"{{term}}\"",
       "hint": "Ctrl+K para abrir · Esc para fechar"
     },
+    "palette": {
+      "aria_modes": "Modos do palette",
+      "tab_search": "Buscar",
+      "tab_jump": "Ir para",
+      "tab_action": "Ações",
+      "heading_shortcuts": "Atalhos",
+      "heading_recent_pages": "Páginas recentes",
+      "heading_actions": "Ações",
+      "empty_pages": "Sem páginas ainda.",
+      "shortcut_daily": "Daily de hoje",
+      "shortcut_journal_history": "Histórico de journal",
+      "shortcut_graph": "Grafo",
+      "shortcut_templates": "Templates",
+      "aria_xp_progress": "{{pct}}% até nível {{level}}",
+      "action_create_page_label": "Criar página",
+      "action_create_page_hint": "Nova página em branco",
+      "action_open_daily_label": "Abrir daily de hoje",
+      "action_open_templates_label": "Abrir templates",
+      "action_open_graph_label": "Abrir grafo",
+      "action_open_graph_hint": "Visualização do grafo",
+      "action_rebuild_fts_label": "Reindexar busca (FTS)",
+      "action_rebuild_fts_hint": "Rebuild full-text index",
+      "action_export_graph_label": "Exportar grafo (JSON)",
+      "action_export_graph_hint": "Download notes-graph.json",
+      "action_open_settings_label": "Abrir configurações",
+      "action_vacuum_label": "Compactar banco (vacuum)",
+      "action_vacuum_hint": "Manutenção do SQLite"
+    },
     "library": {
       "title": "Biblioteca",
       "empty": "Nenhum curso indexado. Rode uma varredura em Configurações.",
@@ -1065,7 +1099,6 @@
         "copy_to": "Copiar para…",
         "upload_files": "Enviar",
         "upload_hint": "Enviar arquivos pra este chat",
-        "keymap_title": "Atalhos de teclado",
         "kbd_help": "Abrir esta ajuda",
         "kbd_esc": "Fechar player / limpar seleção",
         "kbd_click": "Abrir player",

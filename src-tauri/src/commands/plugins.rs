@@ -3,7 +3,7 @@ use std::sync::Arc;
 use omniget_plugin_sdk::{PluginManifest, RegistryEntry};
 use serde::{Deserialize, Serialize};
 
-use crate::plugin_loader::PluginManager;
+use crate::plugin_loader::{PluginLoadError, PluginManager};
 
 #[derive(Debug, Serialize)]
 pub struct PluginInfo {
@@ -16,6 +16,8 @@ pub struct PluginInfo {
     pub loaded: bool,
     pub icon: Option<String>,
     pub nav: Vec<PluginNavInfo>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub load_error: Option<PluginLoadError>,
 }
 
 #[derive(Debug, Serialize)]
@@ -63,8 +65,10 @@ pub fn list_plugins(
                             order: n.order,
                         })
                         .collect(),
+                    load_error: None,
                 },
                 None => {
+                    let load_error = manager.load_error(&entry.id).cloned();
                     let manifest_path = manager.plugins_dir().join(&entry.id).join("plugin.json");
                     let manifest: Option<omniget_plugin_sdk::PluginManifest> =
                         std::fs::read_to_string(&manifest_path)
@@ -96,6 +100,7 @@ pub fn list_plugins(
                                     order: n.order,
                                 })
                                 .collect(),
+                            load_error,
                         },
                         None => PluginInfo {
                             id: entry.id.clone(),
@@ -107,6 +112,7 @@ pub fn list_plugins(
                             loaded: false,
                             icon: None,
                             nav: Vec::new(),
+                            load_error,
                         },
                     }
                 }

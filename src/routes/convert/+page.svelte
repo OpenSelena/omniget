@@ -22,19 +22,46 @@
     type HwAccelInfo,
   } from "$lib/stores/convert-store.svelte";
 
-  type PluginStatus = "checking" | "ready" | "needs-restart" | "not-installed";
+  type PluginStatus =
+    | "checking"
+    | "ready"
+    | "needs-restart"
+    | "not-installed"
+    | "incompatible"
+    | "load-failed";
+  type PluginLoadError = {
+    message: string;
+    kind: string;
+    plugin_abi?: number | null;
+    expected_abi?: number | null;
+  };
   let pluginStatus = $state<PluginStatus>("checking");
+  let loadError = $state<PluginLoadError | null>(null);
 
   onMount(async () => {
     try {
-      const plugins = await invoke<{ id: string; enabled: boolean; loaded: boolean }[]>("list_plugins");
+      const plugins = await invoke<{
+        id: string;
+        enabled: boolean;
+        loaded: boolean;
+        load_error?: PluginLoadError | null;
+      }[]>("list_plugins");
       const plugin = plugins.find((p) => p.id === "convert");
       if (!plugin || !plugin.enabled) {
         pluginStatus = "not-installed";
         return;
       }
       if (!plugin.loaded) {
-        pluginStatus = "needs-restart";
+        if (plugin.load_error) {
+          loadError = plugin.load_error;
+          pluginStatus =
+            plugin.load_error.kind === "abi_mismatch" ||
+            plugin.load_error.kind === "missing_abi_symbol"
+              ? "incompatible"
+              : "load-failed";
+        } else {
+          pluginStatus = "needs-restart";
+        }
         return;
       }
       pluginStatus = "ready";
@@ -215,6 +242,24 @@
   <div class="plugin-guard">
     <h2>{$t("marketplace.restart_required")}</h2>
     <p>{$t("marketplace.plugin_restart_hint")}</p>
+  </div>
+{:else if pluginStatus === "incompatible"}
+  <div class="plugin-guard">
+    <h2>{$t("marketplace.plugin_incompatible_title")}</h2>
+    <p>{$t("marketplace.plugin_incompatible_hint")}</p>
+    <a href="/marketplace" class="guard-link">{$t("marketplace.go_to_marketplace")}</a>
+    {#if loadError}
+      <p class="guard-detail"><code>{loadError.message}</code></p>
+    {/if}
+  </div>
+{:else if pluginStatus === "load-failed"}
+  <div class="plugin-guard">
+    <h2>{$t("marketplace.plugin_load_failed_title")}</h2>
+    <p>{$t("marketplace.plugin_load_failed_hint")}</p>
+    <a href="/marketplace" class="guard-link">{$t("marketplace.go_to_marketplace")}</a>
+    {#if loadError}
+      <p class="guard-detail"><code>{loadError.message}</code></p>
+    {/if}
   </div>
 {:else}
 <div class="convert">
@@ -417,6 +462,8 @@
   .plugin-guard h2 { font-size: 18px; color: var(--secondary); }
   .plugin-guard p { font-size: 14px; max-width: 300px; }
   .guard-link { padding: 10px 24px; font-size: 14px; font-weight: 500; background: var(--cta); color: var(--on-cta); border-radius: var(--border-radius); text-decoration: none; }
+  .guard-detail { font-size: 12px; color: var(--tertiary); max-width: 480px; margin-top: calc(var(--padding) * 0.5); }
+  .guard-detail code { font-family: var(--font-mono, ui-monospace, monospace); font-size: 11px; word-break: break-word; background: var(--surface); padding: 2px 6px; border-radius: 4px; }
   .spinner { width: 24px; height: 24px; border: 2px solid var(--input-border); border-top-color: var(--secondary); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
