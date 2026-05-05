@@ -42,6 +42,11 @@
   </branding>
   <content_rating type="oars-1.1" />
   <releases>
+    <release version="0.5.1" date="2026-05-05">
+      <description>
+        <p>Plugin loading: surface ABI-mismatch errors with a "reinstall" prompt instead of an endless "restart" loop (fixes #102), and show the underlying load error on the Marketplace card. i18n: replace hardcoded Portuguese strings in the study command palette with translated keys across all 8 locales.</p>
+      </description>
+    </release>
     <release version="0.5.0" date="2026-05-03">
       <description>
         <p>Visual restructure: refreshed theme grid, reorganized settings, mascot celebrations with new "amazed" state, and gamified pets. Accessibility: aria-live regions on toasts. Reliability: torrent session shuts down gracefully on app exit, Pinterest regex validated at init. Tooling: single-command version bump, i18n keys auto-generated, multi-OS CI matrix.</p>
