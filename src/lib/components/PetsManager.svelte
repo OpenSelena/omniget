@@ -29,6 +29,9 @@
   let vibeFilter = $state<PetVibe | "">("");
   let lastSyncRelative = $state("");
 
+  let page = $state(0);
+  const PAGE_SIZE = 24;
+
   const ALL_VIBES: PetVibe[] = [
     "cozy", "calm", "playful", "cheerful", "focused", "mischievous",
     "heroic", "edgy", "mystical", "wholesome", "chaotic", "melancholic",
@@ -81,6 +84,44 @@
       return true;
     });
   });
+
+  const totalPages = $derived(Math.max(1, Math.ceil(filtered.length / PAGE_SIZE)));
+  const visible = $derived.by<LocalPetEntry[]>(() => {
+    const start = page * PAGE_SIZE;
+    return filtered.slice(start, start + PAGE_SIZE);
+  });
+
+  $effect(() => {
+    void query;
+    void kindFilter;
+    void vibeFilter;
+    page = 0;
+  });
+
+  $effect(() => {
+    if (page >= totalPages) page = Math.max(0, totalPages - 1);
+  });
+
+  function nextPage() {
+    if (page + 1 < totalPages) {
+      page += 1;
+      scrollToTop();
+    }
+  }
+  function prevPage() {
+    if (page > 0) {
+      page -= 1;
+      scrollToTop();
+    }
+  }
+  function goToPage(p: number) {
+    page = Math.max(0, Math.min(totalPages - 1, p));
+    scrollToTop();
+  }
+  function scrollToTop() {
+    const el = document.querySelector(".pets-manager");
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 
   async function activate(slug: string) {
     if (busySlug) return;
@@ -209,8 +250,19 @@
   {:else if filtered.length === 0}
     <div class="state">Nenhum pet bate com os filtros.</div>
   {:else}
+    <div class="result-info">
+      <span>
+        {filtered.length === 1
+          ? "1 pet"
+          : `${filtered.length} pets`}
+        {#if totalPages > 1}
+          · página {page + 1} de {totalPages}
+        {/if}
+      </span>
+    </div>
+
     <div class="grid">
-      {#each filtered as pet (pet.slug)}
+      {#each visible as pet (pet.slug)}
         <PetCard
           {pet}
           active={pet.slug === activeSlug}
@@ -221,6 +273,47 @@
         />
       {/each}
     </div>
+
+    {#if totalPages > 1}
+      <nav class="pagination" aria-label="Paginação de pets">
+        <button
+          type="button"
+          class="page-btn"
+          onclick={prevPage}
+          disabled={page === 0}
+          aria-label="Página anterior"
+        >
+          ← Anterior
+        </button>
+
+        <div class="page-nums">
+          {#each Array(totalPages) as _, i (i)}
+            {#if i === 0 || i === totalPages - 1 || Math.abs(i - page) <= 1}
+              <button
+                type="button"
+                class="page-num"
+                class:active={i === page}
+                onclick={() => goToPage(i)}
+              >
+                {i + 1}
+              </button>
+            {:else if Math.abs(i - page) === 2}
+              <span class="page-ellipsis" aria-hidden="true">…</span>
+            {/if}
+          {/each}
+        </div>
+
+        <button
+          type="button"
+          class="page-btn"
+          onclick={nextPage}
+          disabled={page + 1 >= totalPages}
+          aria-label="Próxima página"
+        >
+          Próxima →
+        </button>
+      </nav>
+    {/if}
   {/if}
 </section>
 
@@ -384,5 +477,75 @@
   .btn-primary:disabled {
     opacity: 0.6;
     cursor: progress;
+  }
+
+  .result-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+  }
+
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid color-mix(in srgb, var(--border) 50%, transparent);
+  }
+
+  .page-btn {
+    padding: 7px 14px;
+    background: var(--surface-hi);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-family: inherit;
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: background var(--duration-fast) var(--ease-out);
+  }
+  .page-btn:hover:not(:disabled) {
+    background: var(--surface-mut);
+    border-color: var(--accent);
+  }
+  .page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .page-nums {
+    display: flex;
+    gap: 2px;
+    align-items: center;
+  }
+  .page-num {
+    min-width: 32px;
+    padding: 6px 10px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    color: var(--text-muted);
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: background var(--duration-fast) var(--ease-out);
+  }
+  .page-num:hover {
+    background: color-mix(in srgb, var(--accent) 8%, transparent);
+    color: var(--text);
+  }
+  .page-num.active {
+    background: var(--accent);
+    color: var(--on-accent);
+    font-weight: 600;
+  }
+  .page-ellipsis {
+    color: var(--text-muted);
+    font-size: var(--text-sm);
+    padding: 0 4px;
   }
 </style>

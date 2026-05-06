@@ -203,7 +203,9 @@
     <div class="modal small" role="dialog" aria-label="Limpar histórico" aria-modal="true">
       <h3>Limpar histórico?</h3>
       <p class="warn">
-        Isso vai apagar {snapshots.length} snapshot(s) deste bloco. Não dá pra desfazer.
+        {snapshots.length === 1
+          ? "Isso apaga o snapshot deste bloco. Não dá pra desfazer."
+          : `Isso apaga ${snapshots.length} snapshots deste bloco. Não dá pra desfazer.`}
       </p>
       <footer class="foot">
         <span class="spacer"></span>

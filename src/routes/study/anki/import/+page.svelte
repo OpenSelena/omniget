@@ -60,6 +60,17 @@
   let result = $state<Result | null>(null);
   let lastSourcePath = $state("");
 
+  type ExportKind = "apkg" | "colpkg" | "json" | "csv";
+  let exporting = $state<ExportKind | null>(null);
+  let exportNotetypeId = $state<number | null>(null);
+  let exportDelimiter = $state<"" | "\t" | "," | ";">("");
+  let exportToast = $state<{ kind: "ok" | "err"; msg: string } | null>(null);
+
+  function showExportToast(kind: "ok" | "err", msg: string) {
+    exportToast = { kind, msg };
+    setTimeout(() => (exportToast = null), 3000);
+  }
+
   async function refreshLookups() {
     try {
       const [nts, ds] = await Promise.all([
@@ -70,6 +81,9 @@
       decks = ds.filter((d) => !d.filtered);
       if (csvNotetypeId === null && notetypes.length > 0) {
         csvNotetypeId = notetypes[0].id;
+      }
+      if (exportNotetypeId === null && notetypes.length > 0) {
+        exportNotetypeId = notetypes[0].id;
       }
       if (csvDeckId === null) {
         const def = decks.find((d) => d.id === 1) ?? decks[0];
@@ -89,9 +103,10 @@
     await refreshLookups();
   });
 
-  function detectKind(path: string): "apkg" | "json" | "csv" | null {
+  function detectKind(path: string): "apkg" | "colpkg" | "json" | "csv" | null {
     const lower = path.toLowerCase();
-    if (lower.endsWith(".apkg") || lower.endsWith(".colpkg")) return "apkg";
+    if (lower.endsWith(".colpkg")) return "colpkg";
+    if (lower.endsWith(".apkg")) return "apkg";
     if (lower.endsWith(".json")) return "json";
     if (lower.endsWith(".csv") || lower.endsWith(".tsv") || lower.endsWith(".txt"))
       return "csv";
@@ -124,6 +139,13 @@
         const data = await pluginInvoke<ApkgSummary>(
           "study",
           "study:anki:import:apkg",
+          { sourcePath: picked },
+        );
+        result = { kind: "apkg", data };
+      } else if (kind === "colpkg") {
+        const data = await pluginInvoke<ApkgSummary>(
+          "study",
+          "study:anki:import:colpkg",
           { sourcePath: picked },
         );
         result = { kind: "apkg", data };
@@ -161,6 +183,51 @@
     }
   }
 
+  async function pickAndExport(kind: ExportKind) {
+    if (exporting) return;
+    exporting = kind;
+    try {
+      const dialog = await import("@tauri-apps/plugin-dialog");
+      const ext =
+        kind === "apkg" ? "apkg"
+        : kind === "colpkg" ? "colpkg"
+        : kind === "json" ? "json"
+        : "csv";
+      const defaultName = `omniget-${kind}-${new Date().toISOString().slice(0, 10)}.${ext}`;
+      const target = await dialog.save({
+        defaultPath: defaultName,
+        filters: [{ name: ext.toUpperCase(), extensions: [ext] }],
+      });
+      if (typeof target !== "string" || !target) {
+        exporting = null;
+        return;
+      }
+      if (kind === "apkg") {
+        await pluginInvoke("study", "study:anki:export:apkg", { targetPath: target });
+      } else if (kind === "colpkg") {
+        await pluginInvoke("study", "study:anki:export:colpkg", { targetPath: target });
+      } else if (kind === "json") {
+        await pluginInvoke("study", "study:anki:export:json", { targetPath: target });
+      } else {
+        if (exportNotetypeId == null) {
+          showExportToast("err", "Selecione um modelo para exportar CSV");
+          return;
+        }
+        const delim = exportDelimiter === "" ? null : exportDelimiter;
+        await pluginInvoke("study", "study:anki:export:csv_notes", {
+          notetypeId: exportNotetypeId,
+          targetPath: target,
+          delimiter: delim,
+        });
+      }
+      showExportToast("ok", `Exportado · ${target.split(/[\\/]/).pop()}`);
+    } catch (e) {
+      showExportToast("err", e instanceof Error ? e.message : String(e));
+    } finally {
+      exporting = null;
+    }
+  }
+
   function summaryRows(r: Result): { label: string; value: number | string }[] {
     if (r.kind === "apkg") {
       return [
@@ -192,7 +259,7 @@
 </script>
 
 <section class="study-page">
-  <PageHero title="Importar" subtitle="Carregue uma coleção do Anki ou um arquivo de notas" />
+  <PageHero title="Importar / Exportar" subtitle="Mover dados entre o omniget e outros clientes Anki" />
 
   <div class="format-grid">
     <article class="format-card">
@@ -253,6 +320,93 @@
   {#if error}
     <p class="error">{error}</p>
   {/if}
+
+  <section class="export-section">
+    <h2 class="section-heading">Exportar</h2>
+    <p class="section-lede">
+      Salve a coleção em um arquivo. Útil pra backup externo, migração ou
+      compartilhamento.
+    </p>
+
+    {#if exportToast}
+      <div class="toast" class:err={exportToast.kind === "err"} role="status">
+        {exportToast.msg}
+      </div>
+    {/if}
+
+    <div class="export-grid">
+      <article class="export-card">
+        <h3>.apkg</h3>
+        <p>Compatível com Anki desktop. Inclui notes, cards, decks, modelos e mídia.</p>
+        <button
+          type="button"
+          class="btn-secondary"
+          onclick={() => pickAndExport("apkg")}
+          disabled={exporting !== null || busy}
+        >
+          {exporting === "apkg" ? "Exportando…" : "Exportar .apkg"}
+        </button>
+      </article>
+
+      <article class="export-card">
+        <h3>.colpkg</h3>
+        <p>Coleção completa (formato preferido pelo Anki para backup full).</p>
+        <button
+          type="button"
+          class="btn-secondary"
+          onclick={() => pickAndExport("colpkg")}
+          disabled={exporting !== null || busy}
+        >
+          {exporting === "colpkg" ? "Exportando…" : "Exportar .colpkg"}
+        </button>
+      </article>
+
+      <article class="export-card">
+        <h3>.json</h3>
+        <p>Snapshot interno. Importável de volta no omniget com round-trip completo.</p>
+        <button
+          type="button"
+          class="btn-secondary"
+          onclick={() => pickAndExport("json")}
+          disabled={exporting !== null || busy}
+        >
+          {exporting === "json" ? "Exportando…" : "Exportar .json"}
+        </button>
+      </article>
+
+      <article class="export-card csv-card">
+        <h3>.csv (notes)</h3>
+        <p>Planilha de notes para um modelo específico. Útil pra editar em Excel/Sheets.</p>
+        <div class="export-options">
+          <label>
+            <span>Modelo</span>
+            <select bind:value={exportNotetypeId} disabled={exporting !== null}>
+              {#each notetypes as nt (nt.id)}
+                <option value={nt.id}>{nt.name}</option>
+              {/each}
+            </select>
+          </label>
+          <label>
+            <span>Delimitador</span>
+            <select bind:value={exportDelimiter} disabled={exporting !== null}>
+              <option value="">Auto</option>
+              <option value={"\t"}>Tab</option>
+              <option value=",">Vírgula</option>
+              <option value=";">Ponto-e-vírgula</option>
+            </select>
+          </label>
+        </div>
+        <button
+          type="button"
+          class="btn-secondary"
+          onclick={() => pickAndExport("csv")}
+          disabled={exporting !== null || busy || exportNotetypeId == null}
+        >
+          {exporting === "csv" ? "Exportando…" : "Exportar .csv"}
+        </button>
+      </article>
+    </div>
+  </section>
 
   {#if result}
     <section class="card result-card">
@@ -510,8 +664,115 @@
     outline-offset: 2px;
   }
 
+  .export-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--padding);
+    padding-top: calc(var(--padding) * 1.5);
+    border-top: 1px solid color-mix(in oklab, var(--input-border) 50%, transparent);
+  }
+  .section-heading {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--secondary);
+  }
+  .section-lede {
+    margin: 0;
+    color: var(--tertiary);
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .export-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: var(--padding);
+  }
+  .export-card {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: calc(var(--padding) * 1.25);
+    background: var(--button-elevated);
+    border: 1px solid var(--input-border);
+    border-radius: var(--border-radius);
+  }
+  .export-card h3 {
+    margin: 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--secondary);
+    font-family: var(--font-mono, monospace);
+  }
+  .export-card p {
+    margin: 0;
+    flex: 1;
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .export-card.csv-card {
+    grid-column: 1 / -1;
+  }
+  .export-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 8px;
+  }
+  .export-options label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--tertiary);
+  }
+  .export-options select {
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    color: var(--secondary);
+    padding: 6px 8px;
+    border-radius: var(--border-radius);
+    font-size: 13px;
+  }
+
+  .btn-secondary {
+    align-self: flex-start;
+    padding: 7px 14px;
+    background: transparent;
+    border: 1px solid var(--input-border);
+    border-radius: var(--border-radius);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background: color-mix(in oklab, var(--accent) 8%, transparent);
+    border-color: var(--accent);
+  }
+  .btn-secondary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .toast {
+    padding: 8px 12px;
+    border-radius: var(--border-radius);
+    background: color-mix(in oklab, var(--accent) 14%, var(--surface));
+    color: var(--text);
+    font-size: 12px;
+    border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
+  }
+  .toast.err {
+    background: color-mix(in oklab, var(--error, var(--accent)) 14%, var(--surface));
+    border-color: color-mix(in oklab, var(--error, var(--accent)) 30%, transparent);
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .btn-primary,
+    .btn-secondary,
     .back-link {
       transition: none;
     }

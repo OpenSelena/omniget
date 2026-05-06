@@ -55,6 +55,20 @@
 
   type GlobalConf = Record<string, unknown>;
 
+  type BackupEntry = {
+    filename: string;
+    path: string;
+    bytes: number;
+    modified_secs: number;
+  };
+
+  type VerifyReport = {
+    ok: boolean;
+    message: string;
+    schema_version: number | null;
+    bytes: number;
+  };
+
   let loading = $state(true);
   let saving = $state<string | null>(null);
   let error = $state("");
@@ -63,6 +77,20 @@
   let globalConf = $state<GlobalConf>({});
   let deckConfigs = $state<DeckConfigSummary[]>([]);
   let defaultDeckCfg = $state<DeckConfig | null>(null);
+
+  let backups = $state<BackupEntry[]>([]);
+  let backupsLoading = $state(false);
+  let verifyCache = $state<Record<string, VerifyReport>>({});
+  let verifyingPath = $state<string | null>(null);
+  let restoreTargetPath = $state<string | null>(null);
+  let restoring = $state(false);
+  let cleanupKeep = $state(5);
+  let cleanupBusy = $state(false);
+
+  let rawKey = $state("");
+  let rawValue = $state<string | null>(null);
+  let rawBusy = $state(false);
+  let confirmDeleteKeyOpen = $state(false);
 
   let schedulerVer = $state("v3");
   let nextNewCardPos = $state(1);
@@ -243,14 +271,30 @@
     }
   }
 
+  async function loadBackups() {
+    backupsLoading = true;
+    try {
+      const list = await pluginInvoke<BackupEntry[]>(
+        "study",
+        "study:anki:backup:list",
+      );
+      backups = list ?? [];
+    } catch (e) {
+      showToast("err", e instanceof Error ? e.message : String(e));
+    } finally {
+      backupsLoading = false;
+    }
+  }
+
   async function runBackup() {
     saving = "backup";
     try {
-      const r = await pluginInvoke<{ path: string }>(
+      const r = await pluginInvoke<{ path: string; bytes: number }>(
         "study",
         "study:anki:backup:create",
       );
-      showToast("ok", `Backup criado em ${r.path}`);
+      showToast("ok", `Backup criado · ${formatBytes(r.bytes)}`);
+      await loadBackups();
     } catch (e) {
       showToast("err", e instanceof Error ? e.message : String(e));
     } finally {
@@ -258,8 +302,129 @@
     }
   }
 
+  async function verifyBackup(path: string) {
+    verifyingPath = path;
+    try {
+      const report = await pluginInvoke<VerifyReport>(
+        "study",
+        "study:anki:backup:verify",
+        { sourcePath: path },
+      );
+      verifyCache = { ...verifyCache, [path]: report };
+      showToast(report.ok ? "ok" : "err", report.ok ? "Backup íntegro" : "Backup com problemas");
+    } catch (e) {
+      showToast("err", e instanceof Error ? e.message : String(e));
+    } finally {
+      verifyingPath = null;
+    }
+  }
+
+  function askRestore(path: string) {
+    restoreTargetPath = path;
+  }
+
+  async function confirmRestore() {
+    if (!restoreTargetPath) return;
+    restoring = true;
+    try {
+      await pluginInvoke<{ source: string; target: string; backup_before: string | null }>(
+        "study",
+        "study:anki:backup:restore",
+        { sourcePath: restoreTargetPath },
+      );
+      showToast("ok", "Coleção restaurada");
+      restoreTargetPath = null;
+      await loadBackups();
+    } catch (e) {
+      showToast("err", e instanceof Error ? e.message : String(e));
+    } finally {
+      restoring = false;
+    }
+  }
+
+  async function runCleanup() {
+    const keep = Math.max(0, Math.floor(cleanupKeep));
+    cleanupBusy = true;
+    try {
+      const r = await pluginInvoke<{ removed: number }>(
+        "study",
+        "study:anki:backup:cleanup",
+        { keep },
+      );
+      if (r.removed === 0) {
+        showToast("ok", "Nenhum backup antigo pra remover");
+      } else {
+        showToast(
+          "ok",
+          r.removed === 1 ? "1 backup removido" : `${r.removed} backups removidos`,
+        );
+        await loadBackups();
+      }
+    } catch (e) {
+      showToast("err", e instanceof Error ? e.message : String(e));
+    } finally {
+      cleanupBusy = false;
+    }
+  }
+
+  function formatBytes(bytes: number): string {
+    if (!Number.isFinite(bytes) || bytes <= 0) return "—";
+    const units = ["B", "KB", "MB", "GB"];
+    let n = bytes;
+    let i = 0;
+    while (n >= 1024 && i < units.length - 1) {
+      n /= 1024;
+      i++;
+    }
+    return `${n < 10 ? n.toFixed(1) : Math.round(n)} ${units[i]}`;
+  }
+
+  function formatDate(secs: number): string {
+    if (!secs || secs <= 0) return "—";
+    return new Date(secs * 1000).toLocaleString();
+  }
+
+  async function getRawKey() {
+    const key = rawKey.trim();
+    if (!key) return;
+    rawBusy = true;
+    try {
+      const v = await pluginInvoke<unknown>(
+        "study",
+        "study:anki:config:get_global",
+        { key },
+      );
+      rawValue = v == null ? "(não encontrado)" : JSON.stringify(v, null, 2);
+    } catch (e) {
+      showToast("err", e instanceof Error ? e.message : String(e));
+      rawValue = null;
+    } finally {
+      rawBusy = false;
+    }
+  }
+
+  async function deleteRawKey() {
+    const key = rawKey.trim();
+    if (!key) return;
+    confirmDeleteKeyOpen = false;
+    rawBusy = true;
+    try {
+      await pluginInvoke("study", "study:anki:config:delete_global", { key });
+      showToast("ok", `Chave "${key}" removida`);
+      rawValue = null;
+      await load();
+    } catch (e) {
+      showToast("err", e instanceof Error ? e.message : String(e));
+    } finally {
+      rawBusy = false;
+    }
+  }
+
   function toggleSection(key: string) {
     openSection = openSection === key ? "" : key;
+    if (openSection === "backup" && backups.length === 0 && !backupsLoading) {
+      void loadBackups();
+    }
   }
 
   onMount(load);
@@ -544,19 +709,24 @@
         >
           <div class="head-left">
             <h3>Backup</h3>
-            <span class="head-sub">Snapshot manual da coleção</span>
+            <span class="head-sub">
+              {backups.length === 0
+                ? "Snapshots manuais da coleção"
+                : backups.length === 1
+                  ? "1 backup salvo"
+                  : `${backups.length} backups salvos`}
+            </span>
           </div>
           <span class="chev" aria-hidden="true">›</span>
         </button>
 
         {#if openSection === "backup"}
           <div class="card-body">
-            <p class="lede">
-              Cria uma cópia compactada da coleção atual em
-              <code>plugin_data_dir/backups/</code>. Use antes de migrações
-              maiores ou imports de .apkg.
-            </p>
-            <div class="actions">
+            <div class="backup-head">
+              <p class="lede">
+                Backups ficam em <code>plugin_data_dir/backups/</code>. Restaurar
+                substitui a coleção atual — uma cópia de segurança é feita antes.
+              </p>
               <button
                 class="btn primary"
                 onclick={runBackup}
@@ -565,6 +735,81 @@
                 {saving === "backup" ? "Criando…" : "Criar backup agora"}
               </button>
             </div>
+
+            {#if backupsLoading}
+              <p class="muted small">Carregando…</p>
+            {:else if backups.length === 0}
+              <div class="empty-backup">
+                <p>Nenhum backup ainda.</p>
+                <p class="hint">
+                  Crie o primeiro antes de imports grandes ou mudanças de schema.
+                </p>
+              </div>
+            {:else}
+              <ul class="backup-list">
+                {#each backups as b (b.path)}
+                  {@const v = verifyCache[b.path]}
+                  <li class="backup-row">
+                    <div class="backup-info">
+                      <div class="backup-name">
+                        <span class="backup-filename">{b.filename}</span>
+                        {#if v}
+                          <span
+                            class="verify-badge"
+                            class:ok={v.ok}
+                            class:err={!v.ok}
+                            title={v.message}
+                          >
+                            {v.ok ? "íntegro" : "com problema"}
+                          </span>
+                        {/if}
+                      </div>
+                      <div class="backup-meta">
+                        {formatDate(b.modified_secs)} · {formatBytes(b.bytes)}
+                      </div>
+                    </div>
+                    <div class="backup-actions">
+                      <button
+                        type="button"
+                        class="btn ghost sm"
+                        onclick={() => verifyBackup(b.path)}
+                        disabled={verifyingPath === b.path}
+                      >
+                        {verifyingPath === b.path ? "Verificando…" : "Verificar"}
+                      </button>
+                      <button
+                        type="button"
+                        class="btn ghost sm"
+                        onclick={() => askRestore(b.path)}
+                      >
+                        Restaurar
+                      </button>
+                    </div>
+                  </li>
+                {/each}
+              </ul>
+
+              <div class="cleanup-row">
+                <label class="cleanup-label">
+                  Manter os
+                  <input
+                    type="number"
+                    min="0"
+                    max="999"
+                    class="cleanup-keep"
+                    bind:value={cleanupKeep}
+                  />
+                  mais recentes
+                </label>
+                <button
+                  class="btn ghost sm"
+                  onclick={runCleanup}
+                  disabled={cleanupBusy || backups.length <= cleanupKeep}
+                >
+                  {cleanupBusy ? "Limpando…" : "Limpar antigos"}
+                </button>
+              </div>
+            {/if}
           </div>
         {/if}
       </section>
@@ -607,12 +852,129 @@
               <summary>Configuração global bruta (col.conf)</summary>
               <pre>{JSON.stringify(globalConf, null, 2)}</pre>
             </details>
+
+            <h4 class="subhead">Inspecionar chave</h4>
+            <p class="lede">
+              Lê ou apaga uma chave específica de <code>col.conf</code>. Use só
+              se souber o que está fazendo.
+            </p>
+            <div class="raw-row">
+              <input
+                type="text"
+                class="raw-input"
+                placeholder="ex: schedVer"
+                bind:value={rawKey}
+                onkeydown={(e) => { if (e.key === "Enter") getRawKey(); }}
+              />
+              <button
+                type="button"
+                class="btn ghost sm"
+                onclick={getRawKey}
+                disabled={rawBusy || !rawKey.trim()}
+              >
+                Ler
+              </button>
+              <button
+                type="button"
+                class="btn ghost sm danger"
+                onclick={() => (confirmDeleteKeyOpen = true)}
+                disabled={rawBusy || !rawKey.trim()}
+              >
+                Apagar
+              </button>
+            </div>
+            {#if rawValue !== null}
+              <pre class="raw-output">{rawValue}</pre>
+            {/if}
           </div>
         {/if}
       </section>
     </div>
   {/if}
 </section>
+
+{#if confirmDeleteKeyOpen}
+  <div
+    class="modal-backdrop"
+    role="presentation"
+    onclick={() => (confirmDeleteKeyOpen = false)}
+    onkeydown={(e) => { if (e.key === "Escape") confirmDeleteKeyOpen = false; }}
+  >
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      tabindex="-1"
+      onclick={(e) => e.stopPropagation()}
+      onkeydown={(e) => { if (e.key === "Escape") { e.stopPropagation(); confirmDeleteKeyOpen = false; } }}
+    >
+      <h3>Apagar chave?</h3>
+      <p class="modal-body">
+        Vai apagar <code>{rawKey}</code> de <code>col.conf</code>. Não dá pra desfazer.
+      </p>
+      <footer class="modal-foot">
+        <button
+          type="button"
+          class="btn ghost"
+          onclick={() => (confirmDeleteKeyOpen = false)}
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn primary danger"
+          onclick={deleteRawKey}
+        >
+          Apagar
+        </button>
+      </footer>
+    </div>
+  </div>
+{/if}
+
+{#if restoreTargetPath}
+  <div
+    class="modal-backdrop"
+    role="presentation"
+    onclick={() => (restoreTargetPath = null)}
+    onkeydown={(e) => { if (e.key === "Escape") restoreTargetPath = null; }}
+  >
+    <div
+      class="modal"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="restore-title"
+      tabindex="-1"
+      onclick={(e) => e.stopPropagation()}
+      onkeydown={(e) => { if (e.key === "Escape") { e.stopPropagation(); restoreTargetPath = null; } }}
+    >
+      <h3 id="restore-title">Restaurar este backup?</h3>
+      <p class="modal-body">
+        A coleção atual vai ser substituída pelo conteúdo de
+        <code>{restoreTargetPath?.split(/[\\/]/).pop()}</code>.
+        Uma cópia de segurança é criada automaticamente antes.
+      </p>
+      <footer class="modal-foot">
+        <button
+          type="button"
+          class="btn ghost"
+          onclick={() => (restoreTargetPath = null)}
+          disabled={restoring}
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn primary"
+          onclick={confirmRestore}
+          disabled={restoring}
+        >
+          {restoring ? "Restaurando…" : "Restaurar"}
+        </button>
+      </footer>
+    </div>
+  </div>
+{/if}
 
 <style>
   .study-page {
@@ -929,6 +1291,222 @@
     border-radius: 4px;
     font-size: 12px;
     color: var(--text);
+  }
+
+  .backup-head {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .backup-head .lede {
+    flex: 1;
+    margin: 0;
+  }
+  .backup-head .btn {
+    flex-shrink: 0;
+  }
+
+  .empty-backup {
+    text-align: center;
+    padding: 24px 16px;
+    color: var(--secondary);
+    font-size: 13px;
+  }
+  .empty-backup .hint {
+    margin: 4px 0 0;
+    color: var(--tertiary);
+    font-size: 12px;
+  }
+
+  .backup-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .backup-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    border: 1px solid color-mix(in oklab, var(--input-border) 50%, transparent);
+    border-radius: var(--border-radius);
+    background: color-mix(in oklab, var(--surface) 60%, transparent);
+  }
+  .backup-info {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .backup-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .backup-filename {
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 12px;
+    color: var(--text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .verify-badge {
+    flex-shrink: 0;
+    padding: 1px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 500;
+  }
+  .verify-badge.ok {
+    background: color-mix(in oklab, var(--success, var(--accent)) 14%, transparent);
+    color: var(--success, var(--accent));
+  }
+  .verify-badge.err {
+    background: color-mix(in oklab, var(--error, var(--accent)) 14%, transparent);
+    color: var(--error, var(--accent));
+  }
+  .backup-meta {
+    color: var(--tertiary);
+    font-size: 11px;
+  }
+  .backup-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+  }
+
+  .btn.sm {
+    padding: 5px 10px;
+    font-size: 12px;
+  }
+
+  .cleanup-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-top: 8px;
+    border-top: 1px solid color-mix(in oklab, var(--input-border) 40%, transparent);
+  }
+  .cleanup-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--secondary);
+    font-size: 13px;
+  }
+  .cleanup-keep {
+    width: 56px;
+    padding: 4px 8px;
+    border: 1px solid var(--input-border);
+    border-radius: var(--border-radius);
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 13px;
+    text-align: center;
+  }
+  .cleanup-keep:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .muted {
+    color: var(--tertiary);
+  }
+  .small {
+    font-size: 12px;
+  }
+
+  .modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: var(--dialog-backdrop, rgba(0, 0, 0, 0.55));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 200;
+    padding: 16px;
+  }
+  .modal {
+    background: var(--popup-bg, var(--surface));
+    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border-radius: var(--border-radius);
+    padding: 20px;
+    max-width: 460px;
+    width: 100%;
+    box-shadow: 0 20px 50px color-mix(in oklab, black 30%, transparent);
+  }
+  .modal h3 {
+    margin: 0 0 12px;
+    font-size: 15px;
+    font-weight: 600;
+  }
+  .modal-body {
+    margin: 0 0 16px;
+    color: var(--secondary);
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  .modal-body code {
+    word-break: break-all;
+  }
+  .modal-foot {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    border-top: 1px solid color-mix(in oklab, var(--input-border) 40%, transparent);
+    padding-top: 12px;
+  }
+
+  .raw-row {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  .raw-input {
+    flex: 1;
+    padding: 7px 10px;
+    border: 1px solid var(--input-border);
+    border-radius: var(--border-radius);
+    background: var(--bg);
+    color: var(--text);
+    font: inherit;
+    font-size: 12px;
+    font-family: var(--font-mono, ui-monospace, monospace);
+  }
+  .raw-input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .raw-output {
+    margin: 8px 0 0;
+    padding: 10px 12px;
+    background: var(--bg);
+    border: 1px solid color-mix(in oklab, var(--input-border) 50%, transparent);
+    border-radius: var(--border-radius);
+    font-size: 11px;
+    color: var(--secondary);
+    overflow-x: auto;
+    max-height: 200px;
+    overflow-y: auto;
+  }
+  .btn.ghost.danger {
+    color: var(--error, var(--accent));
+    border-color: color-mix(in oklab, var(--error, var(--accent)) 35%, var(--input-border));
+  }
+  .btn.ghost.danger:hover:not(:disabled) {
+    background: color-mix(in oklab, var(--error, var(--accent)) 10%, transparent);
+  }
+  .btn.primary.danger {
+    background: var(--error, var(--accent));
+    color: var(--on-error, var(--on-cta, white));
   }
 
   @media (prefers-reduced-motion: reduce) {

@@ -137,7 +137,7 @@
       disabled={busy !== null}
       title="Reindexa FTS5 (notes_v2). Use se a busca estiver retornando resultados desatualizados."
     >
-      {busy === "search" ? "Reindexando…" : "🔍 Reconstruir busca"}
+      {busy === "search" ? "Reindexando…" : "Reconstruir busca"}
     </button>
     <button
       type="button"
@@ -146,7 +146,7 @@
       disabled={busy !== null}
       title="Recalcula a tabela de refs/backlinks varrendo todo o conteúdo."
     >
-      {busy === "refs" ? "Calculando…" : "🔗 Reconstruir backlinks"}
+      {busy === "refs" ? "Calculando…" : "Reconstruir backlinks"}
     </button>
     <button
       type="button"
@@ -155,7 +155,7 @@
       disabled={busy !== null}
       title="Limpa cache de queries. Inofensivo; queries serão recalculadas."
     >
-      {busy === "qcache" ? "Limpando…" : "♻️ Limpar cache de queries"}
+      {busy === "qcache" ? "Limpando…" : "Limpar cache de queries"}
     </button>
     <button
       type="button"
@@ -164,7 +164,7 @@
       disabled={busy !== null}
       title="Baixa o grafo de notes (nodes + edges) como JSON pra inspeção/backup."
     >
-      {busy === "graph" ? "Exportando…" : "📊 Exportar grafo (JSON)"}
+      {busy === "graph" ? "Exportando…" : "Exportar grafo (JSON)"}
     </button>
     <button
       type="button"
@@ -173,7 +173,7 @@
       disabled={busy !== null || importing}
       title="Lê um .md do disco e cria uma página com o conteúdo."
     >
-      📥 Importar markdown
+      Importar markdown
     </button>
     <input
       type="file"

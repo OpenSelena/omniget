@@ -17,6 +17,8 @@
       title: "Conteúdo",
       items: [
         { href: "/study/anki/notetypes", label: "Modelos", icon: "M4 4h6v6H4z M14 4h6v6h-6z M4 14h6v6H4z M14 14h6v6h-6z" },
+        { href: "/study/anki/tags", label: "Tags", icon: "M20 12L12 20l-9-9V3h8z M7 7h.01" },
+        { href: "/study/anki/media", label: "Mídia", icon: "M21 15V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10 M21 15l-5 6 M14 8a2 2 0 1 0 0-4 2 2 0 0 0 0 4z M3 16l5-5 8 8" },
         { href: "/study/anki/import", label: "Importar", icon: "M12 3v12 M7 10l5 5 5-5 M5 21h14" },
       ],
     },

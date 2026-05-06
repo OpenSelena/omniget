@@ -191,9 +191,11 @@
       await openPage(currentPage.id);
       showToast(
         "ok",
-        r.blocks_updated > 0
-          ? `Renomeada e ${r.blocks_updated} bloco(s) atualizado(s)`
-          : "Renomeada",
+        r.blocks_updated === 0
+          ? "Renomeada"
+          : r.blocks_updated === 1
+            ? "Renomeada e 1 bloco atualizado"
+            : `Renomeada e ${r.blocks_updated} blocos atualizados`,
       );
     } catch (e) {
       showToast("err", e instanceof Error ? e.message : String(e));

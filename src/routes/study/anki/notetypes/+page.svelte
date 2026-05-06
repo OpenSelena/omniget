@@ -571,25 +571,25 @@
             <div class="info-banner ok">
               Salvo:
               {#if saveSummary.fields_added}
-                +{saveSummary.fields_added} field(s)
+                +{saveSummary.fields_added} {saveSummary.fields_added === 1 ? "field" : "fields"}
               {/if}
               {#if saveSummary.fields_removed}
-                · −{saveSummary.fields_removed} field(s)
+                · −{saveSummary.fields_removed} {saveSummary.fields_removed === 1 ? "field" : "fields"}
               {/if}
               {#if saveSummary.templates_added}
-                · +{saveSummary.templates_added} template(s)
+                · +{saveSummary.templates_added} {saveSummary.templates_added === 1 ? "template" : "templates"}
               {/if}
               {#if saveSummary.templates_removed}
-                · −{saveSummary.templates_removed} template(s)
+                · −{saveSummary.templates_removed} {saveSummary.templates_removed === 1 ? "template" : "templates"}
               {/if}
               {#if saveSummary.cards_added}
-                · +{saveSummary.cards_added} card(s)
+                · +{saveSummary.cards_added} {saveSummary.cards_added === 1 ? "card" : "cards"}
               {/if}
               {#if saveSummary.cards_removed}
-                · −{saveSummary.cards_removed} card(s)
+                · −{saveSummary.cards_removed} {saveSummary.cards_removed === 1 ? "card" : "cards"}
               {/if}
               {#if saveSummary.notes_rewritten}
-                · {saveSummary.notes_rewritten} nota(s) ajustadas
+                · {saveSummary.notes_rewritten} {saveSummary.notes_rewritten === 1 ? "nota ajustada" : "notas ajustadas"}
               {/if}
             </div>
           {/if}

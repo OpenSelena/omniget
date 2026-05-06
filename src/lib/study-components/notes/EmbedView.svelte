@@ -87,7 +87,9 @@
     {@const data = eState.data}
     {#if data.kind === "missing"}
       <div class="embed-warning">
-        <span class="warning-icon">⚠</span>
+        <svg class="warning-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 3l10 18H2z M12 10v5 M12 18v.5" />
+        </svg>
         <span>
           {data.target.kind === "page"
             ? `Página "${data.target.name}" não encontrada`
@@ -96,7 +98,9 @@
       </div>
     {:else if data.kind === "cycle"}
       <div class="embed-warning cycle">
-        <span class="warning-icon">⚠</span>
+        <svg class="warning-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 3l10 18H2z M12 10v5 M12 18v.5" />
+        </svg>
         <span>Embed cíclico bloqueado</span>
       </div>
     {:else if data.kind === "block"}
@@ -113,7 +117,10 @@
           class="embed-page-title"
           onclick={() => navigateToPage(data.page.name)}
         >
-          📄 {data.page.title ?? data.page.name}
+          <svg class="page-icon" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z M14 3v5h5" />
+          </svg>
+          {data.page.title ?? data.page.name}
         </button>
         <ul class="embed-block-list">
           {#each flattenBlocks(data.nodes, 8) as n (n.id)}
@@ -197,7 +204,12 @@
     color: var(--error, #e74c3c);
   }
   .warning-icon {
-    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .page-icon {
+    flex-shrink: 0;
+    margin-right: 4px;
+    vertical-align: -2px;
   }
   .embed-block {
     display: flex;

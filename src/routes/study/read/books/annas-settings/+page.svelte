@@ -126,12 +126,72 @@
     }
   }
 
+  let clearingCache = $state(false);
+  async function clearCache() {
+    clearingCache = true;
+    try {
+      const r = await pluginInvoke<{ removed: number }>(
+        "study",
+        "study:read:annas:clear_cache",
+      );
+      okMsg =
+        r.removed === 0
+          ? "Cache já estava vazio"
+          : r.removed === 1
+            ? "1 entrada de cache removida"
+            : `${r.removed} entradas de cache removidas`;
+      setTimeout(() => (okMsg = ""), 3000);
+    } catch (e) {
+      errorMsg = e instanceof Error ? e.message : String(e);
+    } finally {
+      clearingCache = false;
+    }
+  }
+
+  type BrowserStatus = {
+    available: boolean;
+    enabled: boolean;
+    detected_at?: string | null;
+  };
+  let browserStatus = $state<BrowserStatus | null>(null);
+  let browserBusy = $state(false);
+  async function loadBrowserStatus() {
+    try {
+      browserStatus = await pluginInvoke<BrowserStatus>(
+        "study",
+        "study:read:browser:status",
+      );
+    } catch (e) {
+      browserStatus = null;
+    }
+  }
+  async function toggleBrowser(next: boolean) {
+    browserBusy = true;
+    try {
+      await pluginInvoke("study", "study:read:browser:set_enabled", {
+        enabled: next,
+      });
+      await loadBrowserStatus();
+      okMsg = next
+        ? "Browser auxiliar habilitado"
+        : "Browser auxiliar desabilitado";
+      setTimeout(() => (okMsg = ""), 3000);
+    } catch (e) {
+      errorMsg = e instanceof Error ? e.message : String(e);
+    } finally {
+      browserBusy = false;
+    }
+  }
+
   function fmtDate(ts: number | null): string {
     if (!ts) return "—";
     return new Date(ts * 1000).toLocaleString();
   }
 
-  onMount(load);
+  onMount(async () => {
+    await load();
+    await loadBrowserStatus();
+  });
 </script>
 
 <section class="page">
@@ -230,6 +290,58 @@
           {$t("study.read.annas_domains_revert")}
         </button>
       </div>
+    </section>
+
+    <section class="block">
+      <h3>Cache de busca</h3>
+      <p class="muted small">
+        Resultados são guardados em memória pra não bombardear os mirrors.
+        Limpe se você está vendo dados desatualizados.
+      </p>
+      <button
+        type="button"
+        class="ghost-btn"
+        onclick={clearCache}
+        disabled={clearingCache}
+      >
+        {clearingCache ? "Limpando…" : "Limpar cache"}
+      </button>
+    </section>
+
+    <section class="block">
+      <h3>Browser auxiliar</h3>
+      <p class="muted small">
+        Alguns mirrors exigem JavaScript pra retornar HTML. Habilite o browser
+        embutido pra esses casos. Pode ficar mais lento.
+      </p>
+      {#if browserStatus}
+        <div class="browser-status">
+          <span
+            class="dot"
+            class:on={browserStatus.enabled}
+            class:off={!browserStatus.enabled}
+            aria-hidden="true"
+          ></span>
+          <span>
+            {browserStatus.enabled ? "Habilitado" : "Desabilitado"}
+            {#if browserStatus.available === false}
+              · não detectado no sistema
+            {/if}
+          </span>
+        </div>
+      {/if}
+      <button
+        type="button"
+        class="ghost-btn"
+        onclick={() => toggleBrowser(!(browserStatus?.enabled ?? false))}
+        disabled={browserBusy}
+      >
+        {browserBusy
+          ? "Aplicando…"
+          : browserStatus?.enabled
+            ? "Desabilitar"
+            : "Habilitar"}
+      </button>
     </section>
 
     <section class="block danger">
@@ -462,6 +574,22 @@
   .ghost-btn.danger-btn:hover {
     background: color-mix(in oklab, var(--error) 15%, transparent);
   }
+
+  .browser-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    color: var(--secondary);
+    font-size: 12px;
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+  .dot.on { background: var(--success, var(--accent)); }
+  .dot.off { background: var(--tertiary); }
 
   .modal-overlay {
     position: fixed;

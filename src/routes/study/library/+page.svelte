@@ -707,7 +707,7 @@
           onChange={onSearchChange}
           placeholder={$t("study.library.search_placeholder")}
         />
-        <div class="view-toggle" role="tablist" aria-label="Modo de visualização">
+        <div class="view-toggle" role="tablist" aria-label={$t("study.library.view_mode_aria")}>
           <button
             type="button"
             class="view-btn"
@@ -745,29 +745,35 @@
   </header>
 
   {#if healthReport && healthReport.total_issues > 0}
+    {@const parts = [
+      healthReport.zero_byte_videos.length > 0
+        ? $t("study.library.health_banner_part_empty", { count: healthReport.zero_byte_videos.length })
+        : null,
+      healthReport.missing_videos.length > 0
+        ? $t("study.library.health_banner_part_missing", { count: healthReport.missing_videos.length })
+        : null,
+      healthReport.orphan_descriptions.length > 0
+        ? $t("study.library.health_banner_part_orphan", { count: healthReport.orphan_descriptions.length })
+        : null,
+    ].filter(Boolean)}
     <button
       class="health-banner"
       type="button"
       onclick={openHealth}
-      aria-label="Abrir relatório de saúde da biblioteca"
+      aria-label={$t("study.library.health_banner_aria")}
     >
-      <span class="health-icon">⚠️</span>
+      <span class="health-dot" aria-hidden="true"></span>
       <span class="health-text">
-        <strong>{healthReport.total_issues}</strong>
-        problema{healthReport.total_issues === 1 ? "" : "s"} na biblioteca:
-        {#if healthReport.zero_byte_videos.length > 0}
-          {healthReport.zero_byte_videos.length} vídeo(s) com 0 bytes
-        {/if}
-        {#if healthReport.missing_videos.length > 0}
-          {healthReport.zero_byte_videos.length > 0 ? " · " : ""}
-          {healthReport.missing_videos.length} vídeo(s) ausente(s)
-        {/if}
-        {#if healthReport.orphan_descriptions.length > 0}
-          {healthReport.zero_byte_videos.length + healthReport.missing_videos.length > 0 ? " · " : ""}
-          {healthReport.orphan_descriptions.length} description.html órfã(s)
+        <strong>
+          {healthReport.total_issues === 1
+            ? $t("study.library.health_banner_one")
+            : $t("study.library.health_banner_many", { count: healthReport.total_issues })}
+        </strong>
+        {#if parts.length > 0}
+          <span class="health-parts">{parts.join(" · ")}</span>
         {/if}
       </span>
-      <span class="health-cta">Ver detalhes →</span>
+      <span class="health-cta">{$t("study.library.health_banner_cta")}</span>
     </button>
   {/if}
 
@@ -782,12 +788,12 @@
       <SegmentedControl
         bind:value={statusFilter}
         options={[
-          { value: "all", label: "Todos" },
-          { value: "in_progress", label: "Em progresso" },
-          { value: "not_started", label: "Não iniciados" },
-          { value: "completed", label: "Concluídos" },
+          { value: "all", label: $t("study.library.status_all") },
+          { value: "in_progress", label: $t("study.library.status_in_progress") },
+          { value: "not_started", label: $t("study.library.status_not_started") },
+          { value: "completed", label: $t("study.library.status_completed") },
         ]}
-        ariaLabel="Status"
+        ariaLabel={$t("study.library.status_aria")}
       />
       <span class="result-count-inline">
         {visibleCourses.length} de {courses.length}
@@ -800,7 +806,7 @@
           class="filters-toggle"
           onclick={() => (filtersOpen = !filtersOpen)}
         >
-          <span>Filtros</span>
+          <span>{$t("study.library.filters")}</span>
           <span class="count" aria-hidden="true">
             {includeTags.size + excludeTags.size +
               (statusFilter !== "all" ? 1 : 0) +
@@ -810,13 +816,13 @@
 
         {#if filtersOpen}
           <section class="filter-section">
-            <h3>Status</h3>
+            <h3>{$t("study.library.filter_status")}</h3>
             <div class="status-buttons">
               {#each [
-                { v: "all", label: "Todos" },
-                { v: "not_started", label: "Não iniciados" },
-                { v: "in_progress", label: "Em progresso" },
-                { v: "completed", label: "Completos" },
+                { v: "all", label: $t("study.library.status_all") },
+                { v: "not_started", label: $t("study.library.status_not_started") },
+                { v: "in_progress", label: $t("study.library.status_in_progress") },
+                { v: "completed", label: $t("study.library.status_completed") },
               ] as opt (opt.v)}
                 <button
                   type="button"
@@ -832,7 +838,7 @@
 
           {#if playlists.length > 0}
             <section class="filter-section">
-              <h3>Playlist</h3>
+              <h3>{$t("study.library.filter_playlist")}</h3>
               <div class="playlist-list">
                 <button
                   type="button"
@@ -840,7 +846,7 @@
                   class:active={playlistFilter == null}
                   onclick={() => selectPlaylist(null)}
                 >
-                  <span>Todos os cursos</span>
+                  <span>{$t("study.library.all_courses")}</span>
                   <span class="pl-count">{courses.length}</span>
                 </button>
                 {#each playlists as p (p.id)}
@@ -857,7 +863,7 @@
                   </button>
                 {/each}
               </div>
-              <a href="/study/library/playlists" class="manage">Gerenciar playlists →</a>
+              <a href="/study/library/playlists" class="manage">{$t("study.library.manage_playlists")}</a>
             </section>
           {:else}
             <section class="filter-section">
@@ -871,16 +877,16 @@
           {#if allTags.length > 0}
             <section class="filter-section">
               <header class="tags-head">
-                <h3>Tags</h3>
+                <h3>{$t("study.library.filter_tags")}</h3>
                 {#if includeTags.size + excludeTags.size > 0}
                   <button
                     type="button"
                     class="clear-link"
                     onclick={clearTagFilters}
-                  >limpar</button>
+                  >{$t("study.library.clear_filters")}</button>
                 {/if}
               </header>
-              <p class="hint">Click → incluir · Shift+Click → excluir</p>
+              <p class="hint">{$t("study.library.tags_hint")}</p>
               <div class="tag-grid">
                 {#each allTags.slice(0, 40) as t (t.tag)}
                   {@const inc = includeTags.has(t.tag)}
@@ -964,7 +970,7 @@
       </div>
       {#if gridPageSize < visibleCourses.length}
         <div class="grid-sentinel" bind:this={gridSentinel} aria-hidden="true">
-          <span class="muted">Carregando mais cursos…</span>
+          <span class="muted">{$t("study.library.loading_more")}</span>
         </div>
       {/if}
     {/if}
@@ -1124,23 +1130,26 @@
           }}
           disabled={healthLoading}
         >
-          {healthLoading ? "Verificando…" : "Re-verificar"}
+          {healthLoading ? $t("study.library.health_checking") : $t("study.library.health_recheck")}
         </button>
-        <button class="close-btn" onclick={() => (healthOpen = false)} aria-label="Fechar">×</button>
+        <button class="close-btn" onclick={() => (healthOpen = false)} aria-label={$t("study.common.close")}>×</button>
       </header>
 
       {#if !healthReport}
-        <p class="muted small">Carregando…</p>
+        <p class="muted small">{$t("study.common.loading")}</p>
       {:else if healthReport.total_issues === 0}
-        <p class="health-ok">✅ {$t("study.library.health_ok")}</p>
+        <p class="health-ok">
+          <span class="health-ok-dot" aria-hidden="true"></span>
+          {$t("study.library.health_ok")}
+        </p>
       {:else}
         {#if healthReport.zero_byte_videos.length > 0}
           <section class="health-section">
-            <h3>{$t("study.library.health_zero_byte", { count: healthReport.zero_byte_videos.length })}</h3>
-            <p class="muted small">
-              Download interrompido. Re-baixe o curso ou apague o arquivo
-              vazio + faça rescan.
-            </p>
+            <h3>
+              {$t("study.library.health_zero_byte")}
+              <span class="health-count">{healthReport.zero_byte_videos.length}</span>
+            </h3>
+            <p class="muted small">{$t("study.library.health_zero_byte_hint")}</p>
             <ul class="health-list">
               {#each healthReport.zero_byte_videos as v (v.lesson_id)}
                 <li>
@@ -1154,12 +1163,11 @@
 
         {#if healthReport.missing_videos.length > 0}
           <section class="health-section">
-            <h3>{$t("study.library.health_missing", { count: healthReport.missing_videos.length })}</h3>
-            <p class="muted small">
-              Arquivo registrado no DB mas inexistente no disco. Provavelmente
-              foi movido/apagado fora do app. Limpeza só remove se a pasta do
-              curso ainda existir (drives desmontados são preservados).
-            </p>
+            <h3>
+              {$t("study.library.health_missing")}
+              <span class="health-count">{healthReport.missing_videos.length}</span>
+            </h3>
+            <p class="muted small">{$t("study.library.health_missing_hint")}</p>
             <div class="health-actions">
               <button
                 type="button"
@@ -1167,7 +1175,7 @@
                 disabled={cleanupBusy}
                 onclick={() => (cleanupConfirmOpen = true)}
               >
-                {cleanupBusy ? "Limpando…" : $t("study.library.cleanup_btn")}
+                {cleanupBusy ? $t("study.library.cleanup_busy") : $t("study.library.cleanup_btn")}
               </button>
               <button
                 type="button"
@@ -1195,12 +1203,11 @@
 
         {#if healthReport.orphan_descriptions.length > 0}
           <section class="health-section">
-            <h3>{$t("study.library.health_orphan_desc", { count: healthReport.orphan_descriptions.length })}</h3>
-            <p class="muted small">
-              Pastas com texto descritivo mas sem vídeo. Pode ser aula
-              "free preview" do scraper que não baixou o conteúdo, ou aula
-              não-vídeo (texto puro) que o scanner pulou.
-            </p>
+            <h3>
+              {$t("study.library.health_orphan_desc")}
+              <span class="health-count">{healthReport.orphan_descriptions.length}</span>
+            </h3>
+            <p class="muted small">{$t("study.library.health_orphan_hint")}</p>
             <ul class="health-list">
               {#each healthReport.orphan_descriptions as o, i (i)}
                 <li>
@@ -2123,31 +2130,59 @@
     width: 100%;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
     padding: 10px 14px;
-    border: 1px solid color-mix(in oklab, var(--warning, var(--accent)) 50%, transparent);
-    background: color-mix(in oklab, var(--warning, var(--accent)) 8%, transparent);
+    border: 1px solid color-mix(in oklab, var(--input-border) 40%, transparent);
+    background: color-mix(in oklab, var(--surface, var(--primary)) 60%, transparent);
     border-radius: var(--border-radius);
-    color: var(--text);
+    color: var(--secondary);
     cursor: pointer;
     font: inherit;
     font-size: 13px;
     text-align: left;
-    transition: background 120ms ease;
+    transition: background 120ms ease, border-color 120ms ease;
   }
   .health-banner:hover {
-    background: color-mix(in oklab, var(--warning, var(--accent)) 14%, transparent);
+    background: color-mix(in oklab, var(--surface, var(--primary)) 90%, transparent);
+    border-color: color-mix(in oklab, var(--input-border) 70%, transparent);
   }
-  .health-icon {
-    font-size: 16px;
+  .health-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--warning, var(--accent));
+    flex-shrink: 0;
   }
   .health-text {
     flex: 1;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .health-text strong {
+    font-weight: 500;
+  }
+  .health-parts {
+    color: var(--tertiary);
+    font-size: 12px;
   }
   .health-cta {
     color: var(--accent);
     font-size: 12px;
+    font-weight: 500;
     white-space: nowrap;
+  }
+  .health-count {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--input-border) 50%, transparent);
+    color: var(--secondary);
+    font-size: 11px;
+    font-weight: 500;
+    vertical-align: middle;
   }
 
   .health-drawer {
@@ -2186,11 +2221,20 @@
     color: var(--text);
   }
   .health-ok {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
     margin: 0;
     padding: 12px;
-    text-align: center;
-    color: var(--success, var(--accent));
+    color: var(--secondary);
     font-size: 14px;
+  }
+  .health-ok-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--success, var(--accent));
   }
   .health-section {
     display: flex;

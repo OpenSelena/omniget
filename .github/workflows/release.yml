@@ -65,7 +65,28 @@ jobs:
         with:
           tagName: v__VERSION__
           releaseName: 'OmniGet v__VERSION__'
-          releaseBody: 'Download the installer for your platform below.'
+          releaseBody: |
+            ## Downloads
+
+            **Windows**: `.exe` installer or portable.
+            **macOS**: `.dmg` (Apple Silicon `aarch64` or Intel `x86_64`).
+            **Linux**: `.AppImage` (universal) or `.deb` (Debian/Ubuntu).
+
+            ---
+
+            ### Debian/Ubuntu users — AppImage compatibility
+
+            **Debian 12+ ships without FUSE 2 by default**, which AppImage requires.
+            If `./omniget.AppImage` fails with a libfuse error, run:
+
+            ```bash
+            sudo apt install libfuse2
+            ```
+
+            …or use `./omniget.AppImage --appimage-extract-and-run`.
+
+            **Easier alternative**: download the `.deb` instead — works out of the
+            box on Debian 12+ and Ubuntu 22.04+.
           releaseDraft: true
           prerelease: false
           includeUpdaterJson: false

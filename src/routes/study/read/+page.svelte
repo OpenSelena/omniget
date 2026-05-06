@@ -755,6 +755,19 @@
         </svg>
         <span>{$t("study.read.book_discover_nav")}</span>
       </a>
+      <a href="/study/read/search" class="ghost-btn">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="7"></circle>
+          <path d="M21 21l-4.35-4.35"></path>
+        </svg>
+        <span>Buscar anotações</span>
+      </a>
+      <a href="/study/read/downloads" class="ghost-btn">
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 3v12 M7 10l5 5 5-5 M5 21h14"></path>
+        </svg>
+        <span>Downloads</span>
+      </a>
       <button
         type="button"
         class="ghost-btn"

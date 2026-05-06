@@ -139,6 +139,7 @@
       bind:value={period}
       ariaLabel="Período"
     />
+    <a href="/study/anki/stats/revlog" class="advanced-link">Revlog detalhado →</a>
   </div>
 
   {#if loading}
@@ -370,7 +371,19 @@
 
   .period-row {
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+  .advanced-link {
+    color: var(--accent);
+    font-size: 12px;
+    text-decoration: none;
+    padding: 4px 10px;
+    border-radius: var(--border-radius);
+  }
+  .advanced-link:hover {
+    background: color-mix(in oklab, var(--accent) 10%, transparent);
   }
 
   .kpi-grid {

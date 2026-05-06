@@ -89,6 +89,26 @@
   let bulkDeckTarget = $state<number | null>(null);
   let allDecks = $state<DeckSummary[]>([]);
 
+  let bulkTagOpen = $state(false);
+  let bulkTagMode = $state<"add" | "remove">("add");
+  let bulkTagInput = $state("");
+
+  let unburyDeckPickerOpen = $state(false);
+  let unburyDeckTarget = $state<number | null>(null);
+
+  let editNoteOpen = $state(false);
+  let editNoteTarget = $state<Note | null>(null);
+  let editNoteFields = $state<string[]>([]);
+  let editNoteTags = $state("");
+  let editNoteBusy = $state(false);
+
+  let confirmDeleteNoteOpen = $state(false);
+  let deleteNoteTarget = $state<number | null>(null);
+  let deleteNoteBusy = $state(false);
+
+  let siblingCards = $state<Card[]>([]);
+  let siblingsLoading = $state(false);
+
   let busy = $state(false);
 
   let searchTimer: number | null = null;
@@ -346,6 +366,124 @@
       busy = false;
     }
   }
+
+  function selectedNoteIds(): number[] {
+    const noteIds = new Set<number>();
+    for (const cardId of selected) {
+      const card = items.find((c) => c.id === cardId);
+      if (card) noteIds.add(card.nid);
+    }
+    return [...noteIds];
+  }
+
+  async function bulkApplyTags() {
+    const noteIds = selectedNoteIds();
+    const tags = bulkTagInput
+      .trim()
+      .split(/\s+/)
+      .filter((t) => t.length > 0);
+    if (noteIds.length === 0 || tags.length === 0) return;
+    busy = true;
+    try {
+      const cmd =
+        bulkTagMode === "add"
+          ? "study:anki:tags:add_to_notes"
+          : "study:anki:tags:remove_from_notes";
+      await pluginInvoke<{ updated: number }>("study", cmd, {
+        noteIds,
+        tags,
+      });
+      bulkTagOpen = false;
+      bulkTagInput = "";
+      await runSearch();
+    } catch (e) {
+      error = e instanceof Error ? e.message : String(e);
+    } finally {
+      busy = false;
+    }
+  }
+
+  async function unburyDeckAction() {
+    if (unburyDeckTarget == null) return;
+    busy = true;
+    try {
+      await pluginInvoke("study", "study:anki:cards:unbury_deck", {
+        deckId: unburyDeckTarget,
+      });
+      unburyDeckPickerOpen = false;
+      await runSearch();
+    } catch (e) {
+      error = e instanceof Error ? e.message : String(e);
+    } finally {
+      busy = false;
+    }
+  }
+
+  function startEditNote(note: Note) {
+    editNoteTarget = note;
+    editNoteFields = [...note.fields];
+    editNoteTags = note.tags.join(" ");
+    editNoteOpen = true;
+  }
+
+  async function saveEditedNote() {
+    if (!editNoteTarget) return;
+    editNoteBusy = true;
+    try {
+      const tags = editNoteTags.trim().split(/\s+/).filter((t) => t.length > 0);
+      await pluginInvoke("study", "study:anki:notes:update", {
+        id: editNoteTarget.id,
+        fields: editNoteFields,
+        tags,
+      });
+      editNoteOpen = false;
+      editNoteTarget = null;
+      await runSearch();
+    } catch (e) {
+      error = e instanceof Error ? e.message : String(e);
+    } finally {
+      editNoteBusy = false;
+    }
+  }
+
+  function askDeleteNote(noteId: number) {
+    deleteNoteTarget = noteId;
+    confirmDeleteNoteOpen = true;
+  }
+
+  async function confirmDeleteNote() {
+    if (deleteNoteTarget == null) return;
+    deleteNoteBusy = true;
+    try {
+      await pluginInvoke("study", "study:anki:notes:delete", {
+        id: deleteNoteTarget,
+      });
+      confirmDeleteNoteOpen = false;
+      deleteNoteTarget = null;
+      drawerOpen = false;
+      await runSearch();
+    } catch (e) {
+      error = e instanceof Error ? e.message : String(e);
+    } finally {
+      deleteNoteBusy = false;
+    }
+  }
+
+  async function loadSiblingCards(noteId: number) {
+    siblingsLoading = true;
+    try {
+      const cards = await pluginInvoke<Card[]>(
+        "study",
+        "study:anki:cards:list_by_note",
+        { noteId },
+      );
+      siblingCards = cards ?? [];
+    } catch (e) {
+      siblingCards = [];
+    } finally {
+      siblingsLoading = false;
+    }
+  }
   function askDelete() {
     if (selected.size === 0) return;
     confirmAction = "delete";
@@ -372,6 +510,7 @@
     drawerStats = null;
     drawerNote = null;
     drawerError = "";
+    siblingCards = [];
     try {
       const stats = await pluginInvoke<CardStats>(
         "study",
@@ -385,6 +524,7 @@
           id: stats.note_id,
         });
       }
+      void loadSiblingCards(stats.note_id);
     } catch (e) {
       drawerError = e instanceof Error ? e.message : String(e);
     }
@@ -474,6 +614,22 @@
       </button>
       <button
         type="button"
+        class="bulk-btn"
+        onclick={() => { bulkTagMode = "add"; bulkTagOpen = true; }}
+        disabled={busy}
+      >
+        Adicionar tag
+      </button>
+      <button
+        type="button"
+        class="bulk-btn"
+        onclick={() => { bulkTagMode = "remove"; bulkTagOpen = true; }}
+        disabled={busy}
+      >
+        Remover tag
+      </button>
+      <button
+        type="button"
         class="bulk-btn danger"
         onclick={askDelete}
         disabled={busy}
@@ -485,6 +641,18 @@
       </button>
     </div>
   {/if}
+
+  <div class="utility-row">
+    <button
+      type="button"
+      class="util-btn"
+      onclick={() => { unburyDeckTarget = null; unburyDeckPickerOpen = true; }}
+      disabled={busy}
+      title="Reativa cards enterrados de um deck inteiro"
+    >
+      Reativar enterrados…
+    </button>
+  </div>
 
   {#if loading}
     <p class="muted">Buscando…</p>
@@ -625,6 +793,142 @@
   </div>
 {/if}
 
+{#if bulkTagOpen}
+  <div
+    class="modal-backdrop"
+    role="presentation"
+    onclick={(e) => { if (e.target === e.currentTarget) bulkTagOpen = false; }}
+  >
+    <div class="modal" role="dialog" aria-modal="true">
+      <h3>
+        {bulkTagMode === "add" ? "Adicionar tag" : "Remover tag"}
+        em {selectedNoteIds().length}
+        {selectedNoteIds().length === 1 ? "nota" : "notas"}
+      </h3>
+      <label>
+        <span>Tags (separadas por espaço; use <code>::</code> para hierarquia)</span>
+        <input
+          type="text"
+          bind:value={bulkTagInput}
+          placeholder="exemplo livro::cap1"
+          onkeydown={(e) => { if (e.key === "Enter") bulkApplyTags(); }}
+        />
+      </label>
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="btn-secondary"
+          onclick={() => (bulkTagOpen = false)}
+          disabled={busy}
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn-primary"
+          onclick={bulkApplyTags}
+          disabled={busy || bulkTagInput.trim() === ""}
+        >
+          {bulkTagMode === "add" ? "Adicionar" : "Remover"}
+        </button>
+      </div>
+    </div>
+  </div>
+{/if}
+
+{#if unburyDeckPickerOpen}
+  <div
+    class="modal-backdrop"
+    role="presentation"
+    onclick={(e) => { if (e.target === e.currentTarget) unburyDeckPickerOpen = false; }}
+  >
+    <div class="modal" role="dialog" aria-modal="true">
+      <h3>Reativar cards enterrados</h3>
+      <p class="modal-hint">
+        Reverte o estado de enterro de cards do deck selecionado, retornando-os
+        às filas normais.
+      </p>
+      <label>
+        <span>Deck</span>
+        <select bind:value={unburyDeckTarget}>
+          <option value={null}>Selecione…</option>
+          {#each allDecks as d (d.id)}
+            <option value={d.id}>{d.name}</option>
+          {/each}
+        </select>
+      </label>
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="btn-secondary"
+          onclick={() => (unburyDeckPickerOpen = false)}
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn-primary"
+          onclick={unburyDeckAction}
+          disabled={busy || unburyDeckTarget == null}
+        >
+          Reativar
+        </button>
+      </div>
+    </div>
+  </div>
+{/if}
+
+{#if editNoteOpen && editNoteTarget}
+  <div
+    class="modal-backdrop"
+    role="presentation"
+    onclick={(e) => { if (e.target === e.currentTarget) editNoteOpen = false; }}
+  >
+    <div class="modal modal-wide" role="dialog" aria-modal="true">
+      <h3>Editar nota #{editNoteTarget.id}</h3>
+      <div class="edit-fields">
+        {#each editNoteFields as _field, idx (idx)}
+          <label class="edit-field">
+            <span>Campo {idx + 1}</span>
+            <textarea bind:value={editNoteFields[idx]} rows="2"></textarea>
+          </label>
+        {/each}
+        <label class="edit-field">
+          <span>Tags (espaço como separador)</span>
+          <input type="text" bind:value={editNoteTags} />
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button
+          type="button"
+          class="btn-secondary"
+          onclick={() => (editNoteOpen = false)}
+          disabled={editNoteBusy}
+        >
+          Cancelar
+        </button>
+        <button
+          type="button"
+          class="btn-primary"
+          onclick={saveEditedNote}
+          disabled={editNoteBusy}
+        >
+          {editNoteBusy ? "Salvando…" : "Salvar"}
+        </button>
+      </div>
+    </div>
+  </div>
+{/if}
+
+<ConfirmDialog
+  bind:open={confirmDeleteNoteOpen}
+  title="Excluir nota"
+  message="A nota e todos os cards associados serão removidos. Não pode ser desfeito."
+  confirmLabel="Excluir nota"
+  variant="danger"
+  onConfirm={confirmDeleteNote}
+/>
+
 {#if drawerOpen}
   <aside
     class="drawer-backdrop"
@@ -644,7 +948,27 @@
         <p class="muted">Carregando…</p>
       {:else}
         <section class="drawer-section">
-          <h4>Conteúdo</h4>
+          <div class="drawer-section-head">
+            <h4>Conteúdo</h4>
+            {#if drawerNote}
+              <div class="drawer-section-actions">
+                <button
+                  type="button"
+                  class="btn-link"
+                  onclick={() => drawerNote && startEditNote(drawerNote)}
+                >
+                  Editar
+                </button>
+                <button
+                  type="button"
+                  class="btn-link danger"
+                  onclick={() => drawerNote && askDeleteNote(drawerNote.id)}
+                >
+                  Excluir nota
+                </button>
+              </div>
+            {/if}
+          </div>
           {#if drawerNote}
             <ul class="fields">
               {#each drawerNote.fields as field, i (i)}
@@ -661,6 +985,32 @@
                 {/each}
               </div>
             {/if}
+          {/if}
+        </section>
+
+        <section class="drawer-section">
+          <h4>Outras cards desta nota</h4>
+          {#if siblingsLoading}
+            <p class="muted small">Carregando…</p>
+          {:else if siblingCards.length <= 1}
+            <p class="muted small">Esta nota tem só essa card.</p>
+          {:else}
+            <ul class="sibling-list">
+              {#each siblingCards as sib (sib.id)}
+                <li class:current={sib.id === drawerCardId}>
+                  <button
+                    type="button"
+                    class="sibling-link"
+                    onclick={() => sib.id !== drawerCardId && openDrawer(sib.id)}
+                    disabled={sib.id === drawerCardId}
+                  >
+                    <span class="sib-ord">ord {sib.ord}</span>
+                    <span class="sib-state">{sib.queue}</span>
+                    <span class="sib-id mono">#{sib.id}</span>
+                  </button>
+                </li>
+              {/each}
+            </ul>
           {/if}
         </section>
 
@@ -1049,6 +1399,144 @@
     display: flex;
     justify-content: flex-end;
     gap: 8px;
+  }
+  .modal-wide {
+    max-width: 720px;
+  }
+  .modal-hint {
+    margin: 0 0 12px;
+    font-size: 12px;
+    color: var(--tertiary);
+  }
+  .edit-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+  .edit-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--tertiary);
+  }
+  .edit-field textarea,
+  .edit-field input {
+    padding: 8px 10px;
+    border: 1px solid var(--input-border);
+    border-radius: var(--border-radius);
+    background: var(--bg);
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+    resize: vertical;
+  }
+  .edit-field textarea:focus,
+  .edit-field input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .utility-row {
+    display: flex;
+    gap: 8px;
+    padding-top: 4px;
+  }
+  .util-btn {
+    padding: 5px 12px;
+    background: transparent;
+    border: 1px solid var(--input-border);
+    border-radius: var(--border-radius);
+    color: var(--tertiary);
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .util-btn:hover:not(:disabled) {
+    color: var(--text);
+    border-color: var(--accent);
+  }
+  .util-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .drawer-section-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .drawer-section-actions {
+    display: flex;
+    gap: 4px;
+  }
+  .btn-link {
+    padding: 2px 8px;
+    background: transparent;
+    border: 0;
+    color: var(--accent);
+    font: inherit;
+    font-size: 11px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  .btn-link:hover {
+    background: color-mix(in oklab, var(--accent) 10%, transparent);
+  }
+  .btn-link.danger {
+    color: var(--error, var(--accent));
+  }
+  .btn-link.danger:hover {
+    background: color-mix(in oklab, var(--error, var(--accent)) 10%, transparent);
+  }
+
+  .sibling-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .sibling-list li.current .sibling-link {
+    background: color-mix(in oklab, var(--accent) 10%, transparent);
+    cursor: default;
+  }
+  .sibling-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    padding: 6px 10px;
+    border: 0;
+    background: transparent;
+    border-radius: var(--border-radius);
+    color: var(--text);
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+  .sibling-link:hover:not(:disabled) {
+    background: color-mix(in oklab, var(--accent) 5%, transparent);
+  }
+  .sib-ord {
+    font-size: 12px;
+  }
+  .sib-state {
+    font-size: 11px;
+    color: var(--tertiary);
+  }
+  .sib-id {
+    margin-left: auto;
+    font-size: 11px;
+    color: var(--tertiary);
+  }
+  .small {
+    font-size: 12px;
   }
   .btn-primary {
     padding: 8px 18px;

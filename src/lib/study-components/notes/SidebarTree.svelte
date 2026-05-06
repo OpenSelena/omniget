@@ -189,19 +189,40 @@
 
   <div class="quick-actions">
     <button class="quick" onclick={onJournalToday}>
-      <span>📅</span> <span>Journal hoje</span>
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="4" width="18" height="18" rx="2" />
+        <path d="M3 10h18 M8 2v4 M16 2v4" />
+      </svg>
+      <span>Journal hoje</span>
     </button>
     <a class="quick" href="/study/notes/journal">
-      <span>📆</span> <span>Histórico de journal</span>
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3" y="4" width="18" height="18" rx="2" />
+        <path d="M3 10h18 M8 2v4 M16 2v4 M12 14v3l2 1" />
+      </svg>
+      <span>Histórico de journal</span>
     </a>
     <a class="quick" href="/study/notes/search">
-      <span>🔎</span> <span>Buscar</span>
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="11" cy="11" r="7" />
+        <path d="M21 21l-4.3-4.3" />
+      </svg>
+      <span>Buscar</span>
     </a>
     <a class="quick" href="/study/notes/graph">
-      <span>🕸</span> <span>Grafo</span>
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="6" cy="6" r="2.5" />
+        <circle cx="18" cy="6" r="2.5" />
+        <circle cx="12" cy="18" r="2.5" />
+        <path d="M8 7l3 9 M16 7l-3 9 M9 6h6" />
+      </svg>
+      <span>Grafo</span>
     </a>
     <a class="quick" href="/study/notes/templates">
-      <span>📄</span> <span>Templates</span>
+      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z M14 3v5h5" />
+      </svg>
+      <span>Templates</span>
     </a>
   </div>
 
@@ -214,7 +235,12 @@
 
   {#if sectionFavorites.length > 0}
     <section class="sidebar-section">
-      <h3>★ Favoritas</h3>
+      <h3>
+        <svg class="section-icon" viewBox="0 0 24 24" width="13" height="13" fill="currentColor" stroke="none" aria-hidden="true">
+          <path d="M12 2l2.9 6.5 7.1.6-5.4 4.7 1.7 7-6.3-3.8-6.3 3.8 1.7-7L2 9.1l7.1-.6z" />
+        </svg>
+        Favoritas
+      </h3>
       <ul class="page-list">
         {#each sectionFavorites as p (p.id)}
           <li>
@@ -283,7 +309,12 @@
 
   {#if sectionCursos.length > 0}
     <section class="sidebar-section">
-      <h3>📚 Cursos</h3>
+      <h3>
+        <svg class="section-icon" viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M4 4h6a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4z M20 4h-6a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h7z" />
+        </svg>
+        Cursos
+      </h3>
       <ul class="page-list">
         {#each sectionCursos as p (p.id)}
           <li>
@@ -396,6 +427,19 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--tertiary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .section-icon {
+    flex-shrink: 0;
+  }
+  .quick svg {
+    flex-shrink: 0;
+    color: var(--tertiary);
+  }
+  .quick:hover svg {
+    color: currentColor;
   }
   .page-list {
     list-style: none;

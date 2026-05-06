@@ -308,6 +308,8 @@
       <button type="button" class="btn-primary" onclick={() => openCreate(null)}>
         + Novo deck
       </button>
+      <a href="/study/anki/decks/filtered" class="advanced-link">Decks filtrados →</a>
+      <a href="/study/anki/decks/presets" class="advanced-link">Presets →</a>
       <span class="hint">
         Use <code>::</code> no nome pra criar sub-deck (ex: <code>Idiomas::Espanhol</code>)
       </span>
@@ -769,6 +771,17 @@
     color: var(--error);
     border-color: var(--error);
     background: color-mix(in oklab, var(--error) 8%, transparent);
+  }
+
+  .advanced-link {
+    color: var(--accent);
+    font-size: 12px;
+    text-decoration: none;
+    padding: 4px 8px;
+    border-radius: var(--border-radius);
+  }
+  .advanced-link:hover {
+    background: color-mix(in oklab, var(--accent) 10%, transparent);
   }
 
   .btn-primary {

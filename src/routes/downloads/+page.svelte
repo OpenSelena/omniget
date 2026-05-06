@@ -88,7 +88,7 @@
 
   async function cancelDownload(courseId: number) {
     try {
-      await pluginInvoke("courses", "cancel_download", { course_id: courseId });
+      await pluginInvoke("courses", "cancel_course_download", { courseId });
     } catch (e: any) {
       const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
       showToast("error", msg);

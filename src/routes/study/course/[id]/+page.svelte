@@ -220,7 +220,12 @@
       }>("study", "study:courses:probe_durations", { courseId });
       probeReport = r;
       if (r.probed > 0) {
-        showToast("ok", `${r.probed} duração(ões) detectada(s)`);
+        showToast(
+          "ok",
+          r.probed === 1
+            ? "1 duração detectada"
+            : `${r.probed} durações detectadas`,
+        );
         await load();
       } else if (r.failed > 0 && r.probed === 0) {
         showToast("err", "ffprobe falhou — verifique se está instalado");
@@ -349,9 +354,12 @@
           loose_lessons: detail.loose_lessons.map(update),
         };
       }
+      const status = completed ? "completas" : "incompletas";
       showToast(
         "ok",
-        `${ids.length} aula(s) marcada(s) como ${completed ? "completas" : "incompletas"}`,
+        ids.length === 1
+          ? `1 aula marcada como ${completed ? "completa" : "incompleta"}`
+          : `${ids.length} aulas marcadas como ${status}`,
       );
       clearSelection();
     } catch (e) {
@@ -686,7 +694,8 @@
   {#if selectedLessons.size > 0}
     <div class="selection-bar" role="toolbar" aria-label="Ações em massa">
       <span class="sel-count">
-        <strong>{selectedLessons.size}</strong> selecionada(s)
+        <strong>{selectedLessons.size}</strong>
+        {selectedLessons.size === 1 ? "selecionada" : "selecionadas"}
       </span>
       <button class="sel-btn" onclick={selectAllVisible}>
         Selecionar todas
