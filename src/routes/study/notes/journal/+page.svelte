@@ -422,7 +422,8 @@
     display: grid;
     grid-template-columns: 280px 1fr;
     gap: 12px;
-    height: calc(100vh - var(--header-height, 64px));
+    height: 100%;
+    min-height: 0;
     overflow: hidden;
   }
   @media (max-width: 760px) {

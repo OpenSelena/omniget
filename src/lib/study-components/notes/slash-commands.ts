@@ -4,6 +4,7 @@ export type SlashCommandGroup =
   | "estrutura"
   | "blocos"
   | "callout"
+  | "renderers"
   | "refs"
   | "datas"
   | "utilidades";
@@ -22,6 +23,7 @@ const GROUP_ORDER: SlashCommandGroup[] = [
   "estrutura",
   "blocos",
   "callout",
+  "renderers",
   "refs",
   "datas",
   "utilidades",
@@ -31,6 +33,7 @@ const GROUP_LABEL: Record<SlashCommandGroup, string> = {
   estrutura: "Estrutura",
   blocos: "Blocos",
   callout: "Callouts",
+  renderers: "Renderers",
   refs: "Refs",
   datas: "Datas",
   utilidades: "Utilidades",
@@ -328,6 +331,105 @@ export const SLASH_COMMANDS: SlashCommand[] = [
     group: "callout",
     run: (editor, range) =>
       editor.chain().focus().deleteRange(range).setCallout("caution").run(),
+  },
+  {
+    id: "mermaid",
+    label: "Diagrama (mermaid)",
+    hint: "Flowcharts, sequência, gantt — sintaxe mermaid",
+    aliases: ["mermaid", "diagram", "diagrama", "flow", "fluxo"],
+    indicator: "▦",
+    group: "renderers",
+    run: (editor, range) =>
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .insertContent({
+          type: "mermaid",
+          attrs: { source: "graph LR;\n  A-->B" },
+        })
+        .run(),
+  },
+  {
+    id: "flowchart",
+    label: "Fluxograma (flowchart.js)",
+    hint: "Sintaxe flowchart.js: símbolos start/end/operation/condition",
+    aliases: ["flowchart", "fluxograma", "fluxo", "fc"],
+    indicator: "⇄",
+    group: "renderers",
+    run: (editor, range) =>
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .insertContent({
+          type: "flowchart",
+          attrs: {
+            source:
+              "st=>start: Start\nop=>operation: Step\ne=>end: End\nst->op->e",
+          },
+        })
+        .run(),
+  },
+  {
+    id: "mindmap",
+    label: "Mapa mental (markmap)",
+    hint: "Markdown indentado: # raiz, ## ramo, ### folha",
+    aliases: ["mindmap", "markmap", "mapa", "mental", "brain"],
+    indicator: "⌘",
+    group: "renderers",
+    run: (editor, range) =>
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .insertContent({
+          type: "mindmap",
+          attrs: {
+            source: "# Root\n## Branch A\n### Leaf 1\n### Leaf 2\n## Branch B",
+          },
+        })
+        .run(),
+  },
+  {
+    id: "abc",
+    label: "Partitura (notação ABC)",
+    hint: "Notação musical ABC — escala, melodia, harmonia",
+    aliases: ["abc", "musica", "music", "score", "partitura", "notation"],
+    indicator: "♪",
+    group: "renderers",
+    run: (editor, range) =>
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .insertContent({
+          type: "abc",
+          attrs: {
+            source: "X:1\nT:Scale\nM:4/4\nL:1/4\nK:C\nC D E F | G A B c |",
+          },
+        })
+        .run(),
+  },
+  {
+    id: "plantuml",
+    label: "Diagrama UML (PlantUML)",
+    hint: "Sequência, classe, casos de uso — sintaxe PlantUML",
+    aliases: ["plantuml", "puml", "uml", "diagrama", "sequence", "class"],
+    indicator: "⚙",
+    group: "renderers",
+    run: (editor, range) =>
+      editor
+        .chain()
+        .focus()
+        .deleteRange(range)
+        .insertContent({
+          type: "plantuml",
+          attrs: {
+            source: "@startuml\nAlice -> Bob: hello\nBob --> Alice: hi\n@enduml",
+          },
+        })
+        .run(),
   },
   {
     id: "link",

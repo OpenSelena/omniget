@@ -4,6 +4,7 @@
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
   import { pluginInvoke } from "$lib/plugin-invoke";
+  import { rpcSetSource, rpcClearSource } from "$lib/rpc";
   import { awardXp } from "$lib/study-gamification";
   import { t } from "$lib/i18n";
   import SegmentedControl from "$lib/study-components/SegmentedControl.svelte";
@@ -1529,6 +1530,24 @@
     applyFocusMode(false);
     popReadingTheme();
     void session?.stop(false);
+    void rpcClearSource("reading");
+  });
+
+  $effect(() => {
+    if (!book || !meta) return;
+    const total = meta.page_count;
+    const author = book.author?.trim();
+    const stateText = author
+      ? `${author} · pág. ${currentPage}/${total}`
+      : `pág. ${currentPage}/${total}`;
+    void rpcSetSource({
+      source: "reading",
+      details: book.title ?? "Lendo",
+      state: stateText,
+      duration: 0,
+      position: 0,
+      paused: false,
+    });
   });
 
   let pendingEpubSelection = $state<EpubSelectionEvent | null>(null);

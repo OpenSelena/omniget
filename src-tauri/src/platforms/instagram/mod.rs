@@ -780,7 +780,7 @@ impl PlatformDownloader for InstagramDownloader {
                 &output,
                 progress.clone(),
                 headers,
-                None,
+                Some(&opts.cancel_token),
             )
             .await
             {
@@ -830,7 +830,7 @@ impl PlatformDownloader for InstagramDownloader {
                 &output,
                 tx,
                 headers,
-                None,
+                Some(&opts.cancel_token),
             )
             .await
             {

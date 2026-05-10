@@ -110,9 +110,9 @@ pub fn run() {
         .plugin(tauri_plugin_process::init())
         .plugin(
             tauri_plugin_global_shortcut::Builder::new()
-                .with_handler(|app, _shortcut, event| {
+                .with_handler(|app, shortcut, event| {
                     if event.state == tauri_plugin_global_shortcut::ShortcutState::Pressed {
-                        hotkey::on_hotkey_pressed(app);
+                        hotkey::on_hotkey_pressed(app, shortcut);
                     }
                 })
                 .build(),
@@ -127,6 +127,9 @@ pub fn run() {
             commands::host_queue::register_event_listeners(app.handle());
             let settings = storage::config::load_settings(app.handle());
             core::http_client::init_proxy(settings.proxy.clone());
+            core::http_fetcher::set_global_max_concurrent_segments(
+                settings.advanced.max_concurrent_segments as usize,
+            );
             core::ytdlp::set_ext_cookie_path_fn(|| native_host::extension_cookie_file_path());
             core::ytdlp::set_global_cookie_file_fn(|| {
                 let s = storage::config::load_settings_standalone();
@@ -189,6 +192,21 @@ pub fn run() {
                 ));
             }
             core::recovery::init_from_disk();
+            core::queue_history::init_from_disk();
+            {
+                let app_handle = app.handle().clone();
+                tauri::async_runtime::spawn(async move {
+                    let state = app_handle.state::<AppState>();
+                    let snapshot = {
+                        let mut q = state.download_queue.lock().await;
+                        q.hydrate_from_history();
+                        q.get_state()
+                    };
+                    if !snapshot.is_empty() {
+                        core::queue::emit_queue_state_from_state(&app_handle, snapshot);
+                    }
+                });
+            }
             {
                 let pending = core::recovery::list();
                 if !pending.is_empty() {
@@ -305,7 +323,15 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::auth_webview::open_auth_webview,
+            commands::browser_extension::browser_extension_status,
+            commands::browser_extension::browser_extension_export,
+            commands::browser_extension::browser_extension_open_folder,
+            commands::extension_cookies::read_extension_cookies,
+            commands::extension_cookies::extension_cookies_status,
+            commands::clip::clip_video,
+            commands::reencode::reencode_video,
             commands::diagnostics::get_rate_limit_stats,
+            commands::diagnostics::get_hwaccel_info,
             commands::downloads::detect_platform,
             commands::downloads::check_cookie_error,
             commands::downloads::validate_output_path,
@@ -315,6 +341,9 @@ pub fn run() {
             commands::downloads::cancel_generic_download,
             commands::downloads::pause_download,
             commands::downloads::resume_download,
+            commands::downloads::pause_all_downloads,
+            commands::downloads::resume_all_downloads,
+            commands::downloads::reorder_queue,
             commands::downloads::retry_download,
             commands::downloads::remove_download,
             commands::downloads::get_queue_state,
@@ -326,6 +355,8 @@ pub fn run() {
             commands::downloads::get_recovery_items,
             commands::downloads::discard_recovery,
             commands::downloads::restore_recovery,
+            commands::downloads::get_download_history,
+            commands::downloads::clear_download_history,
             commands::downloads::reveal_file,
             commands::downloads::open_path_default,
             commands::host_queue::host_queue_enqueue_external,
@@ -337,6 +368,10 @@ pub fn run() {
             commands::settings::reset_settings,
             commands::settings::mark_onboarding_complete,
             commands::settings::mark_legal_acknowledged,
+            commands::rpc::rpc_test_connection,
+            commands::rpc::rpc_set_source,
+            commands::rpc::rpc_clear_source,
+            commands::rpc::rpc_set_idle_stats,
             commands::autostart::set_autostart,
             commands::autostart::get_autostart_status,
             commands::dependencies::check_dependencies,

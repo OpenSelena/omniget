@@ -12,7 +12,12 @@ pub fn update_settings(app: tauri::AppHandle, partial: String) -> Result<AppSett
     let mut current = config::load_settings(&app);
     let old_hotkey_enabled = current.download.hotkey_enabled;
     let old_hotkey_binding = current.download.hotkey_binding.clone();
+    let old_clip_hotkey_enabled = current.download.clip_hotkey_enabled;
+    let old_clip_hotkey_binding = current.download.clip_hotkey_binding.clone();
+    let old_music_hotkey_enabled = current.download.music_hotkey_enabled;
+    let old_music_hotkey_binding = current.download.music_hotkey_binding.clone();
     let old_start_with_system = current.start_with_system;
+    let old_rpc = current.rpc.clone();
 
     let patch: serde_json::Value =
         serde_json::from_str(&partial).map_err(|e| format!("Invalid JSON: {}", e))?;
@@ -23,15 +28,33 @@ pub fn update_settings(app: tauri::AppHandle, partial: String) -> Result<AppSett
     config::save_settings(&app, &current).map_err(|e| format!("Save: {}", e))?;
 
     crate::core::http_client::init_proxy(current.proxy.clone());
+    crate::core::http_fetcher::set_global_max_concurrent_segments(
+        current.advanced.max_concurrent_segments as usize,
+    );
 
     if old_hotkey_enabled != current.download.hotkey_enabled
         || old_hotkey_binding != current.download.hotkey_binding
+        || old_clip_hotkey_enabled != current.download.clip_hotkey_enabled
+        || old_clip_hotkey_binding != current.download.clip_hotkey_binding
+        || old_music_hotkey_enabled != current.download.music_hotkey_enabled
+        || old_music_hotkey_binding != current.download.music_hotkey_binding
     {
         hotkey::reregister(&app);
     }
 
     if old_start_with_system != current.start_with_system {
         crate::commands::autostart::apply_autostart(&app, current.start_with_system)?;
+    }
+
+    if old_rpc.enabled != current.rpc.enabled
+        || old_rpc.app_id != current.rpc.app_id
+        || old_rpc.large_image_key != current.rpc.large_image_key
+    {
+        let new_rpc = current.rpc.clone();
+        let prev_app_id = old_rpc.app_id.clone();
+        tauri::async_runtime::spawn(async move {
+            crate::core::rpc::handle_settings_changed(new_rpc, prev_app_id).await;
+        });
     }
 
     Ok(current)

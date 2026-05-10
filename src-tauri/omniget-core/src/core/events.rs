@@ -24,6 +24,8 @@ pub struct QueueItemInfo {
     pub file_path: Option<String>,
     pub file_size_bytes: Option<u64>,
     pub file_count: Option<u32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub eta_seconds: Option<u64>,
 }
 
 #[derive(Clone, Serialize)]
@@ -36,6 +38,8 @@ pub struct QueueItemProgress {
     pub downloaded_bytes: u64,
     pub total_bytes: Option<u64>,
     pub phase: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub eta_seconds: Option<u64>,
 }
 
 pub trait EventEmitter: Send + Sync + Clone + 'static {

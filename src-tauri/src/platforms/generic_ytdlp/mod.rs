@@ -266,7 +266,23 @@ impl PlatformDownloader for GenericYtdlpDownloader {
             .first()
             .ok_or_else(|| anyhow!("No quality available"))?;
 
-        let selected = if let Some(ref wanted) = opts.quality {
+        let requested_height = opts
+            .quality
+            .as_deref()
+            .and_then(Self::extract_quality_height);
+
+        let selected = if let Some(h) = requested_height {
+            info.available_qualities
+                .iter()
+                .filter(|q| q.height > 0 && q.height <= h)
+                .max_by_key(|q| q.height)
+                .or_else(|| {
+                    opts.quality
+                        .as_deref()
+                        .and_then(|w| info.available_qualities.iter().find(|q| q.label == *w))
+                })
+                .unwrap_or(first)
+        } else if let Some(ref wanted) = opts.quality {
             info.available_qualities
                 .iter()
                 .find(|q| q.label == *wanted)
@@ -417,7 +433,7 @@ impl PlatformDownloader for GenericYtdlpDownloader {
             ytdlp::ensure_ytdlp().await?
         };
 
-        let quality_height = Self::extract_quality_height(&selected.label);
+        let quality_height = requested_height.or_else(|| Self::extract_quality_height(&selected.label));
         let video_url = &selected.url;
 
         let referer = opts
@@ -425,23 +441,59 @@ impl PlatformDownloader for GenericYtdlpDownloader {
             .as_deref()
             .or_else(|| platform_referer(video_url));
 
-        ytdlp::download_video(
-            &ytdlp_path,
-            video_url,
-            &opts.output_dir,
-            quality_height,
-            progress,
-            opts.download_mode.as_deref(),
-            opts.format_id.as_deref(),
-            opts.filename_template.as_deref(),
-            referer,
-            opts.cancel_token.clone(),
-            None,
-            opts.concurrent_fragments,
-            opts.download_subtitles,
-            &[],
-        )
-        .await
+        let format_fallbacks: &[Option<&str>] = if opts.format_id.is_some() {
+            &[None]
+        } else {
+            &[None, Some("b"), Some("worst")]
+        };
+
+        let mut last_err: Option<anyhow::Error> = None;
+        for (idx, override_format) in format_fallbacks.iter().enumerate() {
+            let effective_format = override_format.or(opts.format_id.as_deref());
+            let attempt_progress = progress.clone();
+            let result = ytdlp::download_video(
+                &ytdlp_path,
+                video_url,
+                &opts.output_dir,
+                quality_height,
+                attempt_progress,
+                opts.download_mode.as_deref(),
+                effective_format,
+                opts.filename_template.as_deref(),
+                referer,
+                opts.cancel_token.clone(),
+                None,
+                opts.concurrent_fragments,
+                opts.download_subtitles,
+                &[],
+            )
+            .await;
+
+            match result {
+                Ok(r) => return Ok(r),
+                Err(e) => {
+                    let msg = e.to_string().to_lowercase();
+                    let is_format_error = msg.contains("requested format")
+                        || msg.contains("format is not available")
+                        || msg.contains("no video formats")
+                        || msg.contains("no suitable format");
+                    let has_more = idx + 1 < format_fallbacks.len();
+                    if is_format_error && has_more && !opts.cancel_token.is_cancelled() {
+                        tracing::warn!(
+                            "[generic_ytdlp] format fallback {}/{} after error: {}",
+                            idx + 1,
+                            format_fallbacks.len() - 1,
+                            e
+                        );
+                        last_err = Some(e);
+                        continue;
+                    }
+                    return Err(e);
+                }
+            }
+        }
+
+        Err(last_err.unwrap_or_else(|| anyhow!("download failed without specific error")))
     }
 }
 

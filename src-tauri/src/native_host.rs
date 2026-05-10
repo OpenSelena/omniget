@@ -25,6 +25,7 @@ const HOST_MANIFEST_NAME: &str = "wtf.tonho.omniget.json";
 struct NativeHostRequest {
     #[serde(rename = "type")]
     kind: String,
+    #[serde(default)]
     url: String,
     #[serde(default, rename = "protocolVersion")]
     protocol_version: Option<u32>,
@@ -499,6 +500,48 @@ fn sanitize_cookie_field(s: &str) -> String {
         .collect()
 }
 
+fn root_domain_of(host: &str) -> String {
+    let h = host.trim_start_matches('.').to_lowercase();
+    let parts: Vec<&str> = h.split('.').collect();
+    if parts.len() >= 2 {
+        parts[parts.len() - 2..].join(".")
+    } else {
+        h
+    }
+}
+
+fn format_cookie_line(c: &NativeCookie, session_ttl: u64) -> String {
+    let raw_domain = sanitize_cookie_field(&c.domain);
+    let path_field = sanitize_cookie_field(&c.path);
+    let name = sanitize_cookie_field(&c.name);
+    let value = sanitize_cookie_field(&c.value);
+    let http_only_prefix = if c.http_only { "#HttpOnly_" } else { "" };
+    let is_host_only = c
+        .host_only
+        .unwrap_or_else(|| !raw_domain.starts_with('.'));
+    let (domain, include_subdomains) = if is_host_only {
+        let stripped = raw_domain
+            .strip_prefix('.')
+            .unwrap_or(&raw_domain)
+            .to_string();
+        (stripped, "FALSE")
+    } else if raw_domain.starts_with('.') {
+        (raw_domain.clone(), "TRUE")
+    } else {
+        (format!(".{}", raw_domain), "TRUE")
+    };
+    let secure = if c.secure { "TRUE" } else { "FALSE" };
+    let expires = if c.expires == 0 {
+        session_ttl
+    } else {
+        c.expires as u64
+    };
+    format!(
+        "{}{}\t{}\t{}\t{}\t{}\t{}\t{}\n",
+        http_only_prefix, domain, include_subdomains, path_field, secure, expires, name, value,
+    )
+}
+
 fn write_extension_cookies(cookies: &[NativeCookie]) -> anyhow::Result<()> {
     let path = extension_cookie_file_path();
     if let Some(parent) = path.parent() {
@@ -514,37 +557,47 @@ fn write_extension_cookies(cookies: &[NativeCookie]) -> anyhow::Result<()> {
         .as_secs();
     let session_ttl = now + 86400; // 24 h, same approach as Cookie-Editor
 
+    // Merge with existing file: keep cookies whose root domain is NOT in the
+    // incoming batch. Each platform capture only ships its own domains, so
+    // overwriting the file would wipe other platforms' auth.
+    let incoming_roots: std::collections::HashSet<String> = cookies
+        .iter()
+        .map(|c| root_domain_of(&c.domain))
+        .collect();
+
+    let mut preserved: Vec<String> = Vec::new();
+    if let Ok(existing) = fs::read_to_string(&path) {
+        for line in existing.lines() {
+            let trimmed = line.trim();
+            if trimmed.is_empty() {
+                continue;
+            }
+            let effective = if let Some(rest) = trimmed.strip_prefix("#HttpOnly_") {
+                rest
+            } else if trimmed.starts_with('#') {
+                continue; // header / comment
+            } else {
+                trimmed
+            };
+            let parts: Vec<&str> = effective.split('\t').collect();
+            if parts.len() < 7 {
+                continue;
+            }
+            let domain = parts[0];
+            let root = root_domain_of(domain);
+            if !incoming_roots.contains(&root) {
+                preserved.push(line.to_string());
+            }
+        }
+    }
+
     let mut content = String::from("# Netscape HTTP Cookie File\n");
+    for line in &preserved {
+        content.push_str(line);
+        content.push('\n');
+    }
     for c in cookies {
-        let raw_domain = sanitize_cookie_field(&c.domain);
-        let path_field = sanitize_cookie_field(&c.path);
-        let name = sanitize_cookie_field(&c.name);
-        let value = sanitize_cookie_field(&c.value);
-        let http_only_prefix = if c.http_only { "#HttpOnly_" } else { "" };
-        let is_host_only = c
-            .host_only
-            .unwrap_or_else(|| !raw_domain.starts_with('.'));
-        let (domain, include_subdomains) = if is_host_only {
-            let stripped = raw_domain
-                .strip_prefix('.')
-                .unwrap_or(&raw_domain)
-                .to_string();
-            (stripped, "FALSE")
-        } else if raw_domain.starts_with('.') {
-            (raw_domain.clone(), "TRUE")
-        } else {
-            (format!(".{}", raw_domain), "TRUE")
-        };
-        let secure = if c.secure { "TRUE" } else { "FALSE" };
-        let expires = if c.expires == 0 {
-            session_ttl
-        } else {
-            c.expires as u64
-        };
-        content.push_str(&format!(
-            "{}{}\t{}\t{}\t{}\t{}\t{}\t{}\n",
-            http_only_prefix, domain, include_subdomains, path_field, secure, expires, name, value,
-        ));
+        content.push_str(&format_cookie_line(c, session_ttl));
     }
 
     fs::write(&path, content)?;
@@ -744,6 +797,35 @@ fn handle_request(request: NativeHostRequest) -> NativeHostResponse {
                 )),
             };
         }
+    }
+
+    if request.kind == "cookies:export" {
+        if let Some(ref cookies) = request.cookies {
+            if cookies.len() > MAX_COOKIES_PER_REQUEST {
+                return NativeHostResponse {
+                    ok: false,
+                    code: Some("TOO_MANY_COOKIES"),
+                    message: Some(format!(
+                        "cookies:export contains {} cookies; max is {MAX_COOKIES_PER_REQUEST}",
+                        cookies.len()
+                    )),
+                };
+            }
+            if !cookies.is_empty() {
+                if let Err(e) = write_extension_cookies(cookies) {
+                    return NativeHostResponse {
+                        ok: false,
+                        code: Some("WRITE_FAILED"),
+                        message: Some(format!("write extension cookies: {}", e)),
+                    };
+                }
+            }
+        }
+        return NativeHostResponse {
+            ok: true,
+            code: None,
+            message: None,
+        };
     }
 
     if request.kind != "enqueue" {

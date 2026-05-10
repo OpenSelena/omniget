@@ -240,7 +240,7 @@ impl PlatformDownloader for PinterestDownloader {
             &quality.url,
             &output_path,
             progress,
-            None,
+            Some(&opts.cancel_token),
         )
         .await?;
 

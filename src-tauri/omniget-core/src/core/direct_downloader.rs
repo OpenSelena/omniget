@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, OnceLock};
 
 use std::time::Duration;
@@ -9,6 +8,10 @@ use anyhow::anyhow;
 use futures::StreamExt;
 use tokio::sync::{mpsc, Semaphore};
 use tokio_util::sync::CancellationToken;
+
+use crate::core::http_fetcher::{
+    get_global_max_concurrent_segments, HttpFetcher, HttpFetcherConfig,
+};
 
 const CHUNK_TIMEOUT: Duration = Duration::from_secs(45);
 const MAX_RETRIES: u32 = 3;
@@ -166,35 +169,29 @@ async fn download_attempt(
         probe.accept_ranges && probe.content_length.is_some_and(|s| s > CHUNK_THRESHOLD);
 
     if use_chunked {
-        let total = probe.content_length.unwrap();
-        let _ = std::fs::remove_file(&part_path);
-        if let Err(chunked_err) = download_chunked(
-            client,
-            url,
-            &part_path,
-            total,
-            progress_tx,
-            headers.clone(),
-            cancel,
-        )
-        .await
-        {
-            if is_fatal_error(&chunked_err) {
-                return Err(chunked_err);
+        match run_http_fetcher(client, url, output, progress_tx, headers.clone(), cancel).await {
+            Ok(size) => return Ok(size),
+            Err(fetch_err) => {
+                if is_fatal_error(&fetch_err) {
+                    return Err(fetch_err);
+                }
+                let _ = std::fs::remove_file(&part_path);
+                tracing::warn!(
+                    "[direct] http_fetcher failed, falling back to single stream: {}",
+                    fetch_err
+                );
+                download_single_stream(
+                    client,
+                    url,
+                    &part_path,
+                    0,
+                    probe.content_length,
+                    progress_tx,
+                    headers,
+                    cancel,
+                )
+                .await?;
             }
-            let _ = std::fs::remove_file(&part_path);
-            tracing::warn!("[direct] chunked failed, falling back: {}", chunked_err);
-            download_single_stream(
-                client,
-                url,
-                &part_path,
-                0,
-                probe.content_length,
-                progress_tx,
-                headers,
-                cancel,
-            )
-            .await?;
         }
     } else {
         let existing = match std::fs::metadata(&part_path) {
@@ -233,205 +230,34 @@ async fn download_attempt(
     Ok(size)
 }
 
-async fn download_chunked(
+async fn run_http_fetcher(
     client: &reqwest::Client,
     url: &str,
-    part_path: &Path,
-    total_size: u64,
+    output: &Path,
     progress_tx: &mpsc::Sender<f64>,
     headers: Option<reqwest::header::HeaderMap>,
     cancel: Option<&CancellationToken>,
-) -> anyhow::Result<()> {
-    let file = std::fs::File::create(part_path)?;
-    file.set_len(total_size)?;
-    drop(file);
-
-    let num_chunks = total_size.div_ceil(CHUNK_SIZE);
-    let downloaded = Arc::new(AtomicU64::new(0));
-    let semaphore = Arc::new(Semaphore::new(MAX_PARALLEL));
-    let cancel_token = match cancel {
-        Some(ct) => ct.clone(),
-        None => CancellationToken::new(),
+) -> anyhow::Result<u64> {
+    let concurrent = get_global_max_concurrent_segments()
+        .unwrap_or(MAX_PARALLEL)
+        .clamp(1, 32);
+    let cfg = HttpFetcherConfig {
+        min_size_for_chunked: 0,
+        concurrent_segments: concurrent,
+        segment_size_hint: CHUNK_SIZE,
+        ..Default::default()
     };
 
-    let mut join_set = tokio::task::JoinSet::new();
-    for i in 0..num_chunks {
-        let start = i * CHUNK_SIZE;
-        let end = ((i + 1) * CHUNK_SIZE).min(total_size) - 1;
-        let client = client.clone();
-        let url = url.to_string();
-        let path = part_path.to_owned();
-        let sem = semaphore.clone();
-        let dl = downloaded.clone();
-        let ptx = progress_tx.clone();
-        let ct = cancel_token.clone();
-        let hdrs = headers.clone();
-
-        join_set.spawn(async move {
-            let _permit = sem.acquire().await.unwrap();
-            if ct.is_cancelled() {
-                return Err(anyhow!("Download cancelled"));
-            }
-            download_chunk(
-                &client, &url, &path, start, end, &dl, total_size, &ptx, hdrs, &ct,
-            )
-            .await
-        });
-    }
-
-    while let Some(result) = join_set.join_next().await {
-        if cancel_token.is_cancelled() {
-            join_set.abort_all();
-            return Err(anyhow!("Download cancelled"));
-        }
-        match result {
-            Ok(Ok(())) => {}
-            Ok(Err(e)) => {
-                join_set.abort_all();
-                return Err(e);
-            }
-            Err(e) => {
-                join_set.abort_all();
-                return Err(anyhow!("Chunk task failed: {:?}", e));
-            }
-        }
-    }
-
-    Ok(())
-}
-
-#[allow(clippy::too_many_arguments)]
-async fn download_chunk(
-    client: &reqwest::Client,
-    url: &str,
-    part_path: &Path,
-    start: u64,
-    end: u64,
-    downloaded: &AtomicU64,
-    total_size: u64,
-    progress_tx: &mpsc::Sender<f64>,
-    headers: Option<reqwest::header::HeaderMap>,
-    cancel: &CancellationToken,
-) -> anyhow::Result<()> {
-    let mut last_err = None;
-
-    for attempt in 0..3u32 {
-        if cancel.is_cancelled() {
-            return Err(anyhow!("Download cancelled"));
-        }
-
-        if attempt > 0 {
-            tokio::time::sleep(Duration::from_millis(1000 * (attempt as u64))).await;
-        }
-
-        match download_chunk_attempt(
-            client,
-            url,
-            part_path,
-            start,
-            end,
-            downloaded,
-            total_size,
-            progress_tx,
-            headers.clone(),
-            cancel,
-        )
-        .await
-        {
-            Ok(()) => return Ok(()),
-            Err(e) => {
-                if is_fatal_error(&e) {
-                    return Err(e);
-                }
-                let chunk_bytes = end - start + 1;
-                let current = downloaded.load(Ordering::Relaxed);
-                downloaded.fetch_sub(chunk_bytes.min(current), Ordering::Relaxed);
-                tracing::warn!(
-                    "[direct] chunk {}-{} attempt {}/3 failed: {}",
-                    start,
-                    end,
-                    attempt + 1,
-                    e
-                );
-                last_err = Some(e);
-            }
-        }
-    }
-
-    Err(last_err.unwrap_or_else(|| anyhow!("Chunk failed after 3 attempts")))
-}
-
-#[allow(clippy::too_many_arguments)]
-async fn download_chunk_attempt(
-    client: &reqwest::Client,
-    url: &str,
-    part_path: &Path,
-    start: u64,
-    end: u64,
-    downloaded: &AtomicU64,
-    total_size: u64,
-    progress_tx: &mpsc::Sender<f64>,
-    headers: Option<reqwest::header::HeaderMap>,
-    cancel: &CancellationToken,
-) -> anyhow::Result<()> {
-    let mut request = client.get(url);
+    let mut fetcher = HttpFetcher::new(client.clone(), url.to_string(), output.to_path_buf())
+        .with_config(cfg);
     if let Some(h) = headers {
-        request = request.headers(h);
+        fetcher = fetcher.with_headers(h);
     }
-    request = request.header("Range", format!("bytes={}-{}", start, end));
-
-    let response = tokio::time::timeout(Duration::from_secs(30), request.send())
-        .await
-        .map_err(|_| anyhow!("Timeout connecting to chunk"))??;
-
-    let status = response.status();
-    if status != reqwest::StatusCode::PARTIAL_CONTENT {
-        if status.is_success() {
-            return Err(anyhow!("Server did not support Range request (HTTP 200)"));
-        }
-        return Err(anyhow!("HTTP {} downloading chunk", status));
+    if let Some(c) = cancel {
+        fetcher = fetcher.with_cancel(c.clone());
     }
-
-    use std::io::{Seek, Write};
-    let mut file = std::fs::OpenOptions::new().write(true).open(part_path)?;
-    file.seek(std::io::SeekFrom::Start(start))?;
-
-    let expected_size = end - start + 1;
-    let mut chunk_written: u64 = 0;
-    let mut stream = response.bytes_stream();
-
-    loop {
-        if cancel.is_cancelled() {
-            return Err(anyhow!("Download cancelled"));
-        }
-
-        let chunk_result = tokio::time::timeout(CHUNK_TIMEOUT, stream.next()).await;
-        match chunk_result {
-            Ok(Some(Ok(data))) => {
-                file.write_all(&data)
-                    .map_err(|e| anyhow!("Write error (disk full?): {}", e))?;
-                chunk_written += data.len() as u64;
-                let total_dl =
-                    downloaded.fetch_add(data.len() as u64, Ordering::Relaxed) + data.len() as u64;
-                let percent = (total_dl as f64 / total_size as f64) * 100.0;
-                let _ = progress_tx.send(percent.min(99.9)).await;
-            }
-            Ok(Some(Err(e))) => return Err(anyhow!("Chunk stream error: {}", e)),
-            Ok(None) => break,
-            Err(_) => return Err(anyhow!("Chunk timeout — no data received for 30 seconds")),
-        }
-    }
-
-    if chunk_written != expected_size {
-        return Err(anyhow!(
-            "Incomplete chunk: expected {} bytes, got {}",
-            expected_size,
-            chunk_written
-        ));
-    }
-
-    file.flush()?;
-    Ok(())
+    let result = fetcher.download(progress_tx.clone()).await?;
+    Ok(result.bytes_written)
 }
 
 #[allow(clippy::too_many_arguments)]

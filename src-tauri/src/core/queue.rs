@@ -93,7 +93,16 @@ pub enum QueueStatus {
     Paused,
     Seeding,
     Complete { success: bool },
-    Error { message: String },
+    Error { message: String, retryable: bool },
+}
+
+pub fn is_retryable_error_message(message: &str) -> bool {
+    let lower = message.to_lowercase();
+    if lower.contains("cancel") {
+        return false;
+    }
+    let (category, _) = omniget_core::core::errors::classify_download_error(message);
+    matches!(category, "unknown" | "rate_limited")
 }
 
 #[derive(Clone, Serialize)]
@@ -115,6 +124,8 @@ pub struct QueueItemInfo {
     pub kind: Option<QueueKind>,
     #[serde(default)]
     pub external: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub eta_seconds: Option<u64>,
 }
 
 pub struct QueueItem {
@@ -147,6 +158,12 @@ pub struct QueueItem {
     pub kind: Option<QueueKind>,
     pub external: bool,
     pub thumbnail_url_override: Option<String>,
+    pub retry_count: u32,
+    pub max_retries: u32,
+    pub resume_state: Option<serde_json::Value>,
+    pub concurrent_segments: Option<usize>,
+    pub segment_size_bytes: Option<u64>,
+    pub eta_seconds: Option<u64>,
 }
 
 impl QueueItem {
@@ -170,6 +187,7 @@ impl QueueItem {
                 .or_else(|| self.media_info.as_ref().and_then(|m| m.thumbnail_url.clone())),
             kind: self.kind,
             external: self.external,
+            eta_seconds: self.eta_seconds,
         }
     }
 }
@@ -178,6 +196,7 @@ pub struct DownloadQueue {
     pub items: Vec<QueueItem>,
     pub max_concurrent: u32,
     pub stagger_delay_ms: u64,
+    pub default_max_retries: u32,
 }
 
 impl DownloadQueue {
@@ -186,6 +205,7 @@ impl DownloadQueue {
             items: Vec::new(),
             max_concurrent,
             stagger_delay_ms: 150,
+            default_max_retries: 3,
         }
     }
 
@@ -242,6 +262,12 @@ impl DownloadQueue {
             kind: computed_kind,
             external: false,
             thumbnail_url_override: None,
+            retry_count: 0,
+            max_retries: self.default_max_retries,
+            resume_state: None,
+            concurrent_segments: None,
+            segment_size_bytes: None,
+            eta_seconds: None,
         };
         crate::core::recovery::persist(crate::core::recovery::RecoveryItem {
             id: item.id,
@@ -255,6 +281,77 @@ impl DownloadQueue {
             referer: item.referer.clone(),
         });
         self.items.push(item);
+    }
+
+    pub fn hydrate_from_history(&mut self) {
+        let entries = crate::core::queue_history::list();
+        if entries.is_empty() {
+            return;
+        }
+        let placeholder: Arc<dyn PlatformDownloader> =
+            Arc::new(crate::platforms::noop::NoopDownloader::new());
+        for entry in entries.iter().rev() {
+            if self.items.iter().any(|i| i.id == entry.id) {
+                continue;
+            }
+            let status = if entry.success {
+                QueueStatus::Complete { success: true }
+            } else {
+                let msg = entry.error.clone().unwrap_or_default();
+                let retryable = is_retryable_error_message(&msg);
+                QueueStatus::Error {
+                    message: msg,
+                    retryable,
+                }
+            };
+            let percent = if entry.success { 100.0 } else { 0.0 };
+            let item = QueueItem {
+                id: entry.id,
+                url: entry.url.clone(),
+                platform: entry.platform.clone(),
+                title: entry.title.clone(),
+                status,
+                cancel_token: CancellationToken::new(),
+                output_dir: entry
+                    .file_path
+                    .as_ref()
+                    .and_then(|p| {
+                        std::path::Path::new(p)
+                            .parent()
+                            .map(|x| x.to_string_lossy().to_string())
+                    })
+                    .unwrap_or_default(),
+                download_mode: None,
+                quality: None,
+                format_id: None,
+                referer: None,
+                extra_headers: None,
+                page_url: None,
+                user_agent: None,
+                percent,
+                speed_bytes_per_sec: 0.0,
+                downloaded_bytes: entry.file_size_bytes.unwrap_or(0),
+                total_bytes: entry.total_bytes,
+                file_path: entry.file_path.clone(),
+                file_size_bytes: entry.file_size_bytes,
+                file_count: None,
+                media_info: None,
+                downloader: placeholder.clone(),
+                ytdlp_path: None,
+                from_hotkey: false,
+                torrent_id: None,
+                kind: entry.kind,
+                external: false,
+                thumbnail_url_override: entry.thumbnail_url.clone(),
+                retry_count: 0,
+                max_retries: 0,
+                resume_state: None,
+                concurrent_segments: None,
+                segment_size_bytes: None,
+                eta_seconds: None,
+            };
+            self.items.push(item);
+        }
     }
 
     pub fn active_count(&self) -> u32 {
@@ -290,18 +387,43 @@ impl DownloadQueue {
         file_size_bytes: Option<u64>,
     ) {
         if let Some(item) = self.items.iter_mut().find(|i| i.id == id) {
+            let error_for_history = error.clone();
             if success {
                 item.status = QueueStatus::Complete { success: true };
                 item.percent = 100.0;
             } else {
+                let msg = error.unwrap_or_default();
+                let retryable = is_retryable_error_message(&msg);
                 item.status = QueueStatus::Error {
-                    message: error.unwrap_or_default(),
+                    message: msg,
+                    retryable,
                 };
             }
             item.file_path = file_path;
             item.file_size_bytes = file_size_bytes;
             item.speed_bytes_per_sec = 0.0;
             crate::core::recovery::remove(id);
+
+            if !item.external {
+                let entry = crate::core::queue_history::HistoryEntry {
+                    id: item.id,
+                    url: item.url.clone(),
+                    platform: item.platform.clone(),
+                    title: item.title.clone(),
+                    file_path: item.file_path.clone(),
+                    file_size_bytes: item.file_size_bytes,
+                    total_bytes: item.total_bytes,
+                    success,
+                    error: if success { None } else { error_for_history },
+                    completed_at: crate::core::queue_history::now_unix_seconds(),
+                    thumbnail_url: item
+                        .thumbnail_url_override
+                        .clone()
+                        .or_else(|| item.media_info.as_ref().and_then(|m| m.thumbnail_url.clone())),
+                    kind: item.kind,
+                };
+                crate::core::queue_history::record(entry);
+            }
         }
     }
 
@@ -331,6 +453,7 @@ impl DownloadQueue {
         downloaded: u64,
         total: Option<u64>,
         torrent_id: Option<usize>,
+        eta_seconds: Option<u64>,
     ) {
         if let Some(item) = self.items.iter_mut().find(|i| i.id == id) {
             item.percent = percent;
@@ -342,6 +465,7 @@ impl DownloadQueue {
             if torrent_id.is_some() && item.torrent_id.is_none() {
                 item.torrent_id = torrent_id;
             }
+            item.eta_seconds = eta_seconds;
         }
     }
 
@@ -374,6 +498,99 @@ impl DownloadQueue {
         false
     }
 
+    pub fn pause_all(&mut self) -> Vec<(u64, Option<usize>)> {
+        let mut paused = Vec::new();
+        for item in self.items.iter_mut() {
+            if item.status == QueueStatus::Active {
+                if item.platform != "magnet" {
+                    item.cancel_token.cancel();
+                }
+                item.status = QueueStatus::Paused;
+                item.speed_bytes_per_sec = 0.0;
+                paused.push((item.id, item.torrent_id));
+            }
+        }
+        paused
+    }
+
+    pub fn resume_all(&mut self) -> Vec<(u64, Option<usize>)> {
+        let mut resumed = Vec::new();
+        for item in self.items.iter_mut() {
+            if item.status == QueueStatus::Paused {
+                let tid = item.torrent_id;
+                if item.platform == "magnet" {
+                    item.status = QueueStatus::Active;
+                } else {
+                    item.status = QueueStatus::Queued;
+                    item.cancel_token = CancellationToken::new();
+                }
+                resumed.push((item.id, tid));
+            }
+        }
+        resumed
+    }
+
+    pub fn reorder(&mut self, ids_in_order: Vec<u64>) -> bool {
+        let mut slots: Vec<Option<QueueItem>> =
+            self.items.drain(..).map(Some).collect();
+
+        let queued_slot_indices: Vec<usize> = slots
+            .iter()
+            .enumerate()
+            .filter_map(|(idx, slot)| {
+                slot.as_ref()
+                    .filter(|i| i.status == QueueStatus::Queued)
+                    .map(|_| idx)
+            })
+            .collect();
+
+        if queued_slot_indices.is_empty() {
+            self.items = slots.into_iter().flatten().collect();
+            return false;
+        }
+
+        let queued_id_to_slot: std::collections::HashMap<u64, usize> = queued_slot_indices
+            .iter()
+            .map(|idx| (slots[*idx].as_ref().unwrap().id, *idx))
+            .collect();
+
+        let mut new_queued_order: Vec<QueueItem> =
+            Vec::with_capacity(queued_slot_indices.len());
+        let mut seen: std::collections::HashSet<u64> = std::collections::HashSet::new();
+
+        for id in &ids_in_order {
+            if seen.contains(id) {
+                continue;
+            }
+            if let Some(slot_idx) = queued_id_to_slot.get(id) {
+                if let Some(item) = slots[*slot_idx].take() {
+                    new_queued_order.push(item);
+                    seen.insert(*id);
+                }
+            }
+        }
+        for idx in &queued_slot_indices {
+            if let Some(item) = slots[*idx].take() {
+                new_queued_order.push(item);
+            }
+        }
+
+        let mut iter = new_queued_order.into_iter();
+        let mut rebuilt: Vec<QueueItem> = Vec::with_capacity(slots.len());
+        for (idx, slot) in slots.into_iter().enumerate() {
+            if queued_slot_indices.contains(&idx) {
+                if let Some(item) = iter.next() {
+                    rebuilt.push(item);
+                }
+            } else if let Some(item) = slot {
+                rebuilt.push(item);
+            }
+        }
+        rebuilt.extend(iter);
+        self.items = rebuilt;
+        true
+    }
+
     /// Cancel an item. Returns the torrent_id if the item needs torrent cleanup (caller should delete from session).
     pub fn cancel(&mut self, id: u64) -> (bool, Option<usize>) {
         let result = self.cancel_inner(id);
@@ -390,6 +607,7 @@ impl DownloadQueue {
                     item.cancel_token.cancel();
                     item.status = QueueStatus::Error {
                         message: "Cancelled".to_string(),
+                        retryable: false,
                     };
                     item.speed_bytes_per_sec = 0.0;
                     return (true, None);
@@ -398,6 +616,7 @@ impl DownloadQueue {
                     let tid = item.torrent_id;
                     item.status = QueueStatus::Error {
                         message: "Cancelled".to_string(),
+                        retryable: false,
                     };
                     item.speed_bytes_per_sec = 0.0;
                     return (true, tid);
@@ -414,6 +633,7 @@ impl DownloadQueue {
                     };
                     item.status = QueueStatus::Error {
                         message: "Cancelled".to_string(),
+                        retryable: false,
                     };
                     item.speed_bytes_per_sec = 0.0;
                     return (true, tid);
@@ -421,6 +641,7 @@ impl DownloadQueue {
                 QueueStatus::Queued => {
                     item.status = QueueStatus::Error {
                         message: "Cancelled".to_string(),
+                        retryable: false,
                     };
                     return (true, None);
                 }
@@ -440,6 +661,7 @@ impl DownloadQueue {
                 item.downloaded_bytes = 0;
                 item.file_path = None;
                 item.file_size_bytes = None;
+                item.retry_count = 0;
                 return true;
             }
         }
@@ -451,6 +673,7 @@ impl DownloadQueue {
         let result = self.remove_inner(id);
         if result.is_some() {
             crate::core::recovery::remove(id);
+            crate::core::queue_history::remove(id);
         }
         result
     }
@@ -487,6 +710,7 @@ impl DownloadQueue {
             .collect();
         for id in &to_remove {
             crate::core::recovery::remove(*id);
+            crate::core::queue_history::remove(*id);
         }
         self.items.retain(|i| {
             !matches!(
@@ -548,6 +772,8 @@ pub struct QueueItemProgress {
     pub downloaded_bytes: u64,
     pub total_bytes: Option<u64>,
     pub phase: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub eta_seconds: Option<u64>,
 }
 
 pub fn emit_queue_state_from_state(app: &tauri::AppHandle, state: Vec<QueueItemInfo>) {
@@ -696,8 +922,21 @@ async fn spawn_download_inner(
             downloaded_bytes: 0,
             total_bytes: None,
             phase: "preparing".to_string(),
+            eta_seconds: None,
         },
     );
+
+    let host_key = {
+        let q = queue.lock().await;
+        q.items
+            .iter()
+            .find(|i| i.id == item_id)
+            .map(|i| crate::core::host_limiter::host_key_for_url(&i.url))
+    };
+    let _host_lease = match host_key {
+        Some(key) => Some(crate::core::host_limiter::acquire(&key).await),
+        None => None,
+    };
 
     let (
         url,
@@ -766,6 +1005,7 @@ async fn spawn_download_inner(
                     downloaded_bytes: 0,
                     total_bytes: None,
                     phase: "fetching_info".to_string(),
+                    eta_seconds: None,
                 },
             );
 
@@ -849,6 +1089,7 @@ async fn spawn_download_inner(
             downloaded_bytes: 0,
             total_bytes: info.file_size_bytes,
             phase: "starting".to_string(),
+            eta_seconds: None,
         },
     );
 
@@ -921,9 +1162,24 @@ async fn spawn_download_inner(
             let phase = match percent {
                 p if p < -1.5 => "connecting",
                 p if p < -0.5 => "starting",
+                p if p > 99.5 => "finalizing",
                 p if p > 0.0 => "downloading",
                 _ => "starting",
             };
+
+            let eta_seconds = omniget_core::core::ytdlp::get_eta(item_id).or_else(|| {
+                if current_speed > 0.0 {
+                    total_bytes.and_then(|total| {
+                        if downloaded_bytes >= total {
+                            None
+                        } else {
+                            Some(((total - downloaded_bytes) as f64 / current_speed) as u64)
+                        }
+                    })
+                } else {
+                    None
+                }
+            });
 
             {
                 let mut q = queue_progress.lock().await;
@@ -935,6 +1191,7 @@ async fn spawn_download_inner(
                     downloaded_bytes,
                     total_bytes,
                     tid,
+                    eta_seconds,
                 );
             }
 
@@ -949,9 +1206,11 @@ async fn spawn_download_inner(
                     downloaded_bytes,
                     total_bytes,
                     phase: phase.to_string(),
+                    eta_seconds,
                 },
             );
         }
+        omniget_core::core::ytdlp::clear_eta(item_id);
     });
 
     if let Some(ua) = opts.user_agent.clone() {
@@ -1081,6 +1340,58 @@ async fn spawn_download_inner(
                 category,
                 raw_err
             );
+
+            let retry_decision = {
+                let mut q = queue.lock().await;
+                if let Some(item) = q.items.iter_mut().find(|i| i.id == item_id) {
+                    if item.downloaded_bytes > 5 * 1024 * 1024 {
+                        item.retry_count = 0;
+                    }
+                    let retryable = is_retryable_category(category);
+                    let attempt = item.retry_count;
+                    let max = item.max_retries;
+                    if retryable && attempt < max {
+                        item.retry_count = attempt + 1;
+                        Some((attempt + 1, max))
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                }
+            };
+
+            if let Some((next_attempt, max)) = retry_decision {
+                let delay_secs = (1u64 << (next_attempt - 1).min(5)).min(30);
+                tracing::warn!(
+                    "[queue] retry {}/{} for {} in {}s (category={})",
+                    next_attempt,
+                    max,
+                    item_id,
+                    delay_secs,
+                    category
+                );
+                let state = {
+                    let mut q = queue.lock().await;
+                    if let Some(item) = q.items.iter_mut().find(|i| i.id == item_id) {
+                        item.status = QueueStatus::Queued;
+                        item.cancel_token = CancellationToken::new();
+                        item.percent = 0.0;
+                        item.speed_bytes_per_sec = 0.0;
+                        item.downloaded_bytes = 0;
+                    }
+                    q.get_state()
+                };
+                emit_queue_state_from_state(&app, state);
+                let app_for_retry = app.clone();
+                let queue_for_retry = queue.clone();
+                tokio::spawn(async move {
+                    tokio::time::sleep(std::time::Duration::from_secs(delay_secs)).await;
+                    try_start_next(app_for_retry, queue_for_retry).await;
+                });
+                return;
+            }
+
             let state = {
                 let mut q = queue.lock().await;
                 q.mark_complete(item_id, false, Some(user_msg), None, None);
@@ -1091,6 +1402,10 @@ async fn spawn_download_inner(
     }
 
     try_start_next(app, queue).await;
+}
+
+fn is_retryable_category(category: &str) -> bool {
+    matches!(category, "unknown" | "rate_limited")
 }
 
 async fn fetch_and_cache_info(
@@ -1245,6 +1560,7 @@ pub async fn try_start_next(app: tauri::AppHandle, queue: Arc<tokio::sync::Mutex
                 downloaded_bytes: 0,
                 total_bytes: None,
                 phase: "queued_starting".to_string(),
+                eta_seconds: None,
             },
         );
 

@@ -2,8 +2,9 @@
   import { onDestroy, onMount, tick } from "svelte";
   import { page } from "$app/stores";
   import { goto } from "$app/navigation";
-  import { convertFileSrc } from "@tauri-apps/api/core";
+  import { convertFileSrc, invoke } from "@tauri-apps/api/core";
   import { pluginInvoke } from "$lib/plugin-invoke";
+  import { rpcSetSource, rpcClearSource } from "$lib/rpc";
   import { awardXp, bumpCounter } from "$lib/study-gamification";
   import { onFocusBreakStart } from "$lib/study-focus-bridge";
   import { renderMarkdownSync } from "$lib/study-markdown";
@@ -437,6 +438,8 @@
 
   let unsubBreak: (() => void) | null = null;
 
+  let unlistenClipHotkey: (() => void) | null = null;
+
   onMount(() => {
     loadLesson(lessonId);
     window.addEventListener("keydown", onKeyDown);
@@ -446,6 +449,16 @@
         void persistProgress(videoRef.currentTime, false);
       }
     });
+    (async () => {
+      try {
+        const { listen } = await import("@tauri-apps/api/event");
+        unlistenClipHotkey = await listen("clip-hotkey-pressed", () => {
+          void clipLast60s();
+        });
+      } catch {
+        // event listener optional
+      }
+    })();
   });
 
   $effect(() => {
@@ -679,6 +692,25 @@
     window.removeEventListener("keydown", onKeyDown);
     unsubBreak?.();
     unsubBreak = null;
+    unlistenClipHotkey?.();
+    unlistenClipHotkey = null;
+    void rpcClearSource("video");
+  });
+
+  $effect(() => {
+    if (!lesson) return;
+    const courseTitle = detail?.course?.title ?? "";
+    const durationMs = lesson.duration_ms ?? 0;
+    const positionSec = Math.floor(videoRef?.currentTime ?? 0);
+    const isPaused = videoRef ? videoRef.paused : true;
+    void rpcSetSource({
+      source: "video",
+      details: lesson.title ?? "Aula",
+      state: courseTitle || "—",
+      duration: Math.floor(durationMs / 1000),
+      position: positionSec,
+      paused: isPaused,
+    });
   });
 
   async function markCompleteNow() {
@@ -710,6 +742,102 @@
   }
 
   let screenshotToast = $state("");
+  let clipping = $state(false);
+  let clipToast = $state("");
+  let replaySaving = $state(false);
+
+  type ClipResult = {
+    output_path: string;
+    duration_secs: number;
+    size_bytes: number;
+    used_reencode: boolean;
+  };
+
+  async function clipLast60s() {
+    if (!videoRef || !lesson) return;
+    if (!videoRef.videoWidth || !videoRef.videoHeight) {
+      clipToast = $t("study.lesson.clip_no_video") as string;
+      setTimeout(() => (clipToast = ""), 2400);
+      return;
+    }
+    if (clipping) return;
+    clipping = true;
+    clipToast = $t("study.lesson.clip_loading") as string;
+    try {
+      const cur = videoRef.currentTime;
+      const duration = 60;
+      const start = Math.max(0, cur - duration);
+      const actual = Math.min(duration, cur);
+      const ts = fmtTimestamp(cur);
+      const res = await invoke<ClipResult>("clip_video", {
+        req: {
+          source_path: lesson.video_path,
+          start_secs: start,
+          duration_secs: actual,
+          dest_dir: null,
+          label: `${safeForFilename(lesson.title || "aula")}-${ts}`,
+          reencode: null,
+        },
+      });
+      const kb = Math.round(res.size_bytes / 1024);
+      clipToast = `${$t("study.lesson.clip_done")} (${kb} KB)`;
+      setTimeout(() => (clipToast = ""), 3500);
+      void awardXp("clip_saved", 2, {
+        lesson_id: lesson.id,
+        timestamp: Math.floor(cur),
+        used_reencode: res.used_reencode,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      clipToast = `${$t("study.lesson.clip_failed")}: ${msg}`;
+      setTimeout(() => (clipToast = ""), 4500);
+    } finally {
+      clipping = false;
+    }
+  }
+
+  async function saveReplayFromBuffer() {
+    if (replaySaving) return;
+    replaySaving = true;
+    clipToast = "Saving replay…";
+    try {
+      const status = await pluginInvoke<{ running: boolean; buffer_secs: number }>(
+        "misc",
+        "misc:studio:replay_buffer:status",
+        {},
+      );
+      if (!status.running) {
+        clipToast = "Replay buffer is off — turn it on in Misc → Studio first";
+        setTimeout(() => (clipToast = ""), 5000);
+        return;
+      }
+      const ts = fmtTimestamp(videoRef?.currentTime ?? 0);
+      const filename = `replay-${safeForFilename(lesson?.title || "aula")}-${ts}.mp4`;
+      const res = await pluginInvoke<{
+        ok: boolean;
+        stats: {
+          buffer_span_secs: number;
+          file_size_bytes: number;
+        };
+      }>("misc", "misc:studio:replay_buffer:save", { filename });
+      const sec = Math.floor(res.stats.buffer_span_secs);
+      const kb = Math.round(res.stats.file_size_bytes / 1024);
+      clipToast = `Replay saved: last ${sec}s (${kb} KB)`;
+      setTimeout(() => (clipToast = ""), 4000);
+      if (lesson) {
+        void awardXp("replay_saved", 3, {
+          lesson_id: lesson.id,
+          buffer_secs: sec,
+        });
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      clipToast = `Replay save failed: ${msg}`;
+      setTimeout(() => (clipToast = ""), 5000);
+    } finally {
+      replaySaving = false;
+    }
+  }
 
   function fmtTimestamp(secs: number): string {
     const total = Math.floor(secs);
@@ -1081,24 +1209,68 @@
           </button>
           <button
             type="button"
-            class="btn screenshot"
+            class="btn icon-btn"
             onclick={captureScreenshot}
             title="Capturar frame atual como PNG"
             aria-label="Screenshot do frame atual"
           >
-            📸
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+              <circle cx="12" cy="13" r="4" />
+            </svg>
           </button>
           <button
             type="button"
-            class="btn"
+            class="btn icon-btn"
+            onclick={clipLast60s}
+            disabled={clipping}
+            title={$t("study.lesson.clip") as string}
+            aria-label={$t("study.lesson.clip_aria") as string}
+          >
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="6" cy="6" r="3" />
+              <circle cx="6" cy="18" r="3" />
+              <line x1="20" y1="4" x2="8.12" y2="15.88" />
+              <line x1="14.47" y1="14.48" x2="20" y2="20" />
+              <line x1="8.12" y1="8.12" x2="12" y2="12" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            class="btn icon-btn"
+            onclick={saveReplayFromBuffer}
+            disabled={replaySaving}
+            title="Save replay buffer (last 30s of what you hear)"
+            aria-label="Save replay buffer"
+          >
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="2" y="2" width="20" height="20" rx="2.18" ry="2.18" />
+              <line x1="7" y1="2" x2="7" y2="22" />
+              <line x1="17" y1="2" x2="17" y2="22" />
+              <line x1="2" y1="12" x2="22" y2="12" />
+              <line x1="2" y1="7" x2="7" y2="7" />
+              <line x1="2" y1="17" x2="7" y2="17" />
+              <line x1="17" y1="17" x2="22" y2="17" />
+              <line x1="17" y1="7" x2="22" y2="7" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            class="btn icon-btn"
             onclick={() => (annotateOpen = !annotateOpen)}
             title="Anotar este momento da aula"
             aria-label="Anotar momento"
           >
-            ✎
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+            </svg>
           </button>
           {#if screenshotToast}
             <span class="screenshot-toast">{screenshotToast}</span>
+          {/if}
+          {#if clipToast}
+            <span class="screenshot-toast">{clipToast}</span>
           {/if}
           <button
             type="button"

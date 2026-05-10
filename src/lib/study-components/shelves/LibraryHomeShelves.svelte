@@ -9,6 +9,8 @@
     type RecentlyAddedCourse,
     type NotificationFull,
   } from "$lib/study-bridge";
+  import { pluginInvoke } from "$lib/plugin-invoke";
+  import { t } from "$lib/i18n";
   import CourseCard from "./CourseCard.svelte";
   import Shelf from "./Shelf.svelte";
 
@@ -101,6 +103,73 @@
       withNewsItems = [...grouped.values()].slice(0, 8);
     }
     newsLoading = false;
+
+    void extractMissingThumbnails();
+  }
+
+  const tried = new Set<number>();
+  async function extractMissingThumbnails() {
+    const missing: number[] = [];
+    for (const it of cwItems) {
+      if (!it.course_thumbnail && !tried.has(it.course_id)) missing.push(it.course_id);
+    }
+    for (const it of recentItems) {
+      if (!it.thumbnail_path && !tried.has(it.id)) missing.push(it.id);
+    }
+    for (const g of platformGroups) {
+      for (const it of g.items) {
+        if (!it.thumbnail_path && !tried.has(it.id)) missing.push(it.id);
+      }
+    }
+    for (const g of subjectGroups) {
+      for (const it of g.items) {
+        if (!it.thumbnail_path && !tried.has(it.id)) missing.push(it.id);
+      }
+    }
+    for (const it of withNewsItems) {
+      if (!it.thumbnail && !tried.has(it.course_id)) missing.push(it.course_id);
+    }
+
+    const unique = [...new Set(missing)];
+    for (const courseId of unique) {
+      tried.add(courseId);
+      try {
+        const res = await pluginInvoke<{ course_id: number; thumbnail_path: string }>(
+          "study",
+          "study:courses:extract_thumbnail",
+          { courseId },
+        );
+        applyThumbnail(res.course_id, res.thumbnail_path);
+      } catch (e) {
+        if (import.meta.env.DEV) {
+          console.warn(`[shelves] thumbnail extract failed for course ${courseId}:`, e);
+        }
+      }
+    }
+  }
+
+  function applyThumbnail(courseId: number, path: string) {
+    cwItems = cwItems.map((it) =>
+      it.course_id === courseId ? { ...it, course_thumbnail: path } : it,
+    );
+    recentItems = recentItems.map((it) =>
+      it.id === courseId ? { ...it, thumbnail_path: path } : it,
+    );
+    platformGroups = platformGroups.map((g) => ({
+      ...g,
+      items: g.items.map((it) =>
+        it.id === courseId ? { ...it, thumbnail_path: path } : it,
+      ),
+    }));
+    subjectGroups = subjectGroups.map((g) => ({
+      ...g,
+      items: g.items.map((it) =>
+        it.id === courseId ? { ...it, thumbnail_path: path } : it,
+      ),
+    }));
+    withNewsItems = withNewsItems.map((it) =>
+      it.course_id === courseId ? { ...it, thumbnail: path } : it,
+    );
   }
 
   $effect(() => {
@@ -148,7 +217,7 @@
 </script>
 
 {#if error && cwItems.length === 0 && !cwLoading}
-  <p class="error" role="alert">Falha ao carregar biblioteca: {error}</p>
+  <p class="error" role="alert">{$t("study.library.home_load_error", { error })}</p>
 {/if}
 
 {#if allEmpty}
@@ -157,20 +226,20 @@
       <rect x="10" y="14" width="44" height="36" rx="4" />
       <path d="M22 26h20M22 32h20M22 38h12" />
     </svg>
-    <h3>Sua biblioteca está vazia</h3>
-    <p>Adicione uma pasta com cursos para começar.</p>
-    <a href="/study/library?mode=browse" class="cta">Adicionar pasta com cursos</a>
+    <h3>{$t("study.library.home_empty_title")}</h3>
+    <p>{$t("study.library.home_empty_desc")}</p>
+    <a href="/study/library?mode=browse" class="cta">{$t("study.library.home_empty_cta")}</a>
   </div>
 {:else}
   <div class="shelves">
     <Shelf
-      title="Continue de onde parou"
-      eyebrow="Recente"
+      title={$t("study.library.home_continue_title") as string}
+      eyebrow={$t("study.library.home_continue_eyebrow") as string}
       isLoading={cwLoading}
       isEmpty={cwEmpty}
     >
       {#snippet empty()}
-        <div class="hint">Nenhum curso em progresso ainda. Comece uma aula para aparecer aqui.</div>
+        <div class="hint">{$t("study.library.home_continue_empty")}</div>
       {/snippet}
       {#each cwItems as item (item.course_id)}
         {@const href =
@@ -178,9 +247,9 @@
             ? `/study/course/${item.course_id}/lesson/${item.last_lesson_id}`
             : `/study/course/${item.course_id}`}
         {@const eyebrowText = item.next_lesson_title
-          ? `Próxima: ${item.next_lesson_title}`
+          ? ($t("study.library.home_continue_next", { title: item.next_lesson_title }) as string)
           : item.last_lesson_title
-            ? `Em: ${item.last_lesson_title}`
+            ? ($t("study.library.home_continue_current", { title: item.last_lesson_title }) as string)
             : item.course_title}
         <CourseCard
           courseId={item.course_id}
@@ -195,21 +264,34 @@
     </Shelf>
 
     {#if withNewsItems.length > 0}
-      <Shelf title="Com novidades" eyebrow="Aulas novas" isLoading={newsLoading}>
+      <Shelf
+        title={$t("study.library.home_news_title") as string}
+        eyebrow={$t("study.library.home_news_eyebrow") as string}
+        isLoading={newsLoading}
+      >
         {#each withNewsItems as item (item.course_id)}
           <CourseCard
             courseId={item.course_id}
             title={item.course_title}
             thumbnail={item.thumbnail}
             notificationCount={item.count}
-            eyebrow={`${item.count} ${item.count === 1 ? "aula nova" : "aulas novas"}`}
+            eyebrow={$t(
+              item.count === 1
+                ? "study.library.home_news_count_one"
+                : "study.library.home_news_count_other",
+              { count: item.count },
+            ) as string}
           />
         {/each}
       </Shelf>
     {/if}
 
     {#if recentItems.length > 0}
-      <Shelf title="Recém-adicionados" eyebrow="Novos" isLoading={recentLoading}>
+      <Shelf
+        title={$t("study.library.home_recently_title") as string}
+        eyebrow={$t("study.library.home_recently_eyebrow") as string}
+        isLoading={recentLoading}
+      >
         {#each recentItems as item (item.id)}
           <CourseCard
             courseId={item.id}
@@ -225,9 +307,13 @@
 
     {#if showPlatform}
       {#each platformGroups as group (group.key)}
+        {@const platformLabel =
+          group.key.toLowerCase() === "generic"
+            ? ($t("study.library.platform_generic") as string)
+            : prettyPlatform(group.label)}
         <Shelf
-          title={prettyPlatform(group.label)}
-          eyebrow="Plataforma"
+          title={platformLabel}
+          eyebrow={$t("study.library.home_platform_eyebrow") as string}
           isLoading={platformLoading}
           isEmpty={group.items.length === 0}
           seeMoreHref={`/study/library?mode=courses&platform=${encodeURIComponent(group.key)}`}
@@ -237,7 +323,7 @@
               courseId={course.id}
               title={course.title}
               thumbnail={course.thumbnail_path}
-              eyebrow={prettyPlatform(group.label)}
+              eyebrow={platformLabel}
             />
           {/each}
         </Shelf>
@@ -248,7 +334,7 @@
       {#each subjectGroups as group (group.key)}
         <Shelf
           title={group.label}
-          eyebrow="Matéria"
+          eyebrow={$t("study.library.home_subject_eyebrow") as string}
           isLoading={subjectLoading}
           isEmpty={group.items.length === 0}
           seeMoreHref={`/study/library?mode=courses&subject=${group.subject_id ?? group.key}`}
@@ -279,7 +365,6 @@
     greatcourses: "The Great Courses",
     thinkific: "Thinkific",
     rocketseat: "Rocketseat",
-    generic: "Outras plataformas",
   };
 
   function prettyPlatform(key: string): string {

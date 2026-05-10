@@ -1,6 +1,7 @@
 <script lang="ts">
   import { t } from "$lib/i18n";
   import { showToast } from "$lib/stores/toast-store.svelte";
+  import RichPresencePanel from "./RichPresencePanel.svelte";
   import {
     getSettings,
     updateSettings,
@@ -114,6 +115,7 @@
           <option value="ja">{$t('settings.appearance.lang_ja')}</option>
           <option value="it">{$t('settings.appearance.lang_it')}</option>
           <option value="fr">{$t('settings.appearance.lang_fr')}</option>
+          <option value="es">{$t('settings.appearance.lang_es')}</option>
           <option value="el">{$t('settings.appearance.lang_el')}</option>
         </select>
       </div>
@@ -138,4 +140,6 @@
       </div>
     </div>
   </section>
+
+  <RichPresencePanel />
 {/if}

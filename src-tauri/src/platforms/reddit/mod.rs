@@ -206,17 +206,23 @@ impl RedditDownloader {
         video_url: &str,
         output: &std::path::Path,
         progress_tx: mpsc::Sender<f64>,
+        cancel: Option<&tokio_util::sync::CancellationToken>,
     ) -> anyhow::Result<u64> {
         let variants = Self::get_resolution_variants(video_url);
         let mut last_err = anyhow!("No resolution available");
 
         for variant in &variants {
+            if let Some(token) = cancel {
+                if token.is_cancelled() {
+                    return Err(anyhow!("Download cancelled"));
+                }
+            }
             match direct_downloader::download_direct(
                 &self.client,
                 variant,
                 output,
                 progress_tx.clone(),
-                None,
+                cancel,
             )
             .await
             {
@@ -569,7 +575,12 @@ impl RedditDownloader {
                     });
 
                     let video_bytes = self
-                        .download_video_with_fallback(&video_quality.url, &video_tmp, vtx)
+                        .download_video_with_fallback(
+                            &video_quality.url,
+                            &video_tmp,
+                            vtx,
+                            Some(&opts.cancel_token),
+                        )
                         .await?;
 
                     let _ = progress.send(60.0).await;
@@ -589,7 +600,7 @@ impl RedditDownloader {
                         audio_url,
                         &audio_tmp,
                         atx,
-                        None,
+                        Some(&opts.cancel_token),
                     )
                     .await
                     .is_ok();
@@ -641,7 +652,12 @@ impl RedditDownloader {
                         .output_dir
                         .join(format!("{}.mp4", sanitize_filename::sanitize(&info.title)));
                     let bytes = self
-                        .download_video_with_fallback(&video_quality.url, &output, progress)
+                        .download_video_with_fallback(
+                            &video_quality.url,
+                            &output,
+                            progress,
+                            Some(&opts.cancel_token),
+                        )
                         .await?;
 
                     Ok(DownloadResult {
@@ -661,9 +677,14 @@ impl RedditDownloader {
                 let output = opts
                     .output_dir
                     .join(format!("{}.gif", sanitize_filename::sanitize(&info.title)));
-                let bytes =
-                    direct_downloader::download_direct(&self.client, url, &output, progress, None)
-                        .await?;
+                let bytes = direct_downloader::download_direct(
+                    &self.client,
+                    url,
+                    &output,
+                    progress,
+                    Some(&opts.cancel_token),
+                )
+                .await?;
 
                 Ok(DownloadResult {
                     file_path: output,
@@ -688,7 +709,7 @@ impl RedditDownloader {
                     &quality.url,
                     &output,
                     progress,
-                    None,
+                    Some(&opts.cancel_token),
                 )
                 .await?;
 
@@ -719,7 +740,7 @@ impl RedditDownloader {
                         &quality.url,
                         &output,
                         tx,
-                        None,
+                        Some(&opts.cancel_token),
                     )
                     .await?;
 

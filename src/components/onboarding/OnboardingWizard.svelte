@@ -13,7 +13,7 @@
     version: string | null;
   };
 
-  const TOTAL_STEPS = 6;
+  const TOTAL_STEPS = 7;
 
   const SUGGESTED_PLUGINS = [
     { id: "courses", name: "Course Downloader", desc: "Hotmart, Udemy, Kiwify, Teachable, Kajabi, MasterClass and 30+ more" },
@@ -28,6 +28,13 @@
   let settings = $derived(getSettings());
   let selectedPlugins = $state<Set<string>>(new Set(["courses"]));
   let hotkeyEnabled = $state(false);
+  let rpcEnabled = $state(true);
+
+  $effect(() => {
+    if (settings) {
+      rpcEnabled = settings.rpc?.enabled ?? true;
+    }
+  });
 
   $effect(() => {
     if (dialogEl && !dialogEl.open) {
@@ -98,6 +105,11 @@
     if (hotkeyEnabled) {
       await updateSettings({ download: { hotkey_enabled: true } });
     }
+    await updateSettings({ rpc: { enabled: rpcEnabled } });
+    if (rpcEnabled) {
+      const { rpcSyncIdleStats } = await import("$lib/rpc");
+      void rpcSyncIdleStats();
+    }
     await completeOnboarding();
   }
 
@@ -143,6 +155,7 @@
               <option value="ja">日本語</option>
               <option value="it">Italiano</option>
               <option value="fr">Français</option>
+              <option value="es">Español</option>
               <option value="el">Ελληνικά</option>
             </select>
           </div>
@@ -281,6 +294,26 @@
         </div>
 
       {:else if step === 6}
+        <div class="step step-rpc">
+          <div class="step-icon">
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M8 10c1.5 0 2.5 1 2.5 2s-1 2-2.5 2M16 10c-1.5 0-2.5 1-2.5 2s1 2 2.5 2" />
+            </svg>
+          </div>
+          <h2>{$t("onboarding.rpc_title")}</h2>
+          <p class="step-desc">{$t("onboarding.rpc_desc")}</p>
+          <button
+            class="hotkey-toggle"
+            class:on={rpcEnabled}
+            onclick={() => { rpcEnabled = !rpcEnabled; }}
+          >
+            <span class="hotkey-toggle-label">{rpcEnabled ? $t("onboarding.rpc_on") : $t("onboarding.rpc_off")}</span>
+          </button>
+          <p class="step-desc step-rpc-note">{$t("onboarding.rpc_privacy_note")}</p>
+        </div>
+
+      {:else if step === 7}
         <div class="step step-done">
           <Mascot emotion="idle" />
           <h2>{$t("onboarding.done_title")}</h2>
@@ -747,6 +780,12 @@
     border-color: var(--cta);
     background: var(--cta);
     color: var(--on-cta);
+  }
+
+  .step-rpc-note {
+    margin-top: calc(var(--padding) / 2);
+    font-size: 12.5px;
+    opacity: 0.8;
   }
 
   .theme-row {

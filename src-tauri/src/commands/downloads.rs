@@ -179,6 +179,7 @@ pub async fn download_from_url(
         let mut q = download_queue.lock().await;
         q.max_concurrent = settings.advanced.max_concurrent_downloads.max(1);
         q.stagger_delay_ms = settings.advanced.stagger_delay_ms;
+        q.default_max_retries = settings.advanced.max_retries;
         if q.has_url(&url) {
             tracing::debug!("[perf] download_from_url took {:?}", _timer_start.elapsed());
             return Err("Download already in progress for this URL".to_string());
@@ -439,6 +440,16 @@ pub fn get_recovery_items() -> Vec<crate::core::recovery::RecoveryItem> {
 }
 
 #[tauri::command]
+pub fn get_download_history() -> Vec<crate::core::queue_history::HistoryEntry> {
+    crate::core::queue_history::list()
+}
+
+#[tauri::command]
+pub fn clear_download_history() {
+    crate::core::queue_history::clear_all();
+}
+
+#[tauri::command]
 pub fn discard_recovery() {
     crate::core::recovery::clear_all();
 }
@@ -518,6 +529,70 @@ pub async fn update_max_concurrent(
     emit_queue_state_from_state(&app, state_to_emit);
     queue::try_start_next(app, state.download_queue.clone()).await;
     Ok(format!("Max concurrent set to {}", max))
+}
+
+#[tauri::command]
+pub async fn pause_all_downloads(
+    app: tauri::AppHandle,
+    state: tauri::State<'_, AppState>,
+) -> Result<u32, String> {
+    let (state_to_emit, count, paused_torrents) = {
+        let mut q = state.download_queue.lock().await;
+        let paused = q.pause_all();
+        let n = paused.len() as u32;
+        let torrents: Vec<usize> = paused.iter().filter_map(|(_, tid)| *tid).collect();
+        (q.get_state(), n, torrents)
+    };
+    if let Some(session) = state.torrent_session.lock().await.as_ref() {
+        for tid in paused_torrents {
+            if let Some(handle) = session.get(librqbit::api::TorrentIdOrHash::Id(tid)) {
+                let _ = session.pause(&handle).await;
+            }
+        }
+    }
+    emit_queue_state_from_state(&app, state_to_emit);
+    Ok(count)
+}
+
+#[tauri::command]
+pub async fn resume_all_downloads(
+    app: tauri::AppHandle,
+    state: tauri::State<'_, AppState>,
+) -> Result<u32, String> {
+    let (state_to_emit, count, resumed_torrents) = {
+        let mut q = state.download_queue.lock().await;
+        let resumed = q.resume_all();
+        let n = resumed.len() as u32;
+        let torrents: Vec<usize> = resumed.iter().filter_map(|(_, tid)| *tid).collect();
+        (q.get_state(), n, torrents)
+    };
+    if let Some(session) = state.torrent_session.lock().await.as_ref() {
+        for tid in resumed_torrents {
+            if let Some(handle) = session.get(librqbit::api::TorrentIdOrHash::Id(tid)) {
+                let _ = session.unpause(&handle).await;
+            }
+        }
+    }
+    emit_queue_state_from_state(&app, state_to_emit);
+    queue::try_start_next(app, state.download_queue.clone()).await;
+    Ok(count)
+}
+
+#[tauri::command]
+pub async fn reorder_queue(
+    app: tauri::AppHandle,
+    state: tauri::State<'_, AppState>,
+    ids: Vec<u64>,
+) -> Result<bool, String> {
+    let (changed, state_to_emit) = {
+        let mut q = state.download_queue.lock().await;
+        let ok = q.reorder(ids);
+        (ok, q.get_state())
+    };
+    if changed {
+        emit_queue_state_from_state(&app, state_to_emit);
+    }
+    Ok(changed)
 }
 
 #[tauri::command]

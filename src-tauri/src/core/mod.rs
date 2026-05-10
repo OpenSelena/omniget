@@ -7,6 +7,7 @@ pub use omniget_core::core::ffmpeg;
 pub use omniget_core::core::filename;
 pub use omniget_core::core::hls_downloader;
 pub use omniget_core::core::http_client;
+pub use omniget_core::core::http_fetcher;
 pub use omniget_core::core::hwaccel;
 pub use omniget_core::core::media_processor;
 pub use omniget_core::core::paths;
@@ -18,7 +19,10 @@ pub use omniget_core::core::ytdlp;
 
 pub mod download_log;
 pub mod events;
+pub mod host_limiter;
 pub mod path_limits;
 pub mod queue;
+pub mod queue_history;
 pub mod recovery;
+pub mod rpc;
 pub mod url_parser;

@@ -2,6 +2,7 @@
   import MaintenanceCard from "$lib/study-components/MaintenanceCard.svelte";
   import { STUDY_NOTES_ENABLED } from "$lib/study-feature-flags";
   import { t } from "$lib/i18n";
+  import NbShell from "$lib/study-components/notes/shell/NbShell.svelte";
 
   let { children } = $props();
 </script>
@@ -12,5 +13,7 @@
     detail={$t("study.maintenance.detail_notes") as string}
   />
 {:else}
-  {@render children?.()}
+  <NbShell>
+    {@render children?.()}
+  </NbShell>
 {/if}

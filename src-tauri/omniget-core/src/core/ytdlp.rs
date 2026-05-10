@@ -106,6 +106,28 @@ fn ext_user_agent_for_url(url: &str) -> Option<String> {
         .and_then(|m| m.get(url).cloned())
 }
 
+static ETA_BY_DOWNLOAD: OnceLock<Mutex<HashMap<u64, u64>>> = OnceLock::new();
+
+fn eta_map() -> &'static Mutex<HashMap<u64, u64>> {
+    ETA_BY_DOWNLOAD.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+pub fn record_eta(download_id: u64, eta_seconds: u64) {
+    if let Ok(mut m) = eta_map().lock() {
+        m.insert(download_id, eta_seconds);
+    }
+}
+
+pub fn get_eta(download_id: u64) -> Option<u64> {
+    eta_map().lock().ok().and_then(|m| m.get(&download_id).copied())
+}
+
+pub fn clear_eta(download_id: u64) {
+    if let Ok(mut m) = eta_map().lock() {
+        m.remove(&download_id);
+    }
+}
+
 static EXT_HEADERS_MAP: OnceLock<Mutex<HashMap<String, HashMap<String, String>>>> = OnceLock::new();
 
 fn ext_headers_map() -> &'static Mutex<HashMap<String, HashMap<String, String>>> {
@@ -964,7 +986,7 @@ pub async fn get_playlist_info(
         "--extractor-retries".to_string(),
         "3".to_string(),
         "--retry-sleep".to_string(),
-        "exp=1:60".to_string(),
+        "exp=1:15".to_string(),
         "--user-agent".to_string(),
         CHROME_UA.to_string(),
     ];
@@ -1297,7 +1319,7 @@ pub async fn download_video(
         "--no-playlist".to_string(),
         "--newline".to_string(),
         "--progress-template".to_string(),
-        "download:%(progress._percent_str)s".to_string(),
+        "download:%(progress._percent_str)s|eta:%(progress.eta)s".to_string(),
         "-o".to_string(),
         output_template,
         "--skip-unavailable-fragments".to_string(),
@@ -1484,6 +1506,11 @@ pub async fn download_video(
                             "[perf] download_video: first_progress > 0% at {:?}",
                             _timer_start.elapsed()
                         );
+                    }
+                    if let Some(id) = log_id {
+                        if let Some(eta) = parse_eta_line(&line) {
+                            record_eta(id, eta);
+                        }
                     }
                     if is_audio_only {
                         if pct >= 99.0 || last_send.elapsed() >= throttle {
@@ -1819,6 +1846,16 @@ fn sanitize_log_line(line: &str) -> String {
 fn translate_ytdlp_error(stderr: &str) -> anyhow::Error {
     let lower = stderr.to_lowercase();
 
+    if lower.contains("errno 22")
+        && (lower.contains("textiowrapper")
+            || lower.contains("encoding=")
+            || lower.contains("exception ignored"))
+    {
+        return anyhow!(
+            "Console encoding error (non-UTF-8 locale). Update yt-dlp in Settings → Dependencies, or run `chcp 65001` in a terminal and reopen the app."
+        );
+    }
+
     if lower.contains("http error 429") {
         return anyhow!("Server returned error 429 (too many requests). Try again later.");
     }
@@ -1830,6 +1867,14 @@ fn translate_ytdlp_error(stderr: &str) -> anyhow::Error {
     }
     if lower.contains("nsig extraction failed") || lower.contains("nsig") {
         return anyhow!("Video extraction failed. Update yt-dlp or try again.");
+    }
+    if lower.contains("cannot parse data")
+        || lower.contains("please report this issue")
+        || (lower.contains("confirm you are on the latest version") && lower.contains("yt-dlp"))
+    {
+        return anyhow!(
+            "yt-dlp extractor is broken for this site. Update yt-dlp in Settings → Dependencies, then retry."
+        );
     }
     if lower.contains("requested format") && lower.contains("not available") {
         return anyhow!(
@@ -1900,15 +1945,32 @@ pub fn get_rate_limit_stats() -> serde_json::Value {
 
 fn parse_progress_line(line: &str) -> Option<f64> {
     let line = line.trim();
-    let pct_str = if let Some(rest) = line.strip_prefix("download:") {
-        rest.trim().trim_end_matches('%')
+    let body = if let Some(rest) = line.strip_prefix("download:") {
+        rest
     } else if line.ends_with('%') {
-        line.trim_end_matches('%').split_whitespace().last()?
+        line
     } else {
         return None;
     };
 
-    pct_str.trim().parse::<f64>().ok()
+    let pct_part = body.split('|').next()?.trim().trim_end_matches('%');
+    let pct_str = pct_part.split_whitespace().last()?;
+    pct_str.parse::<f64>().ok()
+}
+
+fn parse_eta_line(line: &str) -> Option<u64> {
+    let body = line.trim().strip_prefix("download:")?;
+    for part in body.split('|') {
+        let part = part.trim();
+        if let Some(rest) = part.strip_prefix("eta:") {
+            let rest = rest.trim();
+            if rest.is_empty() || rest.eq_ignore_ascii_case("na") {
+                return None;
+            }
+            return rest.parse::<u64>().ok();
+        }
+    }
+    None
 }
 
 async fn find_downloaded_file(output_dir: &Path, url: &str) -> anyhow::Result<PathBuf> {
@@ -2120,6 +2182,34 @@ mod tests {
     #[test]
     fn parse_progress_integer() {
         assert_eq!(parse_progress_line("download:100%"), Some(100.0));
+    }
+
+    #[test]
+    fn parse_progress_with_eta_field() {
+        assert_eq!(
+            parse_progress_line("download:  45.2%|eta:30"),
+            Some(45.2)
+        );
+    }
+
+    #[test]
+    fn parse_eta_extracts_seconds() {
+        assert_eq!(parse_eta_line("download:  45.2%|eta:30"), Some(30));
+    }
+
+    #[test]
+    fn parse_eta_na_returns_none() {
+        assert_eq!(parse_eta_line("download:  45.2%|eta:NA"), None);
+    }
+
+    #[test]
+    fn parse_eta_missing_returns_none() {
+        assert_eq!(parse_eta_line("download:  45.2%"), None);
+    }
+
+    #[test]
+    fn parse_eta_no_prefix_returns_none() {
+        assert_eq!(parse_eta_line("  45.2%|eta:30"), None);
     }
 
     #[test]

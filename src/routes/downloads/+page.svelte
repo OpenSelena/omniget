@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { onMount } from "svelte";
+  import { goto } from "$app/navigation";
   import { invoke } from "@tauri-apps/api/core";
   import { pluginInvoke } from "$lib/plugin-invoke";
   import { t } from "$lib/i18n";
@@ -8,6 +10,7 @@
     getDownloads,
     formatBytes,
     formatSpeed,
+    formatEta,
     getFinishedCount,
     getSpeedHistory,
     type CourseDownloadItem,
@@ -20,6 +23,39 @@
   import ContextHint from "$components/hints/ContextHint.svelte";
   import DownloadSpeedGraph from "$components/download/DownloadSpeedGraph.svelte";
   import DownloadLog from "$components/download/DownloadLog.svelte";
+
+  let studyAvailable = $state(false);
+
+  onMount(async () => {
+    try {
+      const plugins = await invoke<{
+        id: string;
+        enabled: boolean;
+        loaded: boolean;
+      }[]>("list_plugins");
+      studyAvailable = plugins.some(
+        (p) => p.id === "study" && p.enabled && p.loaded,
+      );
+    } catch {
+      studyAvailable = false;
+    }
+  });
+
+  function canOpenInStudy(item: GenericDownloadItem): boolean {
+    return (
+      studyAvailable &&
+      item.status === "complete" &&
+      !!item.filePath &&
+      (item.queueKind === "video" || item.queueKind === "audio")
+    );
+  }
+
+  function openInStudy(filePath: string) {
+    const parts = filePath.replace(/\\/g, "/").split("/");
+    const name = parts[parts.length - 1] ?? "";
+    const url = `/study/watch?path=${encodeURIComponent(filePath)}&name=${encodeURIComponent(name)}`;
+    goto(url);
+  }
 
   let downloads = $derived(getDownloads());
   let courseList = $derived(
@@ -367,6 +403,19 @@
             {/if}
           </button>
         {:else if item.status === "complete" && item.filePath}
+          {#if canOpenInStudy(item)}
+            <button
+              class="action-icon-btn"
+              onclick={() => openInStudy(item.filePath!)}
+              aria-label={$t('downloads.open_in_study')}
+              title={$t('downloads.open_in_study')}
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none" />
+              </svg>
+            </button>
+          {/if}
           <button
             class="action-icon-btn"
             onclick={() => revealFile(item.filePath!)}
@@ -449,6 +498,10 @@
           {/if}
           {#if item.speed > 0}
             <span>{formatSpeed(item.speed)}</span>
+            {#if formatEta(item.etaSeconds)}
+              <span class="stats-sep">&middot;</span>
+              <span>ETA {formatEta(item.etaSeconds)}</span>
+            {/if}
             <DownloadSpeedGraph points={getSpeedHistory(item.id)} />
           {/if}
         </div>

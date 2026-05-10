@@ -40,6 +40,7 @@ pub fn command<S: AsRef<std::ffi::OsStr>>(program: S) -> tokio::process::Command
     cmd.env_remove("PYTHONPATH");
     cmd.env("PYTHONIOENCODING", "utf-8");
     cmd.env("PYTHONUTF8", "1");
+    cmd.env("PYTHONLEGACYWINDOWSSTDIO", "0");
     cmd
 }
 
@@ -57,5 +58,6 @@ pub fn std_command<S: AsRef<std::ffi::OsStr>>(program: S) -> std::process::Comma
     cmd.env_remove("PYTHONPATH");
     cmd.env("PYTHONIOENCODING", "utf-8");
     cmd.env("PYTHONUTF8", "1");
+    cmd.env("PYTHONLEGACYWINDOWSSTDIO", "0");
     cmd
 }

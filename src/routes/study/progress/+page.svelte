@@ -80,11 +80,12 @@
 
   function fmtRelDays(secs: number): string {
     const days = Math.floor((Date.now() / 1000 - secs) / 86400);
-    if (days <= 0) return "hoje";
-    if (days === 1) return "ontem";
-    if (days < 30) return `${days} dias atrás`;
-    if (days < 365) return `${Math.floor(days / 30)} meses atrás`;
-    return `${Math.floor(days / 365)} anos atrás`;
+    if (days <= 0) return $t("study.progress.time_today") as string;
+    if (days === 1) return $t("study.progress.time_yesterday") as string;
+    if (days < 30) return $t("study.progress.time_days_ago", { n: days }) as string;
+    if (days < 365)
+      return $t("study.progress.time_months_ago", { n: Math.floor(days / 30) }) as string;
+    return $t("study.progress.time_years_ago", { n: Math.floor(days / 365) }) as string;
   }
 
   function tierColor(tier: string): string {
@@ -101,25 +102,26 @@
   }
 
   function achievementLabel(code: string): string {
-    const map: Record<string, string> = {
-      "xp:100": "100 XP acumulados",
-      "xp:500": "500 XP acumulados",
-      "xp:1000": "1.000 XP acumulados",
-      "xp:5000": "5.000 XP acumulados",
-      "xp:10000": "10.000 XP acumulados",
-      "lessons:1": "Primeira aula",
-      "lessons:10": "10 aulas concluídas",
-      "lessons:50": "50 aulas concluídas",
-      "lessons:100": "100 aulas concluídas",
-      "focus:60": "1 hora de foco",
-      "focus:600": "10 horas de foco",
-      "focus:6000": "100 horas de foco",
-      "streak:3": "Streak de 3 dias",
-      "streak:7": "Streak de 1 semana",
-      "streak:30": "Streak de 30 dias",
-      "streak:100": "Streak de 100 dias",
+    const keyMap: Record<string, string> = {
+      "xp:100": "study.progress.ach_label_xp_100",
+      "xp:500": "study.progress.ach_label_xp_500",
+      "xp:1000": "study.progress.ach_label_xp_1000",
+      "xp:5000": "study.progress.ach_label_xp_5000",
+      "xp:10000": "study.progress.ach_label_xp_10000",
+      "lessons:1": "study.progress.ach_label_lessons_1",
+      "lessons:10": "study.progress.ach_label_lessons_10",
+      "lessons:50": "study.progress.ach_label_lessons_50",
+      "lessons:100": "study.progress.ach_label_lessons_100",
+      "focus:60": "study.progress.ach_label_focus_60",
+      "focus:600": "study.progress.ach_label_focus_600",
+      "focus:6000": "study.progress.ach_label_focus_6000",
+      "streak:3": "study.progress.ach_label_streak_3",
+      "streak:7": "study.progress.ach_label_streak_7",
+      "streak:30": "study.progress.ach_label_streak_30",
+      "streak:100": "study.progress.ach_label_streak_100",
     };
-    return map[code] ?? code;
+    const key = keyMap[code];
+    return key ? ($t(key) as string) : code;
   }
 
   type DonutSlice = { name: string; minutes: number; color: string };
@@ -133,7 +135,7 @@
     }));
     if (subjectBreakdown.unassigned_minutes > 0) {
       arr.push({
-        name: "Sem disciplina",
+        name: $t("study.progress.chart_subject_unassigned") as string,
         minutes: subjectBreakdown.unassigned_minutes,
         color: "var(--tertiary)",
       });
@@ -423,8 +425,8 @@
     <section class="charts-grid">
       <article class="card chart-card">
         <header class="card-head">
-          <h2>Tempo por curso</h2>
-          <small class="card-hint">últimos {days} dias</small>
+          <h2>{$t("study.progress.chart_time_per_course")}</h2>
+          <small class="card-hint">{$t("study.progress.chart_time_period_days", { n: days })}</small>
         </header>
         <div class="chart-body">
           {#if timePerCourse && timePerCourse.items.length > 0}
@@ -444,15 +446,15 @@
               {/each}
             </ul>
           {:else}
-            <p class="chart-empty">Sem tempo registrado nesse período.</p>
+            <p class="chart-empty">{$t("study.progress.chart_time_per_course_empty")}</p>
           {/if}
         </div>
       </article>
 
       <article class="card chart-card">
         <header class="card-head">
-          <h2>Atividade por hora</h2>
-          <small class="card-hint">soma de focos · 24h</small>
+          <h2>{$t("study.progress.chart_activity_by_hour")}</h2>
+          <small class="card-hint">{$t("study.progress.chart_activity_hint")}</small>
         </header>
         <div class="chart-body">
           {#if activityByHour && activityByHour.buckets.some((b) => b.minutes > 0)}
@@ -479,15 +481,15 @@
               <span>24h</span>
             </div>
           {:else}
-            <p class="chart-empty">Sem atividade nas últimas {days} dias.</p>
+            <p class="chart-empty">{$t("study.progress.chart_activity_empty", { n: days })}</p>
           {/if}
         </div>
       </article>
 
       <article class="card chart-card">
         <header class="card-head">
-          <h2>Por disciplina</h2>
-          <small class="card-hint">minutos focados</small>
+          <h2>{$t("study.progress.chart_subject")}</h2>
+          <small class="card-hint">{$t("study.progress.chart_subject_unit")}</small>
         </header>
         <div class="chart-body">
           {#if donutSlices.length > 0 && donutTotal > 0}
@@ -532,7 +534,7 @@
             </div>
           {:else}
             <p class="chart-empty">
-              Crie disciplinas e atribua sessões para ver breakdown.
+              {$t("study.progress.chart_subject_empty")}
             </p>
           {/if}
         </div>
@@ -540,16 +542,16 @@
 
       <article class="card chart-card retention-card">
         <header class="card-head">
-          <h2>Retenção (Anki)</h2>
-          <small class="card-hint">FSRS-5</small>
+          <h2>{$t("study.progress.retention_title")}</h2>
+          <small class="card-hint">{$t("study.progress.retention_method")}</small>
         </header>
         <div class="chart-body retention-stub">
           <p class="chart-empty">
-            Retenção real virá da query cross-DB do Anki. Por ora, abra
+            {$t("study.progress.retention_stub_before")}
             <a href="/study/anki/stats" class="card-cta inline">
-              Estatísticas Anki →
+              {$t("study.progress.retention_link")}
             </a>
-            para ver retenção, distribuição de intervalos e histórico de revisões.
+            {$t("study.progress.retention_stub_after")}
           </p>
         </div>
       </article>
@@ -602,8 +604,8 @@
     {#if recentAchievements.length > 0}
       <section class="card achievements-block">
         <header class="card-head">
-          <h2>Conquistas recentes</h2>
-          <a class="head-link" href="/study/achievements">Ver todas →</a>
+          <h2>{$t("study.progress.recent_achievements")}</h2>
+          <a class="head-link" href="/study/achievements">{$t("study.progress.view_all")}</a>
         </header>
         <ul class="ach-list">
           {#each recentAchievements as a (a.code)}

@@ -9,6 +9,7 @@ pub mod ffmpeg;
 pub mod filename;
 pub mod hls_downloader;
 pub mod http_client;
+pub mod http_fetcher;
 pub mod hwaccel;
 pub mod log_hook;
 pub mod media_processor;

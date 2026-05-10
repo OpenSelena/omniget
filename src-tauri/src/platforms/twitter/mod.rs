@@ -501,7 +501,7 @@ impl PlatformDownloader for TwitterDownloader {
                 &quality.url,
                 &output,
                 progress,
-                None,
+                Some(&opts.cancel_token),
             )
             .await?;
 
@@ -526,9 +526,14 @@ impl PlatformDownloader for TwitterDownloader {
             let output = opts.output_dir.join(&filename);
             let (tx, _rx) = mpsc::channel(8);
 
-            let bytes =
-                direct_downloader::download_direct(&self.client, &quality.url, &output, tx, None)
-                    .await?;
+            let bytes = direct_downloader::download_direct(
+                &self.client,
+                &quality.url,
+                &output,
+                tx,
+                Some(&opts.cancel_token),
+            )
+            .await?;
 
             total_bytes += bytes;
             last_path = output;

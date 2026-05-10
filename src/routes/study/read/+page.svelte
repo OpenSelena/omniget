@@ -311,8 +311,17 @@
       cbz: "study:read:cbz:extract_cover",
     };
     const pending = books.filter((b) => cmdFor[b.format] && !b.cover_path);
-    if (pending.length === 0) return;
+    if (pending.length === 0) {
+      const formats = [...new Set(books.map((b) => b.format))];
+      console.info(
+        `[read/covers] no extractable covers pending. ${books.length} books, formats: ${formats.join(", ") || "(none)"}`,
+      );
+      return;
+    }
+    console.info(`[read/covers] extracting ${pending.length} cover(s)…`);
     extractingCovers = true;
+    let okCount = 0;
+    const failures: { id: number; format: string; error: string }[] = [];
     try {
       for (const b of pending) {
         const cmd = cmdFor[b.format];
@@ -323,12 +332,25 @@
           books = books.map((x) =>
             x.id === b.id ? { ...x, cover_path: res.cover_path } : x,
           );
+          okCount += 1;
         } catch (e) {
-          // ignore individual failures (corrupt file, no cover, etc.)
+          failures.push({
+            id: b.id,
+            format: b.format,
+            error: e instanceof Error ? e.message : String(e),
+          });
         }
       }
     } finally {
       extractingCovers = false;
+    }
+    if (failures.length > 0) {
+      console.warn(
+        `[read/covers] ${okCount} ok, ${failures.length} failed:`,
+        failures,
+      );
+    } else {
+      console.info(`[read/covers] all ${okCount} cover(s) extracted ok`);
     }
   }
 
@@ -491,7 +513,7 @@
       );
       enrichCandidates = Array.isArray(res?.candidates) ? res.candidates : [];
       if (enrichCandidates.length === 0) {
-        enrichError = "Nenhum resultado. Tente editar o título do livro antes.";
+        enrichError = $t("study.read.enrich_no_results") as string;
       } else {
         enrichSelected = enrichCandidates[0];
       }
@@ -528,7 +550,7 @@
         } as Book;
       });
       enrichBook = null;
-      okMsg = "✓ Metadata atualizado";
+      okMsg = $t("study.read.enrich_done") as string;
       setTimeout(() => (okMsg = ""), 2500);
     } catch (e) {
       enrichError = e instanceof Error ? e.message : String(e);
@@ -760,13 +782,13 @@
           <circle cx="11" cy="11" r="7"></circle>
           <path d="M21 21l-4.35-4.35"></path>
         </svg>
-        <span>Buscar anotações</span>
+        <span>{$t("study.read.search_notes_btn")}</span>
       </a>
       <a href="/study/read/downloads" class="ghost-btn">
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <path d="M12 3v12 M7 10l5 5 5-5 M5 21h14"></path>
         </svg>
-        <span>Downloads</span>
+        <span>{$t("study.read.downloads_btn")}</span>
       </a>
       <button
         type="button"
@@ -1124,10 +1146,10 @@
       {#if enrichSelected}
         <div class="enrich-apply">
           <p class="muted small">{$t("study.read.enrich_apply_hint")}</p>
-          <label><input type="checkbox" bind:checked={enrichApply.title} disabled={!enrichSelected.title} /> Title: <span class="mono">{enrichSelected.title}</span></label>
-          <label><input type="checkbox" bind:checked={enrichApply.author} disabled={!enrichSelected.author} /> Author: <span class="mono">{enrichSelected.author ?? "—"}</span></label>
-          <label><input type="checkbox" bind:checked={enrichApply.publisher} disabled={!enrichSelected.publisher} /> Publisher: <span class="mono">{enrichSelected.publisher ?? "—"}</span></label>
-          <label><input type="checkbox" bind:checked={enrichApply.cover} disabled={!enrichSelected.cover_url} /> Cover (download)</label>
+          <label><input type="checkbox" bind:checked={enrichApply.title} disabled={!enrichSelected.title} /> {$t("study.read.enrich_field_title")} <span class="mono">{enrichSelected.title}</span></label>
+          <label><input type="checkbox" bind:checked={enrichApply.author} disabled={!enrichSelected.author} /> {$t("study.read.enrich_field_author")} <span class="mono">{enrichSelected.author ?? "—"}</span></label>
+          <label><input type="checkbox" bind:checked={enrichApply.publisher} disabled={!enrichSelected.publisher} /> {$t("study.read.enrich_field_publisher")} <span class="mono">{enrichSelected.publisher ?? "—"}</span></label>
+          <label><input type="checkbox" bind:checked={enrichApply.cover} disabled={!enrichSelected.cover_url} /> {$t("study.read.enrich_field_cover")}</label>
           <button type="button" class="cta" onclick={applyEnrichment} disabled={enrichApplying}>
             {enrichApplying ? $t("study.common.loading") : $t("study.read.enrich_apply_btn")}
           </button>

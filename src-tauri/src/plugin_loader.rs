@@ -179,12 +179,14 @@ fn load_single_plugin(
         PluginLoadError::simple("manifest_parse", format!("Invalid plugin.json: {e}"))
     })?;
 
-    let lib_path = find_native_lib(plugin_dir).ok_or_else(|| {
-        PluginLoadError::simple(
-            "no_native_lib",
-            format!("No native library found in {}", plugin_dir.display()),
-        )
-    })?;
+    let lib_path = find_native_lib(plugin_dir, manifest.rust_crate.as_deref()).ok_or_else(
+        || {
+            PluginLoadError::simple(
+                "no_native_lib",
+                format!("No native library found in {}", plugin_dir.display()),
+            )
+        },
+    )?;
 
     let lib = unsafe { libloading::Library::new(&lib_path) }.map_err(|e| {
         PluginLoadError::simple(
@@ -236,7 +238,7 @@ fn load_single_plugin(
     })
 }
 
-fn find_native_lib(dir: &Path) -> Option<PathBuf> {
+fn find_native_lib(dir: &Path, rust_crate: Option<&str>) -> Option<PathBuf> {
     let extensions = if cfg!(target_os = "windows") {
         &["dll"][..]
     } else if cfg!(target_os = "macos") {
@@ -244,6 +246,21 @@ fn find_native_lib(dir: &Path) -> Option<PathBuf> {
     } else {
         &["so"][..]
     };
+
+    if let Some(crate_name) = rust_crate {
+        for ext in extensions {
+            let candidate = dir.join(format!("{}.{}", crate_name, ext));
+            if candidate.is_file() {
+                return Some(candidate);
+            }
+            if !cfg!(target_os = "windows") {
+                let unix_candidate = dir.join(format!("lib{}.{}", crate_name, ext));
+                if unix_candidate.is_file() {
+                    return Some(unix_candidate);
+                }
+            }
+        }
+    }
 
     for entry in fs::read_dir(dir).ok()? {
         let path = entry.ok()?.path();

@@ -290,9 +290,14 @@ impl PlatformDownloader for YouTubeDownloader {
             ytdlp::ensure_ytdlp().await?
         };
 
+        let quality_height = opts
+            .quality
+            .as_deref()
+            .and_then(Self::extract_quality_height);
+
         if info.media_type == MediaType::Playlist {
             return self
-                .download_playlist(info, opts, progress, &ytdlp_path)
+                .download_playlist(info, opts, progress, &ytdlp_path, quality_height)
                 .await;
         }
 
@@ -301,27 +306,14 @@ impl PlatformDownloader for YouTubeDownloader {
             .first()
             .ok_or_else(|| anyhow!("No quality available"))?;
 
-        let quality_height = if let Some(ref wanted) = opts.quality {
-            if wanted == "best" {
-                None
-            } else {
-                Self::extract_quality_height(wanted)
-            }
-        } else {
-            None
-        };
-
-        let selected = if let Some(ref wanted) = opts.quality {
-            if wanted == "best" {
-                first
-            } else {
-                info.available_qualities
-                    .iter()
-                    .find(|q| q.label == *wanted)
-                    .unwrap_or(first)
-            }
-        } else {
-            first
+        let selected = match quality_height {
+            Some(h) => info
+                .available_qualities
+                .iter()
+                .filter(|q| q.height > 0 && q.height <= h)
+                .max_by_key(|q| q.height)
+                .unwrap_or(first),
+            None => first,
         };
         let video_url = &selected.url;
 
@@ -352,6 +344,7 @@ impl YouTubeDownloader {
         opts: &DownloadOptions,
         progress: mpsc::Sender<f64>,
         ytdlp_path: &std::path::Path,
+        quality_height: Option<u32>,
     ) -> anyhow::Result<DownloadResult> {
         let playlist_dir = opts
             .output_dir
@@ -385,7 +378,7 @@ impl YouTubeDownloader {
                 ytdlp_path,
                 &entry.url,
                 &playlist_dir,
-                None,
+                quality_height,
                 video_tx,
                 opts.download_mode.as_deref(),
                 None,

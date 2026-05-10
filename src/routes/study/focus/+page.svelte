@@ -5,6 +5,7 @@
   import { emitFocusBreakStart } from "$lib/study-focus-bridge";
   import { t } from "$lib/i18n";
   import PageHero from "$lib/study-components/PageHero.svelte";
+  import AboutLink from "$lib/study-music-components/AboutLink.svelte";
 
   type Current = {
     id: number;
@@ -196,6 +197,7 @@
   onMount(() => {
     refresh();
     loadSettings();
+    loadRpcText();
     poll = window.setInterval(() => {
       tick += 1;
     }, 1000);
@@ -207,6 +209,33 @@
       poll = null;
     }
   });
+
+  const RPC_TEXT_KEY = "study.focus.rpc_text.v1";
+
+  let rpcCustomText = $state("");
+
+  function loadRpcText() {
+    if (typeof localStorage === "undefined") return;
+    try {
+      rpcCustomText = localStorage.getItem(RPC_TEXT_KEY) ?? "";
+    } catch {
+      rpcCustomText = "";
+    }
+  }
+
+  function saveRpcText(value: string) {
+    rpcCustomText = value;
+    if (typeof localStorage === "undefined") return;
+    try {
+      if (value.trim()) {
+        localStorage.setItem(RPC_TEXT_KEY, value.trim());
+      } else {
+        localStorage.removeItem(RPC_TEXT_KEY);
+      }
+    } catch {
+      /* ignore */
+    }
+  }
 
   function formatDate(iso: string): string {
     try {
@@ -248,6 +277,19 @@
           <span class="status-dot" aria-hidden="true"></span>
           <span class="session-preset">{presetLabel(current.preset)}</span>
         </div>
+        {#if rpcCustomText.trim()}
+          <div class="session-intent">
+            <span class="intent-label">{$t("study.focus.intent_for")}</span>
+            <input
+              type="text"
+              class="intent-input intent-inline"
+              value={rpcCustomText}
+              oninput={(e) => saveRpcText((e.currentTarget as HTMLInputElement).value)}
+              placeholder={$t("study.focus.intent_placeholder") as string}
+              maxlength="48"
+            />
+          </div>
+        {/if}
         <div class="session-actions">
           <button type="button" class="btn-stop" onclick={stop}>
             {$t("study.focus.stop")}
@@ -261,6 +303,35 @@
   {:else}
     <div class="card-hero-start">
       <span class="hero-eyebrow">{$t("study.focus.start_now")}</span>
+
+      <div class="intent-row">
+        <label class="intent-label-block" for="focus-intent">
+          {$t("study.focus.intent_label")}
+        </label>
+        <div class="intent-input-wrap">
+          <span class="intent-prefix">{$t("study.focus.intent_prefix")}</span>
+          <input
+            id="focus-intent"
+            type="text"
+            class="intent-input"
+            value={rpcCustomText}
+            oninput={(e) => saveRpcText((e.currentTarget as HTMLInputElement).value)}
+            placeholder={$t("study.focus.intent_placeholder") as string}
+            autocomplete="off"
+            maxlength="48"
+          />
+          {#if rpcCustomText}
+            <button
+              type="button"
+              class="intent-clear"
+              onclick={() => saveRpcText("")}
+              aria-label={$t("study.common.clear") as string}
+            >×</button>
+          {/if}
+        </div>
+        <p class="intent-hint">{$t("study.focus.intent_hint")}</p>
+      </div>
+
       <div class="presets-row">
         {#each PRESETS as p (p.id)}
           <button type="button" class="preset" onclick={() => start(p.id)}>
@@ -269,7 +340,7 @@
                 <span class="preset-num">{p.minutes}</span>
                 <span class="preset-unit">min</span>
               {:else}
-                <span class="preset-free" aria-label="livre">∞</span>
+                <span class="preset-free" aria-label={$t("study.focus.unlimited_aria") as string}>∞</span>
               {/if}
             </span>
             <span class="preset-label">{$t(p.labelKey)}</span>
@@ -286,19 +357,27 @@
 
     <div class="settings-accordions">
       <span class="settings-status" class:saving={savingState === "saving"} class:saved={savingState === "saved"}>
-        {savingState === "saving" ? "salvando…" : savingState === "saved" ? "salvo ✓" : ""}
+        {savingState === "saving"
+          ? $t("study.focus.settings_saving")
+          : savingState === "saved"
+            ? $t("study.focus.settings_saved")
+            : ""}
       </span>
 
       <details class="acc">
         <summary>
-          <span class="acc-title">Ciclos</span>
+          <span class="acc-title">{$t("study.focus.acc_cycles_title")}</span>
           <span class="acc-summary">
-            {settings.pomodoro_minutes}min foco · {settings.short_break_minutes}min pausa · {settings.cycles_before_long_break}× até pausa longa
+            {$t("study.focus.acc_cycles_summary", {
+              focus: settings.pomodoro_minutes,
+              break: settings.short_break_minutes,
+              cycles: settings.cycles_before_long_break,
+            })}
           </span>
         </summary>
         <div class="acc-body">
           <label class="field">
-            <span>Foco (min)</span>
+            <span>{$t("study.focus.acc_cycles_focus")}</span>
             <input
               type="number"
               min="1"
@@ -308,7 +387,7 @@
             />
           </label>
           <label class="field">
-            <span>Pausa curta (min)</span>
+            <span>{$t("study.focus.acc_cycles_short")}</span>
             <input
               type="number"
               min="1"
@@ -318,7 +397,7 @@
             />
           </label>
           <label class="field">
-            <span>Pausa longa (min)</span>
+            <span>{$t("study.focus.acc_cycles_long")}</span>
             <input
               type="number"
               min="1"
@@ -328,7 +407,7 @@
             />
           </label>
           <label class="field">
-            <span>Ciclos antes da pausa longa</span>
+            <span>{$t("study.focus.acc_cycles_count")}</span>
             <input
               type="number"
               min="2"
@@ -342,11 +421,17 @@
 
       <details class="acc">
         <summary>
-          <span class="acc-title">Pausas & auto-start</span>
+          <span class="acc-title">{$t("study.focus.acc_breaks_title")}</span>
           <span class="acc-summary">
-            {settings.auto_start_breaks ? "auto-pausa" : "manual"} ·
-            {settings.auto_start_focus ? "auto-retomada" : "manual"} ·
-            {settings.auto_pause_player ? "pausa player" : "ignora player"}
+            {settings.auto_start_breaks
+              ? $t("study.focus.acc_breaks_auto_yes")
+              : $t("study.focus.acc_breaks_auto_no")} ·
+            {settings.auto_start_focus
+              ? $t("study.focus.acc_breaks_focus_yes")
+              : $t("study.focus.acc_breaks_focus_no")} ·
+            {settings.auto_pause_player
+              ? $t("study.focus.acc_breaks_player_yes")
+              : $t("study.focus.acc_breaks_player_no")}
           </span>
         </summary>
         <div class="acc-body">
@@ -356,7 +441,7 @@
               bind:checked={settings.auto_start_breaks}
               onchange={saveSettings}
             />
-            <span>Iniciar pausas automaticamente após o foco</span>
+            <span>{$t("study.focus.acc_breaks_check_breaks")}</span>
           </label>
           <label class="check">
             <input
@@ -364,7 +449,7 @@
               bind:checked={settings.auto_start_focus}
               onchange={saveSettings}
             />
-            <span>Retomar foco automaticamente após pausa</span>
+            <span>{$t("study.focus.acc_breaks_check_focus")}</span>
           </label>
           <label class="check">
             <input
@@ -372,17 +457,21 @@
               bind:checked={settings.auto_pause_player}
               onchange={saveSettings}
             />
-            <span>Pausar vídeo durante pausa de foco</span>
+            <span>{$t("study.focus.acc_breaks_check_player")}</span>
           </label>
         </div>
       </details>
 
       <details class="acc">
         <summary>
-          <span class="acc-title">Sons & notificação</span>
+          <span class="acc-title">{$t("study.focus.acc_sounds_title")}</span>
           <span class="acc-summary">
-            {settings.notify_end ? "notificação ON" : "silencioso"} ·
-            {settings.notify_sound ? `som ${settings.sound_volume}%` : "sem som"}
+            {settings.notify_end
+              ? $t("study.focus.acc_sounds_notify_on")
+              : $t("study.focus.acc_sounds_notify_off")} ·
+            {settings.notify_sound
+              ? $t("study.focus.acc_sounds_sound_on", { n: settings.sound_volume })
+              : $t("study.focus.acc_sounds_sound_off")}
           </span>
         </summary>
         <div class="acc-body">
@@ -392,7 +481,7 @@
               bind:checked={settings.notify_end}
               onchange={saveSettings}
             />
-            <span>Notificação ao terminar ciclo</span>
+            <span>{$t("study.focus.acc_sounds_check_notify")}</span>
           </label>
           <label class="check">
             <input
@@ -400,10 +489,10 @@
               bind:checked={settings.notify_sound}
               onchange={saveSettings}
             />
-            <span>Tocar som ao terminar</span>
+            <span>{$t("study.focus.acc_sounds_check_sound")}</span>
           </label>
           <label class="field">
-            <span>Volume ({settings.sound_volume}%)</span>
+            <span>{$t("study.focus.acc_sounds_volume", { n: settings.sound_volume })}</span>
             <input
               type="range"
               min="0"
@@ -435,6 +524,10 @@
       </details>
     {/if}
   {/if}
+
+  <footer class="study-footer">
+    <AboutLink variant="inline" />
+  </footer>
 </section>
 
 <style>
@@ -445,6 +538,13 @@
     width: 100%;
     max-width: 900px;
     margin-inline: auto;
+  }
+  .study-footer {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--space-5, 20px);
+    padding-top: 12px;
+    border-top: 1px solid color-mix(in oklab, var(--border) 50%, transparent);
   }
 
   .study-page[data-mode="active"] {
@@ -478,6 +578,130 @@
     letter-spacing: 0.08em;
     text-transform: uppercase;
     color: var(--text-muted);
+  }
+  .intent-row {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    position: relative;
+  }
+  .intent-label-block {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  .intent-input-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: var(--input-bg, rgba(255, 255, 255, 0.04));
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 4px 4px 4px 14px;
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  .intent-input-wrap:focus-within {
+    border-color: var(--accent);
+    background: color-mix(in oklab, var(--accent) 4%, var(--surface));
+  }
+  .intent-prefix {
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 500;
+    padding-right: 6px;
+    flex-shrink: 0;
+  }
+  .intent-input {
+    flex: 1;
+    border: 0;
+    background: transparent;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    padding: 8px 0;
+    outline: none;
+  }
+  .intent-input::placeholder {
+    color: color-mix(in oklab, var(--text-muted) 70%, transparent);
+  }
+  .intent-clear {
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 50%;
+    color: var(--text-muted);
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .intent-clear:hover {
+    background: color-mix(in oklab, var(--text-muted) 12%, transparent);
+    color: var(--text);
+  }
+  .intent-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: 4px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--elev-2, 0 8px 24px rgba(0, 0, 0, 0.2));
+    z-index: 5;
+  }
+  .suggestion {
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-muted);
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition: color 120ms ease, border-color 120ms ease, background 120ms ease;
+  }
+  .suggestion:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: color-mix(in oklab, var(--accent) 8%, transparent);
+  }
+  .intent-hint {
+    margin: 2px 4px 0;
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+  .session-intent {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+  .intent-label {
+    text-transform: lowercase;
+  }
+  .intent-input.intent-inline {
+    border: 0;
+    background: transparent;
+    padding: 2px 0;
+    border-bottom: 1px dashed color-mix(in oklab, var(--text-muted) 40%, transparent);
+    color: var(--text);
+    font-weight: 600;
+    text-align: center;
+    min-width: 200px;
+  }
+  .intent-input.intent-inline:focus {
+    border-bottom-color: var(--accent);
   }
   .presets-row {
     display: grid;

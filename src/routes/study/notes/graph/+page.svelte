@@ -458,7 +458,8 @@
     grid-template-areas:
       "head head"
       "filters canvas";
-    height: calc(100vh - var(--header-height, 64px));
+    height: 100%;
+    min-height: 0;
     overflow: hidden;
   }
   @media (max-width: 760px) {

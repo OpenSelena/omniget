@@ -31,6 +31,10 @@ const BACKEND_ERROR_MAP: Record<string, string> = {
   "Download timeout — no data received for 30 seconds":
     "errors.download_timeout",
   "Write error (disk full?)": "errors.disk_full",
+  "Console encoding error (non-UTF-8 locale). Update yt-dlp in Settings → Dependencies, or run `chcp 65001` in a terminal and reopen the app.":
+    "errors.console_encoding",
+  "yt-dlp extractor is broken for this site. Update yt-dlp in Settings → Dependencies, then retry.":
+    "errors.extractor_broken",
 };
 
 /**

@@ -18,6 +18,7 @@ export type PageSummary = {
   journal_day: number | null;
   block_count: number;
   updated_at: number;
+  notebook_id: number;
 };
 
 export type BlockKind =
@@ -34,7 +35,12 @@ export type BlockKind =
   | "divider"
   | "image"
   | "embed"
-  | "video";
+  | "video"
+  | "mermaid"
+  | "flowchart"
+  | "mindmap"
+  | "abc"
+  | "plantuml";
 
 export type NoteBlock = {
   id: number;
@@ -261,23 +267,39 @@ export async function notesPagesCreate(args: {
   name: string;
   title?: string;
   journalDay?: number;
-}): Promise<{ id: number }> {
-  return pluginInvoke<{ id: number }>(NS, "study:notes:pages:create", args);
+  notebookId?: number;
+}): Promise<{ id: number; notebook_id: number }> {
+  return pluginInvoke<{ id: number; notebook_id: number }>(
+    NS,
+    "study:notes:pages:create",
+    args,
+  );
 }
 
 export async function notesPagesEnsure(args: {
   name: string;
   title?: string;
-}): Promise<{ id: number }> {
-  return pluginInvoke<{ id: number }>(NS, "study:notes:pages:ensure", args);
+  notebookId?: number;
+}): Promise<{ id: number; notebook_id: number }> {
+  return pluginInvoke<{ id: number; notebook_id: number }>(
+    NS,
+    "study:notes:pages:ensure",
+    args,
+  );
 }
 
 export async function notesPagesGet(id: number): Promise<NotePage> {
   return pluginInvoke<NotePage>(NS, "study:notes:pages:get", { id });
 }
 
-export async function notesPagesGetByName(name: string): Promise<NotePage | null> {
-  return pluginInvoke<NotePage | null>(NS, "study:notes:pages:get_by_name", { name });
+export async function notesPagesGetByName(
+  name: string,
+  notebookId?: number,
+): Promise<NotePage | null> {
+  return pluginInvoke<NotePage | null>(NS, "study:notes:pages:get_by_name", {
+    name,
+    notebookId,
+  });
 }
 
 export async function notesPagesRename(args: {
@@ -993,6 +1015,381 @@ export async function notesCardsExportToAnki(args: {
     NS,
     "study:notes:cards:export_to_anki",
     args,
+  );
+}
+
+// #endregion
+
+// #region tabs + wnds (Z2)
+
+export type TabViewKind =
+  | "editor"
+  | "graph"
+  | "search"
+  | "templates"
+  | "settings"
+  | "journal";
+
+export type TabSummary = {
+  id: number;
+  wnd_id: number;
+  page_id: number | null;
+  page_name: string | null;
+  page_title: string | null;
+  view_kind: TabViewKind;
+  pinned: boolean;
+  sort_idx: number;
+  created_at: number;
+  last_focused_at: number | null;
+};
+
+export type WndNode = {
+  id: number;
+  split_dir: "horizontal" | "vertical" | null;
+  ratio: number;
+  children: WndNode[];
+};
+
+export type TabCloseReport = {
+  closed: boolean;
+  fallback_tab_id: number | null;
+};
+
+export type WndCloseReport = {
+  closed: boolean;
+  collapsed_to_parent: boolean;
+  new_root_id: number | null;
+};
+
+export async function notesTabsListForWnd(wndId: number): Promise<TabSummary[]> {
+  return pluginInvoke<TabSummary[]>(NS, "study:notes:tabs:list_for_wnd", { wndId });
+}
+
+export async function notesTabsOpen(args: {
+  wndId: number;
+  pageId?: number | null;
+  viewKind?: TabViewKind;
+}): Promise<{ tab_id: number }> {
+  return pluginInvoke<{ tab_id: number }>(NS, "study:notes:tabs:open", args);
+}
+
+export async function notesTabsClose(tabId: number): Promise<TabCloseReport> {
+  return pluginInvoke<TabCloseReport>(NS, "study:notes:tabs:close", { tabId });
+}
+
+export async function notesTabsReorder(args: {
+  tabId: number;
+  newSortIdx: number;
+}): Promise<{ ok: true }> {
+  return pluginInvoke<{ ok: true }>(NS, "study:notes:tabs:reorder", args);
+}
+
+export async function notesTabsMoveToWnd(args: {
+  tabId: number;
+  targetWndId: number;
+  sortIdx?: number;
+}): Promise<{ ok: true }> {
+  return pluginInvoke<{ ok: true }>(NS, "study:notes:tabs:move_to_wnd", args);
+}
+
+export async function notesTabsPin(args: {
+  tabId: number;
+  pinned: boolean;
+}): Promise<{ ok: true }> {
+  return pluginInvoke<{ ok: true }>(NS, "study:notes:tabs:pin", args);
+}
+
+export async function notesTabsTouchFocus(tabId: number): Promise<{ ok: true }> {
+  return pluginInvoke<{ ok: true }>(NS, "study:notes:tabs:touch_focus", { tabId });
+}
+
+export async function notesWndsTree(): Promise<WndNode> {
+  return pluginInvoke<WndNode>(NS, "study:notes:wnds:tree", {});
+}
+
+export async function notesWndsSplit(args: {
+  parentWndId: number;
+  direction: "horizontal" | "vertical";
+}): Promise<{ new_wnd_id: number }> {
+  return pluginInvoke<{ new_wnd_id: number }>(NS, "study:notes:wnds:split", args);
+}
+
+export async function notesWndsClose(wndId: number): Promise<WndCloseReport> {
+  return pluginInvoke<WndCloseReport>(NS, "study:notes:wnds:close", { wndId });
+}
+
+export async function notesWndsSetRatio(args: {
+  wndId: number;
+  ratio: number;
+}): Promise<{ ok: true }> {
+  return pluginInvoke<{ ok: true }>(NS, "study:notes:wnds:set_ratio", args);
+}
+
+// #endregion
+
+// #region active state (Z2)
+
+export type ActiveStateEntry = {
+  key: string;
+  value: NoteSettingValue;
+  updated_at: number;
+};
+
+export async function notesActiveStateGet(
+  key: string,
+): Promise<{ value: NoteSettingValue }> {
+  return pluginInvoke<{ value: NoteSettingValue }>(
+    NS,
+    "study:notes:active_state:get",
+    { key },
+  );
+}
+
+export async function notesActiveStateSet(args: {
+  key: string;
+  value: NoteSettingValue;
+}): Promise<{ ok: true }> {
+  return pluginInvoke<{ ok: true }>(NS, "study:notes:active_state:set", args);
+}
+
+export async function notesActiveStateList(): Promise<ActiveStateEntry[]> {
+  return pluginInvoke<ActiveStateEntry[]>(NS, "study:notes:active_state:list", {});
+}
+
+// #endregion
+
+// #region docks (Z3)
+
+export type DockId =
+  | "files"
+  | "outline"
+  | "backlink"
+  | "bookmark"
+  | "tag"
+  | "inbox"
+  | "graph"
+  | (string & {});
+
+export type DockPosition = "left" | "right" | "bottom";
+
+export type DockState = {
+  dock_id: DockId;
+  position: DockPosition;
+  visible: boolean;
+  expanded: boolean;
+  sort_idx: number;
+  width_px: number | null;
+};
+
+export type DockStatePatch = {
+  position?: DockPosition;
+  visible?: boolean;
+  expanded?: boolean;
+  sort_idx?: number;
+  width_px?: number | null;
+};
+
+export type OutlineEntry = {
+  block_id: number;
+  level: number;
+  content: string;
+  order_idx: number;
+};
+
+export async function notesDocksState(): Promise<DockState[]> {
+  return pluginInvoke<DockState[]>(NS, "study:notes:docks:state", {});
+}
+
+export async function notesDocksSetState(args: {
+  dockId: DockId;
+  patch: DockStatePatch;
+}): Promise<{ ok: true; state: DockState }> {
+  return pluginInvoke<{ ok: true; state: DockState }>(
+    NS,
+    "study:notes:docks:set_state",
+    args,
+  );
+}
+
+export async function notesDocksToggleVisible(
+  dockId: DockId,
+): Promise<{ visible: boolean }> {
+  return pluginInvoke<{ visible: boolean }>(
+    NS,
+    "study:notes:docks:toggle_visible",
+    { dockId },
+  );
+}
+
+export async function notesPagesOutline(pageId: number): Promise<OutlineEntry[]> {
+  return pluginInvoke<OutlineEntry[]>(NS, "study:notes:pages:outline", { pageId });
+}
+
+export async function notesBookmarksList(): Promise<PageSummary[]> {
+  return pluginInvoke<PageSummary[]>(NS, "study:notes:bookmarks:list", {});
+}
+
+export async function notesInboxList(): Promise<PageSummary[]> {
+  return pluginInvoke<PageSummary[]>(NS, "study:notes:inbox:list", {});
+}
+
+// #endregion
+
+// #region notebooks (Z4)
+
+export type Notebook = {
+  id: number;
+  name: string;
+  sort_idx: number;
+  closed: boolean;
+  color: string | null;
+  icon_lucide: string | null;
+  cover_asset_id: number | null;
+  created_at: number;
+  updated_at: number;
+  page_count: number;
+};
+
+export type NotebookDeleteReport = {
+  deleted: boolean;
+  page_count: number;
+};
+
+export type NotebookMoveReport = {
+  ok: boolean;
+  new_full_name: string;
+  notebook_id: number;
+};
+
+export async function notesNotebooksList(
+  args: { includeClosed?: boolean } = {},
+): Promise<Notebook[]> {
+  return pluginInvoke<Notebook[]>(NS, "study:notes:notebooks:list", args);
+}
+
+export async function notesNotebooksGet(notebookId: number): Promise<Notebook | null> {
+  return pluginInvoke<Notebook | null>(NS, "study:notes:notebooks:get", {
+    notebookId,
+  });
+}
+
+export async function notesNotebooksCreate(args: {
+  name: string;
+  color?: string | null;
+  iconLucide?: string | null;
+}): Promise<{ notebook_id: number }> {
+  return pluginInvoke<{ notebook_id: number }>(
+    NS,
+    "study:notes:notebooks:create",
+    args,
+  );
+}
+
+export async function notesNotebooksRename(args: {
+  notebookId: number;
+  newName: string;
+}): Promise<{ ok: true }> {
+  return pluginInvoke<{ ok: true }>(NS, "study:notes:notebooks:rename", args);
+}
+
+export async function notesNotebooksClose(
+  notebookId: number,
+): Promise<{ ok: true }> {
+  return pluginInvoke<{ ok: true }>(NS, "study:notes:notebooks:close", {
+    notebookId,
+  });
+}
+
+export async function notesNotebooksReopen(
+  notebookId: number,
+): Promise<{ ok: true }> {
+  return pluginInvoke<{ ok: true }>(NS, "study:notes:notebooks:reopen", {
+    notebookId,
+  });
+}
+
+export async function notesNotebooksDelete(args: {
+  notebookId: number;
+  force?: boolean;
+}): Promise<NotebookDeleteReport> {
+  return pluginInvoke<NotebookDeleteReport>(
+    NS,
+    "study:notes:notebooks:delete",
+    args,
+  );
+}
+
+export async function notesNotebooksMovePage(args: {
+  pageId: number;
+  targetNotebookId: number;
+  targetName?: string;
+}): Promise<NotebookMoveReport> {
+  return pluginInvoke<NotebookMoveReport>(
+    NS,
+    "study:notes:notebooks:move_page",
+    args,
+  );
+}
+
+export async function notesNotebooksSetCover(args: {
+  notebookId: number;
+  assetId?: number | null;
+}): Promise<{ ok: true }> {
+  return pluginInvoke<{ ok: true }>(
+    NS,
+    "study:notes:notebooks:set_cover",
+    args,
+  );
+}
+
+export async function notesNotebooksSetColor(args: {
+  notebookId: number;
+  color?: string | null;
+}): Promise<{ ok: true }> {
+  return pluginInvoke<{ ok: true }>(
+    NS,
+    "study:notes:notebooks:set_color",
+    args,
+  );
+}
+
+export async function notesNotebooksSetIcon(args: {
+  notebookId: number;
+  iconLucide?: string | null;
+}): Promise<{ ok: true }> {
+  return pluginInvoke<{ ok: true }>(
+    NS,
+    "study:notes:notebooks:set_icon",
+    args,
+  );
+}
+
+export async function notesNotebooksReorder(args: {
+  notebookId: number;
+  newSortIdx: number;
+}): Promise<{ ok: true }> {
+  return pluginInvoke<{ ok: true }>(
+    NS,
+    "study:notes:notebooks:reorder",
+    args,
+  );
+}
+
+export async function notesNotebooksActiveGet(): Promise<{ notebook_id: number }> {
+  return pluginInvoke<{ notebook_id: number }>(
+    NS,
+    "study:notes:notebooks:active_get",
+    {},
+  );
+}
+
+export async function notesNotebooksActiveSet(
+  notebookId: number,
+): Promise<{ ok: true }> {
+  return pluginInvoke<{ ok: true }>(
+    NS,
+    "study:notes:notebooks:active_set",
+    { notebookId },
   );
 }
 

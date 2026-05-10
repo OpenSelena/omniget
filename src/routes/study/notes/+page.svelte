@@ -4,8 +4,6 @@
   import { t } from "$lib/i18n";
   import { awardXp } from "$lib/study-gamification";
   import ConfirmDialog from "$lib/study-components/ConfirmDialog.svelte";
-  import SidebarTree from "$lib/study-components/notes/SidebarTree.svelte";
-  import RefsPanel from "$lib/study-components/notes/RefsPanel.svelte";
   import CreatePageDialog from "$lib/study-components/notes/CreatePageDialog.svelte";
   import RenamePageDialog from "$lib/study-components/notes/RenamePageDialog.svelte";
   import Editor from "$lib/study-components/notes/Editor.svelte";
@@ -23,9 +21,6 @@
     notesPagesEnsure,
     notesPagesSetAliases,
     notesPagesSetTags,
-    notesPagesLinkedRefs,
-    notesPagesUnlinkedRefs,
-    notesTagsList,
     notesJournalToday,
     notesBlocksPageTree,
     notesUndoLastOp,
@@ -33,22 +28,12 @@
     notesAssetsListForPage,
     type NotePage as Page,
     type BlockNode,
-    type PageSummary,
-    type LinkedRef,
-    type TagSummary,
   } from "$lib/notes-bridge";
-
-  let sidebarPages = $state<PageSummary[]>([]);
-  let sidebarTags = $state<TagSummary[]>([]);
-  let sidebarSearch = $state("");
-  let recentLimit = $state(50);
+  import { notesShell } from "$lib/study-notes/shell-store.svelte";
+  import { tabsStore } from "$lib/study-notes/tabs-store.svelte";
 
   let currentPage = $state<Page | null>(null);
   let blockTree = $state<BlockNode[]>([]);
-
-  let linkedRefs = $state<LinkedRef[]>([]);
-  let unlinkedRefs = $state<LinkedRef[]>([]);
-  let refsLoading = $state(false);
 
   let loading = $state(true);
   let error = $state("");
@@ -87,19 +72,22 @@
     setTimeout(() => (toast = null), 2400);
   }
 
-  async function loadSidebar() {
+  function notifyDocksDirty() {
     try {
-      const [pages, tags] = await Promise.all([
-        notesPagesList(),
-        notesTagsList(30),
-      ]);
-      sidebarPages = pages;
-      sidebarTags = tags;
+      window.dispatchEvent(new CustomEvent("study:notes:dirty"));
+    } catch {
+      /* ignore */
+    }
+  }
+
+  async function probeNotesAvailability() {
+    try {
+      await notesPagesList();
       error = "";
       notesTableMissing = false;
     } catch (e) {
       const raw = e instanceof Error ? e.message : String(e);
-      console.error("[notes] loadSidebar failed:", raw);
+      console.error("[notes] probe failed:", raw);
       if (/no such table/i.test(raw) || /database\s+disk/i.test(raw)) {
         notesTableMissing = true;
         error = "";
@@ -110,7 +98,7 @@
     }
   }
 
-  async function openPage(id: number) {
+  async function openPage(id: number, registerTab: boolean = true) {
     loading = true;
     error = "";
     try {
@@ -121,27 +109,27 @@
       aliasesDirty = false;
       tagsDirty = false;
       blockTree = await notesBlocksPageTree(id);
-      await Promise.all([refreshRefs(id), loadCover(id)]);
+      notesShell.setActivePage(p.name, p.title ?? null);
+      if (registerTab) {
+        const wnd = tabsStore.activeWndId;
+        if (wnd != null) {
+          void tabsStore
+            .openTab({ wndId: wnd, pageId: id, viewKind: "editor", activate: true })
+            .catch(() => {});
+        }
+      }
+      const initial = blockTree.length > 0 ? blockTree[0].content ?? "" : "";
+      const trimmed = initial.trim();
+      const words = trimmed
+        ? trimmed.replace(/[`*_>#~\-\[\]\(\)\{\}!]+/g, " ").split(/\s+/).filter((w) => w.length > 0).length
+        : 0;
+      notesShell.setCounts(words, initial.length);
+      notesShell.setSaving(false);
+      await loadCover(id);
     } catch (e) {
       error = e instanceof Error ? e.message : String(e);
     } finally {
       loading = false;
-    }
-  }
-
-  async function refreshRefs(pageId: number) {
-    refsLoading = true;
-    try {
-      const [linked, unlinked] = await Promise.all([
-        notesPagesLinkedRefs(pageId),
-        notesPagesUnlinkedRefs(pageId),
-      ]);
-      linkedRefs = linked;
-      unlinkedRefs = unlinked;
-    } catch (e) {
-      console.error("refreshRefs failed", e);
-    } finally {
-      refsLoading = false;
     }
   }
 
@@ -154,7 +142,7 @@
     try {
       const r = await notesPagesCreate({ name });
       createPageOpen = false;
-      await loadSidebar();
+      notifyDocksDirty();
       await openPage(r.id);
       void awardXp("page_created", 15, { page_id: r.id, name });
       showToast("ok", "Página criada");
@@ -169,9 +157,10 @@
       await notesPagesDelete(currentPage.id);
       currentPage = null;
       blockTree = [];
-      linkedRefs = [];
-      unlinkedRefs = [];
-      await loadSidebar();
+      notesShell.setActivePage(null, null);
+      notesShell.setCounts(0, 0);
+      notesShell.setSaving(false);
+      notifyDocksDirty();
       showToast("ok", "Página removida");
     } catch (e) {
       showToast("err", e instanceof Error ? e.message : String(e));
@@ -187,7 +176,7 @@
     try {
       const r = await notesPagesRenameCascade({ id: currentPage.id, newName });
       renameOpen = false;
-      await loadSidebar();
+      notifyDocksDirty();
       await openPage(currentPage.id);
       showToast(
         "ok",
@@ -238,11 +227,11 @@
       const p = await notesPagesResolve(name);
       if (p) {
         await openPage(p.id);
-        await loadSidebar();
+        notifyDocksDirty();
       } else {
         const r = await notesPagesEnsure({ name });
         await openPage(r.id);
-        await loadSidebar();
+        notifyDocksDirty();
       }
     } catch (e) {
       showToast("err", e instanceof Error ? e.message : String(e));
@@ -253,7 +242,7 @@
     try {
       const r = await notesJournalToday();
       await openPage(r.page_id);
-      await loadSidebar();
+      notifyDocksDirty();
     } catch (e) {
       showToast("err", e instanceof Error ? e.message : String(e));
     }
@@ -286,32 +275,37 @@
   }
 
   onMount(async () => {
-    await loadSidebar();
+    await probeNotesAvailability();
     const target = $routePage.url.searchParams.get("page");
     if (target) {
       await gotoPageByName(target);
-    } else if (sidebarPages.length > 0) {
-      await openPage(sidebarPages[0].id);
-    } else {
+      return;
+    }
+    if (notesTableMissing || error) {
+      loading = false;
+      return;
+    }
+    try {
+      const all = await notesPagesList();
+      if (all.length > 0) {
+        await openPage(all[0].id);
+      } else {
+        loading = false;
+      }
+    } catch {
       loading = false;
     }
+  });
+
+  $effect(() => {
+    const t = tabsStore.activeTab;
+    if (!t || t.view_kind !== "editor" || t.page_id == null) return;
+    if (currentPage?.id === t.page_id) return;
+    void openPage(t.page_id, false);
   });
 </script>
 
 <div class="notes-shell" data-surface="notes">
-  <SidebarTree
-    pages={sidebarPages}
-    tags={sidebarTags}
-    selectedPageId={currentPage?.id ?? null}
-    searchValue={sidebarSearch}
-    {recentLimit}
-    onCreate={() => (createPageOpen = true)}
-    onSelect={openPage}
-    onJournalToday={openJournalToday}
-    onSearchInput={(v) => (sidebarSearch = v)}
-    onShowMore={() => (recentLimit += 50)}
-  />
-
   <main class="editor">
     {#if toast}
       <div class="toast" class:err={toast.kind === "err"} role="status">
@@ -324,12 +318,12 @@
     {:else if notesTableMissing}
       <div class="state err">
         <p>{$t("study.library.error_loading_notes")}</p>
-        <button class="btn" onclick={() => loadSidebar()}>{$t("common.retry")}</button>
+        <button class="btn" onclick={() => probeNotesAvailability()}>{$t("common.retry")}</button>
       </div>
     {:else if error}
       <div class="state err">
         <p>{error}</p>
-        <button class="btn" onclick={() => loadSidebar()}>{$t("common.retry")}</button>
+        <button class="btn" onclick={() => probeNotesAvailability()}>{$t("common.retry")}</button>
       </div>
     {:else if !currentPage}
       <div class="state">
@@ -452,18 +446,12 @@
         initialMarkdown={firstBlock?.content ?? ""}
         onSaved={() => { void reloadTree(); }}
         onError={(msg) => showToast("err", msg)}
+        onStats={(s) => notesShell.setCounts(s.words, s.chars)}
+        onSavingChange={(saving) => notesShell.setSaving(saving)}
       />
     {/if}
   </main>
 
-  <RefsPanel
-    {linkedRefs}
-    {unlinkedRefs}
-    loading={refsLoading}
-    active={currentPage !== null}
-    pageId={currentPage?.id ?? null}
-    onPageNavigate={gotoPageByName}
-  />
 </div>
 
 <CoverManager
@@ -512,27 +500,11 @@
 
 <style>
   .notes-shell {
-    display: grid;
-    grid-template-columns: 280px 1fr 320px;
-    gap: 12px;
-    height: calc(100vh - var(--header-height, 64px));
+    height: 100%;
+    min-height: 0;
     overflow: hidden;
-  }
-  @media (max-width: 1100px) {
-    .notes-shell {
-      grid-template-columns: 240px 1fr;
-    }
-    .notes-shell :global(.refs-panel) {
-      display: none;
-    }
-  }
-  @media (max-width: 760px) {
-    .notes-shell {
-      grid-template-columns: 1fr;
-    }
-    .notes-shell :global(.sidebar) {
-      display: none;
-    }
+    display: flex;
+    flex-direction: column;
   }
 
   .editor-banner {

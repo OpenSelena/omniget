@@ -345,7 +345,7 @@ impl PlatformDownloader for TwitchClipsDownloader {
             &selected.url,
             &output_path,
             progress,
-            None,
+            Some(&opts.cancel_token),
         )
         .await?;
 

@@ -25,6 +25,40 @@ pub struct AppSettings {
     pub last_download_options: LastDownloadOptions,
     #[serde(default)]
     pub typography: TypographySettings,
+    #[serde(default)]
+    pub rpc: RpcSettings,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RpcSettings {
+    #[serde(default = "default_rpc_enabled")]
+    pub enabled: bool,
+    #[serde(default = "default_rpc_app_id")]
+    pub app_id: String,
+    #[serde(default = "default_rpc_image_key")]
+    pub large_image_key: String,
+}
+
+impl Default for RpcSettings {
+    fn default() -> Self {
+        Self {
+            enabled: default_rpc_enabled(),
+            app_id: default_rpc_app_id(),
+            large_image_key: default_rpc_image_key(),
+        }
+    }
+}
+
+fn default_rpc_enabled() -> bool {
+    true
+}
+
+fn default_rpc_app_id() -> String {
+    "1502867748353478656".into()
+}
+
+fn default_rpc_image_key() -> String {
+    "omniget_music".into()
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -73,6 +107,16 @@ pub struct DownloadSettings {
     pub hotkey_enabled: bool,
     #[serde(default = "default_hotkey_binding")]
     pub hotkey_binding: String,
+    #[serde(default)]
+    pub clip_hotkey_enabled: bool,
+    #[serde(default = "default_clip_hotkey_binding")]
+    pub clip_hotkey_binding: String,
+    #[serde(default)]
+    pub music_hotkey_enabled: bool,
+    #[serde(default = "default_music_hotkey_binding")]
+    pub music_hotkey_binding: String,
+    #[serde(default = "default_music_audio_format")]
+    pub music_audio_format: String,
     #[serde(default)]
     pub extra_ytdlp_flags: Vec<String>,
     #[serde(default = "default_true")]
@@ -123,6 +167,18 @@ pub fn default_filename_template() -> String {
 
 fn default_hotkey_binding() -> String {
     "CmdOrCtrl+Shift+D".into()
+}
+
+fn default_clip_hotkey_binding() -> String {
+    "CmdOrCtrl+Shift+B".into()
+}
+
+fn default_music_hotkey_binding() -> String {
+    "CmdOrCtrl+Shift+M".into()
+}
+
+fn default_music_audio_format() -> String {
+    "m4a".into()
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -240,6 +296,11 @@ impl Default for AppSettings {
                 split_by_chapters: false,
                 hotkey_enabled: false,
                 hotkey_binding: default_hotkey_binding(),
+                clip_hotkey_enabled: false,
+                clip_hotkey_binding: default_clip_hotkey_binding(),
+                music_hotkey_enabled: false,
+                music_hotkey_binding: default_music_hotkey_binding(),
+                music_audio_format: default_music_audio_format(),
                 extra_ytdlp_flags: Vec::new(),
                 copy_to_clipboard_on_hotkey: true,
                 cookie_file: String::new(),
@@ -262,6 +323,7 @@ impl Default for AppSettings {
             legal_acknowledged: false,
             last_download_options: LastDownloadOptions::default(),
             typography: TypographySettings::default(),
+            rpc: RpcSettings::default(),
         }
     }
 }

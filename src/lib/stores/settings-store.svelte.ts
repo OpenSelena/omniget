@@ -25,6 +25,11 @@ export type AppSettings = {
     split_by_chapters: boolean;
     hotkey_enabled: boolean;
     hotkey_binding: string;
+    clip_hotkey_enabled?: boolean;
+    clip_hotkey_binding?: string;
+    music_hotkey_enabled: boolean;
+    music_hotkey_binding: string;
+    music_audio_format: string;
     copy_to_clipboard_on_hotkey: boolean;
     extra_ytdlp_flags?: string[];
     cookie_file: string;
@@ -49,6 +54,11 @@ export type AppSettings = {
   telegram: {
     concurrent_downloads: number;
     fix_file_extensions: boolean;
+  };
+  rpc: {
+    enabled: boolean;
+    app_id: string;
+    large_image_key: string;
   };
   onboarding_completed: boolean;
   start_with_system: boolean;

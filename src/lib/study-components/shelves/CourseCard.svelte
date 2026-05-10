@@ -1,5 +1,6 @@
 <script lang="ts">
   import { convertFileSrc } from "@tauri-apps/api/core";
+  import { pluginInvoke } from "$lib/plugin-invoke";
   import NotificationBadge from "./NotificationBadge.svelte";
 
   type Props = {
@@ -26,6 +27,78 @@
     tags = [],
   }: Props = $props();
 
+  type SpriteInfo = {
+    sprite_url: string;
+    cols: number;
+    rows: number;
+    total_frames: number;
+  };
+  let sprite = $state<SpriteInfo | null>(null);
+  let spriteLoading = false;
+  let spriteFailed = false;
+  let scrubFrame = $state(0);
+  let scrubbing = $state(false);
+
+  async function ensureSprite() {
+    if (sprite || spriteLoading || spriteFailed) return;
+    spriteLoading = true;
+    try {
+      const res = await pluginInvoke<{
+        sprite_path: string;
+        cols: number;
+        rows: number;
+        total_frames: number;
+      }>("study", "study:courses:generate_sprite", { courseId });
+      let url = res.sprite_path;
+      try {
+        url = convertFileSrc(res.sprite_path);
+      } catch {
+        // keep raw path
+      }
+      sprite = {
+        sprite_url: url,
+        cols: res.cols,
+        rows: res.rows,
+        total_frames: res.total_frames,
+      };
+    } catch (e) {
+      spriteFailed = true;
+      if (import.meta.env.DEV) {
+        console.warn(`[CourseCard] sprite gen failed for ${courseId}:`, e);
+      }
+    } finally {
+      spriteLoading = false;
+    }
+  }
+
+  function onPointerEnter() {
+    void ensureSprite();
+  }
+  function onPointerMove(e: PointerEvent) {
+    if (!sprite) return;
+    const target = e.currentTarget as HTMLElement | null;
+    if (!target) return;
+    const rect = target.getBoundingClientRect();
+    if (rect.width <= 0) return;
+    const x = Math.min(rect.width, Math.max(0, e.clientX - rect.left));
+    const ratio = x / rect.width;
+    scrubFrame = Math.min(
+      sprite.total_frames - 1,
+      Math.floor(ratio * sprite.total_frames),
+    );
+    scrubbing = true;
+  }
+  function onPointerLeave() {
+    scrubbing = false;
+  }
+
+  const scrubStyle = $derived.by(() => {
+    if (!sprite || !scrubbing) return "";
+    const col = scrubFrame % sprite.cols;
+    const row = Math.floor(scrubFrame / sprite.cols);
+    return `background-image: url('${sprite.sprite_url}'); background-position: ${-col * 100}% ${-row * 100}%; background-size: ${sprite.cols * 100}% ${sprite.rows * 100}%;`;
+  });
+
   const visibleTags = $derived(tags.slice(0, 2));
   const extraTags = $derived(Math.max(0, tags.length - 2));
 
@@ -34,7 +107,13 @@
     if (!thumbnail) return null;
     try {
       return convertFileSrc(thumbnail);
-    } catch {
+    } catch (e) {
+      if (import.meta.env.DEV) {
+        console.warn(
+          `[CourseCard] convertFileSrc failed for course ${courseId}: ${thumbnail}`,
+          e,
+        );
+      }
       return thumbnail;
     }
   });
@@ -47,11 +126,18 @@
   });
 </script>
 
-<a class="card" href={link} aria-label="Abrir {title}">
-  <div class="thumb">
-    {#if thumbSrc}
+<a
+  class="card"
+  href={link}
+  aria-label="Abrir {title}"
+  onpointerenter={onPointerEnter}
+  onpointermove={onPointerMove}
+  onpointerleave={onPointerLeave}
+>
+  <div class="thumb" style={scrubStyle}>
+    {#if thumbSrc && !scrubbing}
       <img src={thumbSrc} alt="" loading="lazy" />
-    {:else}
+    {:else if !thumbSrc && !scrubbing}
       <div class="thumb-fallback" aria-hidden="true">
         <svg viewBox="0 0 24 24" width="32" height="32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <rect x="3" y="6" width="18" height="12" rx="2" />

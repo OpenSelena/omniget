@@ -42,6 +42,7 @@ export type GenericDownloadItem = BaseItem & {
   downloadedBytes: number;
   totalBytes: number | null;
   phase: string;
+  etaSeconds?: number | null;
   filePath?: string;
   fileCount?: number;
   thumbnail_url?: string | null;
@@ -240,6 +241,7 @@ type QueueItemInfo = {
   thumbnail_url: string | null;
   kind?: QueueKind;
   external?: boolean;
+  eta_seconds?: number | null;
 };
 
 function queueStatusToDownloadStatus(status: { type: string; data?: unknown }): DownloadStatus {
@@ -296,6 +298,7 @@ export function syncQueueState(items: QueueItemInfo[]) {
       downloadedBytes: qi.downloaded_bytes,
       totalBytes: qi.total_bytes,
       phase: (existing?.kind === "generic" ? existing.phase : undefined) ?? "queued",
+      etaSeconds: qi.eta_seconds ?? null,
       status: dlStatus,
       error: extractError(qi.status),
       startedAt: existing?.startedAt ?? now,
@@ -353,6 +356,7 @@ export function upsertGenericProgress(
   downloadedBytes: number,
   totalBytes: number | null,
   phase: string,
+  etaSeconds?: number | null,
 ) {
   const now = Date.now();
   const existing = downloads.get(id);
@@ -380,6 +384,7 @@ export function upsertGenericProgress(
     downloadedBytes,
     totalBytes,
     phase,
+    etaSeconds: etaSeconds ?? null,
     status: resolvedStatus,
     startedAt: existing?.startedAt ?? now,
     lastUpdateAt: now,
@@ -403,5 +408,18 @@ export function formatSpeed(bytesPerSec: number): string {
   if (bytesPerSec <= 0) return "0 KB/s";
   if (bytesPerSec < 1024 * 1024) return `${(bytesPerSec / 1024).toFixed(0)} KB/s`;
   return `${(bytesPerSec / (1024 * 1024)).toFixed(1)} MB/s`;
+}
+
+export function formatEta(seconds: number | null | undefined): string {
+  if (seconds == null || seconds <= 0 || !Number.isFinite(seconds)) return "";
+  if (seconds < 60) return `${Math.round(seconds)}s`;
+  if (seconds < 3600) {
+    const m = Math.floor(seconds / 60);
+    const s = Math.round(seconds % 60);
+    return s > 0 ? `${m}m ${s}s` : `${m}m`;
+  }
+  const h = Math.floor(seconds / 3600);
+  const m = Math.round((seconds % 3600) / 60);
+  return m > 0 ? `${h}h ${m}m` : `${h}h`;
 }
 

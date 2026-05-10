@@ -21,6 +21,11 @@
   import { Callout } from "./callout-node";
   import { QueryBlock } from "./query-node";
   import { EmbedBlock } from "./embed-node";
+  import { MermaidBlock } from "./mermaid-node";
+  import { FlowchartBlock } from "./flowchart-node";
+  import { MindmapBlock } from "./mindmap-node";
+  import { AbcBlock } from "./abc-node";
+  import { PlantumlBlock } from "./plantuml-node";
   import { createSlashExtension, type SlashSuggestionState } from "./slash-extension";
   import { NotesKeyboardShortcuts } from "./keyboard-shortcuts";
   import {
@@ -51,9 +56,30 @@
     initialMarkdown: string;
     onSaved?: (markdown: string, blockId: number) => void;
     onError?: (message: string) => void;
+    onStats?: (stats: { words: number; chars: number }) => void;
+    onSavingChange?: (saving: boolean) => void;
   };
 
-  let { pageId, aggregateBlockId, initialMarkdown, onSaved, onError }: Props = $props();
+  let {
+    pageId,
+    aggregateBlockId,
+    initialMarkdown,
+    onSaved,
+    onError,
+    onStats,
+    onSavingChange,
+  }: Props = $props();
+
+  function computeStats(markdown: string): { words: number; chars: number } {
+    const trimmed = markdown.trim();
+    const chars = markdown.length;
+    if (!trimmed) return { words: 0, chars };
+    const words = trimmed
+      .replace(/[`*_>#~\-\[\]\(\)\{\}!]+/g, " ")
+      .split(/\s+/)
+      .filter((w) => w.length > 0).length;
+    return { words, chars };
+  }
 
   let element = $state<HTMLDivElement | undefined>(undefined);
   let bubbleElement = $state<HTMLDivElement | undefined>(undefined);
@@ -108,6 +134,8 @@
 
   function scheduleSave(markdown: string) {
     pendingMarkdown = markdown;
+    onStats?.(computeStats(markdown));
+    onSavingChange?.(true);
     if (saveTimer) clearTimeout(saveTimer);
     saveTimer = setTimeout(() => {
       void flush();
@@ -119,8 +147,12 @@
       clearTimeout(saveTimer);
       saveTimer = null;
     }
-    if (pendingMarkdown === initialMarkdown && lastSavedAt === null) return;
+    if (pendingMarkdown === initialMarkdown && lastSavedAt === null) {
+      onSavingChange?.(false);
+      return;
+    }
     isSaving = true;
+    onSavingChange?.(true);
     try {
       const id = await ensureBlockId();
       await notesBlocksUpdate({ id, content: pendingMarkdown });
@@ -131,6 +163,7 @@
       onError?.(msg);
     } finally {
       isSaving = false;
+      onSavingChange?.(false);
     }
   }
 
@@ -173,6 +206,11 @@
         Callout,
         QueryBlock,
         EmbedBlock,
+        MermaidBlock,
+        FlowchartBlock,
+        MindmapBlock,
+        AbcBlock,
+        PlantumlBlock,
         NotesKeyboardShortcuts,
         Mention.extend({ name: "pageMention" }).configure({
           HTMLAttributes: { class: "tiptap-page-mention", "data-mention-kind": "page" },

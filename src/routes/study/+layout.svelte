@@ -4,6 +4,7 @@
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
   import { pluginInvoke } from "$lib/plugin-invoke";
+  import { rpcSetSource, rpcClearSource } from "$lib/rpc";
   import { t } from "$lib/i18n";
   import {
     onGamificationToast,
@@ -11,6 +12,25 @@
   } from "$lib/study-gamification";
   import { emitFocusBreakStart } from "$lib/study-focus-bridge";
   import { STUDY_NOTES_ENABLED, STUDY_ANKI_ENABLED } from "$lib/study-feature-flags";
+  import { beforeNavigate } from "$app/navigation";
+  import { musicPlayer, type MusicTrack } from "$lib/study-music/player-store.svelte";
+  import { musicUI } from "$lib/study-music/ui-store.svelte";
+  import { musicTheme } from "$lib/study-music/theme-store.svelte";
+  import { playlistsStore } from "$lib/study-music/playlists-store.svelte";
+  import { showToast } from "$lib/stores/toast-store.svelte";
+  import PlayerBar from "$lib/study-music-components/PlayerBar.svelte";
+  import RightBar from "$lib/study-music-components/RightBar.svelte";
+  import AddToPlaylistDialog from "$lib/study-music-components/AddToPlaylistDialog.svelte";
+  import RootsManager from "$lib/study-music-components/RootsManager.svelte";
+  import EqualizerPanel from "$lib/study-music-components/EqualizerPanel.svelte";
+  import LastFmPanel from "$lib/study-music-components/LastFmPanel.svelte";
+  import MusicThemePanel from "$lib/study-music-components/MusicThemePanel.svelte";
+  import YoutubePanel from "$lib/study-music-components/YoutubePanel.svelte";
+  import QualityPresetPanel from "$lib/study-music-components/QualityPresetPanel.svelte";
+  import SourceOrderPanel from "$lib/study-music-components/SourceOrderPanel.svelte";
+  import QobuzPanel from "$lib/study-music-components/QobuzPanel.svelte";
+  import SelectionBar from "$lib/study-music-components/SelectionBar.svelte";
+  import ContextMenu, { type ContextMenuItem } from "$lib/study-music-components/ContextMenu.svelte";
 
   const SUBNAV_FULL: { href: string; labelKey: string; icon: string; match: string }[] = [
     { href: "/study", labelKey: "study.hub.title", icon: "M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z M9 22V12h6v10", match: "exact" },
@@ -21,6 +41,7 @@
     { href: "/study/achievements", labelKey: "study.hub.achievements", icon: "M8 21h8 M12 17v4 M7 4h10v6a5 5 0 0 1-10 0V4z M3 5v3a4 4 0 0 0 4 4 M21 5v3a4 4 0 0 1-4 4", match: "prefix" },
     { href: "/study/notes", labelKey: "study.hub.notes", icon: "M4 4h12l4 4v12H4z M14 4v5h5", match: "prefix" },
     { href: "/study/read", labelKey: "study.hub.read", icon: "M4 4h6a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4z M20 4h-6a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h7z", match: "prefix" },
+    { href: "/study/music", labelKey: "study.hub.music", icon: "M9 18V5l12-2v13 M6 18 a3 3 0 1 0 0 0.01z M18 16 a3 3 0 1 0 0 0.01z", match: "prefix" },
     { href: "/study/settings", labelKey: "study.hub.settings", icon: "M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z M19 12a7 7 0 1 1-14 0 7 7 0 0 1 14 0z", match: "prefix" },
   ];
 
@@ -108,9 +129,56 @@
     } catch {}
   }
 
+  function presetLabelStudy(presetId: string): string {
+    const labels: Record<string, string> = {
+      "pomodoro-25": "Pomodoro 25",
+      "deep-50": "Deep Work 50",
+      "stopwatch": "Cronômetro",
+    };
+    return labels[presetId] ?? presetId;
+  }
+
+  function loadFocusCustomText(): string {
+    if (typeof localStorage === "undefined") return "";
+    try {
+      return localStorage.getItem("study.focus.rpc_text.v1") ?? "";
+    } catch {
+      return "";
+    }
+  }
+
+  function pushFocusRpc(cur: FocusCurrent | null) {
+    if (!cur) {
+      void rpcClearSource("focus");
+      return;
+    }
+    const customText = loadFocusCustomText().trim();
+    const target = PRESET_MINUTES[cur.preset] ?? 0;
+    const startedMs = Date.parse(cur.started_at.replace(" ", "T") + "Z");
+    const elapsedSec = Math.max(0, Math.floor((Date.now() - startedMs) / 1000));
+    const presetText = presetLabelStudy(cur.preset);
+    const details = customText || $t("study.focus.rpc_default") as string;
+    const stateText = customText
+      ? (target > 0
+          ? `${presetText} · ${Math.floor(elapsedSec / 60)}/${target} min`
+          : `${presetText} · ${Math.floor(elapsedSec / 60)} min`)
+      : (target > 0
+          ? `${presetText} · ${Math.floor(elapsedSec / 60)}/${target} min`
+          : `${presetText}`);
+    void rpcSetSource({
+      source: "focus",
+      details,
+      state: stateText,
+      duration: target > 0 ? target * 60 : 0,
+      position: elapsedSec,
+      paused: false,
+    });
+  }
+
   async function pollFocusForBreak() {
     try {
       const cur = await pluginInvoke<FocusCurrent>("study", "study:focus:current");
+      pushFocusRpc(cur);
       if (!cur) return;
       const target = PRESET_MINUTES[cur.preset] ?? 0;
       if (target <= 0) return;
@@ -465,6 +533,122 @@
     }
   }
 
+  const ctxItems: ContextMenuItem[] = [
+    { id: "play", label: $t("study.music.play") as string, icon: "M8 5v14l11-7z" },
+    { id: "queue", label: $t("study.music.add_to_queue") as string, icon: "M3 6h13 M3 12h13 M3 18h9 M17 14v6 M14 17h6" },
+    { id: "playlist", label: $t("study.music.add_to_playlist") as string, icon: "M12 5v14 M5 12h14" },
+    { id: "favorite", label: $t("study.music.favorite") as string, icon: "M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" },
+    { id: "sep1", label: "", separator: true },
+    { id: "show", label: $t("study.music.ctx_show_in_folder") as string, icon: "M3 7v13h18V9h-9l-2-2H3z" },
+    { id: "lyrics", label: $t("study.music.lyrics_title") as string, icon: "M9 18V5l12-2v13" },
+  ];
+
+  function handleCtxAction(id: string) {
+    const tr = musicUI.contextMenu.track;
+    if (!tr) return;
+    if (id === "play") {
+      void musicPlayer.play(tr, [tr]);
+    } else if (id === "queue") {
+      const sel = musicUI.selectedIds.has(tr.id) && musicUI.selectionAnchor
+        ? musicUI.selectionAnchor.queue.filter((t) => musicUI.selectedIds.has(t.id))
+        : [tr];
+      musicPlayer.queue = [...musicPlayer.queue, ...sel];
+      showToast("success", $t("study.music.queued_count", { count: sel.length }) as string);
+    } else if (id === "playlist") {
+      musicUI.openAddToPlaylist(tr);
+    } else if (id === "favorite") {
+      void musicPlayer.toggleFavorite(tr.id);
+    } else if (id === "show") {
+      void (async () => {
+        try {
+          const { revealItemInDir } = await import("@tauri-apps/plugin-opener");
+          await revealItemInDir(tr.path);
+        } catch {
+          showToast("error", $t("study.music.ctx_show_failed") as string);
+        }
+      })();
+    } else if (id === "lyrics") {
+      if (musicPlayer.currentTrack?.id !== tr.id) {
+        void musicPlayer.play(tr, [tr]);
+      }
+      musicUI.rightbarTab = "lyrics";
+    }
+  }
+
+  let lastRpcKey = "";
+  let rpcInterval: ReturnType<typeof setInterval> | null = null;
+  let lastScrobbleTrackId: number | null = null;
+  let lastNowPlayingKey = "";
+  let scrobbleTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function pushPresence(track: MusicTrack | null, paused: boolean) {
+    if (!track) {
+      void rpcClearSource("music");
+      lastRpcKey = "";
+      return;
+    }
+    const position = Math.floor(musicPlayer.currentTime);
+    const duration = Math.floor((track.duration_ms ?? 0) / 1000);
+    const details = track.title ?? track.path;
+    const stateParts: string[] = [];
+    if (track.artist) stateParts.push(track.artist);
+    if (track.album) stateParts.push(track.album);
+    const stateStr = stateParts.length > 0 ? stateParts.join(" · ") : "—";
+    const sourceTag = track.source === "spotify" ? "Spotify" : "omniget";
+    void rpcSetSource({
+      source: "music",
+      details,
+      state: `${stateStr} · ${sourceTag}`,
+      duration,
+      position,
+      paused,
+    });
+  }
+
+  $effect(() => {
+    const tr = musicPlayer.currentTrack;
+    const paused = musicPlayer.paused;
+    const key = `${tr?.id ?? "none"}:${paused ? "p" : "play"}`;
+    if (key !== lastRpcKey) {
+      lastRpcKey = key;
+      pushPresence(tr, paused);
+    }
+  });
+
+  $effect(() => {
+    const tr = musicPlayer.currentTrack;
+    if (!tr || musicPlayer.paused) return;
+    if (tr.source === "spotify") return;
+    const key = `${tr.id}:np`;
+    if (key === lastNowPlayingKey) return;
+    lastNowPlayingKey = key;
+    void pluginInvoke("study", "study:music:lastfm:now_playing", {
+      title: tr.title ?? "",
+      artist: tr.artist ?? "",
+      album: tr.album ?? "",
+      duration: Math.floor((tr.duration_ms ?? 0) / 1000),
+    }).catch(() => {});
+
+    if (scrobbleTimer) {
+      clearTimeout(scrobbleTimer);
+      scrobbleTimer = null;
+    }
+    if (lastScrobbleTrackId === tr.id) return;
+    const minPlay = Math.max(30, Math.min(240, Math.floor((tr.duration_ms ?? 0) / 1000 / 2)));
+    scrobbleTimer = setTimeout(() => {
+      const cur = musicPlayer.currentTrack;
+      if (cur && cur.id === tr.id && !musicPlayer.paused) {
+        lastScrobbleTrackId = cur.id;
+        void pluginInvoke("study", "study:music:lastfm:scrobble", {
+          title: cur.title ?? "",
+          artist: cur.artist ?? "",
+          album: cur.album ?? "",
+          duration: Math.floor((cur.duration_ms ?? 0) / 1000),
+        }).catch(() => {});
+      }
+    }, minPlay * 1000);
+  });
+
   onMount(() => {
     const events = [
       "download-complete",
@@ -485,6 +669,14 @@
     focusPoll = window.setInterval(() => {
       void pollFocusForBreak();
     }, 10_000);
+    void playlistsStore.load();
+    musicTheme.load();
+    rpcInterval = setInterval(() => {
+      const tr = musicPlayer.currentTrack;
+      if (tr && !musicPlayer.paused) {
+        pushPresence(tr, false);
+      }
+    }, 30_000);
     return () => {
       for (const fn of unlisteners) fn();
       unlisteners = [];
@@ -494,11 +686,37 @@
         clearInterval(focusPoll);
         focusPoll = null;
       }
+      if (rpcInterval) clearInterval(rpcInterval);
+      if (scrobbleTimer) clearTimeout(scrobbleTimer);
+      void rpcClearSource("music");
+      void rpcClearSource("focus");
     };
   });
 
   onDestroy(() => {
     if (searchTimer != null) clearTimeout(searchTimer);
+  });
+
+  beforeNavigate(({ to, from }) => {
+    if (!to) return;
+    const path = to.url.pathname;
+    if (
+      path.startsWith("/study/watch") ||
+      path.startsWith("/study/course/") ||
+      path.startsWith("/study/anki/study")
+    ) {
+      musicPlayer.pause();
+    }
+    if (path.startsWith("/study/music") && from && !from.url.pathname.startsWith("/study/music")) {
+      try {
+        sessionStorage.setItem(
+          "study.music.return_url",
+          `${from.url.pathname}${from.url.search}`,
+        );
+      } catch {
+        /* ignore */
+      }
+    }
   });
 </script>
 
@@ -520,6 +738,72 @@
 </nav>
 
 {@render children()}
+
+{#if musicPlayer.currentTrack && !$page.url.pathname.startsWith("/study/watch") && !$page.url.pathname.startsWith("/study/course/") && !$page.url.pathname.startsWith("/study/anki/study") && !$page.url.pathname.startsWith("/study/music")}
+  <div class="global-player-bar">
+    <PlayerBar />
+  </div>
+{/if}
+
+<AddToPlaylistDialog
+  open={musicUI.addToPlaylistTrack !== null}
+  trackId={musicUI.addToPlaylistTrack?.id ?? null}
+  trackName={musicUI.addToPlaylistTrack?.title ?? musicUI.addToPlaylistTrack?.path ?? null}
+  onClose={() => musicUI.closeAddToPlaylist()}
+/>
+
+<RootsManager
+  open={musicUI.rootsOpen}
+  onClose={() => musicUI.closeRoots()}
+/>
+
+<EqualizerPanel
+  open={musicUI.equalizerOpen}
+  onClose={() => musicUI.closeEqualizer()}
+/>
+
+<LastFmPanel
+  open={musicUI.lastfmOpen}
+  onClose={() => musicUI.closeLastFm()}
+/>
+
+<MusicThemePanel
+  open={musicUI.themeOpen}
+  onClose={() => musicUI.closeTheme()}
+/>
+
+<YoutubePanel
+  open={musicUI.youtubeOpen}
+  onClose={() => musicUI.closeYoutube()}
+/>
+
+<QualityPresetPanel
+  open={musicUI.qualityOpen}
+  onClose={() => musicUI.closeQuality()}
+/>
+
+<SourceOrderPanel
+  open={musicUI.sourcesOpen}
+  onClose={() => musicUI.closeSources()}
+/>
+
+<QobuzPanel
+  open={musicUI.qobuzOpen}
+  onClose={() => musicUI.closeQobuz()}
+/>
+
+<RightBar />
+
+<SelectionBar />
+
+<ContextMenu
+  open={musicUI.contextMenu.open}
+  x={musicUI.contextMenu.x}
+  y={musicUI.contextMenu.y}
+  items={ctxItems}
+  onAction={handleCtxAction}
+  onClose={() => musicUI.closeContextMenu()}
+/>
 
 {#if gamificationToasts.length > 0}
   <div class="gamif-stack" role="status" aria-live="polite">
@@ -1015,5 +1299,16 @@
     .gamif-toast {
       animation: none;
     }
+  }
+
+  .global-player-bar {
+    position: fixed;
+    bottom: 0;
+    left: var(--sidebar-width, 0px);
+    right: 0;
+    z-index: 80;
+  }
+  :global(body:has(.global-player-bar)) {
+    padding-bottom: 80px;
   }
 </style>

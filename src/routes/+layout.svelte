@@ -103,8 +103,21 @@
   onMount(() => {
     let cleanup: (() => void) | undefined;
     let unlistenExternal: (() => void) | undefined;
+    let unlistenMusicHotkey: (() => void) | undefined;
     initDownloadListener().then((fn) => (cleanup = fn));
     setTimeout(() => void checkAutoVacuum(), 5000);
+    import("$lib/rpc").then(({ rpcSyncIdleStats }) => rpcSyncIdleStats());
+
+    listen<{ url: string }>("music-hotkey-pressed", async (event) => {
+      const url = event.payload?.url;
+      if (!url) return;
+      try {
+        const { pluginInvoke } = await import("$lib/plugin-invoke");
+        await pluginInvoke("study", "study:music:ytdlp:download_shortcut", { url });
+      } catch (e) {
+        console.warn("[music-hotkey] download failed", e);
+      }
+    }).then((fn) => (unlistenMusicHotkey = fn));
 
     invoke<{ id: string; enabled: boolean; nav: { route: string; label: Record<string, string>; icon_svg: string | null; group: string; order: number }[] }[]>("list_plugins")
       .then((plugins) => {
@@ -154,6 +167,7 @@
     return () => {
       cleanup?.();
       unlistenExternal?.();
+      unlistenMusicHotkey?.();
       mediaQuery.removeEventListener("change", handleChange);
     };
   });

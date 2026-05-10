@@ -30,8 +30,8 @@
   type CatalogEntry = {
     code: string;
     family: string;
-    label: string;
-    description: string;
+    labelKey: string;
+    descKey: string;
     icon: string;
     threshold: number;
     tier: "bronze" | "silver" | "gold";
@@ -39,160 +39,25 @@
   };
 
   const CATALOG: CatalogEntry[] = [
-    {
-      code: "xp:100",
-      family: "xp",
-      label: "Primeiros 100 XP",
-      description: "Acumule 100 XP estudando",
-      icon: "✨",
-      threshold: 100,
-      tier: "bronze",
-    },
-    {
-      code: "xp:500",
-      family: "xp",
-      label: "500 XP",
-      description: "Acumule 500 XP",
-      icon: "⭐",
-      threshold: 500,
-      tier: "bronze",
-    },
-    {
-      code: "xp:1000",
-      family: "xp",
-      label: "Mil XP",
-      description: "Marca dos 1000 XP",
-      icon: "🌟",
-      threshold: 1000,
-      tier: "silver",
-    },
-    {
-      code: "xp:5000",
-      family: "xp",
-      label: "5k XP",
-      description: "Cinco mil XP acumulados",
-      icon: "💫",
-      threshold: 5000,
-      tier: "silver",
-    },
-    {
-      code: "xp:10000",
-      family: "xp",
-      label: "10k XP",
-      description: "Dez mil XP — você é dedicado",
-      icon: "🏆",
-      threshold: 10000,
-      tier: "gold",
-    },
+    { code: "xp:100", family: "xp", labelKey: "study.achievements.label_xp_100", descKey: "study.achievements.desc_xp_100", icon: "✨", threshold: 100, tier: "bronze" },
+    { code: "xp:500", family: "xp", labelKey: "study.achievements.label_xp_500", descKey: "study.achievements.desc_xp_500", icon: "⭐", threshold: 500, tier: "bronze" },
+    { code: "xp:1000", family: "xp", labelKey: "study.achievements.label_xp_1000", descKey: "study.achievements.desc_xp_1000", icon: "🌟", threshold: 1000, tier: "silver" },
+    { code: "xp:5000", family: "xp", labelKey: "study.achievements.label_xp_5000", descKey: "study.achievements.desc_xp_5000", icon: "💫", threshold: 5000, tier: "silver" },
+    { code: "xp:10000", family: "xp", labelKey: "study.achievements.label_xp_10000", descKey: "study.achievements.desc_xp_10000", icon: "🏆", threshold: 10000, tier: "gold" },
 
-    {
-      code: "lessons:1",
-      family: "lessons",
-      label: "Primeira aula",
-      description: "Complete sua primeira aula",
-      icon: "🎓",
-      threshold: 1,
-      tier: "bronze",
-      counterKey: "lessons_completed",
-    },
-    {
-      code: "lessons:10",
-      family: "lessons",
-      label: "10 aulas",
-      description: "Complete 10 aulas",
-      icon: "📚",
-      threshold: 10,
-      tier: "bronze",
-      counterKey: "lessons_completed",
-    },
-    {
-      code: "lessons:50",
-      family: "lessons",
-      label: "50 aulas",
-      description: "Meio centenário de aulas",
-      icon: "📖",
-      threshold: 50,
-      tier: "silver",
-      counterKey: "lessons_completed",
-    },
-    {
-      code: "lessons:100",
-      family: "lessons",
-      label: "100 aulas",
-      description: "Cem aulas concluídas",
-      icon: "🥇",
-      threshold: 100,
-      tier: "gold",
-      counterKey: "lessons_completed",
-    },
+    { code: "lessons:1", family: "lessons", labelKey: "study.achievements.label_lessons_1", descKey: "study.achievements.desc_lessons_1", icon: "🎓", threshold: 1, tier: "bronze", counterKey: "lessons_completed" },
+    { code: "lessons:10", family: "lessons", labelKey: "study.achievements.label_lessons_10", descKey: "study.achievements.desc_lessons_10", icon: "📚", threshold: 10, tier: "bronze", counterKey: "lessons_completed" },
+    { code: "lessons:50", family: "lessons", labelKey: "study.achievements.label_lessons_50", descKey: "study.achievements.desc_lessons_50", icon: "📖", threshold: 50, tier: "silver", counterKey: "lessons_completed" },
+    { code: "lessons:100", family: "lessons", labelKey: "study.achievements.label_lessons_100", descKey: "study.achievements.desc_lessons_100", icon: "🥇", threshold: 100, tier: "gold", counterKey: "lessons_completed" },
 
-    {
-      code: "focus:60",
-      family: "focus",
-      label: "1h focado",
-      description: "60 minutos de foco acumulados",
-      icon: "🧘",
-      threshold: 60,
-      tier: "bronze",
-      counterKey: "focus_minutes",
-    },
-    {
-      code: "focus:600",
-      family: "focus",
-      label: "10h focado",
-      description: "600 minutos de foco acumulados",
-      icon: "🎯",
-      threshold: 600,
-      tier: "silver",
-      counterKey: "focus_minutes",
-    },
-    {
-      code: "focus:6000",
-      family: "focus",
-      label: "100h focado",
-      description: "6000 minutos de foco — disciplina rara",
-      icon: "🔥",
-      threshold: 6000,
-      tier: "gold",
-      counterKey: "focus_minutes",
-    },
+    { code: "focus:60", family: "focus", labelKey: "study.achievements.label_focus_60", descKey: "study.achievements.desc_focus_60", icon: "🧘", threshold: 60, tier: "bronze", counterKey: "focus_minutes" },
+    { code: "focus:600", family: "focus", labelKey: "study.achievements.label_focus_600", descKey: "study.achievements.desc_focus_600", icon: "🎯", threshold: 600, tier: "silver", counterKey: "focus_minutes" },
+    { code: "focus:6000", family: "focus", labelKey: "study.achievements.label_focus_6000", descKey: "study.achievements.desc_focus_6000", icon: "🔥", threshold: 6000, tier: "gold", counterKey: "focus_minutes" },
 
-    {
-      code: "streak:3",
-      family: "streak",
-      label: "3 dias seguidos",
-      description: "Mantenha streak por 3 dias",
-      icon: "🔥",
-      threshold: 3,
-      tier: "bronze",
-    },
-    {
-      code: "streak:7",
-      family: "streak",
-      label: "1 semana de streak",
-      description: "7 dias consecutivos estudando",
-      icon: "🔥🔥",
-      threshold: 7,
-      tier: "bronze",
-    },
-    {
-      code: "streak:30",
-      family: "streak",
-      label: "30 dias de streak",
-      description: "Um mês inteiro de consistência",
-      icon: "🔥🔥🔥",
-      threshold: 30,
-      tier: "silver",
-    },
-    {
-      code: "streak:100",
-      family: "streak",
-      label: "100 dias de streak",
-      description: "Hábito de aço",
-      icon: "🏅",
-      threshold: 100,
-      tier: "gold",
-    },
+    { code: "streak:3", family: "streak", labelKey: "study.achievements.label_streak_3", descKey: "study.achievements.desc_streak_3", icon: "🔥", threshold: 3, tier: "bronze" },
+    { code: "streak:7", family: "streak", labelKey: "study.achievements.label_streak_7", descKey: "study.achievements.desc_streak_7", icon: "🔥🔥", threshold: 7, tier: "bronze" },
+    { code: "streak:30", family: "streak", labelKey: "study.achievements.label_streak_30", descKey: "study.achievements.desc_streak_30", icon: "🔥🔥🔥", threshold: 30, tier: "silver" },
+    { code: "streak:100", family: "streak", labelKey: "study.achievements.label_streak_100", descKey: "study.achievements.desc_streak_100", icon: "🏅", threshold: 100, tier: "gold" },
   ];
 
   let xpState = $state<GamificationState | null>(null);
@@ -250,7 +115,7 @@
       await pluginInvoke("study", "study:gamification:reset");
       confirmResetOpen = false;
       await load();
-      showToast("ok", "Reset feito");
+      showToast("ok", $t("study.achievements.reset_done") as string);
     } catch (e) {
       showToast("err", e instanceof Error ? e.message : String(e));
     }
@@ -368,14 +233,14 @@
           <span>/{counts.total}</span>
         </div>
         <div class="sum-tiers">
-          <span class="t-pill bronze">{tierStats.bronze} bronze</span>
-          <span class="t-pill silver">{tierStats.silver} prata</span>
-          <span class="t-pill gold">{tierStats.gold} ouro</span>
+          <span class="t-pill bronze">{tierStats.bronze} {$t("study.achievements.tier_bronze")}</span>
+          <span class="t-pill silver">{tierStats.silver} {$t("study.achievements.tier_silver")}</span>
+          <span class="t-pill gold">{tierStats.gold} {$t("study.achievements.tier_gold")}</span>
         </div>
       </div>
     </section>
 
-    <nav class="filters" aria-label="Filtros de categoria">
+    <nav class="filters" aria-label={$t("study.achievements.filter_aria") as string}>
       {#each families as f (f.v)}
         <button
           class="filter-btn"
@@ -388,11 +253,11 @@
       {/each}
       <a class="filter-btn link" href="/study/achievements/tree">
         <span class="f-icon">🌳</span>
-        <span>Tree</span>
+        <span>{$t("study.achievements.tree_link")}</span>
       </a>
       <a class="filter-btn link" href="/study/achievements/charts">
         <span class="f-icon">📈</span>
-        <span>Charts</span>
+        <span>{$t("study.achievements.charts_link")}</span>
       </a>
     </nav>
 
@@ -404,12 +269,12 @@
         <article class="card" class:unlocked={isUnlocked} data-tier={c.tier}>
           <div class="icon">{c.icon}</div>
           <div class="card-body">
-            <h3>{c.label}</h3>
-            <p>{c.description}</p>
+            <h3>{$t(c.labelKey)}</h3>
+            <p>{$t(c.descKey)}</p>
             {#if isUnlocked}
               <div class="unlocked-meta">
-                <span class="tier-pill" data-tier={c.tier}>{c.tier}</span>
-                <span class="when">desbloqueado {fmtRel(u.unlocked_at)}</span>
+                <span class="tier-pill" data-tier={c.tier}>{$t(`study.achievements.tier_${c.tier}`)}</span>
+                <span class="when">{$t("study.achievements.unlocked_prefix")} {fmtRel(u.unlocked_at)}</span>
               </div>
             {:else}
               <div class="prog">
@@ -463,7 +328,7 @@
   bind:open={confirmResetOpen}
   title={$t("study.achievements.reset_confirm_title") as string}
   message={$t("study.achievements.reset_confirm_message") as string}
-  confirmLabel="Reset"
+  confirmLabel={$t("study.achievements.reset_confirm_label") as string}
   variant="danger"
   onConfirm={resetAll}
 />

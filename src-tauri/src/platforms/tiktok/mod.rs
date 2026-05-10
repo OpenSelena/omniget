@@ -619,7 +619,7 @@ impl PlatformDownloader for TikTokDownloader {
                         &output,
                         tx,
                         Some(headers.clone()),
-                        None,
+                        Some(&opts.cancel_token),
                     )
                     .await?;
 
@@ -652,7 +652,7 @@ impl PlatformDownloader for TikTokDownloader {
                     &output,
                     progress,
                     Some(headers),
-                    None,
+                    Some(&opts.cancel_token),
                 )
                 .await?;
 

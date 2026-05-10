@@ -17,6 +17,7 @@ import {
 import { setMediaPreview } from "./media-preview-store.svelte";
 import { addLog } from "./debug-store.svelte";
 import { recordDownloadComplete } from "./download-stats.svelte";
+import { rpcSyncIdleStats } from "$lib/rpc";
 
 type ProgressPayload = {
   course_id: number;
@@ -51,6 +52,7 @@ type QueueItemInfo = {
   file_size_bytes: number | null;
   file_count: number | null;
   thumbnail_url: string | null;
+  eta_seconds?: number | null;
 };
 
 export type BatchFileStatusPayload = {
@@ -77,6 +79,7 @@ type QueueItemProgressPayload = {
   downloaded_bytes: number;
   total_bytes: number | null;
   phase: string;
+  eta_seconds?: number | null;
 };
 
 type ConvertProgressPayload = {
@@ -172,6 +175,7 @@ export async function initDownloadListener(): Promise<() => void> {
       showToast("success", tr("toast.download_complete", { name: d.course_name }));
       addLog("info", "download", `Course download complete: ${d.course_name}`);
       recordDownloadComplete(0);
+      void rpcSyncIdleStats();
     } else {
       let msg = tr("toast.download_error", { name: d.course_name });
       if (d.error) msg += ` — ${d.error}`;
@@ -217,6 +221,7 @@ export async function initDownloadListener(): Promise<() => void> {
       showToast("success", tr("toast.download_complete", { name: d.course_name }));
       addLog("info", "download", `Udemy download complete: ${d.course_name}`);
       recordDownloadComplete(0);
+      void rpcSyncIdleStats();
       if (d.drm_skipped > 0) {
         showToast("info", tr("toast.drm_skipped", { count: String(d.drm_skipped) }));
         addLog("warn", "download", `${d.drm_skipped} DRM-protected video(s) skipped`, d.course_name);
@@ -247,6 +252,7 @@ export async function initDownloadListener(): Promise<() => void> {
           const tr = get(t);
           showToast("success", tr("toast.generic_download_complete", { name: item.title }));
           recordDownloadComplete(item.file_size_bytes ?? 0);
+          void rpcSyncIdleStats();
         }
       }
       throttledSyncQueueState(payload);
@@ -270,6 +276,7 @@ export async function initDownloadListener(): Promise<() => void> {
         d.downloaded_bytes,
         d.total_bytes,
         d.phase,
+        d.eta_seconds ?? null,
       );
     },
   );

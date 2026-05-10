@@ -1,19 +1,28 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { convertFileSrc, invoke } from "@tauri-apps/api/core";
-  import { goto } from "$app/navigation";
+  import { goto, replaceState } from "$app/navigation";
   import { page } from "$app/stores";
   import { pluginInvoke } from "$lib/plugin-invoke";
+  import { showToast } from "$lib/stores/toast-store.svelte";
   import { t } from "$lib/i18n";
   import PlayerShell from "$lib/study-components/player/PlayerShell.svelte";
+  import ConfirmDialog from "$lib/study-components/ConfirmDialog.svelte";
 
-  type BrowseFolder = { path: string; name: string; video_count: number };
+  type BrowseFolder = {
+    path: string;
+    name: string;
+    video_count: number;
+    preview_videos?: string[];
+    latest_mtime?: number | null;
+  };
   type BrowseVideo = {
     path: string;
     name: string;
     stem: string;
     size: number;
     subtitle_path: string | null;
+    thumbnail_path?: string | null;
   };
   type BrowseDocument = {
     path: string;
@@ -44,6 +53,12 @@
   let listing = $state<BrowseData | null>(null);
   let listingLoading = $state(false);
   let videoErr = $state(false);
+
+  let returnUrl = $state(
+    (typeof window !== "undefined"
+      ? sessionStorage.getItem("study.library.return_url")
+      : null) ?? "/study/library?mode=browse",
+  );
 
   const videoSrc = $derived(currentPath ? convertFileSrc(currentPath) : "");
   const subtitleSrc = $derived(
@@ -122,7 +137,55 @@
     }
   }
 
+  function isTypingTarget(target: EventTarget | null): boolean {
+    if (!(target instanceof HTMLElement)) return false;
+    const tag = target.tagName;
+    return (
+      tag === "INPUT" ||
+      tag === "TEXTAREA" ||
+      tag === "SELECT" ||
+      target.isContentEditable
+    );
+  }
+
+  $effect(() => {
+    if (typeof document === "undefined") return;
+    function onKey(e: KeyboardEvent) {
+      if (e.key !== "Escape") return;
+      if (isTypingTarget(e.target)) return;
+      if (document.fullscreenElement) return;
+      e.preventDefault();
+      back();
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  });
+
   function back() {
+    if (typeof window !== "undefined") {
+      const folderName =
+        listing?.path
+          ?.replace(/\\/g, "/")
+          .split("/")
+          .filter(Boolean)
+          .pop() ?? "";
+      if (folderName) {
+        try {
+          sessionStorage.setItem(
+            "study.library.return_toast",
+            JSON.stringify({ folderName }),
+          );
+        } catch {
+          /* ignore */
+        }
+      }
+      const stored = sessionStorage.getItem("study.library.return_url");
+      if (stored) {
+        sessionStorage.removeItem("study.library.return_url");
+        goto(stored);
+        return;
+      }
+    }
     if (history.length > 1) {
       history.back();
     } else {
@@ -145,6 +208,162 @@
     }
     return `${v.toFixed(v >= 10 || i === 0 ? 0 : 1)} ${units[i]}`;
   }
+
+  type CtxMenuTarget =
+    | { kind: "folder"; path: string; name: string }
+    | { kind: "video"; path: string; name: string }
+    | { kind: "doc"; path: string; name: string }
+    | { kind: "current"; path: string; name: string };
+
+  let contextMenu = $state<{ x: number; y: number; target: CtxMenuTarget } | null>(null);
+  let renamingPath = $state<string | null>(null);
+  let renameValue = $state("");
+  let confirmDeleteOpen = $state(false);
+  let pendingDelete = $state<CtxMenuTarget | null>(null);
+  let headerMenuOpen = $state(false);
+
+  function openContextMenu(event: MouseEvent, target: CtxMenuTarget) {
+    event.preventDefault();
+    event.stopPropagation();
+    contextMenu = { x: event.clientX, y: event.clientY, target };
+  }
+
+  function closeContextMenu() {
+    contextMenu = null;
+  }
+
+  $effect(() => {
+    if (!contextMenu) return;
+    function onDoc(e: MouseEvent) {
+      const t = e.target as HTMLElement | null;
+      if (t && t.closest(".ctx-menu")) return;
+      closeContextMenu();
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") closeContextMenu();
+    }
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  });
+
+  $effect(() => {
+    if (!headerMenuOpen) return;
+    function onDoc(e: MouseEvent) {
+      const t = e.target as HTMLElement | null;
+      if (t && t.closest(".header-menu, .header-menu-btn")) return;
+      headerMenuOpen = false;
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") headerMenuOpen = false;
+    }
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  });
+
+  function isTypingFsTarget(target: EventTarget | null): boolean {
+    if (!(target instanceof HTMLElement)) return false;
+    const tag = target.tagName;
+    return tag === "INPUT" || tag === "TEXTAREA" || target.isContentEditable;
+  }
+
+  async function showInExplorer(path: string) {
+    try {
+      await pluginInvoke("study", "study:shell:show_in_folder", { path });
+    } catch (e) {
+      console.error("show_in_folder failed", e);
+    }
+    closeContextMenu();
+    headerMenuOpen = false;
+  }
+
+  function startRename(target: CtxMenuTarget) {
+    renamingPath = target.path;
+    renameValue = target.name;
+    closeContextMenu();
+    headerMenuOpen = false;
+  }
+
+  async function confirmRename(targetPath: string) {
+    if (renamingPath !== targetPath) return;
+    const trimmed = renameValue.trim();
+    if (!trimmed) {
+      cancelRename();
+      return;
+    }
+    const wasCurrent = targetPath === currentPath;
+    try {
+      const res = await pluginInvoke<{ new_path: string; new_name: string }>(
+        "study",
+        "study:browse:rename",
+        { path: targetPath, newName: trimmed },
+      );
+      renamingPath = null;
+      renameValue = "";
+      if (wasCurrent && typeof window !== "undefined") {
+        const params = new URLSearchParams(window.location.search);
+        params.set("path", res.new_path);
+        params.set("name", res.new_name);
+        try {
+          replaceState(`${window.location.pathname}?${params.toString()}`, {});
+        } catch {
+          window.history.replaceState(null, "", `${window.location.pathname}?${params.toString()}`);
+        }
+      }
+      await loadListing(listingPath);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      showToast("error", msg);
+    }
+  }
+
+  function cancelRename() {
+    renamingPath = null;
+    renameValue = "";
+  }
+
+  function startDelete(target: CtxMenuTarget) {
+    pendingDelete = target;
+    confirmDeleteOpen = true;
+    closeContextMenu();
+    headerMenuOpen = false;
+  }
+
+  async function performDelete() {
+    if (!pendingDelete) return;
+    const target = pendingDelete;
+    const wasCurrent = target.path === currentPath || target.kind === "current";
+    try {
+      await pluginInvoke("study", "study:browse:delete", { path: target.path });
+      showToast(
+        "success",
+        $t("study.library.delete_toast_done", { name: target.name }) as string,
+      );
+      if (wasCurrent) {
+        back();
+      } else {
+        await loadListing(listingPath);
+      }
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      showToast("error", msg);
+    } finally {
+      pendingDelete = null;
+      confirmDeleteOpen = false;
+    }
+  }
+
+  function autofocusOnRender(node: HTMLInputElement) {
+    node.focus();
+    if (node.value.length > 0) node.select();
+  }
 </script>
 
 <section class="watch-page">
@@ -157,6 +376,48 @@
     </button>
     {#if currentName}
       <h1 class="title">{currentName}</h1>
+    {/if}
+    {#if currentPath}
+      <div class="header-menu-wrap">
+        <button
+          type="button"
+          class="header-menu-btn"
+          onclick={() => (headerMenuOpen = !headerMenuOpen)}
+          aria-haspopup="menu"
+          aria-expanded={headerMenuOpen}
+          aria-label={$t("study.library.ctx_open") as string}
+        >
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true">
+            <circle cx="5" cy="12" r="2"/>
+            <circle cx="12" cy="12" r="2"/>
+            <circle cx="19" cy="12" r="2"/>
+          </svg>
+        </button>
+        {#if headerMenuOpen}
+          <div class="header-menu" role="menu">
+            <button
+              type="button"
+              class="ctx-item"
+              role="menuitem"
+              onclick={() => showInExplorer(currentPath)}
+            >{$t("study.library.ctx_show_in_explorer")}</button>
+            <button
+              type="button"
+              class="ctx-item"
+              role="menuitem"
+              onclick={() =>
+                startRename({ kind: "current", path: currentPath, name: currentName })}
+            >{$t("study.library.ctx_rename")}</button>
+            <button
+              type="button"
+              class="ctx-item danger"
+              role="menuitem"
+              onclick={() =>
+                startDelete({ kind: "current", path: currentPath, name: currentName })}
+            >{$t("study.library.ctx_delete")}</button>
+          </div>
+        {/if}
+      </div>
     {/if}
   </header>
 
@@ -209,31 +470,55 @@
             {/each}
           {:else}
             {#each listing.folders as f (f.path)}
+              {@const isRenaming = renamingPath === f.path}
               <li>
                 <button
                   type="button"
                   class="item folder"
-                  onclick={() => navigateFolder(f.path)}
+                  class:renaming={isRenaming}
+                  onclick={() => { if (!isRenaming) navigateFolder(f.path); }}
+                  oncontextmenu={(e) =>
+                    openContextMenu(e, { kind: "folder", path: f.path, name: f.name })}
                 >
                   <span class="ico">
                     <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
                       <path d="M3 7v13h18V9h-9l-2-2H3z"/>
                     </svg>
                   </span>
-                  <span class="name">{f.name}</span>
-                  {#if f.video_count > 0}
-                    <span class="count mono">{f.video_count}</span>
+                  {#if isRenaming}
+                    <input
+                      class="rename-input"
+                      type="text"
+                      bind:value={renameValue}
+                      onclick={(e) => e.stopPropagation()}
+                      onkeydown={(e) => {
+                        e.stopPropagation();
+                        if (e.key === "Enter") confirmRename(f.path);
+                        else if (e.key === "Escape") cancelRename();
+                      }}
+                      onblur={() => confirmRename(f.path)}
+                      use:autofocusOnRender
+                    />
+                  {:else}
+                    <span class="name">{f.name}</span>
+                    {#if f.video_count > 0}
+                      <span class="count mono">{f.video_count}</span>
+                    {/if}
                   {/if}
                 </button>
               </li>
             {/each}
             {#each listing.videos as v (v.path)}
+              {@const isRenaming = renamingPath === v.path}
               <li>
                 <button
                   type="button"
                   class="item video"
                   class:active={v.path === currentPath}
-                  onclick={() => playVideo(v)}
+                  class:renaming={isRenaming}
+                  onclick={() => { if (!isRenaming) playVideo(v); }}
+                  oncontextmenu={(e) =>
+                    openContextMenu(e, { kind: "video", path: v.path, name: v.name })}
                 >
                   <span class="ico">
                     {#if v.path === currentPath}
@@ -246,19 +531,39 @@
                       </svg>
                     {/if}
                   </span>
-                  <span class="name">{v.name}</span>
-                  {#if v.size}
-                    <span class="count mono">{fmtBytes(v.size)}</span>
+                  {#if isRenaming}
+                    <input
+                      class="rename-input"
+                      type="text"
+                      bind:value={renameValue}
+                      onclick={(e) => e.stopPropagation()}
+                      onkeydown={(e) => {
+                        e.stopPropagation();
+                        if (e.key === "Enter") confirmRename(v.path);
+                        else if (e.key === "Escape") cancelRename();
+                      }}
+                      onblur={() => confirmRename(v.path)}
+                      use:autofocusOnRender
+                    />
+                  {:else}
+                    <span class="name">{v.name}</span>
+                    {#if v.size}
+                      <span class="count mono">{fmtBytes(v.size)}</span>
+                    {/if}
                   {/if}
                 </button>
               </li>
             {/each}
             {#each listing.documents ?? [] as d (d.path)}
+              {@const isRenaming = renamingPath === d.path}
               <li>
                 <button
                   type="button"
                   class="item doc"
-                  onclick={() => openDocument(d)}
+                  class:renaming={isRenaming}
+                  onclick={() => { if (!isRenaming) openDocument(d); }}
+                  oncontextmenu={(e) =>
+                    openContextMenu(e, { kind: "doc", path: d.path, name: d.name })}
                 >
                   <span class="ico">
                     <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
@@ -266,8 +571,24 @@
                       <path d="M14 2v6h6"/>
                     </svg>
                   </span>
-                  <span class="name">{d.name}</span>
-                  <span class="count mono">{d.ext.toUpperCase()}</span>
+                  {#if isRenaming}
+                    <input
+                      class="rename-input"
+                      type="text"
+                      bind:value={renameValue}
+                      onclick={(e) => e.stopPropagation()}
+                      onkeydown={(e) => {
+                        e.stopPropagation();
+                        if (e.key === "Enter") confirmRename(d.path);
+                        else if (e.key === "Escape") cancelRename();
+                      }}
+                      onblur={() => confirmRename(d.path)}
+                      use:autofocusOnRender
+                    />
+                  {:else}
+                    <span class="name">{d.name}</span>
+                    <span class="count mono">{d.ext.toUpperCase()}</span>
+                  {/if}
                 </button>
               </li>
             {/each}
@@ -293,7 +614,7 @@
               videoSrc={videoSrc}
               title={currentName}
               courseTitle="Pasta local"
-              backHref="/study/library?mode=browse"
+              backHref={returnUrl}
               durationMs={null}
               initialSeconds={0}
               initialPlaybackSpeed={1}
@@ -325,7 +646,7 @@
               onSpeedChange={() => {}}
               onSkipGap={() => {}}
               onTheaterToggle={() => {}}
-              onClose={() => goto("/study/library?mode=browse")}
+              onClose={back}
             />
           {/key}
         </div>
@@ -333,6 +654,83 @@
     </div>
   </div>
 </section>
+
+<ConfirmDialog
+  bind:open={confirmDeleteOpen}
+  title={$t("study.library.delete_confirm_title")}
+  message={pendingDelete
+    ? ($t(
+        pendingDelete.kind === "folder"
+          ? "study.library.delete_confirm_msg_folder"
+          : "study.library.delete_confirm_msg_file",
+        { name: pendingDelete.name },
+      ) as string)
+    : ""}
+  confirmLabel={$t("study.library.delete_confirm_btn")}
+  variant="danger"
+  onConfirm={performDelete}
+/>
+
+{#if contextMenu}
+  <div
+    class="ctx-menu"
+    role="menu"
+    style:left="{contextMenu.x}px"
+    style:top="{contextMenu.y}px"
+  >
+    {#if contextMenu.target.kind === "folder"}
+      <button
+        type="button"
+        class="ctx-item"
+        role="menuitem"
+        onclick={() => {
+          if (contextMenu) {
+            const t = contextMenu.target;
+            closeContextMenu();
+            navigateFolder(t.path);
+          }
+        }}
+      >{$t("study.library.ctx_open")}</button>
+    {:else}
+      <button
+        type="button"
+        class="ctx-item"
+        role="menuitem"
+        onclick={() => {
+          if (contextMenu) {
+            const t = contextMenu.target;
+            closeContextMenu();
+            if (t.kind === "video") {
+              const v = listing?.videos.find((vv) => vv.path === t.path);
+              if (v) playVideo(v);
+            } else if (t.kind === "doc") {
+              const d = listing?.documents.find((dd) => dd.path === t.path);
+              if (d) void openDocument(d);
+            }
+          }
+        }}
+      >{$t("study.library.ctx_open")}</button>
+    {/if}
+    <button
+      type="button"
+      class="ctx-item"
+      role="menuitem"
+      onclick={() => contextMenu && showInExplorer(contextMenu.target.path)}
+    >{$t("study.library.ctx_show_in_explorer")}</button>
+    <button
+      type="button"
+      class="ctx-item"
+      role="menuitem"
+      onclick={() => contextMenu && startRename(contextMenu.target)}
+    >{$t("study.library.ctx_rename")}</button>
+    <button
+      type="button"
+      class="ctx-item danger"
+      role="menuitem"
+      onclick={() => contextMenu && startDelete(contextMenu.target)}
+    >{$t("study.library.ctx_delete")}</button>
+  </div>
+{/if}
 
 <style>
   .watch-page {
@@ -555,5 +953,102 @@
     color: var(--error);
     font-size: 14px;
     font-weight: 500;
+  }
+
+  .header-menu-wrap {
+    position: relative;
+    flex-shrink: 0;
+  }
+  .header-menu-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid var(--content-border);
+    border-radius: 6px;
+    color: var(--secondary);
+    cursor: pointer;
+    transition: border-color 150ms ease, color 150ms ease, background 150ms ease;
+  }
+  .header-menu-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: color-mix(in oklab, var(--accent) 6%, transparent);
+  }
+  .header-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    z-index: 50;
+    min-width: 200px;
+    padding: 4px;
+    background: var(--surface, var(--button-elevated));
+    border: 1px solid var(--content-border);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px color-mix(in oklab, black 22%, transparent);
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+
+  .ctx-menu {
+    position: fixed;
+    z-index: 200;
+    min-width: 180px;
+    max-width: 280px;
+    padding: 4px;
+    background: var(--surface, var(--button-elevated));
+    border: 1px solid var(--content-border);
+    border-radius: 8px;
+    box-shadow: 0 8px 28px color-mix(in oklab, black 22%, transparent);
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .ctx-item {
+    display: flex;
+    align-items: center;
+    padding: 7px 10px;
+    background: transparent;
+    border: 0;
+    border-radius: 5px;
+    color: var(--secondary);
+    font-family: inherit;
+    font-size: 12px;
+    text-align: left;
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease;
+  }
+  .ctx-item:hover {
+    background: color-mix(in oklab, var(--accent) 10%, transparent);
+  }
+  .ctx-item.danger {
+    color: var(--error, #dc2626);
+  }
+  .ctx-item.danger:hover {
+    background: color-mix(in oklab, var(--error, #dc2626) 12%, transparent);
+  }
+
+  .rename-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 2px 4px;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    background: var(--input-bg);
+    color: var(--secondary);
+    font-family: inherit;
+    font-size: inherit;
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 18%, transparent);
+  }
+  .item.renaming {
+    cursor: default;
+  }
+  .item.renaming:hover {
+    background: transparent;
   }
 </style>

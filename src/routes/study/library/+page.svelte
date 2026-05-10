@@ -1,12 +1,11 @@
 <script lang="ts">
   import { onMount, untrack } from "svelte";
-  import { goto } from "$app/navigation";
+  import { goto, beforeNavigate, replaceState } from "$app/navigation";
   import { invoke, convertFileSrc } from "@tauri-apps/api/core";
   import { pluginInvoke } from "$lib/plugin-invoke";
   import { showToast } from "$lib/stores/toast-store.svelte";
   import { t } from "$lib/i18n";
   import { page } from "$app/stores";
-  import { replaceState } from "$app/navigation";
   import SegmentedControl from "$lib/study-components/SegmentedControl.svelte";
   import ConfirmDialog from "$lib/study-components/ConfirmDialog.svelte";
   import LibraryHomeShelves from "$lib/study-components/shelves/LibraryHomeShelves.svelte";
@@ -43,15 +42,23 @@
     enabled: boolean;
     added_at: number;
     is_default: boolean;
+    exists?: boolean;
   };
 
-  type BrowseFolder = { path: string; name: string; video_count: number };
+  type BrowseFolder = {
+    path: string;
+    name: string;
+    video_count: number;
+    preview_videos?: string[];
+    latest_mtime?: number | null;
+  };
   type BrowseVideo = {
     path: string;
     name: string;
     stem: string;
     size: number;
     subtitle_path: string | null;
+    thumbnail_path: string | null;
   };
   type BrowseDocument = {
     path: string;
@@ -140,49 +147,125 @@
 
   let mode = $state<ViewMode>("courses");
 
-  function syncCoursesUrl() {
+  function buildLibraryUrlSearch(): string {
     const params = new URLSearchParams();
+    if (mode !== "courses") params.set("mode", mode);
     if (mode === "courses" && coursesView !== "home") {
       params.set("view", coursesView);
     }
+    if (mode === "browse" && browsePath.length > 0) params.set("bp", browsePath);
     if (sortKey !== "last_watched" || sortDirection !== "desc") {
       params.set("sort", sortKey);
       if (sortDirection !== "desc") params.set("dir", sortDirection);
     }
-    if (search.trim().length > 0) {
-      params.set("q", search.trim());
-    }
-    const queryString = params.toString();
-    const next = queryString.length > 0 ? `?${queryString}` : "";
-    if (typeof window !== "undefined" && window.location.search !== next) {
-      try {
-        replaceState(`${window.location.pathname}${next}`, {});
-      } catch {
-        window.history.replaceState(null, "", `${window.location.pathname}${next}`);
-      }
+    if (search.trim().length > 0) params.set("q", search.trim());
+    if (statusFilter !== "all") params.set("status", statusFilter);
+    if (playlistFilter != null) params.set("pl", String(playlistFilter));
+    if (includeTags.size > 0) params.set("inc", [...includeTags].join(","));
+    if (excludeTags.size > 0) params.set("exc", [...excludeTags].join(","));
+    if (favoritesOnly) params.set("fav", "1");
+    const qs = params.toString();
+    return qs.length > 0 ? `?${qs}` : "";
+  }
+
+  function buildCurrentLibraryUrl(): string {
+    if (typeof window === "undefined") return "/study/library";
+    return `${window.location.pathname}${buildLibraryUrlSearch()}`;
+  }
+
+  function syncLibraryUrl() {
+    if (typeof window === "undefined") return;
+    const next = buildLibraryUrlSearch();
+    if (window.location.search === next) return;
+    try {
+      replaceState(`${window.location.pathname}${next}`, {});
+    } catch {
+      window.history.replaceState(null, "", `${window.location.pathname}${next}`);
     }
   }
 
   function readUrlParams() {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
+    if (import.meta.env.DEV) {
+      console.log("[lib] readUrlParams from", window.location.search);
+    }
+    let bpFromUrl = params.get("bp");
+    if (!params.get("mode") && !bpFromUrl) {
+      try {
+        const raw = sessionStorage.getItem("study.library.return_state");
+        if (raw) {
+          const fallback = JSON.parse(raw) as {
+            mode?: string;
+            browsePath?: string;
+            search?: string;
+          };
+          if (
+            fallback.mode === "browse" ||
+            fallback.mode === "courses" ||
+            fallback.mode === "telegram"
+          ) {
+            params.set("mode", fallback.mode);
+          }
+          if (fallback.browsePath) {
+            params.set("bp", fallback.browsePath);
+            bpFromUrl = fallback.browsePath;
+          }
+          if (fallback.search) params.set("q", fallback.search);
+          if (import.meta.env.DEV) {
+            console.log("[lib] used return_state fallback", fallback);
+          }
+        }
+      } catch {
+        /* malformed; ignore */
+      }
+    }
+    const m = params.get("mode");
+    if (m === "courses" || m === "browse" || m === "telegram") mode = m;
     const v = params.get("view");
     if (v === "catalog" || v === "home") coursesView = v;
+    const bp = params.get("bp");
+    if (bp) browsePath = bp;
     const s = params.get("sort");
     if (s) sortKey = s as SortKey;
     const d = params.get("dir");
     if (d === "asc" || d === "desc") sortDirection = d;
     const q = params.get("q");
     if (q) search = q;
+    const st = params.get("status");
+    if (
+      st === "all" ||
+      st === "not_started" ||
+      st === "in_progress" ||
+      st === "completed"
+    ) {
+      statusFilter = st;
+    }
+    const pl = params.get("pl");
+    if (pl) {
+      const n = Number(pl);
+      if (Number.isFinite(n)) playlistFilter = n;
+    }
+    const inc = params.get("inc");
+    if (inc) includeTags = new Set(inc.split(",").filter(Boolean));
+    const exc = params.get("exc");
+    if (exc) excludeTags = new Set(exc.split(",").filter(Boolean));
+    if (params.get("fav") === "1") favoritesOnly = true;
   }
 
   $effect(() => {
     void mode;
     void coursesView;
+    void browsePath;
     void sortKey;
     void sortDirection;
     void search;
-    syncCoursesUrl();
+    void statusFilter;
+    void playlistFilter;
+    void includeTags;
+    void excludeTags;
+    void favoritesOnly;
+    syncLibraryUrl();
   });
 
   function onSortChange(s: CatalogSort, d: CatalogSortDirection) {
@@ -202,16 +285,608 @@
   let rescanning = $state(false);
   let rescanMsg = $state("");
 
-  const modeOptions = $derived([
-    { value: "courses", label: $t("study.library.mode_courses") },
-    { value: "browse", label: $t("study.library.mode_browse") },
-    { value: "telegram", label: $t("study.library.mode_telegram") },
-  ]);
+  type PinnedPath = {
+    id: number;
+    path: string;
+    label: string | null;
+    color: string | null;
+    position: number;
+    added_at: number;
+  };
+  let pins = $state<PinnedPath[]>([]);
+
+  let openCrumbIndex = $state<number | null>(null);
+  let crumbSiblingsCache = $state<Map<string, BrowseFolder[]>>(new Map());
+  let crumbSiblingsLoading = $state<string | null>(null);
+
+  let browseViewMode = $state<"grid" | "list">("grid");
+  let lastWatchedInFolder = $state<string | null>(null);
+
+  type BrowseSort = "name_asc" | "name_desc" | "size_desc";
+  let browseSort = $state<BrowseSort>("name_asc");
+  let sortMenuOpen = $state(false);
+
+  let selectedPaths = $state<Set<string>>(new Set());
+  let lastSelectionAnchor = $state<string | null>(null);
+  let bulkDeleteOpen = $state(false);
+
+  type Tab = { path: string };
+  let tabs = $state<Tab[]>([]);
+  let activeTabIndex = $state(0);
+
+  function tabLabel(path: string): string {
+    if (!path) return "Raízes";
+    const norm = path.replace(/\\/g, "/").replace(/\/+$/, "");
+    const seg = norm.split("/").pop();
+    return seg && seg.length > 0 ? seg : path;
+  }
+
+  function saveTabs() {
+    if (typeof window === "undefined") return;
+    try {
+      sessionStorage.setItem(
+        "study.library.tabs.v1",
+        JSON.stringify({ tabs, activeTabIndex }),
+      );
+    } catch {
+      /* ignore */
+    }
+  }
+
+  function loadTabsFromStorage(): { tabs: Tab[]; activeTabIndex: number } | null {
+    if (typeof window === "undefined") return null;
+    try {
+      const raw = sessionStorage.getItem("study.library.tabs.v1");
+      if (!raw) return null;
+      const parsed = JSON.parse(raw) as { tabs?: Tab[]; activeTabIndex?: number };
+      if (!Array.isArray(parsed.tabs) || parsed.tabs.length === 0) return null;
+      const idx = Math.max(0, Math.min(parsed.tabs.length - 1, parsed.activeTabIndex ?? 0));
+      return { tabs: parsed.tabs, activeTabIndex: idx };
+    } catch {
+      return null;
+    }
+  }
+
+  function switchTab(idx: number) {
+    if (idx < 0 || idx >= tabs.length) return;
+    activeTabIndex = idx;
+    const target = tabs[idx].path;
+    saveTabs();
+    if (target !== browsePath) {
+      void loadBrowse(target);
+    }
+  }
+
+  function openInNewTab(path: string) {
+    tabs = [...tabs, { path }];
+    activeTabIndex = tabs.length - 1;
+    saveTabs();
+    if (mode !== "browse") mode = "browse";
+    void loadBrowse(path);
+  }
+
+  function closeTab(idx: number) {
+    if (tabs.length <= 1) {
+      tabs = [];
+      activeTabIndex = 0;
+      saveTabs();
+      return;
+    }
+    const wasActive = idx === activeTabIndex;
+    const next = tabs.filter((_, i) => i !== idx);
+    let nextActive = activeTabIndex;
+    if (wasActive) {
+      nextActive = Math.max(0, idx - 1);
+    } else if (idx < activeTabIndex) {
+      nextActive = activeTabIndex - 1;
+    }
+    tabs = next;
+    activeTabIndex = nextActive;
+    saveTabs();
+    if (wasActive && tabs[nextActive]) {
+      void loadBrowse(tabs[nextActive].path);
+    }
+  }
+
+  function selectionAllPaths(): string[] {
+    if (!visibleBrowse) return [];
+    return [
+      ...visibleBrowse.folders.map((f) => f.path),
+      ...visibleBrowse.videos.map((v) => v.path),
+      ...(visibleBrowse.documents ?? []).map((d) => d.path),
+    ];
+  }
+
+  function clearSelection() {
+    selectedPaths = new Set();
+    lastSelectionAnchor = null;
+  }
+
+  function toggleSelection(path: string) {
+    const next = new Set(selectedPaths);
+    if (next.has(path)) next.delete(path);
+    else next.add(path);
+    selectedPaths = next;
+    lastSelectionAnchor = path;
+  }
+
+  function selectRange(toPath: string) {
+    if (!lastSelectionAnchor || !visibleBrowse) {
+      toggleSelection(toPath);
+      return;
+    }
+    const all = selectionAllPaths();
+    const a = all.indexOf(lastSelectionAnchor);
+    const b = all.indexOf(toPath);
+    if (a < 0 || b < 0) {
+      toggleSelection(toPath);
+      return;
+    }
+    const [from, to] = a <= b ? [a, b] : [b, a];
+    const next = new Set(selectedPaths);
+    for (let i = from; i <= to; i++) next.add(all[i]);
+    selectedPaths = next;
+  }
+
+  function selectAllVisible() {
+    selectedPaths = new Set(selectionAllPaths());
+    lastSelectionAnchor = null;
+  }
+
+  function handleFolderClick(e: MouseEvent, f: BrowseFolder) {
+    if (renamingPath === f.path) return;
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      toggleSelection(f.path);
+      return;
+    }
+    if (e.shiftKey) {
+      e.preventDefault();
+      selectRange(f.path);
+      return;
+    }
+    clearSelection();
+    void loadBrowse(f.path);
+  }
+
+  function handleVideoClick(e: MouseEvent, v: BrowseVideo) {
+    if (renamingPath === v.path) return;
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      toggleSelection(v.path);
+      return;
+    }
+    if (e.shiftKey) {
+      e.preventDefault();
+      selectRange(v.path);
+      return;
+    }
+    clearSelection();
+    openBrowseVideo(v);
+  }
+
+  function handleDocClick(e: MouseEvent, d: BrowseDocument) {
+    if (renamingPath === d.path) return;
+    if (e.ctrlKey || e.metaKey) {
+      e.preventDefault();
+      toggleSelection(d.path);
+      return;
+    }
+    if (e.shiftKey) {
+      e.preventDefault();
+      selectRange(d.path);
+      return;
+    }
+    clearSelection();
+    void openBrowseDocument(d);
+  }
+
+  async function performBulkDelete() {
+    const targets = [...selectedPaths];
+    if (targets.length === 0) {
+      bulkDeleteOpen = false;
+      return;
+    }
+    let ok = 0;
+    let fail = 0;
+    for (const path of targets) {
+      try {
+        await pluginInvoke("study", "study:browse:delete", { path });
+        ok += 1;
+      } catch (e) {
+        fail += 1;
+        if (import.meta.env.DEV) {
+          console.warn("[library] bulk delete failed for", path, e);
+        }
+      }
+    }
+    bulkDeleteOpen = false;
+    clearSelection();
+    await loadBrowse(browsePath);
+    if (fail === 0) {
+      showToast(
+        "success",
+        $t("study.library.selection_delete_done", { count: ok }) as string,
+      );
+    } else {
+      showToast(
+        "info",
+        $t("study.library.selection_delete_partial", { ok, fail }) as string,
+      );
+    }
+  }
+
+  function setBrowseSort(s: BrowseSort) {
+    browseSort = s;
+    sortMenuOpen = false;
+  }
+
+  $effect(() => {
+    if (!sortMenuOpen) return;
+    function onDoc(e: MouseEvent) {
+      const t = e.target as HTMLElement | null;
+      if (t && t.closest(".sort-menu, .sort-btn")) return;
+      sortMenuOpen = false;
+    }
+    document.addEventListener("mousedown", onDoc);
+    return () => document.removeEventListener("mousedown", onDoc);
+  });
+
+  let addressBarOpen = $state(false);
+  let addressBarValue = $state("");
+  let addressBarRef = $state<HTMLInputElement | null>(null);
+
+  let creatingFolder = $state(false);
+  let newFolderName = $state("");
+  let newFolderRef = $state<HTMLInputElement | null>(null);
+
+  let renamingPath = $state<string | null>(null);
+  let renameValue = $state("");
+
+  type CtxMenuTarget =
+    | { kind: "folder"; path: string; name: string }
+    | { kind: "video"; path: string; name: string }
+    | { kind: "doc"; path: string; name: string };
+
+  let contextMenu = $state<{
+    x: number;
+    y: number;
+    target: CtxMenuTarget;
+  } | null>(null);
+
+  let confirmDeleteOpen = $state(false);
+  let pendingDelete = $state<CtxMenuTarget | null>(null);
+
+  function openContextMenu(event: MouseEvent, target: CtxMenuTarget) {
+    event.preventDefault();
+    contextMenu = { x: event.clientX, y: event.clientY, target };
+  }
+
+  function closeContextMenu() {
+    contextMenu = null;
+  }
+
+  $effect(() => {
+    if (!contextMenu) return;
+    function onDoc(e: MouseEvent) {
+      const t = e.target as HTMLElement | null;
+      if (t && t.closest(".ctx-menu")) return;
+      closeContextMenu();
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") closeContextMenu();
+    }
+    document.addEventListener("mousedown", onDoc);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDoc);
+      document.removeEventListener("keydown", onKey);
+    };
+  });
+
+  async function showInExplorer(path: string) {
+    try {
+      await pluginInvoke("study", "study:shell:show_in_folder", { path });
+    } catch (e) {
+      console.error("show_in_folder failed", e);
+    }
+    closeContextMenu();
+  }
+
+  function startRename(target: CtxMenuTarget) {
+    renamingPath = target.path;
+    renameValue = target.name;
+    closeContextMenu();
+  }
+
+  async function confirmRename(targetPath: string) {
+    const trimmed = renameValue.trim();
+    if (!trimmed) {
+      cancelRename();
+      return;
+    }
+    try {
+      await pluginInvoke("study", "study:browse:rename", {
+        path: targetPath,
+        newName: trimmed,
+      });
+      renamingPath = null;
+      renameValue = "";
+      await loadBrowse(browsePath);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      showToast("error", msg);
+    }
+  }
+
+  function cancelRename() {
+    renamingPath = null;
+    renameValue = "";
+  }
+
+  function startDelete(target: CtxMenuTarget) {
+    pendingDelete = target;
+    confirmDeleteOpen = true;
+    closeContextMenu();
+  }
+
+  async function performDelete() {
+    if (!pendingDelete) return;
+    const target = pendingDelete;
+    try {
+      await pluginInvoke("study", "study:browse:delete", { path: target.path });
+      await loadBrowse(browsePath);
+      showToast(
+        "success",
+        $t("study.library.delete_toast_done", { name: target.name }) as string,
+      );
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      showToast("error", msg);
+    } finally {
+      pendingDelete = null;
+      confirmDeleteOpen = false;
+    }
+  }
+
+  function startCreateFolder() {
+    creatingFolder = true;
+    newFolderName = "";
+    queueMicrotask(() => newFolderRef?.focus());
+  }
+
+  async function confirmCreateFolder() {
+    const trimmed = newFolderName.trim();
+    if (!trimmed) {
+      cancelCreateFolder();
+      return;
+    }
+    try {
+      await pluginInvoke("study", "study:browse:create_folder", {
+        parent: browsePath,
+        name: trimmed,
+      });
+      creatingFolder = false;
+      newFolderName = "";
+      await loadBrowse(browsePath);
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      showToast("error", msg);
+    }
+  }
+
+  function cancelCreateFolder() {
+    creatingFolder = false;
+    newFolderName = "";
+  }
+
+  function openAddressBar() {
+    addressBarValue = browsePath;
+    addressBarOpen = true;
+    queueMicrotask(() => {
+      addressBarRef?.focus();
+      addressBarRef?.select();
+    });
+  }
+
+  function submitAddressBar() {
+    const v = addressBarValue.trim();
+    addressBarOpen = false;
+    if (v && v !== browsePath) {
+      void loadBrowse(v);
+    }
+  }
+
+  function closeAddressBar() {
+    addressBarOpen = false;
+    addressBarValue = "";
+  }
+
+  function autofocusOnRender(node: HTMLInputElement) {
+    node.focus();
+    if (node.value.length > 0) {
+      node.select();
+    }
+  }
+
+  function isTypingTarget(target: EventTarget | null): boolean {
+    if (!(target instanceof HTMLElement)) return false;
+    const tag = target.tagName;
+    return (
+      tag === "INPUT" ||
+      tag === "TEXTAREA" ||
+      tag === "SELECT" ||
+      target.isContentEditable
+    );
+  }
+
+  $effect(() => {
+    if (mode !== "browse") return;
+    function onKey(e: KeyboardEvent) {
+      const isAddressBarShortcut =
+        (e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "l";
+      if (isAddressBarShortcut) {
+        e.preventDefault();
+        openAddressBar();
+        return;
+      }
+      if (isTypingTarget(e.target)) return;
+      if (openCrumbIndex !== null) return;
+      if (contextMenu) return;
+      if (renamingPath !== null) return;
+      if (e.key === "Escape" && selectedPaths.size > 0) {
+        e.preventDefault();
+        clearSelection();
+        return;
+      }
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "a") {
+        if (visibleBrowse) {
+          e.preventDefault();
+          selectAllVisible();
+        }
+        return;
+      }
+      const isBack =
+        e.key === "Backspace" ||
+        (e.altKey && e.key === "ArrowLeft") ||
+        (e.metaKey && e.key === "ArrowLeft") ||
+        (e.metaKey && e.key === "ArrowUp") ||
+        (e.altKey && e.key === "ArrowUp");
+      if (!isBack) return;
+      const parent = browseData?.parent ?? null;
+      if (!parent) return;
+      e.preventDefault();
+      void loadBrowse(parent);
+    }
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  });
+
+  async function toggleSiblings(idx: number, parentPath: string) {
+    if (openCrumbIndex === idx) {
+      openCrumbIndex = null;
+      return;
+    }
+    if (!crumbSiblingsCache.has(parentPath)) {
+      crumbSiblingsLoading = parentPath;
+      try {
+        const data = await pluginInvoke<BrowseData>(
+          "study",
+          "study:browse:list",
+          { path: parentPath },
+        );
+        const next = new Map(crumbSiblingsCache);
+        next.set(parentPath, data.folders ?? []);
+        crumbSiblingsCache = next;
+      } catch (e) {
+        if (import.meta.env.DEV) {
+          console.warn("[library] siblings fetch failed", e);
+        }
+        const next = new Map(crumbSiblingsCache);
+        next.set(parentPath, []);
+        crumbSiblingsCache = next;
+      } finally {
+        crumbSiblingsLoading = null;
+      }
+    }
+    openCrumbIndex = idx;
+  }
+
+  function closeSiblings() {
+    openCrumbIndex = null;
+  }
+
+  $effect(() => {
+    if (openCrumbIndex == null) return;
+    function onDocPointer(e: MouseEvent) {
+      const target = e.target as HTMLElement | null;
+      if (target && target.closest(".crumb-chevron-wrap")) return;
+      closeSiblings();
+    }
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") closeSiblings();
+    }
+    document.addEventListener("mousedown", onDocPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDocPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  });
+
+  $effect(() => {
+    void browsePath;
+    crumbSiblingsCache = new Map();
+    openCrumbIndex = null;
+  });
+
+  async function loadPins() {
+    try {
+      const res = await pluginInvoke<{ pins: PinnedPath[] }>(
+        "study",
+        "study:library:pins:list",
+      );
+      pins = res.pins ?? [];
+    } catch (e) {
+      if (import.meta.env.DEV) console.warn("[library] pins:list failed", e);
+    }
+  }
+
+  async function togglePin(path: string, suggestedLabel?: string) {
+    const isPinned = pins.some((p) => p.path === path);
+    try {
+      if (isPinned) {
+        await pluginInvoke("study", "study:library:pins:remove", { path });
+      } else {
+        await pluginInvoke("study", "study:library:pins:add", {
+          path,
+          label: suggestedLabel ?? null,
+        });
+      }
+      await loadPins();
+      showToast(
+        "success",
+        $t(
+          isPinned
+            ? "study.library.pin_removed_toast"
+            : "study.library.pin_added_toast",
+          { name: suggestedLabel ?? path },
+        ) as string,
+      );
+    } catch (e) {
+      console.error("toggle pin failed", e);
+      const msg = e instanceof Error ? e.message : String(e);
+      showToast(
+        "error",
+        $t(
+          isPinned
+            ? "study.library.unpin_failed"
+            : "study.library.pin_failed",
+          { msg },
+        ) as string,
+      );
+    }
+  }
+
+  function openPinnedPath(path: string) {
+    if (mode !== "browse") {
+      mode = "browse";
+    }
+    void loadBrowse(path);
+  }
+
 
   let tgSession = $state<TelegramSessionState>({ kind: "unauthenticated" });
   let tgChecking = $state(false);
   let tgOutputDir = $state("");
   let downloadsActive = $state(0);
+
+  let tgConnected = $derived(tgSession.kind === "authenticated");
+  let telegramLabel = $derived(
+    tgConnected
+      ? ($t("study.library.mode_telegram") as string)
+      : `${$t("study.library.mode_telegram") as string} ${$t("study.library.mode_telegram_disconnected_suffix") as string}`,
+  );
 
   async function checkTelegramSession() {
     tgChecking = true;
@@ -385,14 +1060,29 @@
   const visibleBrowse = $derived.by<BrowseData | null>(() => {
     if (!browseData) return null;
     const term = search.trim().toLowerCase();
-    if (!term) return browseData;
+    let folders = browseData.folders;
+    let videos = browseData.videos;
+    let documents = browseData.documents ?? [];
+    if (term) {
+      folders = folders.filter((f) => f.name.toLowerCase().includes(term));
+      videos = videos.filter((v) => v.name.toLowerCase().includes(term));
+      documents = documents.filter((d) => d.name.toLowerCase().includes(term));
+    }
+    const dir = browseSort === "name_desc" ? -1 : 1;
+    const cmpName = (a: { name: string }, b: { name: string }) =>
+      dir * a.name.localeCompare(b.name, undefined, { numeric: true });
+    const cmpSize = (a: { size?: number; name: string }, b: { size?: number; name: string }) => {
+      const aS = a.size ?? 0;
+      const bS = b.size ?? 0;
+      if (aS === bS) return a.name.localeCompare(b.name, undefined, { numeric: true });
+      return bS - aS;
+    };
+    const sortFn = browseSort === "size_desc" ? cmpSize : cmpName;
     return {
       ...browseData,
-      folders: browseData.folders.filter((f) => f.name.toLowerCase().includes(term)),
-      videos: browseData.videos.filter((v) => v.name.toLowerCase().includes(term)),
-      documents: (browseData.documents ?? []).filter((d) =>
-        d.name.toLowerCase().includes(term),
-      ),
+      folders: [...folders].sort(cmpName),
+      videos: [...videos].sort(sortFn),
+      documents: [...documents].sort(sortFn),
     };
   });
 
@@ -417,13 +1107,172 @@
     }
   }
 
+  function captureScrollRatio(): number {
+    if (typeof window === "undefined") return 0;
+    const max = Math.max(
+      1,
+      document.documentElement.scrollHeight - window.innerHeight,
+    );
+    return Math.min(1, Math.max(0, window.scrollY / max));
+  }
+
+  async function saveBrowseStateFor(
+    path: string,
+    lastVideoPath: string | null = null,
+  ) {
+    if (!path || typeof window === "undefined") return;
+    const ratio = captureScrollRatio();
+    try {
+      const args: {
+        path: string;
+        scrollRatio: number;
+        viewMode: string;
+        lastVideoPath?: string;
+      } = { path, scrollRatio: ratio, viewMode: browseViewMode };
+      if (lastVideoPath) args.lastVideoPath = lastVideoPath;
+      await pluginInvoke("study", "study:library:browse_state:set", args);
+    } catch (e) {
+      if (import.meta.env.DEV) {
+        console.warn("[library] save browse state failed", e);
+      }
+    }
+  }
+
+  async function restoreScrollFor(path: string) {
+    if (!path || typeof window === "undefined") return;
+    try {
+      const state = await pluginInvoke<{
+        scroll_ratio: number;
+        view_mode: string;
+        last_video_path: string | null;
+      }>("study", "study:library:browse_state:get", { path });
+      const restoredView = state?.view_mode;
+      if (restoredView === "list" || restoredView === "grid") {
+        browseViewMode = restoredView;
+      }
+      lastWatchedInFolder = state?.last_video_path ?? null;
+      const ratio = state?.scroll_ratio ?? 0;
+      if (ratio <= 0) return;
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          const max = Math.max(
+            0,
+            document.documentElement.scrollHeight - window.innerHeight,
+          );
+          window.scrollTo({ top: max * ratio, behavior: "auto" });
+        });
+      });
+    } catch (e) {
+      if (import.meta.env.DEV) {
+        console.warn("[library] restore browse scroll failed", e);
+      }
+    }
+  }
+
+  async function setBrowseViewMode(next: "grid" | "list") {
+    if (browseViewMode === next) return;
+    browseViewMode = next;
+    if (!browsePath) return;
+    try {
+      await pluginInvoke("study", "study:library:browse_state:set", {
+        path: browsePath,
+        viewMode: next,
+        scrollRatio: captureScrollRatio(),
+      });
+    } catch (e) {
+      if (import.meta.env.DEV) {
+        console.warn("[library] save view_mode failed", e);
+      }
+    }
+  }
+
+  const triedBrowseThumbs = new Set<string>();
+  let videoThumbCache = $state<Map<string, string>>(new Map());
+
+  function seedThumbCacheFromData() {
+    if (!browseData) return;
+    const next = new Map(videoThumbCache);
+    for (const v of browseData.videos) {
+      if (v.thumbnail_path) next.set(v.path, v.thumbnail_path);
+    }
+    videoThumbCache = next;
+  }
+
+  function applyBrowseThumb(videoPath: string, thumbPath: string) {
+    const next = new Map(videoThumbCache);
+    next.set(videoPath, thumbPath);
+    videoThumbCache = next;
+    if (!browseData) return;
+    browseData = {
+      ...browseData,
+      videos: browseData.videos.map((v) =>
+        v.path === videoPath ? { ...v, thumbnail_path: thumbPath } : v,
+      ),
+    };
+  }
+
+  function collectThumbExtractTargets(): string[] {
+    if (!browseData) return [];
+    const targets = new Set<string>();
+    for (const v of browseData.videos) {
+      if (!videoThumbCache.has(v.path) && !triedBrowseThumbs.has(v.path)) {
+        targets.add(v.path);
+      }
+    }
+    for (const f of browseData.folders) {
+      const previews = f.preview_videos ?? [];
+      for (const vp of previews) {
+        if (!videoThumbCache.has(vp) && !triedBrowseThumbs.has(vp)) {
+          targets.add(vp);
+        }
+      }
+    }
+    return [...targets];
+  }
+
+  async function extractMissingBrowseThumbs() {
+    const targets = collectThumbExtractTargets();
+    for (const path of targets) {
+      triedBrowseThumbs.add(path);
+      try {
+        const res = await pluginInvoke<{
+          video_path: string;
+          thumbnail_path: string;
+        }>("study", "study:browse:extract_thumbnail", { path });
+        applyBrowseThumb(res.video_path, res.thumbnail_path);
+      } catch (e) {
+        if (import.meta.env.DEV) {
+          console.warn("[library] thumb extract failed for", path, e);
+        }
+      }
+    }
+  }
+
   async function loadBrowse(path: string) {
+    const previous = browsePath;
+    if (previous && previous !== path) {
+      void saveBrowseStateFor(previous);
+    }
     browseLoading = true;
     try {
       browseData = await pluginInvoke<BrowseData>("study", "study:browse:list", {
         path,
       });
       browsePath = browseData.path;
+      if (tabs.length === 0) {
+        tabs = [{ path: browsePath }];
+        activeTabIndex = 0;
+        saveTabs();
+      } else if (activeTabIndex < tabs.length && tabs[activeTabIndex].path !== browsePath) {
+        const next = [...tabs];
+        next[activeTabIndex] = { path: browsePath };
+        tabs = next;
+        saveTabs();
+      }
+      clearSelection();
+      seedThumbCacheFromData();
+      void restoreScrollFor(browsePath);
+      void extractMissingBrowseThumbs();
     } catch (e) {
       console.error("browse failed", e);
       browseData = null;
@@ -530,17 +1379,46 @@
     }
   }
 
+  function consumeReturnToast() {
+    if (typeof window === "undefined") return;
+    try {
+      const raw = sessionStorage.getItem("study.library.return_toast");
+      if (!raw) return;
+      sessionStorage.removeItem("study.library.return_toast");
+      const data = JSON.parse(raw) as { folderName?: string };
+      if (data.folderName) {
+        showToast(
+          "info",
+          $t("study.library.back_toast", { folder: data.folderName }) as string,
+        );
+      }
+    } catch {
+      /* malformed or sessionStorage unavailable */
+    }
+  }
+
   onMount(async () => {
     readUrlParams();
-    await Promise.all([loadCourses(), loadRoots()]);
+    consumeReturnToast();
+    const savedTabs = loadTabsFromStorage();
+    if (savedTabs && savedTabs.tabs.length > 0) {
+      tabs = savedTabs.tabs;
+      activeTabIndex = savedTabs.activeTabIndex;
+      if (mode === "browse") {
+        const target = tabs[activeTabIndex]?.path ?? "";
+        if (target !== browsePath) browsePath = target;
+      }
+    }
+    await Promise.all([loadCourses(), loadRoots(), loadPins()]);
     loadHealth();
+    void checkTelegramSession();
     loading = false;
   });
 
   $effect(() => {
     const m = mode;
     if (m === "browse" && untrack(() => !browseData)) {
-      loadBrowse("");
+      loadBrowse(untrack(() => browsePath));
     }
     if (m === "telegram" && untrack(() => !tgChecking && tgSession.kind !== "authenticated")) {
       void checkTelegramSession();
@@ -660,10 +1538,34 @@
   }
 
   function openBrowseVideo(v: BrowseVideo) {
+    if (typeof window !== "undefined") {
+      const returnUrl = buildCurrentLibraryUrl();
+      try {
+        sessionStorage.setItem("study.library.return_url", returnUrl);
+        sessionStorage.setItem(
+          "study.library.return_state",
+          JSON.stringify({ mode, browsePath, search }),
+        );
+      } catch {
+        /* sessionStorage may be unavailable; back-button falls back to history */
+      }
+      if (import.meta.env.DEV) {
+        console.log("[lib] saving return_url", returnUrl, "browsePath", browsePath);
+      }
+    }
+    if (browsePath) {
+      void saveBrowseStateFor(browsePath, v.path);
+    }
     const params = new URLSearchParams({ path: v.path, name: v.name });
     if (v.subtitle_path) params.set("subtitle", v.subtitle_path);
     goto(`/study/watch?${params.toString()}`);
   }
+
+  beforeNavigate(() => {
+    if (mode === "browse" && browsePath) {
+      void saveBrowseStateFor(browsePath);
+    }
+  });
 
   async function openBrowseDocument(d: BrowseDocument) {
     await openPath(d.path);
@@ -673,13 +1575,17 @@
 <section class="study-page">
   <header class="head">
     <div class="row-primary">
-      <h1 class="page-title">{$t("study.library.title")}</h1>
+      <div class="title-block">
+        <h1 class="page-title">{$t("study.library.title")}</h1>
+        <p class="page-subtitle">{$t("study.library.subtitle")}</p>
+      </div>
       <div class="right">
         <button
           type="button"
           class="ghost-btn"
           onclick={() => (rootsOpen = true)}
           aria-label={$t("study.library.roots_button")}
+          title={$t("study.library.roots_button_hint") as string}
         >
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
             <path d="M3 7v13h18V9h-9l-2-2H3z"></path>
@@ -693,7 +1599,33 @@
     </div>
 
     <div class="row-secondary">
-      <SegmentedControl bind:value={mode} options={modeOptions} ariaLabel="mode" />
+      {#snippet iconCourses()}
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M22 10L12 5 2 10l10 5 10-5z"/>
+          <path d="M6 12v5c0 1 3 3 6 3s6-2 6-3v-5"/>
+        </svg>
+      {/snippet}
+      {#snippet iconBrowse()}
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3 7v13h18V9h-9l-2-2H3z"/>
+        </svg>
+      {/snippet}
+      {#snippet iconTelegram()}
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+          <polyline points="7 10 12 15 17 10"/>
+          <line x1="12" y1="15" x2="12" y2="3"/>
+        </svg>
+      {/snippet}
+      <SegmentedControl
+        bind:value={mode}
+        options={[
+          { value: "courses", label: $t("study.library.mode_courses") as string, icon: iconCourses },
+          { value: "browse", label: $t("study.library.mode_browse") as string, icon: iconBrowse },
+          { value: "telegram", label: telegramLabel, icon: iconTelegram },
+        ]}
+        ariaLabel="mode"
+      />
       {#if mode !== "courses"}
         <input
           type="search"
@@ -716,7 +1648,7 @@
             aria-selected={coursesView === "home"}
             onclick={() => (coursesView = "home")}
           >
-            Início
+            {$t("study.library.view_home")}
           </button>
           <button
             type="button"
@@ -726,7 +1658,7 @@
             aria-selected={coursesView === "catalog"}
             onclick={() => (coursesView = "catalog")}
           >
-            Catálogo
+            {$t("study.library.view_catalog")}
           </button>
         </div>
         {#if coursesView === "catalog"}
@@ -775,6 +1707,33 @@
       </span>
       <span class="health-cta">{$t("study.library.health_banner_cta")}</span>
     </button>
+  {/if}
+
+  {#if pins.length > 0}
+    <nav class="pinned-strip" aria-label={$t("study.library.pinned_strip_aria")}>
+      {#each pins as pin (pin.id)}
+        <div class="pin-chip-wrap">
+          <button
+            type="button"
+            class="pin-chip"
+            onclick={() => openPinnedPath(pin.path)}
+            title={pin.path}
+          >
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true">
+              <path d="M14 2l-1.5 1.5L14 5l-2 2v3l-3 3 1.5 1.5L13 11l3 3 1.5-1.5L14 9l2-2 1.5 1.5L19 7z M9 16l-5 5"/>
+            </svg>
+            <span class="pin-label">{pin.label ?? pin.path}</span>
+          </button>
+          <button
+            type="button"
+            class="pin-remove"
+            onclick={() => togglePin(pin.path)}
+            aria-label={$t("study.library.unpin_action")}
+            title={$t("study.library.unpin_action") as string}
+          >×</button>
+        </div>
+      {/each}
+    </nav>
   {/if}
 
   {#if mode === "courses" && coursesView === "home"}
@@ -919,7 +1878,31 @@
     {:else if error}
       <p class="error">{error}</p>
     {:else if visibleCourses.length === 0}
-      <p class="muted">{$t("study.library.empty")}</p>
+      {@const enabledRoots = roots.filter((r) => r.enabled).length}
+      {#if courses.length === 0 && enabledRoots > 0}
+        <div class="empty-with-roots">
+          <p>
+            {$t(
+              enabledRoots === 1
+                ? "study.library.empty_with_roots_one"
+                : "study.library.empty_with_roots_other",
+              { count: enabledRoots },
+            )}
+          </p>
+          <button
+            type="button"
+            class="empty-card-cta"
+            onclick={rescan}
+            disabled={rescanning}
+          >
+            {rescanning
+              ? $t("study.library.rescanning")
+              : $t("study.library.empty_with_roots_cta")}
+          </button>
+        </div>
+      {:else}
+        <p class="muted">{$t("study.library.empty")}</p>
+      {/if}
     {:else}
       <p class="result-count">
         {visibleCourses.length} de {courses.length} cursos
@@ -977,43 +1960,374 @@
       </div>
     </div>
   {:else if mode === "browse"}
+    {#snippet emptyBrowse()}
+      <div class="empty-browse">
+        <div class="empty-browse-head">
+          <h2>{$t("study.library.empty_browse_title")}</h2>
+          <p>{$t("study.library.empty_browse_description")}</p>
+        </div>
+        <div class="empty-cards">
+          <div class="empty-card">
+            <span class="empty-card-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 7v13h18V9h-9l-2-2H3z"/>
+                <line x1="12" y1="13" x2="12" y2="17"/>
+                <line x1="10" y1="15" x2="14" y2="15"/>
+              </svg>
+            </span>
+            <h3>{$t("study.library.empty_add_folder_title")}</h3>
+            <p>{$t("study.library.empty_add_folder_desc")}</p>
+            <button type="button" class="empty-card-cta" onclick={addRoot}>
+              {$t("study.library.empty_add_folder_cta")} →
+            </button>
+          </div>
+          <div class="empty-card">
+            <span class="empty-card-icon">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+              </svg>
+            </span>
+            <h3>{$t("study.library.empty_telegram_title")}</h3>
+            <p>{$t("study.library.empty_telegram_desc")}</p>
+            <button type="button" class="empty-card-cta" onclick={() => (mode = "telegram")}>
+              {$t("study.library.empty_telegram_cta")} →
+            </button>
+          </div>
+        </div>
+      </div>
+    {/snippet}
+    {#if tabs.length >= 2}
+      <nav class="tab-bar" aria-label="Browse tabs">
+        {#each tabs as tab, i (i + ":" + tab.path)}
+          <div class="tab-wrap" class:active={i === activeTabIndex}>
+            <button
+              type="button"
+              class="tab"
+              onclick={() => switchTab(i)}
+              title={tab.path || "Raízes"}
+            >
+              <svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor" aria-hidden="true">
+                <path d="M3 7v13h18V9h-9l-2-2H3z" opacity="0.85"/>
+              </svg>
+              <span class="tab-label">{tabLabel(tab.path)}</span>
+            </button>
+            <button
+              type="button"
+              class="tab-close"
+              onclick={(e) => { e.stopPropagation(); closeTab(i); }}
+              aria-label={$t("study.library.tab_close")}
+              title={$t("study.library.tab_close") as string}
+            >×</button>
+          </div>
+        {/each}
+      </nav>
+    {/if}
     {#if browseLoading && !browseData}
       <p class="muted">{$t("study.common.loading")}</p>
     {:else if !browseData}
-      <p class="muted">{$t("study.library.browse_empty_roots")}</p>
+      {@render emptyBrowse()}
     {:else}
       {#if browseData.breadcrumb.length > 0 || !browseData.is_root_list}
-        <nav class="crumbs" aria-label="breadcrumb">
-          <button type="button" class="crumb" onclick={() => loadBrowse("")}>
-            {$t("study.library.browse_breadcrumb_root")}
-          </button>
-          {#each browseData.breadcrumb as cr, i (cr.path)}
-            <span class="crumb-sep" aria-hidden="true">›</span>
-            {#if i < browseData.breadcrumb.length - 1}
-              <button type="button" class="crumb" onclick={() => loadBrowse(cr.path)}>
-                {cr.name}
-              </button>
-            {:else}
-              <span class="crumb-current">{cr.name}</span>
+        {@const segments = [
+          { path: "", name: $t("study.library.browse_breadcrumb_root") as string },
+          ...browseData.breadcrumb,
+        ]}
+        <div class="crumbs-row">
+          {#if addressBarOpen}
+            <input
+              bind:this={addressBarRef}
+              bind:value={addressBarValue}
+              class="address-bar"
+              type="text"
+              spellcheck="false"
+              autocomplete="off"
+              placeholder={$t("study.library.address_bar_placeholder")}
+              onkeydown={(e) => {
+                if (e.key === "Enter") submitAddressBar();
+                else if (e.key === "Escape") closeAddressBar();
+              }}
+              onblur={() => closeAddressBar()}
+            />
+          {:else}
+            <button
+              type="button"
+              class="address-bar-toggle"
+              onclick={openAddressBar}
+              aria-label={$t("study.library.address_bar_open")}
+              title={$t("study.library.address_bar_open") as string}
+            >
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <polyline points="16 18 22 12 16 6"/>
+                <polyline points="8 6 2 12 8 18"/>
+              </svg>
+            </button>
+          {/if}
+          <nav class="crumbs" aria-label="breadcrumb" class:hidden={addressBarOpen}>
+            {#each segments as seg, i (i + ":" + seg.path)}
+              {@const isLast = i === segments.length - 1}
+              {@const parentPath =
+                i >= 2 ? browseData.breadcrumb[i - 2].path : ""}
+              {@const cached = crumbSiblingsCache.get(parentPath) ?? []}
+              {#if isLast}
+                <span class="crumb-current">{seg.name}</span>
+              {:else if i === 0}
+                <button
+                  type="button"
+                  class="crumb"
+                  onclick={() => loadBrowse("")}
+                >{seg.name}</button>
+              {:else}
+                <button
+                  type="button"
+                  class="crumb"
+                  onclick={() => loadBrowse(seg.path)}
+                >{seg.name}</button>
+              {/if}
+              <span class="crumb-chevron-wrap">
+                <button
+                  type="button"
+                  class="crumb-chevron"
+                  class:open={openCrumbIndex === i}
+                  onclick={() => toggleSiblings(i, parentPath)}
+                  aria-haspopup="menu"
+                  aria-expanded={openCrumbIndex === i}
+                  aria-label={$t("study.library.siblings_aria")}
+                >
+                  <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </button>
+                {#if openCrumbIndex === i}
+                  <div class="crumb-popover" role="menu">
+                    {#if crumbSiblingsLoading === parentPath}
+                      <span class="crumb-popover-empty">…</span>
+                    {:else if cached.length === 0}
+                      <span class="crumb-popover-empty">{$t("study.library.siblings_empty")}</span>
+                    {:else}
+                      {#each cached as sib (sib.path)}
+                        {@const isCurrent = sib.path === seg.path}
+                        <button
+                          type="button"
+                          class="crumb-popover-item"
+                          class:current={isCurrent}
+                          role="menuitem"
+                          onclick={() => {
+                            closeSiblings();
+                            loadBrowse(sib.path);
+                          }}
+                        >
+                          <svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true">
+                            <path d="M3 7v13h18V9h-9l-2-2H3z" opacity="0.85"/>
+                          </svg>
+                          <span class="crumb-popover-name">{sib.name}</span>
+                          {#if sib.video_count > 0}
+                            <span class="crumb-popover-count">{sib.video_count}</span>
+                          {/if}
+                        </button>
+                      {/each}
+                    {/if}
+                  </div>
+                {/if}
+              </span>
+              {#if !isLast}
+                <span class="crumb-sep" aria-hidden="true">›</span>
+              {/if}
+            {/each}
+          </nav>
+          {#if !browseData.is_root_list && browsePath.length > 0}
+            {@const currentName = browseData.breadcrumb.at(-1)?.name ?? ""}
+            {@const isPinned = pins.some((p) => p.path === browsePath)}
+            <button
+              type="button"
+              class="ghost-btn-mini"
+              onclick={startCreateFolder}
+              disabled={creatingFolder}
+              title={$t("study.library.new_folder") as string}
+            >
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 7v13h18V9h-9l-2-2H3z"/>
+                <line x1="12" y1="13" x2="12" y2="17"/>
+                <line x1="10" y1="15" x2="14" y2="15"/>
+              </svg>
+              <span>{$t("study.library.new_folder")}</span>
+            </button>
+            <button
+              type="button"
+              class="pin-current"
+              class:active={isPinned}
+              onclick={() => togglePin(browsePath, currentName)}
+              title={(isPinned
+                ? $t("study.library.unpin_action_title")
+                : $t("study.library.pin_action_title")) as string}
+            >
+              <svg viewBox="0 0 24 24" width="12" height="12" fill={isPinned ? "currentColor" : "none"} stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M14 2l-1.5 1.5L14 5l-2 2v3l-3 3 1.5 1.5L13 11l3 3 1.5-1.5L14 9l2-2 1.5 1.5L19 7z M9 16l-5 5"/>
+              </svg>
+              <span>{$t(isPinned ? "study.library.pin_action_active" : "study.library.pin_action")}</span>
+            </button>
+          {/if}
+          <div class="sort-wrap">
+            <button
+              type="button"
+              class="ghost-btn-mini sort-btn"
+              onclick={() => (sortMenuOpen = !sortMenuOpen)}
+              aria-haspopup="menu"
+              aria-expanded={sortMenuOpen}
+              title={$t("study.library.browse_sort_label") as string}
+            >
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 6h18M6 12h12M10 18h4"/>
+              </svg>
+              <span>
+                {browseSort === "name_asc"
+                  ? $t("study.library.browse_sort_name_asc")
+                  : browseSort === "name_desc"
+                    ? $t("study.library.browse_sort_name_desc")
+                    : $t("study.library.browse_sort_size_desc")}
+              </span>
+            </button>
+            {#if sortMenuOpen}
+              <div class="sort-menu" role="menu">
+                <button
+                  type="button"
+                  class="ctx-item"
+                  class:current={browseSort === "name_asc"}
+                  role="menuitem"
+                  onclick={() => setBrowseSort("name_asc")}
+                >{$t("study.library.browse_sort_name_asc")}</button>
+                <button
+                  type="button"
+                  class="ctx-item"
+                  class:current={browseSort === "name_desc"}
+                  role="menuitem"
+                  onclick={() => setBrowseSort("name_desc")}
+                >{$t("study.library.browse_sort_name_desc")}</button>
+                <button
+                  type="button"
+                  class="ctx-item"
+                  class:current={browseSort === "size_desc"}
+                  role="menuitem"
+                  onclick={() => setBrowseSort("size_desc")}
+                >{$t("study.library.browse_sort_size_desc")}</button>
+              </div>
             {/if}
-          {/each}
-        </nav>
+          </div>
+          <div class="view-mode-toggle" role="tablist" aria-label={$t("study.library.view_mode_aria")}>
+            <button
+              type="button"
+              class="vm-btn"
+              class:active={browseViewMode === "grid"}
+              role="tab"
+              aria-selected={browseViewMode === "grid"}
+              onclick={() => setBrowseViewMode("grid")}
+              title={$t("study.library.view_mode_grid") as string}
+            >
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="3" width="7" height="7"/>
+                <rect x="14" y="3" width="7" height="7"/>
+                <rect x="3" y="14" width="7" height="7"/>
+                <rect x="14" y="14" width="7" height="7"/>
+              </svg>
+            </button>
+            <button
+              type="button"
+              class="vm-btn"
+              class:active={browseViewMode === "list"}
+              role="tab"
+              aria-selected={browseViewMode === "list"}
+              onclick={() => setBrowseViewMode("list")}
+              title={$t("study.library.view_mode_list") as string}
+            >
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <line x1="3" y1="6" x2="21" y2="6"/>
+                <line x1="3" y1="12" x2="21" y2="12"/>
+                <line x1="3" y1="18" x2="21" y2="18"/>
+              </svg>
+            </button>
+          </div>
+        </div>
       {/if}
 
-      {#if visibleBrowse && (visibleBrowse.folders.length > 0 || visibleBrowse.videos.length > 0 || (visibleBrowse.documents?.length ?? 0) > 0)}
-        <div class="grid">
-          {#each visibleBrowse.folders as f (f.path)}
-            <button type="button" class="card folder-card" onclick={() => loadBrowse(f.path)}>
+      {#if visibleBrowse && (visibleBrowse.folders.length > 0 || visibleBrowse.videos.length > 0 || (visibleBrowse.documents?.length ?? 0) > 0) || creatingFolder}
+        <div class="grid" class:browse-list={browseViewMode === "list" && mode === "browse"}>
+          {#if creatingFolder}
+            <div class="card folder-card folder-card-creating">
               <div class="thumb folder-thumb">
-                <svg viewBox="0 0 64 64" width="56" height="56" fill="currentColor" aria-hidden="true">
-                  <path d="M6 14a4 4 0 0 1 4-4h14l6 6h24a4 4 0 0 1 4 4v30a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4V14z" opacity="0.9"/>
-                  <path d="M6 22h52v2H6z" opacity="0.3"/>
+                <svg viewBox="0 0 64 64" width="56" height="56" fill="currentColor" aria-hidden="true" opacity="0.4">
+                  <path d="M6 14a4 4 0 0 1 4-4h14l6 6h24a4 4 0 0 1 4 4v30a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4V14z"/>
                 </svg>
                 <span class="kind-badge">{$t("study.library.folder")}</span>
               </div>
               <div class="meta">
+                <input
+                  bind:this={newFolderRef}
+                  bind:value={newFolderName}
+                  class="rename-input"
+                  type="text"
+                  placeholder={$t("study.library.new_folder_placeholder")}
+                  onkeydown={(e) => {
+                    if (e.key === "Enter") confirmCreateFolder();
+                    else if (e.key === "Escape") cancelCreateFolder();
+                  }}
+                  onblur={() => confirmCreateFolder()}
+                />
+              </div>
+            </div>
+          {/if}
+          {#each visibleBrowse?.folders ?? [] as f (f.path)}
+            {@const previews = (f.preview_videos ?? []).slice(0, 4)}
+            {@const isRenaming = renamingPath === f.path}
+            {@const isSelected = selectedPaths.has(f.path)}
+            <button
+              type="button"
+              class="card folder-card"
+              class:renaming={isRenaming}
+              class:selected={isSelected}
+              onclick={(e) => handleFolderClick(e, f)}
+              oncontextmenu={(e) =>
+                openContextMenu(e, { kind: "folder", path: f.path, name: f.name })}
+            >
+              <div class="thumb folder-thumb">
+                {#if previews.length > 0}
+                  <div class="folder-mosaic" data-tiles={previews.length}>
+                    {#each previews as vp (vp)}
+                      {@const tp = videoThumbCache.get(vp)}
+                      <span class="folder-mosaic-tile">
+                        {#if tp}
+                          <img src={convertFileSrc(tp)} alt="" loading="lazy" />
+                        {/if}
+                      </span>
+                    {/each}
+                  </div>
+                {:else}
+                  <svg viewBox="0 0 64 64" width="56" height="56" fill="currentColor" aria-hidden="true">
+                    <path d="M6 14a4 4 0 0 1 4-4h14l6 6h24a4 4 0 0 1 4 4v30a4 4 0 0 1-4 4H10a4 4 0 0 1-4-4V14z" opacity="0.9"/>
+                    <path d="M6 22h52v2H6z" opacity="0.3"/>
+                  </svg>
+                {/if}
+                <span class="kind-badge">{$t("study.library.folder")}</span>
+              </div>
+              <div class="meta">
                 <div class="title-row">
-                  <span class="title">{f.name}</span>
+                  {#if isRenaming}
+                    <input
+                      class="rename-input"
+                      type="text"
+                      bind:value={renameValue}
+                      onclick={(e) => e.stopPropagation()}
+                      onkeydown={(e) => {
+                        e.stopPropagation();
+                        if (e.key === "Enter") confirmRename(f.path);
+                        else if (e.key === "Escape") cancelRename();
+                      }}
+                      onblur={() => confirmRename(f.path)}
+                      use:autofocusOnRender
+                    />
+                  {:else}
+                    <span class="title">{f.name}</span>
+                  {/if}
                 </div>
                 <div class="sub">
                   <span>{$t("study.library.videos_count", { count: f.video_count })}</span>
@@ -1021,19 +2335,59 @@
               </div>
             </button>
           {/each}
-          {#each visibleBrowse.videos as v (v.path)}
-            <button type="button" class="card video-card" onclick={() => openBrowseVideo(v)}>
+          {#each visibleBrowse?.videos ?? [] as v (v.path)}
+            {@const isRenaming = renamingPath === v.path}
+            {@const isLastWatched = v.path === lastWatchedInFolder}
+            {@const isSelected = selectedPaths.has(v.path)}
+            <button
+              type="button"
+              class="card video-card"
+              class:renaming={isRenaming}
+              class:last-watched={isLastWatched}
+              class:selected={isSelected}
+              onclick={(e) => handleVideoClick(e, v)}
+              oncontextmenu={(e) =>
+                openContextMenu(e, { kind: "video", path: v.path, name: v.name })}
+            >
               <div class="thumb video-thumb">
-                <svg viewBox="0 0 64 64" width="56" height="56" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-                  <rect x="6" y="12" width="52" height="40" rx="4" fill="currentColor" opacity="0.12"/>
-                  <rect x="6" y="12" width="52" height="40" rx="4"/>
-                  <path d="M27 24l14 8-14 8z" fill="currentColor"/>
-                </svg>
+                {#if isLastWatched}
+                  <span class="last-watched-badge">{$t("study.library.last_watched_label")}</span>
+                {/if}
+                {#if v.thumbnail_path}
+                  <img
+                    class="video-thumb-img"
+                    src={convertFileSrc(v.thumbnail_path)}
+                    alt=""
+                    loading="lazy"
+                  />
+                {:else}
+                  <svg viewBox="0 0 64 64" width="56" height="56" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <rect x="6" y="12" width="52" height="40" rx="4" fill="currentColor" opacity="0.12"/>
+                    <rect x="6" y="12" width="52" height="40" rx="4"/>
+                    <path d="M27 24l14 8-14 8z" fill="currentColor"/>
+                  </svg>
+                {/if}
                 <span class="kind-badge">{$t("study.library.video")}</span>
               </div>
               <div class="meta">
                 <div class="title-row">
-                  <span class="title">{v.name}</span>
+                  {#if isRenaming}
+                    <input
+                      class="rename-input"
+                      type="text"
+                      bind:value={renameValue}
+                      onclick={(e) => e.stopPropagation()}
+                      onkeydown={(e) => {
+                        e.stopPropagation();
+                        if (e.key === "Enter") confirmRename(v.path);
+                        else if (e.key === "Escape") cancelRename();
+                      }}
+                      onblur={() => confirmRename(v.path)}
+                      use:autofocusOnRender
+                    />
+                  {:else}
+                    <span class="title">{v.name}</span>
+                  {/if}
                 </div>
                 <div class="sub">
                   {#if v.size}<span>{fmtBytes(v.size)}</span>{/if}
@@ -1042,8 +2396,19 @@
               </div>
             </button>
           {/each}
-          {#each (visibleBrowse.documents ?? []) as d (d.path)}
-            <button type="button" class="card doc-card" data-ext={d.ext} onclick={() => openBrowseDocument(d)}>
+          {#each (visibleBrowse?.documents ?? []) as d (d.path)}
+            {@const isRenaming = renamingPath === d.path}
+            {@const isSelected = selectedPaths.has(d.path)}
+            <button
+              type="button"
+              class="card doc-card"
+              class:renaming={isRenaming}
+              class:selected={isSelected}
+              data-ext={d.ext}
+              onclick={(e) => handleDocClick(e, d)}
+              oncontextmenu={(e) =>
+                openContextMenu(e, { kind: "doc", path: d.path, name: d.name })}
+            >
               <div class="thumb doc-thumb">
                 <svg viewBox="0 0 64 64" width="52" height="64" fill="none" aria-hidden="true">
                   <path d="M14 4h28l10 10v42a4 4 0 0 1-4 4H14a4 4 0 0 1-4-4V8a4 4 0 0 1 4-4z" fill="currentColor" opacity="0.08"/>
@@ -1054,7 +2419,23 @@
               </div>
               <div class="meta">
                 <div class="title-row">
-                  <span class="title">{d.name}</span>
+                  {#if isRenaming}
+                    <input
+                      class="rename-input"
+                      type="text"
+                      bind:value={renameValue}
+                      onclick={(e) => e.stopPropagation()}
+                      onkeydown={(e) => {
+                        e.stopPropagation();
+                        if (e.key === "Enter") confirmRename(d.path);
+                        else if (e.key === "Escape") cancelRename();
+                      }}
+                      onblur={() => confirmRename(d.path)}
+                      use:autofocusOnRender
+                    />
+                  {:else}
+                    <span class="title">{d.name}</span>
+                  {/if}
                 </div>
                 <div class="sub">
                   {#if d.size}<span>{fmtBytes(d.size)}</span>{/if}
@@ -1063,12 +2444,10 @@
             </button>
           {/each}
         </div>
+      {:else if browseData.is_root_list}
+        {@render emptyBrowse()}
       {:else}
-        <p class="muted">
-          {browseData.is_root_list
-            ? $t("study.library.browse_empty_roots")
-            : $t("study.library.browse_empty")}
-        </p>
+        <p class="muted">{$t("study.library.browse_empty")}</p>
       {/if}
     {/if}
   {:else if mode === "telegram"}
@@ -1252,6 +2631,126 @@
   onConfirm={runCleanupForce}
 />
 
+<ConfirmDialog
+  bind:open={confirmDeleteOpen}
+  title={$t("study.library.delete_confirm_title")}
+  message={pendingDelete
+    ? ($t(
+        pendingDelete.kind === "folder"
+          ? "study.library.delete_confirm_msg_folder"
+          : "study.library.delete_confirm_msg_file",
+        { name: pendingDelete.name },
+      ) as string)
+    : ""}
+  confirmLabel={$t("study.library.delete_confirm_btn")}
+  variant="danger"
+  onConfirm={performDelete}
+/>
+
+{#if mode === "browse" && selectedPaths.size > 0}
+  <div class="bulk-action-bar" role="region" aria-label="Bulk actions">
+    <span class="bulk-count">
+      {$t(
+        selectedPaths.size === 1
+          ? "study.library.selection_count_one"
+          : "study.library.selection_count_other",
+        { count: selectedPaths.size },
+      )}
+    </span>
+    <button
+      type="button"
+      class="bulk-btn"
+      onclick={clearSelection}
+    >{$t("study.library.selection_clear")}</button>
+    <button
+      type="button"
+      class="bulk-btn danger"
+      onclick={() => (bulkDeleteOpen = true)}
+    >{$t("study.library.selection_delete")}</button>
+  </div>
+{/if}
+
+<ConfirmDialog
+  bind:open={bulkDeleteOpen}
+  title={$t("study.library.selection_delete_confirm_title", { count: selectedPaths.size })}
+  message={$t("study.library.selection_delete_confirm_msg")}
+  confirmLabel={$t("study.library.selection_delete")}
+  variant="danger"
+  onConfirm={performBulkDelete}
+/>
+
+{#if contextMenu}
+  <div
+    class="ctx-menu"
+    role="menu"
+    style:left="{contextMenu.x}px"
+    style:top="{contextMenu.y}px"
+  >
+    {#if contextMenu.target.kind === "folder"}
+      <button
+        type="button"
+        class="ctx-item"
+        role="menuitem"
+        onclick={() => {
+          if (contextMenu) {
+            const t = contextMenu.target;
+            closeContextMenu();
+            void loadBrowse(t.path);
+          }
+        }}
+      >{$t("study.library.ctx_open")}</button>
+      <button
+        type="button"
+        class="ctx-item"
+        role="menuitem"
+        onclick={() => {
+          if (contextMenu) {
+            const t = contextMenu.target;
+            closeContextMenu();
+            openInNewTab(t.path);
+          }
+        }}
+      >{$t("study.library.open_in_new_tab")}</button>
+    {:else}
+      <button
+        type="button"
+        class="ctx-item"
+        role="menuitem"
+        onclick={() => {
+          if (contextMenu) {
+            const t = contextMenu.target;
+            closeContextMenu();
+            if (t.kind === "video") {
+              const fake = visibleBrowse?.videos.find((vv) => vv.path === t.path);
+              if (fake) openBrowseVideo(fake);
+            } else if (t.kind === "doc") {
+              void openPath(t.path);
+            }
+          }
+        }}
+      >{$t("study.library.ctx_open")}</button>
+    {/if}
+    <button
+      type="button"
+      class="ctx-item"
+      role="menuitem"
+      onclick={() => contextMenu && showInExplorer(contextMenu.target.path)}
+    >{$t("study.library.ctx_show_in_explorer")}</button>
+    <button
+      type="button"
+      class="ctx-item"
+      role="menuitem"
+      onclick={() => contextMenu && startRename(contextMenu.target)}
+    >{$t("study.library.ctx_rename")}</button>
+    <button
+      type="button"
+      class="ctx-item danger"
+      role="menuitem"
+      onclick={() => contextMenu && startDelete(contextMenu.target)}
+    >{$t("study.library.ctx_delete")}</button>
+  </div>
+{/if}
+
 {#if rootsOpen}
   <div
     class="drawer-overlay"
@@ -1280,7 +2779,7 @@
       {:else}
         <ul class="roots-list">
           {#each roots as r (r.path)}
-            <li class="root-row" class:disabled={!r.enabled}>
+            <li class="root-row" class:disabled={!r.enabled} class:missing={r.exists === false}>
               <label class="root-toggle">
                 <input
                   type="checkbox"
@@ -1292,6 +2791,11 @@
                 <span class="root-path" title={r.path}>{compactPath(r.path)}</span>
                 {#if r.is_default}
                   <span class="root-tag">{$t("study.library.roots_default")}</span>
+                {/if}
+                {#if r.exists === false}
+                  <span class="root-tag missing-tag" title={$t("study.library.root_missing_hint") as string}>
+                    {$t("study.library.root_missing_label")}
+                  </span>
                 {/if}
               </div>
               {#if !r.is_default}
@@ -1794,6 +3298,7 @@
     color: var(--accent);
   }
   .video-thumb {
+    overflow: hidden;
     background:
       radial-gradient(
         circle at 50% 50%,
@@ -1801,6 +3306,12 @@
         color-mix(in oklab, var(--primary) 50%, var(--input-bg))
       );
     color: var(--accent);
+  }
+  .video-thumb-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
   }
   .doc-thumb {
     position: relative;
@@ -2336,5 +3847,809 @@
     font-size: 1.1rem;
     font-weight: 600;
     color: var(--secondary);
+  }
+
+  .title-block {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+  .page-subtitle {
+    margin: 0;
+    font-size: 13px;
+    color: var(--tertiary);
+    line-height: 1.4;
+    max-width: 60ch;
+  }
+
+  .empty-browse {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 28px;
+    padding: 56px 24px 24px;
+    text-align: center;
+  }
+  .empty-browse-head {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-width: 50ch;
+  }
+  .empty-browse-head h2 {
+    margin: 0;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    color: var(--secondary);
+  }
+  .empty-browse-head p {
+    margin: 0;
+    font-size: 14px;
+    color: var(--tertiary);
+    line-height: 1.5;
+  }
+  .empty-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    width: 100%;
+    max-width: 600px;
+  }
+  .empty-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 22px 20px;
+    border-radius: 12px;
+    border: 1px solid var(--content-border);
+    background: var(--surface);
+    text-align: left;
+    transition: border-color 150ms ease, transform 150ms ease;
+  }
+  .empty-card:hover {
+    border-color: color-mix(in oklab, var(--accent) 60%, var(--content-border));
+    transform: translateY(-2px);
+  }
+  .empty-card-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: color-mix(in oklab, var(--accent) 12%, transparent);
+    color: var(--accent);
+    display: grid;
+    place-items: center;
+  }
+  .empty-card h3 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--secondary);
+  }
+  .empty-card > p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--tertiary);
+    line-height: 1.45;
+    flex: 1;
+  }
+  .empty-card-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-top: 4px;
+    padding: 8px 14px;
+    background: var(--accent);
+    color: var(--on-accent, white);
+    border: 0;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 150ms ease;
+  }
+  .empty-card-cta:hover {
+    background: color-mix(in oklab, var(--accent) 88%, black);
+  }
+  .empty-card-cta:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .empty-card,
+    .empty-card-cta {
+      transition: none;
+    }
+    .empty-card:hover {
+      transform: none;
+    }
+  }
+
+  .pinned-strip {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 6px;
+    padding: 4px 2px;
+    scrollbar-width: thin;
+  }
+  .pin-chip-wrap {
+    display: inline-flex;
+    align-items: stretch;
+    flex-shrink: 0;
+    border-radius: 999px;
+    border: 1px solid color-mix(in oklab, var(--accent) 30%, transparent);
+    background: color-mix(in oklab, var(--accent) 8%, transparent);
+    transition: background 150ms ease, border-color 150ms ease;
+  }
+  .pin-chip-wrap:hover {
+    background: color-mix(in oklab, var(--accent) 14%, transparent);
+    border-color: color-mix(in oklab, var(--accent) 50%, transparent);
+  }
+  .pin-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px 5px 9px;
+    border: 0;
+    background: transparent;
+    color: var(--secondary);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 999px 0 0 999px;
+    max-width: 240px;
+  }
+  .pin-chip svg {
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  .pin-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .pin-remove {
+    border: 0;
+    background: transparent;
+    color: color-mix(in oklab, currentColor 50%, transparent);
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0 9px;
+    cursor: pointer;
+    border-radius: 0 999px 999px 0;
+    border-left: 1px solid color-mix(in oklab, var(--accent) 18%, transparent);
+    transition: color 150ms ease, background 150ms ease;
+  }
+  .pin-remove:hover {
+    color: var(--error, #dc2626);
+    background: color-mix(in oklab, var(--error, #dc2626) 12%, transparent);
+  }
+
+  .crumbs-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .crumbs-row .crumbs {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .pin-current {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    background: transparent;
+    color: var(--tertiary);
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: border-color 150ms ease, color 150ms ease, background 150ms ease;
+  }
+  .pin-current:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .pin-current.active {
+    border-color: color-mix(in oklab, var(--accent) 60%, transparent);
+    background: color-mix(in oklab, var(--accent) 12%, transparent);
+    color: var(--accent);
+  }
+
+  .crumb-chevron-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+  }
+  .crumb-chevron {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    margin-left: 1px;
+    padding: 0;
+    background: transparent;
+    border: 0;
+    border-radius: 4px;
+    color: color-mix(in oklab, currentColor 45%, transparent);
+    cursor: pointer;
+    transition: color 120ms ease, background 120ms ease, transform 150ms ease;
+  }
+  .crumb-chevron:hover {
+    color: var(--accent);
+    background: color-mix(in oklab, var(--accent) 10%, transparent);
+  }
+  .crumb-chevron.open {
+    color: var(--accent);
+    background: color-mix(in oklab, var(--accent) 14%, transparent);
+    transform: rotate(180deg);
+  }
+  .crumb-popover {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    z-index: 50;
+    min-width: 200px;
+    max-width: 320px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding: 4px;
+    background: var(--surface, var(--button-elevated));
+    border: 1px solid var(--content-border);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px color-mix(in oklab, black 18%, transparent);
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    scrollbar-width: thin;
+  }
+  .crumb-popover-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    background: transparent;
+    border: 0;
+    border-radius: 5px;
+    color: var(--secondary);
+    font-family: inherit;
+    font-size: 12px;
+    text-align: left;
+    cursor: pointer;
+    transition: background 120ms ease;
+  }
+  .crumb-popover-item:hover {
+    background: color-mix(in oklab, var(--accent) 10%, transparent);
+  }
+  .crumb-popover-item.current {
+    background: color-mix(in oklab, var(--accent) 14%, transparent);
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .crumb-popover-item svg {
+    color: color-mix(in oklab, var(--accent) 70%, currentColor);
+    flex-shrink: 0;
+  }
+  .crumb-popover-name {
+    flex: 1;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .crumb-popover-count {
+    font-family: var(--font-mono, "IBM Plex Mono", monospace);
+    font-size: 10px;
+    color: var(--tertiary);
+    font-variant-numeric: tabular-nums;
+  }
+  .crumb-popover-empty {
+    padding: 8px 10px;
+    color: var(--tertiary);
+    font-size: 12px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .crumb-chevron,
+    .crumb-chevron.open {
+      transition: none;
+      transform: none;
+    }
+  }
+
+  .view-mode-toggle {
+    display: inline-flex;
+    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border-radius: 7px;
+    padding: 1px;
+    background: color-mix(in oklab, var(--content-bg) 80%, transparent);
+    flex-shrink: 0;
+  }
+  .vm-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 26px;
+    background: transparent;
+    border: 0;
+    border-radius: 5px;
+    color: color-mix(in oklab, currentColor 55%, transparent);
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease;
+  }
+  .vm-btn:hover:not(.active) {
+    background: color-mix(in oklab, var(--accent) 8%, transparent);
+    color: var(--secondary);
+  }
+  .vm-btn.active {
+    background: var(--accent);
+    color: var(--on-accent, white);
+  }
+
+  .grid.browse-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .grid.browse-list .card {
+    flex-direction: row;
+    align-items: center;
+    width: 100%;
+    padding: 6px;
+    border-radius: 8px;
+    transition: background 150ms ease;
+  }
+  .grid.browse-list .card:hover {
+    background: color-mix(in oklab, var(--accent) 6%, transparent);
+  }
+  .grid.browse-list .thumb {
+    width: 160px;
+    flex-shrink: 0;
+    border-radius: 6px;
+  }
+  .grid.browse-list .meta {
+    flex: 1;
+    min-width: 0;
+    padding: 0 12px;
+  }
+  .grid.browse-list .video-thumb,
+  .grid.browse-list .folder-thumb,
+  .grid.browse-list .doc-thumb {
+    aspect-ratio: 16 / 9;
+  }
+  .grid.browse-list .kind-badge {
+    top: 4px;
+    left: 4px;
+    font-size: 9px;
+    padding: 0.1rem 0.4rem;
+  }
+
+  .folder-thumb {
+    overflow: hidden;
+  }
+  .folder-mosaic {
+    width: 100%;
+    height: 100%;
+    display: grid;
+    gap: 1px;
+    background: color-mix(in oklab, var(--accent) 8%, var(--input-bg));
+  }
+  .folder-mosaic[data-tiles="1"] {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+  }
+  .folder-mosaic[data-tiles="2"] {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+  }
+  .folder-mosaic[data-tiles="3"] {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+  .folder-mosaic[data-tiles="3"] .folder-mosaic-tile:first-child {
+    grid-row: span 2;
+  }
+  .folder-mosaic[data-tiles="4"] {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+  .folder-mosaic-tile {
+    position: relative;
+    overflow: hidden;
+    background: color-mix(in oklab, var(--accent) 12%, var(--input-bg));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .folder-mosaic-tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .address-bar {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 5px 10px;
+    border: 1px solid color-mix(in oklab, var(--accent) 60%, transparent);
+    border-radius: 7px;
+    background: var(--input-bg);
+    color: var(--secondary);
+    font-family: ui-monospace, "IBM Plex Mono", monospace;
+    font-size: 12px;
+    outline: none;
+  }
+  .address-bar:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 18%, transparent);
+  }
+  .address-bar-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border-radius: 6px;
+    color: color-mix(in oklab, currentColor 55%, transparent);
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: border-color 120ms ease, color 120ms ease;
+  }
+  .address-bar-toggle:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .crumbs.hidden {
+    display: none;
+  }
+
+  .ghost-btn-mini {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    background: transparent;
+    color: var(--tertiary);
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: border-color 150ms ease, color 150ms ease, background 150ms ease;
+  }
+  .ghost-btn-mini:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: color-mix(in oklab, var(--accent) 6%, transparent);
+  }
+  .ghost-btn-mini:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  .rename-input {
+    width: 100%;
+    padding: 2px 4px;
+    border: 1px solid var(--accent);
+    border-radius: 4px;
+    background: var(--input-bg);
+    color: var(--secondary);
+    font-family: inherit;
+    font-size: inherit;
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--accent) 18%, transparent);
+  }
+
+  .card.renaming {
+    cursor: default;
+  }
+  .card.renaming:hover {
+    transform: none;
+  }
+
+  .folder-card-creating {
+    border: 1px dashed color-mix(in oklab, var(--accent) 50%, transparent);
+    border-radius: 10px;
+    padding: 4px;
+  }
+
+  .ctx-menu {
+    position: fixed;
+    z-index: 200;
+    min-width: 180px;
+    max-width: 280px;
+    padding: 4px;
+    background: var(--surface, var(--button-elevated));
+    border: 1px solid var(--content-border);
+    border-radius: 8px;
+    box-shadow: 0 8px 28px color-mix(in oklab, black 22%, transparent);
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .ctx-item {
+    display: flex;
+    align-items: center;
+    padding: 7px 10px;
+    background: transparent;
+    border: 0;
+    border-radius: 5px;
+    color: var(--secondary);
+    font-family: inherit;
+    font-size: 12px;
+    text-align: left;
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease;
+  }
+  .ctx-item:hover {
+    background: color-mix(in oklab, var(--accent) 10%, transparent);
+  }
+  .ctx-item.danger {
+    color: var(--error, #dc2626);
+  }
+  .ctx-item.danger:hover {
+    background: color-mix(in oklab, var(--error, #dc2626) 12%, transparent);
+  }
+
+  .video-card.last-watched .video-thumb {
+    box-shadow: 0 0 0 2px var(--accent), 0 0 0 4px color-mix(in oklab, var(--accent) 30%, transparent);
+  }
+  .last-watched-badge {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    z-index: 2;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--on-accent, white);
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    box-shadow: 0 2px 6px color-mix(in oklab, black 25%, transparent);
+  }
+
+  .doc-card[data-ext="pdf"] .doc-thumb {
+    background: linear-gradient(
+      135deg,
+      color-mix(in oklab, oklch(0.6 0.2 30) 14%, var(--input-bg)),
+      color-mix(in oklab, oklch(0.5 0.18 25) 6%, var(--input-bg))
+    );
+    color: oklch(0.7 0.18 28);
+  }
+  .doc-card[data-ext="epub"] .doc-thumb {
+    background: linear-gradient(
+      135deg,
+      color-mix(in oklab, oklch(0.65 0.18 145) 14%, var(--input-bg)),
+      color-mix(in oklab, oklch(0.55 0.16 150) 6%, var(--input-bg))
+    );
+    color: oklch(0.7 0.16 145);
+  }
+  .doc-card[data-ext="cbz"] .doc-thumb,
+  .doc-card[data-ext="cbr"] .doc-thumb {
+    background: linear-gradient(
+      135deg,
+      color-mix(in oklab, oklch(0.6 0.2 300) 14%, var(--input-bg)),
+      color-mix(in oklab, oklch(0.5 0.18 305) 6%, var(--input-bg))
+    );
+    color: oklch(0.7 0.18 300);
+  }
+  .doc-card[data-ext="mobi"] .doc-thumb,
+  .doc-card[data-ext="azw3"] .doc-thumb {
+    background: linear-gradient(
+      135deg,
+      color-mix(in oklab, oklch(0.7 0.16 75) 14%, var(--input-bg)),
+      color-mix(in oklab, oklch(0.6 0.14 80) 6%, var(--input-bg))
+    );
+    color: oklch(0.72 0.16 75);
+  }
+  .doc-card[data-ext="djvu"] .doc-thumb {
+    background: linear-gradient(
+      135deg,
+      color-mix(in oklab, oklch(0.6 0.16 240) 14%, var(--input-bg)),
+      color-mix(in oklab, oklch(0.5 0.14 245) 6%, var(--input-bg))
+    );
+    color: oklch(0.7 0.16 240);
+  }
+
+  .empty-with-roots {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 48px 24px 24px;
+    text-align: center;
+    max-width: 50ch;
+    margin: 0 auto;
+  }
+  .empty-with-roots p {
+    margin: 0;
+    color: var(--secondary);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  .root-row.missing {
+    background: color-mix(in oklab, var(--warning, #d97706) 8%, transparent);
+    border-radius: 6px;
+  }
+  .root-row.missing .root-path {
+    color: color-mix(in oklab, var(--warning, #d97706) 80%, currentColor);
+    text-decoration: line-through;
+    text-decoration-color: color-mix(in oklab, currentColor 40%, transparent);
+  }
+  .missing-tag {
+    background: color-mix(in oklab, var(--warning, #d97706) 18%, transparent) !important;
+    color: var(--warning, #d97706) !important;
+    border-color: color-mix(in oklab, var(--warning, #d97706) 40%, transparent) !important;
+    cursor: help;
+  }
+
+  .sort-wrap {
+    position: relative;
+    display: inline-flex;
+    flex-shrink: 0;
+  }
+  .sort-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    right: 0;
+    z-index: 60;
+    min-width: 160px;
+    padding: 4px;
+    background: var(--surface, var(--button-elevated));
+    border: 1px solid var(--content-border);
+    border-radius: 8px;
+    box-shadow: 0 8px 24px color-mix(in oklab, black 22%, transparent);
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+  }
+  .ctx-item.current {
+    background: color-mix(in oklab, var(--accent) 14%, transparent);
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .card.selected {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    background: color-mix(in oklab, var(--accent) 8%, transparent);
+  }
+  .card.selected.last-watched .video-thumb {
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+
+  .tab-bar {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 2px;
+    padding: 0;
+    margin: 0;
+    border-bottom: 1px solid color-mix(in oklab, var(--content-border) 60%, transparent);
+    scrollbar-width: thin;
+  }
+  .tab-wrap {
+    display: inline-flex;
+    align-items: stretch;
+    flex-shrink: 0;
+    border: 1px solid transparent;
+    border-bottom: 0;
+    border-radius: 7px 7px 0 0;
+    background: transparent;
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+  .tab-wrap:hover:not(.active) {
+    background: color-mix(in oklab, var(--accent) 5%, transparent);
+  }
+  .tab-wrap.active {
+    background: var(--surface, var(--button-elevated));
+    border-color: color-mix(in oklab, var(--content-border) 60%, transparent);
+  }
+  .tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 4px 6px 10px;
+    background: transparent;
+    border: 0;
+    color: var(--secondary);
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    max-width: 200px;
+  }
+  .tab svg {
+    color: var(--accent);
+    flex-shrink: 0;
+  }
+  .tab-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .tab-wrap.active .tab {
+    color: var(--text, var(--secondary));
+    font-weight: 500;
+  }
+  .tab-close {
+    background: transparent;
+    border: 0;
+    color: color-mix(in oklab, currentColor 50%, transparent);
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0 8px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: color 120ms ease, background 120ms ease;
+  }
+  .tab-close:hover {
+    color: var(--error, #dc2626);
+    background: color-mix(in oklab, var(--error, #dc2626) 12%, transparent);
+  }
+
+  .bulk-action-bar {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 90;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 18px;
+    background: var(--surface, var(--button-elevated));
+    border: 1px solid var(--content-border);
+    border-radius: 999px;
+    box-shadow: 0 8px 28px color-mix(in oklab, black 30%, transparent);
+  }
+  .bulk-count {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--secondary);
+  }
+  .bulk-btn {
+    padding: 6px 14px;
+    background: transparent;
+    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border-radius: 999px;
+    color: var(--secondary);
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 120ms ease, color 120ms ease, background 120ms ease;
+  }
+  .bulk-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .bulk-btn.danger {
+    background: var(--error, #dc2626);
+    border-color: var(--error, #dc2626);
+    color: white;
+  }
+  .bulk-btn.danger:hover {
+    background: color-mix(in oklab, var(--error, #dc2626) 88%, black);
+    color: white;
   }
 </style>

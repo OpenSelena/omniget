@@ -13,15 +13,23 @@ pub fn reregister(app: &tauri::AppHandle) {
 
 pub fn register_from_settings(app: &tauri::AppHandle) {
     let settings = config::load_settings(app);
-    if !settings.download.hotkey_enabled {
-        return;
-    }
 
-    let binding = &settings.download.hotkey_binding;
+    if settings.download.hotkey_enabled {
+        register_one(app, &settings.download.hotkey_binding, "download");
+    }
+    if settings.download.clip_hotkey_enabled {
+        register_one(app, &settings.download.clip_hotkey_binding, "clip");
+    }
+    if settings.download.music_hotkey_enabled {
+        register_one(app, &settings.download.music_hotkey_binding, "music");
+    }
+}
+
+fn register_one(app: &tauri::AppHandle, binding: &str, label: &str) {
     match binding.parse::<Shortcut>() {
         Ok(shortcut) => {
             if let Err(e) = app.global_shortcut().register(shortcut) {
-                tracing::warn!("Failed to register hotkey '{}': {}", binding, e);
+                tracing::warn!("[hotkey] register {} '{}' failed: {}", label, binding, e);
                 #[cfg(target_os = "macos")]
                 {
                     tracing::warn!(
@@ -39,16 +47,42 @@ pub fn register_from_settings(app: &tauri::AppHandle) {
                     );
                 }
             } else {
-                tracing::info!("[hotkey] registered: {}", binding);
+                tracing::info!("[hotkey] registered {}: {}", label, binding);
             }
         }
         Err(e) => {
-            tracing::warn!("Invalid hotkey binding '{}': {:?}", binding, e);
+            tracing::warn!("[hotkey] invalid {} binding '{}': {:?}", label, binding, e);
         }
     }
 }
 
-pub fn on_hotkey_pressed(app: &tauri::AppHandle) {
+pub fn on_hotkey_pressed(app: &tauri::AppHandle, shortcut: &Shortcut) {
+    let settings = config::load_settings(app);
+
+    let download_match = matches_binding(shortcut, &settings.download.hotkey_binding);
+    let clip_match = matches_binding(shortcut, &settings.download.clip_hotkey_binding);
+    let music_match = matches_binding(shortcut, &settings.download.music_hotkey_binding);
+
+    if settings.download.clip_hotkey_enabled && clip_match {
+        let _ = app.emit("clip-hotkey-pressed", serde_json::json!({}));
+        return;
+    }
+
+    if settings.download.music_hotkey_enabled && music_match {
+        handle_music_clipboard(app);
+        return;
+    }
+
+    if settings.download.hotkey_enabled && download_match {
+        handle_download_clipboard(app);
+    }
+}
+
+fn matches_binding(pressed: &Shortcut, binding: &str) -> bool {
+    binding.parse::<Shortcut>().map(|s| s == *pressed).unwrap_or(false)
+}
+
+fn handle_download_clipboard(app: &tauri::AppHandle) {
     let text = match app.clipboard().read_text() {
         Ok(t) => t,
         Err(_) => return,
@@ -76,4 +110,19 @@ async fn enqueue_from_clipboard(app: &tauri::AppHandle, url: String) {
     ) {
         let _ = app.emit("hotkey-download-queued", serde_json::json!({ "url": url }));
     }
+}
+
+fn handle_music_clipboard(app: &tauri::AppHandle) {
+    let text = match app.clipboard().read_text() {
+        Ok(t) => t,
+        Err(_) => return,
+    };
+    let text = text.trim().to_string();
+    if text.is_empty() || (!text.starts_with("http://") && !text.starts_with("https://")) {
+        return;
+    }
+    if url::Url::parse(&text).is_err() {
+        return;
+    }
+    let _ = app.emit("music-hotkey-pressed", serde_json::json!({ "url": text }));
 }

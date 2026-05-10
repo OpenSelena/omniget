@@ -86,6 +86,12 @@ pub async fn enqueue_external_inner(
         kind: Some(kind),
         external: true,
         thumbnail_url_override: args.thumbnail_url,
+        retry_count: 0,
+        max_retries: 0,
+        resume_state: None,
+        concurrent_segments: None,
+        segment_size_bytes: None,
+        eta_seconds: None,
     };
 
     {
@@ -197,8 +203,11 @@ pub async fn report_complete_inner(
                     }
                     it.status = QueueStatus::Complete { success: true };
                 } else {
+                    let msg = args.error.clone().unwrap_or_else(|| "Unknown error".to_string());
+                    let retryable = crate::core::queue::is_retryable_error_message(&msg);
                     it.status = QueueStatus::Error {
-                        message: args.error.clone().unwrap_or_else(|| "Unknown error".to_string()),
+                        message: msg,
+                        retryable,
                     };
                 }
                 Some(q.get_state())
