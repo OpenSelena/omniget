@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "OmniGet",
   "description": "Detect supported media pages and send them to OmniGet with one click.",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "default_locale": "en",
   "browser_specific_settings": {
     "gecko": {
@@ -72,7 +72,9 @@
     "*://*.udemycdn.com/*",
     "*://*.bilibili.com/*",
     "*://*.bilivideo.com/*",
-    "*://b23.tv/*"
+    "*://b23.tv/*",
+    "*://*.soundcloud.com/*",
+    "*://*.sndcdn.com/*"
   ],
   "optional_host_permissions": [
     "*://*/*"

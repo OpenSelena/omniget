@@ -7,6 +7,7 @@ export const DEFAULT_PLATFORM_COOKIE_DOMAINS = Object.freeze({
   twitch: [".twitch.tv", ".jtvnw.net"],
   vimeo: [".vimeo.com", ".vimeocdn.com"],
   bilibili: [".bilibili.com", ".bilivideo.com"],
+  soundcloud: [".soundcloud.com", ".sndcdn.com"],
   pinterest: [".pinterest.com"],
   hotmart: [".hotmart.com"],
   udemy: [".udemy.com"],

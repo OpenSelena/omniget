@@ -338,3 +338,195 @@ function sendNativeMessage(message) {
     });
   });
 }
+
+const COOKIE_AUTO_CAPTURE_DEBOUNCE_MS = 1500;
+const COOKIE_AUTO_CAPTURE_MIN_INTERVAL_MS = 60_000;
+const cookieDebounceTimers = new Map();
+const cookieLastSentAt = new Map();
+
+const TRACKED_COOKIE_NAMES = new Set([
+  "__Secure-3PAPISID",
+  "__Secure-1PAPISID",
+  "__Secure-3PSID",
+  "__Secure-1PSID",
+  "SAPISID",
+  "SID",
+  "HSID",
+  "SSID",
+  "APISID",
+  "LOGIN_INFO",
+  "VISITOR_INFO1_LIVE",
+  "PREF",
+  "sessionid",
+  "ds_user_id",
+  "ig_did",
+  "auth_token",
+  "ct0",
+  "kp",
+  "tt_webid",
+  "twid",
+  "loid",
+  "edgebucket",
+  "oauth_token",
+  "sc_anonymous_id",
+  "moe_uuid",
+  "datadome",
+]);
+
+const TRACKED_DOMAIN_SUFFIXES = [
+  ".youtube.com",
+  ".google.com",
+  ".instagram.com",
+  ".tiktok.com",
+  ".x.com",
+  ".twitter.com",
+  ".reddit.com",
+  ".twitch.tv",
+  ".vimeo.com",
+  ".bilibili.com",
+  ".pinterest.com",
+  ".hotmart.com",
+  ".udemy.com",
+  ".bsky.app",
+  ".bsky.social",
+  ".telegram.org",
+  ".soundcloud.com",
+];
+
+function platformForDomain(domain) {
+  const d = (domain || "").toLowerCase();
+  if (d.endsWith(".youtube.com") || d.endsWith(".google.com") || d === "youtube.com")
+    return "youtube";
+  if (d.endsWith(".instagram.com") || d.endsWith(".cdninstagram.com")) return "instagram";
+  if (d.endsWith(".tiktok.com")) return "tiktok";
+  if (d.endsWith(".x.com") || d.endsWith(".twitter.com")) return "twitter";
+  if (d.endsWith(".reddit.com")) return "reddit";
+  if (d.endsWith(".twitch.tv")) return "twitch";
+  if (d.endsWith(".vimeo.com")) return "vimeo";
+  if (d.endsWith(".bilibili.com")) return "bilibili";
+  if (d.endsWith(".pinterest.com")) return "pinterest";
+  if (d.endsWith(".hotmart.com")) return "hotmart";
+  if (d.endsWith(".udemy.com")) return "udemy";
+  if (d.endsWith(".bsky.app") || d.endsWith(".bsky.social")) return "bluesky";
+  if (d.endsWith(".telegram.org")) return "telegram";
+  if (d.endsWith(".soundcloud.com") || d === "soundcloud.com") return "soundcloud";
+  return null;
+}
+
+function shouldTrackCookieDomain(domain) {
+  if (!domain) return false;
+  const d = domain.toLowerCase();
+  for (const suffix of TRACKED_DOMAIN_SUFFIXES) {
+    if (d === suffix.slice(1) || d.endsWith(suffix)) return true;
+  }
+  return false;
+}
+
+function debounceCookieCapture(platform) {
+  if (cookieDebounceTimers.has(platform)) {
+    clearTimeout(cookieDebounceTimers.get(platform));
+  }
+  const timer = setTimeout(() => {
+    cookieDebounceTimers.delete(platform);
+    void capturePlatformCookies(platform);
+  }, COOKIE_AUTO_CAPTURE_DEBOUNCE_MS);
+  cookieDebounceTimers.set(platform, timer);
+}
+
+async function capturePlatformCookies(platform, force = false) {
+  const lastSent = cookieLastSentAt.get(platform) || 0;
+  if (!force && Date.now() - lastSent < COOKIE_AUTO_CAPTURE_MIN_INTERVAL_MS) {
+    console.debug("[OmniGet] cookie capture throttled", platform);
+    return { ok: false, reason: "throttled" };
+  }
+  cookieLastSentAt.set(platform, Date.now());
+
+  let cookies = null;
+  try {
+    cookies = await extractCookiesForPlatform(platform);
+  } catch (e) {
+    console.warn("[OmniGet] cookie extract failed", platform, e);
+    return { ok: false, reason: "extract_failed", error: e.message };
+  }
+  if (!cookies || cookies.length === 0) {
+    console.debug("[OmniGet] no cookies for platform", platform);
+    return { ok: false, reason: "no_cookies" };
+  }
+
+  try {
+    const response = await sendNativeMessage({
+      type: "cookies:export",
+      protocolVersion: PROTOCOL_VERSION,
+      platform,
+      cookies,
+      timestamp: Date.now(),
+    });
+    console.info(
+      "[OmniGet] cookies exported",
+      platform,
+      cookies.length,
+      response,
+    );
+    return { ok: true, count: cookies.length, response };
+  } catch (e) {
+    console.warn("[OmniGet] cookie export failed", platform, e.message);
+    return { ok: false, reason: "host_unreachable", error: e.message };
+  }
+}
+
+async function scanOpenTabsForCookies() {
+  if (!chrome.tabs?.query) return;
+  try {
+    const tabs = await chrome.tabs.query({});
+    const seen = new Set();
+    for (const tab of tabs) {
+      if (!tab.url) continue;
+      let host;
+      try {
+        host = new URL(tab.url).hostname;
+      } catch {
+        continue;
+      }
+      const platform = platformForDomain(host);
+      if (!platform || seen.has(platform)) continue;
+      seen.add(platform);
+      void capturePlatformCookies(platform, true);
+    }
+    if (seen.size === 0) {
+      console.info("[OmniGet] no tracked tabs open at extension load");
+    }
+  } catch (e) {
+    console.warn("[OmniGet] scan tabs failed", e);
+  }
+}
+
+scanOpenTabsForCookies();
+
+if (chrome.cookies?.onChanged) {
+  chrome.cookies.onChanged.addListener((change) => {
+    const cookie = change.cookie;
+    if (!cookie) return;
+    if (!TRACKED_COOKIE_NAMES.has(cookie.name)) return;
+    if (!shouldTrackCookieDomain(cookie.domain)) return;
+    const platform = platformForDomain(cookie.domain);
+    if (!platform) return;
+    debounceCookieCapture(platform);
+  });
+}
+
+if (chrome.tabs?.onUpdated) {
+  chrome.tabs.onUpdated.addListener((_tabId, changeInfo, tab) => {
+    if (changeInfo.status !== "complete") return;
+    if (!tab?.url) return;
+    let host;
+    try {
+      host = new URL(tab.url).hostname;
+    } catch {
+      return;
+    }
+    if (!shouldTrackCookieDomain(host)) return;
+    const platform = platformForDomain(host);
+    if (!platform) return;
+    debounceCookieCapture(platform);
+  });
+}
