@@ -97,6 +97,7 @@
     "download_complete": "完成！{{name}} 已保存到你的文件夹",
     "download_error": "无法下载 {{name}}。要重试吗？",
     "clipboard_url_detected": "检测到链接！粘贴即可下载",
+    "auto_download_started": "已启动自动下载",
     "external_url_ready": "已收到 URL，可以开始下载",
     "external_url_queued": "已从 Chrome 扩展添加下载",
     "file_copied_to_clipboard": "文件已复制到剪贴板",
@@ -212,6 +213,8 @@
       "embed_thumbnail_desc": "将专辑封面嵌入音频文件",
       "clipboard_detection": "剪贴板检测",
       "clipboard_detection_desc": "自动检测复制到剪贴板的链接",
+      "auto_download_on_paste": "粘贴时自动下载",
+      "auto_download_on_paste_desc": "检测到剪贴板中的 URL 时立即开始下载",
       "organize_by_platform": "按平台整理",
       "organize_by_platform_desc": "将文件保存到以平台命名的子文件夹中",
       "download_subtitles": "下载字幕",
@@ -335,7 +338,9 @@
       "torrent_listen_port": "Torrent 监听端口",
       "torrent_listen_port_desc": "用于接收 BitTorrent 连接的 TCP 端口",
       "cookies_from_browser": "浏览器 Cookie（高级）",
-      "cookies_from_browser_desc": "仅在浏览器扩展无法工作时设置。大多数用户应保持为空。"
+      "cookies_from_browser_desc": "仅在浏览器扩展无法工作时设置。大多数用户应保持为空。",
+      "twitter_manual_cookie": "手动 Cookie",
+      "twitter_manual_cookie_desc": "如果下载失败，您可以在此粘贴手动的 Cookie 标头并重试。不限于 Twitter/X。示例：sessionid=...; csrftoken=...; auth_token=..."
     },
     "cat_appearance": "Appearance",
     "cat_typography": "排版",

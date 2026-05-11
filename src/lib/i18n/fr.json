@@ -97,6 +97,7 @@
     "download_complete": "Fini ! {{name}} est dans votre dossier",
     "download_error": "Impossible de telecharger {{name}}. Reessayer ?",
     "clipboard_url_detected": "Lien detecte ! Collez pour telecharger",
+    "auto_download_started": "Téléchargement automatique lancé",
     "external_url_ready": "URL reçue et prête à être téléchargée",
     "external_url_queued": "Téléchargement ajouté depuis l'extension Chrome",
     "file_copied_to_clipboard": "Fichier copié dans le presse-papiers",
@@ -212,6 +213,8 @@
       "embed_thumbnail_desc": "Intégrer la pochette d'album dans les fichiers audio",
       "clipboard_detection": "Détection du presse-papiers",
       "clipboard_detection_desc": "Détecter automatiquement les URLs copiées dans le presse-papiers",
+      "auto_download_on_paste": "Téléchargement automatique au collage",
+      "auto_download_on_paste_desc": "Lancer immédiatement le téléchargement dès qu'une URL est détectée dans le presse-papiers",
       "organize_by_platform": "Organiser par plateforme",
       "organize_by_platform_desc": "Enregistrer les fichiers dans des sous-dossiers nommés d'après la plateforme",
       "download_subtitles": "Télécharger les sous-titres",
@@ -335,7 +338,9 @@
       "torrent_listen_port": "Port d’écoute torrent",
       "torrent_listen_port_desc": "Port TCP pour les connexions BitTorrent entrantes",
       "cookies_from_browser": "Cookies du navigateur (avancé)",
-      "cookies_from_browser_desc": "À configurer uniquement si l'extension du navigateur ne fonctionne pas. La plupart des utilisateurs doivent laisser vide."
+      "cookies_from_browser_desc": "À configurer uniquement si l'extension du navigateur ne fonctionne pas. La plupart des utilisateurs doivent laisser vide.",
+      "twitter_manual_cookie": "Cookie manuel",
+      "twitter_manual_cookie_desc": "Si un téléchargement échoue, vous pouvez coller ici un en-tête Cookie manuel et réessayer. Ce n'est pas limité à Twitter/X. Exemple : sessionid=...; csrftoken=...; auth_token=..."
     },
     "cat_appearance": "Appearance",
     "cat_typography": "Typographie",

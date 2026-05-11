@@ -97,6 +97,7 @@
     "download_complete": "下載完成: {{name}}",
     "download_error": "下載失敗: {{name}}",
     "clipboard_url_detected": "在剪貼簿中偵測到 URL",
+    "auto_download_started": "已啟動自動下載",
     "external_url_ready": "已收到 URL，可以开始下载",
     "external_url_queued": "已从 Chrome 扩展添加下载",
     "file_copied_to_clipboard": "檔案已複製到剪貼簿",
@@ -212,6 +213,8 @@
       "embed_thumbnail_desc": "將專輯封面嵌入音訊檔案",
       "clipboard_detection": "剪貼簿偵測",
       "clipboard_detection_desc": "自動偵測複製到剪貼簿的 URL",
+      "auto_download_on_paste": "貼上時自動下載",
+      "auto_download_on_paste_desc": "在剪貼簿中偵測到 URL 時立即開始下載",
       "organize_by_platform": "依平台整理",
       "organize_by_platform_desc": "依平台名稱將檔案儲存在子資料夾中",
       "download_subtitles": "下載字幕",
@@ -335,7 +338,9 @@
       "torrent_listen_port": "Torrent 監聽連接埠",
       "torrent_listen_port_desc": "用於接收 BitTorrent 連線的 TCP 連接埠",
       "cookies_from_browser": "浏览器 Cookie（高级）",
-      "cookies_from_browser_desc": "仅在浏览器扩展无法工作时设置。大多数用户应保持为空。"
+      "cookies_from_browser_desc": "仅在浏览器扩展无法工作时设置。大多数用户应保持为空。",
+      "twitter_manual_cookie": "手動 Cookie",
+      "twitter_manual_cookie_desc": "如果下載失敗，您可以在此貼上手動的 Cookie 標頭並重試。不限於 Twitter/X。範例：sessionid=...; csrftoken=...; auth_token=..."
     },
     "cat_appearance": "Appearance",
     "cat_typography": "排版",

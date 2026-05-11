@@ -97,6 +97,7 @@
     "download_complete": "Pronto! {{name}} está na sua pasta",
     "download_error": "Não consegui baixar {{name}}. Tente novamente?",
     "clipboard_url_detected": "Link detectado! Cole para baixar",
+    "auto_download_started": "Download automático iniciado",
     "external_url_ready": "URL recebida e pronta para download",
     "external_url_queued": "Download adicionado pela extensão do Chrome",
     "file_copied_to_clipboard": "Arquivo copiado para o clipboard",
@@ -212,6 +213,8 @@
       "embed_thumbnail_desc": "Embutir capa de álbum em arquivos de áudio",
       "clipboard_detection": "Detecção de clipboard",
       "clipboard_detection_desc": "Detectar URLs copiadas automaticamente",
+      "auto_download_on_paste": "Download automático ao colar",
+      "auto_download_on_paste_desc": "Iniciar o download imediatamente quando um URL for detectado na área de transferência",
       "organize_by_platform": "Organizar por plataforma",
       "organize_by_platform_desc": "Salvar arquivos em subpastas com o nome da plataforma",
       "download_subtitles": "Baixar legendas",
@@ -335,7 +338,9 @@
       "torrent_listen_port": "Porta de escuta torrent",
       "torrent_listen_port_desc": "Porta TCP para conexões BitTorrent de entrada",
       "cookies_from_browser": "Ler cookies direto de um perfil do navegador (avançado)",
-      "cookies_from_browser_desc": "Só configure se a extensão do navegador não funcionar. A maioria dos usuários deve deixar vazio."
+      "cookies_from_browser_desc": "Só configure se a extensão do navegador não funcionar. A maioria dos usuários deve deixar vazio.",
+      "twitter_manual_cookie": "Cookie manual",
+      "twitter_manual_cookie_desc": "Se um download falhar, você pode colar aqui um cabeçalho Cookie manual e tentar novamente. Não está limitado ao Twitter/X. Exemplo: sessionid=...; csrftoken=...; auth_token=..."
     },
     "cat_appearance": "Aparência",
     "cat_typography": "Tipografia",

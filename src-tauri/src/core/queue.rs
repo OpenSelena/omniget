@@ -981,7 +981,7 @@ async fn spawn_download_inner(
 
     let info_start = std::time::Instant::now();
     let info = match media_info {
-        Some(i) => {
+        Some(i) if !i.available_qualities.is_empty() => {
             tracing::info!(
                 "[queue] info for {} from cache/pre-fetched in {:?}",
                 item_id,
@@ -989,7 +989,7 @@ async fn spawn_download_inner(
             );
             i
         }
-        None => {
+        _ => {
             tracing::debug!(
                 "[perf] spawn_download_inner {}: media_info is None, fetching info",
                 item_id

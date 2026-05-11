@@ -15,6 +15,7 @@ use crate::models::media::{DownloadResult, FormatInfo};
 type ExtCookiePathFn = Box<dyn Fn() -> PathBuf + Send + Sync>;
 type GlobalCookieFileFn = Box<dyn Fn() -> Option<String> + Send + Sync>;
 type CookiesFromBrowserFn = Box<dyn Fn() -> String + Send + Sync>;
+type ManualCookieHeaderFn = Box<dyn Fn() -> String + Send + Sync>;
 type ExtRefererFn = Box<dyn Fn(&str) -> Option<String> + Send + Sync>;
 type IncludeAutoSubsFn = Box<dyn Fn() -> bool + Send + Sync>;
 type TranslateMetadataFn = Box<dyn Fn() -> Option<String> + Send + Sync>;
@@ -24,6 +25,7 @@ type SplitChaptersFn = Box<dyn Fn() -> bool + Send + Sync>;
 static EXT_COOKIE_PATH_FN: OnceLock<ExtCookiePathFn> = OnceLock::new();
 static GLOBAL_COOKIE_FILE_FN: OnceLock<GlobalCookieFileFn> = OnceLock::new();
 static COOKIES_FROM_BROWSER_FN: OnceLock<CookiesFromBrowserFn> = OnceLock::new();
+static MANUAL_COOKIE_HEADER_FN: OnceLock<ManualCookieHeaderFn> = OnceLock::new();
 static EXT_REFERER_FN: OnceLock<ExtRefererFn> = OnceLock::new();
 static INCLUDE_AUTO_SUBS_FN: OnceLock<IncludeAutoSubsFn> = OnceLock::new();
 static TRANSLATE_METADATA_FN: OnceLock<TranslateMetadataFn> = OnceLock::new();
@@ -40,6 +42,10 @@ pub fn set_global_cookie_file_fn(f: impl Fn() -> Option<String> + Send + Sync + 
 
 pub fn set_cookies_from_browser_fn(f: impl Fn() -> String + Send + Sync + 'static) {
     let _ = COOKIES_FROM_BROWSER_FN.set(Box::new(f));
+}
+
+pub fn set_manual_cookie_header_fn(f: impl Fn() -> String + Send + Sync + 'static) {
+    let _ = MANUAL_COOKIE_HEADER_FN.set(Box::new(f));
 }
 
 pub fn set_ext_referer_fn(f: impl Fn(&str) -> Option<String> + Send + Sync + 'static) {
@@ -164,6 +170,21 @@ fn cookies_from_browser_setting() -> String {
         .unwrap_or_default()
 }
 
+fn manual_cookie_header_setting() -> Option<String> {
+    let raw = MANUAL_COOKIE_HEADER_FN.get().map(|f| f()).unwrap_or_default();
+    let trimmed = raw.trim();
+    if trimmed.is_empty() {
+        return None;
+    }
+
+    let parsed = crate::core::cookie_parser::parse_cookie_input(trimmed, "");
+    if !parsed.cookie_string.trim().is_empty() {
+        Some(parsed.cookie_string)
+    } else {
+        Some(trimmed.to_string())
+    }
+}
+
 pub fn ext_cookie_path() -> PathBuf {
     EXT_COOKIE_PATH_FN
         .get()
@@ -283,6 +304,17 @@ fn proxy_args() -> Vec<String> {
         Some(url) => vec!["--proxy".to_string(), url],
         None => Vec::new(),
     }
+}
+
+fn has_explicit_cookie_header(args: &[String]) -> bool {
+    args.windows(2).any(|pair| {
+        pair[0] == "--add-headers" && pair[1].to_ascii_lowercase().starts_with("cookie:")
+    })
+}
+
+fn append_cookie_header(args: &mut Vec<String>, cookie_header: &str) {
+    args.push("--add-headers".to_string());
+    args.push(format!("Cookie:{}", cookie_header));
 }
 
 struct YtRateLimiter {
@@ -862,20 +894,41 @@ pub async fn get_video_info(
             args.push(extractor_args.to_string());
         }
 
-        let extension_cookies = extension_cookie_file();
-        let global_cf = global_cookie_file();
-        if let Some(ref cf) = extension_cookies {
+        let explicit_cookie_header = has_explicit_cookie_header(extra_flags);
+        let manual_cookie_header = if explicit_cookie_header {
+            None
+        } else {
+            manual_cookie_header_setting()
+        };
+        let extension_cookies = if manual_cookie_header.is_none() {
+            extension_cookie_file()
+        } else {
+            None
+        };
+        let global_cf = if manual_cookie_header.is_none() {
+            global_cookie_file()
+        } else {
+            None
+        };
+        if let Some(ref cookie_header) = manual_cookie_header {
+            append_cookie_header(&mut args, cookie_header);
+            tracing::debug!("[yt-dlp] using manual cookie header from settings");
+        } else if let Some(ref cf) = extension_cookies {
             args.push("--cookies".to_string());
             args.push(cf.to_string_lossy().to_string());
         } else if let Some(ref cf) = global_cf {
             args.push("--cookies".to_string());
             args.push(cf.clone());
-        } else {
+        } else if !explicit_cookie_header {
             let cfb = cookies_from_browser_setting();
             if !cfb.is_empty() {
                 args.push("--cookies-from-browser".to_string());
                 args.push(cfb);
             }
+        } else {
+            tracing::debug!(
+                "[yt-dlp] skipping cookies-from-browser because explicit Cookie header was provided"
+            );
         }
 
         args.extend(proxy_args());
@@ -1203,9 +1256,20 @@ pub async fn download_video(
 
     std::fs::create_dir_all(output_dir)?;
 
-    let global_cookie_file = global_cookie_file();
+    let explicit_cookie_header = has_explicit_cookie_header(extra_flags);
+    let manual_cookie_header = if explicit_cookie_header || cookie_file.is_some() {
+        None
+    } else {
+        manual_cookie_header_setting()
+    };
+    let manual_cookie_enabled = manual_cookie_header.is_some();
+    let global_cookie_file = if manual_cookie_enabled {
+        None
+    } else {
+        global_cookie_file()
+    };
 
-    let ext_cookies = if cookie_file.is_none() && global_cookie_file.is_none() {
+    let ext_cookies = if cookie_file.is_none() && global_cookie_file.is_none() && !manual_cookie_enabled {
         extension_cookie_file()
     } else {
         None
@@ -1216,7 +1280,11 @@ pub async fn download_video(
         .or_else(|| global_cookie_file.map(std::path::PathBuf::from))
         .or(ext_cookies);
 
-    let cfb_setting = cookies_from_browser_setting();
+    let cfb_setting = if manual_cookie_enabled || explicit_cookie_header {
+        String::new()
+    } else {
+        cookies_from_browser_setting()
+    };
     let mut base_args = vec!["-f".to_string(), format_selector];
     base_args.extend(js_runtime_args());
 
@@ -1251,6 +1319,9 @@ pub async fn download_video(
     if let Some(ref cf) = effective_cookie_file {
         base_args.push("--cookies".to_string());
         base_args.push(cf.to_string_lossy().to_string());
+    }
+    if let Some(ref cookie_header) = manual_cookie_header {
+        append_cookie_header(&mut base_args, cookie_header);
     }
 
     if let Some(ref loc) = ffmpeg_location {
@@ -1293,7 +1364,9 @@ pub async fn download_video(
     let mut use_aria2c = aria2c_path.is_some()
         && mode != "audio"
         && effective_cookie_file.is_none()
-        && cfb_setting.is_empty();
+        && cfb_setting.is_empty()
+        && !manual_cookie_enabled
+        && !explicit_cookie_header;
 
     let effective_ua = ext_user_agent_for_url(url).unwrap_or_else(|| CHROME_UA.to_string());
     base_args.extend([
@@ -1369,7 +1442,7 @@ pub async fn download_video(
     let mut extra_args: Vec<String> = Vec::new();
     let mut last_error = String::new();
     let mut use_subtitles = should_download_subs;
-    let mut use_cfb = !cfb_setting.is_empty();
+    let mut use_cfb = !cfb_setting.is_empty() && !explicit_cookie_header && !manual_cookie_enabled;
     let mut format_already_simplified = false;
     let mut last_was_429 = false;
 

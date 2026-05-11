@@ -145,6 +145,11 @@ pub fn run() {
                     .advanced
                     .cookies_from_browser
             });
+            core::ytdlp::set_manual_cookie_header_fn(|| {
+                storage::config::load_settings_standalone()
+                    .advanced
+                    .twitter_manual_cookie
+            });
             core::ytdlp::set_ext_referer_fn(|url| {
                 native_host::read_extension_metadata(url).and_then(|m| m.referer)
             });

@@ -97,6 +97,7 @@
     "download_complete": "Ετοιμο! Το {{name}} ειναι στον φακελο σας",
     "download_error": "Δεν μπορεσα να κατεβασω {{name}}. Θελετε να δοκιμασετε ξανα;",
     "clipboard_url_detected": "Εντοπιστηκε συνδεσμος! Επικολληστε για ληψη",
+    "auto_download_started": "Αυτόματη λήψη ξεκίνησε",
     "external_url_ready": "Το URL λήφθηκε και είναι έτοιμο για λήψη",
     "external_url_queued": "Η λήψη προστέθηκε από την επέκταση Chrome",
     "file_copied_to_clipboard": "Το αρχείο αντιγράφηκε στο πρόχειρο",
@@ -212,6 +213,8 @@
       "embed_thumbnail_desc": "Ενσωματώστε το εξώφυλλο άλμπουμ σε αρχεία ήχου",
       "clipboard_detection": "Ανίχνευση πρόχειρου",
       "clipboard_detection_desc": "Αυτόματος εντοπισμός διευθύνσεων URL που αντιγράφηκαν στο πρόχειρο",
+      "auto_download_on_paste": "Αυτόματη λήψη κατά την επικόλληση",
+      "auto_download_on_paste_desc": "Ξεκινήστε αμέσως τη λήψη όταν εντοπιστεί URL στο πρόχειρο",
       "organize_by_platform": "Οργάνωση ανά πλατφόρμα",
       "organize_by_platform_desc": "Αποθηκεύστε αρχεία σε υποφακέλους με το όνομα της πλατφόρμας",
       "download_subtitles": "Κατεβάστε υπότιτλους",
@@ -335,7 +338,9 @@
       "torrent_listen_port": "Θύρα ακρόασης torrent",
       "torrent_listen_port_desc": "Θύρα TCP για εισερχόμενες συνδέσεις BitTorrent",
       "cookies_from_browser": "Cookies προγράμματος περιήγησης (προχωρημένο)",
-      "cookies_from_browser_desc": "Ορίστε μόνο αν η επέκταση του προγράμματος περιήγησης δεν λειτουργεί. Οι περισσότεροι χρήστες πρέπει να το αφήσουν κενό."
+      "cookies_from_browser_desc": "Ορίστε μόνο αν η επέκταση του προγράμματος περιήγησης δεν λειτουργεί. Οι περισσότεροι χρήστες πρέπει να το αφήσουν κενό.",
+      "twitter_manual_cookie": "Χειροκίνητο cookie",
+      "twitter_manual_cookie_desc": "Αν μια λήψη αποτύχει, μπορείτε να επικολλήσετε εδώ μια χειροκίνητη κεφαλίδα Cookie και να δοκιμάσετε ξανά. Δεν περιορίζεται στο Twitter/X. Παράδειγμα: sessionid=...; csrftoken=...; auth_token=..."
     },
     "cat_appearance": "Appearance",
     "cat_typography": "Τυπογραφία",

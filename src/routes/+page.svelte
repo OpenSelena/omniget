@@ -94,17 +94,50 @@
   let p2pReceiveUrl = $state("");
   let externalNotice = $state<ExternalUrlEvent | null>(null);
   let lastExternalPrefillId = $state<number | null>(null);
+  let pendingAutoDownload = $state(false);
 
   onMount(() => {
     onClipboardUrl((detectedUrl) => {
       if (omniState.kind === "preparing") return;
       url = detectedUrl;
+      const settings = getSettings();
+      const autoDownload = !!(settings?.download.auto_download_on_paste && settings?.download.clipboard_detection);
+      pendingAutoDownload = autoDownload;
       handleInput();
-      showToast("info", $t("toast.clipboard_url_detected"));
+      showToast("info", $t(autoDownload ? "toast.auto_download_started" : "toast.clipboard_url_detected"));
     });
     return () => {
       onClipboardUrl(null);
     };
+  });
+
+  const AUTO_DOWNLOAD_DELAY_MS = 2000;
+
+  $effect(() => {
+    if (!pendingAutoDownload) return;
+    if (omniState.kind === "detected") {
+      const info = omniState.info;
+      if (info.platform === "hotmart" || info.platform === "p2p") {
+        pendingAutoDownload = false;
+        return;
+      }
+      pendingAutoDownload = false;
+      const snapshotUrl = url;
+      setTimeout(() => {
+        if (url === snapshotUrl && omniState.kind === "detected") {
+          handleAction();
+        }
+      }, AUTO_DOWNLOAD_DELAY_MS);
+    } else if (
+      omniState.kind === "unsupported" ||
+      omniState.kind === "error" ||
+      omniState.kind === "batch" ||
+      omniState.kind === "search-results" ||
+      omniState.kind === "search-empty" ||
+      omniState.kind === "idle"
+    ) {
+      pendingAutoDownload = false;
+    }
   });
 
   const STALL_THRESHOLD = 30_000;
@@ -148,7 +181,15 @@
     lastExternalPrefillId = incoming.id;
     clearPendingExternalPrefill(incoming.id);
     externalNotice = incoming;
+
+    if (incoming.action !== "prefill") {
+      return;
+    }
+
     url = incoming.url;
+    if (getSettings()?.download.auto_download_on_paste) {
+      pendingAutoDownload = true;
+    }
     handleInput();
   });
 
@@ -274,6 +315,9 @@
 
     if (isUrl(trimmed)) {
       omniState = { kind: "detecting" };
+      if (getSettings()?.download.auto_download_on_paste) {
+        pendingAutoDownload = true;
+      }
       debounceTimer = setTimeout(() => {
         detectPlatform(trimmed);
       }, 500);
@@ -413,7 +457,7 @@
     const settings = getSettings();
     let outputDir = settings?.download.default_output_dir ?? "";
 
-    if (settings?.download.always_ask_path || !outputDir) {
+    if ((settings?.download.always_ask_path && !settings?.download.auto_download_on_paste) || !outputDir) {
       const selected = await open({
         directory: true,
         title: $t("settings.download.default_output_dir"),
@@ -456,7 +500,7 @@
     const settings = getSettings();
     let outputDir = settings?.download.default_output_dir ?? "";
 
-    if (settings?.download.always_ask_path || !outputDir) {
+    if ((settings?.download.always_ask_path && !settings?.download.auto_download_on_paste) || !outputDir) {
       const selected = await open({
         directory: true,
         title: $t("settings.download.default_output_dir"),
@@ -501,7 +545,7 @@
     const settings = getSettings();
     let outputDir = settings?.download.default_output_dir ?? "";
 
-    if (settings?.download.always_ask_path || !outputDir) {
+    if ((settings?.download.always_ask_path && !settings?.download.auto_download_on_paste) || !outputDir) {
       const selected = await open({
         directory: true,
         title: $t("settings.download.default_output_dir"),

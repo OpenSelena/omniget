@@ -97,6 +97,7 @@
     "download_complete": "Done! {{name}} is in your folder",
     "download_error": "Couldn't download {{name}}. Want to retry?",
     "clipboard_url_detected": "Link detected! Paste to download",
+    "auto_download_started": "Auto-download started",
     "external_url_ready": "URL received and ready to download",
     "external_url_queued": "Download added from the Chrome extension",
     "file_copied_to_clipboard": "File copied to clipboard",
@@ -212,6 +213,8 @@
       "embed_thumbnail_desc": "Embed album art into audio files",
       "clipboard_detection": "Clipboard detection",
       "clipboard_detection_desc": "Auto-detect URLs copied to clipboard",
+      "auto_download_on_paste": "Auto-download on paste",
+      "auto_download_on_paste_desc": "Start downloading instantly when a URL is detected in the clipboard",
       "organize_by_platform": "Organize by platform",
       "organize_by_platform_desc": "Save files in subfolders named after the platform",
       "download_subtitles": "Download subtitles",
@@ -335,7 +338,9 @@
       "torrent_listen_port": "Torrent listen port",
       "torrent_listen_port_desc": "TCP port for incoming BitTorrent connections",
       "cookies_from_browser": "Read cookies directly from a browser profile (advanced)",
-      "cookies_from_browser_desc": "Only set this if the browser extension isn't working. Most users should leave this empty."
+      "cookies_from_browser_desc": "Only set this if the browser extension isn't working. Most users should leave this empty.",
+      "twitter_manual_cookie": "Manual cookie",
+      "twitter_manual_cookie_desc": "If a download fails, you can paste a manual Cookie header here and try again. This is not limited to Twitter/X. Example: sessionid=...; csrftoken=...; auth_token=..."
     },
     "cat_appearance": "Appearance",
     "cat_typography": "Typography",

@@ -97,6 +97,7 @@
     "download_complete": "Fatto! {{name}} e nella tua cartella",
     "download_error": "Non riesco a scaricare {{name}}. Riprovare?",
     "clipboard_url_detected": "Link rilevato! Incolla per scaricare",
+    "auto_download_started": "Download automatico avviato",
     "external_url_ready": "URL ricevuto e pronto per il download",
     "external_url_queued": "Download aggiunto dall'estensione Chrome",
     "file_copied_to_clipboard": "File copiato negli appunti",
@@ -212,6 +213,8 @@
       "embed_thumbnail_desc": "Incorpora copertina nei file audio",
       "clipboard_detection": "Rilevamento appunti",
       "clipboard_detection_desc": "Rileva automaticamente gli URL copiati negli appunti",
+      "auto_download_on_paste": "Download automatico all'incolla",
+      "auto_download_on_paste_desc": "Avvia il download immediatamente quando un URL viene rilevato negli appunti",
       "organize_by_platform": "Organizza per piattaforma",
       "organize_by_platform_desc": "Salva i file in sottocartelle con il nome della piattaforma",
       "download_subtitles": "Scarica sottotitoli",
@@ -335,7 +338,9 @@
       "torrent_listen_port": "Porta di ascolto torrent",
       "torrent_listen_port_desc": "Porta TCP per le connessioni BitTorrent in entrata",
       "cookies_from_browser": "Cookie del browser (avanzato)",
-      "cookies_from_browser_desc": "Configura solo se l'estensione del browser non funziona. La maggior parte degli utenti dovrebbe lasciare vuoto."
+      "cookies_from_browser_desc": "Configura solo se l'estensione del browser non funziona. La maggior parte degli utenti dovrebbe lasciare vuoto.",
+      "twitter_manual_cookie": "Cookie manuale",
+      "twitter_manual_cookie_desc": "Se un download fallisce, puoi incollare qui un header Cookie manuale e riprovare. Non è limitato a Twitter/X. Esempio: sessionid=...; csrftoken=...; auth_token=..."
     },
     "cat_appearance": "Appearance",
     "cat_typography": "Tipografia",

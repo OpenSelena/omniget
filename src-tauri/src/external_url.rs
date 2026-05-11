@@ -298,7 +298,8 @@ pub async fn handle_external_url(
     }
 
     let settings = config::load_settings(app);
-    let can_queue_directly = !settings.download.always_ask_path
+    let can_queue_directly = (!settings.download.always_ask_path
+        || settings.download.auto_download_on_paste)
         && has_valid_output_dir(&settings.download.default_output_dir);
 
     let open_app_flag = crate::native_host::peek_extension_open_app(&url);

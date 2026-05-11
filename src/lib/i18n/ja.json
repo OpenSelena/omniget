@@ -97,6 +97,7 @@
     "download_complete": "完了！{{name}} はフォルダに保存されました",
     "download_error": "{{name}} をダウンロードできませんでした。再試行しますか？",
     "clipboard_url_detected": "リンクを検出！貼り付けてダウンロード",
+    "auto_download_started": "自動ダウンロードを開始しました",
     "external_url_ready": "URLを受信し、ダウンロードの準備ができました",
     "external_url_queued": "Chrome拡張機能からダウンロードを追加しました",
     "file_copied_to_clipboard": "ファイルをクリップボードにコピーしました",
@@ -212,6 +213,8 @@
       "embed_thumbnail_desc": "音声ファイルにアルバムアートを埋め込みます",
       "clipboard_detection": "クリップボード検出",
       "clipboard_detection_desc": "クリップボードにコピーされたURLを自動検出します",
+      "auto_download_on_paste": "貼り付けで自動ダウンロード",
+      "auto_download_on_paste_desc": "クリップボードでURLが検出されたらすぐにダウンロードを開始します",
       "organize_by_platform": "プラットフォーム別に整理",
       "organize_by_platform_desc": "プラットフォーム名のサブフォルダにファイルを保存します",
       "download_subtitles": "字幕をダウンロード",
@@ -335,7 +338,9 @@
       "torrent_listen_port": "Torrent待ち受けポート",
       "torrent_listen_port_desc": "BitTorrent接続を受け付けるTCPポート",
       "cookies_from_browser": "ブラウザのCookie（詳細）",
-      "cookies_from_browser_desc": "ブラウザ拡張機能が動作しない場合のみ設定してください。通常は空のままにしてください。"
+      "cookies_from_browser_desc": "ブラウザ拡張機能が動作しない場合のみ設定してください。通常は空のままにしてください。",
+      "twitter_manual_cookie": "手動Cookie",
+      "twitter_manual_cookie_desc": "ダウンロードに失敗した場合、ここに手動のCookieヘッダーを貼り付けて再試行できます。Twitter/Xに限定されません。例: sessionid=...; csrftoken=...; auth_token=..."
     },
     "cat_appearance": "Appearance",
     "cat_typography": "タイポグラフィ",

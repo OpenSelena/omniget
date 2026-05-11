@@ -16,6 +16,7 @@ export type AppSettings = {
     embed_metadata: boolean;
     embed_thumbnail: boolean;
     clipboard_detection: boolean;
+    auto_download_on_paste: boolean;
     filename_template: string;
     organize_by_platform: boolean;
     download_subtitles: boolean;
@@ -50,6 +51,7 @@ export type AppSettings = {
     stagger_delay_ms: number;
     torrent_listen_port: number;
     cookies_from_browser: string;
+    twitter_manual_cookie: string;
   };
   telegram: {
     concurrent_downloads: number;

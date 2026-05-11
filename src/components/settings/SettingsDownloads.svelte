@@ -384,6 +384,14 @@
       </div>
       <button class="toggle" class:on={settings.download.clipboard_detection} onclick={() => toggleBool("download", "clipboard_detection", settings.download.clipboard_detection)} role="switch" aria-checked={settings.download.clipboard_detection} aria-label={$t('settings.download.clipboard_detection') as string}><span class="toggle-knob"></span></button>
     </div>
+    <div class="divider"></div>
+    <div class="setting-row">
+      <div class="setting-col">
+        <span class="setting-label">{$t('settings.download.auto_download_on_paste')}</span>
+        <span class="setting-path">{$t('settings.download.auto_download_on_paste_desc')}</span>
+      </div>
+      <button class="toggle" class:on={settings.download.auto_download_on_paste} onclick={() => toggleBool("download", "auto_download_on_paste", settings.download.auto_download_on_paste)} role="switch" aria-checked={settings.download.auto_download_on_paste} aria-label={$t('settings.download.auto_download_on_paste') as string}><span class="toggle-knob"></span></button>
+    </div>
   </div>
 </details>
 

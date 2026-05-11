@@ -1,3 +1,5 @@
+import { readText } from "@tauri-apps/plugin-clipboard-manager";
+
 const POLL_INTERVAL = 2000;
 const URL_PATTERN = /^(https?:\/\/|magnet:\?|p2p:).+/;
 
@@ -20,7 +22,7 @@ export function startClipboardMonitor() {
     if (!enabled || !document.hasFocus()) return;
 
     try {
-      const text = await navigator.clipboard.readText();
+      const text = await readText();
       const trimmed = text.trim().split(/[\s\n]/)[0];
 
       if (
