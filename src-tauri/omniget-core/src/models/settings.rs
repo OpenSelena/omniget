@@ -99,6 +99,10 @@ pub struct DownloadSettings {
     pub download_subtitles: bool,
     #[serde(default)]
     pub include_auto_subtitles: bool,
+    #[serde(default = "default_caption_locale")]
+    pub caption_locale: String,
+    #[serde(default)]
+    pub keep_vtt: bool,
     #[serde(default)]
     pub translate_metadata: bool,
     #[serde(default)]
@@ -125,6 +129,8 @@ pub struct DownloadSettings {
     pub copy_to_clipboard_on_hotkey: bool,
     #[serde(default)]
     pub cookie_file: String,
+    #[serde(default)]
+    pub continuous_lecture_numbers: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -183,6 +189,10 @@ fn default_music_hotkey_binding() -> String {
 
 fn default_music_audio_format() -> String {
     "m4a".into()
+}
+
+fn default_caption_locale() -> String {
+    "en".into()
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -296,6 +306,8 @@ impl Default for AppSettings {
                 organize_by_platform: false,
                 download_subtitles: false,
                 include_auto_subtitles: false,
+                caption_locale: default_caption_locale(),
+                keep_vtt: false,
                 translate_metadata: false,
                 youtube_sponsorblock: false,
                 split_by_chapters: false,
@@ -309,6 +321,7 @@ impl Default for AppSettings {
                 extra_ytdlp_flags: Vec::new(),
                 copy_to_clipboard_on_hotkey: true,
                 cookie_file: String::new(),
+                continuous_lecture_numbers: false,
             },
             advanced: AdvancedSettings {
                 max_concurrent_segments: 20,
