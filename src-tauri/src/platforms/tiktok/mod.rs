@@ -521,6 +521,7 @@ impl PlatformDownloader for TikTokDownloader {
                     opts.concurrent_fragments,
                     false,
                     &[],
+                    opts.audio_format.as_deref(),
                 )
                 .await;
             }
@@ -592,6 +593,7 @@ impl PlatformDownloader for TikTokDownloader {
                     opts.concurrent_fragments,
                     false,
                     &[],
+                    opts.audio_format.as_deref(),
                 )
                 .await
             }

@@ -742,6 +742,7 @@ impl PlatformDownloader for TwitterDownloader {
                     opts.concurrent_fragments,
                     false,
                     &extra_flags,
+                    opts.audio_format.as_deref(),
                 )
                 .await;
             }

@@ -178,6 +178,7 @@ impl PlatformDownloader for VimeoDownloader {
             opts.concurrent_fragments,
             false,
             &[],
+            opts.audio_format.as_deref(),
         )
         .await
     }
