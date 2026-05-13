@@ -466,6 +466,7 @@ impl PlatformDownloader for GenericYtdlpDownloader {
                 opts.concurrent_fragments,
                 opts.download_subtitles,
                 &[],
+                opts.audio_format.as_deref(),
             )
             .await;
 

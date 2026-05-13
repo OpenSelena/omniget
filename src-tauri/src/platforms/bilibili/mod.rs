@@ -248,6 +248,7 @@ impl PlatformDownloader for BilibiliDownloader {
             opts.concurrent_fragments,
             opts.download_subtitles,
             &extra,
+            opts.audio_format.as_deref(),
         )
         .await
     }
@@ -303,6 +304,7 @@ impl BilibiliDownloader {
                 opts.concurrent_fragments,
                 opts.download_subtitles,
                 &extra,
+                opts.audio_format.as_deref(),
             )
             .await
             {

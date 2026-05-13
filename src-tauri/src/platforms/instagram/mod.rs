@@ -600,6 +600,7 @@ impl InstagramDownloader {
             opts.concurrent_fragments,
             false,
             &[],
+            opts.audio_format.as_deref(),
         )
         .await
     }
@@ -881,6 +882,7 @@ mod tests {
             download_subtitles: false,
             include_auto_subtitles: false,
             download_mode: None,
+            audio_format: None,
             format_id: None,
             referer: None,
             extra_headers: None,

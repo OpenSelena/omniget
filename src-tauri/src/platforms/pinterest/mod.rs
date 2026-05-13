@@ -220,6 +220,7 @@ impl PlatformDownloader for PinterestDownloader {
                     opts.concurrent_fragments,
                     false,
                     &[],
+                    opts.audio_format.as_deref(),
                 )
                 .await;
             }

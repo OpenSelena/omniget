@@ -78,6 +78,7 @@ pub async fn queue_url_with_defaults(
     app: &AppHandle,
     url: String,
     from_hotkey: bool,
+    download_mode: Option<String>,
 ) -> Result<QueueUrlOutcome, String> {
     let state = app.state::<AppState>();
     let settings = config::load_settings(app);
@@ -230,7 +231,7 @@ pub async fn queue_url_with_defaults(
             platform_name,
             queue_title,
             output_dir,
-            None,
+            download_mode,
             None,
             None,
             ext_referer,
@@ -305,7 +306,7 @@ pub async fn handle_external_url(
     let open_app_flag = crate::native_host::peek_extension_open_app(&url);
 
     let action = if can_queue_directly {
-        let outcome = queue_url_with_defaults(app, url.clone(), false).await?;
+        let outcome = queue_url_with_defaults(app, url.clone(), false, None).await?;
         if open_app_flag == Some(true) {
             crate::tray::show_window(app);
         }

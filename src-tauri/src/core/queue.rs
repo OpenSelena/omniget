@@ -1106,6 +1106,11 @@ async fn spawn_download_inner(
         final_output_dir = final_output_dir.join(&platform_name);
     }
     let torrent_id_slot = Arc::new(tokio::sync::Mutex::new(None));
+    let audio_format = if download_mode.as_deref() == Some("audio") {
+        Some(settings.download.music_audio_format.clone())
+    } else {
+        None
+    };
     let opts = crate::models::media::DownloadOptions {
         quality: quality.or_else(|| Some(settings.download.video_quality.clone())),
         output_dir: final_output_dir,
@@ -1113,6 +1118,7 @@ async fn spawn_download_inner(
         download_subtitles: settings.download.download_subtitles,
         include_auto_subtitles: settings.download.include_auto_subtitles,
         download_mode,
+        audio_format,
         format_id,
         referer,
         extra_headers,

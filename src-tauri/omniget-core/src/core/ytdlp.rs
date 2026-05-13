@@ -1197,6 +1197,7 @@ pub async fn download_video(
     concurrent_fragments: u32,
     download_subtitles: bool,
     extra_flags: &[String],
+    audio_format: Option<&str>,
 ) -> anyhow::Result<DownloadResult> {
     let _timer_start = std::time::Instant::now();
 
@@ -1289,8 +1290,15 @@ pub async fn download_video(
     base_args.extend(js_runtime_args());
 
     if format_id.is_none() && mode == "audio" {
-        base_args.push("-S".to_string());
-        base_args.push("+codec:aac:m4a".to_string());
+        let target_fmt = audio_format.unwrap_or("m4a");
+        if target_fmt == "m4a" {
+            base_args.push("-S".to_string());
+            base_args.push("+codec:aac:m4a".to_string());
+        } else {
+            base_args.push("-x".to_string());
+            base_args.push("--audio-format".to_string());
+            base_args.push(target_fmt.to_string());
+        }
     }
 
     if format_id.is_none() && mode != "audio" && ffmpeg_available {

@@ -45,6 +45,7 @@ pub struct DownloadOptions {
     pub download_subtitles: bool,
     pub include_auto_subtitles: bool,
     pub download_mode: Option<String>,
+    pub audio_format: Option<String>,
     pub format_id: Option<String>,
     pub referer: Option<String>,
     pub extra_headers: Option<HashMap<String, String>>,

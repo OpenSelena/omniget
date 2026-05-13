@@ -265,6 +265,7 @@ impl PlatformDownloader for BlueskyDownloader {
                     opts.concurrent_fragments,
                     false,
                     &[],
+                    opts.audio_format.as_deref(),
                 )
                 .await;
             }

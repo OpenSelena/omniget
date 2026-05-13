@@ -105,7 +105,7 @@ fn handle_download_clipboard(app: &tauri::AppHandle) {
 
 async fn enqueue_from_clipboard(app: &tauri::AppHandle, url: String) {
     if matches!(
-        crate::external_url::queue_url_with_defaults(app, url.clone(), true).await,
+        crate::external_url::queue_url_with_defaults(app, url.clone(), true, None).await,
         Ok(crate::external_url::QueueUrlOutcome::Queued)
     ) {
         let _ = app.emit("hotkey-download-queued", serde_json::json!({ "url": url }));
@@ -124,5 +124,20 @@ fn handle_music_clipboard(app: &tauri::AppHandle) {
     if url::Url::parse(&text).is_err() {
         return;
     }
-    let _ = app.emit("music-hotkey-pressed", serde_json::json!({ "url": text }));
+
+    let app = app.clone();
+    tauri::async_runtime::spawn(async move {
+        if matches!(
+            crate::external_url::queue_url_with_defaults(
+                &app,
+                text.clone(),
+                true,
+                Some("audio".to_string()),
+            )
+            .await,
+            Ok(crate::external_url::QueueUrlOutcome::Queued)
+        ) {
+            let _ = app.emit("hotkey-download-queued", serde_json::json!({ "url": text }));
+        }
+    });
 }
