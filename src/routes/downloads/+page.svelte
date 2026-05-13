@@ -41,6 +41,15 @@
     }
   });
 
+  function qualityChip(item: GenericDownloadItem): string | null {
+    if (item.downloadMode === "audio") return $t('omnibox.quality_audio') as string;
+    if (!item.quality) return null;
+    const q = item.quality.toLowerCase();
+    if (q === "best" || q === "highest") return $t('omnibox.quality_best_short') as string;
+    if (q === "audio") return $t('omnibox.quality_audio') as string;
+    return item.quality;
+  }
+
   function canOpenInStudy(item: GenericDownloadItem): boolean {
     return (
       studyAvailable &&
@@ -310,6 +319,9 @@
         <PlatformIcon platform={item.platform} size={16} />
         <QueueKindBadge kind={item.queueKind} size={14} />
         <span class="item-name">{item.name}</span>
+        {#if qualityChip(item)}
+          <span class="quality-chip" title={$t('downloads.quality_hint')}>{qualityChip(item)}</span>
+        {/if}
       </div>
       <div class="item-header-actions">
         {#if item.status === "downloading"}
@@ -1001,6 +1013,20 @@
     font-size: 12.5px;
     font-weight: 500;
     color: var(--gray);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .quality-chip {
+    padding: 1px 7px;
+    font-size: 10.5px;
+    font-weight: 600;
+    line-height: 1.4;
+    color: var(--secondary);
+    background: var(--button-elevated);
+    border: 1px solid var(--button-stroke);
+    border-radius: 999px;
+    letter-spacing: 0.2px;
+    flex-shrink: 0;
     font-variant-numeric: tabular-nums;
   }
 

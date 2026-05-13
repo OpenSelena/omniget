@@ -1,23 +1,83 @@
 <script lang="ts">
+  import { goto } from "$app/navigation";
   import { musicPlayer } from "$lib/study-music/player-store.svelte";
   import { musicUI } from "$lib/study-music/ui-store.svelte";
   import { t } from "$lib/i18n";
   import CoverImage from "./CoverImage.svelte";
   import ProgressBar from "./ProgressBar.svelte";
   import VolumeControl from "./VolumeControl.svelte";
+  import PlayerErrorBanner from "./PlayerErrorBanner.svelte";
 
   const t_ = $derived(musicPlayer.currentTrack);
+  const videoSupported = $derived(t_?.source === "youtube");
+  const showVideoOverlay = $derived(
+    musicUI.videoMode && videoSupported && !!musicPlayer.youtubeVideoUrl,
+  );
+  const isResolving = $derived(musicPlayer.status === "resolving");
+
+  let videoEl = $state<HTMLVideoElement | null>(null);
+
+  $effect(() => {
+    if (!videoEl) return;
+    const drift = Math.abs(videoEl.currentTime - musicPlayer.currentTime);
+    if (drift > 0.3 && Number.isFinite(musicPlayer.currentTime)) {
+      try {
+        videoEl.currentTime = musicPlayer.currentTime;
+      } catch {
+        /* readyState may be too low */
+      }
+    }
+  });
+
+  $effect(() => {
+    if (!videoEl) return;
+    if (musicPlayer.paused) {
+      videoEl.pause();
+    } else {
+      void videoEl.play().catch(() => {});
+    }
+  });
 
   function favoriteToggle() {
     if (!t_) return;
     void musicPlayer.toggleFavorite(t_.id);
   }
+
+  function openWatch() {
+    if (!t_ || !videoSupported || !musicPlayer.youtubeVideoUrl) return;
+    goto(`/study/music/watch/${t_.id}`);
+  }
+
+  function openNowPlaying() {
+    if (!t_) return;
+    goto("/study/music/now-playing");
+  }
+
+  function toggleVideoMode() {
+    if (!videoSupported) return;
+    musicUI.toggleVideoMode();
+  }
 </script>
 
 {#if t_}
+  <PlayerErrorBanner />
   <div class="player-bar" role="region" aria-label={$t("study.music.player_aria")}>
     <div class="left">
-      <div class="cover-mini">
+      <!-- svelte-ignore a11y_click_events_have_key_events -->
+      <!-- svelte-ignore a11y_no_static_element_interactions -->
+      <div
+        class="cover-mini"
+        class:expandable={showVideoOverlay}
+        class:resolving={isResolving}
+        onclick={showVideoOverlay ? openWatch : undefined}
+        role={showVideoOverlay ? "button" : undefined}
+        title={showVideoOverlay
+          ? ($t("study.music.expand_video") as string)
+          : isResolving
+            ? ($t("study.music.player_resolving") as string)
+            : undefined}
+        aria-busy={isResolving}
+      >
         <CoverImage
           src={t_.cover_path}
           alt={t_.title ?? t_.path}
@@ -25,13 +85,38 @@
           rounded="md"
           trackId={t_.id}
         />
+        {#if isResolving}
+          <span class="resolve-spinner" aria-hidden="true"></span>
+        {/if}
+        {#if videoSupported && musicPlayer.youtubeVideoUrl}
+          {#key musicPlayer.youtubeVideoUrl}
+            <!-- svelte-ignore a11y_media_has_caption -->
+            <video
+              bind:this={videoEl}
+              class="cover-video"
+              class:visible={showVideoOverlay}
+              src={musicPlayer.youtubeVideoUrl}
+              muted
+              playsinline
+              preload="auto"
+              tabindex="-1"
+              aria-hidden={!showVideoOverlay}
+            ></video>
+          {/key}
+        {/if}
       </div>
-      <div class="info">
+      <button
+        type="button"
+        class="info-btn"
+        onclick={openNowPlaying}
+        aria-label={$t("study.music.now_playing_open") as string}
+        title={$t("study.music.now_playing_open") as string}
+      >
         <span class="title">{t_.title ?? t_.path}</span>
         {#if t_.artist}
           <span class="artist">{t_.artist}</span>
         {/if}
-      </div>
+      </button>
       <button
         type="button"
         class="fav"
@@ -136,6 +221,24 @@
       <button
         type="button"
         class="ctrl-btn"
+        class:active={musicUI.videoMode && videoSupported}
+        disabled={!videoSupported}
+        onclick={toggleVideoMode}
+        aria-label={(videoSupported
+          ? $t("study.music.video_mode_toggle")
+          : $t("study.music.video_mode_only_youtube")) as string}
+        title={(videoSupported
+          ? $t("study.music.video_mode_toggle")
+          : $t("study.music.video_mode_only_youtube")) as string}
+      >
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="2" y="6" width="14" height="12" rx="2"/>
+          <polygon points="22 8 16 12 22 16 22 8" fill={musicUI.videoMode && videoSupported ? "currentColor" : "none"}/>
+        </svg>
+      </button>
+      <button
+        type="button"
+        class="ctrl-btn"
         class:active={musicUI.rightbarTab === "info"}
         onclick={() => musicUI.toggleInfo()}
         aria-label={$t("study.music.tab_info") as string}
@@ -226,19 +329,101 @@
     min-width: 0;
   }
   .cover-mini {
+    position: relative;
     flex-shrink: 0;
     width: 56px;
     height: 56px;
     box-shadow: 0 2px 8px color-mix(in oklab, black 20%, transparent);
     border-radius: 6px;
     overflow: hidden;
+    background: rgba(40, 40, 40, 0.6);
   }
-  .info {
+  .cover-mini.expandable {
+    cursor: zoom-in;
+  }
+  .cover-mini.resolving :global(img),
+  .cover-mini.resolving :global(.cover-fallback) {
+    opacity: 0.45;
+    filter: saturate(0.6);
+    transition: opacity 200ms ease, filter 200ms ease;
+  }
+  .resolve-spinner {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 22px;
+    height: 22px;
+    margin: -11px 0 0 -11px;
+    border: 2px solid rgba(255, 255, 255, 0.45);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    pointer-events: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .resolve-spinner { animation: none; border-top-color: rgba(255, 255, 255, 0.7); }
+    .cover-mini.resolving :global(img),
+    .cover-mini.resolving :global(.cover-fallback) {
+      transition: none;
+    }
+  }
+  .cover-mini.expandable:hover::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: color-mix(in oklab, black 30%, transparent);
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  .cover-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    opacity: 0;
+    transition: opacity 200ms ease;
+    background: black;
+    pointer-events: none;
+  }
+  .cover-video.visible {
+    opacity: 1;
+  }
+  .ctrl-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+  .ctrl-btn:disabled:hover {
+    color: var(--tertiary);
+    background: transparent;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .cover-video {
+      transition: none;
+    }
+  }
+  .info-btn {
     display: flex;
     flex-direction: column;
+    align-items: flex-start;
     min-width: 0;
     overflow: hidden;
     flex: 1;
+    padding: 4px 6px;
+    background: transparent;
+    border: 0;
+    border-radius: 6px;
+    color: inherit;
+    cursor: pointer;
+    text-align: left;
+    font-family: inherit;
+    transition: background 120ms ease;
+  }
+  .info-btn:hover { background: rgba(255, 255, 255, 0.04); }
+  .info-btn:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
   }
   .title {
     font-size: 13px;

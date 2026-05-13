@@ -8,8 +8,16 @@
     type ScTrack,
     type ScUser,
   } from "$lib/study-music/soundcloud-store.svelte";
+  import { downloadStore } from "$lib/study-music/download-store.svelte";
+  import {
+    getFirstDownloadDone,
+    getLastCodec,
+    getLastDownloadDir,
+  } from "$lib/study-music/local-prefs";
   import { colorFromString } from "$lib/study-music/format";
   import SoundCloudDownloadDialog from "$lib/study-music-components/SoundCloudDownloadDialog.svelte";
+  import SoundCloudDownloadButton from "$lib/study-music-components/SoundCloudDownloadButton.svelte";
+  import SoundCloudError from "$lib/study-music-components/SoundCloudError.svelte";
 
   type Tab = "tracks" | "playlists" | "users";
 
@@ -21,6 +29,10 @@
   let playlists = $state<ScPlaylist[]>([]);
   let users = $state<ScUser[]>([]);
   let loading = $state(false);
+  let searchError = $state<string | null>(null);
+  let playbackError = $state<string | null>(null);
+  let playbackTrack = $state<ScTrack | null>(null);
+  let playbackQueue = $state<ScTrack[] | null>(null);
   let downloadTrack = $state<ScTrack | null>(null);
   let timer: ReturnType<typeof setTimeout> | null = null;
 
@@ -47,6 +59,7 @@
     const q = query.trim();
     if (!q) return;
     loading = true;
+    searchError = null;
     try {
       const [t, p, u] = await Promise.allSettled([
         soundcloudStore.search("tracks", q, 30),
@@ -56,19 +69,40 @@
       tracks = (t.status === "fulfilled" ? (t.value as ScTrack[]) : []) ?? [];
       playlists = (p.status === "fulfilled" ? (p.value as ScPlaylist[]) : []) ?? [];
       users = (u.status === "fulfilled" ? (u.value as ScUser[]) : []) ?? [];
+      const firstReject = [t, p, u].find((r) => r.status === "rejected");
+      if (
+        firstReject &&
+        firstReject.status === "rejected" &&
+        tracks.length === 0 &&
+        playlists.length === 0 &&
+        users.length === 0
+      ) {
+        searchError =
+          firstReject.reason instanceof Error
+            ? firstReject.reason.message
+            : String(firstReject.reason);
+      }
     } catch (e) {
-      showToast("error", e instanceof Error ? e.message : String(e));
+      searchError = e instanceof Error ? e.message : String(e);
     } finally {
       loading = false;
     }
   }
 
   async function play(track: ScTrack, queueAll: ScTrack[]) {
+    playbackError = null;
+    playbackTrack = track;
+    playbackQueue = queueAll;
     try {
       await soundcloudStore.playTrack(track, queueAll);
     } catch (e) {
-      showToast("error", e instanceof Error ? e.message : String(e));
+      playbackError = e instanceof Error ? e.message : String(e);
     }
+  }
+
+  function retryPlayback() {
+    if (!playbackTrack) return;
+    void play(playbackTrack, playbackQueue ?? [playbackTrack]);
   }
 
   function fmtDuration(ms: number): string {
@@ -76,6 +110,46 @@
     const m = Math.floor(total / 60);
     const s = total % 60;
     return `${m}:${s.toString().padStart(2, "0")}`;
+  }
+
+  function folderName(dir: string): string {
+    const parts = dir.split(/[\\/]/).filter(Boolean);
+    return parts[parts.length - 1] ?? dir;
+  }
+
+  async function startInlineDownload(track: ScTrack) {
+    const codec = getLastCodec() ?? "mp3";
+    const dir = getLastDownloadDir();
+    if (!dir) {
+      downloadTrack = track;
+      return;
+    }
+    const optId = downloadStore.addOptimisticSingleJob({
+      trackId: track.id,
+      title: track.title,
+      artist: track.user.username,
+      artwork:
+        soundcloudStore.pickArtwork(track.artwork_url ?? track.user.avatar_url) ?? null,
+    });
+    try {
+      await soundcloudStore.download({
+        trackId: track.id,
+        codec,
+        outputDir: dir,
+        quality: "progressive",
+      });
+      showToast("success", `Pronto — salvo na pasta ${folderName(dir)}`);
+    } catch (e) {
+      downloadStore.markJobError(optId, e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  function handleDownload(track: ScTrack, advanced: boolean) {
+    if (advanced || !getFirstDownloadDone() || !getLastDownloadDir()) {
+      downloadTrack = track;
+      return;
+    }
+    void startInlineDownload(track);
   }
 </script>
 
@@ -103,6 +177,17 @@
     {#if loading}<span class="spinner"></span>{/if}
   </div>
 
+  {#if searchError}
+    <SoundCloudError error={searchError} onRetry={doSearch} />
+  {/if}
+  {#if playbackError}
+    <SoundCloudError
+      error={playbackError}
+      trackUrl={playbackTrack?.permalink_url}
+      onRetry={retryPlayback}
+    />
+  {/if}
+
   {#if tracks.length || playlists.length || users.length}
     <div class="tabs" role="tablist">
       <button type="button" class="tab" class:on={tab === "tracks"} onclick={() => (tab = "tracks")} role="tab" aria-selected={tab === "tracks"}>Faixas {tracks.length > 0 ? `(${tracks.length})` : ""}</button>
@@ -123,9 +208,7 @@
             <span class="a">{t.user.username}</span>
           </div>
           <span class="d">{fmtDuration(t.duration)}</span>
-          <button type="button" class="dl" onclick={(e) => { e.stopPropagation(); downloadTrack = t; }} aria-label="Baixar">
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          </button>
+          <SoundCloudDownloadButton track={t} onTrigger={handleDownload} />
         </div>
       {/each}
     </div>
@@ -184,8 +267,6 @@
   .t { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .a { font-size: 12px; color: rgba(255,255,255,0.55); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .d { font-size: 13px; color: rgba(255,255,255,0.55); text-align: right; font-variant-numeric: tabular-nums; }
-  .dl { width: 28px; height: 28px; padding: 0; background: transparent; border: 0; color: rgba(255,255,255,0.5); cursor: pointer; display: grid; place-items: center; border-radius: 4px; transition: background 200ms ease, color 200ms ease; }
-  .dl:hover { background: rgba(255,255,255,0.1); color: #ff5500; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 24px; }
   .card { background: transparent; border: 0; padding: 0; cursor: pointer; color: inherit; text-align: left; text-decoration: none; }
   .card-cover, .card-circle { aspect-ratio: 1/1; border-radius: 12px; overflow: hidden; margin-bottom: 12px; background: rgba(40,40,40,0.8); }

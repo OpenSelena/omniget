@@ -11,6 +11,12 @@
     connected: boolean;
   };
 
+  type MusicSettings = {
+    show_cover: boolean;
+    show_buttons: boolean;
+    update_interval_ms: number;
+  };
+
   type Props = {
     open: boolean;
     onClose: () => void;
@@ -19,6 +25,8 @@
   let { open, onClose }: Props = $props();
 
   let status = $state<Status | null>(null);
+  let music = $state<MusicSettings | null>(null);
+  let intervalSecondsInput = $state(5);
   let appIdInput = $state("");
   let imageKeyInput = $state("");
   let busy = $state(false);
@@ -32,6 +40,15 @@
     } catch {
       status = null;
     }
+    try {
+      music = await pluginInvoke<MusicSettings>(
+        "study",
+        "study:music:rpc:music_settings:get",
+      );
+      intervalSecondsInput = Math.round((music.update_interval_ms ?? 5000) / 1000);
+    } catch {
+      music = null;
+    }
   }
 
   $effect(() => {
@@ -40,6 +57,45 @@
       void load();
     }
   });
+
+  async function setMusicField(
+    patch: Partial<MusicSettings>,
+  ): Promise<MusicSettings | null> {
+    if (busy) return null;
+    busy = true;
+    try {
+      const res = await pluginInvoke<MusicSettings>(
+        "study",
+        "study:music:rpc:music_settings:set",
+        patch,
+      );
+      music = res;
+      intervalSecondsInput = Math.round((res.update_interval_ms ?? 5000) / 1000);
+      return res;
+    } catch (e) {
+      showToast("error", e instanceof Error ? e.message : String(e));
+      return null;
+    } finally {
+      busy = false;
+    }
+  }
+
+  function toggleShowCover() {
+    if (!music) return;
+    void setMusicField({ show_cover: !music.show_cover });
+  }
+
+  function toggleShowButtons() {
+    if (!music) return;
+    void setMusicField({ show_buttons: !music.show_buttons });
+  }
+
+  function commitInterval() {
+    if (!music) return;
+    const seconds = Math.max(2, Math.min(30, Math.floor(Number(intervalSecondsInput) || 5)));
+    intervalSecondsInput = seconds;
+    void setMusicField({ update_interval_ms: seconds * 1000 });
+  }
 
   async function toggleEnabled() {
     if (!status || busy) return;
@@ -152,6 +208,52 @@
             />
             <span>{$t("study.music.rpc_enable")}</span>
           </label>
+
+          {#if music && status.enabled}
+            <section class="music-section">
+              <h4>{$t("study.music.rpc_music_section")}</h4>
+              <label class="row">
+                <input
+                  type="checkbox"
+                  checked={music.show_cover}
+                  onchange={toggleShowCover}
+                  disabled={busy}
+                />
+                <div class="row-text">
+                  <span>{$t("study.music.rpc_show_cover")}</span>
+                  <small>{$t("study.music.rpc_show_cover_hint")}</small>
+                </div>
+              </label>
+              <label class="row">
+                <input
+                  type="checkbox"
+                  checked={music.show_buttons}
+                  onchange={toggleShowButtons}
+                  disabled={busy}
+                />
+                <div class="row-text">
+                  <span>{$t("study.music.rpc_show_buttons")}</span>
+                  <small>{$t("study.music.rpc_show_buttons_hint")}</small>
+                </div>
+              </label>
+              <label class="row interval">
+                <div class="row-text">
+                  <span>{$t("study.music.rpc_update_interval")}</span>
+                  <small>{$t("study.music.rpc_update_interval_hint")}</small>
+                </div>
+                <input
+                  type="number"
+                  min="2"
+                  max="30"
+                  step="1"
+                  bind:value={intervalSecondsInput}
+                  onblur={commitInterval}
+                  onchange={commitInterval}
+                  disabled={busy}
+                />
+              </label>
+            </section>
+          {/if}
 
           <details class="advanced">
             <summary>{$t("study.music.rpc_advanced")}</summary>
@@ -296,6 +398,67 @@
     border-radius: 10px;
   }
   .toggle input { width: 14px; height: 14px; accent-color: var(--accent); }
+  .music-section {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px 14px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 10px;
+  }
+  .music-section h4 {
+    margin: 0;
+    font-size: 11px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.55);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+  }
+  .row input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    margin-top: 2px;
+    accent-color: var(--accent);
+  }
+  .row.interval {
+    align-items: center;
+    justify-content: space-between;
+    cursor: default;
+  }
+  .row.interval input[type="number"] {
+    width: 72px;
+    padding: 6px 8px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.95);
+    font-family: ui-monospace, monospace;
+    font-size: 12px;
+    outline: none;
+    text-align: right;
+  }
+  .row.interval input[type="number"]:focus { border-color: var(--accent); }
+  .row-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .row-text span {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.9);
+  }
+  .row-text small {
+    font-size: 11px;
+    line-height: 1.4;
+    color: rgba(255, 255, 255, 0.45);
+  }
   .advanced {
     background: rgba(0, 0, 0, 0.2);
     border: 1px solid rgba(255, 255, 255, 0.06);

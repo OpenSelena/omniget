@@ -1,27 +1,48 @@
 <script lang="ts">
+  import { onDestroy, onMount } from "svelte";
   import { goto } from "$app/navigation";
   import { page } from "$app/stores";
   import { t } from "$lib/i18n";
   import { musicUI } from "$lib/study-music/ui-store.svelte";
   import { musicPlayer } from "$lib/study-music/player-store.svelte";
   import { musicTheme } from "$lib/study-music/theme-store.svelte";
+  import { downloadStore } from "$lib/study-music/download-store.svelte";
   import MusicSidebar from "$lib/study-music-components/MusicSidebar.svelte";
   import PlayerBar from "$lib/study-music-components/PlayerBar.svelte";
+  import DownloadsDock from "$lib/study-music-components/DownloadsDock.svelte";
 
   let { children } = $props();
 
-  const accentBg = $derived.by(() => {
+  onMount(() => {
+    downloadStore.start();
+  });
+
+  onDestroy(() => {
+    downloadStore.stop();
+  });
+
+  const isFullscreen = $derived($page.url.pathname.startsWith("/study/music/now-playing"));
+
+  const paletteVars = $derived.by(() => {
     if (!musicTheme.useDominant) return null;
-    const c = musicPlayer.dominantColor;
-    if (!c) return null;
+    const palette = musicPlayer.palette;
+    const dominant = palette?.[0] ?? musicPlayer.dominantColor;
+    if (!dominant) return null;
+    const accent = palette?.[1] ?? dominant;
+    const highlight = palette?.[2] ?? accent;
     return {
-      strong: `rgb(${c.r}, ${c.g}, ${c.b})`,
-      mid: `rgba(${c.r}, ${c.g}, ${c.b}, 0.18)`,
-      soft: `rgba(${c.r}, ${c.g}, ${c.b}, 0.08)`,
+      dominant: `rgb(${dominant.r}, ${dominant.g}, ${dominant.b})`,
+      accent: `rgb(${accent.r}, ${accent.g}, ${accent.b})`,
+      accentSoft: `rgba(${accent.r}, ${accent.g}, ${accent.b}, 0.18)`,
+      accentMid: `rgba(${accent.r}, ${accent.g}, ${accent.b}, 0.28)`,
+      highlight: `rgb(${highlight.r}, ${highlight.g}, ${highlight.b})`,
+      bgTint: `rgba(${dominant.r}, ${dominant.g}, ${dominant.b}, 0.10)`,
+      scrubberGradient: `linear-gradient(to right, rgb(${accent.r}, ${accent.g}, ${accent.b}), rgb(${highlight.r}, ${highlight.g}, ${highlight.b}))`,
     };
   });
 
   const themeAccentOverride = $derived(musicTheme.effectiveAccent);
+  const reduceAnimationsAttr = $derived(musicTheme.reduceAnimationsActive ? "true" : null);
 
   function exitFullscreen() {
     if (typeof window === "undefined") {
@@ -64,8 +85,10 @@
       if (musicUI.contextMenu.open) return;
       if (musicUI.selectedCount() > 0) return;
       e.preventDefault();
-      // Drill-down: se está em subpage de /study/music, volta pra home da aba.
-      // Se já está na home (/study/music), exit pra fora do music.
+      if ($page.url.pathname.startsWith("/study/music/now-playing")) {
+        goto("/study/music");
+        return;
+      }
       if ($page.url.pathname !== "/study/music") {
         goto("/study/music");
       } else {
@@ -79,33 +102,45 @@
 
 <div
   class="music-shell"
-  style:--music-accent={accentBg ? accentBg.strong : 'transparent'}
-  style:--music-accent-mid={accentBg ? accentBg.mid : 'transparent'}
-  style:--music-accent-soft={accentBg ? accentBg.soft : 'transparent'}
+  class:fullscreen={isFullscreen}
+  data-reduce-animations={reduceAnimationsAttr}
+  style:--music-accent={paletteVars?.accent ?? 'transparent'}
+  style:--music-accent-mid={paletteVars?.accentMid ?? 'transparent'}
+  style:--music-accent-soft={paletteVars?.accentSoft ?? 'transparent'}
+  style:--music-highlight={paletteVars?.highlight ?? 'transparent'}
+  style:--music-bg-tint={paletteVars?.bgTint ?? 'transparent'}
+  style:--music-scrubber-gradient={paletteVars?.scrubberGradient ?? null}
   style:--accent={themeAccentOverride ?? null}
 >
-  <MusicSidebar />
-  <main class="music-main">
-    <button
-      type="button"
-      class="exit-btn"
-      onclick={exitFullscreen}
-      aria-label={$t("study.music.exit") as string}
-      title={$t("study.music.exit") as string}
-    >
-      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <line x1="18" y1="6" x2="6" y2="18"/>
-        <line x1="6" y1="6" x2="18" y2="18"/>
-      </svg>
-      <span class="esc-hint">ESC</span>
-    </button>
-    <div class="music-content">
+  {#if !isFullscreen}
+    <MusicSidebar />
+  {/if}
+  <main class="music-main" class:fullscreen={isFullscreen}>
+    {#if !isFullscreen}
+      <button
+        type="button"
+        class="exit-btn"
+        onclick={exitFullscreen}
+        aria-label={$t("study.music.exit") as string}
+        title={$t("study.music.exit") as string}
+      >
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+        <span class="esc-hint">ESC</span>
+      </button>
+    {/if}
+    <div class="music-content" class:fullscreen={isFullscreen}>
       {@render children()}
     </div>
   </main>
-  <div class="music-player">
-    <PlayerBar />
-  </div>
+  {#if !isFullscreen}
+    <div class="music-player">
+      <PlayerBar />
+    </div>
+  {/if}
+  <DownloadsDock />
 </div>
 
 <style>
@@ -126,6 +161,11 @@
     color: var(--secondary);
     transition: background 600ms ease;
   }
+  .music-shell.fullscreen {
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    grid-template-areas: "main";
+  }
   .music-shell > :global(aside.music-sidebar) {
     grid-area: side;
   }
@@ -136,10 +176,19 @@
     overflow-x: hidden;
     scrollbar-width: thin;
   }
+  .music-main.fullscreen {
+    overflow: hidden;
+  }
   .music-content {
     padding: 24px 32px 32px;
     max-width: 1600px;
     margin-inline: auto;
+  }
+  .music-content.fullscreen {
+    padding: 0;
+    max-width: none;
+    margin: 0;
+    height: 100%;
   }
   .music-player {
     grid-area: player;
@@ -189,5 +238,13 @@
     .music-shell > :global(aside.music-sidebar) {
       display: none;
     }
+  }
+  :global(.music-shell[data-reduce-animations="true"] *),
+  :global(.music-shell[data-reduce-animations="true"] *::before),
+  :global(.music-shell[data-reduce-animations="true"] *::after) {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
   }
 </style>

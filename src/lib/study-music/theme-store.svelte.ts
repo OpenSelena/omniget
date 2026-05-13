@@ -6,10 +6,13 @@ export type MusicThemePreset =
   | "amber"
   | "custom";
 
+export type ReduceAnimationsMode = "auto" | "on" | "off";
+
 export type MusicTheme = {
   preset: MusicThemePreset;
   accent: string;
   useDominant: boolean;
+  reduceAnimations: ReduceAnimationsMode;
 };
 
 const STORAGE_KEY = "study.music.theme.v1";
@@ -26,7 +29,10 @@ const DEFAULT_THEME: MusicTheme = {
   preset: "default",
   accent: "",
   useDominant: true,
+  reduceAnimations: "auto",
 };
+
+const REDUCE_ANIMATIONS_MODES: ReduceAnimationsMode[] = ["auto", "on", "off"];
 
 function isHexColor(value: string): boolean {
   return /^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(value);
@@ -36,8 +42,21 @@ class MusicThemeStore {
   preset = $state<MusicThemePreset>("default");
   accent = $state("");
   useDominant = $state(true);
+  reduceAnimations = $state<ReduceAnimationsMode>("auto");
+  private prefersReducedMotion = $state(false);
 
   load() {
+    if (typeof window !== "undefined" && typeof window.matchMedia === "function") {
+      try {
+        const mql = window.matchMedia("(prefers-reduced-motion: reduce)");
+        this.prefersReducedMotion = mql.matches;
+        mql.addEventListener?.("change", (e) => {
+          this.prefersReducedMotion = e.matches;
+        });
+      } catch {
+        /* ignore */
+      }
+    }
     if (typeof localStorage === "undefined") return;
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
@@ -54,6 +73,12 @@ class MusicThemeStore {
       if (typeof data.useDominant === "boolean") {
         this.useDominant = data.useDominant;
       }
+      if (
+        typeof data.reduceAnimations === "string" &&
+        REDUCE_ANIMATIONS_MODES.includes(data.reduceAnimations as ReduceAnimationsMode)
+      ) {
+        this.reduceAnimations = data.reduceAnimations as ReduceAnimationsMode;
+      }
     } catch {
       /* ignore */
     }
@@ -68,11 +93,23 @@ class MusicThemeStore {
           preset: this.preset,
           accent: this.accent,
           useDominant: this.useDominant,
+          reduceAnimations: this.reduceAnimations,
         }),
       );
     } catch {
       /* ignore */
     }
+  }
+
+  setReduceAnimations(mode: ReduceAnimationsMode) {
+    this.reduceAnimations = mode;
+    this.persist();
+  }
+
+  get reduceAnimationsActive(): boolean {
+    if (this.reduceAnimations === "on") return true;
+    if (this.reduceAnimations === "off") return false;
+    return this.prefersReducedMotion;
   }
 
   setPreset(preset: MusicThemePreset) {
@@ -99,6 +136,7 @@ class MusicThemeStore {
     this.preset = DEFAULT_THEME.preset;
     this.accent = DEFAULT_THEME.accent;
     this.useDominant = DEFAULT_THEME.useDominant;
+    this.reduceAnimations = DEFAULT_THEME.reduceAnimations;
     this.persist();
   }
 

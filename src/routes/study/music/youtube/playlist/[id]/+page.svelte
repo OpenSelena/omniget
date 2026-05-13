@@ -1,80 +1,34 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import { page } from "$app/stores";
-  import { pluginInvoke } from "$lib/plugin-invoke";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { fmtDuration } from "$lib/study-music/format";
-  import {
-    musicPlayer,
-    type MusicTrack,
-  } from "$lib/study-music/player-store.svelte";
   import { t } from "$lib/i18n";
+  import { showToast } from "$lib/stores/toast-store.svelte";
+  import {
+    studyYoutubePlaylist,
+    type YoutubePlaylist,
+    type YoutubePlaylistVideo,
+    type YoutubeSearchVideoItem,
+  } from "$lib/study-bridge";
+  import MediaHero from "$lib/study-music-components/MediaHero.svelte";
+  import TrackListRow from "$lib/study-music-components/TrackListRow.svelte";
+  import YoutubeSkeleton from "$lib/study-music-youtube-components/YoutubeSkeleton.svelte";
+  import YoutubeError from "$lib/study-music-youtube-components/YoutubeError.svelte";
+  import EmptyPlaceholder from "$lib/study-music-components/EmptyPlaceholder.svelte";
+  import ExpandableText from "$lib/study-music-components/ExpandableText.svelte";
+  import StickyHeader from "$lib/study-music-components/StickyHeader.svelte";
+  import { playYoutubeVideoItem } from "$lib/study-music/youtube-play-helper";
+  import { musicPlayer } from "$lib/study-music/player-store.svelte";
 
-  type YtTrack = {
-    video_id: string;
-    url: string;
-    title: string | null;
-    artist: string | null;
-    uploader: string | null;
-    duration_ms: number | null;
-    thumbnail: string | null;
-    last_played_at: number | null;
-    play_count: number;
-    favorite: boolean;
-  };
-
-  type YtPlaylist = {
-    id: string;
-    url: string;
-    title: string | null;
-    uploader: string | null;
-    thumbnail: string | null;
-    track_count: number;
-    kind: string;
-  };
-
-  let playlist = $state<YtPlaylist | null>(null);
-  let tracks = $state<YtTrack[]>([]);
-  let loading = $state(true);
+  let playlistId = $derived($page.params.id ?? "");
+  let playlist = $state<YoutubePlaylist | null>(null);
+  let loading = $state(false);
   let error = $state<string | null>(null);
-
-  const playlistId = $derived(decodeURIComponent($page.params.id ?? ""));
-
-  function ytToMusicTrack(t: YtTrack): MusicTrack {
-    const numericId =
-      Math.abs(
-        t.video_id
-          .split("")
-          .reduce((acc, c) => (acc * 31 + c.charCodeAt(0)) | 0, 0),
-      ) || 1;
-    return {
-      id: numericId,
-      path: t.url,
-      title: t.title,
-      artist: t.artist ?? t.uploader,
-      album: playlist?.title ?? null,
-      duration_ms: t.duration_ms,
-      cover_path: null,
-      favorite: t.favorite,
-      play_count: t.play_count,
-      last_played_at: t.last_played_at,
-      source: "youtube",
-      youtube_url: t.url,
-      youtube_video_id: t.video_id,
-      youtube_thumbnail: t.thumbnail ?? undefined,
-    };
-  }
+  let pendingShuffle = $state(false);
 
   async function load() {
     loading = true;
     error = null;
     try {
-      const res = await pluginInvoke<{
-        playlist: YtPlaylist;
-        tracks: YtTrack[];
-      }>("study", "study:music:youtube:playlist_get", { id: playlistId });
-      playlist = res.playlist;
-      tracks = res.tracks ?? [];
+      playlist = await studyYoutubePlaylist({ playlistId });
     } catch (e) {
       error = e instanceof Error ? e.message : String(e);
     } finally {
@@ -82,104 +36,151 @@
     }
   }
 
-  function playAll() {
-    if (tracks.length === 0) return;
-    const queue = tracks.map(ytToMusicTrack);
-    void musicPlayer.play(queue[0], queue);
+  function totalDurationText(videos: YoutubePlaylistVideo[]): string | null {
+    const totalSeconds = videos.reduce((acc, v) => acc + (v.duration_seconds ?? 0), 0);
+    if (totalSeconds <= 0) return null;
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    if (hours > 0) return `${hours}h ${minutes}min`;
+    return `${minutes}min`;
   }
 
-  function playOne(t: YtTrack) {
-    const queue = tracks.map(ytToMusicTrack);
-    const target = queue.find((q) => q.youtube_video_id === t.video_id);
-    if (target) void musicPlayer.play(target, queue);
+  function asSearchVideo(v: YoutubePlaylistVideo, fallbackThumb: string | null): YoutubeSearchVideoItem {
+    return {
+      kind: "video",
+      video_id: v.video_id,
+      title: v.title,
+      channel_id: v.channel_id,
+      channel_title: v.channel_title,
+      thumbnail_url: v.thumbnail_url ?? fallbackThumb,
+      duration_text: v.duration_text,
+      published_time_text: null,
+      view_count_text: null,
+      short_description: null,
+      is_live: false,
+    };
   }
 
-  async function toggleFavorite(t: YtTrack) {
+  async function playFromIndex(idx: number, shuffle = false) {
+    if (!playlist || playlist.videos.length === 0) return;
+    const fallbackThumb = playlist.info.thumbnail_url;
+    let queue = playlist.videos.map((v) => asSearchVideo(v, fallbackThumb));
+    let target = queue[idx];
+    if (shuffle) {
+      const rest = queue.slice();
+      for (let i = rest.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [rest[i], rest[j]] = [rest[j], rest[i]];
+      }
+      queue = rest;
+      target = queue[0];
+    }
     try {
-      const res = await pluginInvoke<{ favorite: boolean }>(
-        "study",
-        "study:music:youtube:track_toggle_favorite",
-        { video_id: t.video_id },
-      );
-      tracks = tracks.map((x) =>
-        x.video_id === t.video_id ? { ...x, favorite: res.favorite } : x,
-      );
+      await playYoutubeVideoItem(target, queue);
     } catch (e) {
       showToast("error", e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  async function shareLink() {
+    if (!playlist) return;
+    const url = `https://www.youtube.com/playlist?list=${encodeURIComponent(playlist.info.playlist_id)}`;
+    try {
+      await navigator.clipboard.writeText(url);
+      showToast("success", $t("study.music.share_copied"));
+    } catch (e) {
+      showToast("error", e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  async function shuffleAll() {
+    if (pendingShuffle) return;
+    pendingShuffle = true;
+    try {
+      await playFromIndex(0, true);
+    } finally {
+      pendingShuffle = false;
     }
   }
 
   $effect(() => {
     if (playlistId) void load();
   });
-
-  onMount(() => {
-    void load();
-  });
 </script>
 
 <section class="page">
-  {#if loading}
-    <p class="muted">{$t("study.common.loading")}</p>
-  {:else if error}
-    <p class="error">{error}</p>
-  {:else if playlist}
-    <header class="hero">
-      <div class="hero-cover">
-        {#if playlist.thumbnail}
-          <img src={playlist.thumbnail} alt="" />
-        {:else}
-          <div class="fallback"></div>
-        {/if}
-      </div>
-      <div class="hero-meta">
-        <span class="eyebrow">{$t("study.music.yt_eyebrow")}</span>
-        <h1>{playlist.title ?? playlist.id}</h1>
-        {#if playlist.uploader}
-          <p class="hero-sub">{playlist.uploader}</p>
-        {/if}
-        <p class="hero-stats">{tracks.length} faixas</p>
-        <div class="hero-actions">
-          <button type="button" class="cta" onclick={playAll}>
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-            {$t("study.music.play")}
-          </button>
-        </div>
-      </div>
-    </header>
+  <StickyHeader>
+    <div class="sticky-row">
+      <button class="back" type="button" onclick={() => history.back()}>← {$t("study.music.back")}</button>
+      {#if playlist}
+        <span class="sticky-title">{playlist.info.title || playlistId}</span>
+      {/if}
+    </div>
+  </StickyHeader>
 
-    <ul class="track-list">
-      {#each tracks as track, i (track.video_id)}
-        <li class="row">
-          <button type="button" class="row-btn" onclick={() => playOne(track)}>
-            <span class="num">{i + 1}</span>
-            <span class="thumb-wrap">
-              {#if track.thumbnail}
-                <img src={track.thumbnail} alt="" loading="lazy" />
-              {/if}
-            </span>
-            <span class="info">
-              <span class="title">{track.title ?? track.video_id}</span>
-              {#if track.artist || track.uploader}
-                <span class="artist">{track.artist ?? track.uploader}</span>
-              {/if}
-            </span>
-            <span class="dur">{fmtDuration(track.duration_ms)}</span>
-          </button>
-          <button
-            type="button"
-            class="fav"
-            class:on={track.favorite}
-            onclick={(e) => { e.stopPropagation(); toggleFavorite(track); }}
-            aria-label={$t("study.music.favorite") as string}
-          >
-            <svg viewBox="0 0 24 24" width="14" height="14" fill={track.favorite ? "currentColor" : "none"} stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
-            </svg>
-          </button>
-        </li>
-      {/each}
-    </ul>
+  {#if loading && !playlist}
+    <div class="hero-skel"><YoutubeSkeleton kind="card" count={1} /></div>
+    <div class="list-skel"><YoutubeSkeleton kind="row" count={6} /></div>
+  {:else if error && !playlist}
+    <YoutubeError error={error} onRetry={() => { error = null; void load(); }} />
+  {:else if playlist}
+    {@const total = totalDurationText(playlist.videos)}
+    {@const trackCount = playlist.info.video_count ?? playlist.videos.length}
+    {@const ownerLine = playlist.info.owner_title
+      ? $t("study.music.youtube.creator_by", { name: playlist.info.owner_title })
+      : null}
+    <MediaHero
+      coverUrl={playlist.info.thumbnail_url}
+      eyebrow={$t("study.music.eyebrow_playlist")}
+      title={playlist.info.title || playlistId}
+      subtitle={ownerLine}
+      stats={[
+        { label: "", value: trackCount === 1 ? $t("study.music.track_count_one") : $t("study.music.tracks_count_n", { count: trackCount }) },
+        { label: "", value: total },
+        { label: "", value: playlist.info.view_count_text },
+      ]}
+      actions={[
+        {
+          id: "play",
+          label: $t("study.music.play_all"),
+          primary: true,
+          onClick: () => void playFromIndex(0, false),
+        },
+        {
+          id: "shuffle",
+          label: $t("study.music.shuffle_play"),
+          busy: pendingShuffle,
+          onClick: () => void shuffleAll(),
+        },
+        {
+          id: "share",
+          label: $t("study.music.share"),
+          onClick: () => void shareLink(),
+        },
+      ]}
+    >
+      {#snippet description()}
+        <ExpandableText text={playlist?.info.description ?? null} maxLines={3} />
+      {/snippet}
+    </MediaHero>
+
+    {#if playlist.videos.length === 0}
+      <EmptyPlaceholder title={$t("study.music.playlist_empty")} />
+    {:else}
+      <div class="tracklist">
+        {#each playlist.videos as v, idx (v.video_id)}
+          <TrackListRow
+            index={idx}
+            coverUrl={v.thumbnail_url}
+            title={v.title}
+            subtitle={v.channel_title}
+            durationText={v.duration_text}
+            isPlaying={musicPlayer.currentTrack?.youtube_video_id === v.video_id}
+            onPlay={() => void playFromIndex(idx, false)}
+          />
+        {/each}
+      </div>
+    {/if}
   {/if}
 </section>
 
@@ -187,174 +188,49 @@
   .page {
     display: flex;
     flex-direction: column;
-    gap: 28px;
-    padding-bottom: 40px;
+    gap: 16px;
+    padding: 0 20px 32px;
   }
-  .hero {
-    display: flex;
-    gap: 24px;
-    align-items: flex-end;
-  }
-  .hero-cover {
-    width: 200px;
-    height: 200px;
-    flex-shrink: 0;
-    border-radius: 10px;
-    overflow: hidden;
-    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.5);
-    background: rgba(40, 40, 40, 0.6);
-  }
-  .hero-cover img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .hero-cover .fallback {
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(135deg, #ff0000, #8b0000);
-  }
-  .hero-meta {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .eyebrow {
-    font-size: 11px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--accent);
-  }
-  .hero-meta h1 {
-    margin: 0;
-    font-size: 40px;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-  }
-  .hero-sub {
-    margin: 0;
-    color: rgba(255, 255, 255, 0.65);
-    font-size: 14px;
-  }
-  .hero-stats {
-    margin: 0;
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 12px;
-  }
-  .hero-actions {
-    display: flex;
-    gap: 8px;
-    margin-top: 12px;
-  }
-  .cta {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 22px;
-    border: 0;
-    border-radius: 999px;
-    background: var(--accent);
-    color: var(--on-accent, white);
-    font-family: inherit;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-  }
-  .track-list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-  }
-  .row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 4px 8px;
-    border-radius: 6px;
-  }
-  .row:hover { background: rgba(255, 255, 255, 0.04); }
-  .row-btn {
-    flex: 1;
+  .sticky-row {
     display: flex;
     align-items: center;
     gap: 12px;
-    padding: 6px 4px;
+    min-height: 32px;
+  }
+  .sticky-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.9);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    opacity: 0;
+    transition: opacity 200ms ease;
+  }
+  :global(.sticky-header.opaque) .sticky-title {
+    opacity: 1;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .sticky-title {
+      transition: none;
+    }
+  }
+  .back {
+    align-self: flex-start;
+    padding: 6px 10px;
     background: transparent;
     border: 0;
-    color: rgba(255, 255, 255, 0.95);
-    font-family: inherit;
-    text-align: left;
+    color: var(--tertiary);
     cursor: pointer;
-    min-width: 0;
+    font-size: 13px;
   }
-  .num {
-    flex-shrink: 0;
-    width: 24px;
-    text-align: center;
-    color: rgba(255, 255, 255, 0.5);
-    font-size: 12px;
-    font-variant-numeric: tabular-nums;
-  }
-  .thumb-wrap {
-    flex-shrink: 0;
-    width: 40px;
-    height: 40px;
-    background: rgba(40, 40, 40, 0.6);
-    border-radius: 4px;
-    overflow: hidden;
-  }
-  .thumb-wrap img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  .info {
-    flex: 1;
+  .back:hover { color: var(--secondary); }
+  .tracklist {
     display: flex;
     flex-direction: column;
-    min-width: 0;
     gap: 2px;
+    padding: 4px;
   }
-  .title {
-    font-size: 13px;
-    font-weight: 600;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .artist {
-    font-size: 11px;
-    color: rgba(255, 255, 255, 0.5);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-  .dur {
-    flex-shrink: 0;
-    font-size: 12px;
-    color: rgba(255, 255, 255, 0.5);
-    font-variant-numeric: tabular-nums;
-    min-width: 48px;
-    text-align: right;
-  }
-  .fav {
-    width: 28px;
-    height: 28px;
-    padding: 0;
-    background: transparent;
-    border: 0;
-    border-radius: 50%;
-    color: rgba(255, 255, 255, 0.5);
-    cursor: pointer;
-    display: grid;
-    place-items: center;
-  }
-  .fav:hover { color: var(--accent); background: rgba(255, 255, 255, 0.08); }
-  .fav.on { color: var(--accent); }
-  .muted { color: rgba(255, 255, 255, 0.5); }
-  .error { color: rgb(248, 113, 113); }
+  .hero-skel,
+  .list-skel { display: flex; flex-direction: column; gap: 8px; }
 </style>

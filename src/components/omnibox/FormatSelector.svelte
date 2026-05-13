@@ -19,6 +19,7 @@
 
   let {
     platform,
+    isPlaylist = false,
     formats = $bindable([]),
     selectedFormatId = $bindable<string | null>(null),
     loadingFormats = false,
@@ -90,7 +91,11 @@
   });
 </script>
 
-{#if isYtdlpPlatform(platform)}
+{#if isYtdlpPlatform(platform) && isPlaylist}
+  <div class="formats-playlist-note">
+    {$t('omnibox.formats_playlist_note')}
+  </div>
+{:else if isYtdlpPlatform(platform)}
   <button
     class="button formats-toggle-btn"
     onclick={onLoadFormats}
@@ -243,6 +248,16 @@
     align-items: center;
     gap: 6px;
     font-size: 14.5px;
+  }
+
+  .formats-playlist-note {
+    padding: calc(var(--padding) / 2) var(--padding);
+    background: var(--button-elevated);
+    border-radius: calc(var(--border-radius) - 2px);
+    border-left: 3px solid var(--cta);
+    font-size: 12.5px;
+    color: var(--secondary);
+    line-height: 1.4;
   }
 
   .small-spinner {

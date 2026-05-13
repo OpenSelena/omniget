@@ -116,12 +116,10 @@
     inset: 50% auto auto 0;
     transform: translateY(-50%);
     height: 4px;
-    background: var(--secondary);
+    background: var(--music-scrubber-gradient, var(--music-accent, var(--secondary)));
     border-radius: 2px;
     pointer-events: none;
-  }
-  .track:hover .filled {
-    background: var(--accent);
+    transition: background 400ms ease;
   }
   .thumb {
     position: absolute;
@@ -130,11 +128,12 @@
     height: 12px;
     margin-left: -6px;
     margin-top: -6px;
-    background: var(--secondary);
+    background: var(--music-highlight, var(--secondary));
     border-radius: 50%;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 120ms ease;
+    transition: opacity 120ms ease, background 400ms ease;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
   }
   .track:hover .thumb {
     opacity: 1;

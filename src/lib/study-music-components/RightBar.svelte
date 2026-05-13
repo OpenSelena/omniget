@@ -6,6 +6,7 @@
   import { fmtDuration, fmtDurationLong, trackDisplayTitle } from "$lib/study-music/format";
   import { t } from "$lib/i18n";
   import CoverImage from "./CoverImage.svelte";
+  import ChaptersList from "$lib/study-components/player/ChaptersList.svelte";
 
   let lyricsContainer = $state<HTMLDivElement | null>(null);
   let lineRefs: HTMLLIElement[] = [];
@@ -135,6 +136,22 @@
           </svg>
           <span>{$t("study.music.tab_info")}</span>
         </button>
+        {#if musicPlayer.youtubeChapters.length > 0}
+          <button
+            type="button"
+            role="tab"
+            class="tab"
+            class:active={musicUI.rightbarTab === "chapters"}
+            aria-selected={musicUI.rightbarTab === "chapters"}
+            onclick={() => setTab("chapters")}
+          >
+            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 6h18M3 12h18M3 18h18"/>
+            </svg>
+            <span>{$t("study.music.tab_chapters")}</span>
+            <span class="badge">{musicPlayer.youtubeChapters.length}</span>
+          </button>
+        {/if}
       </nav>
       <button type="button" class="close" onclick={close} aria-label={$t("study.common.close") as string}>×</button>
     </header>
@@ -255,6 +272,20 @@
               {/if}
             </dl>
             <p class="info-path" title={currentTrack.path}>{currentTrack.path}</p>
+          </div>
+        {/if}
+      {:else if musicUI.rightbarTab === "chapters"}
+        {#if musicPlayer.youtubeChapters.length === 0}
+          <p class="empty">{$t("study.music.chapters_empty")}</p>
+        {:else}
+          <div class="chapters-wrap">
+            <ChaptersList
+              chapters={musicPlayer.youtubeChapters}
+              currentTimeMs={Math.round(musicPlayer.currentTime * 1000)}
+              onJump={(toMs) => {
+                musicPlayer.seek(toMs / 1000);
+              }}
+            />
           </div>
         {/if}
       {/if}
@@ -539,5 +570,8 @@
     font-size: 10px;
     color: rgba(255, 255, 255, 0.45);
     word-break: break-all;
+  }
+  .chapters-wrap {
+    padding: 4px 0;
   }
 </style>

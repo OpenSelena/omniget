@@ -257,7 +257,16 @@ class SpotifySdkController {
   }
 
   async seek(positionMs: number): Promise<void> {
-    if (this.player) await this.player.seek(positionMs);
+    if (this.player) await this.player.seek(Math.max(0, Math.floor(positionMs)));
+  }
+
+  async getCurrentState(): Promise<SpotifySdkState | null> {
+    if (!this.player) return null;
+    try {
+      return await this.player.getCurrentState();
+    } catch {
+      return null;
+    }
   }
 
   async next(): Promise<void> {

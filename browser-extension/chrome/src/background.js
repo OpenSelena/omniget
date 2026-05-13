@@ -500,7 +500,53 @@ async function scanOpenTabsForCookies() {
   }
 }
 
+// Scan every tracked platform — useful when the user logged into a service
+// before installing the extension (no cookies.onChanged event was ever fired
+// for that login, and they may not have a tab open right now).
+async function scanAllPlatformsForCookies() {
+  if (!chrome.cookies?.getAll) return;
+  const allPlatforms = [
+    "youtube",
+    "instagram",
+    "tiktok",
+    "twitter",
+    "reddit",
+    "twitch",
+    "vimeo",
+    "bilibili",
+    "soundcloud",
+    "pinterest",
+    "hotmart",
+    "udemy",
+    "bluesky",
+    "telegram",
+  ];
+  for (const platform of allPlatforms) {
+    try {
+      void capturePlatformCookies(platform, true);
+    } catch (e) {
+      console.warn(`[OmniGet] proactive capture ${platform} failed`, e);
+    }
+  }
+}
+
 scanOpenTabsForCookies();
+// Also do a proactive sweep for users who logged in BEFORE installing the
+// extension (cookies.onChanged never fired, no tab open) — covers SoundCloud,
+// YouTube etc. when the user already had a session in their browser.
+scanAllPlatformsForCookies();
+
+if (chrome.runtime?.onStartup) {
+  chrome.runtime.onStartup.addListener(() => {
+    void scanOpenTabsForCookies();
+    void scanAllPlatformsForCookies();
+  });
+}
+if (chrome.runtime?.onInstalled) {
+  chrome.runtime.onInstalled.addListener(() => {
+    void scanAllPlatformsForCookies();
+  });
+}
 
 if (chrome.cookies?.onChanged) {
   chrome.cookies.onChanged.addListener((change) => {

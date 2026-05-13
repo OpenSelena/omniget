@@ -126,6 +126,10 @@ pub struct QueueItemInfo {
     pub external: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub eta_seconds: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub quality: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub download_mode: Option<String>,
 }
 
 pub struct QueueItem {
@@ -188,6 +192,8 @@ impl QueueItem {
             kind: self.kind,
             external: self.external,
             eta_seconds: self.eta_seconds,
+            quality: self.quality.clone(),
+            download_mode: self.download_mode.clone(),
         }
     }
 }

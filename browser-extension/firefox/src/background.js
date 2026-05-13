@@ -500,7 +500,36 @@ async function scanOpenTabsForCookies() {
   }
 }
 
+async function scanAllPlatformsForCookies() {
+  if (!chrome.cookies?.getAll) return;
+  const allPlatforms = [
+    "youtube", "instagram", "tiktok", "twitter", "reddit",
+    "twitch", "vimeo", "bilibili", "soundcloud", "pinterest",
+    "hotmart", "udemy", "bluesky", "telegram",
+  ];
+  for (const platform of allPlatforms) {
+    try {
+      void capturePlatformCookies(platform, true);
+    } catch (e) {
+      console.warn(`[OmniGet] proactive capture ${platform} failed`, e);
+    }
+  }
+}
+
 scanOpenTabsForCookies();
+scanAllPlatformsForCookies();
+
+if (chrome.runtime?.onStartup) {
+  chrome.runtime.onStartup.addListener(() => {
+    void scanOpenTabsForCookies();
+    void scanAllPlatformsForCookies();
+  });
+}
+if (chrome.runtime?.onInstalled) {
+  chrome.runtime.onInstalled.addListener(() => {
+    void scanAllPlatformsForCookies();
+  });
+}
 
 if (chrome.cookies?.onChanged) {
   chrome.cookies.onChanged.addListener((change) => {

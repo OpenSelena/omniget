@@ -27,6 +27,7 @@
   import { needsOnboarding } from "$lib/stores/onboarding-store.svelte";
   import { isYtdlpAvailable, isDepsChecked, refreshYtdlpStatus } from "$lib/stores/dependency-store.svelte";
   import { showToast } from "$lib/stores/toast-store.svelte";
+  import { ensureTrackerNotifications } from "$lib/tracker-notifications.svelte";
   import { t, locale } from "$lib/i18n";
   import { get } from "svelte/store";
   import { CORE_NAV_ITEMS, type NavItem } from "$lib/nav-config";
@@ -106,6 +107,7 @@
     let unlistenMusicHotkey: (() => void) | undefined;
     initDownloadListener().then((fn) => (cleanup = fn));
     setTimeout(() => void checkAutoVacuum(), 5000);
+    void ensureTrackerNotifications();
     import("$lib/rpc").then(({ rpcSyncIdleStats }) => rpcSyncIdleStats());
 
     listen<{ url: string }>("music-hotkey-pressed", async (event) => {

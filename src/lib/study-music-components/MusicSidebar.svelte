@@ -70,9 +70,21 @@
       match: "prefix",
     },
     {
+      href: "/study/music/history",
+      labelKey: "study.music.nav_history",
+      icon: "M12 8v4l3 3 M3.05 11a9 9 0 1 1 .5 4 M3 3v6h6",
+      match: "prefix",
+    },
+    {
       href: "/study/music/download",
       labelKey: "study.music.nav_download",
       icon: "M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3",
+      match: "prefix",
+    },
+    {
+      href: "/study/music/transcode",
+      labelKey: "study.music.nav_transcode",
+      icon: "M4 4h16v16H4z M9 9l6 3-6 3z",
       match: "prefix",
     },
     {
@@ -230,14 +242,25 @@
 
 <style>
   .music-sidebar {
-    display: grid;
-    grid-template-rows: auto auto auto 1fr auto;
+    display: flex;
+    flex-direction: column;
     gap: 12px;
     padding: 16px 12px;
     height: 100%;
     overflow: hidden;
     background: color-mix(in oklab, var(--primary) 96%, black);
     border-right: 1px solid color-mix(in oklab, var(--content-border) 40%, transparent);
+    scrollbar-width: thin;
+  }
+  .brand,
+  .divider,
+  .footer-nav {
+    flex: 0 0 auto;
+  }
+  .nav {
+    flex: 0 1 auto;
+    min-height: 0;
+    overflow-y: auto;
     scrollbar-width: thin;
   }
   .brand {
@@ -307,7 +330,8 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    min-height: 0;
+    flex: 1 1 200px;
+    min-height: 160px;
     overflow-y: auto;
     overflow-x: hidden;
   }

@@ -1,6 +1,6 @@
 {
   "name": "omniget",
-  "version": "0.6.0",
+  "version": "0.6.1",
   "description": "",
   "type": "module",
   "packageManager": "pnpm@10.29.3",
@@ -30,6 +30,7 @@
     "@tauri-apps/api": "^2",
     "@tauri-apps/plugin-clipboard-manager": "^2.3.2",
     "@tauri-apps/plugin-dialog": "^2.6.0",
+    "@tauri-apps/plugin-notification": "^2.3.3",
     "@tauri-apps/plugin-opener": "^2",
     "@tauri-apps/plugin-process": "^2.3.1",
     "@tauri-apps/plugin-shell": "^2.3.5",
@@ -56,6 +57,7 @@
     "cytoscape": "^3.33.3",
     "flowchart.js": "^1.18.0",
     "highlight.js": "^11.10.0",
+    "hls.js": "^1.6.16",
     "katex": "^0.16.11",
     "lowlight": "^3.3.0",
     "marked": "^14.1.3",

@@ -7,7 +7,18 @@ export type ContextMenuState = {
   track: MusicTrack | null;
 };
 
-export type RightBarTab = "queue" | "lyrics" | "info";
+export type RightBarTab = "queue" | "lyrics" | "info" | "chapters";
+
+const VIDEO_MODE_KEY = "study.music.video_mode";
+
+function loadVideoMode(): boolean {
+  if (typeof localStorage === "undefined") return false;
+  try {
+    return localStorage.getItem(VIDEO_MODE_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
 
 class MusicUI {
   addToPlaylistTrack = $state<MusicTrack | null>(null);
@@ -18,6 +29,7 @@ class MusicUI {
   selectedIds = $state<Set<number>>(new Set());
   selectionAnchor = $state<{ trackId: number; queue: MusicTrack[] } | null>(null);
   contextMenu = $state<ContextMenuState>({ open: false, x: 0, y: 0, track: null });
+  videoMode = $state<boolean>(loadVideoMode());
 
   get queueOpen(): boolean {
     return this.rightbarTab === "queue";
@@ -110,6 +122,13 @@ class MusicUI {
   closeQobuz() {
     this.qobuzOpen = false;
   }
+  translationSettingsOpen = $state(false);
+  openTranslationSettings() {
+    this.translationSettingsOpen = true;
+  }
+  closeTranslationSettings() {
+    this.translationSettingsOpen = false;
+  }
   openContextMenu(track: MusicTrack, x: number, y: number) {
     this.contextMenu = { open: true, x, y, track };
   }
@@ -159,6 +178,18 @@ class MusicUI {
   }
   selectedCount(): number {
     return this.selectedIds.size;
+  }
+  toggleVideoMode() {
+    this.setVideoMode(!this.videoMode);
+  }
+  setVideoMode(enabled: boolean) {
+    this.videoMode = enabled;
+    if (typeof localStorage === "undefined") return;
+    try {
+      localStorage.setItem(VIDEO_MODE_KEY, enabled ? "true" : "false");
+    } catch {
+      /* ignore */
+    }
   }
 }
 

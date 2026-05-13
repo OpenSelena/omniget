@@ -46,6 +46,8 @@ export type GenericDownloadItem = BaseItem & {
   filePath?: string;
   fileCount?: number;
   thumbnail_url?: string | null;
+  quality?: string | null;
+  downloadMode?: string | null;
 };
 
 export type DownloadItem = CourseDownloadItem | GenericDownloadItem;
@@ -242,6 +244,8 @@ type QueueItemInfo = {
   kind?: QueueKind;
   external?: boolean;
   eta_seconds?: number | null;
+  quality?: string | null;
+  download_mode?: string | null;
 };
 
 function queueStatusToDownloadStatus(status: { type: string; data?: unknown }): DownloadStatus {
@@ -308,6 +312,8 @@ export function syncQueueState(items: QueueItemInfo[]) {
       thumbnail_url: qi.thumbnail_url,
       queueKind: qi.kind,
       external: qi.external,
+      quality: qi.quality ?? null,
+      downloadMode: qi.download_mode ?? null,
     });
 
     if (dlStatus === "downloading" || dlStatus === "seeding") {
@@ -388,6 +394,8 @@ export function upsertGenericProgress(
     status: resolvedStatus,
     startedAt: existing?.startedAt ?? now,
     lastUpdateAt: now,
+    quality: existing?.kind === "generic" ? existing.quality : undefined,
+    downloadMode: existing?.kind === "generic" ? existing.downloadMode : undefined,
   });
 
   if (resolvedStatus === "downloading") {

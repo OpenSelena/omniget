@@ -57,9 +57,14 @@
   const ITEMS_PER_PAGE = 12;
   let currentPage = $state(1);
 
-  let totalPages = $derived(Math.max(1, Math.ceil(items.length / ITEMS_PER_PAGE)));
+  let filteredItems = $derived.by(() => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return items;
+    return items.filter((it) => getItemName(it).toLowerCase().includes(q));
+  });
+  let totalPages = $derived(Math.max(1, Math.ceil(filteredItems.length / ITEMS_PER_PAGE)));
   let paginatedItems = $derived(
-    items.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
+    filteredItems.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
   );
 
   let pageNumbers = $derived((): number[] => {
@@ -445,20 +450,21 @@
         {$t("hotmart.logged_as", { email: sessionDisplay() })}
       </span>
       <div class="session-actions">
-        {#if config.features.has_search}
-          <div class="search-bar">
-            <input
-              class="search-input"
-              type="text"
-              placeholder={$t("courses.search_placeholder")}
-              bind:value={searchQuery}
-              onkeydown={(e) => { if (e.key === "Enter") handleSearch(); }}
-            />
+        <div class="search-bar">
+          <input
+            class="search-input"
+            type="text"
+            placeholder={$t("courses.search_placeholder")}
+            bind:value={searchQuery}
+            oninput={() => { currentPage = 1; }}
+            onkeydown={(e) => { if (e.key === "Enter" && config.features.has_search) handleSearch(); }}
+          />
+          {#if config.features.has_search}
             <button class="button" onclick={handleSearch} disabled={!searchQuery.trim()}>
               {$t("courses.search_btn") ?? "Search"}
             </button>
-          </div>
-        {/if}
+          {/if}
+        </div>
         <button class="button" onclick={refreshItems} disabled={refreshing} aria-label={$t("hotmart.refresh")}>
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class:spinning={refreshing}>
             <path d="M21 2v6h-6" /><path d="M3 12a9 9 0 0115-6.7L21 8" /><path d="M3 22v-6h6" /><path d="M21 12a9 9 0 01-15 6.7L3 16" />
@@ -480,10 +486,16 @@
       </div>
     {:else if items.length === 0}
       <p class="empty-text">{$t("hotmart.no_courses")}</p>
-    {:else}
+    {:else if filteredItems.length === 0}
       <div class="courses-header">
         <h2>{config.name}</h2>
         <span class="subtext">{items.length === 1 ? $t("hotmart.course_count_one", { count: items.length }) : $t("hotmart.course_count", { count: items.length })}</span>
+      </div>
+      <p class="empty-text">{$t("courses.no_search_results") ?? "No matching courses"}</p>
+    {:else}
+      <div class="courses-header">
+        <h2>{config.name}</h2>
+        <span class="subtext">{filteredItems.length === 1 ? $t("hotmart.course_count_one", { count: filteredItems.length }) : $t("hotmart.course_count", { count: filteredItems.length })}</span>
       </div>
 
       <div class="courses-grid">
@@ -503,7 +515,7 @@
       {#if totalPages > 1}
         <div class="pagination">
           <span class="pagination-info">
-            {$t("hotmart.page_of", { current: currentPage, total: totalPages })} &middot; {items.length === 1 ? $t("hotmart.course_count_one", { count: items.length }) : $t("hotmart.course_count", { count: items.length })}
+            {$t("hotmart.page_of", { current: currentPage, total: totalPages })} &middot; {filteredItems.length === 1 ? $t("hotmart.course_count_one", { count: filteredItems.length }) : $t("hotmart.course_count", { count: filteredItems.length })}
           </span>
           <div class="pagination-controls">
             <button class="button pagination-btn" disabled={currentPage <= 1} onclick={() => goToPage(currentPage - 1)}>&lt;</button>

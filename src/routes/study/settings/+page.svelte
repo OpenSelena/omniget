@@ -15,6 +15,8 @@
   import LibrarySettingsTab from "$lib/study-components/settings/LibrarySettingsTab.svelte";
   import MaintenanceTab from "$lib/study-components/settings/MaintenanceTab.svelte";
   import PetsSettingsTab from "$lib/study-components/settings/PetsSettingsTab.svelte";
+  import MusicSettingsTab from "$lib/study-components/settings/MusicSettingsTab.svelte";
+  import DiagnosticTab from "$lib/study-components/settings/DiagnosticTab.svelte";
   import NotesSettingsTab from "$lib/study-components/notes/NotesSettingsTab.svelte";
 
   type TabKey =
@@ -23,20 +25,24 @@
     | "audio"
     | "behavior"
     | "library"
+    | "music"
+    | "diagnostic"
     | "notes"
     | "maintenance"
     | "pets";
 
-  const TABS: { key: TabKey; label: string }[] = [
+  const TABS = $derived<{ key: TabKey; label: string }[]>([
     { key: "player", label: "Player" },
     { key: "subtitles", label: "Legendas" },
     { key: "audio", label: "Áudio" },
     { key: "behavior", label: "Comportamento" },
     { key: "library", label: "Biblioteca" },
+    { key: "music", label: "Música" },
+    { key: "diagnostic", label: $t("study.settings.tab_diagnostic") as string },
     { key: "notes", label: "Notas" },
     { key: "maintenance", label: "Manutenção" },
     { key: "pets", label: "Pets" },
-  ];
+  ]);
 
   let activeTab = $state<TabKey>("player");
   let settings = $state<StudySettings>({});
@@ -158,15 +164,15 @@
     <div class="status">
       {#if savingState === "saving"}
         <span class="dot saving" aria-hidden="true"></span>
-        <span>Salvando…</span>
+        <span>{$t("study.settings.saving")}</span>
       {:else if savingState === "saved"}
         <span class="dot saved" aria-hidden="true"></span>
-        <span>Salvo</span>
+        <span>{$t("study.settings.saved")}</span>
       {/if}
     </div>
   </header>
 
-  <nav class="tabs" role="tablist" aria-label="Categorias">
+  <nav class="tabs" role="tablist" aria-label={$t("study.settings.categories_aria") as string}>
     {#each TABS as tab (tab.key)}
       <button
         type="button"
@@ -196,6 +202,10 @@
       <BehaviorSettingsTab {settings} onPatch={patchSettings} />
     {:else if activeTab === "library"}
       <LibrarySettingsTab {settings} onPatch={patchSettings} />
+    {:else if activeTab === "music"}
+      <MusicSettingsTab {settings} onPatch={patchSettings} />
+    {:else if activeTab === "diagnostic"}
+      <DiagnosticTab />
     {:else if activeTab === "notes"}
       <NotesSettingsTab onToast={showToast} />
     {:else if activeTab === "maintenance"}

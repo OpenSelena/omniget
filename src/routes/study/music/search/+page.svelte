@@ -76,6 +76,14 @@
     timer = setTimeout(() => runSearch(q), 200);
   }
 
+  function onSearchSubmit(e: Event) {
+    e.preventDefault();
+    const trimmed = q.trim();
+    if (!trimmed) return;
+    if (timer) clearTimeout(timer);
+    void runSearch(trimmed);
+  }
+
   onMount(() => {
     inputRef?.focus();
     return () => {
@@ -86,7 +94,7 @@
 
 <section class="search-page">
   <header class="head">
-    <div class="search-box">
+    <form class="search-box" onsubmit={onSearchSubmit}>
       <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <circle cx="11" cy="11" r="7"/>
         <line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -107,18 +115,20 @@
           aria-label={$t("study.common.clear") as string}
         >×</button>
       {/if}
-    </div>
+    </form>
   </header>
 
   {#if !q.trim()}
     <div class="empty">
-      <p>{$t("study.music.search_hint")}</p>
+      <p>{$t("study.music.local_search_hint")}</p>
     </div>
   {:else if loading}
-    <p class="muted">{$t("study.common.loading")}</p>
+    <div class="empty muted">
+      <p>{$t("study.music.loading")}</p>
+    </div>
   {:else if tracks.length === 0 && albums.length === 0 && artists.length === 0}
     <div class="empty">
-      <p>{$t("study.music.empty_results")}</p>
+      <p>{$t("study.music.empty_search_no_results")}</p>
     </div>
   {:else}
     {#if tracks.length > 0}
@@ -199,6 +209,8 @@
   }
   .clear:hover { color: var(--secondary); }
   .empty { padding: 48px 24px; text-align: center; color: var(--tertiary); font-size: 14px; }
+  .empty.muted p { font-style: italic; }
+  .head { display: flex; flex-direction: column; gap: 12px; }
   .block { display: flex; flex-direction: column; gap: 10px; }
   .block h2 { margin: 0; font-size: 16px; font-weight: 700; color: var(--secondary); }
   .track-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 1px; }
@@ -231,5 +243,4 @@
     color: var(--accent);
     background: color-mix(in oklab, var(--accent) 8%, transparent);
   }
-  .muted { color: var(--tertiary); font-size: 13px; }
 </style>

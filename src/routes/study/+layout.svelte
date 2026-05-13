@@ -25,10 +25,11 @@
   import EqualizerPanel from "$lib/study-music-components/EqualizerPanel.svelte";
   import LastFmPanel from "$lib/study-music-components/LastFmPanel.svelte";
   import MusicThemePanel from "$lib/study-music-components/MusicThemePanel.svelte";
-  import YoutubePanel from "$lib/study-music-components/YoutubePanel.svelte";
+  import YoutubePanel from "$lib/study-music-youtube-components/YoutubePanel.svelte";
   import QualityPresetPanel from "$lib/study-music-components/QualityPresetPanel.svelte";
   import SourceOrderPanel from "$lib/study-music-components/SourceOrderPanel.svelte";
   import QobuzPanel from "$lib/study-music-components/QobuzPanel.svelte";
+  import LyricsTranslationPanel from "$lib/study-music-components/LyricsTranslationPanel.svelte";
   import SelectionBar from "$lib/study-music-components/SelectionBar.svelte";
   import ContextMenu, { type ContextMenuItem } from "$lib/study-music-components/ContextMenu.svelte";
 
@@ -103,11 +104,15 @@
     }
   }
 
-  const PRESET_MINUTES: Record<string, number> = {
-    "pomodoro-25": 25,
-    "deep-50": 50,
-    "stopwatch": 0,
-  };
+  function focusPresetMinutes(presetId: string): number {
+    if (presetId === "stopwatch") return 0;
+    const match = presetId.match(/-(\d+)$/);
+    if (match) return Math.max(0, Number(match[1]) || 0);
+    if (presetId.startsWith("deep")) return 50;
+    if (presetId.startsWith("short-break")) return 5;
+    if (presetId.startsWith("long-break")) return 15;
+    return 25;
+  }
 
   type FocusCurrent = {
     id: number;
@@ -138,6 +143,19 @@
     return labels[presetId] ?? presetId;
   }
 
+  function presetLabelForRpc(presetId: string): string {
+    const minutes = focusPresetMinutes(presetId);
+    if (presetId === "stopwatch") return $t("study.focus.preset_custom") as string;
+    if (presetId.startsWith("short-break")) {
+      return `${$t("study.focus.preset_short_break")} ${minutes}`;
+    }
+    if (presetId.startsWith("long-break")) {
+      return `${$t("study.focus.preset_long_break")} ${minutes}`;
+    }
+    if (presetId.startsWith("deep")) return `${$t("study.focus.preset_deep")} ${minutes}`;
+    return `${$t("study.focus.preset_pomodoro")} ${minutes}`;
+  }
+
   function loadFocusCustomText(): string {
     if (typeof localStorage === "undefined") return "";
     try {
@@ -153,10 +171,10 @@
       return;
     }
     const customText = loadFocusCustomText().trim();
-    const target = PRESET_MINUTES[cur.preset] ?? 0;
+    const target = focusPresetMinutes(cur.preset);
     const startedMs = Date.parse(cur.started_at.replace(" ", "T") + "Z");
     const elapsedSec = Math.max(0, Math.floor((Date.now() - startedMs) / 1000));
-    const presetText = presetLabelStudy(cur.preset);
+    const presetText = presetLabelForRpc(cur.preset);
     const details = customText || $t("study.focus.rpc_default") as string;
     const stateText = customText
       ? (target > 0
@@ -180,7 +198,7 @@
       const cur = await pluginInvoke<FocusCurrent>("study", "study:focus:current");
       pushFocusRpc(cur);
       if (!cur) return;
-      const target = PRESET_MINUTES[cur.preset] ?? 0;
+      const target = focusPresetMinutes(cur.preset);
       if (target <= 0) return;
       const startedMs = Date.parse(cur.started_at.replace(" ", "T") + "Z");
       const elapsedSec = Math.max(0, Math.floor((Date.now() - startedMs) / 1000));
@@ -770,6 +788,11 @@
 <MusicThemePanel
   open={musicUI.themeOpen}
   onClose={() => musicUI.closeTheme()}
+/>
+
+<LyricsTranslationPanel
+  open={musicUI.translationSettingsOpen}
+  onClose={() => musicUI.closeTranslationSettings()}
 />
 
 <YoutubePanel

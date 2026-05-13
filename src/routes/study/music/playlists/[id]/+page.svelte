@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
+  import { listen, type UnlistenFn } from "@tauri-apps/api/event";
   import { page } from "$app/stores";
   import { goto } from "$app/navigation";
   import { pluginInvoke } from "$lib/plugin-invoke";
@@ -35,6 +36,10 @@
   let confirmDeleteOpen = $state(false);
   let dragIndex = $state<number | null>(null);
   let dragOver = $state<number | null>(null);
+  let confirmRefreshOpen = $state(false);
+  let refreshRunning = $state(false);
+  let refreshProgress = $state<{ current: number; total: number } | null>(null);
+  const refreshUnlisteners: UnlistenFn[] = [];
 
   async function load() {
     if (!Number.isFinite(playlistId)) return;
@@ -57,6 +62,45 @@
 
   onMount(() => {
     void load();
+    void (async () => {
+      const onStart = await listen<{ playlist_id: number; total: number }>(
+        "study:music:playlist:refresh_covers:start",
+        (e) => {
+          if (e.payload?.playlist_id !== playlistId) return;
+          refreshProgress = { current: 0, total: e.payload.total };
+        },
+      );
+      const onProgress = await listen<{
+        playlist_id: number;
+        current: number;
+        total: number;
+      }>("study:music:playlist:refresh_covers:progress", (e) => {
+        if (e.payload?.playlist_id !== playlistId) return;
+        refreshProgress = { current: e.payload.current, total: e.payload.total };
+      });
+      const onComplete = await listen<{
+        playlist_id: number;
+        updated: number;
+        errors: number;
+        skipped: number;
+      }>("study:music:playlist:refresh_covers:complete", (e) => {
+        if (e.payload?.playlist_id !== playlistId) return;
+        refreshRunning = false;
+        refreshProgress = null;
+        const p = e.payload;
+        const msg = ($t("study.music.refresh_covers_done", {
+          updated: p.updated,
+          skipped: p.skipped + p.errors,
+        }) as string) ?? `${p.updated} capa(s) atualizada(s)`;
+        showToast("success", msg);
+        void load();
+      });
+      refreshUnlisteners.push(onStart, onProgress, onComplete);
+    })();
+  });
+
+  onDestroy(() => {
+    for (const u of refreshUnlisteners) u();
   });
 
   $effect(() => {
@@ -182,6 +226,23 @@
     dragIndex = null;
     dragOver = null;
   }
+
+  async function startRefreshCovers() {
+    if (refreshRunning) return;
+    refreshRunning = true;
+    confirmRefreshOpen = false;
+    refreshProgress = { current: 0, total: tracks.length };
+    try {
+      await pluginInvoke("study", "study:music:playlists:refresh_covers", {
+        playlistId,
+      });
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      showToast("error", msg);
+      refreshRunning = false;
+      refreshProgress = null;
+    }
+  }
 </script>
 
 <section class="playlist-page">
@@ -243,6 +304,27 @@
               <line x1="15" y1="15" x2="21" y2="21"/>
               <line x1="4" y1="4" x2="9" y2="9"/>
             </svg>
+          </button>
+          <button
+            type="button"
+            class="ghost-big"
+            onclick={() => (confirmRefreshOpen = true)}
+            disabled={tracks.length === 0 || refreshRunning}
+            title={$t("study.music.refresh_covers_action") as string}
+            aria-label={$t("study.music.refresh_covers_action") as string}
+          >
+            {#if refreshRunning}
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="spin">
+                <path d="M21 12a9 9 0 1 1-3-6.7"/>
+                <polyline points="21 4 21 10 15 10"/>
+              </svg>
+            {:else}
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                <circle cx="8.5" cy="8.5" r="1.5"/>
+                <polyline points="21 15 16 10 5 21"/>
+              </svg>
+            {/if}
           </button>
           <button
             type="button"
@@ -326,6 +408,43 @@
           </li>
         {/each}
       </ol>
+    {/if}
+
+    {#if refreshRunning && refreshProgress}
+      <div class="progress-strip" role="status" aria-live="polite">
+        <div class="progress-track">
+          <div
+            class="progress-fill"
+            style:width="{refreshProgress.total > 0
+              ? Math.round((refreshProgress.current / refreshProgress.total) * 100)
+              : 0}%"
+          ></div>
+        </div>
+        <span class="progress-label">
+          {$t("study.music.refresh_covers_progress", {
+            current: refreshProgress.current,
+            total: refreshProgress.total,
+          })}
+        </span>
+      </div>
+    {/if}
+
+    {#if confirmRefreshOpen}
+      <div class="confirm-overlay" role="presentation" onclick={(e) => { if (e.target === e.currentTarget) confirmRefreshOpen = false; }}>
+        <div class="confirm-dialog" role="dialog" aria-modal="true">
+          <h3>{$t("study.music.refresh_covers_title")}</h3>
+          <p>{$t("study.music.refresh_covers_body", { count: tracks.length })}</p>
+          <p class="hint">{$t("study.music.refresh_covers_hint")}</p>
+          <div class="confirm-actions">
+            <button type="button" class="ghost" onclick={() => (confirmRefreshOpen = false)}>
+              {$t("study.common.cancel")}
+            </button>
+            <button type="button" class="primary" onclick={startRefreshCovers}>
+              {$t("study.music.refresh_covers_confirm")}
+            </button>
+          </div>
+        </div>
+      </div>
     {/if}
 
     {#if confirmDeleteOpen}
@@ -514,6 +633,53 @@
   .confirm-actions .danger {
     padding: 8px 14px; background: var(--error, #dc2626); color: white;
     border: 0; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .confirm-actions .primary {
+    padding: 8px 14px; background: var(--accent); color: var(--on-accent, white);
+    border: 0; border-radius: 8px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer;
+  }
+  .confirm-dialog .hint {
+    margin: -8px 0 16px;
+    font-size: 12px;
+    color: color-mix(in oklab, var(--tertiary) 80%, transparent);
+  }
+  .progress-strip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    margin: 0 4px 4px;
+    border: 1px solid color-mix(in oklab, var(--accent) 40%, transparent);
+    border-radius: 8px;
+    background: color-mix(in oklab, var(--accent) 6%, transparent);
+  }
+  .progress-track {
+    flex: 1;
+    height: 4px;
+    border-radius: 4px;
+    background: color-mix(in oklab, var(--content-border) 50%, transparent);
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--accent);
+    transition: width 200ms ease;
+  }
+  .progress-label {
+    font-size: 12px;
+    color: var(--tertiary);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .spin {
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .spin { animation: none; }
+    .progress-fill { transition: none; }
   }
   .muted { color: var(--tertiary); font-size: 13px; }
   .error { color: var(--error, #dc2626); font-size: 13px; }

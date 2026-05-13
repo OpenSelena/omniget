@@ -7,8 +7,16 @@
     soundcloudStore,
     type ScTrack,
   } from "$lib/study-music/soundcloud-store.svelte";
+  import { downloadStore } from "$lib/study-music/download-store.svelte";
+  import {
+    getFirstDownloadDone,
+    getLastCodec,
+    getLastDownloadDir,
+  } from "$lib/study-music/local-prefs";
   import { colorFromString } from "$lib/study-music/format";
   import SoundCloudDownloadDialog from "$lib/study-music-components/SoundCloudDownloadDialog.svelte";
+  import SoundCloudDownloadButton from "$lib/study-music-components/SoundCloudDownloadButton.svelte";
+  import SoundCloudError from "$lib/study-music-components/SoundCloudError.svelte";
 
   let booting = $state(true);
   let downloadTrack = $state<ScTrack | null>(null);
@@ -18,17 +26,34 @@
   let importBusy = $state(false);
   let importError = $state<string | null>(null);
 
+  let loginBusy = $state(false);
+  let loginError = $state<string | null>(null);
+
+  let loadError = $state<string | null>(null);
+  let playbackError = $state<string | null>(null);
+  let playbackTrack = $state<ScTrack | null>(null);
+  let playbackQueue = $state<ScTrack[] | null>(null);
   let recommended = $state<ScTrack[]>([]);
   let recommendedSeed = $state<ScTrack | null>(null);
 
   onMount(async () => {
-    await soundcloudStore.refreshStatus();
-    if (soundcloudStore.isLoggedIn) {
-      await soundcloudStore.loadAll();
-      void loadRecommended();
-    }
-    booting = false;
+    await boot();
   });
+
+  async function boot() {
+    loadError = null;
+    try {
+      await soundcloudStore.refreshStatus();
+      if (soundcloudStore.isLoggedIn) {
+        await soundcloudStore.loadAll();
+        void loadRecommended();
+      }
+    } catch (e) {
+      loadError = e instanceof Error ? e.message : String(e);
+    } finally {
+      booting = false;
+    }
+  }
 
   async function loadRecommended() {
     const seed = soundcloudStore.likedTracks[0] ?? soundcloudStore.streamFeed[0];
@@ -43,22 +68,59 @@
   }
 
   async function refresh() {
-    await soundcloudStore.refreshStatus();
-    await soundcloudStore.loadAll();
-    void loadRecommended();
-  }
-
-  async function openInBrowser() {
-    const { open } = await import("@tauri-apps/plugin-shell");
-    await open("https://soundcloud.com/signin");
-  }
-
-  async function play(track: ScTrack, queue?: ScTrack[]) {
+    loadError = null;
     try {
-      await soundcloudStore.playTrack(track, queue);
+      await soundcloudStore.refreshStatus();
+      await soundcloudStore.loadAll();
+      void loadRecommended();
+    } catch (e) {
+      loadError = e instanceof Error ? e.message : String(e);
+    }
+  }
+
+  async function handleLogin() {
+    if (loginBusy) return;
+    loginBusy = true;
+    loginError = null;
+    try {
+      await soundcloudStore.loginWithWebview();
+      if (soundcloudStore.isLoggedIn) {
+        void loadRecommended();
+      } else {
+        loginError = "Não consegui completar o login. Tenta de novo.";
+      }
+    } catch (e) {
+      loginError = e instanceof Error ? e.message : String(e);
+    } finally {
+      loginBusy = false;
+    }
+  }
+
+  async function handleLogout() {
+    try {
+      await soundcloudStore.logout();
+      recommended = [];
+      recommendedSeed = null;
+      loginError = null;
     } catch (e) {
       showToast("error", e instanceof Error ? e.message : String(e));
     }
+  }
+
+  async function play(track: ScTrack, queue?: ScTrack[]) {
+    playbackError = null;
+    playbackTrack = track;
+    playbackQueue = queue ?? [track];
+    try {
+      await soundcloudStore.playTrack(track, queue);
+    } catch (e) {
+      playbackError = e instanceof Error ? e.message : String(e);
+    }
+  }
+
+  function retryPlayback() {
+    if (!playbackTrack) return;
+    void play(playbackTrack, playbackQueue ?? [playbackTrack]);
   }
 
   function fmtDuration(ms: number): string {
@@ -66,6 +128,46 @@
     const m = Math.floor(total / 60);
     const s = total % 60;
     return `${m}:${s.toString().padStart(2, "0")}`;
+  }
+
+  function folderName(dir: string): string {
+    const parts = dir.split(/[\\/]/).filter(Boolean);
+    return parts[parts.length - 1] ?? dir;
+  }
+
+  async function startInlineDownload(track: ScTrack) {
+    const codec = getLastCodec() ?? "mp3";
+    const dir = getLastDownloadDir();
+    if (!dir) {
+      downloadTrack = track;
+      return;
+    }
+    const optId = downloadStore.addOptimisticSingleJob({
+      trackId: track.id,
+      title: track.title,
+      artist: track.user.username,
+      artwork:
+        soundcloudStore.pickArtwork(track.artwork_url ?? track.user.avatar_url) ?? null,
+    });
+    try {
+      await soundcloudStore.download({
+        trackId: track.id,
+        codec,
+        outputDir: dir,
+        quality: "progressive",
+      });
+      showToast("success", `Pronto — salvo na pasta ${folderName(dir)}`);
+    } catch (e) {
+      downloadStore.markJobError(optId, e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  function handleDownload(track: ScTrack, advanced: boolean) {
+    if (advanced || !getFirstDownloadDone() || !getLastDownloadDir()) {
+      downloadTrack = track;
+      return;
+    }
+    void startInlineDownload(track);
   }
 
   function openImport() {
@@ -170,7 +272,7 @@
           {/if}
           <span>{soundcloudStore.profile.username}</span>
         </span>
-        <button type="button" class="ghost-btn" onclick={() => soundcloudStore.logout()}>{$t('study.music.sc_logout')}</button>
+        <button type="button" class="ghost-btn" onclick={handleLogout}>{$t('study.music.sc_logout')}</button>
       </div>
     {/if}
   </header>
@@ -184,18 +286,36 @@
           <path d="M1.175 12.225c-.051 0-.094.046-.101.1l-.233 2.154.233 2.105c.007.058.05.098.101.098.05 0 .09-.04.099-.098l.255-2.105-.27-2.154c0-.057-.045-.1-.09-.1m-.899.828c-.06 0-.091.037-.104.094L0 14.479l.165 1.308c0 .055.045.094.09.094s.089-.045.104-.104l.21-1.319-.21-1.334c0-.061-.044-.1-.09-.1m1.83-1.229c-.061 0-.12.045-.12.104l-.21 2.563.225 2.458c0 .06.045.12.12.12.06 0 .12-.061.12-.12l.255-2.458-.27-2.563c0-.06-.045-.104-.12-.104m.945-.089c-.075 0-.135.06-.15.135l-.193 2.652.21 2.544c.016.077.075.135.149.135.075 0 .135-.058.15-.135l.225-2.544-.225-2.652c-.014-.075-.075-.135-.149-.135m1.139.07c-.089 0-.164.072-.164.163l-.21 2.602.193 2.581c0 .088.075.157.164.157.09 0 .166-.069.18-.157l.21-2.581-.21-2.602c-.014-.091-.09-.163-.18-.163m.93-.058c-.105 0-.18.07-.18.166l-.21 2.6.18 2.539c0 .106.075.179.179.179.111 0 .19-.073.19-.18l.224-2.539-.21-2.6c0-.094-.083-.165-.197-.165m.95-.082c-.12 0-.21.087-.21.207l-.165 2.6.165 2.482c0 .12.09.214.21.214.12 0 .211-.094.211-.214l.196-2.482-.196-2.6c0-.12-.091-.207-.21-.207m1.022-.034c-.135 0-.226.103-.226.225l-.165 2.616.165 2.466c0 .118.09.222.226.222.12 0 .21-.104.226-.222l.179-2.466-.18-2.616c-.015-.122-.105-.225-.225-.225m1.039-.225c-.135 0-.255.121-.255.255l-.135 2.84.135 2.453c0 .135.12.241.255.241s.255-.106.27-.241l.149-2.453-.15-2.84c-.014-.135-.135-.255-.27-.255m1.171.106c-.149 0-.27.121-.27.271l-.119 2.738.119 2.453c0 .15.121.27.27.27.15 0 .271-.12.286-.27l.135-2.453-.135-2.738c-.015-.15-.135-.27-.286-.271m1.205.345c-.165 0-.299.135-.299.301l-.105 2.379.105 2.469c0 .166.134.301.299.301.165 0 .3-.135.3-.3l.121-2.471-.121-2.379c0-.166-.135-.301-.3-.301m1.295-.106c-.18 0-.314.135-.314.314l-.091 2.47.091 2.453c0 .181.135.315.314.315.181 0 .315-.134.315-.315l.105-2.453-.105-2.47c0-.179-.135-.314-.315-.314m1.376-.241c-.196 0-.345.149-.345.345l-.075 2.692.075 2.452c0 .197.15.345.345.345.196 0 .346-.148.346-.345l.09-2.452-.09-2.692c0-.196-.151-.345-.346-.345m1.487 5.879H22.49a1.515 1.515 0 0 0 1.51-1.524 1.512 1.512 0 0 0-1.51-1.51c-.135 0-.27.014-.39.044C22.04 9.706 19.94 7.766 17.39 7.766c-.61 0-1.21.135-1.756.36-.15.06-.18.105-.18.255v9.117c.014.165.135.299.299.314z"/>
         </svg>
       </div>
-      <h2>{$t('study.music.sc_signin_heading')}</h2>
-      <p>{$t('study.music.sc_signin_body')}</p>
+      <h2>Entrar com SoundCloud</h2>
+      <p>Vai abrir uma janelinha do SoundCloud. Faça login e ela fecha sozinha quando você terminar.</p>
       <div class="login-actions">
-        <button type="button" class="cta" onclick={openInBrowser}>{$t('study.music.sc_open_in_browser')}</button>
-        <button type="button" class="ghost-btn" onclick={refresh}>{$t('study.music.sc_already_signed_in')}</button>
+        <button type="button" class="cta" disabled={loginBusy} onclick={handleLogin}>
+          {loginBusy ? "Abrindo SoundCloud…" : "Entrar com SoundCloud"}
+        </button>
       </div>
-      {#if soundcloudStore.error}
-        <p class="error">{soundcloudStore.error}</p>
+      {#if loginError}
+        <p class="error">{loginError}</p>
+        <details class="why-fail">
+          <summary>Por que pode falhar?</summary>
+          <ul>
+            <li>Conta nova: confirme o email primeiro no SoundCloud</li>
+            <li>2FA: termine o segundo passo antes de fechar a janela</li>
+            <li>Captcha: resolva no site, a janela espera você</li>
+          </ul>
+        </details>
       {/if}
-      <p class="hint">{$t('study.music.sc_status_client_id')}: {soundcloudStore.status.has_client_id ? '✓' : '✗'} · {$t('study.music.sc_status_oauth')}: {soundcloudStore.status.has_oauth ? '✓' : '✗'}</p>
     </div>
   {:else}
+    {#if loadError}
+      <SoundCloudError error={loadError} onRetry={refresh} />
+    {/if}
+    {#if playbackError}
+      <SoundCloudError
+        error={playbackError}
+        trackUrl={playbackTrack?.permalink_url}
+        onRetry={retryPlayback}
+      />
+    {/if}
     {#if recommended.length > 0}
       <section class="block">
         <header class="block-head">
@@ -216,9 +336,7 @@
                 <span class="track-artist">{track.user.username}</span>
               </div>
               <span class="track-dur">{fmtDuration(track.duration)}</span>
-              <button type="button" class="dl-btn" onclick={(e) => { e.stopPropagation(); downloadTrack = track; }} aria-label={$t('study.music.sc_download_track') as string}>
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              </button>
+              <SoundCloudDownloadButton {track} onTrigger={handleDownload} />
             </div>
           {/each}
         </div>
@@ -243,9 +361,7 @@
                 <span class="track-artist">{track.user.username}</span>
               </div>
               <span class="track-dur">{fmtDuration(track.duration)}</span>
-              <button type="button" class="dl-btn" onclick={(e) => { e.stopPropagation(); downloadTrack = track; }} aria-label={$t('study.music.sc_download_track') as string}>
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              </button>
+              <SoundCloudDownloadButton {track} onTrigger={handleDownload} />
             </div>
           {/each}
         </div>
@@ -269,9 +385,7 @@
                 <span class="track-artist">{track.user.username}</span>
               </div>
               <span class="track-dur">{fmtDuration(track.duration)}</span>
-              <button type="button" class="dl-btn" onclick={(e) => { e.stopPropagation(); downloadTrack = track; }} aria-label={$t('study.music.sc_download_track') as string}>
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              </button>
+              <SoundCloudDownloadButton {track} onTrigger={handleDownload} />
             </div>
           {/each}
         </div>
@@ -341,7 +455,6 @@
           placeholder={$t('study.music.sc_import_url_placeholder') as string}
           bind:value={importUrl}
           onkeydown={(e) => { if (e.key === 'Enter') submitImport(); }}
-          autofocus
           spellcheck="false"
         />
         {#if importError}<p class="d-error">{importError}</p>{/if}
@@ -388,7 +501,12 @@
   .cta { padding: 12px 32px; background: #ff5500; color: white; border: 0; border-radius: 999px; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 200ms ease; }
   .cta:hover { background: #ff7733; }
   .error { color: #e22134; font-size: 13px; }
-  .hint { font-size: 11px; color: rgba(255,255,255,0.4); }
+  .why-fail { margin-top: 4px; max-width: 44ch; text-align: left; color: rgba(255,255,255,0.65); font-size: 12px; }
+  .why-fail summary { cursor: pointer; color: rgba(255,255,255,0.55); padding: 2px 0; user-select: none; }
+  .why-fail summary:hover { color: rgba(255,255,255,0.85); }
+  .why-fail ul { margin: 8px 0 0; padding-left: 18px; display: flex; flex-direction: column; gap: 4px; }
+  .why-fail li { line-height: 1.5; }
+  .cta:disabled { opacity: 0.6; cursor: not-allowed; }
 
   .block { display: flex; flex-direction: column; gap: 16px; }
   .block-head h2 { margin: 0; font-size: 22px; font-weight: 800; }
@@ -403,8 +521,6 @@
   .track-title { font-size: 14px; font-weight: 600; color: white; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .track-artist { font-size: 12px; color: rgba(255,255,255,0.55); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .track-dur { font-size: 13px; color: rgba(255,255,255,0.55); text-align: right; font-variant-numeric: tabular-nums; }
-  .dl-btn { width: 28px; height: 28px; padding: 0; background: transparent; border: 0; color: rgba(255,255,255,0.5); cursor: pointer; display: grid; place-items: center; border-radius: 4px; transition: background 200ms ease, color 200ms ease; }
-  .dl-btn:hover { background: rgba(255,255,255,0.1); color: #ff5500; }
 
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 24px; }
   .card { background: transparent; border: 0; padding: 0; cursor: pointer; color: inherit; text-align: left; text-decoration: none; }

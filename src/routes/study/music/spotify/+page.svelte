@@ -23,13 +23,13 @@
         await spotifyStore.refreshStatus();
         await spotifyStore.loadAll();
         void spotifyStore.prewarmSdk();
-        showToast("success", "Conectado ao Spotify");
+        showToast("success", $t("study.music.spotify_connected") as string);
       });
       unlistenError = await listen<{ error: string }>(
         "study-spotify-auth-error",
         (event) => {
           spotifyStore.authInProgress = false;
-          spotifyStore.error = event.payload.error ?? "Falha na autenticação";
+          spotifyStore.error = event.payload.error ?? ($t("study.music.spotify_auth_failed") as string);
           showToast("error", spotifyStore.error);
         },
       );
@@ -48,7 +48,7 @@
 
   async function refreshLibrary() {
     await spotifyStore.loadAll();
-    showToast("info", "Biblioteca atualizada");
+    showToast("info", $t("study.music.spotify_library_updated") as string);
   }
 
   onDestroy(() => {
@@ -61,7 +61,7 @@
       await spotifyStore.login();
       showToast(
         "info",
-        "Aguardando autorização no navegador. Volte aqui depois de aceitar.",
+        $t("study.music.spotify_auth_waiting") as string,
       );
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -75,14 +75,14 @@
 
   async function doLogout() {
     await spotifyStore.logout();
-    showToast("info", "Desconectado do Spotify");
+    showToast("info", $t("study.music.spotify_disconnected") as string);
   }
 
   async function playTrack(track: SpotifyTrack, queue?: SpotifyTrack[]) {
     try {
       const mode = await spotifyStore.playTrack(track, queue);
       if (mode === "youtube") {
-        showToast("info", "Tocando via YouTube (modo Free)");
+        showToast("info", $t("study.music.spotify_play_via_yt") as string);
       }
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
@@ -126,17 +126,17 @@
             type="button"
             class="ghost-btn"
             onclick={() => goto("/study/music/spotify/search")}
-            aria-label="Buscar no Spotify"
+            aria-label={$t("study.music.spotify_search_aria") as string}
           >
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <circle cx="11" cy="11" r="8"/>
               <line x1="21" y1="21" x2="16.65" y2="16.65"/>
             </svg>
-            Buscar
+            {$t("study.music.spotify_search_label")}
           </button>
         {/if}
         <button type="button" class="ghost-btn" onclick={refreshLibrary}>
-          Atualizar
+          {$t("study.music.spotify_refresh_label")}
         </button>
         <span class="profile-pill">
           {#if spotifyStore.profile.images?.[0]?.url}
@@ -255,10 +255,10 @@
         <header class="block-head">
           <h2>Suas playlists</h2>
           <div class="scroll-arrows">
-            <button type="button" class="arrow" onclick={() => scrollContainer("sp-playlists", -1)} aria-label="Anterior">
+            <button type="button" class="arrow" onclick={() => scrollContainer("sp-playlists", -1)} aria-label={$t("study.music.spotify_prev_aria") as string}>
               <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
             </button>
-            <button type="button" class="arrow" onclick={() => scrollContainer("sp-playlists", 1)} aria-label="Próximo">
+            <button type="button" class="arrow" onclick={() => scrollContainer("sp-playlists", 1)} aria-label={$t("study.music.spotify_next_aria") as string}>
               <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
           </div>
@@ -294,10 +294,10 @@
         <header class="block-head">
           <h2>Seus artistas</h2>
           <div class="scroll-arrows">
-            <button type="button" class="arrow" onclick={() => scrollContainer("sp-artists", -1)} aria-label="Anterior">
+            <button type="button" class="arrow" onclick={() => scrollContainer("sp-artists", -1)} aria-label={$t("study.music.spotify_prev_aria") as string}>
               <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
             </button>
-            <button type="button" class="arrow" onclick={() => scrollContainer("sp-artists", 1)} aria-label="Próximo">
+            <button type="button" class="arrow" onclick={() => scrollContainer("sp-artists", 1)} aria-label={$t("study.music.spotify_next_aria") as string}>
               <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
             </button>
           </div>

@@ -1499,7 +1499,7 @@ pub async fn download_video(
                     Some(url) => format!(" --all-proxy={}", url),
                     None => String::new(),
                 };
-                args.push(format!("aria2c:-x {} -k 1M -j {} --min-split-size=1M --file-allocation=none --optimize-concurrent-downloads=true --auto-file-renaming=false --summary-interval=0{}", conns, conns, aria2c_proxy));
+                args.push(format!("aria2c:-x {} -k 1M -j {} --min-split-size=1M --file-allocation=none --optimize-concurrent-downloads=true --auto-file-renaming=false --summary-interval=1 --console-log-level=warn{}", conns, conns, aria2c_proxy));
             }
         }
 
@@ -2018,6 +2018,11 @@ pub fn get_rate_limit_stats() -> serde_json::Value {
 
 fn parse_progress_line(line: &str) -> Option<f64> {
     let line = line.trim();
+
+    if let Some(pct) = parse_aria2c_progress(line) {
+        return Some(pct);
+    }
+
     let body = if let Some(rest) = line.strip_prefix("download:") {
         rest
     } else if line.ends_with('%') {
@@ -2029,6 +2034,16 @@ fn parse_progress_line(line: &str) -> Option<f64> {
     let pct_part = body.split('|').next()?.trim().trim_end_matches('%');
     let pct_str = pct_part.split_whitespace().last()?;
     pct_str.parse::<f64>().ok()
+}
+
+fn parse_aria2c_progress(line: &str) -> Option<f64> {
+    if !line.starts_with("[#") {
+        return None;
+    }
+    let open = line.find('(')?;
+    let after = &line[open + 1..];
+    let close = after.find("%)")?;
+    after[..close].trim().parse::<f64>().ok()
 }
 
 fn parse_eta_line(line: &str) -> Option<u64> {
@@ -2288,6 +2303,27 @@ mod tests {
     #[test]
     fn parse_progress_garbage_returns_none() {
         assert_eq!(parse_progress_line("[info] Writing video subtitles"), None);
+    }
+
+    #[test]
+    fn parse_progress_aria2c_summary() {
+        assert_eq!(
+            parse_progress_line("[#1ce85c 35MiB/68MiB(50%) CN:8 DL:1.5MiB ETA:21s]"),
+            Some(50.0)
+        );
+    }
+
+    #[test]
+    fn parse_progress_aria2c_decimal() {
+        assert_eq!(
+            parse_progress_line("[#abc 100MiB/200MiB(50.5%) CN:5 DL:2MiB]"),
+            Some(50.5)
+        );
+    }
+
+    #[test]
+    fn parse_progress_aria2c_no_paren_returns_none() {
+        assert_eq!(parse_progress_line("[#abc NOTICE]"), None);
     }
 
     #[test]

@@ -288,10 +288,14 @@
   function handleInput() {
     if (debounceTimer) clearTimeout(debounceTimer);
     clearMediaPreview();
-    const saved = getSettings()?.last_download_options;
+    const currentSettings = getSettings();
+    const saved = currentSettings?.last_download_options;
     const savedQuality = saved?.quality;
     const savedMode = saved?.mode;
-    selectedQuality = savedQuality && typeof savedQuality === "string" ? savedQuality : "best";
+    const settingsQuality = currentSettings?.download.video_quality;
+    selectedQuality = savedQuality && typeof savedQuality === "string"
+      ? savedQuality
+      : (settingsQuality && typeof settingsQuality === "string" ? settingsQuality : "best");
     downloadMode = savedMode === "audio" || savedMode === "mute" ? savedMode : "auto";
     selectedFormatId = null;
     formats = [];
@@ -722,6 +726,7 @@
 
                 <FormatSelector
                   platform={omniState.info.platform}
+                  isPlaylist={omniState.info.content_type === "playlist"}
                   bind:formats
                   bind:selectedFormatId
                   {loadingFormats}

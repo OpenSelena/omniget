@@ -197,7 +197,38 @@ class SoundCloudStore {
       this.playlists = [];
       this.followings = [];
       this.streamFeed = [];
+      this.status = { has_client_id: this.status.has_client_id, has_oauth: false, user_id: null };
+      this.error = null;
       await this.refreshStatus();
+    }
+  }
+
+  async loginWithWebview(): Promise<void> {
+    const { invoke } = await import("@tauri-apps/api/core");
+    this.error = null;
+    const result = await invoke<{
+      cookies: { name: string; value: string; domain: string; path: string }[];
+      finalUrl: string;
+    }>("open_auth_webview", {
+      request: {
+        url: "https://soundcloud.com/signin",
+        title: "Entrar com SoundCloud",
+        cookieDomains: [".soundcloud.com", "soundcloud.com"],
+        successUrlContains: null,
+        waitForCookie: "oauth_token",
+        initializationScript: null,
+      },
+    });
+    if (!result?.cookies || result.cookies.length === 0) {
+      throw new Error("Não capturei seu login. Tenta de novo.");
+    }
+    const cookiesJson = JSON.stringify(result.cookies);
+    await pluginInvoke("study", "study:soundcloud:auth:set_cookies", {
+      cookies_json: cookiesJson,
+    });
+    await this.refreshStatus();
+    if (this.isLoggedIn) {
+      await this.loadAll();
     }
   }
 
@@ -384,15 +415,7 @@ async function resolveSoundcloudStream(
     "study:soundcloud:stream:resolve",
     { trackId: scId, quality: "progressive" },
   );
-  if (!res.url) {
-    const fallback = await pluginInvoke<{ url: string; is_hls: boolean }>(
-      "study",
-      "study:soundcloud:stream:resolve",
-      { trackId: scId, quality: "hq" },
-    );
-    if (!fallback.url) throw new Error("SoundCloud não retornou URL");
-    return fallback;
-  }
+  if (!res.url) throw new Error("SoundCloud nao retornou URL");
   return res;
 }
 

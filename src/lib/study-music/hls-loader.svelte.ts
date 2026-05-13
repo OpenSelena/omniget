@@ -1,40 +1,4 @@
-declare global {
-  interface Window {
-    Hls?: any;
-  }
-}
-
-const HLS_CDN = "https://cdn.jsdelivr.net/npm/hls.js@1.5.13/dist/hls.min.js";
-
-let loadingPromise: Promise<void> | null = null;
-
-export async function ensureHlsLoaded(): Promise<void> {
-  if (typeof window === "undefined") return;
-  if (window.Hls) return;
-  if (loadingPromise) return loadingPromise;
-
-  loadingPromise = new Promise<void>((resolve, reject) => {
-    const existing = document.querySelector(`script[src="${HLS_CDN}"]`);
-    if (existing) {
-      existing.addEventListener("load", () => resolve());
-      existing.addEventListener("error", () =>
-        reject(new Error("Falha ao carregar hls.js")),
-      );
-      return;
-    }
-    const script = document.createElement("script");
-    script.src = HLS_CDN;
-    script.async = true;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Falha ao carregar hls.js"));
-    document.head.appendChild(script);
-  }).catch((e) => {
-    loadingPromise = null;
-    throw e;
-  });
-
-  return loadingPromise;
-}
+import Hls from "hls.js";
 
 export type HlsHandle = {
   destroy: () => void;
@@ -47,19 +11,16 @@ export async function attachHls(audio: HTMLAudioElement, m3u8Url: string): Promi
       destroy: () => {
         try {
           audio.src = "";
-        } catch {
-          /* ignore */
-        }
+        } catch {}
       },
     };
   }
 
-  await ensureHlsLoaded();
-  if (!window.Hls || !window.Hls.isSupported()) {
-    throw new Error("HLS não é suportado neste navegador");
+  if (!Hls.isSupported()) {
+    throw new Error("HLS nao e suportado neste navegador");
   }
 
-  const hls = new window.Hls({
+  const hls = new Hls({
     enableWorker: false,
     lowLatencyMode: false,
   });
@@ -70,9 +31,7 @@ export async function attachHls(audio: HTMLAudioElement, m3u8Url: string): Promi
     destroy: () => {
       try {
         hls.destroy();
-      } catch {
-        /* ignore */
-      }
+      } catch {}
     },
   };
 }

@@ -611,3 +611,753 @@ export async function studySubjectsActivity(args: {
 }): Promise<SubjectActivityRow[]> {
   return pluginInvoke<SubjectActivityRow[]>("study", "study:subjects:activity", args);
 }
+
+export type YoutubeStreamFormat = {
+  itag: number;
+  url: string | null;
+  mime_type: string;
+  bitrate: number;
+  width: number | null;
+  height: number | null;
+  fps: number | null;
+  quality_label: string | null;
+  audio_quality: string | null;
+  audio_sample_rate: number | null;
+  content_length: number | null;
+  approx_duration_ms: number | null;
+  last_modified: number | null;
+  is_adaptive: boolean;
+};
+
+export type YoutubeVideoDetails = {
+  video_id: string;
+  title: string;
+  author: string;
+  channel_id: string;
+  length_seconds: number;
+  is_live: boolean;
+  view_count: number;
+  keywords: string[];
+};
+
+export type YoutubeChapter = {
+  start_ms: number;
+  end_ms: number;
+  title: string;
+};
+
+export type YoutubePlayerResult = {
+  video_id: string;
+  status: { state: string; reason: string | null; playable: boolean };
+  video_details: YoutubeVideoDetails;
+  formats: YoutubeStreamFormat[];
+  adaptive_formats: YoutubeStreamFormat[];
+  dash_manifest_url: string | null;
+  hls_manifest_url: string | null;
+  expires_at: number;
+  has_potoken: boolean;
+  client_used: string;
+  cached: boolean;
+  chapters?: YoutubeChapter[];
+};
+
+export async function studyYoutubePlayer(args: {
+  videoId: string;
+}): Promise<YoutubePlayerResult> {
+  return pluginInvoke<YoutubePlayerResult>("study", "study:youtube:player", {
+    video_id: args.videoId,
+  });
+}
+
+export async function studyYoutubePlayerCacheClear(): Promise<{ ok: boolean }> {
+  return pluginInvoke<{ ok: boolean }>("study", "study:youtube:player_cache_clear", {});
+}
+
+export type SponsorBlockCategory =
+  | "sponsor"
+  | "selfpromo"
+  | "interaction"
+  | "intro"
+  | "outro"
+  | "preview"
+  | "music_offtopic"
+  | "filler";
+
+export type SponsorBlockSegment = {
+  category: SponsorBlockCategory | string;
+  action_type: string;
+  start_ms: number;
+  end_ms: number;
+  uuid: string;
+  votes: number;
+};
+
+export type SponsorBlockLookupResult = {
+  video_id: string;
+  segments: SponsorBlockSegment[];
+  error?: string;
+};
+
+export async function studyYoutubeSponsorblock(args: {
+  videoId: string;
+  categories?: SponsorBlockCategory[] | string[];
+}): Promise<SponsorBlockLookupResult> {
+  return pluginInvoke<SponsorBlockLookupResult>("study", "study:youtube:sponsorblock", {
+    video_id: args.videoId,
+    categories: args.categories,
+  });
+}
+
+export type YoutubeChaptersResult = {
+  video_id_or_url: string;
+  chapters: YoutubeChapter[];
+};
+
+export async function studyYoutubeChapters(args: {
+  videoId: string;
+}): Promise<YoutubeChaptersResult> {
+  return pluginInvoke<YoutubeChaptersResult>("study", "study:youtube:chapters", {
+    video_id: args.videoId,
+  });
+}
+
+export type YoutubeSearchFilter = "all" | "music" | "videos" | "channels" | "playlists" | "live";
+
+export type YoutubeSearchVideoItem = {
+  kind: "video";
+  video_id: string;
+  title: string;
+  channel_id: string | null;
+  channel_title: string | null;
+  thumbnail_url: string | null;
+  duration_text: string | null;
+  published_time_text: string | null;
+  view_count_text: string | null;
+  short_description: string | null;
+  is_live: boolean;
+};
+
+export type YoutubeSearchChannelItem = {
+  kind: "channel";
+  channel_id: string;
+  title: string;
+  handle: string | null;
+  avatar_url: string | null;
+  subscribers_text: string | null;
+  video_count_text: string | null;
+  description: string | null;
+};
+
+export type YoutubeSearchPlaylistItem = {
+  kind: "playlist";
+  playlist_id: string;
+  title: string;
+  thumbnail_url: string | null;
+  video_count: number | null;
+  channel_title: string | null;
+};
+
+export type YoutubeSearchMixItem = {
+  kind: "mix";
+  playlist_id: string;
+  title: string;
+  thumbnail_url: string | null;
+  first_video_id: string | null;
+};
+
+export type YoutubeSearchShelfItem = {
+  kind: "shelf";
+  title: string;
+  items: YoutubeSearchItem[];
+};
+
+export type YoutubeSearchItem =
+  | YoutubeSearchVideoItem
+  | YoutubeSearchChannelItem
+  | YoutubeSearchPlaylistItem
+  | YoutubeSearchMixItem
+  | YoutubeSearchShelfItem;
+
+export type YoutubeSearchResultGroup = {
+  kind: string;
+  title: string | null;
+  items: YoutubeSearchItem[];
+};
+
+export type YoutubeSearchResult = {
+  query: string;
+  filter: string;
+  estimated_results: number | null;
+  groups: YoutubeSearchResultGroup[];
+  continuation: string | null;
+};
+
+export async function studyYoutubeSearch(args: {
+  query: string;
+  filter?: YoutubeSearchFilter;
+}): Promise<YoutubeSearchResult> {
+  return pluginInvoke<YoutubeSearchResult>("study", "study:youtube:search", {
+    query: args.query,
+    filter: args.filter,
+  });
+}
+
+export type YoutubeChannelTab = "home" | "videos" | "playlists" | "shorts" | "live" | "about";
+
+export type YoutubeChannelHeader = {
+  channel_id: string;
+  title: string;
+  handle: string | null;
+  avatar_url: string | null;
+  banner_url: string | null;
+  subscribers_text: string | null;
+  video_count_text: string | null;
+  description: string | null;
+};
+
+export type YoutubeChannel = {
+  header: YoutubeChannelHeader;
+  tab: string;
+  items: YoutubeSearchItem[];
+  continuation: string | null;
+};
+
+export async function studyYoutubeChannel(args: {
+  channelId: string;
+  tab?: YoutubeChannelTab;
+}): Promise<YoutubeChannel> {
+  return pluginInvoke<YoutubeChannel>("study", "study:youtube:channel", {
+    channel_id: args.channelId,
+    tab: args.tab,
+  });
+}
+
+export type YoutubePlaylistVideo = {
+  video_id: string;
+  title: string;
+  channel_id: string | null;
+  channel_title: string | null;
+  thumbnail_url: string | null;
+  duration_text: string | null;
+  duration_seconds: number | null;
+  position: number;
+};
+
+export type YoutubePlaylistInfo = {
+  playlist_id: string;
+  title: string;
+  description: string | null;
+  thumbnail_url: string | null;
+  video_count: number | null;
+  view_count_text: string | null;
+  owner_title: string | null;
+  owner_channel_id: string | null;
+};
+
+export type YoutubePlaylist = {
+  info: YoutubePlaylistInfo;
+  videos: YoutubePlaylistVideo[];
+  continuation: string | null;
+};
+
+export async function studyYoutubePlaylist(args: {
+  playlistId: string;
+}): Promise<YoutubePlaylist> {
+  return pluginInvoke<YoutubePlaylist>("study", "study:youtube:playlist", {
+    playlist_id: args.playlistId,
+  });
+}
+
+export type YoutubeTrendingCategory = "now" | "music" | "gaming" | "movies";
+
+export type YoutubeTrendingResult = {
+  category: string;
+  items: YoutubeSearchItem[];
+};
+
+export async function studyYoutubeTrending(args?: {
+  category?: YoutubeTrendingCategory;
+}): Promise<YoutubeTrendingResult> {
+  return pluginInvoke<YoutubeTrendingResult>("study", "study:youtube:trending", {
+    category: args?.category,
+  });
+}
+
+export type YoutubeMoodCategory = {
+  title: string;
+  mood_id: string;
+  params: string | null;
+  color: string | null;
+};
+
+export type YoutubeMoodSection = {
+  title: string;
+  items: YoutubeMoodCategory[];
+};
+
+export type YoutubeMoodsResult = {
+  sections: YoutubeMoodSection[];
+};
+
+export async function studyYoutubeMoodsAndGenres(): Promise<YoutubeMoodsResult> {
+  return pluginInvoke<YoutubeMoodsResult>("study", "study:youtube:moods_and_genres", {});
+}
+
+export type YoutubeMoodPlaylistItem = {
+  playlist_id: string;
+  title: string;
+  subtitle: string | null;
+  thumbnail_url: string | null;
+};
+
+export type YoutubeMoodShelf = {
+  title: string;
+  items: YoutubeMoodPlaylistItem[];
+};
+
+export type YoutubeMoodDetail = {
+  mood_id: string;
+  title: string | null;
+  shelves: YoutubeMoodShelf[];
+};
+
+export async function studyYoutubeMoodDetail(args: {
+  moodId: string;
+  params?: string | null;
+}): Promise<YoutubeMoodDetail> {
+  return pluginInvoke<YoutubeMoodDetail>("study", "study:youtube:mood_detail", {
+    mood_id: args.moodId,
+    params: args.params ?? undefined,
+  });
+}
+
+export type YoutubeNewReleaseAlbum = {
+  browse_id: string;
+  playlist_id: string | null;
+  title: string;
+  artist: string | null;
+  year: string | null;
+  thumbnail_url: string | null;
+};
+
+export type YoutubeNewReleasesResult = {
+  albums: YoutubeNewReleaseAlbum[];
+};
+
+export async function studyYoutubeNewReleases(): Promise<YoutubeNewReleasesResult> {
+  return pluginInvoke<YoutubeNewReleasesResult>("study", "study:youtube:new_releases", {});
+}
+
+export type LoopCookieStatus = {
+  available: boolean;
+  file_path: string;
+  has_youtube: boolean;
+};
+
+export async function studyMusicLoopCookieStatus(): Promise<LoopCookieStatus> {
+  return pluginInvoke<LoopCookieStatus>("study", "study:music:loop_cookie_status", {});
+}
+
+export type YoutubePotokenStatus = {
+  engine: string;
+  snapshot_version: string;
+  minting_available: boolean;
+  minting_status: string;
+  visitor: {
+    has_token: boolean;
+    expires_in_seconds: number | null;
+    expired: boolean | null;
+  };
+  content_cached_count: number;
+  last_generated_at: number | null;
+};
+
+export async function studyYoutubePotokenStatus(): Promise<YoutubePotokenStatus> {
+  return pluginInvoke<YoutubePotokenStatus>("study", "study:youtube:potoken_status", {});
+}
+
+export type YoutubeSubscription = {
+  channel_id: string;
+  title: string;
+  thumbnail_url: string | null;
+  added_at: number;
+  last_notified_at: number | null;
+};
+
+export async function studyYoutubeSubsList(): Promise<{ subs: YoutubeSubscription[] }> {
+  return pluginInvoke<{ subs: YoutubeSubscription[] }>("study", "study:youtube:subs:list", {});
+}
+
+export async function studyYoutubeSubsAdd(args: {
+  channelId: string;
+  title: string;
+  thumbnailUrl?: string;
+}): Promise<{ ok: boolean; channel_id: string }> {
+  return pluginInvoke("study", "study:youtube:subs:add", {
+    channel_id: args.channelId,
+    title: args.title,
+    thumbnail_url: args.thumbnailUrl,
+  });
+}
+
+export async function studyYoutubeSubsRemove(args: {
+  channelId: string;
+}): Promise<{ ok: boolean; removed: boolean }> {
+  return pluginInvoke("study", "study:youtube:subs:remove", {
+    channel_id: args.channelId,
+  });
+}
+
+export async function studyYoutubeSubsIsSubscribed(args: {
+  channelId: string;
+}): Promise<{ subscribed: boolean }> {
+  return pluginInvoke("study", "study:youtube:subs:is_subscribed", {
+    channel_id: args.channelId,
+  });
+}
+
+export type YoutubeSubsFeedEntry = {
+  channel_id: string;
+  channel_title: string;
+  items: YoutubeSearchItem[];
+  error: string | null;
+};
+
+export async function studyYoutubeSubsFeed(): Promise<{ entries: YoutubeSubsFeedEntry[] }> {
+  return pluginInvoke<{ entries: YoutubeSubsFeedEntry[] }>("study", "study:youtube:subs:feed", {});
+}
+
+export type MusicHistorySource = "local" | "spotify" | "youtube" | "soundcloud";
+
+export type MusicHistoryEntry = {
+  id: number;
+  source: MusicHistorySource;
+  external_id: string | null;
+  track_id: number | null;
+  title: string;
+  artist: string | null;
+  album: string | null;
+  cover_url: string | null;
+  duration_ms: number | null;
+  position_ms: number;
+  played_at: number;
+  metadata: unknown | null;
+};
+
+export async function studyMusicHistoryAdd(args: {
+  source: MusicHistorySource;
+  title: string;
+  externalId?: string;
+  trackId?: number;
+  artist?: string;
+  album?: string;
+  coverUrl?: string;
+  durationMs?: number;
+  positionMs?: number;
+  metadata?: Record<string, unknown>;
+}): Promise<{ ok: boolean; id: number; played_at: number }> {
+  return pluginInvoke("study", "study:music:history:add", {
+    source: args.source,
+    title: args.title,
+    external_id: args.externalId,
+    track_id: args.trackId,
+    artist: args.artist,
+    album: args.album,
+    cover_url: args.coverUrl,
+    duration_ms: args.durationMs,
+    position_ms: args.positionMs ?? 0,
+    metadata: args.metadata,
+  });
+}
+
+export async function studyMusicHistoryList(args?: {
+  limit?: number;
+  source?: MusicHistorySource;
+}): Promise<{ entries: MusicHistoryEntry[] }> {
+  return pluginInvoke<{ entries: MusicHistoryEntry[] }>("study", "study:music:history:list", {
+    limit: args?.limit,
+    source: args?.source,
+  });
+}
+
+export async function studyMusicHistoryClear(args?: {
+  source?: MusicHistorySource;
+}): Promise<{ ok: boolean; removed: number }> {
+  return pluginInvoke("study", "study:music:history:clear", {
+    source: args?.source,
+  });
+}
+
+export async function studyMusicHistoryRemove(args: {
+  id: number;
+}): Promise<{ ok: boolean; removed: number }> {
+  return pluginInvoke("study", "study:music:history:remove", {
+    id: args.id,
+  });
+}
+
+export type MusicQuickPickEntry = {
+  source: MusicHistorySource;
+  external_id: string | null;
+  track_id: number | null;
+  title: string;
+  artist: string | null;
+  cover_url: string | null;
+  origin: "favorite" | "history" | "trending";
+};
+
+export async function studyMusicQuickPicks(): Promise<{
+  entries: MusicQuickPickEntry[];
+  seed: number;
+}> {
+  return pluginInvoke<{ entries: MusicQuickPickEntry[]; seed: number }>(
+    "study",
+    "study:music:quick_picks",
+    {},
+  );
+}
+
+export type MusicContinueEntry = {
+  source: MusicHistorySource;
+  external_id: string | null;
+  track_id: number | null;
+  title: string;
+  artist: string | null;
+  album: string | null;
+  cover_url: string | null;
+  duration_ms: number | null;
+  position_ms: number;
+  played_at: number;
+  progress: number;
+};
+
+export async function studyMusicContinueListening(args?: {
+  limit?: number;
+}): Promise<{ entries: MusicContinueEntry[] }> {
+  return pluginInvoke<{ entries: MusicContinueEntry[] }>(
+    "study",
+    "study:music:continue_listening",
+    { limit: args?.limit },
+  );
+}
+
+export type MusicDiscoverEntry = {
+  external_id: string;
+  title: string;
+  artist: string | null;
+  album: string | null;
+  cover_url: string | null;
+  duration_ms: number | null;
+};
+
+export async function studyMusicDailyDiscover(args?: {
+  refresh?: boolean;
+}): Promise<{
+  entries: MusicDiscoverEntry[];
+  seed_video_id: string | null;
+  seed_title: string | null;
+  from_cache: boolean;
+}> {
+  return pluginInvoke<{
+    entries: MusicDiscoverEntry[];
+    seed_video_id: string | null;
+    seed_title: string | null;
+    from_cache: boolean;
+  }>("study", "study:music:daily_discover", { refresh: args?.refresh ?? false });
+}
+
+export type YoutubeUserPlaylistSummary = {
+  id: number;
+  title: string;
+  description: string | null;
+  created_at: number;
+  updated_at: number;
+  item_count: number;
+};
+
+export type YoutubeUserPlaylistItem = {
+  video_id: string;
+  position: number;
+  added_at: number;
+  title: string | null;
+  channel_title: string | null;
+  thumbnail_url: string | null;
+  duration_ms: number | null;
+};
+
+export type YoutubeUserPlaylistDetail = {
+  summary: YoutubeUserPlaylistSummary;
+  items: YoutubeUserPlaylistItem[];
+};
+
+export async function studyYoutubeUserPlaylistCreate(args: {
+  title: string;
+  description?: string;
+}): Promise<{ id: number }> {
+  return pluginInvoke<{ id: number }>("study", "study:youtube:user_playlist:create", args);
+}
+
+export async function studyYoutubeUserPlaylistRename(args: {
+  playlistId: number;
+  title: string;
+  description?: string;
+}): Promise<{ ok: boolean; updated: boolean }> {
+  return pluginInvoke("study", "study:youtube:user_playlist:rename", {
+    playlist_id: args.playlistId,
+    title: args.title,
+    description: args.description,
+  });
+}
+
+export async function studyYoutubeUserPlaylistDelete(args: {
+  playlistId: number;
+}): Promise<{ ok: boolean; removed: boolean }> {
+  return pluginInvoke("study", "study:youtube:user_playlist:delete", {
+    playlist_id: args.playlistId,
+  });
+}
+
+export async function studyYoutubeUserPlaylistList(): Promise<{
+  playlists: YoutubeUserPlaylistSummary[];
+}> {
+  return pluginInvoke<{ playlists: YoutubeUserPlaylistSummary[] }>(
+    "study",
+    "study:youtube:user_playlist:list",
+    {},
+  );
+}
+
+export async function studyYoutubeUserPlaylistGet(args: {
+  playlistId: number;
+}): Promise<YoutubeUserPlaylistDetail> {
+  return pluginInvoke<YoutubeUserPlaylistDetail>("study", "study:youtube:user_playlist:get", {
+    playlist_id: args.playlistId,
+  });
+}
+
+export async function studyYoutubeUserPlaylistAddItem(args: {
+  playlistId: number;
+  item: {
+    video_id: string;
+    title?: string;
+    channel_title?: string;
+    thumbnail_url?: string;
+    duration_ms?: number;
+  };
+  position?: number;
+}): Promise<{ ok: boolean; position: number }> {
+  return pluginInvoke("study", "study:youtube:user_playlist:add_item", {
+    playlist_id: args.playlistId,
+    item: args.item,
+    position: args.position,
+  });
+}
+
+export async function studyYoutubeUserPlaylistRemoveItem(args: {
+  playlistId: number;
+  videoId: string;
+}): Promise<{ ok: boolean; removed: boolean }> {
+  return pluginInvoke("study", "study:youtube:user_playlist:remove_item", {
+    playlist_id: args.playlistId,
+    video_id: args.videoId,
+  });
+}
+
+export async function studyYoutubeUserPlaylistReorder(args: {
+  playlistId: number;
+  videoIds: string[];
+}): Promise<{ ok: boolean }> {
+  return pluginInvoke("study", "study:youtube:user_playlist:reorder", {
+    playlist_id: args.playlistId,
+    video_ids: args.videoIds,
+  });
+}
+
+export type YoutubeEndpointMetrics = {
+  endpoint: string;
+  success_count: number;
+  fail_count: number;
+  last_success_ts: number | null;
+  last_fail_ts: number | null;
+  last_error: string | null;
+};
+
+export async function studyYoutubeMetricsGet(): Promise<{
+  metrics: YoutubeEndpointMetrics[];
+}> {
+  return pluginInvoke<{ metrics: YoutubeEndpointMetrics[] }>(
+    "study",
+    "study:youtube:metrics:get",
+    {},
+  );
+}
+
+export async function studyYoutubeMetricsReset(): Promise<{ removed: number }> {
+  return pluginInvoke<{ removed: number }>("study", "study:youtube:metrics:reset", {});
+}
+
+export async function studyYoutubeHumanizeError(args: {
+  error: string;
+}): Promise<{ humanized: string; original: string }> {
+  return pluginInvoke<{ humanized: string; original: string }>(
+    "study",
+    "study:youtube:humanize_error",
+    { error: args.error },
+  );
+}
+
+export async function studySoundcloudHumanizeError(args: {
+  error: string;
+}): Promise<{ humanized: string; original: string }> {
+  return pluginInvoke<{ humanized: string; original: string }>(
+    "study",
+    "study:soundcloud:humanize_error",
+    { error: args.error },
+  );
+}
+
+export type LocalArtistTrack = {
+  id: number;
+  path: string;
+  title: string | null;
+  artist: string | null;
+  album: string | null;
+  album_artist: string | null;
+  year: number | null;
+  duration_ms: number | null;
+  cover_path: string | null;
+  play_count: number;
+  favorite: boolean;
+};
+
+export async function studyMusicArtistTracksLocal(args: {
+  artist: string;
+  limit?: number;
+}): Promise<{ artist: string; normalized: string; tracks: LocalArtistTrack[] }> {
+  return pluginInvoke<{ artist: string; normalized: string; tracks: LocalArtistTrack[] }>(
+    "study",
+    "study:music:artist:tracks_local",
+    { artist: args.artist, limit: args.limit ?? 100 },
+  );
+}
+
+export type AlbumLookupHit = {
+  playlist_id: string;
+  title: string;
+  thumbnail_url: string | null;
+  video_count: number | null;
+  channel_title: string | null;
+  score: number;
+};
+
+export async function studyMusicAlbumOnlineLookup(args: {
+  album: string;
+  artist?: string;
+  year?: number;
+}): Promise<{ query: string; best: AlbumLookupHit | null; candidates: AlbumLookupHit[] }> {
+  return pluginInvoke<{ query: string; best: AlbumLookupHit | null; candidates: AlbumLookupHit[] }>(
+    "study",
+    "study:music:album:online_lookup",
+    { album: args.album, artist: args.artist, year: args.year },
+  );
+}

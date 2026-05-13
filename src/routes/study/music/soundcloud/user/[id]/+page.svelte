@@ -9,23 +9,36 @@
     type ScTrack,
     type ScUser,
   } from "$lib/study-music/soundcloud-store.svelte";
+  import { downloadStore } from "$lib/study-music/download-store.svelte";
+  import {
+    getFirstDownloadDone,
+    getLastCodec,
+    getLastDownloadDir,
+  } from "$lib/study-music/local-prefs";
   import { colorFromString } from "$lib/study-music/format";
   import SoundCloudDownloadDialog from "$lib/study-music-components/SoundCloudDownloadDialog.svelte";
+  import SoundCloudDownloadButton from "$lib/study-music-components/SoundCloudDownloadButton.svelte";
+  import SoundCloudError from "$lib/study-music-components/SoundCloudError.svelte";
 
   let user = $state<ScUser | null>(null);
   let tracks = $state<ScTrack[]>([]);
   let playlists = $state<ScPlaylist[]>([]);
   let loading = $state(true);
   let error = $state<string | null>(null);
+  let playbackError = $state<string | null>(null);
+  let playbackTrack = $state<ScTrack | null>(null);
+  let playbackQueue = $state<ScTrack[] | null>(null);
   let downloadTrack = $state<ScTrack | null>(null);
 
   const userId = $derived(parseInt($page.params.id ?? "0", 10));
 
-  onMount(async () => {
+  async function load() {
     if (!userId) {
       goto("/study/music/soundcloud");
       return;
     }
+    loading = true;
+    error = null;
     try {
       const [u, t, p] = await Promise.allSettled([
         soundcloudStore.getUser(userId),
@@ -35,21 +48,42 @@
       if (u.status === "fulfilled") user = u.value;
       if (t.status === "fulfilled") tracks = t.value;
       if (p.status === "fulfilled") playlists = p.value;
+      const firstReject = [u, t, p].find((r) => r.status === "rejected");
+      if (firstReject && firstReject.status === "rejected" && !user) {
+        error =
+          firstReject.reason instanceof Error
+            ? firstReject.reason.message
+            : String(firstReject.reason);
+      }
     } catch (e) {
       error = e instanceof Error ? e.message : String(e);
     } finally {
       loading = false;
     }
-  });
+  }
+
+  onMount(load);
+
+  async function playQueue(track: ScTrack, queue: ScTrack[]) {
+    playbackError = null;
+    playbackTrack = track;
+    playbackQueue = queue;
+    try {
+      await soundcloudStore.playTrack(track, queue);
+    } catch (e) {
+      playbackError = e instanceof Error ? e.message : String(e);
+    }
+  }
 
   async function play(idx: number) {
     if (tracks.length === 0) return;
     const reordered = [...tracks.slice(idx), ...tracks.slice(0, idx)];
-    try {
-      await soundcloudStore.playTrack(reordered[0], reordered);
-    } catch (e) {
-      showToast("error", e instanceof Error ? e.message : String(e));
-    }
+    await playQueue(reordered[0], reordered);
+  }
+
+  function retryPlayback() {
+    if (!playbackTrack) return;
+    void playQueue(playbackTrack, playbackQueue ?? [playbackTrack]);
   }
 
   function fmtDuration(ms: number): string {
@@ -57,6 +91,46 @@
     const m = Math.floor(total / 60);
     const s = total % 60;
     return `${m}:${s.toString().padStart(2, "0")}`;
+  }
+
+  function folderName(dir: string): string {
+    const parts = dir.split(/[\\/]/).filter(Boolean);
+    return parts[parts.length - 1] ?? dir;
+  }
+
+  async function startInlineDownload(track: ScTrack) {
+    const codec = getLastCodec() ?? "mp3";
+    const dir = getLastDownloadDir();
+    if (!dir) {
+      downloadTrack = track;
+      return;
+    }
+    const optId = downloadStore.addOptimisticSingleJob({
+      trackId: track.id,
+      title: track.title,
+      artist: track.user.username,
+      artwork:
+        soundcloudStore.pickArtwork(track.artwork_url ?? track.user.avatar_url) ?? null,
+    });
+    try {
+      await soundcloudStore.download({
+        trackId: track.id,
+        codec,
+        outputDir: dir,
+        quality: "progressive",
+      });
+      showToast("success", `Pronto — salvo na pasta ${folderName(dir)}`);
+    } catch (e) {
+      downloadStore.markJobError(optId, e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  function handleDownload(track: ScTrack, advanced: boolean) {
+    if (advanced || !getFirstDownloadDone() || !getLastDownloadDir()) {
+      downloadTrack = track;
+      return;
+    }
+    void startInlineDownload(track);
   }
 </script>
 
@@ -100,8 +174,19 @@
   {#if loading}
     <p class="muted">Carregando…</p>
   {:else if error}
-    <p class="error">{error}</p>
+    <SoundCloudError
+      {error}
+      trackUrl={user?.permalink_url}
+      onRetry={load}
+    />
   {:else}
+    {#if playbackError}
+      <SoundCloudError
+        error={playbackError}
+        trackUrl={playbackTrack?.permalink_url}
+        onRetry={retryPlayback}
+      />
+    {/if}
     {#if tracks.length > 0}
       <section class="block">
         <header class="block-head"><h2>Faixas ({tracks.length})</h2></header>
@@ -119,9 +204,7 @@
                 {#if track.likes_count}<span class="a">♥ {track.likes_count.toLocaleString("pt-BR")}</span>{/if}
               </div>
               <span class="d">{fmtDuration(track.duration)}</span>
-              <button type="button" class="dl" onclick={(e) => { e.stopPropagation(); downloadTrack = track; }} aria-label="Baixar">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              </button>
+              <SoundCloudDownloadButton {track} onTrigger={handleDownload} />
             </div>
           {/each}
         </div>
@@ -184,8 +267,6 @@
   .t { font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .a { font-size: 12px; color: rgba(255,255,255,0.55); }
   .d { font-size: 13px; color: rgba(255,255,255,0.55); text-align: right; font-variant-numeric: tabular-nums; }
-  .dl { width: 28px; height: 28px; padding: 0; background: transparent; border: 0; color: rgba(255,255,255,0.5); cursor: pointer; display: grid; place-items: center; border-radius: 4px; transition: background 200ms ease, color 200ms ease; }
-  .dl:hover { background: rgba(255,255,255,0.1); color: #ff5500; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 24px; }
   .card { background: transparent; border: 0; padding: 0; cursor: pointer; color: inherit; text-align: left; text-decoration: none; }
   .card-cover { aspect-ratio: 1/1; border-radius: 12px; overflow: hidden; margin-bottom: 12px; background: rgba(40,40,40,0.8); }
@@ -195,5 +276,4 @@
   .card-title { margin: 0; font-size: 14px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 4px; }
   .card-sub { margin: 4px 0 0; font-size: 12px; color: rgba(255,255,255,0.5); padding: 0 4px; }
   .muted { color: rgba(255,255,255,0.5); font-size: 13px; }
-  .error { color: #e22134; font-size: 13px; }
 </style>

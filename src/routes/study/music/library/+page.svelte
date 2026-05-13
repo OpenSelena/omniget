@@ -3,6 +3,8 @@
   import { pluginInvoke } from "$lib/plugin-invoke";
   import { t } from "$lib/i18n";
   import TrackRow from "$lib/study-music-components/TrackRow.svelte";
+  import Skeleton from "$lib/study-music-components/Skeleton.svelte";
+  import EmptyPlaceholder from "$lib/study-music-components/EmptyPlaceholder.svelte";
   import type { MusicTrack } from "$lib/study-music/player-store.svelte";
   import {
     spotifyStore,
@@ -176,11 +178,22 @@
   </div>
 
   {#if loading && tracks.length === 0}
-    <p class="muted">{$t("study.common.loading")}</p>
+    <ul class="track-list" aria-busy="true">
+      {#each Array(8) as _, i (i)}
+        <li class="skel-row">
+          <Skeleton width="36px" height="36px" rounded="sm" />
+          <div class="skel-text">
+            <Skeleton width="62%" height="13px" rounded="sm" block />
+            <Skeleton width="38%" height="11px" rounded="sm" block />
+          </div>
+          <Skeleton width="36px" height="11px" rounded="sm" />
+        </li>
+      {/each}
+    </ul>
   {:else if tracks.length === 0}
-    <div class="empty">
-      <p>{$t("study.music.empty_results")}</p>
-    </div>
+    <EmptyPlaceholder
+      title={(q.trim() ? $t("study.music.empty_search_no_results") : $t("study.music.empty_results")) as string}
+    />
   {:else}
     <p class="result-count">{tracks.length} de {total} faixa(s)</p>
     <ul class="track-list">
@@ -246,5 +259,17 @@
     text-align: center;
     color: rgba(255, 255, 255, 0.5);
   }
-  .muted { color: rgba(255, 255, 255, 0.5); font-size: 13px; }
+  .skel-row {
+    display: grid;
+    grid-template-columns: 36px 1fr auto;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 4px;
+  }
+  .skel-text {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
 </style>

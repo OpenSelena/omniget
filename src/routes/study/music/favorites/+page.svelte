@@ -3,6 +3,7 @@
   import { pluginInvoke } from "$lib/plugin-invoke";
   import { t } from "$lib/i18n";
   import TrackRow from "$lib/study-music-components/TrackRow.svelte";
+  import EmptyPlaceholder from "$lib/study-music-components/EmptyPlaceholder.svelte";
   import type { MusicTrack } from "$lib/study-music/player-store.svelte";
   import {
     spotifyStore,
@@ -69,9 +70,7 @@
   {#if loading}
     <p class="muted">{$t("study.common.loading")}</p>
   {:else if tracks.length === 0}
-    <div class="empty">
-      <p>{$t("study.music.favorites_empty")}</p>
-    </div>
+    <EmptyPlaceholder title={$t("study.music.favorites_empty") as string} />
   {:else}
     <ul class="track-list">
       {#each tracks as track (track.id)}
@@ -86,6 +85,5 @@
   .head h1 { margin: 0; font-size: 28px; font-weight: 800; color: var(--secondary); letter-spacing: -0.01em; }
   .head .sub { margin: 4px 0 0; color: var(--tertiary); font-size: 13px; }
   .track-list { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 1px; }
-  .empty { padding: 48px 24px; text-align: center; color: var(--tertiary); }
   .muted { color: var(--tertiary); font-size: 13px; }
 </style>

@@ -2,6 +2,8 @@
   import { onMount } from "svelte";
   import { convertFileSrc } from "@tauri-apps/api/core";
   import SkipGapsButton from "./SkipGapsButton.svelte";
+  import SponsorBlockOverlay from "./SponsorBlockOverlay.svelte";
+  import ChaptersList from "./ChaptersList.svelte";
   import ThumbnailScrubber from "./ThumbnailScrubber.svelte";
   import type {
     SubtitleTrack,
@@ -9,6 +11,8 @@
     SkipGaps,
     ThumbnailSlice,
     StudySettings,
+    SponsorBlockSegment,
+    YoutubeChapter,
   } from "$lib/study-bridge";
 
   type Props = {
@@ -23,6 +27,9 @@
     audioTracks: AudioTrack[];
     skipGaps: SkipGaps | null;
     thumbnails: ThumbnailSlice[];
+    sponsorBlockSegments?: SponsorBlockSegment[];
+    sponsorBlockAutoSkip?: boolean;
+    chapters?: YoutubeChapter[];
     settings: StudySettings["player"] | null;
     selectedSubtitleLang: string | null;
     selectedAudioLang: string | null;
@@ -54,6 +61,9 @@
     audioTracks,
     skipGaps,
     thumbnails,
+    sponsorBlockSegments = [],
+    sponsorBlockAutoSkip = false,
+    chapters = [],
     settings,
     selectedSubtitleLang,
     selectedAudioLang,
@@ -283,6 +293,7 @@
   });
 
   let toolbarPickerOpen = $state<"subs" | "audio" | "speed" | null>(null);
+  let chaptersOpen = $state(false);
   const SPEED_OPTIONS = [0.5, 0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
   let volumeCloseTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -407,6 +418,38 @@
     bingeAutoSkip={settings?.binge_watching ?? false}
     onSkip={onSkipGap}
   />
+
+  <SponsorBlockOverlay
+    segments={sponsorBlockSegments}
+    {currentTimeMs}
+    autoSkip={sponsorBlockAutoSkip}
+    onSkip={(toMs) => {
+      if (videoEl) videoEl.currentTime = toMs / 1000;
+    }}
+  />
+
+  {#if chapters.length > 0 && chaptersOpen}
+    <aside class="chapters-drawer" aria-label="Capítulos">
+      <header class="chapters-drawer__header">
+        <span>Capítulos</span>
+        <button type="button" class="icon-btn" onclick={() => (chaptersOpen = false)} aria-label="Fechar capítulos">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+      </header>
+      <div class="chapters-drawer__body">
+        <ChaptersList
+          {chapters}
+          {currentTimeMs}
+          onJump={(toMs) => {
+            if (videoEl) videoEl.currentTime = toMs / 1000;
+          }}
+        />
+      </div>
+    </aside>
+  {/if}
 
   <header class="top-bar">
     <a class="back" href={backHref} aria-label="Voltar">
@@ -569,6 +612,24 @@
           >
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M11 5L6 9H2v6h4l5 4z" />
+            </svg>
+          </button>
+        {/if}
+        {#if chapters.length > 0}
+          <button
+            type="button"
+            class="icon-btn"
+            class:active={chaptersOpen}
+            onclick={(e) => { e.stopPropagation(); chaptersOpen = !chaptersOpen; }}
+            aria-label="Capítulos"
+          >
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <line x1="8" y1="6" x2="21" y2="6" />
+              <line x1="8" y1="12" x2="21" y2="12" />
+              <line x1="8" y1="18" x2="21" y2="18" />
+              <line x1="3" y1="6" x2="3.01" y2="6" />
+              <line x1="3" y1="12" x2="3.01" y2="12" />
+              <line x1="3" y1="18" x2="3.01" y2="18" />
             </svg>
           </button>
         {/if}
@@ -1134,6 +1195,61 @@
     .progress-thumb,
     .big-play {
       transition: none;
+    }
+  }
+
+  .chapters-drawer {
+    position: absolute;
+    top: 64px;
+    right: 16px;
+    bottom: 96px;
+    width: 320px;
+    max-width: 38vw;
+    background: color-mix(in oklab, black 80%, transparent);
+    border: 1px solid color-mix(in oklab, white 12%, transparent);
+    border-radius: 12px;
+    backdrop-filter: blur(10px);
+    color: white;
+    z-index: 6;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 12px 32px color-mix(in oklab, black 50%, transparent);
+    animation: drawer-in 200ms ease-out;
+  }
+
+  .chapters-drawer__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 1px solid color-mix(in oklab, white 10%, transparent);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  .chapters-drawer__body {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 6px;
+  }
+
+  @keyframes drawer-in {
+    from {
+      opacity: 0;
+      transform: translateX(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .chapters-drawer {
+      animation: none;
     }
   }
 </style>

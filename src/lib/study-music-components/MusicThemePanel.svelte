@@ -1,6 +1,8 @@
 <script lang="ts">
-  import { musicTheme, PRESET_ACCENTS, type MusicThemePreset } from "$lib/study-music/theme-store.svelte";
+  import { musicTheme, PRESET_ACCENTS, type MusicThemePreset, type ReduceAnimationsMode } from "$lib/study-music/theme-store.svelte";
   import { t } from "$lib/i18n";
+
+  const REDUCE_MODES: ReduceAnimationsMode[] = ["auto", "off", "on"];
 
   type Props = {
     open: boolean;
@@ -109,6 +111,21 @@
           </div>
         </section>
 
+        <section class="row">
+          <span class="label">{$t("study.music.music_theme_reduce_motion")}</span>
+          <div class="dom-toggle">
+            {#each REDUCE_MODES as mode (mode)}
+              <button
+                type="button"
+                class="seg"
+                class:active={musicTheme.reduceAnimations === mode}
+                onclick={() => musicTheme.setReduceAnimations(mode)}
+              >{$t(`study.music.music_theme_reduce_motion_${mode}`)}</button>
+            {/each}
+          </div>
+          <p class="hint subtle">{$t("study.music.music_theme_reduce_motion_hint")}</p>
+        </section>
+
         <div class="actions">
           <button type="button" class="reset" onclick={() => musicTheme.reset()}>
             {$t("study.music.music_theme_reset")}
@@ -177,6 +194,10 @@
     color: rgba(255, 255, 255, 0.55);
     font-size: 13px;
     line-height: 1.5;
+  }
+  .hint.subtle {
+    font-size: 11.5px;
+    color: rgba(255, 255, 255, 0.4);
   }
   .row {
     display: flex;
