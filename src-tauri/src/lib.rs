@@ -12,6 +12,7 @@ pub struct P2pSendHandle {
 pub type ActiveP2pSends = Arc<tokio::sync::Mutex<HashMap<String, P2pSendHandle>>>;
 
 pub mod commands;
+pub mod cookies;
 pub mod core;
 pub mod extension_storage;
 pub mod external_url;
@@ -357,6 +358,13 @@ pub fn run() {
             commands::browser_extension::browser_extension_open_folder,
             commands::extension_cookies::read_extension_cookies,
             commands::extension_cookies::extension_cookies_status,
+            cookies::commands::cookies_list,
+            cookies::commands::cookies_read,
+            cookies::commands::cookies_import,
+            cookies::commands::cookies_clear,
+            cookies::commands::cookies_rename,
+            cookies::commands::cookies_migrate_legacy,
+            cookies::commands::cookies_detect_platform,
             commands::clip::clip_video,
             commands::reencode::reencode_video,
             commands::diagnostics::get_rate_limit_stats,

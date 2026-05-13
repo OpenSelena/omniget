@@ -84,6 +84,12 @@ struct CookiesRequest {
     cookies: Vec<ExtensionCookie>,
     #[serde(default)]
     protocol_version: Option<u32>,
+    #[serde(default)]
+    source_url: Option<String>,
+    #[serde(default)]
+    page_title: Option<String>,
+    #[serde(default)]
+    alias: Option<String>,
 }
 
 const HOST_MAX_PROTOCOL_VERSION: u32 = 1;
@@ -297,6 +303,16 @@ async fn enqueue(
             if let Err(error) = write_extension_cookies(cookies) {
                 tracing::warn!("failed to write extension cookies: {error}");
             }
+            if let Err(error) = crate::cookies::ingest_batch(
+                cookies,
+                crate::cookies::IngestSource {
+                    source_url: payload.page_url.clone().or_else(|| Some(payload.url.clone())),
+                    source_label: "Browser extension".to_string(),
+                    alias_hint: payload.title.clone(),
+                },
+            ) {
+                tracing::warn!("failed to ingest cookies into manager: {error}");
+            }
         }
     }
 
@@ -372,6 +388,22 @@ async fn cookies_export(
                 "WRITE_FAILED",
                 format!("write extension cookies: {error}"),
             );
+        }
+        let label = if request.source_url.is_some() || request.alias.is_some() {
+            "Browser extension (manual capture)".to_string()
+        } else {
+            "Browser extension (auto-capture)".to_string()
+        };
+        let alias_hint = request.alias.clone().or_else(|| request.page_title.clone());
+        if let Err(error) = crate::cookies::ingest_batch(
+            &request.cookies,
+            crate::cookies::IngestSource {
+                source_url: request.source_url.clone(),
+                source_label: label,
+                alias_hint,
+            },
+        ) {
+            tracing::warn!("failed to ingest cookies into manager: {error}");
         }
     }
 
