@@ -52,7 +52,7 @@ function i18nKeysPlugin({ strict } = { strict: false }) {
   };
 }
 
-export default defineConfig(async ({ command }) => {
+export default defineConfig(({ command }) => {
   const gitInfo = getGitInfo();
   const isBuild = command === "build";
   const strictI18n =

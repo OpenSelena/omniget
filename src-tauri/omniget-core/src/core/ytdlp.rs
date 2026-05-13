@@ -21,6 +21,7 @@ type IncludeAutoSubsFn = Box<dyn Fn() -> bool + Send + Sync>;
 type TranslateMetadataFn = Box<dyn Fn() -> Option<String> + Send + Sync>;
 type SponsorBlockFn = Box<dyn Fn() -> bool + Send + Sync>;
 type SplitChaptersFn = Box<dyn Fn() -> bool + Send + Sync>;
+type PerDomainCookieFn = Box<dyn Fn(&str) -> Option<PathBuf> + Send + Sync>;
 
 static EXT_COOKIE_PATH_FN: OnceLock<ExtCookiePathFn> = OnceLock::new();
 static GLOBAL_COOKIE_FILE_FN: OnceLock<GlobalCookieFileFn> = OnceLock::new();
@@ -28,12 +29,17 @@ static COOKIES_FROM_BROWSER_FN: OnceLock<CookiesFromBrowserFn> = OnceLock::new()
 static MANUAL_COOKIE_HEADER_FN: OnceLock<ManualCookieHeaderFn> = OnceLock::new();
 static EXT_REFERER_FN: OnceLock<ExtRefererFn> = OnceLock::new();
 static INCLUDE_AUTO_SUBS_FN: OnceLock<IncludeAutoSubsFn> = OnceLock::new();
+static PER_DOMAIN_COOKIE_FN: OnceLock<PerDomainCookieFn> = OnceLock::new();
 static TRANSLATE_METADATA_FN: OnceLock<TranslateMetadataFn> = OnceLock::new();
 static SPONSORBLOCK_FN: OnceLock<SponsorBlockFn> = OnceLock::new();
 static SPLIT_CHAPTERS_FN: OnceLock<SplitChaptersFn> = OnceLock::new();
 
 pub fn set_ext_cookie_path_fn(f: impl Fn() -> PathBuf + Send + Sync + 'static) {
     let _ = EXT_COOKIE_PATH_FN.set(Box::new(f));
+}
+
+pub fn set_per_domain_cookie_fn(f: impl Fn(&str) -> Option<PathBuf> + Send + Sync + 'static) {
+    let _ = PER_DOMAIN_COOKIE_FN.set(Box::new(f));
 }
 
 pub fn set_global_cookie_file_fn(f: impl Fn() -> Option<String> + Send + Sync + 'static) {
@@ -703,6 +709,25 @@ async fn find_ffmpeg_location_cached() -> Option<String> {
     result
 }
 
+fn per_domain_cookie_file(url: &str) -> Option<std::path::PathBuf> {
+    let source = PER_DOMAIN_COOKIE_FN.get()?(url)?;
+    if !source.exists() {
+        return None;
+    }
+    let metadata = std::fs::metadata(&source).ok()?;
+    let modified = metadata.modified().ok()?;
+    if modified.elapsed().unwrap_or_default() >= std::time::Duration::from_secs(604800 * 4) {
+        return None;
+    }
+    let stem = source
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or("cookies");
+    let copy = source.with_file_name(format!("{}-session.txt", stem));
+    std::fs::copy(&source, &copy).ok()?;
+    Some(copy)
+}
+
 /// Returns a disposable copy of the extension cookie file for yt-dlp.
 ///
 /// yt-dlp rewrites `--cookies` files after every run, which corrupts the
@@ -875,6 +900,8 @@ pub async fn get_video_info(
             "--no-warnings".to_string(),
             "--no-playlist".to_string(),
             "--no-check-certificates".to_string(),
+            "--encoding".to_string(),
+            "utf-8".to_string(),
             "--socket-timeout".to_string(),
             "15".to_string(),
             "--retries".to_string(),
@@ -895,22 +922,31 @@ pub async fn get_video_info(
         }
 
         let explicit_cookie_header = has_explicit_cookie_header(extra_flags);
-        let manual_cookie_header = if explicit_cookie_header {
+        let per_domain_cookies = if explicit_cookie_header {
+            None
+        } else {
+            per_domain_cookie_file(url)
+        };
+        let manual_cookie_header = if explicit_cookie_header || per_domain_cookies.is_some() {
             None
         } else {
             manual_cookie_header_setting()
         };
-        let extension_cookies = if manual_cookie_header.is_none() {
+        let extension_cookies = if per_domain_cookies.is_none() && manual_cookie_header.is_none() {
             extension_cookie_file()
         } else {
             None
         };
-        let global_cf = if manual_cookie_header.is_none() {
+        let global_cf = if per_domain_cookies.is_none() && manual_cookie_header.is_none() {
             global_cookie_file()
         } else {
             None
         };
-        if let Some(ref cookie_header) = manual_cookie_header {
+        if let Some(ref cf) = per_domain_cookies {
+            args.push("--cookies".to_string());
+            args.push(cf.to_string_lossy().to_string());
+            tracing::debug!("[yt-dlp] using per-domain cookies from cookies manager");
+        } else if let Some(ref cookie_header) = manual_cookie_header {
             append_cookie_header(&mut args, cookie_header);
             tracing::debug!("[yt-dlp] using manual cookie header from settings");
         } else if let Some(ref cf) = extension_cookies {
@@ -1032,6 +1068,8 @@ pub async fn get_playlist_info(
         "--flat-playlist".to_string(),
         "--dump-json".to_string(),
         "--no-warnings".to_string(),
+        "--encoding".to_string(),
+        "utf-8".to_string(),
         "--socket-timeout".to_string(),
         "30".to_string(),
         "--retries".to_string(),
@@ -1258,19 +1296,31 @@ pub async fn download_video(
     std::fs::create_dir_all(output_dir)?;
 
     let explicit_cookie_header = has_explicit_cookie_header(extra_flags);
-    let manual_cookie_header = if explicit_cookie_header || cookie_file.is_some() {
+    let per_domain_cookies = if explicit_cookie_header || cookie_file.is_some() {
+        None
+    } else {
+        per_domain_cookie_file(url)
+    };
+    let manual_cookie_header = if explicit_cookie_header
+        || cookie_file.is_some()
+        || per_domain_cookies.is_some()
+    {
         None
     } else {
         manual_cookie_header_setting()
     };
     let manual_cookie_enabled = manual_cookie_header.is_some();
-    let global_cookie_file = if manual_cookie_enabled {
+    let global_cookie_file = if manual_cookie_enabled || per_domain_cookies.is_some() {
         None
     } else {
         global_cookie_file()
     };
 
-    let ext_cookies = if cookie_file.is_none() && global_cookie_file.is_none() && !manual_cookie_enabled {
+    let ext_cookies = if cookie_file.is_none()
+        && global_cookie_file.is_none()
+        && !manual_cookie_enabled
+        && per_domain_cookies.is_none()
+    {
         extension_cookie_file()
     } else {
         None
@@ -1278,15 +1328,23 @@ pub async fn download_video(
 
     let effective_cookie_file = cookie_file
         .map(|p| p.to_path_buf())
+        .or_else(|| per_domain_cookies.clone())
         .or_else(|| global_cookie_file.map(std::path::PathBuf::from))
         .or(ext_cookies);
 
-    let cfb_setting = if manual_cookie_enabled || explicit_cookie_header {
+    let cfb_setting = if manual_cookie_enabled || explicit_cookie_header || effective_cookie_file.is_some() {
         String::new()
     } else {
         cookies_from_browser_setting()
     };
-    let mut base_args = vec!["-f".to_string(), format_selector];
+    let mut base_args = vec![
+        "-f".to_string(),
+        format_selector,
+        "--encoding".to_string(),
+        "utf-8".to_string(),
+        "--print".to_string(),
+        "after_video:OMNIGET_FILEPATH:%(filepath)s".to_string(),
+    ];
     base_args.extend(js_runtime_args());
 
     if format_id.is_none() && mode == "audio" {
@@ -1544,6 +1602,7 @@ pub async fn download_video(
             let mut max_reported = 0.0f64;
             let mut first_line_logged = false;
             let mut first_progress_logged = false;
+            let mut authoritative_capture = false;
             let mut last_send = std::time::Instant::now();
             let throttle = std::time::Duration::from_millis(250);
             while let Ok(Some(line)) = lines.next_line().await {
@@ -1557,6 +1616,15 @@ pub async fn download_video(
                         _timer_start.elapsed()
                     );
                 }
+                if let Some(rest) = line.strip_prefix("OMNIGET_FILEPATH:") {
+                    let final_path = rest.trim();
+                    if !final_path.is_empty() && final_path != "NA" {
+                        authoritative_capture = true;
+                        let mut guard = captured_path_writer.lock().unwrap();
+                        *guard = Some(PathBuf::from(final_path));
+                    }
+                    continue;
+                }
                 if let Some(dest) = parse_destination_line(&line) {
                     let dest_path = PathBuf::from(&dest);
                     let ext = dest_path
@@ -1566,7 +1634,7 @@ pub async fn download_video(
                         .to_lowercase();
                     let is_subtitle =
                         matches!(ext.as_str(), "vtt" | "srt" | "ass" | "ssa" | "sub" | "lrc");
-                    if !is_subtitle {
+                    if !is_subtitle && !authoritative_capture {
                         phase += 1;
                         let mut guard = captured_path_writer.lock().unwrap();
                         *guard = Some(dest_path);
@@ -1943,8 +2011,18 @@ fn translate_ytdlp_error(stderr: &str) -> anyhow::Error {
     if lower.contains("http error 403") || lower.contains("forbidden") {
         return anyhow!("Access denied (403). The video may be private or region-restricted.");
     }
-    if lower.contains("sign in to confirm") || lower.contains("login required") {
-        return anyhow!("Video requires login. Use browser cookies or try another URL.");
+    if lower.contains("sign in to confirm")
+        || lower.contains("login required")
+        || stderr.contains("请先登录")
+        || stderr.contains("需要登录")
+        || stderr.contains("登录后可")
+        || stderr.contains("仅登录用户")
+        || lower.contains("this video is only available")
+            && lower.contains("members")
+    {
+        return anyhow!(
+            "This video requires login. Import cookies for this site in Settings → Cookies, then retry."
+        );
     }
     if lower.contains("nsig extraction failed") || lower.contains("nsig") {
         return anyhow!("Video extraction failed. Update yt-dlp or try again.");
@@ -2151,7 +2229,12 @@ async fn find_downloaded_file(output_dir: &Path, url: &str) -> anyhow::Result<Pa
 
     newest
         .map(|(p, _)| p)
-        .ok_or_else(|| anyhow!("Downloaded file not found in {:?}", output_dir))
+        .ok_or_else(|| anyhow!(
+            "Download reported success but no matching file appeared in {:?}. \
+             This can happen on Windows with a non-UTF-8 console locale when the title contains non-Latin characters. \
+             Try `chcp 65001` in a terminal before launching the app, or update yt-dlp in Settings → Dependencies.",
+            output_dir
+        ))
 }
 
 pub fn parse_formats(json: &serde_json::Value) -> Vec<FormatInfo> {
@@ -2251,6 +2334,16 @@ fn extract_id_from_url(url: &str) -> Option<String> {
             .query_pairs()
             .find(|(k, _)| k == "v")
             .map(|(_, v)| v.to_string());
+    }
+
+    if host.contains("bilibili.com") || host == "b23.tv" {
+        for seg in parsed.path().split('/').filter(|s| !s.is_empty()) {
+            if (seg.starts_with("BV") && seg.len() >= 10)
+                || (seg.starts_with("av") && seg.len() > 2)
+            {
+                return Some(seg.trim_end_matches('/').to_string());
+            }
+        }
     }
 
     None

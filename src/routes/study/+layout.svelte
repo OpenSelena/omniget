@@ -25,7 +25,6 @@
   import EqualizerPanel from "$lib/study-music-components/EqualizerPanel.svelte";
   import LastFmPanel from "$lib/study-music-components/LastFmPanel.svelte";
   import MusicThemePanel from "$lib/study-music-components/MusicThemePanel.svelte";
-  import YoutubePanel from "$lib/study-music-youtube-components/YoutubePanel.svelte";
   import QualityPresetPanel from "$lib/study-music-components/QualityPresetPanel.svelte";
   import SourceOrderPanel from "$lib/study-music-components/SourceOrderPanel.svelte";
   import QobuzPanel from "$lib/study-music-components/QobuzPanel.svelte";
@@ -793,11 +792,6 @@
 <LyricsTranslationPanel
   open={musicUI.translationSettingsOpen}
   onClose={() => musicUI.closeTranslationSettings()}
-/>
-
-<YoutubePanel
-  open={musicUI.youtubeOpen}
-  onClose={() => musicUI.closeYoutube()}
 />
 
 <QualityPresetPanel

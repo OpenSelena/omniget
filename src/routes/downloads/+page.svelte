@@ -15,6 +15,7 @@
     getSpeedHistory,
     type CourseDownloadItem,
     type GenericDownloadItem,
+    type QueueKind,
   } from "$lib/stores/download-store.svelte";
   import { getDownloadStats } from "$lib/stores/download-stats.svelte";
   import PlatformIcon from "$components/icons/PlatformIcon.svelte";
@@ -23,6 +24,10 @@
   import ContextHint from "$components/hints/ContextHint.svelte";
   import DownloadSpeedGraph from "$components/download/DownloadSpeedGraph.svelte";
   import DownloadLog from "$components/download/DownloadLog.svelte";
+  import ReencodeDialog from "$components/dialog/ReencodeDialog.svelte";
+  import { locale as i18nLocale } from "$lib/i18n";
+  import { get } from "svelte/store";
+  import timeAgo from "$lib/time-ago";
 
   let studyAvailable = $state(false);
 
@@ -208,6 +213,24 @@
     }
   }
 
+  async function pauseAll() {
+    try {
+      await invoke("pause_all_downloads");
+    } catch (e: any) {
+      const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
+      showToast("error", msg);
+    }
+  }
+
+  async function resumeAll() {
+    try {
+      await invoke("resume_all_downloads");
+    } catch (e: any) {
+      const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
+      showToast("error", msg);
+    }
+  }
+
   async function revealFile(path: string) {
     try {
       await invoke("reveal_file", { path });
@@ -216,9 +239,192 @@
       showToast("error", msg);
     }
   }
+
+  let reencodePath = $state<string | null>(null);
+
+  function openReencode(path: string) {
+    reencodePath = path;
+  }
+
+  type HistoryEntry = {
+    id: number;
+    url: string;
+    platform: string;
+    title: string;
+    file_path: string | null;
+    file_size_bytes: number | null;
+    total_bytes: number | null;
+    success: boolean;
+    error: string | null;
+    completed_at: number;
+    thumbnail_url: string | null;
+    kind: QueueKind | null;
+  };
+
+  let viewMode = $state<"active" | "history">("active");
+  let historyEntries = $state<HistoryEntry[]>([]);
+  let historyLoading = $state(false);
+
+  async function loadHistory() {
+    historyLoading = true;
+    try {
+      historyEntries = await invoke<HistoryEntry[]>("get_download_history");
+    } catch (e: any) {
+      const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
+      showToast("error", msg);
+    } finally {
+      historyLoading = false;
+    }
+  }
+
+  async function clearHistory() {
+    if (!confirm($t("downloads.history_clear_confirm") as string)) return;
+    try {
+      await invoke("clear_download_history");
+      historyEntries = [];
+    } catch (e: any) {
+      const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
+      showToast("error", msg);
+    }
+  }
+
+  function toggleHistoryView() {
+    if (viewMode === "history") {
+      viewMode = "active";
+    } else {
+      viewMode = "history";
+      loadHistory();
+    }
+  }
+
+  async function historyRetry(url: string, platform: string) {
+    try {
+      const settings = (await import("$lib/stores/settings-store.svelte")).getSettings();
+      const outputDir = settings?.download.default_output_dir ?? "";
+      if (!outputDir) {
+        showToast("error", $t("common.error") as string);
+        return;
+      }
+      await invoke("download_from_url", {
+        url,
+        outputDir,
+        downloadMode: null,
+        quality: settings?.download.video_quality ?? "best",
+        formatId: null,
+        referer: null,
+      });
+      viewMode = "active";
+      showToast("info", $t("downloads.history_requeued") as string);
+    } catch (e: any) {
+      const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
+      showToast("error", msg);
+    }
+  }
+
+  function fmtHistoryTime(unixSec: number): string {
+    const ms = unixSec * 1000;
+    const loc = get(i18nLocale) || "en";
+    const lookup = loc.startsWith("pt") ? "pt" : "en";
+    return timeAgo(ms, lookup);
+  }
+
+  function canPlayInStudyHistory(entry: HistoryEntry): boolean {
+    return (
+      studyAvailable &&
+      entry.success &&
+      !!entry.file_path &&
+      (entry.kind === "video" || entry.kind === "audio")
+    );
+  }
+
+  function openHistoryInStudy(filePath: string) {
+    const parts = filePath.replace(/\\/g, "/").split("/");
+    const name = parts[parts.length - 1] ?? "";
+    const url = `/study/watch?path=${encodeURIComponent(filePath)}&name=${encodeURIComponent(name)}`;
+    goto(url);
+  }
+
+  let dragId = $state<number | null>(null);
+  let dropTargetId = $state<number | null>(null);
+  let dropPosition = $state<"before" | "after">("before");
+
+  function onDragStart(e: DragEvent, id: number) {
+    dragId = id;
+    if (e.dataTransfer) {
+      e.dataTransfer.effectAllowed = "move";
+      e.dataTransfer.setData("text/plain", String(id));
+    }
+  }
+
+  function onDragOver(e: DragEvent, id: number) {
+    if (dragId === null || dragId === id) return;
+    e.preventDefault();
+    if (e.dataTransfer) e.dataTransfer.dropEffect = "move";
+    const target = e.currentTarget as HTMLElement;
+    const rect = target.getBoundingClientRect();
+    const midpoint = rect.top + rect.height / 2;
+    dropPosition = e.clientY < midpoint ? "before" : "after";
+    dropTargetId = id;
+  }
+
+  function onDragLeave(e: DragEvent, id: number) {
+    if (dropTargetId === id) {
+      dropTargetId = null;
+    }
+  }
+
+  async function onDrop(e: DragEvent, targetId: number) {
+    e.preventDefault();
+    const movingId = dragId;
+    const position = dropPosition;
+    dragId = null;
+    dropTargetId = null;
+    if (movingId === null || movingId === targetId) return;
+
+    const order = grouped.queued.map((q) => q.id);
+    const fromIdx = order.indexOf(movingId);
+    if (fromIdx === -1) return;
+    order.splice(fromIdx, 1);
+    let targetIdx = order.indexOf(targetId);
+    if (targetIdx === -1) return;
+    if (position === "after") targetIdx += 1;
+    order.splice(targetIdx, 0, movingId);
+
+    try {
+      await invoke<boolean>("reorder_queue", { ids: order });
+    } catch (e: any) {
+      const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
+      showToast("error", msg);
+    }
+  }
+
+  function onDragEnd() {
+    dragId = null;
+    dropTargetId = null;
+  }
+
+  function onKeydown(e: KeyboardEvent) {
+    const target = e.target as HTMLElement | null;
+    const tag = target?.tagName?.toLowerCase();
+    const isEditable =
+      tag === "input" ||
+      tag === "textarea" ||
+      tag === "select" ||
+      target?.isContentEditable;
+    if (isEditable) return;
+    if (e.ctrlKey && !e.altKey && !e.metaKey && !e.shiftKey && (e.key === "h" || e.key === "H")) {
+      e.preventDefault();
+      toggleHistoryView();
+    }
+  }
+
+  onMount(() => {
+    window.addEventListener("keydown", onKeydown);
+    return () => window.removeEventListener("keydown", onKeydown);
+  });
 </script>
 
-{#if hasDownloads}
+{#if hasDownloads || viewMode === "history"}
   <div class="downloads-page">
     <div class="downloads-header">
       <div class="downloads-title-row">
@@ -227,13 +433,44 @@
           <span class="downloads-stats">{$t('downloads.stats_line', { count: String(dlStats.totalDownloads), size: formatBytes(dlStats.totalBytes) })}</span>
         {/if}
       </div>
-      {#if finishedCount > 0}
-        <button class="clear-btn" onclick={clearFinished}>
-          {$t('downloads.clear_finished')}
+      <div class="bulk-actions">
+        {#if viewMode === "active"}
+          {#if grouped.active.length > 0}
+            <button class="clear-btn" onclick={pauseAll} title={$t('downloads.pause_all') as string}>
+              {$t('downloads.pause_all')}
+            </button>
+          {/if}
+          {#if grouped.paused.length > 0}
+            <button class="clear-btn" onclick={resumeAll} title={$t('downloads.resume_all') as string}>
+              {$t('downloads.resume_all')}
+            </button>
+          {/if}
+          {#if finishedCount > 0}
+            <button class="clear-btn" onclick={clearFinished}>
+              {$t('downloads.clear_finished')}
+            </button>
+          {/if}
+        {:else if historyEntries.length > 0}
+          <button class="clear-btn" onclick={clearHistory}>
+            {$t('downloads.history_clear')}
+          </button>
+        {/if}
+        <button
+          class="history-toggle"
+          class:on={viewMode === "history"}
+          onclick={toggleHistoryView}
+          aria-label={$t('downloads.history_toggle') as string}
+          title={$t('downloads.history_toggle_hint') as string}
+        >
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9" />
+            <polyline points="12 7 12 12 15 14" />
+          </svg>
         </button>
-      {/if}
+      </div>
     </div>
 
+    {#if viewMode === "active"}
     <div class="filter-pills" role="tablist" aria-label={$t('downloads.filter_label')}>
       {#each [
         { value: 'all', labelKey: 'downloads.filter.all', count: filterCounts.all },
@@ -272,9 +509,28 @@
       {/if}
 
       {#if showSection.queued && grouped.queued.length > 0}
-        <h5 class="section-label">{$t('downloads.section_queued')}</h5>
+        <h5 class="section-label">
+          {$t('downloads.section_queued')}
+          {#if grouped.queued.length > 1}
+            <span class="queue-reorder-hint">{$t('downloads.reorder_hint')}</span>
+          {/if}
+        </h5>
         {#each grouped.queued as item (item.id)}
-          {@render genericItem(item)}
+          <div
+            class="queue-drop-zone"
+            class:drop-before={dropTargetId === item.id && dropPosition === "before"}
+            class:drop-after={dropTargetId === item.id && dropPosition === "after"}
+            class:dragging={dragId === item.id}
+            draggable="true"
+            role="listitem"
+            ondragstart={(e) => onDragStart(e, item.id)}
+            ondragover={(e) => onDragOver(e, item.id)}
+            ondragleave={(e) => onDragLeave(e, item.id)}
+            ondrop={(e) => onDrop(e, item.id)}
+            ondragend={onDragEnd}
+          >
+            {@render genericItem(item)}
+          </div>
         {/each}
       {/if}
 
@@ -293,13 +549,122 @@
         {/if}
       {/if}
     </div>
+    {:else}
+      <div class="history-view">
+        {#if historyLoading}
+          <p class="history-empty">{$t('downloads.history_loading')}</p>
+        {:else if historyEntries.length === 0}
+          <div class="history-empty-state">
+            <svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="9" />
+              <polyline points="12 7 12 12 15 14" />
+            </svg>
+            <p class="history-empty-text">{$t('downloads.history_empty')}</p>
+          </div>
+        {:else}
+          <ul class="history-list">
+            {#each historyEntries as entry (entry.id)}
+              <li class="history-item" data-success={entry.success}>
+                <div class="history-item-head">
+                  {#if entry.thumbnail_url}
+                    <img
+                      src={entry.thumbnail_url}
+                      alt=""
+                      class="queue-thumb"
+                      loading="lazy"
+                      onerror={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    />
+                  {/if}
+                  <PlatformIcon platform={entry.platform} size={16} />
+                  {#if entry.kind}
+                    <QueueKindBadge kind={entry.kind} size={14} />
+                  {/if}
+                  <span class="history-title">{entry.title || entry.url}</span>
+                  <span class="history-time">{fmtHistoryTime(entry.completed_at)}</span>
+                </div>
+                <div class="history-item-meta">
+                  {#if entry.success && entry.file_size_bytes}
+                    <span class="history-meta-chip">{formatBytes(entry.file_size_bytes)}</span>
+                  {/if}
+                  {#if !entry.success && entry.error}
+                    <span class="history-meta-chip history-meta-error">{entry.error}</span>
+                  {/if}
+                </div>
+                <div class="history-item-actions">
+                  {#if canPlayInStudyHistory(entry) && entry.file_path}
+                    <button
+                      class="action-icon-btn"
+                      onclick={() => openHistoryInStudy(entry.file_path!)}
+                      aria-label={$t('downloads.open_in_study')}
+                      title={$t('downloads.open_in_study')}
+                    >
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none" />
+                      </svg>
+                    </button>
+                  {/if}
+                  {#if entry.success && entry.file_path}
+                    <button
+                      class="action-icon-btn"
+                      onclick={() => revealFile(entry.file_path!)}
+                      aria-label={$t('downloads.open_folder')}
+                      title={$t('downloads.open_folder')}
+                    >
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
+                      </svg>
+                    </button>
+                  {/if}
+                  {#if entry.success && entry.file_path && entry.kind === "video"}
+                    <button
+                      class="action-icon-btn"
+                      onclick={() => openReencode(entry.file_path!)}
+                      aria-label={$t('reencode.action_label')}
+                      title={$t('reencode.action_label')}
+                    >
+                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="4 14 10 14 10 20" />
+                        <polyline points="20 10 14 10 14 4" />
+                        <line x1="14" y1="10" x2="21" y2="3" />
+                        <line x1="3" y1="21" x2="10" y2="14" />
+                      </svg>
+                    </button>
+                  {/if}
+                  <button
+                    class="action-icon-btn"
+                    onclick={() => historyRetry(entry.url, entry.platform)}
+                    aria-label={$t('downloads.history_redownload')}
+                    title={$t('downloads.history_redownload')}
+                  >
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="23 4 23 10 17 10" />
+                      <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" />
+                    </svg>
+                  </button>
+                </div>
+              </li>
+            {/each}
+          </ul>
+        {/if}
+      </div>
+    {/if}
   </div>
 {:else}
   <div class="downloads-empty">
     <Mascot emotion="idle" />
     <p class="empty-text">{$t('downloads.empty')} <ContextHint text={$t('hints.downloads_empty')} dismissKey="downloads_empty" /></p>
+    <button class="history-link" onclick={toggleHistoryView}>
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" />
+        <polyline points="12 7 12 12 15 14" />
+      </svg>
+      {$t('downloads.history_view_link')}
+    </button>
   </div>
 {/if}
+
+<ReencodeDialog bind:inputPath={reencodePath} />
 
 {#snippet genericItem(item: GenericDownloadItem)}
   <div class="download-item" data-status={item.status}>
@@ -438,6 +803,21 @@
               <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z" />
             </svg>
           </button>
+          {#if item.queueKind === "video"}
+            <button
+              class="action-icon-btn"
+              onclick={() => openReencode(item.filePath!)}
+              aria-label={$t('reencode.action_label')}
+              title={$t('reencode.action_label')}
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="4 14 10 14 10 20" />
+                <polyline points="20 10 14 10 14 4" />
+                <line x1="14" y1="10" x2="21" y2="3" />
+                <line x1="3" y1="21" x2="10" y2="14" />
+              </svg>
+            </button>
+          {/if}
           <button
             class="action-icon-btn"
             class:confirm-remove={pendingRemove === item.id}
@@ -683,6 +1063,13 @@
     font-size: 12px;
     color: var(--tertiary);
     font-weight: 400;
+  }
+
+  .bulk-actions {
+    display: flex;
+    align-items: center;
+    gap: calc(var(--padding) / 3);
+    flex-shrink: 0;
   }
 
   .clear-btn {
@@ -1034,5 +1421,209 @@
     align-self: center;
     font-size: 13px;
     padding: calc(var(--padding) / 2) var(--padding);
+  }
+
+  .history-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: calc(var(--border-radius) / 2);
+    color: var(--tertiary);
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  @media (hover: hover) {
+    .history-toggle:hover {
+      color: var(--secondary);
+      background: var(--button-elevated);
+    }
+  }
+
+  .history-toggle.on {
+    color: var(--accent);
+    background: var(--accent-soft, color-mix(in srgb, var(--accent) 12%, transparent));
+    border-color: color-mix(in srgb, var(--accent) 25%, transparent);
+  }
+
+  .history-toggle:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .history-view {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .history-empty {
+    color: var(--tertiary);
+    font-size: 13px;
+    padding: var(--padding) 0;
+  }
+
+  .history-empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: calc(var(--padding) / 2);
+    padding: calc(var(--padding) * 3) var(--padding);
+    color: var(--tertiary);
+  }
+
+  .history-empty-text {
+    font-size: 13.5px;
+    margin: 0;
+  }
+
+  .history-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .history-item {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "head actions"
+      "meta actions";
+    column-gap: calc(var(--padding) / 2);
+    align-items: center;
+    padding: 8px 10px;
+    border-radius: var(--border-radius);
+    background: var(--button);
+  }
+
+  .history-item[data-success="false"] {
+    background: color-mix(in srgb, var(--error, #c33) 6%, var(--button));
+  }
+
+  .history-item-head {
+    grid-area: head;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .history-title {
+    font-size: 13.5px;
+    color: var(--secondary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .history-time {
+    font-size: 11.5px;
+    color: var(--tertiary);
+    flex-shrink: 0;
+  }
+
+  .history-item-meta {
+    grid-area: meta;
+    display: flex;
+    gap: 6px;
+    margin-top: 2px;
+    padding-left: 24px;
+  }
+
+  .history-meta-chip {
+    font-size: 11px;
+    color: var(--tertiary);
+    background: var(--button-elevated);
+    padding: 2px 6px;
+    border-radius: calc(var(--border-radius) / 2);
+  }
+
+  .history-meta-error {
+    color: var(--error, #c33);
+    background: color-mix(in srgb, var(--error, #c33) 12%, transparent);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    max-width: 320px;
+  }
+
+  .history-item-actions {
+    grid-area: actions;
+    display: flex;
+    gap: 2px;
+    align-items: center;
+  }
+
+  .history-link {
+    margin-top: calc(var(--padding) / 2);
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12.5px;
+    color: var(--tertiary);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 4px 6px;
+    border-radius: calc(var(--border-radius) / 2);
+  }
+
+  @media (hover: hover) {
+    .history-link:hover {
+      color: var(--secondary);
+      background: var(--button);
+    }
+  }
+
+  .queue-reorder-hint {
+    font-size: 10.5px;
+    font-weight: 400;
+    color: var(--tertiary);
+    text-transform: none;
+    letter-spacing: 0;
+    margin-left: 8px;
+  }
+
+  .queue-drop-zone {
+    position: relative;
+    cursor: grab;
+    transition: opacity 0.12s;
+  }
+
+  .queue-drop-zone:active {
+    cursor: grabbing;
+  }
+
+  .queue-drop-zone.dragging {
+    opacity: 0.4;
+  }
+
+  .queue-drop-zone.drop-before::before,
+  .queue-drop-zone.drop-after::after {
+    content: "";
+    position: absolute;
+    left: 8px;
+    right: 8px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 1px;
+    pointer-events: none;
+  }
+
+  .queue-drop-zone.drop-before::before {
+    top: -2px;
+  }
+
+  .queue-drop-zone.drop-after::after {
+    bottom: -2px;
   }
 </style>

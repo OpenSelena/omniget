@@ -53,6 +53,7 @@ pub fn run() {
     registry.register(Arc::new(platforms::youtube::YouTubeDownloader::new()));
     registry.register(Arc::new(platforms::vimeo::VimeoDownloader::new()));
     registry.register(Arc::new(platforms::bilibili::BilibiliDownloader::new()));
+    registry.register(Arc::new(platforms::douyin::DouyinDownloader::new()));
     let torrent_session: Arc<tokio::sync::Mutex<Option<Arc<librqbit::Session>>>> =
         Arc::new(tokio::sync::Mutex::new(None));
     registry.register(Arc::new(platforms::magnet::MagnetDownloader::new(
@@ -132,7 +133,15 @@ pub fn run() {
             core::http_fetcher::set_global_max_concurrent_segments(
                 settings.advanced.max_concurrent_segments as usize,
             );
-            core::ytdlp::set_ext_cookie_path_fn(|| extension_storage::extension_cookie_file_path());
+            core::ytdlp::set_per_domain_cookie_fn(|url| {
+                let parsed = url::Url::parse(url).ok()?;
+                let host = parsed.host_str()?;
+                let root = crate::cookies::root_domain_of(host);
+                if root.is_empty() {
+                    return None;
+                }
+                crate::cookies::account_path_for_consumer(&root, None)
+            });
             core::ytdlp::set_global_cookie_file_fn(|| {
                 let s = storage::config::load_settings_standalone();
                 let cf = s.download.cookie_file.clone();
@@ -262,6 +271,42 @@ pub fn run() {
             // Firefox stop trying to start the legacy host process.
             extension_storage::cleanup_legacy_native_messaging();
 
+            // Cookie Manager: reparticiona `chrome-extension-cookies.txt` legacy em
+            // `cookies/<domain>/_default.txt` (CK-1). Quando o registry já tem
+            // buckets, a migration vira no-op. Após migration bem-sucedida, o
+            // arquivo legacy é deletado — a partir de CK-7b o multi-file é a
+            // única fonte de verdade.
+            if !cookies::storage::has_been_migrated() {
+                match cookies::migrate_legacy_if_needed() {
+                    Ok(_) => {
+                        let legacy = extension_storage::extension_cookie_file_path();
+                        if legacy.exists() {
+                            if let Err(err) = std::fs::remove_file(&legacy) {
+                                tracing::warn!(
+                                    "cookies: failed to remove legacy file {}: {}",
+                                    legacy.display(),
+                                    err
+                                );
+                            }
+                        }
+                    }
+                    Err(err) => tracing::warn!("cookies: legacy migration skipped: {err}"),
+                }
+            } else {
+                // Registry já populado — significa migration anterior já rolou; se
+                // o legacy ainda existe (instalação intermediária), remove agora.
+                let legacy = extension_storage::extension_cookie_file_path();
+                if legacy.exists() {
+                    if let Err(err) = std::fs::remove_file(&legacy) {
+                        tracing::warn!(
+                            "cookies: failed to remove stale legacy file {}: {}",
+                            legacy.display(),
+                            err
+                        );
+                    }
+                }
+            }
+
             // Start the localhost HTTP bridge for the browser extension. This
             // replaces the previous Chrome native-messaging path, which forced
             // us to maintain a hard-coded extension-ID allowlist. Bridge auth
@@ -365,6 +410,9 @@ pub fn run() {
             cookies::commands::cookies_rename,
             cookies::commands::cookies_migrate_legacy,
             cookies::commands::cookies_detect_platform,
+            cookies::commands::cookies_import_file,
+            cookies::commands::cookies_export_to,
+            cookies::commands::cookies_add_account,
             commands::clip::clip_video,
             commands::reencode::reencode_video,
             commands::diagnostics::get_rate_limit_stats,

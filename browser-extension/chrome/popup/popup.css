@@ -327,3 +327,49 @@ body {
 ::-webkit-scrollbar-thumb:hover { background: #444; }
 
 .hidden { display: none; }
+
+.cookie-capture {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 10px 14px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cookie-capture[data-state="hidden"] { display: none; }
+.cookie-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  color: #e5e5e5;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 120ms, background 120ms, color 120ms;
+}
+.cookie-btn:hover:not(:disabled) {
+  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(255, 255, 255, 0.07);
+  color: #fff;
+}
+.cookie-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.cookie-btn[data-state="success"] {
+  border-color: #1DB954;
+  color: #1DB954;
+}
+.cookie-btn[data-state="error"] {
+  border-color: #d33;
+  color: #d33;
+}
+.cookie-btn-label { flex: 1; text-align: left; }
+.cookie-hint {
+  margin: 0;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.45);
+  line-height: 1.4;
+}

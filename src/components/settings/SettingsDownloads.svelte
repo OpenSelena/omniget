@@ -135,6 +135,11 @@
     const value = (e.target as HTMLSelectElement).value;
     updateSettings({ download: { music_audio_format: value } });
   }
+
+  function changeCaptionLocale(e: Event) {
+    const value = (e.target as HTMLSelectElement).value;
+    updateSettings({ download: { caption_locale: value } });
+  }
 </script>
 
 {#if settings}
@@ -325,6 +330,32 @@
         </div>
         <button class="toggle" class:on={settings.download.include_auto_subtitles} onclick={() => toggleBool("download", "include_auto_subtitles", settings.download.include_auto_subtitles)} role="switch" aria-checked={settings.download.include_auto_subtitles} aria-label={$t('settings.download.include_auto_subtitles') as string}><span class="toggle-knob"></span></button>
       </div>
+      <div class="divider"></div>
+      <div class="setting-row">
+        <div class="setting-col">
+          <span class="setting-label">{$t('settings.download.caption_locale')}</span>
+          <span class="setting-path">{$t('settings.download.caption_locale_desc')}</span>
+        </div>
+        <select class="select" value={settings.download.caption_locale} onchange={changeCaptionLocale}>
+          <option value="en">English</option>
+          <option value="pt">Português</option>
+          <option value="es">Español</option>
+          <option value="fr">Français</option>
+          <option value="it">Italiano</option>
+          <option value="ja">日本語</option>
+          <option value="zh-Hans">简体中文</option>
+          <option value="zh-Hant">繁體中文</option>
+          <option value="el">Ελληνικά</option>
+        </select>
+      </div>
+      <div class="divider"></div>
+      <div class="setting-row">
+        <div class="setting-col">
+          <span class="setting-label">{$t('settings.download.keep_vtt')}</span>
+          <span class="setting-path">{$t('settings.download.keep_vtt_desc')}</span>
+        </div>
+        <button class="toggle" class:on={settings.download.keep_vtt} onclick={() => toggleBool("download", "keep_vtt", settings.download.keep_vtt)} role="switch" aria-checked={settings.download.keep_vtt} aria-label={$t('settings.download.keep_vtt') as string}><span class="toggle-knob"></span></button>
+      </div>
     {/if}
     <div class="divider"></div>
     <div class="setting-row">
@@ -370,6 +401,19 @@
         <span class="setting-path">{$t('settings.download.split_by_chapters_desc')}</span>
       </div>
       <button class="toggle" class:on={settings.download.split_by_chapters} onclick={() => toggleBool("download", "split_by_chapters", settings.download.split_by_chapters)} role="switch" aria-checked={settings.download.split_by_chapters} aria-label={$t('settings.download.split_by_chapters') as string}><span class="toggle-knob"></span></button>
+    </div>
+  </div>
+</details>
+
+<details class="section">
+  <summary class="section-title">{$t('settings.download.courses_section')}</summary>
+  <div class="card">
+    <div class="setting-row">
+      <div class="setting-col">
+        <span class="setting-label">{$t('settings.download.continuous_lecture_numbers')}</span>
+        <span class="setting-path">{$t('settings.download.continuous_lecture_numbers_desc')}</span>
+      </div>
+      <button class="toggle" class:on={settings.download.continuous_lecture_numbers} onclick={() => toggleBool("download", "continuous_lecture_numbers", settings.download.continuous_lecture_numbers)} role="switch" aria-checked={settings.download.continuous_lecture_numbers} aria-label={$t('settings.download.continuous_lecture_numbers') as string}><span class="toggle-knob"></span></button>
     </div>
   </div>
 </details>

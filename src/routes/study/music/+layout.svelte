@@ -81,7 +81,6 @@
       if (musicUI.lastfmOpen) return;
       if (musicUI.themeOpen) return;
       if (musicUI.discordOpen) return;
-      if (musicUI.youtubeOpen) return;
       if (musicUI.contextMenu.open) return;
       if (musicUI.selectedCount() > 0) return;
       e.preventDefault();

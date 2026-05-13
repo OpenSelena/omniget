@@ -94,13 +94,6 @@ class MusicUI {
   closeDiscord() {
     this.discordOpen = false;
   }
-  youtubeOpen = $state(false);
-  openYoutube() {
-    this.youtubeOpen = true;
-  }
-  closeYoutube() {
-    this.youtubeOpen = false;
-  }
   qualityOpen = $state(false);
   openQuality() {
     this.qualityOpen = true;

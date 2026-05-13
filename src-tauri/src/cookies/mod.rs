@@ -19,6 +19,6 @@ pub mod storage;
 
 pub use platform::{root_domain_of, PlatformKind};
 pub use storage::{
-    account_path_for_consumer, ingest_batch, load_registry, migrate_legacy_if_needed,
-    AccountEntry, BucketEntry, CookieRegistry, IngestSource,
+    account_path_for_consumer, ingest_batch, ingest_to_account, load_registry,
+    migrate_legacy_if_needed, AccountEntry, BucketEntry, CookieRegistry, IngestSource,
 };

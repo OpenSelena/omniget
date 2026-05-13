@@ -253,6 +253,7 @@ fn platform_display(p: PlatformKind) -> &'static str {
         PlatformKind::Vimeo => "Vimeo",
         PlatformKind::Tiktok => "TikTok",
         PlatformKind::Bilibili => "Bilibili",
+        PlatformKind::Douyin => "Douyin",
         PlatformKind::Reddit => "Reddit",
         PlatformKind::Pinterest => "Pinterest",
         PlatformKind::Bluesky => "Bluesky",
@@ -305,6 +306,101 @@ pub fn move_to_trash(domain: &str, slug: &str) -> anyhow::Result<()> {
         }
     }
     Ok(())
+}
+
+pub fn slugify_alias(alias: &str) -> String {
+    let lowered = alias.to_lowercase();
+    let cleaned: String = lowered
+        .chars()
+        .map(|c| {
+            if c.is_ascii_alphanumeric() {
+                c
+            } else if c.is_whitespace() || c == '-' || c == '_' {
+                '-'
+            } else {
+                '-'
+            }
+        })
+        .collect();
+    let collapsed: String = cleaned
+        .split('-')
+        .filter(|s| !s.is_empty())
+        .collect::<Vec<_>>()
+        .join("-");
+    if collapsed.is_empty() || collapsed.starts_with('_') {
+        format!("account-{}", current_unix_ms())
+    } else {
+        collapsed.chars().take(40).collect()
+    }
+}
+
+pub fn ingest_to_account(
+    domain: &str,
+    requested_slug: &str,
+    cookies: &[ExtensionCookie],
+    source: IngestSource,
+) -> anyhow::Result<(String, usize)> {
+    let root = root_domain_of(domain);
+    if root.is_empty() {
+        anyhow::bail!("invalid domain: {domain}");
+    }
+    let scoped: Vec<ExtensionCookie> = cookies
+        .iter()
+        .filter(|c| root_domain_of(&c.domain) == root)
+        .cloned()
+        .collect();
+    if scoped.is_empty() {
+        anyhow::bail!("no cookies in payload match domain {root}");
+    }
+
+    let mut registry = load_registry();
+    let bucket = registry.buckets.entry(root.clone()).or_insert_with(|| {
+        let platform = PlatformKind::from_domain(&root);
+        BucketEntry {
+            platform_kind: platform.as_str().to_string(),
+            accounts: Vec::new(),
+        }
+    });
+
+    let mut slug = if requested_slug.trim().is_empty() {
+        slugify_alias(
+            source
+                .alias_hint
+                .as_deref()
+                .unwrap_or(""),
+        )
+    } else {
+        slugify_alias(requested_slug)
+    };
+    if slug == DEFAULT_SLUG {
+        slug = format!("{}-extra", DEFAULT_SLUG.trim_start_matches('_'));
+    }
+    let mut candidate = slug.clone();
+    let mut suffix = 2;
+    while bucket.accounts.iter().any(|a| a.slug == candidate) {
+        candidate = format!("{}-{}", slug, suffix);
+        suffix += 1;
+    }
+    let final_slug = candidate;
+
+    let count = write_account_file(&root, &final_slug, &scoped)?;
+    let now = current_unix_ms();
+    let alias = source.alias_hint.clone().unwrap_or_else(|| {
+        format!("{} · {}", platform_display(PlatformKind::from_domain(&root)), human_date(now))
+    });
+
+    bucket.accounts.push(AccountEntry {
+        slug: final_slug.clone(),
+        alias,
+        source_url: source.source_url.clone(),
+        source_label: Some(source.source_label.clone()),
+        captured_at_ms: now,
+        cookie_count: count,
+        last_used_at_ms: None,
+    });
+
+    save_registry(&registry)?;
+    Ok((final_slug, count))
 }
 
 pub fn rename_account(domain: &str, slug: &str, new_alias: &str) -> anyhow::Result<()> {

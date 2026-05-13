@@ -36,7 +36,7 @@ use tokio::net::TcpListener;
 use tower_http::cors::{Any, CorsLayer};
 
 use crate::extension_storage::{
-    cookie_limit, write_extension_cookies, write_extension_metadata, ExtensionCookie,
+    cookie_limit, write_extension_metadata, ExtensionCookie,
     ExtensionPayload,
 };
 use crate::storage::config;
@@ -300,9 +300,6 @@ async fn enqueue(
             );
         }
         if !cookies.is_empty() {
-            if let Err(error) = write_extension_cookies(cookies) {
-                tracing::warn!("failed to write extension cookies: {error}");
-            }
             if let Err(error) = crate::cookies::ingest_batch(
                 cookies,
                 crate::cookies::IngestSource {
@@ -382,13 +379,6 @@ async fn cookies_export(
     }
 
     if !request.cookies.is_empty() {
-        if let Err(error) = write_extension_cookies(&request.cookies) {
-            return error_response(
-                StatusCode::INTERNAL_SERVER_ERROR,
-                "WRITE_FAILED",
-                format!("write extension cookies: {error}"),
-            );
-        }
         let label = if request.source_url.is_some() || request.alias.is_some() {
             "Browser extension (manual capture)".to_string()
         } else {
@@ -403,7 +393,11 @@ async fn cookies_export(
                 alias_hint,
             },
         ) {
-            tracing::warn!("failed to ingest cookies into manager: {error}");
+            return error_response(
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "WRITE_FAILED",
+                format!("ingest cookies: {error}"),
+            );
         }
     }
 

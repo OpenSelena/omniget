@@ -6,6 +6,8 @@
 const BACKEND_ERROR_MAP: Record<string, string> = {
   "Video requires login. Use browser cookies or try another URL.":
     "errors.login_required",
+  "This video requires login. Import cookies for this site in Settings → Cookies, then retry.":
+    "errors.login_required",
   "Server returned error 429 (too many requests). Try again later.":
     "errors.rate_limited",
   "Access denied (403). The video may be private or region-restricted.":
@@ -71,6 +73,8 @@ export function translateBackendError(
   if (lower.includes("size mismatch")) return t("errors.size_mismatch");
   if (lower.includes("disk full") || lower.includes("write error")) return t("errors.disk_full");
   if (lower.includes("tiktok") && lower.includes("blocking")) return t("errors.tiktok_blocked");
+  if (lower.includes("download reported success but no matching file"))
+    return t("errors.console_encoding");
 
   return stripped || msg;
 }

@@ -2,6 +2,7 @@
   import { pluginInvoke } from "$lib/plugin-invoke";
   import { showToast } from "$lib/stores/toast-store.svelte";
   import { musicUI } from "$lib/study-music/ui-store.svelte";
+  import { goto } from "$app/navigation";
   import { t } from "$lib/i18n";
 
   type SourceEntry = { slug: string; available: boolean };
@@ -102,7 +103,7 @@
       musicUI.openQobuz();
     } else if (slug === "youtube_music") {
       onClose();
-      musicUI.openYoutube();
+      void goto("/settings?cat=cookies");
     }
   }
 

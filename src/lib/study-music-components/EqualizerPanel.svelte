@@ -92,7 +92,7 @@
             <span class="gain">{value > 0 ? "+" : ""}{value.toFixed(1)} dB</span>
             <input
               type="range"
-              orient="vertical"
+              {...{ orient: "vertical" } as Record<string, string>}
               min="-12"
               max="12"
               step="0.5"

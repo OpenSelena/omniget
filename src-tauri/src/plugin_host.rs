@@ -137,4 +137,30 @@ impl<R: Runtime + 'static> PluginHost for PluginHostImpl<R> {
         })?;
         Ok(dir)
     }
+
+    fn get_cookie_file(&self, domain: &str, account: Option<&str>) -> Option<PathBuf> {
+        crate::cookies::account_path_for_consumer(domain, account)
+    }
+
+    fn cookie_status(&self, domain: &str) -> omniget_plugin_sdk::CookieStatus {
+        let registry = crate::cookies::load_registry();
+        let root = crate::cookies::root_domain_of(domain);
+        let bucket = match registry.buckets.get(&root) {
+            Some(b) => b,
+            None => return omniget_plugin_sdk::CookieStatus::Missing,
+        };
+        let primary = match bucket.accounts.iter().find(|a| a.slug == "_default") {
+            Some(a) => a,
+            None => return omniget_plugin_sdk::CookieStatus::Missing,
+        };
+        let path = match crate::cookies::account_path_for_consumer(&root, None) {
+            Some(p) => p,
+            None => return omniget_plugin_sdk::CookieStatus::Missing,
+        };
+        omniget_plugin_sdk::CookieStatus::Available {
+            path,
+            last_modified_secs: primary.captured_at_ms / 1000,
+            cookie_count: primary.cookie_count,
+        }
+    }
 }

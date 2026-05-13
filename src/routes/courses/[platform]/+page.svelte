@@ -457,7 +457,7 @@
             placeholder={$t("courses.search_placeholder")}
             bind:value={searchQuery}
             oninput={() => { currentPage = 1; }}
-            onkeydown={(e) => { if (e.key === "Enter" && config.features.has_search) handleSearch(); }}
+            onkeydown={(e) => { if (e.key === "Enter" && config?.features.has_search) handleSearch(); }}
           />
           {#if config.features.has_search}
             <button class="button" onclick={handleSearch} disabled={!searchQuery.trim()}>

@@ -2,6 +2,7 @@ import { loadOpenAppState, isOpenAppEnabled, setOpenAppEnabled } from "../src/op
 import { getHlsGroupKey } from "../src/hls-grouping.js";
 import { normalizePageKey } from "../src/sniffer-storage.js";
 import { formatCookieSummary } from "../src/cookie-summary.js";
+import { captureCookiesForTab } from "../src/cookie-capture.js";
 
 const APP_URL = "https://github.com/tonhowtf/omniget/releases/latest";
 
@@ -22,11 +23,15 @@ async function init() {
   const toggle = document.getElementById("sniffer-toggle");
   const openAppToggle = document.getElementById("open-app-toggle");
 
+  let activeTab = null;
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    activeTab = tab ?? null;
     pageTitle = tab?.title || "";
     pageThumbnail = tab?.favIconUrl || "";
   } catch {}
+
+  initCookieCapture(activeTab);
 
   await loadOpenAppState();
   openAppToggle.checked = isOpenAppEnabled();
@@ -501,6 +506,72 @@ function escapeHtml(str) {
   const d = document.createElement("div");
   d.textContent = str;
   return d.innerHTML;
+}
+
+function initCookieCapture(activeTab) {
+  const wrap = document.getElementById("cookie-capture");
+  const btn = document.getElementById("cookie-capture-btn");
+  const label = document.getElementById("cookie-capture-label");
+  const hint = document.getElementById("cookie-capture-hint");
+  if (!wrap || !btn || !label) return;
+
+  const url = activeTab?.url ?? "";
+  let isHttpish = false;
+  try {
+    const p = new URL(url);
+    isHttpish = p.protocol === "http:" || p.protocol === "https:";
+  } catch {}
+
+  if (!isHttpish) {
+    wrap.dataset.state = "hidden";
+    return;
+  }
+
+  let busy = false;
+  btn.addEventListener("click", async () => {
+    if (busy) return;
+    busy = true;
+    btn.disabled = true;
+    btn.removeAttribute("data-state");
+    label.textContent = "Saving cookies…";
+
+    const result = await captureCookiesForTab(activeTab);
+    busy = false;
+    btn.disabled = false;
+
+    if (result.ok) {
+      btn.dataset.state = "success";
+      label.textContent = `${result.cookie_count} cookies saved`;
+      if (hint) hint.textContent = `${result.domain} • ${result.platform_kind.replace("_", " ")}`;
+      setTimeout(() => {
+        btn.removeAttribute("data-state");
+        label.textContent = "Save site cookies";
+        if (hint) hint.textContent = "Sends cookies of this site to OmniGet's cookie manager.";
+      }, 3500);
+    } else {
+      btn.dataset.state = "error";
+      label.textContent = explainFailure(result);
+      setTimeout(() => {
+        btn.removeAttribute("data-state");
+        label.textContent = "Save site cookies";
+      }, 4000);
+    }
+  });
+}
+
+function explainFailure(result) {
+  switch (result?.reason) {
+    case "no-url": return "No active tab";
+    case "invalid-url": return "Page can't be inspected";
+    case "unsupported-scheme": return "Only http/https pages";
+    case "no-cookies-api": return "Cookies API blocked";
+    case "no-cookies-for-domain": return "No cookies for this site";
+    case "missing-token": return "Pair OmniGet first";
+    case "missing-endpoint": return "OmniGet not detected";
+    case "fetch-failed": return "OmniGet isn't running";
+    case "unauthorized": return "Bad pairing token";
+    default: return "Couldn't save cookies";
+  }
 }
 
 init();

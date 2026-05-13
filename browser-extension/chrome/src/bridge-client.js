@@ -227,6 +227,9 @@ export async function sendCookiesViaBridge(
     storage = globalThis.chrome?.storage?.local,
     timeoutMs = ENQUEUE_TIMEOUT_MS,
     config = null,
+    sourceUrl = null,
+    pageTitle = null,
+    alias = null,
   } = {}
 ) {
   if (!fetchImpl) {
@@ -245,6 +248,9 @@ export async function sendCookiesViaBridge(
   }
 
   const body = { cookies, protocolVersion: PROTOCOL_VERSION };
+  if (sourceUrl) body.sourceUrl = sourceUrl;
+  if (pageTitle) body.pageTitle = pageTitle;
+  if (alias) body.alias = alias;
 
   const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
   let response;

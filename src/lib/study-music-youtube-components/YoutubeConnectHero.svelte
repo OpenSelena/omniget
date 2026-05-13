@@ -1,6 +1,5 @@
 <script lang="ts">
   import { t } from "$lib/i18n";
-  import { musicUI } from "$lib/study-music/ui-store.svelte";
   import { goto } from "$app/navigation";
 
   type Props = {
@@ -11,11 +10,11 @@
   let { status, filePath }: Props = $props();
 
   function openConfigPanel() {
-    musicUI.openYoutube();
+    void goto("/settings?cat=cookies");
   }
 
   function exploreAnonymously() {
-    goto("/study/music/youtube/explore");
+    void goto("/study/music/youtube/explore");
   }
 </script>
 

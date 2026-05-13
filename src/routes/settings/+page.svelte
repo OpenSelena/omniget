@@ -16,6 +16,7 @@
   import SettingsDownloads from "$components/settings/SettingsDownloads.svelte";
   import SettingsTypography from "$components/settings/SettingsTypography.svelte";
   import SettingsBrowserExtension from "$components/settings/SettingsBrowserExtension.svelte";
+  import SettingsCookies from "$components/settings/SettingsCookies.svelte";
 
   type DependencyStatus = {
     name: string;
@@ -137,7 +138,7 @@
     await updateSettings({ download: { video_quality: value } });
   }
 
-  type SettingsCategory = "downloads" | "appearance" | "typography" | "network" | "plugins" | "advanced";
+  type SettingsCategory = "downloads" | "appearance" | "typography" | "network" | "cookies" | "plugins" | "advanced";
   let activeCategory = $state<SettingsCategory>("downloads");
 
   let searchQuery = $state("");
@@ -401,6 +402,7 @@
         ["appearance", "settings.cat_appearance"],
         ["typography", "settings.cat_typography"],
         ["network", "settings.cat_network"],
+        ["cookies", "settings.cat_cookies"],
         ["plugins", "settings.cat_plugins"],
         ["advanced", "settings.cat_advanced"],
       ] as [cat, key] (cat)}
@@ -436,6 +438,10 @@
     {#if isSearching || activeCategory === "network"}
       <SettingsBrowserExtension />
       <SettingsNetwork />
+    {/if}
+
+    {#if isSearching || activeCategory === "cookies"}
+      <SettingsCookies />
     {/if}
 
     {#if isSearching || activeCategory === "advanced"}

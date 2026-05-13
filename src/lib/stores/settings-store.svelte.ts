@@ -21,6 +21,9 @@ export type AppSettings = {
     organize_by_platform: boolean;
     download_subtitles: boolean;
     include_auto_subtitles: boolean;
+    caption_locale: string;
+    keep_vtt: boolean;
+    continuous_lecture_numbers: boolean;
     translate_metadata: boolean;
     youtube_sponsorblock: boolean;
     split_by_chapters: boolean;
