@@ -62,6 +62,7 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
           LDAI_UPDATE_INFORMATION: ${{ contains(matrix.platform, 'ubuntu') && 'gh-releases-zsync|tonhowtf|omniget|latest|*AppImage.zsync' || '' }}
+          NODE_OPTIONS: --max-old-space-size=6144
         with:
           tagName: v__VERSION__
           releaseName: 'OmniGet v__VERSION__'
