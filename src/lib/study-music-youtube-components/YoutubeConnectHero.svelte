@@ -91,7 +91,7 @@
     margin: 0;
     font-size: 22px;
     font-weight: 700;
-    color: var(--primary);
+    color: var(--secondary);
     line-height: 1.25;
   }
   .hero-body {

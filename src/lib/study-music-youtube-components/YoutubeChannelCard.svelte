@@ -53,7 +53,7 @@
     margin: 6px 0 0 0;
     font-size: 13px;
     font-weight: 600;
-    color: var(--primary);
+    color: var(--secondary);
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;

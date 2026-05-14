@@ -81,7 +81,7 @@
   }
   .yt-error svg { color: var(--tertiary); margin-top: 2px; }
   .body { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-  .msg { margin: 0; font-size: 14px; color: var(--primary); }
+  .msg { margin: 0; font-size: 14px; color: var(--secondary); }
   .actions { display: flex; flex-wrap: wrap; gap: 8px; }
   .btn {
     padding: 6px 12px;

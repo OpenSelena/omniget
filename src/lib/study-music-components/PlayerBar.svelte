@@ -2,6 +2,7 @@
   import { goto } from "$app/navigation";
   import { musicPlayer } from "$lib/study-music/player-store.svelte";
   import { musicUI } from "$lib/study-music/ui-store.svelte";
+  import { listenTogether } from "$lib/study-music/listen-together-store.svelte";
   import { t } from "$lib/i18n";
   import CoverImage from "./CoverImage.svelte";
   import ProgressBar from "./ProgressBar.svelte";
@@ -269,6 +270,33 @@
       <button
         type="button"
         class="ctrl-btn"
+        class:active={listenTogether.connected}
+        onclick={() => musicUI.toggleListenTogether()}
+        aria-label={$t("study.music.listen_together_title") as string}
+        title={$t("study.music.listen_together_title") as string}
+      >
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+      </button>
+      <button
+        type="button"
+        class="ctrl-btn"
+        class:active={musicPlayer.sleepTimerEndsAt !== null || musicPlayer.sleepTimerEndOfTrack}
+        onclick={() => musicUI.toggleSleepTimer()}
+        aria-label={$t("study.music.sleep_timer_title") as string}
+        title={$t("study.music.sleep_timer_title") as string}
+      >
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+        </svg>
+      </button>
+      <button
+        type="button"
+        class="ctrl-btn"
         class:active={musicPlayer.eqEnabled}
         onclick={() => musicUI.toggleEqualizer()}
         aria-label={$t("study.music.eq_title") as string}
@@ -499,7 +527,7 @@
     border: 0;
     border-radius: 50%;
     background: var(--secondary);
-    color: var(--primary);
+    color: var(--secondary);
     cursor: pointer;
     display: grid;
     place-items: center;

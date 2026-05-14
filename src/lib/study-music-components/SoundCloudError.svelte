@@ -122,7 +122,7 @@
 
   .msg {
     margin: 0;
-    color: var(--primary);
+    color: var(--secondary);
     font-size: 14px;
     font-weight: 700;
     line-height: 1.35;
@@ -168,7 +168,7 @@
   }
 
   .btn.ghost:hover {
-    color: var(--primary);
+    color: var(--secondary);
     background: color-mix(in oklab, var(--button) 80%, transparent);
   }
 

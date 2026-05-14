@@ -106,6 +106,53 @@
         {/each}
       </div>
 
+      <div class="crossfade-row">
+        <div class="crossfade-head">
+          <span class="crossfade-label">{$t("study.music.crossfade_label")}</span>
+          <span class="crossfade-value">
+            {musicPlayer.crossfadeSec === 0
+              ? $t("study.music.crossfade_off")
+              : `${musicPlayer.crossfadeSec}s`}
+          </span>
+        </div>
+        <input
+          type="range"
+          min="0"
+          max="12"
+          step="1"
+          value={musicPlayer.crossfadeSec}
+          oninput={(e) =>
+            musicPlayer.setCrossfade(Number((e.currentTarget as HTMLInputElement).value))}
+        />
+      </div>
+
+      <div class="extras-row">
+        <label class="toggle">
+          <input
+            type="checkbox"
+            checked={musicPlayer.normalizationEnabled}
+            onchange={(e) =>
+              musicPlayer.setNormalization((e.currentTarget as HTMLInputElement).checked)}
+          />
+          <span>
+            <strong>{$t("study.music.normalization_label")}</strong>
+            <em>{$t("study.music.normalization_hint")}</em>
+          </span>
+        </label>
+        <label class="toggle">
+          <input
+            type="checkbox"
+            checked={musicPlayer.skipSilenceEnabled}
+            onchange={(e) =>
+              musicPlayer.setSkipSilence((e.currentTarget as HTMLInputElement).checked)}
+          />
+          <span>
+            <strong>{$t("study.music.skip_silence_label")}</strong>
+            <em>{$t("study.music.skip_silence_hint")}</em>
+          </span>
+        </label>
+      </div>
+
       <footer class="foot">
         <button
           type="button"
@@ -243,11 +290,72 @@
   .band input[type="range"] {
     writing-mode: vertical-lr;
     direction: rtl;
-    appearance: slider-vertical;
-    -webkit-appearance: slider-vertical;
     width: 18px;
     height: 160px;
     accent-color: var(--accent);
+  }
+  .crossfade-row {
+    padding: 12px 20px 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    margin-top: 12px;
+  }
+  .crossfade-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .crossfade-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgba(255, 255, 255, 0.5);
+  }
+  .crossfade-value {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.85);
+    font-variant-numeric: tabular-nums;
+  }
+  .crossfade-row input[type="range"] {
+    width: 100%;
+    accent-color: var(--accent);
+  }
+  .extras-row {
+    padding: 8px 20px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .extras-row .toggle {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+  }
+  .extras-row .toggle input {
+    margin-top: 3px;
+    width: 14px;
+    height: 14px;
+    accent-color: var(--accent);
+    flex-shrink: 0;
+  }
+  .extras-row .toggle span {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .extras-row .toggle strong {
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+  }
+  .extras-row .toggle em {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.5);
+    font-style: normal;
+    line-height: 1.3;
   }
   .freq {
     font-size: 10px;
