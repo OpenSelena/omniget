@@ -5,6 +5,7 @@
   import { save as saveDialog } from "@tauri-apps/plugin-dialog";
   import { t } from "$lib/i18n";
   import { showToast } from "$lib/stores/toast-store.svelte";
+  import { getSettings, updateSettings } from "$lib/stores/settings-store.svelte";
   import CookieBucketCard from "$lib/components/cookies/CookieBucketCard.svelte";
   import CookieImportMenu from "$lib/components/cookies/CookieImportMenu.svelte";
   import CookieContentModal from "$lib/components/cookies/CookieContentModal.svelte";
@@ -27,6 +28,15 @@
   };
 
   let registry = $state<Registry>({ buckets: {} });
+
+  let settings = $derived(getSettings());
+  let managedOnly = $derived(settings?.download.always_use_managed_cookies ?? true);
+
+  async function toggleManagedOnly() {
+    await updateSettings({
+      download: { always_use_managed_cookies: !managedOnly },
+    });
+  }
   let cookiesDir = $state("");
   let loading = $state(true);
   let pasteOpen = $state(false);
@@ -255,6 +265,18 @@
         <code>{cookiesDir}</code>
       </p>
     {/if}
+
+    <label class="managed-toggle">
+      <input
+        type="checkbox"
+        checked={managedOnly}
+        onchange={toggleManagedOnly}
+      />
+      <div class="managed-toggle-text">
+        <span class="managed-toggle-title">{$t("settings.cookies.managed_only_title")}</span>
+        <span class="managed-toggle-desc">{$t("settings.cookies.managed_only_desc")}</span>
+      </div>
+    </label>
   </header>
 
   {#if loading}
@@ -359,7 +381,7 @@
 <style>
   .section { display: flex; flex-direction: column; gap: 16px; }
   .section-head { display: flex; flex-direction: column; gap: 8px; }
-  .section-title { margin: 0; font-size: 18px; font-weight: 600; color: var(--primary); }
+  .section-title { margin: 0; font-size: 18px; font-weight: 600; color: var(--secondary); }
   .section-intro { margin: 0; color: var(--secondary); font-size: 13px; line-height: 1.5; }
   .head-actions { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
   .dir-hint {
@@ -379,6 +401,35 @@
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 100%;
+  }
+  .managed-toggle {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-top: 10px;
+    padding: 10px 12px;
+    background: var(--button);
+    border-radius: var(--border-radius);
+    cursor: pointer;
+  }
+  .managed-toggle input[type="checkbox"] {
+    margin-top: 3px;
+    flex-shrink: 0;
+  }
+  .managed-toggle-text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+  .managed-toggle-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--secondary);
+  }
+  .managed-toggle-desc {
+    font-size: 12px;
+    color: var(--secondary);
+    line-height: 1.4;
   }
   .ghost-btn {
     display: inline-flex;
@@ -455,7 +506,7 @@
     background: color-mix(in oklab, var(--button) 50%, transparent);
     border: 1px solid color-mix(in oklab, var(--content-border) 40%, transparent);
     border-radius: 8px;
-    color: var(--primary);
+    color: var(--secondary);
     font: inherit;
     font-size: 13px;
     outline: none;
@@ -470,13 +521,13 @@
   }
   .confirm {
     width: min(420px, 100%);
-    background: var(--background);
+    background: var(--surface, var(--bg));
     border: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
     border-radius: 14px;
     padding: 20px;
     display: flex; flex-direction: column; gap: 12px;
   }
-  .confirm h3 { margin: 0; font-size: 16px; color: var(--primary); }
+  .confirm h3 { margin: 0; font-size: 16px; color: var(--secondary); }
   .confirm p { margin: 0; font-size: 13px; color: var(--secondary); line-height: 1.5; }
   .confirm-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 6px; }
   .danger-btn {

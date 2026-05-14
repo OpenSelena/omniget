@@ -89,7 +89,7 @@
     max-height: 80vh;
     display: flex;
     flex-direction: column;
-    background: var(--background);
+    background: var(--surface, var(--bg));
     border: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
     border-radius: 16px;
     overflow: hidden;
@@ -99,7 +99,7 @@
     padding: 20px 56px 16px 20px;
     border-bottom: 1px solid color-mix(in oklab, var(--content-border) 30%, transparent);
   }
-  .modal-head h2 { margin: 0; font-size: 18px; font-weight: 600; color: var(--primary); }
+  .modal-head h2 { margin: 0; font-size: 18px; font-weight: 600; color: var(--secondary); }
   .subtitle { margin: 4px 0 0; font-size: 12px; color: var(--tertiary); line-height: 1.5; }
   .close {
     position: absolute;
@@ -122,7 +122,7 @@
     background: color-mix(in oklab, var(--button) 40%, transparent);
     border: 1px solid color-mix(in oklab, var(--content-border) 40%, transparent);
     border-radius: 8px;
-    color: var(--primary);
+    color: var(--secondary);
     font: inherit;
     font-size: 13px;
     outline: none;

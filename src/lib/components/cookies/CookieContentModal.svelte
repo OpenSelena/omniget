@@ -151,7 +151,7 @@
     max-height: 80vh;
     display: flex;
     flex-direction: column;
-    background: var(--background);
+    background: var(--surface, var(--bg));
     border: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
     border-radius: 16px;
     overflow: hidden;
@@ -165,7 +165,7 @@
     margin: 0;
     font-size: 18px;
     font-weight: 600;
-    color: var(--primary);
+    color: var(--secondary);
   }
   .subtitle {
     margin: 4px 0 0;
@@ -253,7 +253,7 @@
     color: var(--tertiary);
     text-decoration: line-through;
   }
-  .row-name { font-weight: 600; color: var(--primary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .row-name { font-weight: 600; color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .row-domain { color: var(--tertiary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .row-value { color: var(--secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .expired-tag {

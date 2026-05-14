@@ -27,6 +27,8 @@
     onLoadFormats,
     onSelectFormat,
     onClearFormat,
+    onPresetBest,
+    onPresetMusic,
   } = $props();
 
   function formatFilesize(bytes: number | null): string {
@@ -70,13 +72,14 @@
 
   function applyBest() {
     activePreset = "best";
-    const target = bestVA ?? bestVideo;
-    if (target) onSelectFormat(target.format_id);
+    if (selectedFormatId) onClearFormat();
+    onPresetBest?.();
   }
 
   function applyMusic() {
     activePreset = "music";
-    if (bestAudio) onSelectFormat(bestAudio.format_id);
+    if (selectedFormatId) onClearFormat();
+    onPresetMusic?.();
   }
 
   function toggleCustom() {

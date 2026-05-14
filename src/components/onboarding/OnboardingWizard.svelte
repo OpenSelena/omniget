@@ -686,7 +686,7 @@
     font-size: 13px;
     font-weight: 500;
     background: var(--secondary);
-    color: var(--primary);
+    color: var(--secondary);
     box-shadow: none;
   }
 

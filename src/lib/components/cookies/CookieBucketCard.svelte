@@ -268,7 +268,7 @@
     padding: 0;
     background: transparent;
     border: 0;
-    color: var(--primary);
+    color: var(--secondary);
     font-size: 16px;
     font-weight: 600;
     cursor: pointer;
@@ -295,7 +295,7 @@
     background: color-mix(in oklab, var(--button) 60%, transparent);
     border: 1px solid var(--accent);
     border-radius: 6px;
-    color: var(--primary);
+    color: var(--secondary);
     font-size: 16px;
     font-weight: 600;
     outline: none;

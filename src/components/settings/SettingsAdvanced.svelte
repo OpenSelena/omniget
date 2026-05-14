@@ -65,7 +65,7 @@
       <input
         type="text"
         class="input-text"
-        placeholder="e.g., firefox, chrome, edge"
+        placeholder={$t('settings.advanced.cookies_from_browser_placeholder')}
         value={settings.advanced?.cookies_from_browser ?? ""}
         onchange={(e) => updateSettings({ advanced: { cookies_from_browser: (e.target as HTMLInputElement).value.trim() } })}
       />

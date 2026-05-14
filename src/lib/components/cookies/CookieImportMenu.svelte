@@ -95,7 +95,7 @@
     top: calc(100% + 4px);
     right: 0;
     min-width: 240px;
-    background: var(--background);
+    background: var(--surface, var(--bg));
     border: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
     border-radius: 10px;
     overflow: hidden;
@@ -117,7 +117,7 @@
     cursor: pointer;
     transition: background 120ms;
   }
-  .menu-item:hover { background: color-mix(in oklab, var(--button) 40%, transparent); color: var(--primary); }
+  .menu-item:hover { background: color-mix(in oklab, var(--button) 40%, transparent); color: var(--secondary); }
   .menu-item svg { margin-top: 2px; flex-shrink: 0; }
   .item-text { display: flex; flex-direction: column; gap: 2px; }
   .item-title { font-size: 13px; font-weight: 500; }
