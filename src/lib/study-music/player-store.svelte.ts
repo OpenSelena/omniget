@@ -6,6 +6,12 @@ import { attachHls, type HlsHandle } from "./hls-loader.svelte";
 
 export type TrackSource = "local" | "spotify" | "youtube" | "soundcloud";
 
+export type PlayerBroadcastEvent =
+  | { type: "track-change"; track: MusicTrack }
+  | { type: "play" }
+  | { type: "pause"; time: number }
+  | { type: "seek"; time: number };
+
 export type MusicTrack = {
   id: number;
   path: string;
@@ -308,6 +314,39 @@ class MusicPlayerStore {
   youtubeSponsorBlockSegments = $state<import("$lib/study-bridge").SponsorBlockSegment[]>([]);
   private mediaSessionInstalled = false;
 
+  private broadcastListeners = new Set<(ev: PlayerBroadcastEvent) => void>();
+
+  addBroadcastListener(cb: (ev: PlayerBroadcastEvent) => void): () => void {
+    this.broadcastListeners.add(cb);
+    return () => {
+      this.broadcastListeners.delete(cb);
+    };
+  }
+
+  private fireBroadcast(ev: PlayerBroadcastEvent) {
+    for (const cb of this.broadcastListeners) {
+      try {
+        cb(ev);
+      } catch {
+        /* listener errors must not break playback */
+      }
+    }
+  }
+
+  sleepTimerEndsAt = $state<number | null>(null);
+  sleepTimerEndOfTrack = $state(false);
+  private sleepFadeStarted = false;
+  private sleepBaseVolume = 1;
+  crossfadeSec = $state(0);
+  private crossfadeStarted = false;
+  private crossfadeBaseVolume = 1;
+  normalizationEnabled = $state(false);
+  private normalizationGain: GainNode | null = null;
+  skipSilenceEnabled = $state(false);
+  private silenceAnalyser: AnalyserNode | null = null;
+  private silenceCheckHandle: ReturnType<typeof setInterval> | null = null;
+  private silenceStartedAt: number | null = null;
+
   init() {
     if (this.audio || typeof window === "undefined") return;
     const audio = new Audio();
@@ -340,12 +379,15 @@ class MusicPlayerStore {
       this.currentTime = audio.currentTime;
       this.scheduleQueueSave();
       this.updateMediaSessionPosition();
+      this.tickSleepTimer();
+      this.tickCrossfade();
     });
     audio.addEventListener("loadedmetadata", () => {
       this.duration = audio.duration || 0;
       this.ready = true;
       this.loading = false;
       this.updateMediaSessionPosition();
+      this.applyNormalizationGain();
     });
     audio.addEventListener("loadstart", () => {
       this.loading = true;
@@ -402,6 +444,10 @@ class MusicPlayerStore {
           eqEnabled?: boolean;
           eqGains?: number[];
           eqPreset?: EqPreset;
+          crossfadeSec?: number;
+          sleepEndOfTrack?: boolean;
+          normalizationEnabled?: boolean;
+          skipSilenceEnabled?: boolean;
         };
         if (typeof data.volume === "number") {
           audio.volume = Math.min(1, Math.max(0, data.volume));
@@ -419,6 +465,18 @@ class MusicPlayerStore {
         }
         if (data.eqPreset && data.eqPreset in EQ_PRESETS) {
           this.eqPreset = data.eqPreset;
+        }
+        if (typeof data.crossfadeSec === "number") {
+          this.crossfadeSec = Math.max(0, Math.min(12, data.crossfadeSec));
+        }
+        if (typeof data.sleepEndOfTrack === "boolean") {
+          this.sleepTimerEndOfTrack = data.sleepEndOfTrack;
+        }
+        if (typeof data.normalizationEnabled === "boolean") {
+          this.normalizationEnabled = data.normalizationEnabled;
+        }
+        if (typeof data.skipSilenceEnabled === "boolean") {
+          this.skipSilenceEnabled = data.skipSilenceEnabled;
         }
       }
     } catch {
@@ -1167,21 +1225,114 @@ class MusicPlayerStore {
       });
       const out = ctx.createGain();
       out.gain.value = 1;
+      const norm = ctx.createGain();
+      norm.gain.value = 1;
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 2048;
+      analyser.smoothingTimeConstant = 0.85;
       let node: AudioNode = source;
       for (const f of filters) {
         node.connect(f);
         node = f;
       }
       node.connect(out);
-      out.connect(ctx.destination);
+      out.connect(norm);
+      norm.connect(analyser);
+      analyser.connect(ctx.destination);
       this.eqContext = ctx;
       this.eqSource = source;
       this.eqFilters = filters;
       this.eqGainNode = out;
+      this.normalizationGain = norm;
+      this.silenceAnalyser = analyser;
       this.applyEq();
+      this.applyNormalizationGain();
+      this.maybeStartSilenceWatcher();
     } catch {
       /* ignore — EQ optional */
     }
+  }
+
+  private applyNormalizationGain() {
+    if (!this.normalizationGain) return;
+    if (!this.normalizationEnabled) {
+      this.normalizationGain.gain.value = 1;
+      return;
+    }
+    const ld = (this.currentTrack as unknown as { loudness_db?: number } | null)
+      ?.loudness_db;
+    if (typeof ld === "number" && Number.isFinite(ld)) {
+      const target = -14;
+      const factor = Math.pow(10, (target - ld) / 20);
+      this.normalizationGain.gain.value = Math.max(0.3, Math.min(3, factor));
+    } else {
+      this.normalizationGain.gain.value = 1;
+    }
+  }
+
+  setNormalization(enabled: boolean) {
+    this.normalizationEnabled = enabled;
+    this.ensureEqGraph();
+    this.applyNormalizationGain();
+    this.persistPlayerSettings();
+  }
+
+  setSkipSilence(enabled: boolean) {
+    this.skipSilenceEnabled = enabled;
+    this.ensureEqGraph();
+    this.maybeStartSilenceWatcher();
+    this.persistPlayerSettings();
+  }
+
+  private maybeStartSilenceWatcher() {
+    if (!this.skipSilenceEnabled || !this.silenceAnalyser) {
+      if (this.silenceCheckHandle !== null) {
+        clearInterval(this.silenceCheckHandle);
+        this.silenceCheckHandle = null;
+        this.silenceStartedAt = null;
+      }
+      return;
+    }
+    if (this.silenceCheckHandle !== null) return;
+    const analyser = this.silenceAnalyser;
+    const buf = new Float32Array(analyser.fftSize);
+    const SILENCE_RMS_THRESHOLD = 0.01;
+    const SILENCE_HOLD_MS = 1500;
+    let lastSkipAt = 0;
+    this.silenceCheckHandle = setInterval(() => {
+      if (!this.audio || this.audio.paused) {
+        this.silenceStartedAt = null;
+        return;
+      }
+      analyser.getFloatTimeDomainData(buf);
+      let sumSq = 0;
+      for (let i = 0; i < buf.length; i++) sumSq += buf[i] * buf[i];
+      const rms = Math.sqrt(sumSq / buf.length);
+      const now = Date.now();
+      if (rms < SILENCE_RMS_THRESHOLD) {
+        if (this.silenceStartedAt === null) {
+          this.silenceStartedAt = now;
+        } else if (
+          now - this.silenceStartedAt >= SILENCE_HOLD_MS &&
+          now - lastSkipAt >= 10_000 &&
+          this.audio.duration > 0 &&
+          this.audio.currentTime + 3 < this.audio.duration
+        ) {
+          try {
+            this.audio.currentTime = Math.min(
+              this.audio.currentTime + 3,
+              this.audio.duration - 1,
+            );
+            lastSkipAt = now;
+            this.silenceStartedAt = null;
+          } catch {
+            /* ignore */
+          }
+        }
+      } else {
+        this.silenceStartedAt = null;
+      }
+    }, 300);
   }
 
   private applyEq() {
@@ -1251,6 +1402,7 @@ class MusicPlayerStore {
     this.lastError = null;
     this.status = "resolving";
     this.loading = true;
+    this.fireBroadcast({ type: "track-change", track });
     this.ready = false;
     this.currentTime = 0;
     this.duration = (track.duration_ms ?? 0) / 1000;
@@ -1655,21 +1807,26 @@ class MusicPlayerStore {
   }
 
   pause() {
+    const time = this.currentTime;
     if (this.isSpotify()) {
       void spotifySdk.pause();
+      this.fireBroadcast({ type: "pause", time });
       return;
     }
     if (this.audio && !this.paused) this.audio.pause();
+    this.fireBroadcast({ type: "pause", time });
   }
 
   resume() {
     if (this.isSpotify()) {
       void spotifySdk.resume();
+      this.fireBroadcast({ type: "play" });
       return;
     }
     if (this.audio && this.paused && this.currentTrack) {
       this.audio.play().catch(() => {});
       this.ensureEqGraph();
+      this.fireBroadcast({ type: "play" });
     }
   }
 
@@ -1731,13 +1888,16 @@ class MusicPlayerStore {
       this.updateMediaSessionPosition();
       void spotifySdk.seek(ms);
       void this.fireRpcUpdate();
+      this.fireBroadcast({ type: "seek", time: target });
       return;
     }
     if (!this.audio) return;
     const dur = this.audio.duration || this.duration;
     if (!Number.isFinite(dur) || dur <= 0) return;
-    this.audio.currentTime = Math.max(0, Math.min(dur, seconds));
+    const target = Math.max(0, Math.min(dur, seconds));
+    this.audio.currentTime = target;
     void this.fireRpcUpdate();
+    this.fireBroadcast({ type: "seek", time: target });
   }
 
   seekRatio(ratio: number) {
@@ -1809,12 +1969,116 @@ class MusicPlayerStore {
 
   private handleEnded() {
     void this.flushPlayReport();
+    if (this.sleepTimerEndOfTrack) {
+      this.sleepTimerEndOfTrack = false;
+      this.audio?.pause();
+      this.persistPlayerSettings();
+      return;
+    }
     if (this.repeat === "one" && this.audio) {
       this.audio.currentTime = 0;
       this.audio.play().catch(() => {});
       return;
     }
     this.next();
+  }
+
+  setSleepTimerMinutes(minutes: number | null) {
+    if (minutes === null || minutes <= 0) {
+      this.sleepTimerEndsAt = null;
+      this.sleepFadeStarted = false;
+      if (this.audio && this.sleepBaseVolume > 0) {
+        this.audio.volume = this.sleepBaseVolume;
+      }
+    } else {
+      this.sleepTimerEndsAt = Date.now() + minutes * 60_000;
+      this.sleepBaseVolume = this.audio?.volume ?? 1;
+      this.sleepFadeStarted = false;
+    }
+    this.persistPlayerSettings();
+  }
+
+  setSleepEndOfTrack(enabled: boolean) {
+    this.sleepTimerEndOfTrack = enabled;
+    if (enabled) {
+      this.sleepTimerEndsAt = null;
+    }
+    this.persistPlayerSettings();
+  }
+
+  cancelSleepTimer() {
+    this.sleepTimerEndsAt = null;
+    this.sleepTimerEndOfTrack = false;
+    this.sleepFadeStarted = false;
+    if (this.audio && this.sleepBaseVolume > 0) {
+      this.audio.volume = this.sleepBaseVolume;
+    }
+    this.persistPlayerSettings();
+  }
+
+  setCrossfade(seconds: number) {
+    this.crossfadeSec = Math.max(0, Math.min(12, seconds));
+    this.persistPlayerSettings();
+  }
+
+  private tickSleepTimer() {
+    if (!this.audio) return;
+    if (this.sleepTimerEndsAt === null) return;
+    const remaining = this.sleepTimerEndsAt - Date.now();
+    const FADE_MS = 10_000;
+    if (remaining <= 0) {
+      this.audio.pause();
+      this.audio.volume = this.sleepBaseVolume;
+      this.sleepTimerEndsAt = null;
+      this.sleepFadeStarted = false;
+      this.persistPlayerSettings();
+      return;
+    }
+    if (remaining <= FADE_MS) {
+      if (!this.sleepFadeStarted) {
+        this.sleepFadeStarted = true;
+        this.sleepBaseVolume = this.audio.volume || 1;
+      }
+      const factor = Math.max(0, remaining / FADE_MS);
+      this.audio.volume = this.sleepBaseVolume * factor;
+    }
+  }
+
+  private tickCrossfade() {
+    if (!this.audio) return;
+    if (this.crossfadeSec <= 0 || this.duration <= 0) {
+      if (this.crossfadeStarted && this.crossfadeBaseVolume > 0) {
+        this.audio.volume = this.crossfadeBaseVolume;
+        this.crossfadeStarted = false;
+      }
+      return;
+    }
+    const remaining = this.duration - this.currentTime;
+    if (remaining <= this.crossfadeSec && remaining > 0) {
+      if (!this.crossfadeStarted) {
+        this.crossfadeStarted = true;
+        this.crossfadeBaseVolume = this.audio.volume || 1;
+      }
+      const factor = Math.max(0, remaining / this.crossfadeSec);
+      this.audio.volume = this.crossfadeBaseVolume * factor;
+    } else if (this.crossfadeStarted) {
+      this.audio.volume = this.crossfadeBaseVolume;
+      this.crossfadeStarted = false;
+    }
+  }
+
+  private persistPlayerSettings() {
+    try {
+      const raw = localStorage.getItem(PERSIST_KEY);
+      const data = raw ? JSON.parse(raw) : {};
+      data.crossfadeSec = this.crossfadeSec;
+      data.sleepEndOfTrack = this.sleepTimerEndOfTrack;
+      data.normalizationEnabled = this.normalizationEnabled;
+      data.skipSilenceEnabled = this.skipSilenceEnabled;
+      localStorage.setItem(PERSIST_KEY, JSON.stringify(data));
+    } catch {
+      /* ignore */
+    }
   }
 
   private async flushPlayReport() {

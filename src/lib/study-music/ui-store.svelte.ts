@@ -74,6 +74,20 @@ class MusicUI {
   closeEqualizer() {
     this.equalizerOpen = false;
   }
+  sleepTimerOpen = $state(false);
+  toggleSleepTimer() {
+    this.sleepTimerOpen = !this.sleepTimerOpen;
+  }
+  closeSleepTimer() {
+    this.sleepTimerOpen = false;
+  }
+  listenTogetherOpen = $state(false);
+  toggleListenTogether() {
+    this.listenTogetherOpen = !this.listenTogetherOpen;
+  }
+  closeListenTogether() {
+    this.listenTogetherOpen = false;
+  }
   openLastFm() {
     this.lastfmOpen = true;
   }

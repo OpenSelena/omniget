@@ -165,8 +165,15 @@ class SoundCloudStore {
 
   async refreshStatus() {
     try {
-      const s = await pluginInvoke<AuthStatus>("study", "study:soundcloud:auth:refresh");
+      let s = await pluginInvoke<AuthStatus>("study", "study:soundcloud:auth:refresh");
       this.status = s;
+      if (!s.has_oauth) {
+        const hydrated = await this.tryHydrateFromCookieManager();
+        if (hydrated) {
+          s = await pluginInvoke<AuthStatus>("study", "study:soundcloud:auth:refresh");
+          this.status = s;
+        }
+      }
       if (s.has_oauth && s.user_id == null) {
         try {
           const me = await pluginInvoke<any>("study", "study:soundcloud:me");
@@ -185,6 +192,29 @@ class SoundCloudStore {
       }
     } catch (e) {
       this.error = e instanceof Error ? e.message : String(e);
+    }
+  }
+
+  async tryHydrateFromCookieManager(): Promise<boolean> {
+    try {
+      const { invoke } = await import("@tauri-apps/api/core");
+      const accounts = await invoke<{ domain: string; accounts: { slug: string }[] }>(
+        "cookies_accounts_for_url",
+        { url: "https://soundcloud.com/" }
+      );
+      if (!accounts.accounts.length) return false;
+      const slug = accounts.accounts[0].slug;
+      const cookies = await invoke<
+        { name: string; value: string; domain: string; path: string }[]
+      >("cookies_read_as_json", { request: { domain: accounts.domain, slug } });
+      if (!cookies.length) return false;
+      await pluginInvoke("study", "study:soundcloud:auth:set_cookies", {
+        cookies_json: JSON.stringify(cookies),
+      });
+      return true;
+    } catch (e) {
+      console.warn("[soundcloud] hydrate from cookie manager failed:", e);
+      return false;
     }
   }
 
