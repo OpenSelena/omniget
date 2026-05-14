@@ -400,7 +400,10 @@ pub async fn ensure_default_plugins(state: Arc<tokio::sync::RwLock<PluginManager
     for (plugin_id, repo) in DEFAULT_PLUGINS {
         let already_installed = {
             let manager = state.read().await;
-            manager.installed_plugins().iter().any(|p| p.id == *plugin_id)
+            manager
+                .installed_plugins()
+                .iter()
+                .any(|p| p.id == *plugin_id)
         };
         if already_installed {
             tracing::debug!("default plugin '{}' already installed, skipping", plugin_id);

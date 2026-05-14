@@ -36,8 +36,7 @@ use tokio::net::TcpListener;
 use tower_http::cors::{Any, CorsLayer};
 
 use crate::extension_storage::{
-    cookie_limit, write_extension_metadata, ExtensionCookie,
-    ExtensionPayload,
+    cookie_limit, write_extension_metadata, ExtensionCookie, ExtensionPayload,
 };
 use crate::storage::config;
 
@@ -138,10 +137,7 @@ async fn bind_listener(preferred: u16) -> std::io::Result<(u16, TcpListener)> {
 
 /// Ensure `settings.bridge.{token,port}` are populated and persisted.
 /// Returns the resolved (token, port) pair to use for this run.
-fn ensure_bridge_settings(
-    app: &AppHandle,
-    bound_port: u16,
-) -> anyhow::Result<(String, u16)> {
+fn ensure_bridge_settings(app: &AppHandle, bound_port: u16) -> anyhow::Result<(String, u16)> {
     let mut settings = config::load_settings(app);
     let mut dirty = false;
 
@@ -249,7 +245,10 @@ fn check_bearer(headers: &HeaderMap, expected: &str) -> bool {
         Ok(s) => s,
         Err(_) => return false,
     };
-    let provided = match raw.strip_prefix("Bearer ").or_else(|| raw.strip_prefix("bearer ")) {
+    let provided = match raw
+        .strip_prefix("Bearer ")
+        .or_else(|| raw.strip_prefix("bearer "))
+    {
         Some(s) => s.trim(),
         None => return false,
     };
@@ -303,7 +302,10 @@ async fn enqueue(
             if let Err(error) = crate::cookies::ingest_batch(
                 cookies,
                 crate::cookies::IngestSource {
-                    source_url: payload.page_url.clone().or_else(|| Some(payload.url.clone())),
+                    source_url: payload
+                        .page_url
+                        .clone()
+                        .or_else(|| Some(payload.url.clone())),
                     source_label: "Browser extension".to_string(),
                     alias_hint: payload.title.clone(),
                 },
@@ -330,9 +332,7 @@ async fn enqueue(
     let app = state.app.clone();
     let url = payload.url.clone();
     tauri::async_runtime::spawn(async move {
-        if let Err(error) =
-            crate::external_url::handle_external_url(&app, url, "bridge").await
-        {
+        if let Err(error) = crate::external_url::handle_external_url(&app, url, "bridge").await {
             tracing::warn!("failed to handle bridge URL: {error}");
         }
     });

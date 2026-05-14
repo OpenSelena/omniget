@@ -283,8 +283,8 @@ impl PlatformDownloader for BlueskyDownloader {
                 let output_path = opts.output_dir.join(&filename);
                 let output_str = output_path.to_string_lossy().to_string();
 
-                let downloader = HlsDownloader::new()
-                    .with_user_agent_override(opts.user_agent.clone());
+                let downloader =
+                    HlsDownloader::new().with_user_agent_override(opts.user_agent.clone());
                 let _ = progress.send(0.0).await;
 
                 let result = downloader

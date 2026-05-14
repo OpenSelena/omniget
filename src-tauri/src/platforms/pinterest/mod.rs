@@ -214,7 +214,9 @@ impl PlatformDownloader for PinterestDownloader {
                     opts.download_mode.as_deref(),
                     opts.format_id.as_deref(),
                     opts.filename_template.as_deref(),
-                    opts.referer.as_deref().or(Some("https://www.pinterest.com/")),
+                    opts.referer
+                        .as_deref()
+                        .or(Some("https://www.pinterest.com/")),
                     opts.cancel_token.clone(),
                     None,
                     opts.concurrent_fragments,

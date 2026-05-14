@@ -79,7 +79,10 @@ pub fn on_hotkey_pressed(app: &tauri::AppHandle, shortcut: &Shortcut) {
 }
 
 fn matches_binding(pressed: &Shortcut, binding: &str) -> bool {
-    binding.parse::<Shortcut>().map(|s| s == *pressed).unwrap_or(false)
+    binding
+        .parse::<Shortcut>()
+        .map(|s| s == *pressed)
+        .unwrap_or(false)
 }
 
 fn handle_download_clipboard(app: &tauri::AppHandle) {

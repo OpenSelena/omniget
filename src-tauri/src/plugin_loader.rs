@@ -179,14 +179,13 @@ fn load_single_plugin(
         PluginLoadError::simple("manifest_parse", format!("Invalid plugin.json: {e}"))
     })?;
 
-    let lib_path = find_native_lib(plugin_dir, manifest.rust_crate.as_deref()).ok_or_else(
-        || {
+    let lib_path =
+        find_native_lib(plugin_dir, manifest.rust_crate.as_deref()).ok_or_else(|| {
             PluginLoadError::simple(
                 "no_native_lib",
                 format!("No native library found in {}", plugin_dir.display()),
             )
-        },
-    )?;
+        })?;
 
     let lib = unsafe { libloading::Library::new(&lib_path) }.map_err(|e| {
         PluginLoadError::simple(
@@ -227,9 +226,9 @@ fn load_single_plugin(
         })?;
 
     let mut plugin = unsafe { Box::from_raw(init_fn()) };
-    plugin.initialize(host).map_err(|e| {
-        PluginLoadError::simple("initialize", format!("Plugin init failed: {e}"))
-    })?;
+    plugin
+        .initialize(host)
+        .map_err(|e| PluginLoadError::simple("initialize", format!("Plugin init failed: {e}")))?;
 
     Ok(LoadedPlugin {
         _lib: Some(lib),

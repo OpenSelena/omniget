@@ -248,8 +248,8 @@ async fn run_http_fetcher(
         ..Default::default()
     };
 
-    let mut fetcher = HttpFetcher::new(client.clone(), url.to_string(), output.to_path_buf())
-        .with_config(cfg);
+    let mut fetcher =
+        HttpFetcher::new(client.clone(), url.to_string(), output.to_path_buf()).with_config(cfg);
     if let Some(h) = headers {
         fetcher = fetcher.with_headers(h);
     }

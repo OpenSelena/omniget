@@ -57,10 +57,7 @@ pub async fn check_ytdlp_available() -> Result<bool, String> {
 }
 
 #[tauri::command]
-pub async fn install_dependency(
-    name: String,
-    variant: Option<String>,
-) -> Result<String, String> {
+pub async fn install_dependency(name: String, variant: Option<String>) -> Result<String, String> {
     match name.as_str() {
         "yt-dlp" => {
             crate::core::ytdlp::ensure_ytdlp()
@@ -79,8 +76,7 @@ pub async fn install_dependency(
             let _path: PathBuf = pdfium::ensure_pdfium_with_variant(variant)
                 .await
                 .map_err(|e| e.to_string())?;
-            return Ok(pdfium::read_version_marker()
-                .unwrap_or_else(|| "installed".to_string()));
+            return Ok(pdfium::read_version_marker().unwrap_or_else(|| "installed".to_string()));
         }
         _ => return Err(format!("Unknown dependency: {}", name)),
     }
@@ -128,12 +124,8 @@ pub fn set_dependency_path(name: String, source_path: String) -> Result<String, 
     match name.as_str() {
         "PDFium" => {
             pdfium::set_pdfium_from_path(&src).map_err(|e| e.to_string())?;
-            Ok(pdfium::read_version_marker()
-                .unwrap_or_else(|| "custom".to_string()))
+            Ok(pdfium::read_version_marker().unwrap_or_else(|| "custom".to_string()))
         }
-        _ => Err(format!(
-            "Custom file path not supported for: {}",
-            name
-        )),
+        _ => Err(format!("Custom file path not supported for: {}", name)),
     }
 }

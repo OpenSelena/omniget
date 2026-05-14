@@ -163,4 +163,8 @@ impl<R: Runtime + 'static> PluginHost for PluginHostImpl<R> {
             cookie_count: primary.cookie_count,
         }
     }
+
+    fn emit_download_log(&self, download_id: u64, line: &str) {
+        omniget_core::core::log_hook::emit_log(download_id, line);
+    }
 }

@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use serde::Serialize;
 
 use crate::core::queue::{self, emit_queue_state_from_state, QueueItemInfo};
@@ -156,6 +158,7 @@ pub async fn download_from_url(
     quality: Option<String>,
     format_id: Option<String>,
     referer: Option<String>,
+    cookie_slug: Option<String>,
 ) -> Result<DownloadStarted, String> {
     let _timer_start = std::time::Instant::now();
     let platform = Platform::from_url(&url);
@@ -223,6 +226,8 @@ pub async fn download_from_url(
             downloader,
             ytdlp_path,
             false,
+            cookie_slug,
+            None,
         );
 
         let next_ids = q.next_queued_ids();
@@ -264,6 +269,108 @@ pub async fn download_from_url(
     });
 
     tracing::debug!("[perf] download_from_url took {:?}", _timer_start.elapsed());
+    Ok(DownloadStarted {
+        id: download_id,
+        title,
+    })
+}
+
+#[cfg(not(target_os = "android"))]
+#[tauri::command]
+pub async fn download_with_custom_args(
+    app: tauri::AppHandle,
+    state: tauri::State<'_, AppState>,
+    url: String,
+    output_dir: String,
+    custom_args: Vec<String>,
+    cookie_slug: Option<String>,
+) -> Result<DownloadStarted, String> {
+    if url.trim().is_empty() {
+        return Err("URL is required".to_string());
+    }
+    if let Err(err) = crate::core::path_limits::validate_output_dir(&output_dir) {
+        return Err(format!(
+            "PathTooLong|{}|{}|{}",
+            err.limit, err.current, err.reserve
+        ));
+    }
+
+    let download_id = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_millis() as u64;
+
+    let download_queue = state.download_queue.clone();
+    {
+        let settings = config::load_settings(&app);
+        let mut q = download_queue.lock().await;
+        q.max_concurrent = settings.advanced.max_concurrent_downloads.max(1);
+        q.stagger_delay_ms = settings.advanced.stagger_delay_ms;
+        q.default_max_retries = settings.advanced.max_retries;
+        if q.has_url(&url) {
+            return Err("Download already in progress for this URL".to_string());
+        }
+    }
+
+    let downloader: Arc<dyn crate::platforms::traits::PlatformDownloader> =
+        Arc::new(crate::platforms::generic_ytdlp::GenericYtdlpDownloader::new());
+
+    let title = url.clone();
+    let ytdlp_path = ytdlp::find_ytdlp_cached().await;
+
+    let state_to_emit = {
+        let mut q = download_queue.lock().await;
+        q.enqueue(
+            download_id,
+            url,
+            "generic".to_string(),
+            title.clone(),
+            output_dir,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            None,
+            downloader,
+            ytdlp_path,
+            false,
+            cookie_slug,
+            Some(custom_args),
+        );
+        let next_ids = q.next_queued_ids();
+        for nid in &next_ids {
+            q.mark_active(*nid);
+        }
+        q.get_state()
+    };
+    emit_queue_state_from_state(&app, state_to_emit);
+
+    let q_clone = download_queue.clone();
+    let app_clone = app.clone();
+    tokio::spawn(async move {
+        let ids_to_start = {
+            let q = q_clone.lock().await;
+            q.items
+                .iter()
+                .filter(|i| i.status == queue::QueueStatus::Active)
+                .filter(|i| i.id == download_id)
+                .map(|i| i.id)
+                .collect::<Vec<_>>()
+        };
+        for nid in ids_to_start {
+            let a = app_clone.clone();
+            let qc = q_clone.clone();
+            tokio::spawn(async move {
+                queue::spawn_download(a, qc, nid).await;
+            });
+        }
+    });
+
     Ok(DownloadStarted {
         id: download_id,
         title,
@@ -472,6 +579,7 @@ pub async fn restore_recovery(
             item.quality,
             item.format_id,
             item.referer,
+            None,
         )
         .await
         {
@@ -484,8 +592,7 @@ pub async fn restore_recovery(
 
 #[tauri::command]
 pub fn parse_batch_file(path: String) -> Result<Vec<String>, String> {
-    let content = std::fs::read_to_string(&path)
-        .map_err(|e| format!("Read error: {}", e))?;
+    let content = std::fs::read_to_string(&path).map_err(|e| format!("Read error: {}", e))?;
     let mut urls = Vec::new();
     for raw in content.lines() {
         let line = raw.trim();

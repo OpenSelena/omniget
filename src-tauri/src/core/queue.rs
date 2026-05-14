@@ -71,8 +71,8 @@ pub enum QueueKind {
 pub fn kind_from_platform(platform: &str) -> QueueKind {
     let p = platform.to_ascii_lowercase();
     match p.as_str() {
-        "youtube" | "vimeo" | "twitch" | "bilibili" | "tiktok" | "twitter" | "x"
-        | "instagram" | "reddit" | "bluesky" | "facebook" | "generic_ytdlp" => QueueKind::Video,
+        "youtube" | "vimeo" | "twitch" | "bilibili" | "tiktok" | "twitter" | "x" | "instagram"
+        | "reddit" | "bluesky" | "facebook" | "generic_ytdlp" => QueueKind::Video,
         "soundcloud" | "spotify" => QueueKind::Audio,
         "pinterest" => QueueKind::Image,
         "magnet" | "p2p" | "torrent" => QueueKind::Generic,
@@ -168,6 +168,8 @@ pub struct QueueItem {
     pub concurrent_segments: Option<usize>,
     pub segment_size_bytes: Option<u64>,
     pub eta_seconds: Option<u64>,
+    pub cookie_slug: Option<String>,
+    pub custom_ytdlp_args: Option<Vec<String>>,
 }
 
 impl QueueItem {
@@ -185,10 +187,11 @@ impl QueueItem {
             file_path: self.file_path.clone(),
             file_size_bytes: self.file_size_bytes,
             file_count: self.file_count,
-            thumbnail_url: self
-                .thumbnail_url_override
-                .clone()
-                .or_else(|| self.media_info.as_ref().and_then(|m| m.thumbnail_url.clone())),
+            thumbnail_url: self.thumbnail_url_override.clone().or_else(|| {
+                self.media_info
+                    .as_ref()
+                    .and_then(|m| m.thumbnail_url.clone())
+            }),
             kind: self.kind,
             external: self.external,
             eta_seconds: self.eta_seconds,
@@ -236,6 +239,8 @@ impl DownloadQueue {
         downloader: Arc<dyn PlatformDownloader>,
         ytdlp_path: Option<PathBuf>,
         from_hotkey: bool,
+        cookie_slug: Option<String>,
+        custom_ytdlp_args: Option<Vec<String>>,
     ) {
         let computed_kind = Some(kind_from_platform(&platform));
         let item = QueueItem {
@@ -274,6 +279,8 @@ impl DownloadQueue {
             concurrent_segments: None,
             segment_size_bytes: None,
             eta_seconds: None,
+            cookie_slug,
+            custom_ytdlp_args,
         };
         crate::core::recovery::persist(crate::core::recovery::RecoveryItem {
             id: item.id,
@@ -355,6 +362,8 @@ impl DownloadQueue {
                 concurrent_segments: None,
                 segment_size_bytes: None,
                 eta_seconds: None,
+                cookie_slug: None,
+                custom_ytdlp_args: None,
             };
             self.items.push(item);
         }
@@ -422,10 +431,11 @@ impl DownloadQueue {
                     success,
                     error: if success { None } else { error_for_history },
                     completed_at: crate::core::queue_history::now_unix_seconds(),
-                    thumbnail_url: item
-                        .thumbnail_url_override
-                        .clone()
-                        .or_else(|| item.media_info.as_ref().and_then(|m| m.thumbnail_url.clone())),
+                    thumbnail_url: item.thumbnail_url_override.clone().or_else(|| {
+                        item.media_info
+                            .as_ref()
+                            .and_then(|m| m.thumbnail_url.clone())
+                    }),
                     kind: item.kind,
                 };
                 crate::core::queue_history::record(entry);
@@ -537,8 +547,7 @@ impl DownloadQueue {
     }
 
     pub fn reorder(&mut self, ids_in_order: Vec<u64>) -> bool {
-        let mut slots: Vec<Option<QueueItem>> =
-            self.items.drain(..).map(Some).collect();
+        let mut slots: Vec<Option<QueueItem>> = self.items.drain(..).map(Some).collect();
 
         let queued_slot_indices: Vec<usize> = slots
             .iter()
@@ -560,8 +569,7 @@ impl DownloadQueue {
             .map(|idx| (slots[*idx].as_ref().unwrap().id, *idx))
             .collect();
 
-        let mut new_queued_order: Vec<QueueItem> =
-            Vec::with_capacity(queued_slot_indices.len());
+        let mut new_queued_order: Vec<QueueItem> = Vec::with_capacity(queued_slot_indices.len());
         let mut seen: std::collections::HashSet<u64> = std::collections::HashSet::new();
 
         for id in &ids_in_order {
@@ -711,7 +719,12 @@ impl DownloadQueue {
         let to_remove: Vec<u64> = self
             .items
             .iter()
-            .filter(|i| matches!(i.status, QueueStatus::Complete { .. } | QueueStatus::Error { .. }))
+            .filter(|i| {
+                matches!(
+                    i.status,
+                    QueueStatus::Complete { .. } | QueueStatus::Error { .. }
+                )
+            })
             .map(|i| i.id)
             .collect();
         for id in &to_remove {
@@ -960,6 +973,8 @@ async fn spawn_download_inner(
         downloader,
         ytdlp_path,
         from_hotkey,
+        cookie_slug,
+        custom_ytdlp_args,
     ) = {
         let q = queue.lock().await;
         let item = match q.items.iter().find(|i| i.id == item_id) {
@@ -982,6 +997,8 @@ async fn spawn_download_inner(
             item.downloader.clone(),
             item.ytdlp_path.clone(),
             item.from_hotkey,
+            item.cookie_slug.clone(),
+            item.custom_ytdlp_args.clone(),
         )
     };
 
@@ -1129,6 +1146,7 @@ async fn spawn_download_inner(
         ytdlp_path,
         torrent_listen_port: Some(settings.advanced.torrent_listen_port),
         torrent_id_slot: Some(torrent_id_slot.clone()),
+        custom_ytdlp_args: custom_ytdlp_args.clone(),
     };
 
     let total_bytes = info.file_size_bytes;
@@ -1241,8 +1259,11 @@ async fn spawn_download_inner(
             }
         }
     };
-    let result = omniget_core::core::log_hook::CURRENT_DOWNLOAD_ID
-        .scope(item_id, dl_future)
+    let result = omniget_core::core::log_hook::CURRENT_COOKIE_SLUG
+        .scope(
+            cookie_slug.clone(),
+            omniget_core::core::log_hook::CURRENT_DOWNLOAD_ID.scope(item_id, dl_future),
+        )
         .await;
     omniget_core::core::ytdlp::clear_ext_user_agent(&url);
     omniget_core::core::ytdlp::clear_ext_headers(&url);
@@ -1666,7 +1687,10 @@ mod kind_tests {
     #[test]
     fn telegram_kind() {
         assert_eq!(kind_from_platform("telegram"), QueueKind::TelegramMedia);
-        assert_eq!(kind_from_platform("telegram_media"), QueueKind::TelegramMedia);
+        assert_eq!(
+            kind_from_platform("telegram_media"),
+            QueueKind::TelegramMedia
+        );
     }
 
     #[test]

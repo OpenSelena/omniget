@@ -15,7 +15,10 @@ pub struct BrowserExtensionStatus {
 
 fn read_bundled_manifest_version(app: &AppHandle, browser: &str) -> Option<String> {
     let resource = format!("browser-extension/{}/manifest.json", browser);
-    let path = app.path().resolve(resource, tauri::path::BaseDirectory::Resource).ok()?;
+    let path = app
+        .path()
+        .resolve(resource, tauri::path::BaseDirectory::Resource)
+        .ok()?;
     let raw = std::fs::read_to_string(&path).ok()?;
     let v: serde_json::Value = serde_json::from_str(&raw).ok()?;
     v.get("version")?.as_str().map(|s| s.to_string())
@@ -96,7 +99,7 @@ pub async fn browser_extension_export(
     if browser != "chrome" && browser != "firefox" {
         return Err(format!("browser '{}' não suportado pra export", browser));
     }
-    let resource = format!("../browser-extension/{}", browser);
+    let resource = format!("browser-extension/{}", browser);
     let src = app
         .path()
         .resolve(resource, tauri::path::BaseDirectory::Resource)

@@ -140,7 +140,15 @@ pub fn run() {
                 if root.is_empty() {
                     return None;
                 }
-                crate::cookies::account_path_for_consumer(&root, None)
+                let slug = omniget_core::core::log_hook::current_cookie_slug();
+                let path = crate::cookies::account_path_for_consumer(&root, slug.as_deref())?;
+                crate::cookies::touch_last_used(&root, slug.as_deref().unwrap_or("_default"));
+                Some(path)
+            });
+            core::ytdlp::set_managed_cookies_only_fn(|| {
+                storage::config::load_settings_standalone()
+                    .download
+                    .always_use_managed_cookies
             });
             core::ytdlp::set_global_cookie_file_fn(|| {
                 let s = storage::config::load_settings_standalone();
@@ -194,18 +202,16 @@ pub fn run() {
             });
             {
                 let app_handle = app.handle().clone();
-                omniget_core::core::log_hook::set_log_sink(std::sync::Arc::new(
-                    move |id, line| {
-                        let should_emit = core::download_log::push_line(id, line);
-                        if should_emit {
-                            let _ = tauri::Emitter::emit(
-                                &app_handle,
-                                "download-log-update",
-                                serde_json::json!({ "id": id }),
-                            );
-                        }
-                    },
-                ));
+                omniget_core::core::log_hook::set_log_sink(std::sync::Arc::new(move |id, line| {
+                    let should_emit = core::download_log::push_line(id, line);
+                    if should_emit {
+                        let _ = tauri::Emitter::emit(
+                            &app_handle,
+                            "download-log-update",
+                            serde_json::json!({ "id": id }),
+                        );
+                    }
+                }));
             }
             core::recovery::init_from_disk();
             core::queue_history::init_from_disk();
@@ -410,6 +416,8 @@ pub fn run() {
             cookies::commands::cookies_rename,
             cookies::commands::cookies_migrate_legacy,
             cookies::commands::cookies_detect_platform,
+            cookies::commands::cookies_accounts_for_url,
+            cookies::commands::cookies_read_as_json,
             cookies::commands::cookies_import_file,
             cookies::commands::cookies_export_to,
             cookies::commands::cookies_add_account,
@@ -423,7 +431,11 @@ pub fn run() {
             commands::downloads::get_media_formats,
             commands::downloads::prefetch_media_info,
             commands::downloads::download_from_url,
+            commands::downloads::download_with_custom_args,
             commands::downloads::cancel_generic_download,
+            commands::yt_templates::yt_templates_list,
+            commands::yt_templates::yt_templates_save,
+            commands::yt_templates::yt_templates_delete,
             commands::downloads::pause_download,
             commands::downloads::resume_download,
             commands::downloads::pause_all_downloads,

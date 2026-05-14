@@ -70,10 +70,7 @@ pub fn apply_global_proxy(builder: reqwest::ClientBuilder) -> reqwest::ClientBui
     apply_proxy(builder, &proxy)
 }
 
-pub fn inject_ua_header(
-    headers: &mut reqwest::header::HeaderMap,
-    opts_ua: Option<&str>,
-) {
+pub fn inject_ua_header(headers: &mut reqwest::header::HeaderMap, opts_ua: Option<&str>) {
     if let Some(ua) = opts_ua {
         if let Ok(v) = reqwest::header::HeaderValue::from_str(ua) {
             headers.insert(reqwest::header::USER_AGENT, v);

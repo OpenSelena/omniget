@@ -22,6 +22,7 @@ type TranslateMetadataFn = Box<dyn Fn() -> Option<String> + Send + Sync>;
 type SponsorBlockFn = Box<dyn Fn() -> bool + Send + Sync>;
 type SplitChaptersFn = Box<dyn Fn() -> bool + Send + Sync>;
 type PerDomainCookieFn = Box<dyn Fn(&str) -> Option<PathBuf> + Send + Sync>;
+type ManagedCookiesOnlyFn = Box<dyn Fn() -> bool + Send + Sync>;
 
 static EXT_COOKIE_PATH_FN: OnceLock<ExtCookiePathFn> = OnceLock::new();
 static GLOBAL_COOKIE_FILE_FN: OnceLock<GlobalCookieFileFn> = OnceLock::new();
@@ -30,6 +31,7 @@ static MANUAL_COOKIE_HEADER_FN: OnceLock<ManualCookieHeaderFn> = OnceLock::new()
 static EXT_REFERER_FN: OnceLock<ExtRefererFn> = OnceLock::new();
 static INCLUDE_AUTO_SUBS_FN: OnceLock<IncludeAutoSubsFn> = OnceLock::new();
 static PER_DOMAIN_COOKIE_FN: OnceLock<PerDomainCookieFn> = OnceLock::new();
+static MANAGED_COOKIES_ONLY_FN: OnceLock<ManagedCookiesOnlyFn> = OnceLock::new();
 static TRANSLATE_METADATA_FN: OnceLock<TranslateMetadataFn> = OnceLock::new();
 static SPONSORBLOCK_FN: OnceLock<SponsorBlockFn> = OnceLock::new();
 static SPLIT_CHAPTERS_FN: OnceLock<SplitChaptersFn> = OnceLock::new();
@@ -40,6 +42,14 @@ pub fn set_ext_cookie_path_fn(f: impl Fn() -> PathBuf + Send + Sync + 'static) {
 
 pub fn set_per_domain_cookie_fn(f: impl Fn(&str) -> Option<PathBuf> + Send + Sync + 'static) {
     let _ = PER_DOMAIN_COOKIE_FN.set(Box::new(f));
+}
+
+pub fn set_managed_cookies_only_fn(f: impl Fn() -> bool + Send + Sync + 'static) {
+    let _ = MANAGED_COOKIES_ONLY_FN.set(Box::new(f));
+}
+
+fn managed_cookies_only() -> bool {
+    MANAGED_COOKIES_ONLY_FN.get().map(|f| f()).unwrap_or(true)
 }
 
 pub fn set_global_cookie_file_fn(f: impl Fn() -> Option<String> + Send + Sync + 'static) {
@@ -63,10 +73,7 @@ pub fn set_include_auto_subs_fn(f: impl Fn() -> bool + Send + Sync + 'static) {
 }
 
 fn include_auto_subs_setting() -> bool {
-    INCLUDE_AUTO_SUBS_FN
-        .get()
-        .map(|f| f())
-        .unwrap_or(false)
+    INCLUDE_AUTO_SUBS_FN.get().map(|f| f()).unwrap_or(false)
 }
 
 pub fn set_translate_metadata_fn(f: impl Fn() -> Option<String> + Send + Sync + 'static) {
@@ -112,10 +119,7 @@ pub fn clear_ext_user_agent(url: &str) {
 }
 
 fn ext_user_agent_for_url(url: &str) -> Option<String> {
-    ext_ua_map()
-        .lock()
-        .ok()
-        .and_then(|m| m.get(url).cloned())
+    ext_ua_map().lock().ok().and_then(|m| m.get(url).cloned())
 }
 
 static ETA_BY_DOWNLOAD: OnceLock<Mutex<HashMap<u64, u64>>> = OnceLock::new();
@@ -131,7 +135,10 @@ pub fn record_eta(download_id: u64, eta_seconds: u64) {
 }
 
 pub fn get_eta(download_id: u64) -> Option<u64> {
-    eta_map().lock().ok().and_then(|m| m.get(&download_id).copied())
+    eta_map()
+        .lock()
+        .ok()
+        .and_then(|m| m.get(&download_id).copied())
 }
 
 pub fn clear_eta(download_id: u64) {
@@ -177,7 +184,10 @@ fn cookies_from_browser_setting() -> String {
 }
 
 fn manual_cookie_header_setting() -> Option<String> {
-    let raw = MANUAL_COOKIE_HEADER_FN.get().map(|f| f()).unwrap_or_default();
+    let raw = MANUAL_COOKIE_HEADER_FN
+        .get()
+        .map(|f| f())
+        .unwrap_or_default();
     let trimmed = raw.trim();
     if trimmed.is_empty() {
         return None;
@@ -1254,7 +1264,25 @@ pub async fn download_video(
     );
 
     let format_selector = if let Some(fid) = format_id {
-        fid.to_string()
+        if let Some(h) = quality_height.filter(|h| *h > 0) {
+            let fallback = match mode {
+                "audio" => "ba/b".to_string(),
+                "mute" => format!("bv*[height<={}]/bv*/b", h),
+                _ => {
+                    if ffmpeg_available {
+                        format!(
+                            "bv*[height<={}]+ba[ext=m4a]/bv*[height<={}]+ba/b[height<={}]/b",
+                            h, h, h
+                        )
+                    } else {
+                        format!("b[height<={}]/bv*[height<={}]/b", h, h)
+                    }
+                }
+            };
+            format!("{}/{}", fid, fallback)
+        } else {
+            fid.to_string()
+        }
     } else {
         match mode {
             "audio" => "ba/b".to_string(),
@@ -1301,30 +1329,32 @@ pub async fn download_video(
     } else {
         per_domain_cookie_file(url)
     };
-    let manual_cookie_header = if explicit_cookie_header
-        || cookie_file.is_some()
-        || per_domain_cookies.is_some()
-    {
-        None
-    } else {
+    let managed_only = managed_cookies_only();
+    let allow_fallback = !managed_only
+        && !explicit_cookie_header
+        && cookie_file.is_none()
+        && per_domain_cookies.is_none();
+
+    let manual_cookie_header = if allow_fallback {
         manual_cookie_header_setting()
+    } else {
+        None
     };
     let manual_cookie_enabled = manual_cookie_header.is_some();
-    let global_cookie_file = if manual_cookie_enabled || per_domain_cookies.is_some() {
-        None
-    } else {
+    let global_cookie_file = if allow_fallback && !manual_cookie_enabled {
         global_cookie_file()
+    } else {
+        None
     };
 
-    let ext_cookies = if cookie_file.is_none()
-        && global_cookie_file.is_none()
-        && !manual_cookie_enabled
-        && per_domain_cookies.is_none()
-    {
+    let ext_cookies = if allow_fallback && !manual_cookie_enabled && global_cookie_file.is_none() {
         extension_cookie_file()
     } else {
         None
     };
+
+    let had_global_cookie_file = global_cookie_file.is_some();
+    let had_ext_cookies = ext_cookies.is_some();
 
     let effective_cookie_file = cookie_file
         .map(|p| p.to_path_buf())
@@ -1332,11 +1362,65 @@ pub async fn download_video(
         .or_else(|| global_cookie_file.map(std::path::PathBuf::from))
         .or(ext_cookies);
 
-    let cfb_setting = if manual_cookie_enabled || explicit_cookie_header || effective_cookie_file.is_some() {
+    let cfb_setting = if !allow_fallback
+        || manual_cookie_enabled
+        || explicit_cookie_header
+        || effective_cookie_file.is_some()
+    {
         String::new()
     } else {
         cookies_from_browser_setting()
     };
+
+    if let Some(dl_id) = log_hook::current_download_id() {
+        let host = url::Url::parse(url)
+            .ok()
+            .and_then(|u| u.host_str().map(|s| s.to_string()))
+            .unwrap_or_else(|| url.to_string());
+        let slug = log_hook::current_cookie_slug();
+        let line = if explicit_cookie_header {
+            "[cookies] using explicit Cookie header from extra flags".to_string()
+        } else if cookie_file.is_some() {
+            "[cookies] using caller-supplied cookie file".to_string()
+        } else if let Some(ref p) = per_domain_cookies {
+            let slug_label = slug.as_deref().unwrap_or("_default");
+            format!(
+                "[cookies] using managed cookie for {} (account: {}) → {}",
+                host,
+                slug_label,
+                p.file_name()
+                    .map(|s| s.to_string_lossy().to_string())
+                    .unwrap_or_default()
+            )
+        } else if manual_cookie_enabled {
+            format!(
+                "[cookies] no managed cookie for {}; using manual Cookie header from settings",
+                host
+            )
+        } else if had_global_cookie_file {
+            format!(
+                "[cookies] no managed cookie for {}; using global cookie file from settings",
+                host
+            )
+        } else if had_ext_cookies {
+            format!(
+                "[cookies] no managed cookie for {}; using browser-extension cookies",
+                host
+            )
+        } else if !cfb_setting.is_empty() {
+            format!(
+                "[cookies] no managed cookie for {}; using --cookies-from-browser {}",
+                host, cfb_setting
+            )
+        } else {
+            format!(
+                "[cookies] no cookies available for {} — downloading without auth",
+                host
+            )
+        };
+        log_hook::emit_log(dl_id, &line);
+    }
+
     let mut base_args = vec![
         "-f".to_string(),
         format_selector,
@@ -1347,9 +1431,9 @@ pub async fn download_video(
     ];
     base_args.extend(js_runtime_args());
 
-    if format_id.is_none() && mode == "audio" {
+    if mode == "audio" {
         let target_fmt = audio_format.unwrap_or("m4a");
-        if target_fmt == "m4a" {
+        if format_id.is_none() && target_fmt == "m4a" {
             base_args.push("-S".to_string());
             base_args.push("+codec:aac:m4a".to_string());
         } else {
@@ -2017,8 +2101,7 @@ fn translate_ytdlp_error(stderr: &str) -> anyhow::Error {
         || stderr.contains("需要登录")
         || stderr.contains("登录后可")
         || stderr.contains("仅登录用户")
-        || lower.contains("this video is only available")
-            && lower.contains("members")
+        || lower.contains("this video is only available") && lower.contains("members")
     {
         return anyhow!(
             "This video requires login. Import cookies for this site in Settings → Cookies, then retry."
@@ -2375,10 +2458,7 @@ mod tests {
 
     #[test]
     fn parse_progress_with_eta_field() {
-        assert_eq!(
-            parse_progress_line("download:  45.2%|eta:30"),
-            Some(45.2)
-        );
+        assert_eq!(parse_progress_line("download:  45.2%|eta:30"), Some(45.2));
     }
 
     #[test]

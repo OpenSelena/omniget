@@ -35,10 +35,7 @@ pub async fn rpc_set_source(
 }
 
 #[tauri::command]
-pub async fn rpc_clear_source(
-    app: tauri::AppHandle,
-    source: String,
-) -> Result<Value, String> {
+pub async fn rpc_clear_source(app: tauri::AppHandle, source: String) -> Result<Value, String> {
     let settings = config::load_settings(&app);
     rpc::clear_source(settings.rpc.clone(), source).await
 }

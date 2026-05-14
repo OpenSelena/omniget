@@ -131,6 +131,8 @@ pub struct DownloadSettings {
     pub copy_to_clipboard_on_hotkey: bool,
     #[serde(default)]
     pub cookie_file: String,
+    #[serde(default = "default_true")]
+    pub always_use_managed_cookies: bool,
     #[serde(default)]
     pub continuous_lecture_numbers: bool,
 }
@@ -358,6 +360,7 @@ impl Default for AppSettings {
                 extra_ytdlp_flags: Vec::new(),
                 copy_to_clipboard_on_hotkey: true,
                 cookie_file: String::new(),
+                always_use_managed_cookies: true,
                 continuous_lecture_numbers: false,
             },
             advanced: AdvancedSettings {

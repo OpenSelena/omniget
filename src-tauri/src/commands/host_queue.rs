@@ -48,7 +48,9 @@ pub async fn enqueue_external_inner(
     forced_id: Option<u64>,
 ) -> Result<u64, String> {
     let queue_id = forced_id.unwrap_or_else(next_external_id);
-    let kind = args.kind.unwrap_or_else(|| kind_from_platform(&args.platform));
+    let kind = args
+        .kind
+        .unwrap_or_else(|| kind_from_platform(&args.platform));
     let output_dir = args
         .output_path
         .parent()
@@ -92,6 +94,8 @@ pub async fn enqueue_external_inner(
         concurrent_segments: None,
         segment_size_bytes: None,
         eta_seconds: None,
+        cookie_slug: None,
+        custom_ytdlp_args: None,
     };
 
     {
@@ -106,7 +110,12 @@ pub async fn enqueue_external_inner(
     };
     emit_queue_state_from_state(app, snapshot);
 
-    tracing::info!("[host-queue] enqueue_external id={} platform={} kind={:?}", queue_id, args.platform, kind);
+    tracing::info!(
+        "[host-queue] enqueue_external id={} platform={} kind={:?}",
+        queue_id,
+        args.platform,
+        kind
+    );
     Ok(queue_id)
 }
 
@@ -203,7 +212,10 @@ pub async fn report_complete_inner(
                     }
                     it.status = QueueStatus::Complete { success: true };
                 } else {
-                    let msg = args.error.clone().unwrap_or_else(|| "Unknown error".to_string());
+                    let msg = args
+                        .error
+                        .clone()
+                        .unwrap_or_else(|| "Unknown error".to_string());
                     let retryable = crate::core::queue::is_retryable_error_message(&msg);
                     it.status = QueueStatus::Error {
                         message: msg,
@@ -256,7 +268,9 @@ pub fn register_event_listeners(app: &AppHandle) {
                 let app = app_for_enqueue.clone();
                 tauri::async_runtime::spawn(async move {
                     let state = app.state::<AppState>();
-                    if let Err(e) = enqueue_external_inner(&app, &state, p.args, Some(p.queue_id)).await {
+                    if let Err(e) =
+                        enqueue_external_inner(&app, &state, p.args, Some(p.queue_id)).await
+                    {
                         tracing::warn!("[host-queue] enqueue listener failed: {}", e);
                     }
                 });

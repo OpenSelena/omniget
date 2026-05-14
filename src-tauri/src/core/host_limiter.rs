@@ -39,7 +39,10 @@ pub fn host_key_for_url(url: &str) -> String {
 
 fn canonicalize_host(host: &str) -> String {
     let trimmed = host.trim_start_matches("www.");
-    if trimmed.contains("youtube.com") || trimmed.contains("youtu.be") || trimmed.contains("googlevideo.com") {
+    if trimmed.contains("youtube.com")
+        || trimmed.contains("youtu.be")
+        || trimmed.contains("googlevideo.com")
+    {
         return "youtube".to_string();
     }
     if trimmed.contains("instagram.com") || trimmed.contains("cdninstagram.com") {
@@ -48,10 +51,14 @@ fn canonicalize_host(host: &str) -> String {
     if trimmed.contains("tiktok.com") || trimmed.contains("tiktokcdn.com") {
         return "tiktok".to_string();
     }
-    if trimmed.contains("twitter.com") || trimmed.contains("x.com") || trimmed.contains("twimg.com") {
+    if trimmed.contains("twitter.com") || trimmed.contains("x.com") || trimmed.contains("twimg.com")
+    {
         return "twitter".to_string();
     }
-    if trimmed.contains("reddit.com") || trimmed.contains("redd.it") || trimmed.contains("redditmedia.com") {
+    if trimmed.contains("reddit.com")
+        || trimmed.contains("redd.it")
+        || trimmed.contains("redditmedia.com")
+    {
         return "reddit".to_string();
     }
     if trimmed.contains("vimeo.com") || trimmed.contains("vimeocdn.com") {
@@ -152,15 +159,24 @@ mod tests {
 
     #[test]
     fn youtube_variants_canonicalize() {
-        assert_eq!(host_key_for_url("https://www.youtube.com/watch?v=abc"), "youtube");
+        assert_eq!(
+            host_key_for_url("https://www.youtube.com/watch?v=abc"),
+            "youtube"
+        );
         assert_eq!(host_key_for_url("https://youtu.be/abc"), "youtube");
-        assert_eq!(host_key_for_url("https://r5---sn-foo.googlevideo.com/x"), "youtube");
+        assert_eq!(
+            host_key_for_url("https://r5---sn-foo.googlevideo.com/x"),
+            "youtube"
+        );
     }
 
     #[test]
     fn x_and_twitter_share_bucket() {
         assert_eq!(host_key_for_url("https://x.com/jack/status/1"), "twitter");
-        assert_eq!(host_key_for_url("https://twitter.com/jack/status/1"), "twitter");
+        assert_eq!(
+            host_key_for_url("https://twitter.com/jack/status/1"),
+            "twitter"
+        );
     }
 
     #[test]

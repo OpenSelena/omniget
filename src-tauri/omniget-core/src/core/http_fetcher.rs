@@ -137,7 +137,8 @@ impl Segment {
                 0
             }
         } else {
-            let bytes_per_sec = (cur_d - baseline_d) as u128 * 1_000_000_000u128 / elapsed_ns as u128;
+            let bytes_per_sec =
+                (cur_d - baseline_d) as u128 * 1_000_000_000u128 / elapsed_ns as u128;
             if bytes_per_sec == 0 {
                 u64::MAX / 2
             } else {
@@ -219,7 +220,11 @@ impl HttpFetcher {
 
         let initial_segments = if self.config.use_sidecar_resume {
             load_resume_state(&resume_path)
-                .filter(|st| st.r#type == "http_segmented" && st.total_bytes == total && st.url_hash == url_hash)
+                .filter(|st| {
+                    st.r#type == "http_segmented"
+                        && st.total_bytes == total
+                        && st.url_hash == url_hash
+                })
                 .map(|st| st.segments)
         } else {
             None
@@ -227,13 +232,24 @@ impl HttpFetcher {
 
         let segments = match initial_segments {
             Some(segs) if !segs.is_empty() => segs,
-            _ => plan_segments(total, self.config.segment_size_hint, self.config.concurrent_segments),
+            _ => plan_segments(
+                total,
+                self.config.segment_size_hint,
+                self.config.concurrent_segments,
+            ),
         };
 
         ensure_part_file(&part_path, total).await?;
 
         let result = self
-            .download_chunked(&part_path, total, segments, &resume_path, &url_hash, &progress_tx)
+            .download_chunked(
+                &part_path,
+                total,
+                segments,
+                &resume_path,
+                &url_hash,
+                &progress_tx,
+            )
             .await;
 
         match result {
@@ -249,7 +265,9 @@ impl HttpFetcher {
                     .await
                     .map(|m| m.len())
                     .unwrap_or(total);
-                Ok(HttpFetcherResult { bytes_written: bytes })
+                Ok(HttpFetcherResult {
+                    bytes_written: bytes,
+                })
             }
             Err(e) => Err(e),
         }
@@ -320,7 +338,12 @@ impl HttpFetcher {
                 }
                 Ok(Some(Err(e))) => return Err(anyhow!("stream error: {}", e)),
                 Ok(None) => break,
-                Err(_) => return Err(anyhow!("read timed out after {:?}", self.config.read_timeout)),
+                Err(_) => {
+                    return Err(anyhow!(
+                        "read timed out after {:?}",
+                        self.config.read_timeout
+                    ))
+                }
             }
         }
 
@@ -546,7 +569,17 @@ async fn worker_loop(
             if cancel.is_cancelled() {
                 return Ok(());
             }
-            match download_segment(&client, &url, headers.as_ref(), &part_path, &seg, &cancel, &cfg).await {
+            match download_segment(
+                &client,
+                &url,
+                headers.as_ref(),
+                &part_path,
+                &seg,
+                &cancel,
+                &cfg,
+            )
+            .await
+            {
                 Ok(()) => {
                     seg.state.store(SEG_DONE, Ordering::Relaxed);
                     break;
@@ -604,10 +637,7 @@ async fn claim_pending_or_steal(
     None
 }
 
-fn try_steal(
-    segs: &mut Vec<Arc<Segment>>,
-    cfg: &HttpFetcherConfig,
-) -> Option<Arc<Segment>> {
+fn try_steal(segs: &mut Vec<Arc<Segment>>, cfg: &HttpFetcherConfig) -> Option<Arc<Segment>> {
     let mut victim: Option<Arc<Segment>> = None;
     let mut victim_score: u64 = 0;
     for s in segs.iter() {
@@ -642,7 +672,9 @@ fn try_steal(
     if new_begin_for_helper <= victim.begin + victim.downloaded.load(Ordering::Relaxed) {
         return None;
     }
-    victim.end_ceiling.store(new_end_for_victim, Ordering::Relaxed);
+    victim
+        .end_ceiling
+        .store(new_end_for_victim, Ordering::Relaxed);
 
     let next_id = segs.iter().map(|s| s.id).max().unwrap_or(0) + 1;
     let helper = Arc::new(Segment::new(next_id, new_begin_for_helper, old_end, 0));
@@ -968,10 +1000,8 @@ mod tests {
     #[tokio::test]
     async fn fetcher_downloads_small_file_streaming() {
         use std::io::Write;
-        let temp_dir = std::env::temp_dir().join(format!(
-            "omniget_http_fetcher_test_{}",
-            now_unix_nanos()
-        ));
+        let temp_dir =
+            std::env::temp_dir().join(format!("omniget_http_fetcher_test_{}", now_unix_nanos()));
         std::fs::create_dir_all(&temp_dir).unwrap();
         let payload: Vec<u8> = (0u8..=255).cycle().take(200_000).collect();
 
@@ -980,7 +1010,9 @@ mod tests {
         let payload_for_server = payload.clone();
         tokio::spawn(async move {
             loop {
-                let Ok((mut stream, _)) = listener.accept().await else { break };
+                let Ok((mut stream, _)) = listener.accept().await else {
+                    break;
+                };
                 let body = payload_for_server.clone();
                 tokio::spawn(async move {
                     use tokio::io::AsyncReadExt;
@@ -1092,10 +1124,8 @@ mod tests {
 
     #[tokio::test]
     async fn fetcher_downloads_multi_segment_with_range() {
-        let temp_dir = std::env::temp_dir().join(format!(
-            "omniget_http_fetcher_chunked_{}",
-            now_unix_nanos()
-        ));
+        let temp_dir =
+            std::env::temp_dir().join(format!("omniget_http_fetcher_chunked_{}", now_unix_nanos()));
         std::fs::create_dir_all(&temp_dir).unwrap();
         let payload: Vec<u8> = (0u8..=255).cycle().take(2 * 1024 * 1024).collect();
 
@@ -1212,10 +1242,8 @@ mod tests {
 
     #[tokio::test]
     async fn fetcher_resume_sidecar_round_trip() {
-        let temp_dir = std::env::temp_dir().join(format!(
-            "omniget_http_fetcher_resume_{}",
-            now_unix_nanos()
-        ));
+        let temp_dir =
+            std::env::temp_dir().join(format!("omniget_http_fetcher_resume_{}", now_unix_nanos()));
         std::fs::create_dir_all(&temp_dir).unwrap();
         let path = temp_dir.join("video.mp4.part.resume.json");
         let state = ResumeState {

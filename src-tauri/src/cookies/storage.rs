@@ -76,7 +76,13 @@ pub fn trash_dir() -> PathBuf {
 fn safe_domain_segment(domain: &str) -> String {
     let h = domain.trim_start_matches('.').to_lowercase();
     h.chars()
-        .map(|c| if c.is_ascii_alphanumeric() || c == '.' || c == '-' || c == '_' { c } else { '_' })
+        .map(|c| {
+            if c.is_ascii_alphanumeric() || c == '.' || c == '-' || c == '_' {
+                c
+            } else {
+                '_'
+            }
+        })
         .collect()
 }
 
@@ -84,9 +90,19 @@ fn safe_slug_segment(slug: &str) -> String {
     let lowered = slug.to_lowercase();
     let cleaned: String = lowered
         .chars()
-        .map(|c| if c.is_ascii_alphanumeric() || c == '-' || c == '_' { c } else { '-' })
+        .map(|c| {
+            if c.is_ascii_alphanumeric() || c == '-' || c == '_' {
+                c
+            } else {
+                '-'
+            }
+        })
         .collect();
-    if cleaned.is_empty() { DEFAULT_SLUG.to_string() } else { cleaned }
+    if cleaned.is_empty() {
+        DEFAULT_SLUG.to_string()
+    } else {
+        cleaned
+    }
 }
 
 pub fn load_registry() -> CookieRegistry {
@@ -125,7 +141,10 @@ fn format_cookie_line(c: &ExtensionCookie, session_ttl: u64) -> String {
     let http_only_prefix = if c.http_only { "#HttpOnly_" } else { "" };
     let is_host_only = c.host_only.unwrap_or_else(|| !raw_domain.starts_with('.'));
     let (domain, include_subdomains) = if is_host_only {
-        let stripped = raw_domain.strip_prefix('.').unwrap_or(&raw_domain).to_string();
+        let stripped = raw_domain
+            .strip_prefix('.')
+            .unwrap_or(&raw_domain)
+            .to_string();
         (stripped, "FALSE")
     } else if raw_domain.starts_with('.') {
         (raw_domain.clone(), "TRUE")
@@ -133,7 +152,11 @@ fn format_cookie_line(c: &ExtensionCookie, session_ttl: u64) -> String {
         (format!(".{}", raw_domain), "TRUE")
     };
     let secure = if c.secure { "TRUE" } else { "FALSE" };
-    let expires = if c.expires == 0 { session_ttl } else { c.expires as u64 };
+    let expires = if c.expires == 0 {
+        session_ttl
+    } else {
+        c.expires as u64
+    };
     format!(
         "{}{}\t{}\t{}\t{}\t{}\t{}\t{}\n",
         http_only_prefix, domain, include_subdomains, path_field, secure, expires, name, value,
@@ -141,7 +164,9 @@ fn format_cookie_line(c: &ExtensionCookie, session_ttl: u64) -> String {
 }
 
 fn sanitize_field(s: &str) -> String {
-    s.chars().filter(|c| *c != '\n' && *c != '\r' && *c != '\t').collect()
+    s.chars()
+        .filter(|c| *c != '\n' && *c != '\r' && *c != '\t')
+        .collect()
 }
 
 pub struct IngestSource {
@@ -199,17 +224,16 @@ pub fn ingest_batch(
     for (root, group) in by_root.iter() {
         let count = write_account_file(root, DEFAULT_SLUG, group)?;
         let platform = PlatformKind::from_domain(root);
-        let bucket = registry.buckets.entry(root.clone()).or_insert_with(|| BucketEntry {
-            platform_kind: platform.as_str().to_string(),
-            accounts: Vec::new(),
-        });
+        let bucket = registry
+            .buckets
+            .entry(root.clone())
+            .or_insert_with(|| BucketEntry {
+                platform_kind: platform.as_str().to_string(),
+                accounts: Vec::new(),
+            });
         bucket.platform_kind = platform.as_str().to_string();
 
-        let alias_default = format!(
-            "{} · {}",
-            platform_display(platform),
-            human_date(now),
-        );
+        let alias_default = format!("{} · {}", platform_display(platform), human_date(now),);
         let new_alias = source.alias_hint.clone().unwrap_or(alias_default);
 
         if let Some(existing) = bucket.accounts.iter_mut().find(|a| a.slug == DEFAULT_SLUG) {
@@ -284,7 +308,12 @@ pub fn move_to_trash(domain: &str, slug: &str) -> anyhow::Result<()> {
     let trash = trash_dir();
     fs::create_dir_all(&trash)?;
     let stamp = current_unix_ms();
-    let dst_name = format!("{}__{}__{}.txt", safe_domain_segment(domain), safe_slug_segment(slug), stamp);
+    let dst_name = format!(
+        "{}__{}__{}.txt",
+        safe_domain_segment(domain),
+        safe_slug_segment(slug),
+        stamp
+    );
     let dst = trash.join(dst_name);
     fs::rename(&src, &dst)?;
 
@@ -363,12 +392,7 @@ pub fn ingest_to_account(
     });
 
     let mut slug = if requested_slug.trim().is_empty() {
-        slugify_alias(
-            source
-                .alias_hint
-                .as_deref()
-                .unwrap_or(""),
-        )
+        slugify_alias(source.alias_hint.as_deref().unwrap_or(""))
     } else {
         slugify_alias(requested_slug)
     };
@@ -386,7 +410,11 @@ pub fn ingest_to_account(
     let count = write_account_file(&root, &final_slug, &scoped)?;
     let now = current_unix_ms();
     let alias = source.alias_hint.clone().unwrap_or_else(|| {
-        format!("{} · {}", platform_display(PlatformKind::from_domain(&root)), human_date(now))
+        format!(
+            "{} · {}",
+            platform_display(PlatformKind::from_domain(&root)),
+            human_date(now)
+        )
     });
 
     bucket.accounts.push(AccountEntry {
@@ -422,7 +450,22 @@ pub fn rename_account(domain: &str, slug: &str, new_alias: &str) -> anyhow::Resu
 pub fn account_path_for_consumer(domain: &str, slug: Option<&str>) -> Option<PathBuf> {
     let slug = slug.unwrap_or(DEFAULT_SLUG);
     let path = account_file(domain, slug);
-    if path.exists() { Some(path) } else { None }
+    if path.exists() {
+        Some(path)
+    } else {
+        None
+    }
+}
+
+pub fn touch_last_used(domain: &str, slug: &str) {
+    let mut registry = load_registry();
+    let now = current_unix_ms();
+    if let Some(bucket) = registry.buckets.get_mut(domain) {
+        if let Some(account) = bucket.accounts.iter_mut().find(|a| a.slug == slug) {
+            account.last_used_at_ms = Some(now);
+            let _ = save_registry(&registry);
+        }
+    }
 }
 
 pub fn migrate_legacy_if_needed() -> anyhow::Result<usize> {

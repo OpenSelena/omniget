@@ -11,8 +11,8 @@ use tokio::sync::Mutex;
 use download::{fetch_manifest, RemoteManifest};
 use install::{
     diff as compute_diff, force_refresh as install_force_refresh,
-    install_bundle as install_bundle_impl, install_missing as install_missing_impl,
-    refresh_index, uninstall as uninstall_impl, DiffReport, InstallReport, LocalIndex,
+    install_bundle as install_bundle_impl, install_missing as install_missing_impl, refresh_index,
+    uninstall as uninstall_impl, DiffReport, InstallReport, LocalIndex,
 };
 use manifest::{ensure_root, load, now_iso, pets_root, save_atomic};
 
@@ -86,7 +86,9 @@ fn read_active(app: &AppHandle) -> Option<String> {
     let path = pref_file(app).ok()?;
     let raw = std::fs::read_to_string(&path).ok()?;
     let v: serde_json::Value = serde_json::from_str(&raw).ok()?;
-    v.get("slug").and_then(|s| s.as_str()).map(|s| s.to_string())
+    v.get("slug")
+        .and_then(|s| s.as_str())
+        .map(|s| s.to_string())
 }
 
 fn write_active(app: &AppHandle, slug: &str) -> Result<(), String> {

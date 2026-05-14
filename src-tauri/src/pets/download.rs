@@ -96,10 +96,14 @@ pub async fn fetch_manifest() -> anyhow::Result<RemoteManifest> {
             message: e.to_string(),
             retryable: true,
         })?;
-        let res = client.get(MANIFEST_URL).send().await.map_err(|e| RetryError {
-            message: e.to_string(),
-            retryable: true,
-        })?;
+        let res = client
+            .get(MANIFEST_URL)
+            .send()
+            .await
+            .map_err(|e| RetryError {
+                message: e.to_string(),
+                retryable: true,
+            })?;
         let status = res.status();
         if !status.is_success() {
             let retryable = is_retryable(Some(status.as_u16()));
@@ -125,7 +129,11 @@ pub fn fallback_bundle_url() -> &'static str {
     FALLBACK_BUNDLE_URL
 }
 
-pub async fn fetch_bytes(url: &str, max_bytes: usize, timeout_secs: u64) -> anyhow::Result<Vec<u8>> {
+pub async fn fetch_bytes(
+    url: &str,
+    max_bytes: usize,
+    timeout_secs: u64,
+) -> anyhow::Result<Vec<u8>> {
     let label = format!("GET {}", url);
     with_retry(&label, || async {
         let client = build_client(timeout_secs).map_err(|e| RetryError {

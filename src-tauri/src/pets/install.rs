@@ -9,8 +9,8 @@ use tauri::{AppHandle, Emitter};
 use tokio::sync::Mutex;
 
 use super::download::{
-    extract_ext_from_url, fallback_bundle_url, fetch_bundle_zip, fetch_pet_json,
-    fetch_spritesheet, RemoteManifest, RemotePet,
+    extract_ext_from_url, fallback_bundle_url, fetch_bundle_zip, fetch_pet_json, fetch_spritesheet,
+    RemoteManifest, RemotePet,
 };
 use super::manifest::{
     discover_local_pets, ensure_root, load, manifest_path, now_iso, pet_dir, save_atomic,
@@ -69,7 +69,11 @@ pub fn refresh_index(app_data_dir: &Path) -> std::io::Result<LocalIndex> {
     discover_local_pets(app_data_dir, &mut manifest)?;
     save_atomic(app_data_dir, &manifest)?;
     let mut pets: Vec<LocalPetEntry> = manifest.pets.values().cloned().collect();
-    pets.sort_by(|a, b| a.display_name.to_lowercase().cmp(&b.display_name.to_lowercase()));
+    pets.sort_by(|a, b| {
+        a.display_name
+            .to_lowercase()
+            .cmp(&b.display_name.to_lowercase())
+    });
     let total = pets.len();
     Ok(LocalIndex {
         pets,
@@ -463,7 +467,11 @@ pub async fn install_bundle(
                 let lower = name.to_lowercase();
                 let dest = dir.join(&name);
                 if lower == "spritesheet.webp" || lower == "spritesheet.png" {
-                    sprite_ext = if lower.ends_with(".png") { "png".into() } else { "webp".into() };
+                    sprite_ext = if lower.ends_with(".png") {
+                        "png".into()
+                    } else {
+                        "webp".into()
+                    };
                     if atomic_write(&dest, &bytes).is_ok() {
                         sizes.insert("spritesheet".into(), bytes.len() as u64);
                         wrote_sprite = true;

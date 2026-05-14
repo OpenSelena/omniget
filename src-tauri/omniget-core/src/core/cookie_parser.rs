@@ -1,10 +1,13 @@
 use std::collections::HashMap;
 use std::sync::Arc;
 
-fn cookie_domain_matches(request_domain: &str, cookie_domain: &str, include_subdomains: bool) -> bool {
+fn cookie_domain_matches(
+    request_domain: &str,
+    cookie_domain: &str,
+    include_subdomains: bool,
+) -> bool {
     if include_subdomains {
-        request_domain == cookie_domain
-            || request_domain.ends_with(&format!(".{}", cookie_domain))
+        request_domain == cookie_domain || request_domain.ends_with(&format!(".{}", cookie_domain))
     } else {
         request_domain == cookie_domain
     }
@@ -309,27 +312,51 @@ mod tests {
     #[test]
     fn host_only_matches_exact_only() {
         assert!(cookie_domain_matches("example.com", "example.com", false));
-        assert!(!cookie_domain_matches("sub.example.com", "example.com", false));
-        assert!(!cookie_domain_matches("example.com", "sub.example.com", false));
+        assert!(!cookie_domain_matches(
+            "sub.example.com",
+            "example.com",
+            false
+        ));
+        assert!(!cookie_domain_matches(
+            "example.com",
+            "sub.example.com",
+            false
+        ));
     }
 
     #[test]
     fn include_subdomains_allows_proper_suffix() {
         assert!(cookie_domain_matches("example.com", "example.com", true));
-        assert!(cookie_domain_matches("sub.example.com", "example.com", true));
-        assert!(cookie_domain_matches("a.b.example.com", "example.com", true));
+        assert!(cookie_domain_matches(
+            "sub.example.com",
+            "example.com",
+            true
+        ));
+        assert!(cookie_domain_matches(
+            "a.b.example.com",
+            "example.com",
+            true
+        ));
     }
 
     #[test]
     fn substring_false_positive_rejected() {
         assert!(!cookie_domain_matches("foo.com", "oo.com", true));
         assert!(!cookie_domain_matches("foo.com", "oo.com", false));
-        assert!(!cookie_domain_matches("notexample.com", "example.com", true));
+        assert!(!cookie_domain_matches(
+            "notexample.com",
+            "example.com",
+            true
+        ));
     }
 
     #[test]
     fn parent_does_not_match_child_cookie() {
-        assert!(!cookie_domain_matches("example.com", "sub.example.com", true));
+        assert!(!cookie_domain_matches(
+            "example.com",
+            "sub.example.com",
+            true
+        ));
     }
 
     #[test]
@@ -420,8 +447,14 @@ mod tests {
         let parsed = parse_cookie_input("sessionid=abc; csrftoken=xyz", "sessionid");
 
         assert_eq!(parsed.token, "abc");
-        assert_eq!(parsed.cookies.get("sessionid").map(|s| s.as_str()), Some("abc"));
-        assert_eq!(parsed.cookies.get("csrftoken").map(|s| s.as_str()), Some("xyz"));
+        assert_eq!(
+            parsed.cookies.get("sessionid").map(|s| s.as_str()),
+            Some("abc")
+        );
+        assert_eq!(
+            parsed.cookies.get("csrftoken").map(|s| s.as_str()),
+            Some("xyz")
+        );
     }
 
     #[test]
@@ -519,7 +552,8 @@ mod tests {
 
     #[test]
     fn parse_bearer_input_falls_back_to_auth_like_cookie_name() {
-        let input = r#"{"cookies":[{"name":"auth_session","value":"long_enough_session_value_xyz"}]}"#;
+        let input =
+            r#"{"cookies":[{"name":"auth_session","value":"long_enough_session_value_xyz"}]}"#;
 
         assert_eq!(parse_bearer_input(input), "long_enough_session_value_xyz");
     }
@@ -545,7 +579,11 @@ mod tests {
         let request_domain = "sub.example.com".trim_start_matches('.').to_lowercase();
         let include_subdomains = raw_domain.starts_with('.');
 
-        assert!(cookie_domain_matches(&request_domain, &cookie_domain, include_subdomains));
+        assert!(cookie_domain_matches(
+            &request_domain,
+            &cookie_domain,
+            include_subdomains
+        ));
     }
 
     #[test]
@@ -554,6 +592,10 @@ mod tests {
         let cookie_domain = raw_domain.trim_start_matches('.').to_lowercase();
         let request_domain = "sub.example.com".trim_start_matches('.').to_lowercase();
 
-        assert!(!cookie_domain_matches(&request_domain, &cookie_domain, false));
+        assert!(!cookie_domain_matches(
+            &request_domain,
+            &cookie_domain,
+            false
+        ));
     }
 }

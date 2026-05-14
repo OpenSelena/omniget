@@ -90,23 +90,44 @@ mod tests {
 
     #[test]
     fn youtube_variants_map_correctly() {
-        assert_eq!(PlatformKind::from_domain("youtube.com"), PlatformKind::Youtube);
-        assert_eq!(PlatformKind::from_domain(".youtube.com"), PlatformKind::Youtube);
-        assert_eq!(PlatformKind::from_domain("www.youtube.com"), PlatformKind::Youtube);
-        assert_eq!(PlatformKind::from_domain("music.youtube.com"), PlatformKind::YoutubeMusic);
+        assert_eq!(
+            PlatformKind::from_domain("youtube.com"),
+            PlatformKind::Youtube
+        );
+        assert_eq!(
+            PlatformKind::from_domain(".youtube.com"),
+            PlatformKind::Youtube
+        );
+        assert_eq!(
+            PlatformKind::from_domain("www.youtube.com"),
+            PlatformKind::Youtube
+        );
+        assert_eq!(
+            PlatformKind::from_domain("music.youtube.com"),
+            PlatformKind::YoutubeMusic
+        );
         assert_eq!(PlatformKind::from_domain("youtu.be"), PlatformKind::Youtube);
     }
 
     #[test]
     fn twitter_x_share_kind() {
         assert_eq!(PlatformKind::from_domain("x.com"), PlatformKind::XTwitter);
-        assert_eq!(PlatformKind::from_domain("twitter.com"), PlatformKind::XTwitter);
+        assert_eq!(
+            PlatformKind::from_domain("twitter.com"),
+            PlatformKind::XTwitter
+        );
     }
 
     #[test]
     fn unknown_falls_to_generic() {
-        assert_eq!(PlatformKind::from_domain("example.com"), PlatformKind::Generic);
-        assert_eq!(PlatformKind::from_domain("bandcamp.com"), PlatformKind::Generic);
+        assert_eq!(
+            PlatformKind::from_domain("example.com"),
+            PlatformKind::Generic
+        );
+        assert_eq!(
+            PlatformKind::from_domain("bandcamp.com"),
+            PlatformKind::Generic
+        );
     }
 
     #[test]

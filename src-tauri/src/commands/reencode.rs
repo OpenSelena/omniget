@@ -44,9 +44,7 @@ pub async fn reencode_video(req: ReencodeRequest) -> Result<ReencodeResult, Stri
     if !input.is_file() {
         return Err(format!("source not found: {}", req.input_path));
     }
-    let original_size = std::fs::metadata(&input)
-        .map(|m| m.len())
-        .unwrap_or(0);
+    let original_size = std::fs::metadata(&input).map(|m| m.len()).unwrap_or(0);
 
     let output = req.output_path.clone().unwrap_or_else(|| {
         let stem = input.file_stem().and_then(|s| s.to_str()).unwrap_or("out");

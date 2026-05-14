@@ -158,7 +158,9 @@ fn format_count_short(count: u64) -> String {
 
 fn redact(settings: &RpcSettings) -> Value {
     let connected = match RPC.lock() {
-        Ok(g) => g.connected && !settings.app_id.is_empty() && g.connected_app_id == settings.app_id,
+        Ok(g) => {
+            g.connected && !settings.app_id.is_empty() && g.connected_app_id == settings.app_id
+        }
         Err(_) => false,
     };
     json!({
@@ -248,11 +250,18 @@ fn apply_top_activity(default_image: &str) -> bool {
         None => {
             let details = "omniget".to_string();
             let state_text = idle_state_text(idle_stats);
-            (details, state_text, "idle".to_string(), default_image.to_string())
+            (
+                details,
+                state_text,
+                "idle".to_string(),
+                default_image.to_string(),
+            )
         }
     };
 
-    let assets = Assets::new().large_image(&img_key_owned).large_text(APP_LARGE_TEXT);
+    let assets = Assets::new()
+        .large_image(&img_key_owned)
+        .large_text(APP_LARGE_TEXT);
     let buttons = vec![Button::new(GITHUB_BUTTON_LABEL, GITHUB_BUTTON_URL)];
 
     let start = if session_start > 0 {
@@ -365,7 +374,9 @@ pub async fn set_presence_source(
             return false;
         }
         if let Ok(mut state) = RPC.lock() {
-            state.activities.insert(source_owned.clone(), activity_record);
+            state
+                .activities
+                .insert(source_owned.clone(), activity_record);
         }
         apply_top_activity(&default_img)
     })
@@ -473,7 +484,10 @@ mod tests {
 
     #[test]
     fn format_position_duration_basic() {
-        assert_eq!(format_position_duration(83, 245), Some("1:23 / 4:05".into()));
+        assert_eq!(
+            format_position_duration(83, 245),
+            Some("1:23 / 4:05".into())
+        );
     }
 
     #[test]

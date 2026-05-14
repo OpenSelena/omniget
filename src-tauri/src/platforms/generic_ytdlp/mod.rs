@@ -433,7 +433,8 @@ impl PlatformDownloader for GenericYtdlpDownloader {
             ytdlp::ensure_ytdlp().await?
         };
 
-        let quality_height = requested_height.or_else(|| Self::extract_quality_height(&selected.label));
+        let quality_height =
+            requested_height.or_else(|| Self::extract_quality_height(&selected.label));
         let video_url = &selected.url;
 
         let referer = opts
@@ -448,6 +449,11 @@ impl PlatformDownloader for GenericYtdlpDownloader {
         };
 
         let mut last_err: Option<anyhow::Error> = None;
+        let extra_flags_owned: Vec<String> = opts
+            .custom_ytdlp_args
+            .as_deref()
+            .map(|v| v.to_vec())
+            .unwrap_or_default();
         for (idx, override_format) in format_fallbacks.iter().enumerate() {
             let effective_format = override_format.or(opts.format_id.as_deref());
             let attempt_progress = progress.clone();
@@ -465,7 +471,7 @@ impl PlatformDownloader for GenericYtdlpDownloader {
                 None,
                 opts.concurrent_fragments,
                 opts.download_subtitles,
-                &[],
+                &extra_flags_owned,
                 opts.audio_format.as_deref(),
             )
             .await;

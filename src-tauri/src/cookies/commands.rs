@@ -4,9 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use super::parsers;
 use super::platform::PlatformKind;
-use super::storage::{
-    self, AccountEntry, CookieRegistry, IngestSource,
-};
+use super::storage::{self, AccountEntry, CookieRegistry, IngestSource};
 
 #[derive(Debug, Serialize)]
 pub struct CookieListResponse {
@@ -76,14 +74,19 @@ const DEFAULT_SLUG: &str = "_default";
 pub async fn cookies_list() -> Result<CookieListResponse, String> {
     let registry = storage::load_registry();
     let cookies_dir = storage::cookies_root().to_string_lossy().into_owned();
-    Ok(CookieListResponse { registry, cookies_dir })
+    Ok(CookieListResponse {
+        registry,
+        cookies_dir,
+    })
 }
 
 #[tauri::command]
 pub async fn cookies_read(request: ReadRequest) -> Result<ReadResponse, String> {
     let slug = request.slug.as_deref().unwrap_or(DEFAULT_SLUG);
     let content = storage::read_account_file(&request.domain, slug).map_err(|e| e.to_string())?;
-    let path = storage::account_file(&request.domain, slug).to_string_lossy().into_owned();
+    let path = storage::account_file(&request.domain, slug)
+        .to_string_lossy()
+        .into_owned();
     Ok(ReadResponse { content, path })
 }
 
@@ -93,7 +96,9 @@ pub async fn cookies_import(request: ImportRequest) -> Result<ImportResponse, St
     if cookies.is_empty() {
         return Err("No cookies found in payload".to_string());
     }
-    let label = request.source_label.unwrap_or_else(|| "Manual import".to_string());
+    let label = request
+        .source_label
+        .unwrap_or_else(|| "Manual import".to_string());
     let written = storage::ingest_batch(
         &cookies,
         IngestSource {
@@ -108,7 +113,11 @@ pub async fn cookies_import(request: ImportRequest) -> Result<ImportResponse, St
         .into_iter()
         .map(|(domain, cookie_count)| {
             let platform_kind = PlatformKind::from_domain(&domain).as_str().to_string();
-            BucketWrite { domain, cookie_count, platform_kind }
+            BucketWrite {
+                domain,
+                cookie_count,
+                platform_kind,
+            }
         })
         .collect();
     Ok(ImportResponse { buckets_written })
@@ -141,6 +150,75 @@ pub async fn cookies_migrate_legacy() -> Result<OkResponse, String> {
 #[tauri::command]
 pub async fn cookies_detect_platform(domain: String) -> Result<String, String> {
     Ok(PlatformKind::from_domain(&domain).as_str().to_string())
+}
+
+#[derive(Debug, Serialize)]
+pub struct AccountsForUrlResponse {
+    pub domain: String,
+    pub accounts: Vec<AccountEntry>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct CookieJsonEntry {
+    pub name: String,
+    pub value: String,
+    pub domain: String,
+    pub path: String,
+    pub secure: bool,
+    pub expires: i64,
+    #[serde(rename = "httpOnly")]
+    pub http_only: bool,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ReadAsJsonRequest {
+    pub domain: String,
+    #[serde(default)]
+    pub slug: Option<String>,
+}
+
+#[tauri::command]
+pub async fn cookies_read_as_json(
+    request: ReadAsJsonRequest,
+) -> Result<Vec<CookieJsonEntry>, String> {
+    let slug = request.slug.as_deref().unwrap_or(DEFAULT_SLUG);
+    let content = storage::read_account_file(&request.domain, slug).map_err(|e| e.to_string())?;
+    let parsed = parsers::parse_netscape(&content).map_err(|e| e.to_string())?;
+    Ok(parsed
+        .into_iter()
+        .map(|c| CookieJsonEntry {
+            name: c.name,
+            value: c.value,
+            domain: c.domain,
+            path: c.path,
+            secure: c.secure,
+            expires: c.expires,
+            http_only: c.http_only,
+        })
+        .collect())
+}
+
+#[tauri::command]
+pub async fn cookies_accounts_for_url(url: String) -> Result<AccountsForUrlResponse, String> {
+    let parsed = url::Url::parse(&url).map_err(|e| e.to_string())?;
+    let host = parsed.host_str().unwrap_or("");
+    let root = super::platform::root_domain_of(host);
+    if root.is_empty() {
+        return Ok(AccountsForUrlResponse {
+            domain: String::new(),
+            accounts: Vec::new(),
+        });
+    }
+    let registry = storage::load_registry();
+    let accounts = registry
+        .buckets
+        .get(&root)
+        .map(|b| b.accounts.clone())
+        .unwrap_or_default();
+    Ok(AccountsForUrlResponse {
+        domain: root,
+        accounts,
+    })
 }
 
 #[derive(Debug, Deserialize)]
@@ -177,7 +255,11 @@ pub async fn cookies_import_file(request: ImportFileRequest) -> Result<ImportRes
         .into_iter()
         .map(|(domain, cookie_count)| {
             let platform_kind = PlatformKind::from_domain(&domain).as_str().to_string();
-            BucketWrite { domain, cookie_count, platform_kind }
+            BucketWrite {
+                domain,
+                cookie_count,
+                platform_kind,
+            }
         })
         .collect();
     Ok(ImportResponse { buckets_written })

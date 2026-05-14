@@ -106,6 +106,17 @@ pub trait PluginHost: Send + Sync {
     fn cookie_status(&self, _domain: &str) -> CookieStatus {
         CookieStatus::Missing
     }
+
+    /// Append a line to the user-visible download log for `download_id`.
+    ///
+    /// Plugins should use this to surface progress and errors that the user
+    /// can see and copy when reporting a bug. The host routes the line through
+    /// the same `download-log-update` Tauri event the core uses for the queue,
+    /// so the line appears in the `DownloadLog` component for that download.
+    ///
+    /// Default impl is a no-op so plugins compiled against SDK ≥ this version
+    /// still load on older hosts without ABI breakage.
+    fn emit_download_log(&self, _download_id: u64, _line: &str) {}
 }
 
 #[derive(Debug, Clone)]

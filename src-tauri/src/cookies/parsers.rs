@@ -31,7 +31,10 @@ pub fn detect_format(content: &str) -> CookieFormat {
     if first == '[' || first == '{' {
         return CookieFormat::Json;
     }
-    if trimmed.starts_with("# Netscape") || trimmed.starts_with("#HttpOnly_") || trimmed.contains('\t') {
+    if trimmed.starts_with("# Netscape")
+        || trimmed.starts_with("#HttpOnly_")
+        || trimmed.contains('\t')
+    {
         return CookieFormat::Netscape;
     }
     CookieFormat::Unknown
@@ -109,8 +112,8 @@ struct JsonCookie {
 }
 
 pub fn parse_json(content: &str) -> anyhow::Result<Vec<ExtensionCookie>> {
-    let raw: serde_json::Value = serde_json::from_str(content)
-        .map_err(|e| anyhow::anyhow!("invalid JSON: {e}"))?;
+    let raw: serde_json::Value =
+        serde_json::from_str(content).map_err(|e| anyhow::anyhow!("invalid JSON: {e}"))?;
     let arr = match raw {
         serde_json::Value::Array(a) => a,
         serde_json::Value::Object(_) => vec![raw],
@@ -148,17 +151,26 @@ mod tests {
 
     #[test]
     fn detect_netscape_header() {
-        assert_eq!(detect_format("# Netscape HTTP Cookie File\n.foo\tTRUE\t/\tTRUE\t0\ta\tb"), CookieFormat::Netscape);
+        assert_eq!(
+            detect_format("# Netscape HTTP Cookie File\n.foo\tTRUE\t/\tTRUE\t0\ta\tb"),
+            CookieFormat::Netscape
+        );
     }
 
     #[test]
     fn detect_json_array() {
-        assert_eq!(detect_format("[{\"domain\":\"x.com\"}]"), CookieFormat::Json);
+        assert_eq!(
+            detect_format("[{\"domain\":\"x.com\"}]"),
+            CookieFormat::Json
+        );
     }
 
     #[test]
     fn detect_tab_separated_without_header() {
-        assert_eq!(detect_format(".x.com\tTRUE\t/\tTRUE\t0\tname\tvalue"), CookieFormat::Netscape);
+        assert_eq!(
+            detect_format(".x.com\tTRUE\t/\tTRUE\t0\tname\tvalue"),
+            CookieFormat::Netscape
+        );
     }
 
     #[test]
@@ -169,7 +181,8 @@ mod tests {
 
     #[test]
     fn parse_netscape_basic() {
-        let raw = "# Netscape HTTP Cookie File\n.youtube.com\tTRUE\t/\tTRUE\t1830000000\tSID\tabc123\n";
+        let raw =
+            "# Netscape HTTP Cookie File\n.youtube.com\tTRUE\t/\tTRUE\t1830000000\tSID\tabc123\n";
         let cookies = parse_netscape(raw).unwrap();
         assert_eq!(cookies.len(), 1);
         assert_eq!(cookies[0].domain, ".youtube.com");

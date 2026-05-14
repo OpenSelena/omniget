@@ -115,9 +115,7 @@ pub fn pdfium_version_marker_path() -> Option<PathBuf> {
 }
 
 pub fn is_installed() -> bool {
-    pdfium_target_path()
-        .map(|p| p.is_file())
-        .unwrap_or(false)
+    pdfium_target_path().map(|p| p.is_file()).unwrap_or(false)
 }
 
 pub fn read_version_marker() -> Option<String> {
@@ -135,14 +133,11 @@ pub async fn ensure_pdfium() -> anyhow::Result<PathBuf> {
     ensure_pdfium_with_variant(None).await
 }
 
-pub async fn ensure_pdfium_with_variant(
-    variant: Option<String>,
-) -> anyhow::Result<PathBuf> {
+pub async fn ensure_pdfium_with_variant(variant: Option<String>) -> anyhow::Result<PathBuf> {
     let target_dir =
         pdfium_target_dir().ok_or_else(|| anyhow!("could not determine app data dir"))?;
-    std::fs::create_dir_all(&target_dir).with_context(|| {
-        format!("creating pdfium target dir {}", target_dir.display())
-    })?;
+    std::fs::create_dir_all(&target_dir)
+        .with_context(|| format!("creating pdfium target dir {}", target_dir.display()))?;
 
     let archive_name = archive_name_for_variant(variant.as_deref());
     let url = format!("{}/{}", PDFIUM_DOWNLOAD_BASE, archive_name);
@@ -174,11 +169,12 @@ pub async fn ensure_pdfium_with_variant(
     let target_path_clone = target_path.clone();
     let target_dir_clone = target_dir.clone();
     let lib_name = lib_filename.to_string();
-    let extracted_version = tokio::task::spawn_blocking(move || -> anyhow::Result<Option<String>> {
-        extract_pdfium_archive(&bytes, &target_path_clone, &target_dir_clone, &lib_name)
-    })
-    .await
-    .map_err(|e| anyhow!("spawn_blocking failed: {}", e))??;
+    let extracted_version =
+        tokio::task::spawn_blocking(move || -> anyhow::Result<Option<String>> {
+            extract_pdfium_archive(&bytes, &target_path_clone, &target_dir_clone, &lib_name)
+        })
+        .await
+        .map_err(|e| anyhow!("spawn_blocking failed: {}", e))??;
 
     if let Some(version_marker) = pdfium_version_marker_path() {
         let base = extracted_version.unwrap_or_else(|| "latest".to_string());
@@ -205,16 +201,12 @@ pub async fn ensure_pdfium_with_variant(
 
 pub fn set_pdfium_from_path(source: &Path) -> anyhow::Result<PathBuf> {
     if !source.is_file() {
-        return Err(anyhow!(
-            "source not a file: {}",
-            source.display()
-        ));
+        return Err(anyhow!("source not a file: {}", source.display()));
     }
     let target_dir =
         pdfium_target_dir().ok_or_else(|| anyhow!("could not determine app data dir"))?;
-    std::fs::create_dir_all(&target_dir).with_context(|| {
-        format!("creating pdfium target dir {}", target_dir.display())
-    })?;
+    std::fs::create_dir_all(&target_dir)
+        .with_context(|| format!("creating pdfium target dir {}", target_dir.display()))?;
     let lib_filename = pdfium_lib_filename();
     let target_path = target_dir.join(lib_filename);
 
@@ -263,15 +255,13 @@ fn extract_pdfium_archive(
             let mut buf = Vec::new();
             entry.read_to_end(&mut buf)?;
             let tmp = target_dir.join(format!(".{}.tmp", lib_filename));
-            std::fs::write(&tmp, &buf).with_context(|| {
-                format!("writing temp pdfium lib {}", tmp.display())
-            })?;
+            std::fs::write(&tmp, &buf)
+                .with_context(|| format!("writing temp pdfium lib {}", tmp.display()))?;
             if target_path.exists() {
                 let _ = std::fs::remove_file(target_path);
             }
-            std::fs::rename(&tmp, target_path).with_context(|| {
-                format!("moving pdfium to {}", target_path.display())
-            })?;
+            std::fs::rename(&tmp, target_path)
+                .with_context(|| format!("moving pdfium to {}", target_path.display()))?;
             found_lib = true;
         } else if file_name == "VERSION" {
             let mut buf = String::new();
@@ -281,10 +271,7 @@ fn extract_pdfium_archive(
     }
 
     if !found_lib {
-        return Err(anyhow!(
-            "{} not found inside pdfium archive",
-            lib_filename
-        ));
+        return Err(anyhow!("{} not found inside pdfium archive", lib_filename));
     }
 
     Ok(version)

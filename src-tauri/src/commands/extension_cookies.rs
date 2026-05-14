@@ -110,10 +110,13 @@ const WELL_KNOWN_NAMES: &[&str] = &[
     "PREF",
 ];
 
-fn cookie_domain_matches(request_domain: &str, cookie_domain: &str, include_subdomains: bool) -> bool {
+fn cookie_domain_matches(
+    request_domain: &str,
+    cookie_domain: &str,
+    include_subdomains: bool,
+) -> bool {
     if include_subdomains {
-        request_domain == cookie_domain
-            || request_domain.ends_with(&format!(".{}", cookie_domain))
+        request_domain == cookie_domain || request_domain.ends_with(&format!(".{}", cookie_domain))
     } else {
         request_domain == cookie_domain
     }

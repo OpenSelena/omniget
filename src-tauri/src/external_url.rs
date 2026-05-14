@@ -257,6 +257,8 @@ pub async fn queue_url_with_defaults(
             downloader,
             ytdlp_path,
             from_hotkey,
+            None,
+            None,
         );
 
         let next_ids = q.next_queued_ids();

@@ -96,9 +96,7 @@ fn format_cookie_line(c: &ExtensionCookie, session_ttl: u64) -> String {
     let name = sanitize_cookie_field(&c.name);
     let value = sanitize_cookie_field(&c.value);
     let http_only_prefix = if c.http_only { "#HttpOnly_" } else { "" };
-    let is_host_only = c
-        .host_only
-        .unwrap_or_else(|| !raw_domain.starts_with('.'));
+    let is_host_only = c.host_only.unwrap_or_else(|| !raw_domain.starts_with('.'));
     let (domain, include_subdomains) = if is_host_only {
         let stripped = raw_domain
             .strip_prefix('.')
@@ -140,10 +138,8 @@ pub fn write_extension_cookies(cookies: &[ExtensionCookie]) -> anyhow::Result<()
     // Merge with existing file: keep cookies whose root domain is NOT in the
     // incoming batch. Each platform capture only ships its own domains, so
     // overwriting the file would wipe other platforms' auth.
-    let incoming_roots: std::collections::HashSet<String> = cookies
-        .iter()
-        .map(|c| root_domain_of(&c.domain))
-        .collect();
+    let incoming_roots: std::collections::HashSet<String> =
+        cookies.iter().map(|c| root_domain_of(&c.domain)).collect();
 
     let mut preserved: Vec<String> = Vec::new();
     if let Ok(existing) = fs::read_to_string(&path) {
@@ -219,10 +215,7 @@ fn load_metadata_map(path: &std::path::Path) -> serde_json::Map<String, serde_js
     }
 }
 
-fn prune_expired_metadata(
-    map: &mut serde_json::Map<String, serde_json::Value>,
-    now: u64,
-) {
+fn prune_expired_metadata(map: &mut serde_json::Map<String, serde_json::Value>, now: u64) {
     map.retain(|_, v| {
         v.get("timestamp")
             .and_then(|t| t.as_u64())
