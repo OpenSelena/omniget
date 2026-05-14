@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { t } from "$lib/i18n";
   import {
     studyNotificationsList,
     studyNotificationsRead,
@@ -97,7 +98,7 @@
 </script>
 
 {#if !loading && items.length > 0}
-  <section class="panel" aria-label="Aulas novas">
+  <section class="panel" aria-label={$t("notifications.inline_section_aria")}>
     <button
       type="button"
       class="panel-head"
@@ -112,10 +113,13 @@
           </svg>
         </span>
         <span class="title">
-          {items.length}
-          {items.length === 1 ? "aula nova" : "aulas novas"}
+          {items.length === 1
+            ? $t("notifications.inline_count_one", { n: String(items.length) })
+            : $t("notifications.inline_count_other", { n: String(items.length) })}
           {#if unreadCount > 0 && unreadCount !== items.length}
-            <span class="unread-tag">{unreadCount} não {unreadCount === 1 ? "lida" : "lidas"}</span>
+            <span class="unread-tag">{unreadCount === 1
+              ? $t("notifications.inline_unread_tag_one", { n: String(unreadCount) })
+              : $t("notifications.inline_unread_tag_other", { n: String(unreadCount) })}</span>
           {/if}
         </span>
       </div>
@@ -138,24 +142,24 @@
               onclick={() => markRead(n.id)}
             >
               {#if isUnread}
-                <span class="dot" aria-label="Não lida"></span>
+                <span class="dot" aria-label={$t("notifications.unread_indicator")}></span>
               {/if}
               <span class="lesson-title">
-                {n.lesson_title ?? "Nova aula"}
+                {n.lesson_title ?? $t("notifications.new_lesson_fallback")}
               </span>
             </a>
             <button
               type="button"
               class="dismiss"
               onclick={() => dismiss(n.id)}
-              aria-label="Dispensar"
+              aria-label={$t("notifications.dismiss")}
             >×</button>
           </li>
         {/each}
       </ul>
       {#if items.length > 1}
         <button type="button" class="dismiss-all" onclick={dismissAll}>
-          Dispensar todas
+          {$t("notifications.inline_dismiss_all")}
         </button>
       {/if}
     {/if}

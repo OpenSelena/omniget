@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { t } from "$lib/i18n";
   let { count = 0 }: { count?: number } = $props();
   let pulse = $state(false);
   let prevCount = $state(0);
@@ -16,7 +17,7 @@
 </script>
 
 {#if count > 0}
-  <span class="badge" class:pulse aria-label="{count} notificações novas">
+  <span class="badge" class:pulse aria-label={$t("notifications.badge_aria", { count: String(count) })}>
     {count > 99 ? "99+" : count}
   </span>
 {/if}

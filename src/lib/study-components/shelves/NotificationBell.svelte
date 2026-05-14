@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { t } from "$lib/i18n";
   import { studyNotificationsCount } from "$lib/study-bridge";
   import NotificationsDrawer from "./NotificationsDrawer.svelte";
 
@@ -69,7 +70,7 @@
   class="bell"
   class:has-unread={count.unread > 0}
   class:pulse
-  aria-label="Notificações ({count.unread} não lidas)"
+  aria-label={$t("notifications.bell_aria", { count: String(count.unread) })}
   onclick={() => (drawerOpen = true)}
 >
   <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
