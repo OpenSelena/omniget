@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
+  import { t } from "$lib/i18n";
   import {
     studyNotificationsList,
     studyNotificationsRead,
@@ -37,10 +38,10 @@
 
   function fmtAgo(secs: number): string {
     const diff = Math.floor(Date.now() / 1000) - secs;
-    if (diff < 60) return "agora";
-    if (diff < 3600) return `${Math.floor(diff / 60)}min`;
-    if (diff < 86400) return `${Math.floor(diff / 3600)}h`;
-    if (diff < 30 * 86400) return `${Math.floor(diff / 86400)}d`;
+    if (diff < 60) return $t("notifications.time_now");
+    if (diff < 3600) return $t("notifications.time_min", { n: String(Math.floor(diff / 60)) });
+    if (diff < 86400) return $t("notifications.time_hour", { n: String(Math.floor(diff / 3600)) });
+    if (diff < 30 * 86400) return $t("notifications.time_day", { n: String(Math.floor(diff / 86400)) });
     return new Date(secs * 1000).toLocaleDateString();
   }
 
@@ -73,20 +74,35 @@
     }
   }
 
+  async function dismissAll() {
+    if (items.length === 0) return;
+    const before = items;
+    const ids = items.map((n) => n.id);
+    items = [];
+    try {
+      for (const id of ids) {
+        await studyNotificationsDismiss(id);
+      }
+    } catch (err) {
+      console.error("dismiss all failed", err);
+      items = before;
+    }
+  }
+
   function onBackdropKey(e: KeyboardEvent) {
     if (e.key === "Escape") onClose();
   }
 </script>
 
 {#if open}
-  <div class="overlay" role="dialog" aria-modal="true" aria-label="Notificações" tabindex="-1" onkeydown={onBackdropKey}>
-    <button type="button" class="bg-btn" aria-label="Fechar" onclick={onClose}></button>
+  <div class="overlay" role="dialog" aria-modal="true" aria-label={$t("notifications.title")} tabindex="-1" onkeydown={onBackdropKey}>
+    <button type="button" class="bg-btn" aria-label={$t("notifications.close")} onclick={onClose}></button>
     <aside class="drawer" role="document">
       <header class="head">
-        <h2>Notificações</h2>
-        <button type="button" class="close" aria-label="Fechar" onclick={onClose}>×</button>
+        <h2>{$t("notifications.title")}</h2>
+        <button type="button" class="close" aria-label={$t("notifications.close")} onclick={onClose}>×</button>
       </header>
-      <div class="filter-row" role="tablist" aria-label="Filtro">
+      <div class="filter-row" role="tablist" aria-label={$t("notifications.filter_label")}>
         <button
           type="button"
           class="ftab"
@@ -94,7 +110,7 @@
           role="tab"
           aria-selected={filter === "unread"}
           onclick={() => (filter = "unread")}
-        >Não lidas</button>
+        >{$t("notifications.filter_unread")}</button>
         <button
           type="button"
           class="ftab"
@@ -102,18 +118,26 @@
           role="tab"
           aria-selected={filter === "all"}
           onclick={() => (filter = "all")}
-        >Todas</button>
+        >{$t("notifications.filter_all")}</button>
+        {#if items.length > 0}
+          <button
+            type="button"
+            class="dismiss-all"
+            onclick={dismissAll}
+            aria-label={$t("notifications.dismiss_all_aria")}
+          >{$t("notifications.dismiss_all")}</button>
+        {/if}
       </div>
       <div class="body">
         {#if loading}
-          <p class="muted">Carregando…</p>
+          <p class="muted">{$t("notifications.loading")}</p>
         {:else if items.length === 0}
           <div class="empty">
             <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
               <path d="M10 21a2 2 0 0 0 4 0" />
             </svg>
-            <p>{filter === "unread" ? "Tudo lido por aqui!" : "Nenhuma notificação"}</p>
+            <p>{filter === "unread" ? $t("notifications.empty_unread") : $t("notifications.empty_all")}</p>
           </div>
         {:else}
           <ul class="list">
@@ -122,18 +146,18 @@
               <li class="row" class:unread={isUnread}>
                 <button type="button" class="row-btn" onclick={() => openItem(n)}>
                   {#if isUnread}
-                    <span class="dot" aria-label="Não lida"></span>
+                    <span class="dot" aria-label={$t("notifications.unread_indicator")}></span>
                   {/if}
                   <span class="content">
                     <span class="course">{n.course_title}</span>
-                    <span class="lesson">{n.lesson_title ?? "Nova aula"}</span>
+                    <span class="lesson">{n.lesson_title ?? $t("notifications.new_lesson_fallback")}</span>
                   </span>
                   <span class="ago">{fmtAgo(n.detected_at)}</span>
                 </button>
                 <button
                   type="button"
                   class="dismiss"
-                  aria-label="Dispensar"
+                  aria-label={$t("notifications.dismiss")}
                   onclick={(e) => dismiss(n.id, e)}
                 >×</button>
               </li>
@@ -166,12 +190,26 @@
     grid-column: 2;
     width: min(420px, 90vw);
     height: 100%;
-    background: var(--content-bg);
+    background: var(--popup-bg, var(--primary));
     border-left: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
     display: flex;
     flex-direction: column;
     box-shadow: -8px 0 24px color-mix(in oklab, black 25%, transparent);
     animation: slide-in-right 220ms ease-out;
+  }
+
+  .dismiss-all {
+    margin-left: auto;
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px solid color-mix(in oklab, var(--error, #dc2626) 40%, transparent);
+    border-radius: 999px;
+    color: var(--error, #dc2626);
+    font-size: 11.5px;
+    cursor: pointer;
+  }
+  .dismiss-all:hover {
+    background: color-mix(in oklab, var(--error, #dc2626) 8%, transparent);
   }
 
   .head {
