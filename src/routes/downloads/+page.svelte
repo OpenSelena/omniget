@@ -1014,6 +1014,10 @@
     </div>
 
     <span class="item-percent">{Math.max(0, item.percent).toFixed(1)}%</span>
+
+    {#if item.status !== "queued"}
+      <DownloadLog id={item.id} />
+    {/if}
   </div>
 {/snippet}
 

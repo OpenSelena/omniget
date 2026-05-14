@@ -152,7 +152,7 @@
     justify-content: space-between;
     gap: 12px;
   }
-  .head h1 { margin: 0; font-size: 22px; font-weight: 700; color: var(--primary); }
+  .head h1 { margin: 0; font-size: 22px; font-weight: 700; color: var(--secondary); }
   .clear-btn {
     padding: 6px 14px;
     background: transparent;
@@ -190,7 +190,7 @@
     padding: 0;
     background: transparent;
     border: 0;
-    color: var(--primary);
+    color: var(--secondary);
     font-size: 14px;
     font-weight: 600;
     text-align: left;

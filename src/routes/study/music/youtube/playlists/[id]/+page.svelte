@@ -523,14 +523,14 @@
     justify-content: space-between;
     gap: 12px;
   }
-  .modal h2 { margin: 0; font-size: 18px; font-weight: 800; color: var(--primary); }
+  .modal h2 { margin: 0; font-size: 18px; font-weight: 800; color: var(--secondary); }
   .modal p { margin: 0; color: var(--secondary); font-size: 14px; line-height: 1.5; }
   .modal input[type="text"] {
     padding: 9px 12px;
     border-radius: 8px;
     border: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
     background: color-mix(in oklab, var(--button) 30%, transparent);
-    color: var(--primary);
+    color: var(--secondary);
     font: inherit;
     font-size: 14px;
   }
@@ -545,7 +545,7 @@
     font-size: 20px;
     line-height: 1;
   }
-  .close:hover { color: var(--primary); }
+  .close:hover { color: var(--secondary); }
   .modal-actions {
     display: flex;
     gap: 8px;
@@ -598,7 +598,7 @@
   .add-title {
     font-size: 13px;
     font-weight: 600;
-    color: var(--primary);
+    color: var(--secondary);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;

@@ -11,7 +11,13 @@
     type GamificationToast,
   } from "$lib/study-gamification";
   import { emitFocusBreakStart } from "$lib/study-focus-bridge";
-  import { STUDY_NOTES_ENABLED, STUDY_ANKI_ENABLED } from "$lib/study-feature-flags";
+  import {
+    STUDY_NOTES_ENABLED,
+    STUDY_ANKI_ENABLED,
+    STUDY_FOCUS_ENABLED,
+    STUDY_PROGRESS_ENABLED,
+    STUDY_ACHIEVEMENTS_ENABLED,
+  } from "$lib/study-feature-flags";
   import { beforeNavigate } from "$app/navigation";
   import { musicPlayer, type MusicTrack } from "$lib/study-music/player-store.svelte";
   import { musicUI } from "$lib/study-music/ui-store.svelte";
@@ -23,6 +29,8 @@
   import AddToPlaylistDialog from "$lib/study-music-components/AddToPlaylistDialog.svelte";
   import RootsManager from "$lib/study-music-components/RootsManager.svelte";
   import EqualizerPanel from "$lib/study-music-components/EqualizerPanel.svelte";
+  import SleepTimerPanel from "$lib/study-music-components/SleepTimerPanel.svelte";
+  import ListenTogetherPanel from "$lib/study-music-components/ListenTogetherPanel.svelte";
   import LastFmPanel from "$lib/study-music-components/LastFmPanel.svelte";
   import MusicThemePanel from "$lib/study-music-components/MusicThemePanel.svelte";
   import QualityPresetPanel from "$lib/study-music-components/QualityPresetPanel.svelte";
@@ -48,6 +56,9 @@
   const SUBNAV = SUBNAV_FULL.filter((item) => {
     if (item.href === "/study/notes" && !STUDY_NOTES_ENABLED) return false;
     if (item.href === "/study/anki" && !STUDY_ANKI_ENABLED) return false;
+    if (item.href === "/study/focus" && !STUDY_FOCUS_ENABLED) return false;
+    if (item.href === "/study/progress" && !STUDY_PROGRESS_ENABLED) return false;
+    if (item.href === "/study/achievements" && !STUDY_ACHIEVEMENTS_ENABLED) return false;
     return true;
   });
 
@@ -777,6 +788,16 @@
 <EqualizerPanel
   open={musicUI.equalizerOpen}
   onClose={() => musicUI.closeEqualizer()}
+/>
+
+<SleepTimerPanel
+  open={musicUI.sleepTimerOpen}
+  onClose={() => musicUI.closeSleepTimer()}
+/>
+
+<ListenTogetherPanel
+  open={musicUI.listenTogetherOpen}
+  onClose={() => musicUI.closeListenTogether()}
 />
 
 <LastFmPanel

@@ -31,6 +31,12 @@
   import { t, locale } from "$lib/i18n";
   import { get } from "svelte/store";
   import { CORE_NAV_ITEMS, type NavItem } from "$lib/nav-config";
+  import {
+    STUDY_FOCUS_ENABLED,
+    STUDY_PROGRESS_ENABLED,
+    STUDY_ACHIEVEMENTS_ENABLED,
+    STUDY_NOTES_ENABLED,
+  } from "$lib/study-feature-flags";
   import type { Snippet } from "svelte";
 
   let pluginNavItems = $state<NavItem[]>([]);
@@ -115,6 +121,10 @@
         for (const p of plugins) {
           if (!p.enabled) continue;
           for (const n of p.nav) {
+            if (n.route === "/study/focus" && !STUDY_FOCUS_ENABLED) continue;
+            if (n.route === "/study/progress" && !STUDY_PROGRESS_ENABLED) continue;
+            if (n.route === "/study/achievements" && !STUDY_ACHIEVEMENTS_ENABLED) continue;
+            if (n.route === "/study/notes" && !STUDY_NOTES_ENABLED) continue;
             items.push({
               href: n.route,
               label: n.label[get(locale)] || n.label["en"] || p.id,

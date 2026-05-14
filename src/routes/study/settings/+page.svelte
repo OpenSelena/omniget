@@ -18,6 +18,7 @@
   import MusicSettingsTab from "$lib/study-components/settings/MusicSettingsTab.svelte";
   import DiagnosticTab from "$lib/study-components/settings/DiagnosticTab.svelte";
   import NotesSettingsTab from "$lib/study-components/notes/NotesSettingsTab.svelte";
+  import YouTubeSettingsTab from "$lib/study-components/settings/YouTubeSettingsTab.svelte";
 
   type TabKey =
     | "player"
@@ -26,6 +27,7 @@
     | "behavior"
     | "library"
     | "music"
+    | "youtube"
     | "diagnostic"
     | "notes"
     | "maintenance"
@@ -38,6 +40,7 @@
     { key: "behavior", label: "Comportamento" },
     { key: "library", label: "Biblioteca" },
     { key: "music", label: "Música" },
+    { key: "youtube", label: "YouTube" },
     { key: "diagnostic", label: $t("study.settings.tab_diagnostic") as string },
     { key: "notes", label: "Notas" },
     { key: "maintenance", label: "Manutenção" },
@@ -204,6 +207,8 @@
       <LibrarySettingsTab {settings} onPatch={patchSettings} />
     {:else if activeTab === "music"}
       <MusicSettingsTab {settings} onPatch={patchSettings} />
+    {:else if activeTab === "youtube"}
+      <YouTubeSettingsTab />
     {:else if activeTab === "diagnostic"}
       <DiagnosticTab />
     {:else if activeTab === "notes"}

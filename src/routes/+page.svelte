@@ -8,6 +8,8 @@
   import DownloadModeSelector from "$components/omnibox/DownloadModeSelector.svelte";
   import QualityPicker from "$components/omnibox/QualityPicker.svelte";
   import FormatSelector from "$components/omnibox/FormatSelector.svelte";
+  import CookieAccountPicker from "$components/omnibox/CookieAccountPicker.svelte";
+  import OmniboxAdvanced from "$components/omnibox/OmniboxAdvanced.svelte";
   import MediaPreview from "$components/omnibox/MediaPreview.svelte";
   import BatchDownload from "$components/omnibox/BatchDownload.svelte";
   import SearchResults from "$components/omnibox/SearchResults.svelte";
@@ -24,6 +26,7 @@
   import { t } from "$lib/i18n";
   import { translateBackendError } from "$lib/error-translate";
   import { platformDisplayName } from "$lib/platform-display-names";
+  import { STUDY_MAINTENANCE_NOTICE } from "$lib/study-feature-flags";
 
   type PlatformInfo = {
     platform: string;
@@ -86,6 +89,26 @@
   let formatError = $state<string | null>(null);
   let formatFetchGeneration = $state(0);
   let referer = $state("");
+
+  type CookieAccount = {
+    slug: string;
+    alias: string;
+    captured_at_ms: number;
+    cookie_count: number;
+    last_used_at_ms: number | null;
+  };
+  let cookieAccounts = $state<CookieAccount[]>([]);
+  let selectedCookieSlug = $state<string | null>(null);
+  let advancedMode = $state(false);
+  const STUDY_NOTICE_DISMISS_KEY = "omniget.study_maintenance_notice_dismissed_v1";
+  let studyNoticeDismissed = $state(
+    typeof localStorage !== "undefined"
+      && localStorage.getItem(STUDY_NOTICE_DISMISS_KEY) === "1"
+  );
+  function dismissStudyNotice() {
+    studyNoticeDismissed = true;
+    try { localStorage.setItem(STUDY_NOTICE_DISMISS_KEY, "1"); } catch {}
+  }
   let mediaPreview = $derived(getMediaPreview());
   let pendingExternalPrefill = $derived(getPendingExternalPrefill());
   let previewImageLoading = $state(true);
@@ -290,12 +313,11 @@
     clearMediaPreview();
     const currentSettings = getSettings();
     const saved = currentSettings?.last_download_options;
-    const savedQuality = saved?.quality;
     const savedMode = saved?.mode;
     const settingsQuality = currentSettings?.download.video_quality;
-    selectedQuality = savedQuality && typeof savedQuality === "string"
-      ? savedQuality
-      : (settingsQuality && typeof settingsQuality === "string" ? settingsQuality : "best");
+    selectedQuality = settingsQuality && typeof settingsQuality === "string"
+      ? settingsQuality
+      : "best";
     downloadMode = savedMode === "audio" || savedMode === "mute" ? savedMode : "auto";
     selectedFormatId = null;
     formats = [];
@@ -344,11 +366,31 @@
       if (result.supported) {
         omniState = { kind: "detected", info: result };
         invoke("prefetch_media_info", { url: value }).catch(() => {});
+        loadCookieAccounts(value);
       } else {
         omniState = { kind: "unsupported" };
       }
     } catch {
       omniState = { kind: "unsupported" };
+    }
+  }
+
+  async function loadCookieAccounts(targetUrl: string) {
+    try {
+      const result = await invoke<{ domain: string; accounts: CookieAccount[] }>(
+        "cookies_accounts_for_url",
+        { url: targetUrl }
+      );
+      const accounts = result.accounts.slice().sort((a, b) => {
+        const lhs = a.last_used_at_ms ?? a.captured_at_ms;
+        const rhs = b.last_used_at_ms ?? b.captured_at_ms;
+        return rhs - lhs;
+      });
+      cookieAccounts = accounts;
+      selectedCookieSlug = accounts[0]?.slug ?? null;
+    } catch {
+      cookieAccounts = [];
+      selectedCookieSlug = null;
     }
   }
 
@@ -428,15 +470,25 @@
     selectedFormatId = null;
   }
 
+  function presetBest() {
+    selectedFormatId = null;
+    downloadMode = "auto";
+    selectedQuality = "best";
+  }
+
+  function presetMusic() {
+    selectedFormatId = null;
+    downloadMode = "audio";
+  }
+
   function persistLastDownloadOptions() {
     const saved = getSettings()?.last_download_options;
     const nextMode = downloadMode;
-    const nextQuality = selectedQuality;
-    if (saved?.mode === nextMode && saved?.quality === nextQuality) return;
+    if (saved?.mode === nextMode) return;
     updateSettings({
       last_download_options: {
         mode: nextMode,
-        quality: nextQuality,
+        quality: saved?.quality ?? "best",
       },
     }).catch(() => {});
   }
@@ -483,6 +535,7 @@
         quality: selectedQuality,
         formatId: selectedFormatId,
         referer: referer.trim() || null,
+        cookieSlug: selectedCookieSlug,
       });
       persistLastDownloadOptions();
       omniState = { kind: "idle" };
@@ -524,6 +577,7 @@
         quality: selectedQuality,
         formatId: null,
         referer: null,
+        cookieSlug: null,
       }))
     );
 
@@ -569,6 +623,7 @@
         quality: "best",
         formatId: null,
         referer: null,
+        cookieSlug: null,
       });
       omniState = { kind: "idle" };
     } catch (e: any) {
@@ -628,6 +683,25 @@
 </script>
 
 <div class="home">
+  {#if STUDY_MAINTENANCE_NOTICE && !studyNoticeDismissed}
+    <div class="study-maintenance-banner" role="status">
+      <div class="study-maintenance-text">
+        <strong>{$t("study.maintenance.home_banner_title")}</strong>
+        <span>{$t("study.maintenance.home_banner_body")}</span>
+      </div>
+      <button
+        type="button"
+        class="study-maintenance-dismiss"
+        onclick={dismissStudyNotice}
+        aria-label={$t('common.close')}
+      >
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M18 6L6 18M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  {/if}
+
   <HomeHero
     emotion={mascotEmotion}
     compact={mascotCompact}
@@ -636,6 +710,28 @@
   />
 
   <div class="omnibox-area">
+    <div class="mode-toggle-row">
+      <button
+        type="button"
+        class="mode-toggle-btn"
+        class:active={!advancedMode}
+        onclick={() => { advancedMode = false; }}
+      >
+        {$t('omnibox.mode_normal')}
+      </button>
+      <button
+        type="button"
+        class="mode-toggle-btn"
+        class:active={advancedMode}
+        onclick={() => { advancedMode = true; }}
+      >
+        {$t('omnibox.mode_advanced')}
+      </button>
+    </div>
+
+    {#if advancedMode}
+      <OmniboxAdvanced />
+    {:else}
     {#if externalNotice}
       <div class="feedback-card feedback-enter external-url-card">
         <div class="card-row">
@@ -706,6 +802,9 @@
           <div class="options-content">
             <DownloadModeSelector bind:downloadMode onChange={() => { selectedFormatId = null; }} />
             <QualityPicker bind:selectedQuality selectedFormatId />
+            {#if cookieAccounts.length > 1}
+              <CookieAccountPicker accounts={cookieAccounts} bind:selectedSlug={selectedCookieSlug} />
+            {/if}
 
             <details class="options-panel">
               <summary class="options-toggle">{$t('omnibox.advanced')}</summary>
@@ -734,6 +833,8 @@
                   onLoadFormats={loadFormats}
                   onSelectFormat={selectFormat}
                   onClearFormat={clearFormatSelection}
+                  onPresetBest={presetBest}
+                  onPresetMusic={presetMusic}
                 />
               </div>
             </details>
@@ -801,6 +902,7 @@
         </div>
       </div>
     {/if}
+    {/if}
   </div>
 
   {#if showP2pSendDialog}
@@ -865,6 +967,60 @@
     padding: var(--space-5) var(--space-3);
   }
 
+  .study-maintenance-banner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    max-width: 640px;
+    padding: 8px 12px;
+    background: color-mix(in oklab, var(--secondary) 8%, transparent);
+    border: 1px solid color-mix(in oklab, var(--secondary) 18%, transparent);
+    border-radius: var(--border-radius);
+    color: var(--secondary);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+
+  .study-maintenance-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .study-maintenance-text strong {
+    font-weight: 500;
+    font-size: 12.5px;
+    color: var(--text);
+  }
+
+  .study-maintenance-text span {
+    color: var(--secondary);
+    font-size: 11.5px;
+  }
+
+  .study-maintenance-dismiss {
+    background: transparent;
+    border: none;
+    padding: 4px;
+    margin: -4px;
+    border-radius: 4px;
+    color: var(--secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.55;
+    transition: opacity 0.15s ease, background 0.15s ease;
+  }
+
+  .study-maintenance-dismiss:hover {
+    opacity: 1;
+    background: color-mix(in oklab, var(--text) 6%, transparent);
+  }
+
   .omnibox-area {
     display: flex;
     flex-direction: column;
@@ -872,6 +1028,33 @@
     gap: var(--space-3);
     width: 100%;
     max-width: 640px;
+  }
+
+  .mode-toggle-row {
+    display: inline-flex;
+    background: var(--button);
+    border-radius: var(--border-radius);
+    padding: 3px;
+    gap: 2px;
+    margin-bottom: 4px;
+  }
+  .mode-toggle-btn {
+    padding: 5px 14px;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--gray);
+    background: transparent;
+    border: none;
+    border-radius: calc(var(--border-radius) - 3px);
+    cursor: pointer;
+  }
+  .mode-toggle-btn.active {
+    background: var(--cta);
+    color: var(--on-cta);
+  }
+  .mode-toggle-btn:not(.active):hover {
+    color: var(--secondary);
+    background: var(--button-elevated);
   }
 
   .loop-icon {

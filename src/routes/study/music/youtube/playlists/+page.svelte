@@ -154,7 +154,7 @@
     gap: 16px;
     flex-wrap: wrap;
   }
-  h1 { margin: 0; font-size: 24px; font-weight: 800; color: var(--primary); }
+  h1 { margin: 0; font-size: 24px; font-weight: 800; color: var(--secondary); }
   .subtitle { margin: 4px 0 0; color: var(--tertiary); font-size: 13px; }
   .create-btn {
     padding: 10px 18px;
@@ -204,7 +204,7 @@
   .card-title {
     font-size: 14px;
     font-weight: 700;
-    color: var(--primary);
+    color: var(--secondary);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -235,7 +235,7 @@
     gap: 14px;
     box-shadow: 0 24px 48px rgba(0, 0, 0, 0.5);
   }
-  .modal h2 { margin: 0; font-size: 18px; font-weight: 800; color: var(--primary); }
+  .modal h2 { margin: 0; font-size: 18px; font-weight: 800; color: var(--secondary); }
   .modal label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--secondary); }
   .modal input,
   .modal textarea {
@@ -243,7 +243,7 @@
     border-radius: 8px;
     border: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
     background: color-mix(in oklab, var(--button) 30%, transparent);
-    color: var(--primary);
+    color: var(--secondary);
     font: inherit;
     font-size: 14px;
     resize: vertical;
