@@ -654,6 +654,9 @@ export type YoutubePlayerResult = {
   adaptive_formats: YoutubeStreamFormat[];
   dash_manifest_url: string | null;
   hls_manifest_url: string | null;
+  dash_built: string | null;
+  sabr_only: boolean;
+  server_abr_url: string | null;
   expires_at: number;
   has_potoken: boolean;
   client_used: string;

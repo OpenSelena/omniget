@@ -6,7 +6,55 @@ import { summarizeCookies } from "./cookie-summary.js";
 import { loadSnifferState, isSnifferEnabled, setSnifferEnabled } from "./sniffer-toggle.js";
 import { registerContextMenu, getContextMenuId } from "./context-menu.js";
 import { openOmnigetScheme } from "./send-via-scheme.js";
-import { sendViaBridge, sendCookiesViaBridge } from "./bridge-client.js";
+import { sendViaBridge, sendCookiesViaBridge, autoPair, loadBridgeConfig } from "./bridge-client.js";
+
+const AUTOPAIR_ALARM = "omniget-autopair";
+
+async function isPaired() {
+  try {
+    const cfg = await loadBridgeConfig();
+    return Boolean(cfg.token);
+  } catch {
+    return false;
+  }
+}
+
+// Keep a low-frequency poll alive while unpaired so that, the moment the user
+// clicks "Pair extension" in the desktop app (which opens a ~120s single-use
+// window), the extension grabs the token on its own — no copy-paste, no
+// returning to the extension. The alarm clears itself once paired.
+async function runAutoPairTick() {
+  if (await isPaired()) {
+    try {
+      await chrome.alarms.clear(AUTOPAIR_ALARM);
+    } catch {}
+    return true;
+  }
+  const result = await autoPair().catch(() => ({ ok: false }));
+  if (result?.ok) {
+    try {
+      await chrome.alarms.clear(AUTOPAIR_ALARM);
+    } catch {}
+    refreshActiveTab().catch(() => {});
+    return true;
+  }
+  return false;
+}
+
+async function ensureAutoPairAlarm() {
+  if (await isPaired()) return;
+  try {
+    if (!(await chrome.alarms.get(AUTOPAIR_ALARM))) {
+      chrome.alarms.create(AUTOPAIR_ALARM, { periodInMinutes: 1 });
+    }
+  } catch {}
+}
+
+if (chrome.alarms?.onAlarm) {
+  chrome.alarms.onAlarm.addListener((alarm) => {
+    if (alarm?.name === AUTOPAIR_ALARM) void runAutoPairTick();
+  });
+}
 
 const INSTALL_URL = "https://github.com/tonhowtf/omniget/releases/latest";
 const PROTOCOL_VERSION = 1;
@@ -62,7 +110,11 @@ chrome.runtime.onInstalled.addListener(async (details) => {
     const stored = await chrome.storage.local.get("bridge_token");
     const token = typeof stored?.bridge_token === "string" ? stored.bridge_token.trim() : "";
     if (!token) {
-      chrome.runtime.openOptionsPage().catch(() => {});
+      const paired = await runAutoPairTick();
+      if (!paired) {
+        await ensureAutoPairAlarm();
+        chrome.runtime.openOptionsPage().catch(() => {});
+      }
     }
   } catch {
     // storage unavailable — fall back to the previous behaviour and only
@@ -93,6 +145,8 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
 
 chrome.runtime.onStartup.addListener(() => {
   refreshActiveTab().catch(() => {});
+  void runAutoPairTick();
+  void ensureAutoPairAlarm();
 });
 
 if (chrome.commands && chrome.commands.onCommand) {

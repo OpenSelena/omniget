@@ -1,8 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
   import { studySoundcloudHumanizeError } from "$lib/study-bridge";
-  import MascotSlot from "$lib/components/MascotSlot.svelte";
-  import { petsGetActive } from "$lib/pets/sync";
 
   type Props = {
     error: string;
@@ -12,21 +9,6 @@
   let { error, trackUrl, onRetry }: Props = $props();
 
   let humanized = $state<string>("Erro tecnico. Toca os detalhes pra ver o que aconteceu");
-  let petSlug = $state<string | null>(null);
-
-  onMount(() => {
-    let active = true;
-    petsGetActive()
-      .then((slug) => {
-        if (active) petSlug = slug;
-      })
-      .catch(() => {
-        if (active) petSlug = null;
-      });
-    return () => {
-      active = false;
-    };
-  });
 
   async function resolve(err: string) {
     try {
@@ -52,8 +34,12 @@
 </script>
 
 <div class="sc-error" role="alert">
-  <div class="pet" aria-hidden="true">
-    <MascotSlot slug={petSlug} event="syncError" scale={0.23} fallback="warn" />
+  <div class="icon" aria-hidden="true">
+    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+      <line x1="12" y1="9" x2="12" y2="13" />
+      <line x1="12" y1="17" x2="12.01" y2="17" />
+    </svg>
   </div>
   <div class="body">
     <p class="kicker">SoundCloud</p>
@@ -91,17 +77,13 @@
     color: var(--secondary);
   }
 
-  .pet {
+  .icon {
     width: 48px;
     min-height: 48px;
     display: grid;
     place-items: center;
     color: var(--sc-accent);
     overflow: hidden;
-  }
-
-  .pet :global(.slot-fallback) {
-    color: var(--sc-accent);
   }
 
   .body {
@@ -206,7 +188,7 @@
       grid-template-columns: 1fr;
     }
 
-    .pet {
+    .icon {
       display: none;
     }
   }

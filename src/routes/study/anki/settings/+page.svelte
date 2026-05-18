@@ -442,13 +442,6 @@
     </div>
   {/if}
 
-  <div class="pets-moved">
-    <span class="pets-moved-text">
-      A configuração de pets foi movida para
-      <a class="pets-moved-link" href="/study/settings?tab=pets">Configurações &rsaquo; Pets</a>.
-    </span>
-  </div>
-
   {#if loading}
     <div class="state">Carregando preferências…</div>
   {:else if error}
@@ -1025,25 +1018,6 @@
       transform: translateY(0);
       opacity: 1;
     }
-  }
-
-  .pets-moved {
-    margin-bottom: 24px;
-    padding: 12px 16px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-sm);
-    color: var(--text-muted);
-    font-size: var(--text-sm);
-  }
-
-  .pets-moved-link {
-    color: var(--accent);
-    text-decoration: none;
-  }
-
-  .pets-moved-link:hover {
-    text-decoration: underline;
   }
 
   .sections {

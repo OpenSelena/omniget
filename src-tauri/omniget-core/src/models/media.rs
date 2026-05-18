@@ -57,6 +57,9 @@ pub struct DownloadOptions {
     pub torrent_listen_port: Option<u16>,
     pub torrent_id_slot: Option<std::sync::Arc<tokio::sync::Mutex<Option<usize>>>>,
     pub custom_ytdlp_args: Option<Vec<String>>,
+    pub torrent_files: Option<Vec<usize>>,
+    pub torrent_auto_trackers: bool,
+    pub torrent_upnp: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

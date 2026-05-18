@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { onMount } from "svelte";
+  import { onMount, onDestroy } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
   import { t } from "$lib/i18n";
   import { showToast } from "$lib/stores/toast-store.svelte";
@@ -54,6 +54,39 @@
     }
   }
 
+  let pairing = $state(false);
+  let pairSecondsLeft = $state(0);
+  let pairTimer: ReturnType<typeof setInterval> | null = null;
+
+  async function startPairing() {
+    try {
+      const res = await invoke<{ ok: boolean; window_secs: number; enabled: boolean }>(
+        "bridge_open_pairing"
+      );
+      if (!res.ok || !res.enabled) {
+        showToast("error", $t("settings.bridge.pair_unavailable") as string);
+        return;
+      }
+      pairing = true;
+      pairSecondsLeft = res.window_secs;
+      if (pairTimer) clearInterval(pairTimer);
+      pairTimer = setInterval(() => {
+        pairSecondsLeft -= 1;
+        if (pairSecondsLeft <= 0) {
+          pairing = false;
+          if (pairTimer) clearInterval(pairTimer);
+          pairTimer = null;
+        }
+      }, 1000);
+    } catch (e: any) {
+      showToast("error", typeof e === "string" ? e : (e.message ?? String(e)));
+    }
+  }
+
+  onDestroy(() => {
+    if (pairTimer) clearInterval(pairTimer);
+  });
+
   function maskedToken(value: string): string {
     if (!value) return "";
     if (value.length <= 8) return "•".repeat(value.length);
@@ -77,6 +110,25 @@
         <span class="setting-label">{$t("settings.bridge.unavailable")}</span>
       </div>
     {:else}
+      <div class="setting-row">
+        <div class="setting-col">
+          <span class="setting-label">{$t("settings.bridge.pair_label")}</span>
+          <span class="setting-hint">
+            {pairing
+              ? $t("settings.bridge.pair_active", { secs: pairSecondsLeft })
+              : $t("settings.bridge.pair_hint")}
+          </span>
+        </div>
+        <button
+          class="bridge-action primary"
+          type="button"
+          disabled={pairing}
+          onclick={startPairing}
+        >
+          {pairing ? $t("settings.bridge.pair_waiting") : $t("settings.bridge.pair")}
+        </button>
+      </div>
+      <div class="divider"></div>
       <div class="setting-row">
         <div class="setting-col">
           <span class="setting-label">{$t("settings.bridge.endpoint_label")}</span>
@@ -157,6 +209,12 @@
   }
   .bridge-action:hover { background: rgba(255, 255, 255, 0.08); }
   .bridge-action:disabled { opacity: 0.5; cursor: not-allowed; }
+  .bridge-action.primary {
+    background: var(--accent);
+    color: var(--on-accent);
+    border-color: transparent;
+  }
+  .bridge-action.primary:hover { background: var(--accent-lo, var(--accent)); }
   .bridge-action.danger { color: #ff8b6f; border-color: rgba(255, 139, 111, 0.3); }
   .bridge-action.danger:hover { background: rgba(255, 139, 111, 0.1); }
 </style>

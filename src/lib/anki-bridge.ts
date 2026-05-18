@@ -1,14 +1,5 @@
 import { pluginInvoke } from "$lib/plugin-invoke";
 
-export type AnkiPet = {
-  slug: string;
-  display_name: string;
-  description: string;
-  spritesheet_url: string;
-  vibes: string[];
-  tags: string[];
-};
-
 export type AnkiStreak = {
   current: number;
   longest: number;
@@ -59,7 +50,6 @@ export type AnkiDashboardState = {
   reviewed_today: number;
   recent_reviews: number;
   streak: AnkiStreak;
-  pet: AnkiPet;
   pending: AnkiPendingCounts;
   motd: string;
 };
@@ -99,18 +89,6 @@ export function ankiOpen(): Promise<unknown> {
 
 export function ankiDashboard(): Promise<AnkiDashboardState> {
   return pluginInvoke<AnkiDashboardState>("study", "study:anki:dashboard:state");
-}
-
-export function ankiPetsList(): Promise<AnkiPet[]> {
-  return pluginInvoke<AnkiPet[]>("study", "study:anki:pets:list");
-}
-
-export function ankiPetActive(): Promise<AnkiPet> {
-  return pluginInvoke<AnkiPet>("study", "study:anki:pets:active");
-}
-
-export function ankiPetSetActive(slug: string): Promise<AnkiPet> {
-  return pluginInvoke<AnkiPet>("study", "study:anki:pets:set_active", { slug });
 }
 
 export function ankiStreak(): Promise<AnkiStreak> {

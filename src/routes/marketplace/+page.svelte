@@ -162,7 +162,7 @@
       await invoke("install_plugin_from_registry", { pluginId: id, repo });
       await refreshPlugins();
     } catch (e: any) {
-      const msg = typeof e === "string" ? e : e?.message ?? "Install failed";
+      const msg = typeof e === "string" ? e : e?.message ?? $t("common.error");
       showToast("error", msg);
     }
     installingId = null;

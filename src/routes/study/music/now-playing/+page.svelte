@@ -10,6 +10,7 @@
   import ProgressBar from "$lib/study-music-components/ProgressBar.svelte";
   import VolumeControl from "$lib/study-music-components/VolumeControl.svelte";
   import PlayerErrorBanner from "$lib/study-music-components/PlayerErrorBanner.svelte";
+  import PasteLyricsModal from "$lib/study-music-components/PasteLyricsModal.svelte";
 
   type Tab = "lyrics" | "queue" | "previous";
   let tab = $state<Tab>("lyrics");
@@ -18,10 +19,19 @@
   const trackId = $derived(track?.id ?? null);
   const lyricsLines = $derived(lyricsStore.lines);
   const lyricsStatus = $derived(lyricsStore.status);
+  const effectiveTime = $derived(
+    musicPlayer.currentTime + lyricsStore.offsetMs / 1000,
+  );
   const activeLyricIdx = $derived(
     lyricsStatus === "synced" && lyricsLines.length > 0
-      ? lyricsStore.activeIndex(musicPlayer.currentTime)
+      ? lyricsStore.activeIndex(effectiveTime)
       : -1,
+  );
+  const nowMs = $derived(effectiveTime * 1000);
+  const offsetLabel = $derived(
+    (lyricsStore.offsetMs >= 0 ? "+" : "−") +
+      (Math.abs(lyricsStore.offsetMs) / 1000).toFixed(2) +
+      "s",
   );
   const previousTracks = $derived(
     musicPlayer.queue.slice(0, Math.max(0, musicPlayer.queueIndex)).reverse(),
@@ -30,6 +40,7 @@
 
   const reduceMotion = $derived(musicTheme.reduceAnimationsActive);
 
+  let pasteOpen = $state(false);
   let lyricsContainer = $state<HTMLDivElement | null>(null);
   let lineRefs: HTMLLIElement[] = $state([]);
   let _lastScrollAt = 0;
@@ -90,6 +101,16 @@
     void musicPlayer.toggleFavorite(track.id);
   }
 
+  function retryLyrics() {
+    if (trackId === null) return;
+    void lyricsStore.loadFor(trackId, true);
+  }
+
+  function seekToLine(timeMs: number) {
+    if (lyricsStatus !== "synced") return;
+    musicPlayer.seek(Math.max(0, timeMs / 1000));
+  }
+
   const coverSrc = $derived(
     track?.cover_path ??
       track?.spotify_cover_url ??
@@ -106,6 +127,11 @@
 {#if track}
   <div class="np-shell">
     <PlayerErrorBanner />
+    <PasteLyricsModal
+      open={pasteOpen}
+      {trackId}
+      onclose={() => (pasteOpen = false)}
+    />
     <div class="np-backdrop" aria-hidden="true">
       {#if coverSrc}
         <CoverImage
@@ -280,20 +306,95 @@
                 <span class="np-skel-bar" style:width="74%"></span>
               </div>
             {:else if lyricsStatus === "notfound"}
-              <p class="np-empty">{$t("study.music.now_playing_lyrics_empty")}</p>
+              <div class="np-lyrics-msg">
+                <p class="np-empty">{$t("study.music.now_playing_lyrics_empty")}</p>
+                <button type="button" class="np-retry" onclick={retryLyrics}
+                  >{$t("study.music.now_playing_lyrics_retry")}</button>
+                <button type="button" class="np-retry" onclick={() => (pasteOpen = true)}
+                  >{$t("study.music.lyrics_paste_title")}</button>
+              </div>
             {:else if lyricsStatus === "error"}
-              <p class="np-empty">{$t("study.music.now_playing_lyrics_error")}</p>
+              <div class="np-lyrics-msg">
+                <p class="np-empty">{$t("study.music.now_playing_lyrics_error")}</p>
+                <button type="button" class="np-retry" onclick={retryLyrics}
+                  >{$t("study.music.now_playing_lyrics_retry")}</button>
+                <button type="button" class="np-retry" onclick={() => (pasteOpen = true)}
+                  >{$t("study.music.lyrics_paste_title")}</button>
+              </div>
+            {:else if lyricsStatus === "plain"}
+              <div class="np-lyrics np-lyrics-plain">
+                <p class="np-plain-note">{$t("study.music.now_playing_lyrics_plain_note")}</p>
+                <pre class="np-plain">{lyricsStore.plain ?? ""}</pre>
+              </div>
             {:else if lyricsLines.length === 0}
-              <p class="np-empty">{$t("study.music.now_playing_lyrics_empty")}</p>
+              <div class="np-lyrics-msg">
+                <p class="np-empty">{$t("study.music.now_playing_lyrics_empty")}</p>
+                <button type="button" class="np-retry" onclick={retryLyrics}
+                  >{$t("study.music.now_playing_lyrics_retry")}</button>
+                <button type="button" class="np-retry" onclick={() => (pasteOpen = true)}
+                  >{$t("study.music.lyrics_paste_title")}</button>
+              </div>
             {:else}
+              <div class="np-lyrics-head">
+                <div class="np-sync" role="group">
+                  <button
+                    type="button"
+                    class="np-sync-btn"
+                    onclick={() => lyricsStore.nudgeOffset(-100)}
+                    aria-label={$t("study.music.now_playing_lyrics_sync_earlier") as string}
+                    title={$t("study.music.now_playing_lyrics_sync_earlier") as string}
+                    >−</button>
+                  <button
+                    type="button"
+                    class="np-sync-val"
+                    class:dirty={lyricsStore.offsetMs !== 0}
+                    onclick={() => lyricsStore.resetOffset()}
+                    aria-label={$t("study.music.now_playing_lyrics_sync_reset") as string}
+                    title={$t("study.music.now_playing_lyrics_sync_reset") as string}
+                    >{offsetLabel}</button>
+                  <button
+                    type="button"
+                    class="np-sync-btn"
+                    onclick={() => lyricsStore.nudgeOffset(100)}
+                    aria-label={$t("study.music.now_playing_lyrics_sync_later") as string}
+                    title={$t("study.music.now_playing_lyrics_sync_later") as string}
+                    >+</button>
+                </div>
+                <div class="np-head-actions">
+                  <button
+                    type="button"
+                    class="np-trans-toggle"
+                    onclick={() => (pasteOpen = true)}
+                    >{$t("study.music.lyrics_paste_title")}</button>
+                  <button
+                    type="button"
+                    class="np-trans-toggle"
+                    onclick={() => lyricsStore.toggleTranslation()}
+                    >{lyricsStore.showTranslation
+                      ? $t("study.music.now_playing_lyrics_hide_translation")
+                      : $t("study.music.now_playing_lyrics_show_translation")}</button>
+                </div>
+              </div>
               <div bind:this={lyricsContainer} class="np-lyrics">
                 <ol>
                   {#each lyricsLines as line, i (i + ":" + line.text)}
+                    {@const tr = lyricsStore.showTranslation
+                      ? lyricsStore.translations.get(i)
+                      : null}
                     <li
                       bind:this={lineRefs[i]}
                       class="np-line"
                       class:active={i === activeLyricIdx}
-                    >{line.text || " "}</li>
+                    >
+                      <button
+                        type="button"
+                        class="np-line-btn"
+                        onclick={() => seekToLine(line.time_ms)}
+                        >{#if i === activeLyricIdx && line.syllables && line.syllables.length > 0}<span class="np-line-words">{#each line.syllables as syl, si (si)}<span class="np-syl" class:sung={nowMs >= syl.time_ms}>{syl.text}</span>{/each}</span>{:else}{line.text || " "}{/if}</button>
+                      {#if tr && tr.translation}
+                        <span class="np-line-tr">{tr.translation}</span>
+                      {/if}
+                    </li>
                   {/each}
                 </ol>
               </div>
@@ -667,6 +768,159 @@
     color: rgba(255, 255, 255, 1);
     transform: scale(1.02);
     transform-origin: left center;
+  }
+  .np-line-btn {
+    appearance: none;
+    background: none;
+    border: 0;
+    margin: 0;
+    padding: 2px 0;
+    width: 100%;
+    text-align: inherit;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    display: block;
+  }
+  .np-line-btn:focus-visible {
+    outline: 2px solid var(--music-highlight, var(--accent));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+  .np-line-tr {
+    display: block;
+    margin-top: 2px;
+    font-size: 13px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.5);
+  }
+  .np-line.active .np-line-tr {
+    color: rgba(255, 255, 255, 0.78);
+  }
+  .np-line-words {
+    display: inline;
+  }
+  .np-syl {
+    color: rgba(255, 255, 255, 0.34);
+    transition: color 180ms ease;
+  }
+  .np-syl.sung {
+    color: rgba(255, 255, 255, 1);
+  }
+
+  .np-lyrics-msg {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding: 32px 8px;
+  }
+  .np-retry {
+    appearance: none;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 18px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+  .np-retry:hover {
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.32);
+  }
+
+  .np-lyrics-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 4px 0;
+  }
+  .np-head-actions {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .np-sync {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+  }
+  .np-sync-btn {
+    appearance: none;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.78);
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    font-size: 15px;
+    line-height: 1;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: background 120ms ease;
+  }
+  .np-sync-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+  }
+  .np-sync-val {
+    appearance: none;
+    border: 0;
+    background: none;
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    min-width: 52px;
+    text-align: center;
+    cursor: pointer;
+    padding: 2px 4px;
+  }
+  .np-sync-val.dirty {
+    color: var(--music-highlight, var(--accent));
+    font-weight: 600;
+  }
+  .np-trans-toggle {
+    appearance: none;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.75);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease;
+  }
+  .np-trans-toggle:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.95);
+  }
+
+  .np-lyrics-plain {
+    padding: 8px 4px 50vh;
+  }
+  .np-plain-note {
+    margin: 0 0 12px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.4);
+    text-align: center;
+  }
+  .np-plain {
+    margin: 0;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.78);
+    white-space: pre-wrap;
+    word-break: break-word;
   }
 
   .np-lyrics-skel {

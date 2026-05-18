@@ -59,6 +59,30 @@
     <div class="divider"></div>
     <div class="setting-row">
       <div class="setting-col">
+        <span class="setting-label">{$t('settings.advanced.torrent_auto_trackers')}</span>
+        <span class="setting-path">{$t('settings.advanced.torrent_auto_trackers_desc')}</span>
+      </div>
+      <button class="toggle" class:on={settings.advanced.torrent_auto_trackers} onclick={() => toggleBool("advanced", "torrent_auto_trackers", settings.advanced.torrent_auto_trackers)} role="switch" aria-checked={settings.advanced.torrent_auto_trackers} aria-label={$t('settings.advanced.torrent_auto_trackers') as string}><span class="toggle-knob"></span></button>
+    </div>
+    <div class="divider"></div>
+    <div class="setting-row">
+      <div class="setting-col">
+        <span class="setting-label">{$t('settings.advanced.torrent_upnp')}</span>
+        <span class="setting-path">{$t('settings.advanced.torrent_upnp_desc')}</span>
+      </div>
+      <button class="toggle" class:on={settings.advanced.torrent_upnp} onclick={() => toggleBool("advanced", "torrent_upnp", settings.advanced.torrent_upnp)} role="switch" aria-checked={settings.advanced.torrent_upnp} aria-label={$t('settings.advanced.torrent_upnp') as string}><span class="toggle-knob"></span></button>
+    </div>
+    <div class="divider"></div>
+    <div class="setting-row">
+      <div class="setting-col">
+        <span class="setting-label">{$t('settings.advanced.prevent_sleep')}</span>
+        <span class="setting-path">{$t('settings.advanced.prevent_sleep_desc')}</span>
+      </div>
+      <button class="toggle" class:on={settings.advanced.prevent_sleep} onclick={() => toggleBool("advanced", "prevent_sleep", settings.advanced.prevent_sleep)} role="switch" aria-checked={settings.advanced.prevent_sleep} aria-label={$t('settings.advanced.prevent_sleep') as string}><span class="toggle-knob"></span></button>
+    </div>
+    <div class="divider"></div>
+    <div class="setting-row">
+      <div class="setting-col">
         <span class="setting-label">{$t('settings.advanced.cookies_from_browser')}</span>
         <span class="setting-path">{$t('settings.advanced.cookies_from_browser_desc')}</span>
       </div>
@@ -68,6 +92,20 @@
         placeholder={$t('settings.advanced.cookies_from_browser_placeholder')}
         value={settings.advanced?.cookies_from_browser ?? ""}
         onchange={(e) => updateSettings({ advanced: { cookies_from_browser: (e.target as HTMLInputElement).value.trim() } })}
+      />
+    </div>
+    <div class="divider"></div>
+    <div class="setting-row">
+      <div class="setting-col">
+        <span class="setting-label">{$t('settings.advanced.user_agent')}</span>
+        <span class="setting-path">{$t('settings.advanced.user_agent_desc')}</span>
+      </div>
+      <input
+        type="text"
+        class="input-text"
+        placeholder={$t('settings.advanced.user_agent_placeholder')}
+        value={settings.advanced?.user_agent ?? ""}
+        onchange={(e) => updateSettings({ advanced: { user_agent: (e.target as HTMLInputElement).value.trim() } })}
       />
     </div>
     <div class="divider"></div>

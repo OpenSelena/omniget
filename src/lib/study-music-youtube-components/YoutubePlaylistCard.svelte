@@ -44,51 +44,55 @@
   .card {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
     padding: 0;
     background: transparent;
     border: 0;
     text-align: left;
     cursor: pointer;
-    color: var(--secondary);
+    color: #f1f1f1;
   }
   .thumb-wrap {
     position: relative;
     aspect-ratio: 16 / 9;
-    border-radius: 8px;
+    border-radius: 12px;
     overflow: hidden;
-    background: color-mix(in oklab, var(--button) 60%, transparent);
+    background: #272727;
   }
-  .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .thumb-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 220ms ease; }
+  .card:hover .thumb-wrap img { transform: scale(1.045); }
   .stack-edge {
     position: absolute;
-    right: -2px;
-    top: 4px;
-    bottom: 4px;
-    width: 4px;
+    right: -3px;
+    top: 5px;
+    bottom: 5px;
+    width: 6px;
     border-radius: 0 8px 8px 0;
-    background: color-mix(in oklab, var(--button) 80%, transparent);
+    background: rgba(255, 255, 255, 0.18);
   }
   .count {
     position: absolute;
-    right: 6px;
-    bottom: 6px;
-    padding: 2px 6px;
+    right: 8px;
+    bottom: 8px;
+    padding: 3px 5px;
     border-radius: 4px;
-    background: rgba(0, 0, 0, 0.75);
+    background: rgba(0, 0, 0, 0.8);
     color: #fff;
-    font-size: 11px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
   }
   .title {
     margin: 0;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--secondary);
-    line-height: 1.3;
+    font-size: 14px;
+    font-weight: 500;
+    color: #f1f1f1;
+    line-height: 1.4;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
-  .meta { margin: 0; font-size: 11px; color: var(--tertiary); }
+  .card:hover .title { color: #fff; }
+  .meta { margin: 0; font-size: 12.5px; color: #aaa; }
 </style>

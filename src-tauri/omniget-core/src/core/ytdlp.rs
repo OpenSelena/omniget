@@ -21,6 +21,14 @@ type IncludeAutoSubsFn = Box<dyn Fn() -> bool + Send + Sync>;
 type TranslateMetadataFn = Box<dyn Fn() -> Option<String> + Send + Sync>;
 type SponsorBlockFn = Box<dyn Fn() -> bool + Send + Sync>;
 type SplitChaptersFn = Box<dyn Fn() -> bool + Send + Sync>;
+type EmbedMetadataFn = Box<dyn Fn() -> bool + Send + Sync>;
+type EmbedThumbnailFn = Box<dyn Fn() -> bool + Send + Sync>;
+type SpeedLimitFn = Box<dyn Fn() -> Option<String> + Send + Sync>;
+type LiveFromStartFn = Box<dyn Fn() -> bool + Send + Sync>;
+type ConcurrentFragmentsFn = Box<dyn Fn() -> u32 + Send + Sync>;
+type UserAgentFn = Box<dyn Fn() -> Option<String> + Send + Sync>;
+type SponsorBlockModeFn = Box<dyn Fn() -> String + Send + Sync>;
+type SponsorBlockCategoriesFn = Box<dyn Fn() -> Vec<String> + Send + Sync>;
 type PerDomainCookieFn = Box<dyn Fn(&str) -> Option<PathBuf> + Send + Sync>;
 type ManagedCookiesOnlyFn = Box<dyn Fn() -> bool + Send + Sync>;
 
@@ -35,6 +43,14 @@ static MANAGED_COOKIES_ONLY_FN: OnceLock<ManagedCookiesOnlyFn> = OnceLock::new()
 static TRANSLATE_METADATA_FN: OnceLock<TranslateMetadataFn> = OnceLock::new();
 static SPONSORBLOCK_FN: OnceLock<SponsorBlockFn> = OnceLock::new();
 static SPLIT_CHAPTERS_FN: OnceLock<SplitChaptersFn> = OnceLock::new();
+static EMBED_METADATA_FN: OnceLock<EmbedMetadataFn> = OnceLock::new();
+static EMBED_THUMBNAIL_FN: OnceLock<EmbedThumbnailFn> = OnceLock::new();
+static SPEED_LIMIT_FN: OnceLock<SpeedLimitFn> = OnceLock::new();
+static LIVE_FROM_START_FN: OnceLock<LiveFromStartFn> = OnceLock::new();
+static CONCURRENT_FRAGMENTS_FN: OnceLock<ConcurrentFragmentsFn> = OnceLock::new();
+static USER_AGENT_FN: OnceLock<UserAgentFn> = OnceLock::new();
+static SPONSORBLOCK_MODE_FN: OnceLock<SponsorBlockModeFn> = OnceLock::new();
+static SPONSORBLOCK_CATEGORIES_FN: OnceLock<SponsorBlockCategoriesFn> = OnceLock::new();
 
 pub fn set_ext_cookie_path_fn(f: impl Fn() -> PathBuf + Send + Sync + 'static) {
     let _ = EXT_COOKIE_PATH_FN.set(Box::new(f));
@@ -92,12 +108,82 @@ fn sponsorblock_enabled() -> bool {
     SPONSORBLOCK_FN.get().map(|f| f()).unwrap_or(false)
 }
 
+pub fn set_sponsorblock_mode_fn(f: impl Fn() -> String + Send + Sync + 'static) {
+    let _ = SPONSORBLOCK_MODE_FN.set(Box::new(f));
+}
+
+fn sponsorblock_mode() -> String {
+    SPONSORBLOCK_MODE_FN
+        .get()
+        .map(|f| f())
+        .unwrap_or_else(|| "remove".to_string())
+}
+
+pub fn set_sponsorblock_categories_fn(f: impl Fn() -> Vec<String> + Send + Sync + 'static) {
+    let _ = SPONSORBLOCK_CATEGORIES_FN.set(Box::new(f));
+}
+
+fn sponsorblock_categories() -> Vec<String> {
+    SPONSORBLOCK_CATEGORIES_FN
+        .get()
+        .map(|f| f())
+        .unwrap_or_default()
+}
+
 pub fn set_split_chapters_fn(f: impl Fn() -> bool + Send + Sync + 'static) {
     let _ = SPLIT_CHAPTERS_FN.set(Box::new(f));
 }
 
 fn split_chapters_enabled() -> bool {
     SPLIT_CHAPTERS_FN.get().map(|f| f()).unwrap_or(false)
+}
+
+pub fn set_embed_metadata_fn(f: impl Fn() -> bool + Send + Sync + 'static) {
+    let _ = EMBED_METADATA_FN.set(Box::new(f));
+}
+
+fn embed_metadata_enabled() -> bool {
+    EMBED_METADATA_FN.get().map(|f| f()).unwrap_or(true)
+}
+
+pub fn set_embed_thumbnail_fn(f: impl Fn() -> bool + Send + Sync + 'static) {
+    let _ = EMBED_THUMBNAIL_FN.set(Box::new(f));
+}
+
+fn embed_thumbnail_enabled() -> bool {
+    EMBED_THUMBNAIL_FN.get().map(|f| f()).unwrap_or(true)
+}
+
+pub fn set_speed_limit_fn(f: impl Fn() -> Option<String> + Send + Sync + 'static) {
+    let _ = SPEED_LIMIT_FN.set(Box::new(f));
+}
+
+fn speed_limit_value() -> Option<String> {
+    SPEED_LIMIT_FN.get().and_then(|f| f())
+}
+
+pub fn set_live_from_start_fn(f: impl Fn() -> bool + Send + Sync + 'static) {
+    let _ = LIVE_FROM_START_FN.set(Box::new(f));
+}
+
+fn live_from_start_enabled() -> bool {
+    LIVE_FROM_START_FN.get().map(|f| f()).unwrap_or(false)
+}
+
+pub fn set_concurrent_fragments_fn(f: impl Fn() -> u32 + Send + Sync + 'static) {
+    let _ = CONCURRENT_FRAGMENTS_FN.set(Box::new(f));
+}
+
+fn concurrent_fragments_value() -> u32 {
+    CONCURRENT_FRAGMENTS_FN.get().map(|f| f()).unwrap_or(1)
+}
+
+pub fn set_user_agent_fn(f: impl Fn() -> Option<String> + Send + Sync + 'static) {
+    let _ = USER_AGENT_FN.set(Box::new(f));
+}
+
+fn user_agent_setting() -> Option<String> {
+    USER_AGENT_FN.get().and_then(|f| f())
 }
 
 static EXT_UA_MAP: OnceLock<Mutex<HashMap<String, String>>> = OnceLock::new();
@@ -1518,7 +1604,9 @@ pub async fn download_video(
         && !manual_cookie_enabled
         && !explicit_cookie_header;
 
-    let effective_ua = ext_user_agent_for_url(url).unwrap_or_else(|| CHROME_UA.to_string());
+    let effective_ua = ext_user_agent_for_url(url)
+        .or_else(user_agent_setting)
+        .unwrap_or_else(|| CHROME_UA.to_string());
     base_args.extend([
         "--no-check-certificate".to_string(),
         "--no-warnings".to_string(),
@@ -1557,12 +1645,49 @@ pub async fn download_video(
     }
 
     if sponsorblock_enabled() && is_youtube_url(url) {
-        base_args.push("--sponsorblock-remove".to_string());
-        base_args.push("default".to_string());
+        let cats = sponsorblock_categories();
+        let cat_arg = if cats.is_empty() {
+            "default".to_string()
+        } else {
+            cats.join(",")
+        };
+        let flag = if sponsorblock_mode() == "mark" {
+            "--sponsorblock-mark"
+        } else {
+            "--sponsorblock-remove"
+        };
+        base_args.push(flag.to_string());
+        base_args.push(cat_arg);
     }
 
     if split_chapters_enabled() {
         base_args.push("--split-chapters".to_string());
+    }
+
+    if embed_metadata_enabled() {
+        base_args.push("--embed-metadata".to_string());
+    }
+
+    if embed_thumbnail_enabled() {
+        base_args.push("--embed-thumbnail".to_string());
+        base_args.push("--convert-thumbnails".to_string());
+        base_args.push("jpg".to_string());
+    }
+
+    if let Some(rate) = speed_limit_value() {
+        base_args.push("--limit-rate".to_string());
+        base_args.push(rate);
+    }
+
+    let frag_count = concurrent_fragments_value();
+    if frag_count > 1 {
+        base_args.push("--concurrent-fragments".to_string());
+        base_args.push(frag_count.to_string());
+    }
+
+    if live_from_start_enabled() {
+        base_args.push("--live-from-start".to_string());
+        base_args.push("--no-part".to_string());
     }
 
     if cfg!(target_os = "windows") {

@@ -17,6 +17,8 @@
   import SettingsTypography from "$components/settings/SettingsTypography.svelte";
   import SettingsBrowserExtension from "$components/settings/SettingsBrowserExtension.svelte";
   import SettingsCookies from "$components/settings/SettingsCookies.svelte";
+  import SettingsChannels from "$components/settings/SettingsChannels.svelte";
+  import SettingsAI from "$components/settings/SettingsAI.svelte";
 
   type DependencyStatus = {
     name: string;
@@ -138,8 +140,19 @@
     await updateSettings({ download: { video_quality: value } });
   }
 
-  type SettingsCategory = "downloads" | "appearance" | "typography" | "network" | "cookies" | "plugins" | "advanced";
+  type SettingsCategory = "downloads" | "appearance" | "typography" | "network" | "cookies" | "channels" | "ai" | "plugins" | "advanced";
   let activeCategory = $state<SettingsCategory>("downloads");
+
+  let tabApplied = false;
+  $effect(() => {
+    if (tabApplied || typeof window === "undefined") return;
+    tabApplied = true;
+    const tab = new URLSearchParams(window.location.search).get("tab");
+    const valid = ["downloads", "appearance", "typography", "network", "cookies", "channels", "ai", "plugins", "advanced"];
+    if (tab && valid.includes(tab)) {
+      activeCategory = tab as SettingsCategory;
+    }
+  });
 
   let searchQuery = $state("");
   let normalizedQuery = $derived(searchQuery.trim().toLowerCase());
@@ -305,49 +318,6 @@
     }, 800);
   }
 
-  const YTDLP_FLAG_CATALOG = [
-    { flag: "--embed-subs", label: "Embed subtitles" },
-    { flag: "--write-thumbnail", label: "Save thumbnail" },
-    { flag: "--write-description", label: "Save description" },
-    { flag: "--write-comments", label: "Save comments" },
-    { flag: "--restrict-filenames", label: "ASCII filenames" },
-    { flag: "--no-overwrites", label: "No overwrites" },
-    { flag: "--prefer-free-formats", label: "Free formats" },
-    { flag: "--force-ipv4", label: "Force IPv4" },
-    { flag: "--geo-bypass", label: "Geo bypass" },
-    { flag: "--limit-rate", label: "Limit rate", hasValue: true, placeholder: "e.g. 1M" },
-    { flag: "--sleep-interval", label: "Sleep interval", hasValue: true, placeholder: "e.g. 5" },
-  ];
-
-  async function toggleFlag(flag: string) {
-    let current = [...(settings?.download?.extra_ytdlp_flags ?? [])];
-    const idx = current.findIndex(f => f === flag || f.startsWith(flag + " "));
-    if (idx >= 0) {
-      current.splice(idx, 1);
-    } else {
-      current.push(flag);
-    }
-    await updateSettings({ download: { extra_ytdlp_flags: current } });
-  }
-
-  async function setFlagValue(flag: string, value: string) {
-    let current = [...(settings?.download?.extra_ytdlp_flags ?? [])];
-    const idx = current.findIndex(f => f === flag || f.startsWith(flag + " "));
-    if (idx >= 0) {
-      current[idx] = value ? `${flag} ${value}` : flag;
-    }
-    await updateSettings({ download: { extra_ytdlp_flags: current } });
-  }
-
-  function isFlagActive(flag: string): boolean {
-    return (settings?.download?.extra_ytdlp_flags ?? []).some(f => f === flag || f.startsWith(flag + " "));
-  }
-
-  function getFlagValue(flag: string): string {
-    const f = (settings?.download?.extra_ytdlp_flags ?? []).find(f => f.startsWith(flag + " "));
-    return f ? f.slice(flag.length + 1) : "";
-  }
-
   async function handleReset() {
     if (!confirm($t("settings.advanced.reset_confirm"))) return;
     resetting = true;
@@ -403,6 +373,8 @@
         ["typography", "settings.cat_typography"],
         ["network", "settings.cat_network"],
         ["cookies", "settings.cat_cookies"],
+        ["channels", "settings.cat_channels"],
+        ["ai", "settings.cat_ai"],
         ["plugins", "settings.cat_plugins"],
         ["advanced", "settings.cat_advanced"],
       ] as [cat, key] (cat)}
@@ -442,6 +414,14 @@
 
     {#if isSearching || activeCategory === "cookies"}
       <SettingsCookies />
+    {/if}
+
+    {#if isSearching || activeCategory === "channels"}
+      <SettingsChannels />
+    {/if}
+
+    {#if isSearching || activeCategory === "ai"}
+      <SettingsAI />
     {/if}
 
     {#if isSearching || activeCategory === "advanced"}

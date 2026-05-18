@@ -117,10 +117,12 @@ impl PlatformDownloader for MagnetDownloader {
                     listen_port,
                     output_dir.display()
                 );
+                let enable_upnp = opts.torrent_upnp;
                 let make_opts = |disable_dht_persistence: bool, disable_dht: bool| SessionOptions {
                     listen_port_range: Some(listen_port..listen_port.saturating_add(10)),
                     disable_dht,
                     disable_dht_persistence,
+                    enable_upnp_port_forwarding: enable_upnp,
                     ..Default::default()
                 };
                 let cancel_rx = opts.cancel_token.clone();
@@ -178,8 +180,25 @@ impl PlatformDownloader for MagnetDownloader {
                 AddTorrent::from_url(url)
             }
         };
+        let only_files = opts
+            .torrent_files
+            .as_ref()
+            .filter(|v| !v.is_empty())
+            .cloned();
+        if let Some(sel) = &only_files {
+            tracing::info!("[magnet] selective download: {} file(s)", sel.len());
+        }
+        let trackers = if opts.torrent_auto_trackers {
+            let list = crate::core::trackers::extra_trackers();
+            tracing::info!("[magnet] injecting {} public trackers", list.len());
+            Some(list)
+        } else {
+            None
+        };
         let torrent_opts = AddTorrentOptions {
             overwrite: true,
+            only_files,
+            trackers,
             ..Default::default()
         };
 

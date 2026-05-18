@@ -96,6 +96,9 @@ pub async fn enqueue_external_inner(
         eta_seconds: None,
         cookie_slug: None,
         custom_ytdlp_args: None,
+        torrent_files: None,
+        scheduled_at_ms: None,
+        stop_at_ms: None,
     };
 
     {

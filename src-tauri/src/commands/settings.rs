@@ -123,6 +123,37 @@ pub fn rotate_bridge_token(app: tauri::AppHandle) -> Result<BridgeInfo, String> 
     get_bridge_info(app)
 }
 
+#[derive(serde::Serialize)]
+pub struct BridgePairStatus {
+    pub ok: bool,
+    pub window_secs: i64,
+    pub port: u16,
+    pub enabled: bool,
+}
+
+/// Opens a short, single-use, user-consented pairing window so an installed
+/// browser extension can fetch the bearer token from `GET /v1/pair` without
+/// the user copy-pasting it.
+#[tauri::command]
+pub fn bridge_open_pairing(app: tauri::AppHandle) -> Result<BridgePairStatus, String> {
+    let settings = config::load_settings(&app);
+    if !settings.bridge.enabled {
+        return Ok(BridgePairStatus {
+            ok: false,
+            window_secs: 0,
+            port: settings.bridge.port,
+            enabled: false,
+        });
+    }
+    let window_secs = crate::local_bridge::open_pairing_window();
+    Ok(BridgePairStatus {
+        ok: true,
+        window_secs,
+        port: settings.bridge.port,
+        enabled: true,
+    })
+}
+
 fn merge_json(base: &mut serde_json::Value, patch: &serde_json::Value) {
     if let (Some(base_obj), Some(patch_obj)) = (base.as_object_mut(), patch.as_object()) {
         for (key, value) in patch_obj {

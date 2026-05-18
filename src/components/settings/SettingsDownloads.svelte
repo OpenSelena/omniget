@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { invoke } from "@tauri-apps/api/core";
   import { t } from "$lib/i18n";
   import ContextHint from "$components/hints/ContextHint.svelte";
   import {
@@ -13,6 +14,28 @@
 
   let settings = $derived(getSettings());
   let activePreset = $derived<YtdlpPresetId | null>(matchActivePreset(settings));
+
+  type PathLimitInfo = { limit: number; current: number; reserve: number; ok: boolean };
+  let pathInfo = $state<PathLimitInfo | null>(null);
+
+  $effect(() => {
+    const dir = settings?.download.default_output_dir;
+    if (!dir) {
+      pathInfo = null;
+      return;
+    }
+    let cancelled = false;
+    invoke<PathLimitInfo>("validate_output_path", { outputDir: dir })
+      .then((info) => {
+        if (!cancelled) pathInfo = info;
+      })
+      .catch(() => {
+        if (!cancelled) pathInfo = null;
+      });
+    return () => {
+      cancelled = true;
+    };
+  });
 
   async function applyPreset(id: YtdlpPresetId) {
     const preset = YTDLP_PRESETS.find((p) => p.id === id);
@@ -38,6 +61,53 @@
       musicHotkeyInput = settings.download.music_hotkey_binding;
     }
   });
+
+  let speedNum = $state<number | null>(null);
+  let speedUnit = $state<"K" | "M">("M");
+
+  $effect(() => {
+    const raw = settings?.download.speed_limit?.trim() ?? "";
+    const m = raw.match(/^(\d+(?:\.\d+)?)([KM])?$/i);
+    if (m) {
+      speedNum = Number(m[1]);
+      speedUnit = (m[2]?.toUpperCase() as "K" | "M") ?? "M";
+    } else {
+      speedNum = null;
+    }
+  });
+
+  function applySpeedLimit() {
+    const value = speedNum && speedNum > 0 ? `${speedNum}${speedUnit}` : "";
+    updateSettings({ download: { speed_limit: value } });
+  }
+
+  const SB_CATEGORIES = [
+    "sponsor",
+    "selfpromo",
+    "interaction",
+    "intro",
+    "outro",
+    "preview",
+    "filler",
+    "music_offtopic",
+  ] as const;
+
+  function sbHas(cat: string): boolean {
+    return settings?.download.sponsorblock_categories?.includes(cat) ?? false;
+  }
+
+  function toggleSbCategory(cat: string) {
+    const current = settings?.download.sponsorblock_categories ?? [];
+    const next = current.includes(cat)
+      ? current.filter((c) => c !== cat)
+      : [...current, cat];
+    updateSettings({ download: { sponsorblock_categories: next } });
+  }
+
+  function setSbMode(e: Event) {
+    const value = (e.target as HTMLSelectElement).value;
+    updateSettings({ download: { sponsorblock_mode: value } });
+  }
 
   function previewTemplate(template: string): string {
     return template
@@ -235,6 +305,16 @@
       <div class="setting-col">
         <span class="setting-label">{$t('settings.download.default_output_dir')}</span>
         <span class="setting-path">{settings.download.default_output_dir}</span>
+        {#if pathInfo && !pathInfo.ok}
+          <span class="path-warning" role="status">
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+              <line x1="12" y1="9" x2="12" y2="13" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+            {$t('settings.download.path_too_long', { current: pathInfo.current, limit: pathInfo.limit })}
+          </span>
+        {/if}
       </div>
       <button class="button" onclick={chooseFolder}>{$t('settings.download.choose_folder')}</button>
     </div>
@@ -256,6 +336,30 @@
         <option value="480p">{$t('omnibox.quality_480p')}</option>
         <option value="360p">{$t('omnibox.quality_360p')}</option>
       </select>
+    </div>
+    <div class="divider"></div>
+    <div class="setting-row">
+      <div class="setting-col">
+        <span class="setting-label">{$t('settings.download.speed_limit')}</span>
+        <span class="setting-path">{$t('settings.download.speed_limit_desc')}</span>
+      </div>
+      <div class="speed-limit">
+        <input
+          type="number"
+          class="input-number"
+          min="0"
+          step="1"
+          inputmode="numeric"
+          placeholder={$t('settings.download.speed_limit_unlimited') as string}
+          bind:value={speedNum}
+          onchange={applySpeedLimit}
+          aria-label={$t('settings.download.speed_limit') as string}
+        />
+        <select class="select" bind:value={speedUnit} onchange={applySpeedLimit} aria-label="unit">
+          <option value="K">KB/s</option>
+          <option value="M">MB/s</option>
+        </select>
+      </div>
     </div>
     <div class="divider"></div>
     <div class="setting-row">
@@ -394,6 +498,39 @@
       </div>
       <button class="toggle" class:on={settings.download.youtube_sponsorblock} onclick={() => toggleBool("download", "youtube_sponsorblock", settings.download.youtube_sponsorblock)} role="switch" aria-checked={settings.download.youtube_sponsorblock} aria-label={$t('settings.download.youtube_sponsorblock') as string}><span class="toggle-knob"></span></button>
     </div>
+    {#if settings.download.youtube_sponsorblock}
+      <div class="divider"></div>
+      <div class="setting-row">
+        <div class="setting-col">
+          <span class="setting-label">{$t('settings.download.sb_mode')}</span>
+          <span class="setting-path">{$t('settings.download.sb_mode_desc')}</span>
+        </div>
+        <select class="select" value={settings.download.sponsorblock_mode} onchange={setSbMode}>
+          <option value="remove">{$t('settings.download.sb_mode_remove')}</option>
+          <option value="mark">{$t('settings.download.sb_mode_mark')}</option>
+        </select>
+      </div>
+      <div class="divider"></div>
+      <div class="setting-row">
+        <div class="setting-col">
+          <span class="setting-label">{$t('settings.download.sb_categories')}</span>
+          <span class="setting-path">{$t('settings.download.sb_categories_desc')}</span>
+        </div>
+      </div>
+      <div class="sb-chips">
+        {#each SB_CATEGORIES as cat (cat)}
+          <button
+            type="button"
+            class="sb-chip"
+            class:on={sbHas(cat)}
+            onclick={() => toggleSbCategory(cat)}
+            aria-pressed={sbHas(cat)}
+          >
+            {$t(`settings.download.sb_cat_${cat}`)}
+          </button>
+        {/each}
+      </div>
+    {/if}
     <div class="divider"></div>
     <div class="setting-row">
       <div class="setting-col">
@@ -401,6 +538,14 @@
         <span class="setting-path">{$t('settings.download.split_by_chapters_desc')}</span>
       </div>
       <button class="toggle" class:on={settings.download.split_by_chapters} onclick={() => toggleBool("download", "split_by_chapters", settings.download.split_by_chapters)} role="switch" aria-checked={settings.download.split_by_chapters} aria-label={$t('settings.download.split_by_chapters') as string}><span class="toggle-knob"></span></button>
+    </div>
+    <div class="divider"></div>
+    <div class="setting-row">
+      <div class="setting-col">
+        <span class="setting-label">{$t('settings.download.live_from_start')}</span>
+        <span class="setting-path">{$t('settings.download.live_from_start_desc')}</span>
+      </div>
+      <button class="toggle" class:on={settings.download.live_from_start} onclick={() => toggleBool("download", "live_from_start", settings.download.live_from_start)} role="switch" aria-checked={settings.download.live_from_start} aria-label={$t('settings.download.live_from_start') as string}><span class="toggle-knob"></span></button>
     </div>
   </div>
 </details>
@@ -459,6 +604,70 @@
 {/if}
 
 <style>
+  .path-warning {
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    margin-top: 6px;
+    color: var(--warning);
+    font-size: 12px;
+    line-height: 1.4;
+  }
+  .path-warning svg {
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .speed-limit {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .input-number {
+    width: 88px;
+    padding: 6px 8px;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius, 6px);
+    font: inherit;
+    text-align: right;
+  }
+  .input-number:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .sb-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 4px 0 8px;
+  }
+  .sb-chip {
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text-muted, var(--text));
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition: border-color 0.12s ease, background 0.12s ease, color 0.12s ease;
+  }
+  .sb-chip:hover {
+    border-color: var(--accent);
+  }
+  .sb-chip.on {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+    color: var(--text);
+  }
+  .sb-chip:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+
   .preset-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));

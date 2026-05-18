@@ -141,17 +141,6 @@ pub async fn cookies_rename(request: RenameRequest) -> Result<OkResponse, String
     Ok(OkResponse { ok: true })
 }
 
-#[tauri::command]
-pub async fn cookies_migrate_legacy() -> Result<OkResponse, String> {
-    storage::migrate_legacy_if_needed().map_err(|e| e.to_string())?;
-    Ok(OkResponse { ok: true })
-}
-
-#[tauri::command]
-pub async fn cookies_detect_platform(domain: String) -> Result<String, String> {
-    Ok(PlatformKind::from_domain(&domain).as_str().to_string())
-}
-
 #[derive(Debug, Serialize)]
 pub struct AccountsForUrlResponse {
     pub domain: String,
@@ -320,12 +309,102 @@ pub async fn cookies_export_to(request: ExportToRequest) -> Result<OkResponse, S
     Ok(OkResponse { ok: true })
 }
 
-#[allow(dead_code)]
-pub fn list_accounts_for_domain(domain: &str) -> Vec<AccountEntry> {
+const COOKIE_FRESH_DAYS: i64 = 7;
+const COOKIE_EXPIRE_DAYS: i64 = 28;
+
+#[derive(Debug, Serialize)]
+pub struct CookieHealthItem {
+    pub domain: String,
+    pub slug: String,
+    pub status: String,
+    pub age_days: i64,
+    pub expires_in_days: i64,
+    pub cookie_count: usize,
+}
+
+#[derive(Debug, Serialize)]
+pub struct CookieHealthResponse {
+    pub items: Vec<CookieHealthItem>,
+    pub fresh_days: i64,
+    pub expire_days: i64,
+}
+
+#[tauri::command]
+pub async fn cookies_health() -> Result<CookieHealthResponse, String> {
     let registry = storage::load_registry();
-    registry
-        .buckets
-        .get(domain)
-        .map(|b| b.accounts.clone())
-        .unwrap_or_default()
+    let now = storage::current_unix_ms();
+    let mut items = Vec::new();
+    for (domain, bucket) in &registry.buckets {
+        for acc in &bucket.accounts {
+            let age_days = (now - acc.captured_at_ms).max(0) / 86_400_000;
+            let status = if age_days >= COOKIE_EXPIRE_DAYS {
+                "expired"
+            } else if age_days >= COOKIE_FRESH_DAYS {
+                "stale"
+            } else {
+                "fresh"
+            };
+            items.push(CookieHealthItem {
+                domain: domain.clone(),
+                slug: acc.slug.clone(),
+                status: status.to_string(),
+                age_days,
+                expires_in_days: (COOKIE_EXPIRE_DAYS - age_days).max(0),
+                cookie_count: acc.cookie_count,
+            });
+        }
+    }
+    Ok(CookieHealthResponse {
+        items,
+        fresh_days: COOKIE_FRESH_DAYS,
+        expire_days: COOKIE_EXPIRE_DAYS,
+    })
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CookieTestRequest {
+    pub url: String,
+    #[serde(default)]
+    pub slug: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct CookieTestResponse {
+    pub ok: bool,
+    pub message: String,
+}
+
+#[tauri::command]
+pub async fn cookies_test(request: CookieTestRequest) -> Result<CookieTestResponse, String> {
+    let ytdlp = crate::core::ytdlp::find_ytdlp_cached()
+        .await
+        .ok_or_else(|| "yt-dlp unavailable".to_string())?;
+    let url = request.url.clone();
+    let flags = vec!["--no-warnings".to_string()];
+    let result = omniget_core::core::log_hook::CURRENT_COOKIE_SLUG
+        .scope(request.slug.clone(), async move {
+            crate::core::ytdlp::get_video_info(&ytdlp, &url, &flags).await
+        })
+        .await;
+    match result {
+        Ok(_) => Ok(CookieTestResponse {
+            ok: true,
+            message: "ok".to_string(),
+        }),
+        Err(e) => {
+            let raw = e.to_string();
+            let summary = raw
+                .lines()
+                .find(|l| l.contains("ERROR"))
+                .unwrap_or_else(|| raw.lines().next().unwrap_or("failed"))
+                .trim()
+                .chars()
+                .take(240)
+                .collect::<String>();
+            Ok(CookieTestResponse {
+                ok: false,
+                message: summary,
+            })
+        }
+    }
 }

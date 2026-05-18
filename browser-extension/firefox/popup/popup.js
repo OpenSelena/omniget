@@ -6,6 +6,9 @@ import { captureCookiesForTab } from "../src/cookie-capture.js";
 
 const APP_URL = "https://github.com/tonhowtf/omniget/releases/latest";
 
+const tr = (k, ...subs) =>
+  (chrome.i18n?.getMessage?.(k, subs.length ? subs.map(String) : undefined) || k);
+
 const SVG = {
   play: `<svg viewBox="0 0 20 20" fill="currentColor"><path d="M6.5 4v12l10-6z"/></svg>`,
   check: `<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path class="checkmark-path" d="M4 10.5l4 4 8-8"/></svg>`,
@@ -19,7 +22,23 @@ let currentData = null;
 let pageTitle = "";
 let pageThumbnail = "";
 
+function localizeStatic() {
+  const openApp = tr("popup_open_app_label");
+  const sniffer = tr("popup_sniffer_label");
+  const openWrap = document.getElementById("open-app-toggle")?.closest(".toggle-group");
+  if (openWrap) openWrap.title = openApp;
+  document.getElementById("open-app-toggle")?.setAttribute("aria-label", openApp);
+  const snifWrap = document.getElementById("sniffer-toggle")?.closest(".toggle-group");
+  if (snifWrap) snifWrap.title = sniffer;
+  document.getElementById("sniffer-toggle")?.setAttribute("aria-label", sniffer);
+  const ckLabel = document.getElementById("cookie-capture-label");
+  if (ckLabel) ckLabel.textContent = tr("popup_ck_btn");
+  const ckHint = document.getElementById("cookie-capture-hint");
+  if (ckHint) ckHint.textContent = tr("popup_ck_hint");
+}
+
 async function init() {
+  localizeStatic();
   const toggle = document.getElementById("sniffer-toggle");
   const openAppToggle = document.getElementById("open-app-toggle");
 
@@ -122,8 +141,8 @@ function renderMediaDetected(container) {
 
   const domain = getDomainFromUrl(currentData.tabUrl || best.url);
   const title = pageTitle ? truncate(pageTitle, 40) : domain;
-  const countText = totalVideos > 1 ? `${totalVideos} videos found` : "Video found";
-  const label = best.mediaType === "audio" ? "Send audio" : "Send to OmniGet";
+  const countText = totalVideos > 1 ? tr("popup_videos_found", totalVideos) : tr("popup_video_found_one");
+  const label = best.mediaType === "audio" ? tr("popup_send_audio") : tr("popup_send_default");
 
   appendPrimaryButton(container, label, title + " \u00b7 " + countText, (btn) => {
     handleDownload(btn, best.url, "generic", best);
@@ -136,8 +155,8 @@ function renderListening(container) {
   container.innerHTML = `
     <div class="state-empty" role="status">
       <div class="listening-dot" aria-hidden="true"></div>
-      <span class="state-title">Listening for media\u2026</span>
-      <span class="state-hint">Videos and audio will appear here<br>as pages load them.</span>
+      <span class="state-title">${escapeHtml(tr("popup_listening_title"))}</span>
+      <span class="state-hint">${escapeHtml(tr("popup_listening_hint"))}</span>
     </div>
   `;
 }
@@ -145,8 +164,8 @@ function renderListening(container) {
 function renderSnifferOff(container) {
   container.innerHTML = `
     <div class="state-empty" role="status">
-      <span class="state-title">Media detection is paused</span>
-      <span class="state-hint">Turn on the toggle above to<br>detect videos on this page.</span>
+      <span class="state-title">${escapeHtml(tr("popup_paused_title"))}</span>
+      <span class="state-hint">${escapeHtml(tr("popup_paused_hint"))}</span>
     </div>
   `;
 }
@@ -184,11 +203,12 @@ function appendMediaControls(container, media) {
 
     const btn = document.createElement("button");
     btn.className = "secondary-btn";
-    btn.setAttribute("aria-label", `Send all ${groups.length} videos`);
+    const sendAllLabel = tr("popup_send_all", groups.length);
+    btn.setAttribute("aria-label", sendAllLabel);
     btn.innerHTML = `
       <span class="btn-icon">${SVG.download}</span>
       <div class="btn-content">
-        <span class="btn-label">Send all (${groups.length} videos)</span>
+        <span class="btn-label">${escapeHtml(sendAllLabel)}</span>
       </div>
     `;
 
@@ -210,7 +230,7 @@ function appendMediaList(container, hlsGroups, directMedia, totalItems) {
   toggleBtn.className = "media-toggle";
   toggleBtn.setAttribute("aria-expanded", "false");
   toggleBtn.innerHTML = `
-    <span>${totalItems} video${totalItems !== 1 ? "s" : ""} detected</span>
+    <span>${escapeHtml(totalItems === 1 ? tr("popup_detected_one") : tr("popup_detected_many", totalItems))}</span>
     <span class="media-toggle-arrow">\u25be</span>
   `;
 
@@ -221,7 +241,7 @@ function appendMediaList(container, hlsGroups, directMedia, totalItems) {
   for (const group of hlsGroups) {
     const domain = getDomainFromUrl(group.master.url);
     list.appendChild(createMediaItem(
-      `Video ${idx}`, domain,
+      tr("popup_video_n", idx), domain,
       () => sendToApp(group.master.url, "generic", group.master)
     ));
     idx++;
@@ -230,7 +250,7 @@ function appendMediaList(container, hlsGroups, directMedia, totalItems) {
   for (const entry of directMedia) {
     const name = getFilenameFromUrl(entry.url);
     const size = entry.sizeText || "";
-    const meta = (entry.mediaType === "audio" ? "Audio" : "Video") + (size ? " \u00b7 " + size : "");
+    const meta = (entry.mediaType === "audio" ? tr("popup_kind_audio") : tr("popup_kind_video")) + (size ? " \u00b7 " + size : "");
     list.appendChild(createMediaItem(name, meta, () => sendToApp(entry.url, "generic", entry)));
   }
 
@@ -255,7 +275,7 @@ function createMediaItem(name, meta, sendFn) {
         <span class="media-meta">${escapeHtml(meta)}</span>
       </div>
     </div>
-    <button class="item-download-btn" aria-label="Download ${escapeHtml(name)}">${SVG.arrow}</button>
+    <button class="item-download-btn" aria-label="${escapeHtml(tr("popup_download_aria", name))}">${SVG.arrow}</button>
   `;
 
   const btn = item.querySelector(".item-download-btn");
@@ -282,7 +302,7 @@ async function handleDownload(btn, url, platform, mediaEntry) {
   btn.dataset.busy = "1";
 
   btn.classList.add("sending");
-  btn.querySelector(".btn-label").textContent = "Sending\u2026";
+  btn.querySelector(".btn-label").textContent = tr("popup_sending");
   btn.querySelector(".btn-meta").textContent = "";
 
   const result = await sendToApp(url, platform, mediaEntry);
@@ -291,7 +311,7 @@ async function handleDownload(btn, url, platform, mediaEntry) {
     btn.classList.remove("sending");
     btn.classList.add("success");
     btn.querySelector(".btn-icon").innerHTML = SVG.check;
-    btn.querySelector(".btn-label").textContent = "Sent!";
+    btn.querySelector(".btn-label").textContent = tr("popup_sent");
     const summaryText = formatCookieSummary(result.cookieSummary);
     const metaEl = btn.querySelector(".btn-meta");
     if (metaEl) metaEl.textContent = summaryText;
@@ -305,7 +325,7 @@ async function handleBatchDownload(btn, groups) {
   if (btn.dataset.busy) return;
   btn.dataset.busy = "1";
 
-  btn.querySelector(".btn-label").textContent = `Sending ${groups.length} videos\u2026`;
+  btn.querySelector(".btn-label").textContent = tr("popup_sending_n", groups.length);
   btn.classList.add("sending");
 
   const result = await sendBatch(groups);
@@ -314,11 +334,11 @@ async function handleBatchDownload(btn, groups) {
     btn.classList.remove("sending");
     btn.classList.add("success");
     btn.querySelector(".btn-icon").innerHTML = SVG.check;
-    btn.querySelector(".btn-label").textContent = `${result.sent} videos sent!`;
+    btn.querySelector(".btn-label").textContent = tr("popup_sent_n", result.sent);
     setTimeout(() => window.close(), 1200);
   } else if (result.sent > 0) {
     btn.classList.remove("sending");
-    btn.querySelector(".btn-label").textContent = `Sent ${result.sent}, failed ${result.failed}`;
+    btn.querySelector(".btn-label").textContent = tr("popup_sent_failed", result.sent, result.failed);
     delete btn.dataset.busy;
   } else {
     showError(btn.closest(".secondary-action") || btn.parentElement);
@@ -330,11 +350,11 @@ function showError(container) {
     <div class="error-box">
       <div class="error-header">
         <span class="error-icon">${SVG.warning}</span>
-        <span class="error-message">OmniGet is not running</span>
+        <span class="error-message">${escapeHtml(tr("popup_not_running"))}</span>
       </div>
       <div class="error-actions">
-        <button class="error-btn error-btn-primary" data-action="retry">Try again</button>
-        <button class="error-btn error-btn-secondary" data-action="open">Get OmniGet</button>
+        <button class="error-btn error-btn-primary" data-action="retry">${escapeHtml(tr("popup_try_again"))}</button>
+        <button class="error-btn error-btn-secondary" data-action="open">${escapeHtml(tr("popup_get_app"))}</button>
       </div>
     </div>
   `;
@@ -458,17 +478,17 @@ function pickBestMedia(media) {
 
 function getDownloadLabel(contentType) {
   switch (contentType) {
-    case "course": return "Send course to OmniGet";
-    case "playlist": return "Send playlist to OmniGet";
-    case "video": return "Send video to OmniGet";
-    case "reel": return "Send reel to OmniGet";
-    case "post": return "Send post to OmniGet";
-    case "short": return "Send short to OmniGet";
-    case "clip": return "Send clip to OmniGet";
-    case "image": return "Send image to OmniGet";
-    case "audio": return "Send audio to OmniGet";
-    case "profile": return "Send profile to OmniGet";
-    default: return "Send page to OmniGet";
+    case "course": return tr("popup_lbl_course");
+    case "playlist": return tr("popup_lbl_playlist");
+    case "video": return tr("popup_lbl_video");
+    case "reel": return tr("popup_lbl_reel");
+    case "post": return tr("popup_lbl_post");
+    case "short": return tr("popup_lbl_short");
+    case "clip": return tr("popup_lbl_clip");
+    case "image": return tr("popup_lbl_image");
+    case "audio": return tr("popup_lbl_audio");
+    case "profile": return tr("popup_lbl_profile");
+    default: return tr("popup_lbl_page");
   }
 }
 
@@ -533,7 +553,7 @@ function initCookieCapture(activeTab) {
     busy = true;
     btn.disabled = true;
     btn.removeAttribute("data-state");
-    label.textContent = "Saving cookies…";
+    label.textContent = tr("popup_ck_saving");
 
     const result = await captureCookiesForTab(activeTab);
     busy = false;
@@ -541,19 +561,19 @@ function initCookieCapture(activeTab) {
 
     if (result.ok) {
       btn.dataset.state = "success";
-      label.textContent = `${result.cookie_count} cookies saved`;
-      if (hint) hint.textContent = `${result.domain} • ${result.platform_kind.replace("_", " ")}`;
+      label.textContent = tr("popup_ck_saved", result.cookie_count);
+      if (hint) hint.textContent = tr("popup_ck_meta", result.domain, result.platform_kind.replace("_", " "));
       setTimeout(() => {
         btn.removeAttribute("data-state");
-        label.textContent = "Save site cookies";
-        if (hint) hint.textContent = "Sends cookies of this site to OmniGet's cookie manager.";
+        label.textContent = tr("popup_ck_btn");
+        if (hint) hint.textContent = tr("popup_ck_hint");
       }, 3500);
     } else {
       btn.dataset.state = "error";
       label.textContent = explainFailure(result);
       setTimeout(() => {
         btn.removeAttribute("data-state");
-        label.textContent = "Save site cookies";
+        label.textContent = tr("popup_ck_btn");
       }, 4000);
     }
   });
@@ -561,16 +581,16 @@ function initCookieCapture(activeTab) {
 
 function explainFailure(result) {
   switch (result?.reason) {
-    case "no-url": return "No active tab";
-    case "invalid-url": return "Page can't be inspected";
-    case "unsupported-scheme": return "Only http/https pages";
-    case "no-cookies-api": return "Cookies API blocked";
-    case "no-cookies-for-domain": return "No cookies for this site";
-    case "missing-token": return "Pair OmniGet first";
-    case "missing-endpoint": return "OmniGet not detected";
-    case "fetch-failed": return "OmniGet isn't running";
-    case "unauthorized": return "Bad pairing token";
-    default: return "Couldn't save cookies";
+    case "no-url": return tr("popup_ckerr_no_url");
+    case "invalid-url": return tr("popup_ckerr_invalid_url");
+    case "unsupported-scheme": return tr("popup_ckerr_unsupported");
+    case "no-cookies-api": return tr("popup_ckerr_no_api");
+    case "no-cookies-for-domain": return tr("popup_ckerr_no_cookies");
+    case "missing-token": return tr("popup_ckerr_missing_token");
+    case "missing-endpoint": return tr("popup_ckerr_missing_endpoint");
+    case "fetch-failed": return tr("popup_ckerr_fetch_failed");
+    case "unauthorized": return tr("popup_ckerr_unauthorized");
+    default: return tr("popup_ckerr_default");
   }
 }
 

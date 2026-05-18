@@ -14,7 +14,6 @@
   import BehaviorSettingsTab from "$lib/study-components/settings/BehaviorSettingsTab.svelte";
   import LibrarySettingsTab from "$lib/study-components/settings/LibrarySettingsTab.svelte";
   import MaintenanceTab from "$lib/study-components/settings/MaintenanceTab.svelte";
-  import PetsSettingsTab from "$lib/study-components/settings/PetsSettingsTab.svelte";
   import MusicSettingsTab from "$lib/study-components/settings/MusicSettingsTab.svelte";
   import DiagnosticTab from "$lib/study-components/settings/DiagnosticTab.svelte";
   import NotesSettingsTab from "$lib/study-components/notes/NotesSettingsTab.svelte";
@@ -30,8 +29,7 @@
     | "youtube"
     | "diagnostic"
     | "notes"
-    | "maintenance"
-    | "pets";
+    | "maintenance";
 
   const TABS = $derived<{ key: TabKey; label: string }[]>([
     { key: "player", label: "Player" },
@@ -44,7 +42,6 @@
     { key: "diagnostic", label: $t("study.settings.tab_diagnostic") as string },
     { key: "notes", label: "Notas" },
     { key: "maintenance", label: "Manutenção" },
-    { key: "pets", label: "Pets" },
   ]);
 
   let activeTab = $state<TabKey>("player");
@@ -215,8 +212,6 @@
       <NotesSettingsTab onToast={showToast} />
     {:else if activeTab === "maintenance"}
       <MaintenanceTab onToast={showToast} />
-    {:else if activeTab === "pets"}
-      <PetsSettingsTab />
     {/if}
   </div>
 

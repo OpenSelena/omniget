@@ -208,17 +208,3 @@ pub async fn p2p_resume_send(
         None => Err("No active send with this code".to_string()),
     }
 }
-
-#[cfg(not(target_os = "android"))]
-#[tauri::command]
-pub async fn p2p_get_active_sends(
-    state: tauri::State<'_, AppState>,
-) -> Result<Vec<String>, String> {
-    let sends = state.active_p2p_sends.lock().await;
-    Ok(sends.keys().cloned().collect())
-}
-
-#[tauri::command]
-pub fn p2p_validate_code(code: String) -> Result<bool, String> {
-    Ok(p2p::words::is_valid_code(&code))
-}

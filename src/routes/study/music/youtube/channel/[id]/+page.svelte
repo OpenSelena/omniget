@@ -251,7 +251,14 @@
     display: flex;
     flex-direction: column;
     gap: 16px;
-    padding: 0 20px 32px;
+    margin: -16px;
+    padding: 20px 24px 48px;
+    background: #0f0f0f;
+    color: #f1f1f1;
+    min-height: 100%;
+    border-radius: 14px;
+    font-family:
+      "Roboto", "YouTube Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   }
   .sticky-row {
     display: flex;

@@ -50,17 +50,17 @@
   }
 
   const YTDLP_FLAG_CATALOG = [
-    { flag: "--embed-subs", label: "Embed subtitles" },
-    { flag: "--write-thumbnail", label: "Save thumbnail" },
-    { flag: "--write-description", label: "Save description" },
-    { flag: "--write-comments", label: "Save comments" },
-    { flag: "--restrict-filenames", label: "ASCII filenames" },
-    { flag: "--no-overwrites", label: "No overwrites" },
-    { flag: "--prefer-free-formats", label: "Free formats" },
-    { flag: "--force-ipv4", label: "Force IPv4" },
-    { flag: "--geo-bypass", label: "Geo bypass" },
-    { flag: "--limit-rate", label: "Limit rate", hasValue: true, placeholder: "e.g. 1M" },
-    { flag: "--sleep-interval", label: "Sleep interval", hasValue: true, placeholder: "e.g. 5" },
+    { flag: "--embed-subs", key: "embed_subs" },
+    { flag: "--write-thumbnail", key: "write_thumbnail" },
+    { flag: "--write-description", key: "write_description" },
+    { flag: "--write-comments", key: "write_comments" },
+    { flag: "--restrict-filenames", key: "restrict_filenames" },
+    { flag: "--no-overwrites", key: "no_overwrites" },
+    { flag: "--prefer-free-formats", key: "prefer_free_formats" },
+    { flag: "--force-ipv4", key: "force_ipv4" },
+    { flag: "--geo-bypass", key: "geo_bypass" },
+    { flag: "--limit-rate", key: "limit_rate", hasValue: true, phKey: "limit_rate_ph" },
+    { flag: "--sleep-interval", key: "sleep_interval", hasValue: true, phKey: "sleep_interval_ph" },
   ];
 
   async function toggleFlag(flag: string) {
@@ -156,13 +156,13 @@
           onclick={() => toggleFlag(item.flag)}
           title={item.flag}
         >
-          {item.label}
+          {$t(`settings.ytdlp_flags.${item.key}`)}
         </button>
         {#if item.hasValue && isFlagActive(item.flag)}
           <input
             class="flag-value-input"
             type="text"
-            placeholder={item.placeholder}
+            placeholder={item.phKey ? ($t(`settings.ytdlp_flags.${item.phKey}`) as string) : ""}
             value={getFlagValue(item.flag)}
             oninput={(e) => {
               const val = (e.target as HTMLInputElement).value;

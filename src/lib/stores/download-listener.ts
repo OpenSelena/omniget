@@ -19,6 +19,26 @@ import { addLog } from "./debug-store.svelte";
 import { recordDownloadComplete } from "./download-stats.svelte";
 import { rpcSyncIdleStats } from "$lib/rpc";
 
+// Best-effort OS notification so completions reach the user when the window is
+// in the background (parity with the in-app toast and the channel feature).
+async function notifyComplete(title: string) {
+  try {
+    const n = await import("@tauri-apps/plugin-notification");
+    let granted = await n.isPermissionGranted();
+    if (!granted) {
+      granted = (await n.requestPermission()) === "granted";
+    }
+    if (granted) {
+      const tr = get(t);
+      n.sendNotification({
+        title: tr("toast.download_complete", { name: title }) as string,
+      });
+    }
+  } catch {
+    // notifications are optional; never block completion handling
+  }
+}
+
 type ProgressPayload = {
   course_id: number;
   course_name: string;
@@ -173,6 +193,7 @@ export async function initDownloadListener(): Promise<() => void> {
     const tr = get(t);
     if (d.success) {
       showToast("success", tr("toast.download_complete", { name: d.course_name }));
+      void notifyComplete(d.course_name);
       addLog("info", "download", `Course download complete: ${d.course_name}`);
       recordDownloadComplete(0);
       void rpcSyncIdleStats();
@@ -219,6 +240,7 @@ export async function initDownloadListener(): Promise<() => void> {
     const tr = get(t);
     if (d.success) {
       showToast("success", tr("toast.download_complete", { name: d.course_name }));
+      void notifyComplete(d.course_name);
       addLog("info", "download", `Udemy download complete: ${d.course_name}`);
       recordDownloadComplete(0);
       void rpcSyncIdleStats();
@@ -251,6 +273,7 @@ export async function initDownloadListener(): Promise<() => void> {
           addLog("info", "download", `Download complete: ${item.title}`, item.file_path ?? undefined);
           const tr = get(t);
           showToast("success", tr("toast.generic_download_complete", { name: item.title }));
+          void notifyComplete(item.title);
           recordDownloadComplete(item.file_size_bytes ?? 0);
           void rpcSyncIdleStats();
         }

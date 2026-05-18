@@ -18,7 +18,6 @@
     type LoopCookieStatus,
   } from "$lib/study-bridge";
   import NavigationTitle from "$lib/study-music-components/NavigationTitle.svelte";
-  import SpeedDialGridItem from "$lib/study-music-components/SpeedDialGridItem.svelte";
   import EmptyPlaceholder from "$lib/study-music-components/EmptyPlaceholder.svelte";
   import YoutubeSkeleton from "$lib/study-music-youtube-components/YoutubeSkeleton.svelte";
   import YoutubeConnectHero from "$lib/study-music-youtube-components/YoutubeConnectHero.svelte";
@@ -198,63 +197,62 @@
 </script>
 
 <section class="yt-hub">
-  <header class="page-head">
-    <h1>{$t("study.music.youtube.hub_title")}</h1>
-    <p class="tagline">{$t("study.music.youtube.hub_tagline")}</p>
+  <header class="yt-topbar">
+    <h1 class="yt-brand">{$t("study.music.youtube.hub_title")}</h1>
+    <a
+      class="yt-search"
+      href="/study/music/youtube/search"
+      aria-label={$t("study.music.speed_dial_search") as string}
+    >
+      <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <span>{$t("study.music.speed_dial_search")}</span>
+    </a>
   </header>
 
   {#if authDerived === "loading"}
     <div class="boot-skel">
-      <YoutubeSkeleton kind="card" count={3} />
+      <YoutubeSkeleton kind="card" count={6} />
     </div>
   {:else if authDerived !== "ready"}
-    <div class="speed-dial-row anon">
-      <SpeedDialGridItem label={$t("study.music.speed_dial_search") as string} href="/study/music/youtube/search">
-        {#snippet icon()}
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        {/snippet}
-      </SpeedDialGridItem>
-      <SpeedDialGridItem label={$t("study.music.youtube.explore_title") as string} href="/study/music/youtube/explore">
-        {#snippet icon()}
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-        {/snippet}
-      </SpeedDialGridItem>
-    </div>
+    <nav class="yt-chips" aria-label={$t("study.music.youtube.hub_title") as string}>
+      <a class="yt-chip" href="/study/music/youtube/search">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <span>{$t("study.music.speed_dial_search")}</span>
+      </a>
+      <a class="yt-chip" href="/study/music/youtube/explore">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+        <span>{$t("study.music.youtube.explore_title")}</span>
+      </a>
+    </nav>
 
     <YoutubeConnectHero status={authDerived as "missing" | "no_youtube"} filePath={authStatus?.file_path ?? ""} />
   {:else}
-    <div class="speed-dial-row">
-      <SpeedDialGridItem label={$t("study.music.speed_dial_search") as string} href="/study/music/youtube/search">
-        {#snippet icon()}
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
-        {/snippet}
-      </SpeedDialGridItem>
-      <SpeedDialGridItem label={$t("study.music.youtube.explore_title") as string} href="/study/music/youtube/explore">
-        {#snippet icon()}
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
-        {/snippet}
-      </SpeedDialGridItem>
-      <SpeedDialGridItem label={$t("study.music.speed_dial_history") as string} href="/study/music/youtube/history">
-        {#snippet icon()}
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.74 9.74 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
-        {/snippet}
-      </SpeedDialGridItem>
-      <SpeedDialGridItem label={$t("study.music.youtube.shelf_subscriptions") as string} href="/study/music/youtube/explore">
-        {#snippet icon()}
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19h16"/><path d="M6 15h12"/><rect x="3" y="3" width="18" height="9" rx="2"/></svg>
-        {/snippet}
-      </SpeedDialGridItem>
-      <SpeedDialGridItem label={$t("study.music.my_playlists_title") as string} href="/study/music/youtube/playlists">
-        {#snippet icon()}
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15V6"/><path d="M3 18V9"/><path d="M3 18a3 3 0 1 0 6 0V9a3 3 0 1 0-6 0"/><path d="M15 6a3 3 0 1 0 6 0 3 3 0 1 0-6 0"/></svg>
-        {/snippet}
-      </SpeedDialGridItem>
-      <SpeedDialGridItem label={$t("study.music.speed_dial_trending") as string} href="/study/music/youtube/explore">
-        {#snippet icon()}
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/></svg>
-        {/snippet}
-      </SpeedDialGridItem>
-    </div>
+    <nav class="yt-chips" aria-label={$t("study.music.youtube.hub_title") as string}>
+      <a class="yt-chip" href="/study/music/youtube/search">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <span>{$t("study.music.speed_dial_search")}</span>
+      </a>
+      <a class="yt-chip" href="/study/music/youtube/explore">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+        <span>{$t("study.music.youtube.explore_title")}</span>
+      </a>
+      <a class="yt-chip" href="/study/music/youtube/history">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 9-9 9.74 9.74 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+        <span>{$t("study.music.speed_dial_history")}</span>
+      </a>
+      <a class="yt-chip" href="/study/music/youtube/explore">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19h16"/><path d="M6 15h12"/><rect x="3" y="3" width="18" height="9" rx="2"/></svg>
+        <span>{$t("study.music.youtube.shelf_subscriptions")}</span>
+      </a>
+      <a class="yt-chip" href="/study/music/youtube/playlists">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15V6"/><path d="M3 18V9"/><path d="M3 18a3 3 0 1 0 6 0V9a3 3 0 1 0-6 0"/><path d="M15 6a3 3 0 1 0 6 0 3 3 0 1 0-6 0"/></svg>
+        <span>{$t("study.music.my_playlists_title")}</span>
+      </a>
+      <a class="yt-chip" href="/study/music/youtube/explore">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m23 6-9.5 9.5-5-5L1 18"/><path d="M17 6h6v6"/></svg>
+        <span>{$t("study.music.speed_dial_trending")}</span>
+      </a>
+    </nav>
 
   <section class="block">
     <NavigationTitle title={$t("study.music.youtube.shelf_continue_watching") as string} seeAllHref="/study/music/youtube/history" />
@@ -413,47 +411,95 @@
   .yt-hub {
     display: flex;
     flex-direction: column;
-    gap: 28px;
-    color: rgba(255, 255, 255, 0.95);
+    gap: 22px;
+    color: #f1f1f1;
+    background: #0f0f0f;
+    min-height: 100vh;
+    width: 100vw;
+    margin-left: calc(50% - 50vw);
+    margin-top: -16px;
+    margin-bottom: -16px;
+    padding: 0 0 56px;
+    font-family:
+      "Roboto", "YouTube Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
   }
-  .page-head h1 {
+  .yt-topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    padding: 12px 24px;
+    background: rgba(15, 15, 15, 0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  }
+  .yt-brand {
     margin: 0;
-    font-size: clamp(28px, 3.5vw, 40px);
-    font-weight: 900;
+    font-size: 20px;
+    font-weight: 700;
     letter-spacing: -0.02em;
-    color: white;
+    color: #fff;
+    white-space: nowrap;
   }
-  .tagline {
-    margin: 4px 0 0;
-    color: rgba(255, 255, 255, 0.55);
+  .yt-search {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1;
+    max-width: 640px;
+    padding: 9px 18px;
+    border-radius: 999px;
+    background: #121212;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #aaa;
     font-size: 14px;
+    text-decoration: none;
+    transition: border-color 140ms ease, background 140ms ease;
   }
-  .speed-dial-row {
-    display: grid;
-    grid-template-columns: repeat(6, 1fr);
+  .yt-search:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    background: #1a1a1a;
+  }
+  .yt-search svg { color: #aaa; flex: 0 0 auto; }
+  .yt-chips {
+    display: flex;
     gap: 10px;
+    overflow-x: auto;
+    padding: 4px 24px 6px;
+    scrollbar-width: none;
   }
-  .speed-dial-row.anon {
-    grid-template-columns: repeat(2, 1fr);
-    max-width: 480px;
+  .yt-chips::-webkit-scrollbar { display: none; }
+  .yt-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+    padding: 8px 14px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #f1f1f1;
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 140ms ease;
   }
-  @media (max-width: 760px) {
-    .speed-dial-row {
-      grid-template-columns: repeat(3, 1fr);
-    }
-    .speed-dial-row.anon {
-      grid-template-columns: repeat(2, 1fr);
-    }
-  }
+  .yt-chip svg { color: #f1f1f1; }
+  .yt-chip:hover { background: rgba(255, 255, 255, 0.16); }
+  .yt-chip:active { background: rgba(255, 255, 255, 0.22); }
   .boot-skel {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-    gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 16px;
+    padding: 8px 24px 0;
   }
   .block {
     display: flex;
     flex-direction: column;
     gap: 14px;
+    padding: 0 24px;
   }
   .seed-hint {
     margin: -4px 0 0;
@@ -461,19 +507,30 @@
     font-size: 13px;
   }
   .h-scroll {
-    display: flex;
-    gap: 18px;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(260px, 1fr);
+    grid-template-rows: 1fr;
+    gap: 16px;
     overflow-x: auto;
     overflow-y: visible;
-    padding: 4px 2px 16px;
-    scrollbar-width: none;
+    padding: 2px 2px 14px;
+    scrollbar-width: thin;
+    scrollbar-color: #5a5a5a transparent;
     scroll-behavior: smooth;
+    scroll-snap-type: x proximity;
   }
-  .h-scroll::-webkit-scrollbar { display: none; }
+  .h-scroll::-webkit-scrollbar { height: 8px; }
+  .h-scroll::-webkit-scrollbar-thumb {
+    background: #5a5a5a;
+    border-radius: 4px;
+  }
+  .h-scroll::-webkit-scrollbar-track { background: transparent; }
 
   .continue-card,
   .discover-card {
     flex: 0 0 auto;
+    width: 100%;
     background: transparent;
     border: 0;
     padding: 0;
@@ -481,70 +538,85 @@
     color: inherit;
     cursor: pointer;
     font: inherit;
+    scroll-snap-align: start;
   }
-  .continue-card { width: 160px; }
-  .discover-card { width: 176px; }
 
   .cover {
     position: relative;
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 16 / 9;
     border-radius: 12px;
     overflow: hidden;
-    background: rgba(40, 40, 40, 0.6);
+    background: #272727;
     margin-bottom: 10px;
-    transition: transform 200ms ease;
   }
-  .continue-card:hover .cover,
-  .discover-card:hover .cover {
-    transform: scale(1.02);
-  }
-  .cover img {
+  .cover img,
+  .cover-fallback {
     width: 100%;
     height: 100%;
     object-fit: cover;
     display: block;
+    transition: transform 220ms ease;
   }
-  .cover-fallback {
-    width: 100%;
-    height: 100%;
+  .continue-card:hover .cover img,
+  .discover-card:hover .cover img {
+    transform: scale(1.045);
+  }
+  .cover::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0);
+    transition: background 160ms ease;
+  }
+  .continue-card:hover .cover::after,
+  .discover-card:hover .cover::after {
+    background: rgba(0, 0, 0, 0.12);
   }
   .progress-track {
     position: absolute;
-    left: 6px;
-    right: 6px;
-    bottom: 6px;
-    height: 3px;
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 2px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.25);
     overflow: hidden;
+    z-index: 1;
   }
   .progress-fill {
     height: 100%;
-    background: var(--accent);
-    border-radius: inherit;
+    background: #f00;
+    border-radius: 0;
   }
   .card-title {
     margin: 0;
-    font-size: 13px;
-    font-weight: 700;
-    color: white;
+    font-size: 14px;
+    font-weight: 500;
+    color: #f1f1f1;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    padding: 0 2px;
+    padding: 0;
+  }
+  .continue-card:hover .card-title,
+  .discover-card:hover .card-title {
+    color: #fff;
   }
   .card-sub {
-    margin: 2px 0 0;
-    font-size: 11px;
-    font-weight: 600;
-    color: rgba(255, 255, 255, 0.55);
+    margin: 4px 0 0;
+    font-size: 12.5px;
+    font-weight: 400;
+    color: #aaa;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    padding: 0 2px;
+    padding: 0;
   }
   @media (prefers-reduced-motion: reduce) {
-    .cover, .continue-card:hover .cover, .discover-card:hover .cover {
+    .cover img,
+    .continue-card:hover .cover img,
+    .discover-card:hover .cover img {
       transition: none;
       transform: none;
     }

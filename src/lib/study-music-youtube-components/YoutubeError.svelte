@@ -1,5 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
+  import { t } from "$lib/i18n";
   import { studyYoutubeHumanizeError } from "$lib/study-bridge";
 
   type Props = {
@@ -10,7 +11,7 @@
   };
   let { error, onRetry, fallbackLabel, onFallback }: Props = $props();
 
-  let humanized = $state<string>("Algo deu errado ao falar com o YouTube");
+  let humanized = $state<string>("");
   let showDetails = $state(false);
 
   async function resolve(err: string) {
@@ -45,13 +46,13 @@
     <line x1="12" y1="16" x2="12" y2="16.01" />
   </svg>
   <div class="body">
-    <p class="msg">{humanized}</p>
+    <p class="msg">{humanized || $t("study.music.youtube_error_generic")}</p>
     <div class="actions">
       {#if onRetry}
-        <button type="button" class="btn primary" onclick={onRetry}>Tentar de novo</button>
+        <button type="button" class="btn primary" onclick={onRetry}>{$t("study.music.youtube_error_retry")}</button>
       {/if}
       {#if onFallback}
-        <button type="button" class="btn ghost" onclick={onFallback}>{fallbackLabel ?? "Ouvir só áudio"}</button>
+        <button type="button" class="btn ghost" onclick={onFallback}>{fallbackLabel ?? ($t("study.music.youtube_error_audio_only") as string)}</button>
       {/if}
       <button
         type="button"
@@ -59,7 +60,7 @@
         onclick={() => (showDetails = !showDetails)}
         aria-expanded={showDetails}
       >
-        {showDetails ? "Esconder detalhes" : "Detalhes técnicos"}
+        {showDetails ? $t("study.music.youtube_error_hide_details") : $t("study.music.youtube_error_details")}
       </button>
     </div>
     {#if showDetails}
@@ -73,45 +74,48 @@
     display: grid;
     grid-template-columns: auto 1fr;
     gap: 12px;
-    padding: 14px 16px;
-    background: color-mix(in oklab, var(--button) 40%, transparent);
-    border: 1px solid color-mix(in oklab, var(--content-border) 40%, transparent);
-    border-radius: 10px;
-    color: var(--secondary);
+    padding: 16px 18px;
+    background: #1f1f1f;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 12px;
+    color: #f1f1f1;
   }
-  .yt-error svg { color: var(--tertiary); margin-top: 2px; }
-  .body { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
-  .msg { margin: 0; font-size: 14px; color: var(--secondary); }
-  .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+  .yt-error svg { color: #aaa; margin-top: 2px; }
+  .body { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .msg { margin: 0; font-size: 14px; color: #f1f1f1; }
+  .actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
   .btn {
-    padding: 6px 12px;
+    padding: 8px 14px;
     border-radius: 999px;
     border: 0;
-    font-size: 12px;
+    font-size: 13px;
     font-weight: 600;
     cursor: pointer;
   }
-  .btn.primary { background: var(--accent); color: #fff; }
+  .btn.primary { background: #cc0000; color: #fff; }
+  .btn.primary:hover { background: #e60000; }
   .btn.ghost {
     background: transparent;
-    color: var(--secondary);
-    border: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
+    color: #f1f1f1;
+    border: 1px solid rgba(255, 255, 255, 0.22);
   }
+  .btn.ghost:hover { background: rgba(255, 255, 255, 0.08); }
   .btn.link {
     background: transparent;
-    color: var(--tertiary);
-    padding: 6px 0;
+    color: #aaa;
+    padding: 8px 0;
     font-weight: 500;
   }
-  .btn.link:hover { color: var(--secondary); }
+  .btn.link:hover { color: #f1f1f1; }
   .raw {
     margin: 0;
-    padding: 8px 10px;
-    background: color-mix(in oklab, var(--button) 70%, transparent);
-    border-radius: 6px;
-    font-size: 11px;
-    font-family: var(--mono, monospace);
-    color: var(--tertiary);
+    padding: 10px 12px;
+    background: #0f0f0f;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 8px;
+    font-size: 12px;
+    font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
+    color: #aaa;
     white-space: pre-wrap;
     word-break: break-word;
     max-height: 200px;

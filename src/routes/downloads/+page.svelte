@@ -25,6 +25,8 @@
   import DownloadSpeedGraph from "$components/download/DownloadSpeedGraph.svelte";
   import DownloadLog from "$components/download/DownloadLog.svelte";
   import ReencodeDialog from "$components/dialog/ReencodeDialog.svelte";
+  import ToolsPanel from "$components/downloads/ToolsPanel.svelte";
+  import VideoOpsOverlay from "$components/downloads/VideoOpsOverlay.svelte";
   import { locale as i18nLocale } from "$lib/i18n";
   import { get } from "svelte/store";
   import timeAgo from "$lib/time-ago";
@@ -203,6 +205,16 @@
     }
   }
 
+  async function removeItemWithFile(id: number) {
+    if (!confirm($t("downloads.delete_file_confirm"))) return;
+    try {
+      await invoke("remove_download", { downloadId: id, deleteFile: true });
+    } catch (e: any) {
+      const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
+      showToast("error", msg);
+    }
+  }
+
   async function clearFinished() {
     if (!confirm($t("downloads.clear_confirm"))) return;
     try {
@@ -246,6 +258,8 @@
     reencodePath = path;
   }
 
+  let vopPath = $state<string | null>(null);
+
   type HistoryEntry = {
     id: number;
     url: string;
@@ -261,7 +275,7 @@
     kind: QueueKind | null;
   };
 
-  let viewMode = $state<"active" | "history">("active");
+  let viewMode = $state<"active" | "history" | "tools">("active");
   let historyEntries = $state<HistoryEntry[]>([]);
   let historyLoading = $state(false);
 
@@ -295,6 +309,10 @@
       viewMode = "history";
       loadHistory();
     }
+  }
+
+  function toggleToolsView() {
+    viewMode = viewMode === "tools" ? "active" : "tools";
   }
 
   async function historyRetry(url: string, platform: string) {
@@ -424,7 +442,7 @@
   });
 </script>
 
-{#if hasDownloads || viewMode === "history"}
+{#if hasDownloads || viewMode !== "active"}
   <div class="downloads-page">
     <div class="downloads-header">
       <div class="downloads-title-row">
@@ -465,6 +483,17 @@
           <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="9" />
             <polyline points="12 7 12 12 15 14" />
+          </svg>
+        </button>
+        <button
+          class="history-toggle"
+          class:on={viewMode === "tools"}
+          onclick={toggleToolsView}
+          aria-label={$t('tools.tab') as string}
+          title={$t('tools.tab') as string}
+        >
+          <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-2.4z" />
           </svg>
         </button>
       </div>
@@ -549,7 +578,7 @@
         {/if}
       {/if}
     </div>
-    {:else}
+    {:else if viewMode === "history"}
       <div class="history-view">
         {#if historyLoading}
           <p class="history-empty">{$t('downloads.history_loading')}</p>
@@ -648,23 +677,37 @@
           </ul>
         {/if}
       </div>
+    {:else}
+      <ToolsPanel />
     {/if}
   </div>
 {:else}
   <div class="downloads-empty">
     <Mascot emotion="idle" />
     <p class="empty-text">{$t('downloads.empty')} <ContextHint text={$t('hints.downloads_empty')} dismissKey="downloads_empty" /></p>
-    <button class="history-link" onclick={toggleHistoryView}>
-      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <circle cx="12" cy="12" r="9" />
-        <polyline points="12 7 12 12 15 14" />
-      </svg>
-      {$t('downloads.history_view_link')}
-    </button>
+    <div class="empty-links">
+      <button class="history-link" onclick={toggleHistoryView}>
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="9" />
+          <polyline points="12 7 12 12 15 14" />
+        </svg>
+        {$t('downloads.history_view_link')}
+      </button>
+      <button class="history-link" onclick={toggleToolsView}>
+        <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.6 2.6-2.4-2.4z" />
+        </svg>
+        {$t('tools.tab')}
+      </button>
+    </div>
   </div>
 {/if}
 
 <ReencodeDialog bind:inputPath={reencodePath} />
+
+{#if vopPath}
+  <VideoOpsOverlay filePath={vopPath} onClose={() => (vopPath = null)} />
+{/if}
 
 {#snippet genericItem(item: GenericDownloadItem)}
   <div class="download-item" data-status={item.status}>
@@ -836,6 +879,34 @@
             {/if}
           </button>
         {:else if item.status === "complete"}
+          {#if item.filePath && item.queueKind === "video"}
+            <button
+              class="action-icon-btn"
+              onclick={() => (vopPath = item.filePath!)}
+              aria-label={$t('downloads.vop.action_label')}
+              title={$t('downloads.vop.action_label')}
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2 2 7l10 5 10-5-10-5Z" />
+                <path d="m2 17 10 5 10-5M2 12l10 5 10-5" />
+              </svg>
+            </button>
+          {/if}
+          {#if item.filePath}
+            <button
+              class="action-icon-btn"
+              onclick={() => removeItemWithFile(item.id)}
+              aria-label={$t('downloads.delete_file')}
+              title={$t('downloads.delete_file')}
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="3 6 5 6 21 6" />
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                <line x1="10" y1="11" x2="10" y2="17" />
+                <line x1="14" y1="11" x2="14" y2="17" />
+              </svg>
+            </button>
+          {/if}
           <button
             class="action-icon-btn"
             class:confirm-remove={pendingRemove === item.id}
@@ -1567,6 +1638,12 @@
     align-items: center;
   }
 
+  .empty-links {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
   .history-link {
     margin-top: calc(var(--padding) / 2);
     display: inline-flex;

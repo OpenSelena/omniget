@@ -27,7 +27,57 @@
     buckets_written: Array<{ domain: string; cookie_count: number; platform_kind: string }>;
   };
 
+  type HealthItem = {
+    domain: string;
+    slug: string;
+    status: string;
+    age_days: number;
+    expires_in_days: number;
+    cookie_count: number;
+  };
+  type HealthResponse = { items: HealthItem[]; fresh_days: number; expire_days: number };
+
   let registry = $state<Registry>({ buckets: {} });
+  let healthByKey = $state<Record<string, HealthItem>>({});
+
+  function healthKey(domain: string, slug: string): string {
+    return `${domain}__${slug}`;
+  }
+
+  function bucketHealth(domain: string): Record<string, HealthItem> {
+    const out: Record<string, HealthItem> = {};
+    for (const [k, v] of Object.entries(healthByKey)) {
+      if (v.domain === domain) out[v.slug] = v;
+    }
+    return out;
+  }
+
+  let testing = $state<Record<string, boolean>>({});
+
+  async function handleTest(domain: string, slug: string) {
+    const bucket = registry.buckets[domain];
+    const acc = bucket?.accounts.find((a) => a.slug === slug);
+    const url = acc?.source_url || `https://${domain}`;
+    const key = healthKey(domain, slug);
+    testing = { ...testing, [key]: true };
+    try {
+      const res = await invoke<{ ok: boolean; message: string }>("cookies_test", {
+        request: { url, slug },
+      });
+      if (res.ok) {
+        showToast("success", $t("settings.cookies.test_ok") as string);
+      } else {
+        showToast(
+          "error",
+          ($t("settings.cookies.test_fail", { msg: res.message }) as string) || res.message,
+        );
+      }
+    } catch (e) {
+      showToast("error", String(e));
+    } finally {
+      testing = { ...testing, [key]: false };
+    }
+  }
 
   let settings = $derived(getSettings());
   let managedOnly = $derived(settings?.download.always_use_managed_cookies ?? true);
@@ -72,6 +122,14 @@
       const res = await invoke<ListResponse>("cookies_list");
       registry = res.registry;
       cookiesDir = res.cookies_dir;
+      try {
+        const h = await invoke<HealthResponse>("cookies_health");
+        const map: Record<string, HealthItem> = {};
+        for (const item of h.items) map[healthKey(item.domain, item.slug)] = item;
+        healthByKey = map;
+      } catch {
+        healthByKey = {};
+      }
     } catch (e) {
       showToast("error", String(e));
     } finally {
@@ -301,11 +359,14 @@
       {#each bucketList as bucket (bucket.domain)}
         <CookieBucketCard
           {bucket}
+          health={bucketHealth(bucket.domain)}
+          testing={testing}
           onView={handleView}
           onExport={handleExport}
           onRename={handleRename}
           onClear={askClear}
           onAddAccount={openAddAccount}
+          onTest={handleTest}
         />
       {/each}
     </div>

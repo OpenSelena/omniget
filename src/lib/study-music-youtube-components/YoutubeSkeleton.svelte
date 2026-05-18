@@ -31,8 +31,8 @@
 {/each}
 
 <style>
-  .skel-card { display: flex; flex-direction: column; gap: 8px; }
-  .skel-card .thumb { aspect-ratio: 16 / 9; border-radius: 8px; }
+  .skel-card { display: flex; flex-direction: column; gap: 10px; }
+  .skel-card .thumb { aspect-ratio: 16 / 9; border-radius: 12px; }
   .skel-channel { display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 12px 8px; }
   .skel-channel .avatar { width: 96px; height: 96px; border-radius: 50%; }
   .skel-row {
@@ -55,9 +55,9 @@
   .shimmer {
     background: linear-gradient(
       90deg,
-      color-mix(in oklab, var(--button) 40%, transparent) 0%,
-      color-mix(in oklab, var(--button) 80%, transparent) 50%,
-      color-mix(in oklab, var(--button) 40%, transparent) 100%
+      #1f1f1f 0%,
+      #303030 50%,
+      #1f1f1f 100%
     );
     background-size: 200% 100%;
     animation: shimmer 1.6s linear infinite;
@@ -67,6 +67,6 @@
     100% { background-position: -200% 0; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .shimmer { animation: none; background: color-mix(in oklab, var(--button) 60%, transparent); }
+    .shimmer { animation: none; background: #272727; }
   }
 </style>

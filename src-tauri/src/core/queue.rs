@@ -5,6 +5,13 @@ use std::sync::{Arc, OnceLock};
 
 static EMIT_COUNT: AtomicU64 = AtomicU64::new(0);
 
+pub fn now_ms() -> u64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_millis() as u64)
+        .unwrap_or(0)
+}
+
 use serde::Serialize;
 use tauri::{Emitter, Manager};
 use tokio::sync::mpsc;
@@ -170,6 +177,9 @@ pub struct QueueItem {
     pub eta_seconds: Option<u64>,
     pub cookie_slug: Option<String>,
     pub custom_ytdlp_args: Option<Vec<String>>,
+    pub torrent_files: Option<Vec<usize>>,
+    pub scheduled_at_ms: Option<u64>,
+    pub stop_at_ms: Option<u64>,
 }
 
 impl QueueItem {
@@ -241,6 +251,9 @@ impl DownloadQueue {
         from_hotkey: bool,
         cookie_slug: Option<String>,
         custom_ytdlp_args: Option<Vec<String>>,
+        torrent_files: Option<Vec<usize>>,
+        scheduled_at_ms: Option<u64>,
+        stop_at_ms: Option<u64>,
     ) {
         let computed_kind = Some(kind_from_platform(&platform));
         let item = QueueItem {
@@ -281,6 +294,9 @@ impl DownloadQueue {
             eta_seconds: None,
             cookie_slug,
             custom_ytdlp_args,
+            torrent_files,
+            scheduled_at_ms,
+            stop_at_ms,
         };
         crate::core::recovery::persist(crate::core::recovery::RecoveryItem {
             id: item.id,
@@ -364,6 +380,9 @@ impl DownloadQueue {
                 eta_seconds: None,
                 cookie_slug: None,
                 custom_ytdlp_args: None,
+                torrent_files: None,
+                scheduled_at_ms: None,
+                stop_at_ms: None,
             };
             self.items.push(item);
         }
@@ -378,9 +397,11 @@ impl DownloadQueue {
 
     pub fn next_queued_ids(&self) -> Vec<u64> {
         let slots = self.max_concurrent.saturating_sub(self.active_count()) as usize;
+        let now = now_ms();
         self.items
             .iter()
             .filter(|i| i.status == QueueStatus::Queued)
+            .filter(|i| i.scheduled_at_ms.map(|t| now >= t).unwrap_or(true))
             .take(slots)
             .map(|i| i.id)
             .collect()
@@ -803,6 +824,7 @@ pub fn emit_queue_state_from_state(app: &tauri::AppHandle, state: Vec<QueueItemI
     let _ = app.emit("queue-state-update", &state);
     let total = crate::tray::compute_total_active(app);
     crate::tray::update_active_count(app, total);
+    crate::core::awake::sync(total > 0);
 
     let active_items: Vec<_> = state
         .iter()
@@ -814,6 +836,8 @@ pub fn emit_queue_state_from_state(app: &tauri::AppHandle, state: Vec<QueueItemI
     } else {
         0.0
     };
+    let total_speed: f64 = active_items.iter().map(|i| i.speed_bytes_per_sec).sum();
+    crate::tray::update_speed_tooltip(app, total, total_speed);
     crate::tray::update_taskbar_badge(app, total, avg_percent);
 
     if let Some(window) = app.get_webview_window("main") {
@@ -975,6 +999,7 @@ async fn spawn_download_inner(
         from_hotkey,
         cookie_slug,
         custom_ytdlp_args,
+        torrent_files,
     ) = {
         let q = queue.lock().await;
         let item = match q.items.iter().find(|i| i.id == item_id) {
@@ -999,6 +1024,7 @@ async fn spawn_download_inner(
             item.from_hotkey,
             item.cookie_slug.clone(),
             item.custom_ytdlp_args.clone(),
+            item.torrent_files.clone(),
         )
     };
 
@@ -1147,6 +1173,9 @@ async fn spawn_download_inner(
         torrent_listen_port: Some(settings.advanced.torrent_listen_port),
         torrent_id_slot: Some(torrent_id_slot.clone()),
         custom_ytdlp_args: custom_ytdlp_args.clone(),
+        torrent_files: torrent_files.clone(),
+        torrent_auto_trackers: settings.advanced.torrent_auto_trackers,
+        torrent_upnp: settings.advanced.torrent_upnp,
     };
 
     let total_bytes = info.file_size_bytes;
@@ -1623,6 +1652,43 @@ pub async fn try_start_next(app: tauri::AppHandle, queue: Arc<tokio::sync::Mutex
         });
     }
     tracing::debug!("[perf] try_start_next took {:?}", _timer_start.elapsed());
+}
+
+// Periodic tick so a future-scheduled download still starts when its time
+// arrives even if the queue is otherwise idle, and so a download with a
+// stop time is cancelled when that time passes.
+pub fn start_scheduler(app: tauri::AppHandle) {
+    tauri::async_runtime::spawn(async move {
+        tokio::time::sleep(std::time::Duration::from_secs(15)).await;
+        loop {
+            let state = app.state::<crate::AppState>();
+            let queue = state.download_queue.clone();
+            let (has_due, stopped_any) = {
+                let q = queue.lock().await;
+                let now = now_ms();
+                let mut stopped = false;
+                for item in &q.items {
+                    if item.status == QueueStatus::Active {
+                        if let Some(stop) = item.stop_at_ms {
+                            if now >= stop {
+                                item.cancel_token.cancel();
+                                stopped = true;
+                            }
+                        }
+                    }
+                }
+                let due = q.items.iter().any(|i| {
+                    i.status == QueueStatus::Queued
+                        && i.scheduled_at_ms.map(|t| now >= t).unwrap_or(false)
+                });
+                (due, stopped)
+            };
+            if has_due || stopped_any {
+                try_start_next(app.clone(), queue.clone()).await;
+            }
+            tokio::time::sleep(std::time::Duration::from_secs(15)).await;
+        }
+    });
 }
 
 fn is_generic_title(title: &str) -> bool {

@@ -19,6 +19,7 @@
 //!                         the URL through `external_url::handle_external_url`.
 
 use std::net::SocketAddr;
+use std::sync::atomic::{AtomicI64, Ordering};
 use std::sync::Arc;
 
 use axum::{
@@ -206,6 +207,7 @@ pub async fn spawn(app: AppHandle) {
 
     let router = Router::new()
         .route("/v1/health", get(health))
+        .route("/v1/pair", get(pair))
         .route("/v1/enqueue", post(enqueue))
         .route("/v1/cookies", post(cookies_export))
         .with_state(state)
@@ -225,6 +227,61 @@ async fn health() -> Json<HealthResponse> {
         ok: true,
         version: env!("CARGO_PKG_VERSION"),
     })
+}
+
+/// Seconds the pairing window stays open after the user clicks "Pair" in the
+/// app. The window is single-use (closed on the first successful hand-out).
+pub const PAIR_WINDOW_SECS: i64 = 120;
+
+/// Unix-ms deadline until which `GET /v1/pair` will return the token.
+/// `0` means the pairing window is closed.
+static PAIR_OPEN_UNTIL_MS: AtomicI64 = AtomicI64::new(0);
+
+fn now_ms() -> i64 {
+    std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_millis() as i64)
+        .unwrap_or(0)
+}
+
+/// Opens the user-consented pairing window. Returns the window length (s).
+pub fn open_pairing_window() -> i64 {
+    PAIR_OPEN_UNTIL_MS.store(now_ms() + PAIR_WINDOW_SECS * 1000, Ordering::SeqCst);
+    PAIR_WINDOW_SECS
+}
+
+fn pairing_open() -> bool {
+    PAIR_OPEN_UNTIL_MS.load(Ordering::SeqCst) > now_ms()
+}
+
+#[derive(Debug, Serialize)]
+struct PairResponse {
+    ok: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    token: Option<String>,
+}
+
+async fn pair(State(state): State<BridgeState>) -> Response {
+    if !pairing_open() {
+        return (
+            StatusCode::FORBIDDEN,
+            Json(PairResponse {
+                ok: false,
+                token: None,
+            }),
+        )
+            .into_response();
+    }
+    PAIR_OPEN_UNTIL_MS.store(0, Ordering::SeqCst);
+    tracing::info!("[bridge] pairing token handed out (window closed, single-use)");
+    (
+        StatusCode::OK,
+        Json(PairResponse {
+            ok: true,
+            token: Some((*state.token).clone()),
+        }),
+    )
+        .into_response()
 }
 
 fn unauthorized() -> Response {

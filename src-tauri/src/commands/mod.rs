@@ -1,11 +1,12 @@
+pub mod ai;
 pub mod app_lifecycle;
 pub mod auth_webview;
 pub mod autostart;
 pub mod browser_extension;
+pub mod channels;
 pub mod clip;
 pub mod diagnostics;
 pub mod downloads;
-pub mod extension_cookies;
 pub mod host_queue;
 pub mod integration;
 pub mod p2p;
@@ -13,6 +14,8 @@ pub mod plugins;
 pub mod reencode;
 pub mod rpc;
 pub mod settings;
+pub mod subtitle_ws;
+pub mod video_ops;
 pub mod yt_templates;
 
 #[cfg(not(target_os = "android"))]

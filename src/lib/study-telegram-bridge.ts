@@ -186,20 +186,6 @@ export function studyUploadsCreate(args: {
   );
 }
 
-const liveUploads = new Map<number, number>();
-
-export function bindLiveUpload(telegramId: number, studyId: number) {
-  liveUploads.set(telegramId, studyId);
-}
-
-export function studyIdForUploadId(telegramId: number): number | undefined {
-  return liveUploads.get(telegramId);
-}
-
-export function clearLiveUpload(telegramId: number) {
-  liveUploads.delete(telegramId);
-}
-
 export async function enqueueTelegramUpload(args: {
   chat: TelegramChat;
   filePath: string;
@@ -218,7 +204,6 @@ export async function enqueueTelegramUpload(args: {
     filePath: args.filePath,
     caption: args.caption,
   });
-  bindLiveUpload(tg.id, created.id);
   await studyDownloadsUpdate({
     id: created.id,
     status: "downloading",

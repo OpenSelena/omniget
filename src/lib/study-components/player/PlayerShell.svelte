@@ -470,6 +470,8 @@
     </button>
   </header>
 
+  <div class="scrim-bottom" aria-hidden="true"></div>
+
   <footer class="bottom-bar">
     <!-- svelte-ignore a11y_click_events_have_key_events -->
     <!-- svelte-ignore a11y_no_static_element_interactions -->
@@ -858,7 +860,6 @@
 
   .bottom-bar {
     bottom: 0;
-    background: linear-gradient(to top, color-mix(in oklab, black 78%, transparent) 30%, transparent);
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -870,6 +871,37 @@
     opacity: 0;
     transform: translateY(8px);
     pointer-events: none;
+  }
+
+  .scrim-bottom {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 38%;
+    min-height: 96px;
+    z-index: 3;
+    pointer-events: none;
+    background: linear-gradient(
+      to top,
+      color-mix(in oklab, black 60%, transparent) 0%,
+      color-mix(in oklab, black 28%, transparent) 45%,
+      transparent 100%
+    );
+    opacity: 0.55;
+    transition: opacity 280ms ease;
+  }
+
+  .shell.controls-visible .scrim-bottom {
+    opacity: 1;
+  }
+
+  .shell.paused .scrim-bottom {
+    opacity: 1;
+  }
+
+  .shell:not(.controls-visible):not(.paused) {
+    cursor: none;
   }
 
   .shell.paused .top-bar,

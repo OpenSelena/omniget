@@ -19,7 +19,6 @@ pub mod external_url;
 pub mod hotkey;
 pub mod local_bridge;
 pub mod models;
-pub mod pets;
 pub mod platforms;
 pub mod plugin_host;
 pub mod plugin_loader;
@@ -96,7 +95,6 @@ pub fn run() {
             }
         }))
         .manage(state)
-        .manage(pets::PetsState::default())
         .manage(Arc::new(tokio::sync::RwLock::new(
             plugin_loader::PluginManager::new(
                 core::paths::app_data_dir()
@@ -195,10 +193,62 @@ pub fn run() {
                     .download
                     .youtube_sponsorblock
             });
+            core::ytdlp::set_sponsorblock_mode_fn(|| {
+                storage::config::load_settings_standalone()
+                    .download
+                    .sponsorblock_mode
+            });
+            core::ytdlp::set_sponsorblock_categories_fn(|| {
+                storage::config::load_settings_standalone()
+                    .download
+                    .sponsorblock_categories
+            });
             core::ytdlp::set_split_chapters_fn(|| {
                 storage::config::load_settings_standalone()
                     .download
                     .split_by_chapters
+            });
+            core::ytdlp::set_embed_metadata_fn(|| {
+                storage::config::load_settings_standalone()
+                    .download
+                    .embed_metadata
+            });
+            core::ytdlp::set_embed_thumbnail_fn(|| {
+                storage::config::load_settings_standalone()
+                    .download
+                    .embed_thumbnail
+            });
+            core::ytdlp::set_speed_limit_fn(|| {
+                let v = storage::config::load_settings_standalone()
+                    .download
+                    .speed_limit;
+                let t = v.trim();
+                if t.is_empty() {
+                    None
+                } else {
+                    Some(t.to_string())
+                }
+            });
+            core::ytdlp::set_live_from_start_fn(|| {
+                storage::config::load_settings_standalone()
+                    .download
+                    .live_from_start
+            });
+            core::ytdlp::set_concurrent_fragments_fn(|| {
+                storage::config::load_settings_standalone()
+                    .advanced
+                    .concurrent_fragments
+            });
+            core::ytdlp::set_user_agent_fn(|| {
+                let v = storage::config::load_settings_standalone()
+                    .advanced
+                    .user_agent;
+                let t = v.trim();
+                if t.is_empty() {
+                    None
+                } else {
+                    Some(t.to_string())
+                }
             });
             {
                 let app_handle = app.handle().clone();
@@ -215,6 +265,9 @@ pub fn run() {
             }
             core::recovery::init_from_disk();
             core::queue_history::init_from_disk();
+            core::channels::init_from_disk();
+            core::channel_poller::start(app.handle().clone());
+            core::queue::start_scheduler(app.handle().clone());
             {
                 let app_handle = app.handle().clone();
                 tauri::async_runtime::spawn(async move {
@@ -407,23 +460,20 @@ pub fn run() {
             commands::browser_extension::browser_extension_status,
             commands::browser_extension::browser_extension_export,
             commands::browser_extension::browser_extension_open_folder,
-            commands::extension_cookies::read_extension_cookies,
-            commands::extension_cookies::extension_cookies_status,
             cookies::commands::cookies_list,
             cookies::commands::cookies_read,
             cookies::commands::cookies_import,
             cookies::commands::cookies_clear,
             cookies::commands::cookies_rename,
-            cookies::commands::cookies_migrate_legacy,
-            cookies::commands::cookies_detect_platform,
             cookies::commands::cookies_accounts_for_url,
             cookies::commands::cookies_read_as_json,
             cookies::commands::cookies_import_file,
             cookies::commands::cookies_export_to,
             cookies::commands::cookies_add_account,
+            cookies::commands::cookies_health,
+            cookies::commands::cookies_test,
             commands::clip::clip_video,
             commands::reencode::reencode_video,
-            commands::diagnostics::get_rate_limit_stats,
             commands::diagnostics::get_hwaccel_info,
             commands::downloads::detect_platform,
             commands::downloads::check_cookie_error,
@@ -431,6 +481,39 @@ pub fn run() {
             commands::downloads::get_media_formats,
             commands::downloads::prefetch_media_info,
             commands::downloads::download_from_url,
+            commands::downloads::playlist_entries,
+            commands::downloads::torrent_contents,
+            commands::channels::channels_list,
+            commands::channels::channel_add,
+            commands::channels::channel_remove,
+            commands::channels::channel_update,
+            commands::channels::channel_check_now,
+            commands::channels::sync_channels_tray,
+            commands::ai::ai_get_config,
+            commands::ai::ai_set_config,
+            commands::ai::ai_test,
+            commands::ai::ai_summarize_url,
+            commands::ai::whisper_generate,
+            commands::ai::ai_history_list,
+            commands::ai::ai_history_clear,
+            commands::video_ops::video_op_preset,
+            commands::video_ops::video_op_propose,
+            commands::video_ops::video_op_run,
+            commands::video_ops::detect_shot_changes,
+            commands::video_ops::waveform_peaks,
+            commands::subtitle_ws::subtitle_load,
+            commands::subtitle_ws::subtitle_save,
+            commands::subtitle_ws::subtitle_translate,
+            commands::downloads::metadata_fetch,
+            commands::downloads::thumbnails_list,
+            commands::downloads::thumbnail_save,
+            commands::downloads::subtitles_list,
+            commands::downloads::subtitles_save,
+            commands::downloads::subtitles_merge,
+            commands::downloads::comments_fetch,
+            commands::downloads::chapters_fetch,
+            commands::downloads::tools_save_text,
+            commands::downloads::livechat_fetch,
             commands::downloads::download_with_custom_args,
             commands::downloads::cancel_generic_download,
             commands::yt_templates::yt_templates_list,
@@ -443,11 +526,9 @@ pub fn run() {
             commands::downloads::reorder_queue,
             commands::downloads::retry_download,
             commands::downloads::remove_download,
-            commands::downloads::get_queue_state,
             commands::downloads::update_max_concurrent,
             commands::downloads::clear_finished_downloads,
             commands::downloads::get_download_log,
-            commands::downloads::clear_download_log,
             commands::downloads::parse_batch_file,
             commands::downloads::get_recovery_items,
             commands::downloads::discard_recovery,
@@ -471,8 +552,7 @@ pub fn run() {
             commands::rpc::rpc_set_idle_stats,
             commands::settings::get_bridge_info,
             commands::settings::rotate_bridge_token,
-            commands::autostart::set_autostart,
-            commands::autostart::get_autostart_status,
+            commands::settings::bridge_open_pairing,
             commands::dependencies::check_dependencies,
             commands::dependencies::check_ytdlp_available,
             commands::dependencies::install_dependency,
@@ -495,25 +575,8 @@ pub fn run() {
             commands::p2p::p2p_cancel_send,
             commands::p2p::p2p_pause_send,
             commands::p2p::p2p_resume_send,
-            commands::p2p::p2p_get_active_sends,
-            commands::p2p::p2p_validate_code,
-            commands::app_lifecycle::get_active_download_count,
-            commands::app_lifecycle::request_app_quit,
             commands::app_lifecycle::force_exit_app,
             commands::app_lifecycle::get_debug_info,
-            pets::pets_get_local_index,
-            pets::pets_fetch_remote_manifest,
-            pets::pets_diff,
-            pets::pets_install_bundle,
-            pets::pets_install_missing,
-            pets::pets_force_refresh,
-            pets::pets_uninstall,
-            pets::pets_open_folder,
-            pets::pets_set_active,
-            pets::pets_get_active,
-            pets::pets_resolve_path,
-            pets::pets_get_display_prefs,
-            pets::pets_set_display_prefs,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

@@ -10,7 +10,8 @@
     "cookies",
     "webRequest",
     "storage",
-    "contextMenus"
+    "contextMenus",
+    "alarms"
   ],
   "host_permissions": [
     "http://127.0.0.1/*",

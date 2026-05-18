@@ -31,29 +31,30 @@
     flex-direction: column;
     align-items: center;
     gap: 6px;
-    padding: 12px 8px;
+    padding: 16px 8px;
     background: transparent;
     border: 0;
     border-radius: 12px;
-    color: var(--secondary);
+    color: #f1f1f1;
     cursor: pointer;
     text-align: center;
+    transition: background 140ms ease;
   }
-  .card:hover { background: color-mix(in oklab, var(--button) 30%, transparent); }
+  .card:hover { background: rgba(255, 255, 255, 0.06); }
   .avatar {
-    width: 96px;
-    height: 96px;
+    width: 88px;
+    height: 88px;
     border-radius: 50%;
     overflow: hidden;
-    background: color-mix(in oklab, var(--button) 60%, transparent);
+    background: #272727;
     display: block;
   }
   .avatar img { width: 100%; height: 100%; object-fit: cover; }
   .title {
-    margin: 6px 0 0 0;
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--secondary);
+    margin: 8px 0 0 0;
+    font-size: 14px;
+    font-weight: 500;
+    color: #f1f1f1;
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -61,7 +62,7 @@
   }
   .handle, .subs {
     margin: 0;
-    font-size: 11px;
-    color: var(--tertiary);
+    font-size: 12.5px;
+    color: #aaa;
   }
 </style>

@@ -110,6 +110,7 @@
   onMount(() => {
     let cleanup: (() => void) | undefined;
     let unlistenExternal: (() => void) | undefined;
+    let unlistenChannels: (() => void) | undefined;
     initDownloadListener().then((fn) => (cleanup = fn));
     setTimeout(() => void checkAutoVacuum(), 5000);
     void ensureTrackerNotifications();
@@ -151,6 +152,25 @@
         })
         .catch(() => {});
     });
+    listen<{ channel_title: string; auto_download: boolean; videos: unknown[] }>(
+      "channel-new-videos",
+      (event) => {
+        const p = event.payload;
+        const count = p.videos?.length ?? 0;
+        if (count <= 0) return;
+        showToast(
+          "info",
+          $t(
+            p.auto_download
+              ? "toast.channel_new_auto"
+              : "toast.channel_new",
+            { channel: p.channel_title, count },
+          ) as string,
+        );
+      },
+    ).then((fn) => {
+      unlistenChannels = fn;
+    });
     refreshUpdateInfo();
     initChangelog();
     refreshYtdlpStatus();
@@ -167,6 +187,7 @@
     return () => {
       cleanup?.();
       unlistenExternal?.();
+      unlistenChannels?.();
       mediaQuery.removeEventListener("change", handleChange);
     };
   });

@@ -109,8 +109,16 @@ pub struct DownloadSettings {
     pub translate_metadata: bool,
     #[serde(default)]
     pub youtube_sponsorblock: bool,
+    #[serde(default = "default_sponsorblock_mode")]
+    pub sponsorblock_mode: String,
+    #[serde(default = "default_sponsorblock_categories")]
+    pub sponsorblock_categories: Vec<String>,
     #[serde(default)]
     pub split_by_chapters: bool,
+    #[serde(default)]
+    pub live_from_start: bool,
+    #[serde(default)]
+    pub speed_limit: String,
     #[serde(default)]
     pub hotkey_enabled: bool,
     #[serde(default = "default_hotkey_binding")]
@@ -149,14 +157,34 @@ pub struct AdvancedSettings {
     pub stagger_delay_ms: u64,
     #[serde(default = "default_torrent_listen_port")]
     pub torrent_listen_port: u16,
+    #[serde(default = "default_torrent_auto_trackers")]
+    pub torrent_auto_trackers: bool,
+    #[serde(default = "default_torrent_upnp")]
+    pub torrent_upnp: bool,
+    #[serde(default = "default_prevent_sleep")]
+    pub prevent_sleep: bool,
     #[serde(default)]
     pub cookies_from_browser: String,
     #[serde(default)]
     pub twitter_manual_cookie: String,
+    #[serde(default)]
+    pub user_agent: String,
 }
 
 fn default_concurrent_fragments() -> u32 {
     8
+}
+
+fn default_sponsorblock_mode() -> String {
+    "remove".to_string()
+}
+
+fn default_sponsorblock_categories() -> Vec<String> {
+    vec![
+        "sponsor".to_string(),
+        "selfpromo".to_string(),
+        "interaction".to_string(),
+    ]
 }
 
 fn default_max_concurrent_downloads() -> u32 {
@@ -165,6 +193,18 @@ fn default_max_concurrent_downloads() -> u32 {
 
 fn default_stagger_delay_ms() -> u64 {
     150
+}
+
+fn default_torrent_auto_trackers() -> bool {
+    true
+}
+
+fn default_torrent_upnp() -> bool {
+    true
+}
+
+fn default_prevent_sleep() -> bool {
+    true
 }
 
 fn default_torrent_listen_port() -> u16 {
@@ -349,7 +389,15 @@ impl Default for AppSettings {
                 keep_vtt: false,
                 translate_metadata: false,
                 youtube_sponsorblock: false,
+                sponsorblock_mode: "remove".to_string(),
+                sponsorblock_categories: vec![
+                    "sponsor".to_string(),
+                    "selfpromo".to_string(),
+                    "interaction".to_string(),
+                ],
                 split_by_chapters: false,
+                live_from_start: false,
+                speed_limit: String::new(),
                 hotkey_enabled: false,
                 hotkey_binding: default_hotkey_binding(),
                 clip_hotkey_enabled: false,
@@ -370,8 +418,12 @@ impl Default for AppSettings {
                 concurrent_fragments: 8,
                 stagger_delay_ms: 150,
                 torrent_listen_port: 6881,
+                torrent_auto_trackers: true,
+                torrent_upnp: true,
+                prevent_sleep: true,
                 cookies_from_browser: String::new(),
                 twitter_manual_cookie: String::new(),
+                user_agent: String::new(),
             },
             telegram: TelegramSettings::default(),
             proxy: ProxySettings::default(),

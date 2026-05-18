@@ -1563,11 +1563,11 @@ class MusicPlayerStore {
       const { audio: audioUrl, video: videoUrl } =
         await this.resolveYoutubeMedia(videoId);
       if (!audioUrl) throw new Error("empty stream url");
+      this.audio.crossOrigin = null;
       this.audio.src = audioUrl;
       this.youtubeVideoUrl = videoUrl;
       void this.refreshYoutubeSponsorBlock(videoId);
       await this.audio.play();
-      this.ensureEqGraph();
       this.saveQueueNow();
       this.updateMediaSessionMetadata(track);
       void this.refreshDominantColor(track);
@@ -1592,6 +1592,11 @@ class MusicPlayerStore {
     try {
       const { studyYoutubePlayer } = await import("$lib/study-bridge");
       const res = await studyYoutubePlayer({ videoId });
+      if (res.sabr_only) {
+        throw new Error(
+          "SABR-only stream: no directly playable format (format unavailable in this client yet)",
+        );
+      }
       const audio = pickBestYoutubeAudio(res);
       const video = pickBestYoutubeVideo(res);
       if (!audio) throw new Error("no audio format returned");
@@ -1600,15 +1605,21 @@ class MusicPlayerStore {
       return { audio, video, legacy: false };
     } catch (err) {
       console.warn(
-        "[study-music] study:youtube:player falhou, caindo para track_stream_url:",
+        "[study-music] study:youtube:player failed, falling back to yt-dlp resolver:",
         err,
       );
-      const legacy = await pluginInvoke<{ url: string }>(
+      const legacy = await pluginInvoke<{ url: string; via?: string }>(
         "study",
         "study:music:youtube:track_stream_url",
         { video_id: videoId },
       );
-      return { audio: legacy.url || null, video: null, legacy: true };
+      if (!legacy.url) {
+        throw err instanceof Error
+          ? err
+          : new Error(typeof err === "string" ? err : "youtube resolve failed");
+      }
+      this.youtubeChapters = [];
+      return { audio: legacy.url, video: null, legacy: true };
     }
   }
 
@@ -1634,6 +1645,7 @@ class MusicPlayerStore {
       if (!url) throw new Error("refresh returned no audio format");
       const wasPaused = this.audio.paused;
       const t = this.audio.currentTime;
+      this.audio.crossOrigin = null;
       this.audio.src = url;
       this.audio.currentTime = t;
       this.youtubeVideoUrl = videoUrl;

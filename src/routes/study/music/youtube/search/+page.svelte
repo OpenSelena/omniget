@@ -365,7 +365,19 @@
 </section>
 
 <style>
-  .search-page { display: flex; flex-direction: column; gap: 20px; }
+  .search-page {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    margin: -16px;
+    padding: 20px 24px 48px;
+    background: #0f0f0f;
+    color: #f1f1f1;
+    min-height: 100%;
+    border-radius: 14px;
+    font-family:
+      "Roboto", "YouTube Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  }
   .search-box {
     position: relative;
     display: flex;

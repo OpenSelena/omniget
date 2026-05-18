@@ -15,7 +15,8 @@
     "cookies",
     "webRequest",
     "storage",
-    "menus"
+    "menus",
+    "alarms"
   ],
   "host_permissions": [
     "http://127.0.0.1/*",

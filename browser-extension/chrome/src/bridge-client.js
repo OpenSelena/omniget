@@ -138,6 +138,43 @@ export async function checkBridgeHealth(
   }
 }
 
+// One-shot auto-pair. If we don't have a token yet, discover the bridge and
+// ask `GET /v1/pair`. That endpoint only returns the token while the user has
+// an active, single-use, ~120s pairing window open in the desktop app — so
+// this turns "find the token, copy, paste" into a single click in the app.
+export async function autoPair({
+  fetchImpl = typeof fetch !== "undefined" ? fetch : null,
+  storage = globalThis.chrome?.storage?.local,
+  timeoutMs = HEALTH_TIMEOUT_MS,
+} = {}) {
+  if (!fetchImpl) return { ok: false, reason: "no-fetch" };
+  const current = await loadBridgeConfig({ storage });
+  if (current.token) return { ok: true, reason: "already-paired" };
+
+  let endpoint = current.endpoint;
+  const discovered = await discoverBridgeEndpoint({ fetchImpl, timeoutMs });
+  if (discovered?.endpoint) endpoint = discovered.endpoint;
+  endpoint = trimEndpoint(endpoint);
+  if (!endpoint) return { ok: false, reason: "no-endpoint" };
+
+  const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
+  try {
+    const response = await withTimeout(
+      fetchImpl(`${endpoint}/v1/pair`, { method: "GET", signal: controller?.signal }),
+      timeoutMs,
+      controller
+    );
+    if (!response.ok) return { ok: false, reason: "window-closed" };
+    const parsed = await response.json().catch(() => null);
+    const token = typeof parsed?.token === "string" ? parsed.token.trim() : "";
+    if (!parsed?.ok || !token) return { ok: false, reason: "no-token" };
+    await saveBridgeConfig({ endpoint, token }, { storage });
+    return { ok: true, reason: "paired", endpoint };
+  } catch (error) {
+    return { ok: false, reason: "error", message: error?.message ?? String(error) };
+  }
+}
+
 export async function sendViaBridge(
   payload,
   {

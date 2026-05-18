@@ -7,7 +7,6 @@
     type AnkiDashboardState,
     type AnkiDeckSummary,
   } from "$lib/anki-bridge";
-  import MascotSlot from "$lib/components/MascotSlot.svelte";
 
   let dashState = $state<AnkiDashboardState | null>(null);
   let loading = $state(true);
@@ -117,16 +116,6 @@
             {/if}
           </div>
         </div>
-
-        <div class="hero-mascot">
-          <MascotSlot
-            slug={dashState.pet.slug}
-            state={totalToReview === 0 ? "jumping" : "idle"}
-            scale={0.75}
-            fallback="none"
-          />
-          <span class="pet-name">{dashState.pet.display_name}</span>
-        </div>
       </div>
     </section>
 
@@ -134,12 +123,6 @@
       <section class="surface-card streak-card">
         <header class="streak-head">
           <h2 class="section-title">Streak</h2>
-          <MascotSlot
-            slug={dashState.pet.slug}
-            state={dashState.streak.current > 0 ? "waving" : "idle"}
-            scale={0.4}
-            fallback="none"
-          />
         </header>
 
         <div class="streak-ring-wrap">
@@ -207,13 +190,6 @@
       </section>
     {:else}
       <section class="surface-card empty-pane">
-        <MascotSlot
-          slug={dashState.pet.slug}
-          state="jumping"
-          scale={1}
-          fallback="check"
-          fallbackLabel="Tudo zerado"
-        />
         <h2 class="empty-title">Tudo zerado</h2>
         <p class="empty-desc">Você revisou todos os cards de hoje. Volte amanhã ou crie novos.</p>
         <button type="button" class="btn-cta" onclick={() => goto("/study/anki/decks")}>
@@ -311,21 +287,6 @@
     gap: var(--space-2);
     flex-wrap: wrap;
     margin-top: var(--space-2);
-  }
-
-  .hero-mascot {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: var(--space-2);
-    flex-shrink: 0;
-  }
-
-  .pet-name {
-    font-size: var(--text-xs);
-    color: var(--text-dim);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
   }
 
   .pill {
@@ -638,10 +599,6 @@
     .hero-body {
       flex-direction: column-reverse;
       align-items: stretch;
-    }
-    .hero-mascot {
-      flex-direction: row;
-      justify-content: center;
     }
   }
 </style>

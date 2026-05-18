@@ -19,16 +19,31 @@
     accounts: Account[];
   };
 
+  type HealthItem = { status: string; age_days: number; expires_in_days: number };
+
   type Props = {
     bucket: Bucket;
+    health?: Record<string, HealthItem>;
+    testing?: Record<string, boolean>;
     onView: (domain: string, slug: string) => void;
     onExport: (domain: string, slug: string) => void;
     onRename: (domain: string, slug: string, currentAlias: string) => void;
     onClear: (domain: string, slug: string) => void;
     onAddAccount?: (domain: string) => void;
+    onTest?: (domain: string, slug: string) => void;
   };
 
-  let { bucket, onView, onExport, onRename, onClear, onAddAccount }: Props = $props();
+  let {
+    bucket,
+    health = {},
+    testing = {},
+    onView,
+    onExport,
+    onRename,
+    onClear,
+    onAddAccount,
+    onTest,
+  }: Props = $props();
 
   let primaryAccount = $derived(bucket.accounts.find((a) => a.slug === "_default") ?? bucket.accounts[0]);
   let extraAccounts = $derived(bucket.accounts.filter((a) => a !== primaryAccount));
@@ -36,12 +51,19 @@
   let editValue = $state("");
   let inputRef = $state<HTMLInputElement | null>(null);
 
+  let primaryHealth = $derived(primaryAccount ? health[primaryAccount.slug] : undefined);
+
   let status = $derived.by(() => {
     if (!primaryAccount) return "empty";
+    if (primaryHealth) {
+      if (primaryHealth.status === "fresh") return "fresh";
+      if (primaryHealth.status === "stale") return "aging";
+      return "stale";
+    }
     const ageMs = Date.now() - primaryAccount.captured_at_ms;
     const dayMs = 24 * 60 * 60 * 1000;
     if (ageMs < dayMs) return "fresh";
-    if (ageMs < 30 * dayMs) return "aging";
+    if (ageMs < 28 * dayMs) return "aging";
     return "stale";
   });
 
@@ -183,6 +205,14 @@
           <span class="sep">·</span>
           <span class="via">{$t("settings.cookies.via_label", { label: primaryAccount.source_label })}</span>
         {/if}
+        {#if primaryHealth && primaryHealth.status !== "fresh"}
+          <span class="sep">·</span>
+          {#if primaryHealth.status === "expired"}
+            <span class="expiry expired">{$t("settings.cookies.expired")}</span>
+          {:else}
+            <span class="expiry stale">{$t("settings.cookies.expires_in", { days: String(primaryHealth.expires_in_days) })}</span>
+          {/if}
+        {/if}
       </p>
     {/if}
 
@@ -197,6 +227,18 @@
         <button type="button" class="ghost-btn" onclick={() => startEdit()}>
           {$t("settings.cookies.action_rename")}
         </button>
+        {#if onTest}
+          <button
+            type="button"
+            class="ghost-btn"
+            disabled={testing[`${bucket.domain}__${primaryAccount.slug}`]}
+            onclick={() => onTest?.(bucket.domain, primaryAccount.slug)}
+          >
+            {testing[`${bucket.domain}__${primaryAccount.slug}`]
+              ? $t("settings.cookies.test_running")
+              : $t("settings.cookies.action_test")}
+          </button>
+        {/if}
         <button type="button" class="ghost-btn danger" onclick={() => onClear(bucket.domain, primaryAccount.slug)}>
           {$t("settings.cookies.action_clear")}
         </button>
@@ -352,6 +394,15 @@
   .time-line {
     color: var(--tertiary);
     font-size: 11px;
+  }
+  .expiry {
+    font-weight: 600;
+  }
+  .expiry.stale {
+    color: #f4a72b;
+  }
+  .expiry.expired {
+    color: #d33;
   }
   .actions {
     display: flex;

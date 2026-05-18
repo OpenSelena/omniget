@@ -75,8 +75,50 @@ class LyricsStore {
   translator = $state<string | null>(null);
   showTranslation = $state(false);
 
+  offsetMs = $state(0);
+
   private _lastIdx = -1;
   private _lastTranslationKey: string | null = null;
+
+  private _offsetKey(id: number): string {
+    return `study:lyrics:offset:${id}`;
+  }
+
+  private _loadOffset(id: number) {
+    try {
+      const v =
+        typeof localStorage !== "undefined"
+          ? localStorage.getItem(this._offsetKey(id))
+          : null;
+      const n = v ? parseInt(v, 10) : 0;
+      this.offsetMs = Number.isFinite(n) ? n : 0;
+    } catch {
+      this.offsetMs = 0;
+    }
+  }
+
+  setOffset(ms: number) {
+    const clamped = Math.max(-30000, Math.min(30000, Math.round(ms)));
+    this.offsetMs = clamped;
+    const id = this.trackId;
+    if (id === null) return;
+    try {
+      if (typeof localStorage !== "undefined") {
+        if (clamped === 0) localStorage.removeItem(this._offsetKey(id));
+        else localStorage.setItem(this._offsetKey(id), String(clamped));
+      }
+    } catch {
+      /* persistence is best-effort */
+    }
+  }
+
+  nudgeOffset(deltaMs: number) {
+    this.setOffset(this.offsetMs + deltaMs);
+  }
+
+  resetOffset() {
+    this.setOffset(0);
+  }
 
   get notFound(): boolean {
     return this.status === "notfound";
@@ -92,6 +134,7 @@ class LyricsStore {
       return;
     }
     this.trackId = trackId;
+    this._loadOffset(trackId);
     this.lines = [];
     this.plain = null;
     this.meta = {};
@@ -161,6 +204,7 @@ class LyricsStore {
     this.error = null;
     this.status = "idle";
     this.loading = false;
+    this.offsetMs = 0;
     this._lastIdx = -1;
     this._resetTranslation();
   }

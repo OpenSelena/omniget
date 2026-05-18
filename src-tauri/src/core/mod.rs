@@ -17,6 +17,9 @@ pub use omniget_core::core::redirect;
 pub use omniget_core::core::registry;
 pub use omniget_core::core::ytdlp;
 
+pub mod awake;
+pub mod channel_poller;
+pub mod channels;
 pub mod download_log;
 pub mod events;
 pub mod host_limiter;
@@ -25,4 +28,5 @@ pub mod queue;
 pub mod queue_history;
 pub mod recovery;
 pub mod rpc;
+pub mod trackers;
 pub mod url_parser;

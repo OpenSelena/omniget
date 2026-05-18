@@ -26,7 +26,11 @@ export type AppSettings = {
     continuous_lecture_numbers: boolean;
     translate_metadata: boolean;
     youtube_sponsorblock: boolean;
+    sponsorblock_mode: string;
+    sponsorblock_categories: string[];
     split_by_chapters: boolean;
+    live_from_start: boolean;
+    speed_limit: string;
     hotkey_enabled: boolean;
     hotkey_binding: string;
     clip_hotkey_enabled?: boolean;
@@ -54,8 +58,12 @@ export type AppSettings = {
     concurrent_fragments: number;
     stagger_delay_ms: number;
     torrent_listen_port: number;
+    torrent_auto_trackers: boolean;
+    torrent_upnp: boolean;
+    prevent_sleep: boolean;
     cookies_from_browser: string;
     twitter_manual_cookie: string;
+    user_agent: string;
   };
   telegram: {
     concurrent_downloads: number;

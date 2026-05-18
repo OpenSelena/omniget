@@ -17,7 +17,7 @@
   import P2pReceiveDialog from "$components/p2p/P2pReceiveDialog.svelte";
   import HomeHero from "$components/home/HomeHero.svelte";
   // Mascot is consumed by HomeHero; keep direct import path live for backward compat if needed
-  import { getDownloads } from "$lib/stores/download-store.svelte";
+  import { getDownloads, formatBytes } from "$lib/stores/download-store.svelte";
   import { getSettings, updateSettings } from "$lib/stores/settings-store.svelte";
   import { showToast } from "$lib/stores/toast-store.svelte";
   import { onClipboardUrl } from "$lib/stores/clipboard-monitor";
@@ -83,6 +83,16 @@
   let debounceTimer = $state<ReturnType<typeof setTimeout> | null>(null);
   let downloadMode = $state<"auto" | "audio" | "mute">("auto");
   let selectedQuality = $state("best");
+  let clipStart = $state("");
+  let clipEnd = $state("");
+  let scheduleAt = $state("");
+  let scheduleStop = $state("");
+  let playlistEntries = $state<{ index: number; title: string; url: string }[]>([]);
+  let selectedPlaylistItems = $state<Set<number>>(new Set());
+  let playlistLoading = $state(false);
+  let torrentEntries = $state<{ index: number; path: string; size_bytes: number }[]>([]);
+  let selectedTorrentFiles = $state<Set<number>>(new Set());
+  let torrentLoading = $state(false);
   let selectedFormatId = $state<string | null>(null);
   let formats = $state<FormatInfo[]>([]);
   let loadingFormats = $state(false);
@@ -99,6 +109,7 @@
   };
   let cookieAccounts = $state<CookieAccount[]>([]);
   let selectedCookieSlug = $state<string | null>(null);
+  let cookieHint = $state<"stale" | "expired" | null>(null);
   let advancedMode = $state(false);
   const STUDY_NOTICE_DISMISS_KEY = "omniget.study_maintenance_notice_dismissed_v1";
   let studyNoticeDismissed = $state(
@@ -308,9 +319,52 @@
     return value.startsWith("http://") || value.startsWith("https://") || value.startsWith("magnet:") || value.startsWith("p2p:") || value.endsWith(".torrent");
   }
 
+  function isValidTimeBound(v: string): boolean {
+    return /^(\d+:)?\d{1,2}:\d{1,2}(\.\d+)?$|^\d+(\.\d+)?$/.test(v.trim());
+  }
+
+  function buildTimeRange(): string | null {
+    const s = clipStart.trim();
+    const e = clipEnd.trim();
+    if (!s && !e) return null;
+    if (s && !isValidTimeBound(s)) return null;
+    if (e && !isValidTimeBound(e)) return null;
+    return `${s || "0"}-${e || "inf"}`;
+  }
+
+  function toEpochMs(v: string): number | null {
+    if (!v) return null;
+    const ms = new Date(v).getTime();
+    if (Number.isNaN(ms)) return null;
+    return ms;
+  }
+
+  function setSchedulePreset(kind: "1h" | "tonight" | "1d") {
+    const d = new Date();
+    if (kind === "1h") d.setHours(d.getHours() + 1);
+    else if (kind === "1d") d.setDate(d.getDate() + 1);
+    else {
+      d.setHours(22, 0, 0, 0);
+      if (d.getTime() < Date.now()) d.setDate(d.getDate() + 1);
+    }
+    const pad = (n: number) => String(n).padStart(2, "0");
+    scheduleAt = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  }
+
   function handleInput() {
     if (debounceTimer) clearTimeout(debounceTimer);
     clearMediaPreview();
+    clipStart = "";
+    clipEnd = "";
+    scheduleAt = "";
+    scheduleStop = "";
+    cookieHint = null;
+    playlistEntries = [];
+    selectedPlaylistItems = new Set();
+    playlistLoading = false;
+    torrentEntries = [];
+    selectedTorrentFiles = new Set();
+    torrentLoading = false;
     const currentSettings = getSettings();
     const saved = currentSettings?.last_download_options;
     const savedMode = saved?.mode;
@@ -367,12 +421,89 @@
         omniState = { kind: "detected", info: result };
         invoke("prefetch_media_info", { url: value }).catch(() => {});
         loadCookieAccounts(value);
+        if (result.content_type === "playlist") {
+          loadPlaylistEntries(value);
+        }
+        if (isTorrentUrl(value)) {
+          loadTorrentContents(value);
+        }
       } else {
         omniState = { kind: "unsupported" };
       }
     } catch {
       omniState = { kind: "unsupported" };
     }
+  }
+
+  async function loadPlaylistEntries(targetUrl: string) {
+    playlistEntries = [];
+    selectedPlaylistItems = new Set();
+    playlistLoading = true;
+    try {
+      const entries = await invoke<{ index: number; title: string; url: string }[]>(
+        "playlist_entries",
+        { url: targetUrl }
+      );
+      playlistEntries = entries;
+      selectedPlaylistItems = new Set(entries.map((e) => e.index));
+    } catch {
+      playlistEntries = [];
+    } finally {
+      playlistLoading = false;
+    }
+  }
+
+  function togglePlaylistItem(idx: number) {
+    const next = new Set(selectedPlaylistItems);
+    if (next.has(idx)) next.delete(idx);
+    else next.add(idx);
+    selectedPlaylistItems = next;
+  }
+
+  function selectAllPlaylist() {
+    selectedPlaylistItems = new Set(playlistEntries.map((e) => e.index));
+  }
+
+  function selectNonePlaylist() {
+    selectedPlaylistItems = new Set();
+  }
+
+  function isTorrentUrl(value: string): boolean {
+    const v = value.trim().toLowerCase();
+    return v.startsWith("magnet:") || v.endsWith(".torrent");
+  }
+
+  async function loadTorrentContents(targetUrl: string) {
+    torrentEntries = [];
+    selectedTorrentFiles = new Set();
+    torrentLoading = true;
+    try {
+      const entries = await invoke<{ index: number; path: string; size_bytes: number }[]>(
+        "torrent_contents",
+        { url: targetUrl }
+      );
+      torrentEntries = entries;
+      selectedTorrentFiles = new Set(entries.map((e) => e.index));
+    } catch {
+      torrentEntries = [];
+    } finally {
+      torrentLoading = false;
+    }
+  }
+
+  function toggleTorrentFile(idx: number) {
+    const next = new Set(selectedTorrentFiles);
+    if (next.has(idx)) next.delete(idx);
+    else next.add(idx);
+    selectedTorrentFiles = next;
+  }
+
+  function selectAllTorrent() {
+    selectedTorrentFiles = new Set(torrentEntries.map((e) => e.index));
+  }
+
+  function selectNoneTorrent() {
+    selectedTorrentFiles = new Set();
   }
 
   async function loadCookieAccounts(targetUrl: string) {
@@ -388,9 +519,25 @@
       });
       cookieAccounts = accounts;
       selectedCookieSlug = accounts[0]?.slug ?? null;
+      cookieHint = null;
+      if (accounts.length > 0) {
+        try {
+          const h = await invoke<{ items: { domain: string; slug: string; status: string }[] }>(
+            "cookies_health"
+          );
+          const slug = selectedCookieSlug ?? "_default";
+          const item =
+            h.items.find((it) => it.domain === result.domain && it.slug === slug) ??
+            h.items.find((it) => it.domain === result.domain);
+          if (item && item.status !== "fresh") {
+            cookieHint = item.status === "expired" ? "expired" : "stale";
+          }
+        } catch {}
+      }
     } catch {
       cookieAccounts = [];
       selectedCookieSlug = null;
+      cookieHint = null;
     }
   }
 
@@ -510,6 +657,18 @@
       return;
     }
 
+    const isPlaylist = info.content_type === "playlist" && playlistEntries.length > 0;
+    if (isPlaylist && selectedPlaylistItems.size === 0) {
+      showToast("error", $t("omnibox.playlist_none_selected") as string);
+      return;
+    }
+
+    const isTorrent = torrentEntries.length > 0;
+    if (isTorrent && selectedTorrentFiles.size === 0) {
+      showToast("error", $t("omnibox.torrent_none_selected") as string);
+      return;
+    }
+
     const settings = getSettings();
     let outputDir = settings?.download.default_output_dir ?? "";
 
@@ -536,6 +695,11 @@
         formatId: selectedFormatId,
         referer: referer.trim() || null,
         cookieSlug: selectedCookieSlug,
+        timeRange: buildTimeRange(),
+        playlistItems: isPlaylist ? [...selectedPlaylistItems] : null,
+        torrentFiles: isTorrent ? [...selectedTorrentFiles] : null,
+        scheduledAt: toEpochMs(scheduleAt),
+        stopAt: toEpochMs(scheduleStop),
       });
       persistLastDownloadOptions();
       omniState = { kind: "idle" };
@@ -788,12 +952,104 @@
     {#if omniState.kind === "detected"}
       <MediaPreview bind:mediaPreview bind:imageLoading={previewImageLoading} />
 
+      {#if omniState.info.content_type === "playlist"}
+        <div class="playlist-picker">
+          <div class="playlist-head">
+            <span class="playlist-count">
+              {$t('omnibox.playlist_selected', { selected: selectedPlaylistItems.size, total: playlistEntries.length })}
+            </span>
+            {#if !playlistLoading && playlistEntries.length > 0}
+              <div class="playlist-bulk">
+                <button type="button" class="playlist-link" onclick={selectAllPlaylist}>{$t('omnibox.playlist_all')}</button>
+                <button type="button" class="playlist-link" onclick={selectNonePlaylist}>{$t('omnibox.playlist_none')}</button>
+              </div>
+            {/if}
+          </div>
+          {#if playlistLoading}
+            <div class="playlist-status"><span class="feedback-spinner"></span> {$t('omnibox.playlist_loading')}</div>
+          {:else if playlistEntries.length === 0}
+            <span class="playlist-status">{$t('omnibox.playlist_empty')}</span>
+          {:else}
+            <ul class="playlist-list">
+              {#each playlistEntries as entry (entry.index)}
+                <li>
+                  <label class="playlist-item">
+                    <input
+                      type="checkbox"
+                      checked={selectedPlaylistItems.has(entry.index)}
+                      onchange={() => togglePlaylistItem(entry.index)}
+                    />
+                    <span class="playlist-idx">{entry.index}.</span>
+                    <span class="playlist-title">{entry.title}</span>
+                  </label>
+                </li>
+              {/each}
+            </ul>
+          {/if}
+        </div>
+      {/if}
+
+      {#if torrentLoading || torrentEntries.length > 0}
+        <div class="playlist-picker">
+          <div class="playlist-head">
+            <span class="playlist-count">
+              {$t('omnibox.torrent_selected', { selected: selectedTorrentFiles.size, total: torrentEntries.length })}
+            </span>
+            {#if !torrentLoading && torrentEntries.length > 0}
+              <div class="playlist-bulk">
+                <button type="button" class="playlist-link" onclick={selectAllTorrent}>{$t('omnibox.playlist_all')}</button>
+                <button type="button" class="playlist-link" onclick={selectNoneTorrent}>{$t('omnibox.playlist_none')}</button>
+              </div>
+            {/if}
+          </div>
+          {#if torrentLoading}
+            <div class="playlist-status"><span class="feedback-spinner"></span> {$t('omnibox.torrent_loading')}</div>
+          {:else}
+            <ul class="playlist-list">
+              {#each torrentEntries as entry (entry.index)}
+                <li>
+                  <label class="playlist-item">
+                    <input
+                      type="checkbox"
+                      checked={selectedTorrentFiles.has(entry.index)}
+                      onchange={() => toggleTorrentFile(entry.index)}
+                    />
+                    <span class="playlist-title">{entry.path}</span>
+                    <span class="torrent-size">{formatBytes(entry.size_bytes)}</span>
+                  </label>
+                </li>
+              {/each}
+            </ul>
+          {/if}
+        </div>
+      {/if}
+
+      {#if cookieHint}
+        <p class="cookie-hint" class:expired={cookieHint === "expired"} role="status">
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
+            <line x1="12" y1="9" x2="12" y2="13" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+          <span>
+            {cookieHint === "expired"
+              ? $t("omnibox.cookie_hint_expired")
+              : $t("omnibox.cookie_hint_stale")}
+          </span>
+          <button type="button" class="cookie-hint-link" onclick={() => goto("/settings?tab=cookies")}>
+            {$t("omnibox.cookie_hint_action")}
+          </button>
+        </p>
+      {/if}
+
       {#if omniState.info.platform === "hotmart"}
         <button class="button action-btn" onclick={handleAction}>
           {$t('omnibox.go_to_hotmart')}
         </button>
       {:else}
-        <button class="download-primary-btn" onclick={handleAction}>
+        {@const playlistBlocked = omniState.info.content_type === "playlist" && playlistEntries.length > 0 && selectedPlaylistItems.size === 0}
+        {@const torrentBlocked = torrentEntries.length > 0 && selectedTorrentFiles.size === 0}
+        <button class="download-primary-btn" disabled={playlistBlocked || torrentBlocked} onclick={handleAction}>
           {$t('omnibox.download')}
         </button>
 
@@ -822,6 +1078,62 @@
                     />
                   </div>
                 {/if}
+
+                {#if omniState.info.content_type !== "playlist"}
+                  <div class="timerange-wrapper">
+                    <span class="timerange-label">{$t('omnibox.timerange_label')}</span>
+                    <div class="timerange-inputs">
+                      <input
+                        class="timerange-input"
+                        type="text"
+                        placeholder={$t('omnibox.timerange_start')}
+                        bind:value={clipStart}
+                        spellcheck="false"
+                        inputmode="numeric"
+                        aria-label={$t('omnibox.timerange_start') as string}
+                      />
+                      <span class="timerange-sep" aria-hidden="true">—</span>
+                      <input
+                        class="timerange-input"
+                        type="text"
+                        placeholder={$t('omnibox.timerange_end')}
+                        bind:value={clipEnd}
+                        spellcheck="false"
+                        inputmode="numeric"
+                        aria-label={$t('omnibox.timerange_end') as string}
+                      />
+                    </div>
+                    <span class="timerange-hint">{$t('omnibox.timerange_hint')}</span>
+                  </div>
+                {/if}
+
+                <div class="timerange-wrapper">
+                  <span class="timerange-label">{$t('omnibox.schedule_label')}</span>
+                  <div class="schedule-presets">
+                    <button type="button" class="schedule-preset" onclick={() => setSchedulePreset('1h')}>{$t('omnibox.schedule_1h')}</button>
+                    <button type="button" class="schedule-preset" onclick={() => setSchedulePreset('tonight')}>{$t('omnibox.schedule_tonight')}</button>
+                    <button type="button" class="schedule-preset" onclick={() => setSchedulePreset('1d')}>{$t('omnibox.schedule_1d')}</button>
+                    {#if scheduleAt || scheduleStop}
+                      <button type="button" class="schedule-preset" onclick={() => { scheduleAt = ""; scheduleStop = ""; }}>{$t('omnibox.schedule_clear')}</button>
+                    {/if}
+                  </div>
+                  <div class="timerange-inputs">
+                    <input
+                      class="timerange-input schedule-input"
+                      type="datetime-local"
+                      bind:value={scheduleAt}
+                      aria-label={$t('omnibox.schedule_start') as string}
+                    />
+                    <span class="timerange-sep" aria-hidden="true">—</span>
+                    <input
+                      class="timerange-input schedule-input"
+                      type="datetime-local"
+                      bind:value={scheduleStop}
+                      aria-label={$t('omnibox.schedule_stop') as string}
+                    />
+                  </div>
+                  <span class="timerange-hint">{$t('omnibox.schedule_hint')}</span>
+                </div>
 
                 <FormatSelector
                   platform={omniState.info.platform}
@@ -1184,6 +1496,110 @@
     outline-offset: var(--focus-ring-offset);
   }
 
+  .download-primary-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+
+  .playlist-picker {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 12px;
+    background: var(--button);
+    border: 1px solid var(--input-border);
+    border-radius: var(--border-radius);
+  }
+
+  .playlist-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .playlist-count {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--secondary);
+  }
+
+  .playlist-bulk {
+    display: flex;
+    gap: 10px;
+  }
+
+  .playlist-link {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    font-size: 12px;
+    color: var(--accent);
+    cursor: pointer;
+  }
+
+  .playlist-link:hover {
+    text-decoration: underline;
+  }
+
+  .playlist-status {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12.5px;
+    color: var(--gray);
+  }
+
+  .playlist-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-height: 220px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .playlist-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 4px;
+    border-radius: calc(var(--border-radius) - 3px);
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--secondary);
+  }
+
+  .playlist-item:hover {
+    background: var(--button-elevated);
+  }
+
+  .playlist-idx {
+    color: var(--gray);
+    font-variant-numeric: tabular-nums;
+    flex-shrink: 0;
+  }
+
+  .playlist-title {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .torrent-size {
+    margin-left: auto;
+    flex-shrink: 0;
+    padding-left: 8px;
+    color: var(--gray);
+    font-variant-numeric: tabular-nums;
+  }
+
   .options-panel {
     width: 100%;
   }
@@ -1249,6 +1665,109 @@
   .referer-input:focus-visible {
     border-color: var(--secondary);
     outline: none;
+  }
+
+  .timerange-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .timerange-label {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--gray);
+  }
+
+  .timerange-inputs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .timerange-input {
+    width: 96px;
+    padding: 6px var(--padding);
+    font-size: 13px;
+    background: var(--button);
+    border: 1px solid var(--input-border);
+    border-radius: calc(var(--border-radius) - 2px);
+    color: var(--secondary);
+    text-align: center;
+  }
+
+  .timerange-input::placeholder {
+    color: var(--gray);
+  }
+
+  .timerange-input:focus-visible {
+    border-color: var(--secondary);
+    outline: none;
+  }
+
+  .timerange-sep {
+    color: var(--gray);
+  }
+
+  .timerange-hint {
+    font-size: 11.5px;
+    color: var(--gray);
+  }
+
+  .schedule-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 6px;
+  }
+
+  .schedule-preset {
+    padding: 4px 10px;
+    font-size: 12px;
+    background: var(--button);
+    border: 1px solid var(--input-border);
+    border-radius: calc(var(--border-radius) - 2px);
+    color: var(--text);
+    cursor: pointer;
+  }
+
+  .schedule-preset:hover {
+    background: var(--button-elevated);
+  }
+
+  .schedule-input {
+    width: auto;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .cookie-hint {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+    font-size: 12px;
+    color: #f4a72b;
+  }
+  .cookie-hint.expired {
+    color: #e0564f;
+  }
+  .cookie-hint svg {
+    flex-shrink: 0;
+  }
+  .cookie-hint-link {
+    background: none;
+    border: 0;
+    padding: 0;
+    font: inherit;
+    font-size: 12px;
+    color: var(--accent);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .cookie-hint-link:hover {
+    filter: brightness(1.15);
   }
 
   .action-btn {

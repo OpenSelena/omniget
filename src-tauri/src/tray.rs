@@ -1,21 +1,27 @@
 use std::collections::hash_map::DefaultHasher;
 use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
-use std::sync::atomic::{AtomicU32, Ordering};
+use std::sync::atomic::{AtomicU32, AtomicU64, Ordering};
 use std::sync::Mutex;
 use std::sync::OnceLock;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 use tauri::{
     image::Image,
-    menu::{MenuBuilder, MenuItem, MenuItemBuilder},
+    menu::{MenuBuilder, MenuItem, MenuItemBuilder, Submenu, SubmenuBuilder},
     tray::TrayIconBuilder,
     AppHandle, Emitter, Manager, Wry,
 };
 
 static DOWNLOADS_ITEM: OnceLock<MenuItem<Wry>> = OnceLock::new();
+static CHANNELS_SUBMENU: OnceLock<Submenu<Wry>> = OnceLock::new();
 static BASE_ICON: OnceLock<(Vec<u8>, u32, u32)> = OnceLock::new();
 static LAST_ACTIVE: AtomicU32 = AtomicU32::new(0);
 static ICON_COUNT: AtomicU32 = AtomicU32::new(0);
+static LAST_TOOLTIP_MS: AtomicU64 = AtomicU64::new(0);
+static LAST_SPEED_BUCKET: AtomicU64 = AtomicU64::new(u64::MAX);
+
+const SPEED_TOOLTIP_MIN_INTERVAL_MS: u64 = 2000;
 static BADGE_CACHE: OnceLock<Mutex<BadgeCache>> = OnceLock::new();
 
 struct BadgeCache {
@@ -60,10 +66,17 @@ pub fn setup(app: &AppHandle) -> tauri::Result<()> {
     DOWNLOADS_ITEM.set(downloads_item.clone()).ok();
     let quit_item = MenuItemBuilder::with_id("quit", "Quit").build(app)?;
 
+    // Empty, hidden until the frontend pushes localized channel labels via
+    // sync_channels_tray (the tray menu is native — $t is not reachable here).
+    let channels_submenu = SubmenuBuilder::new(app, "Channels").build()?;
+    channels_submenu.set_enabled(false).ok();
+    CHANNELS_SUBMENU.set(channels_submenu.clone()).ok();
+
     let menu = MenuBuilder::new(app)
         .item(&open_item)
         .separator()
         .item(&downloads_item)
+        .item(&channels_submenu)
         .separator()
         .item(&quit_item)
         .build()?;
@@ -86,7 +99,15 @@ pub fn setup(app: &AppHandle) -> tauri::Result<()> {
             "quit" => {
                 request_quit(app);
             }
-            _ => {}
+            other => {
+                if let Some(channel_id) = other.strip_prefix("chk:") {
+                    let app = app.clone();
+                    let channel_id = channel_id.to_string();
+                    tauri::async_runtime::spawn(async move {
+                        let _ = crate::core::channel_poller::check_now(&app, &channel_id).await;
+                    });
+                }
+            }
         })
         .on_tray_icon_event(|tray, event| {
             if let tauri::tray::TrayIconEvent::Click {
@@ -103,6 +124,30 @@ pub fn setup(app: &AppHandle) -> tauri::Result<()> {
     Ok(())
 }
 
+// Repopulates the Channels submenu with the localized labels the frontend
+// resolved via $t. Each entry id is "chk:{channel_id}" so on_menu_event can
+// route a click to an immediate check. Only the submenu is touched — the rest
+// of the tray menu (and DOWNLOADS_ITEM) is left intact.
+pub fn rebuild_menu(
+    app: &AppHandle,
+    header: String,
+    channels: Vec<(String, String)>,
+) -> tauri::Result<()> {
+    let Some(submenu) = CHANNELS_SUBMENU.get() else {
+        return Ok(());
+    };
+    submenu.set_text(header)?;
+    while !submenu.items()?.is_empty() {
+        submenu.remove_at(0)?;
+    }
+    for (id, title) in &channels {
+        let item = MenuItemBuilder::with_id(format!("chk:{}", id), title).build(app)?;
+        submenu.append(&item)?;
+    }
+    submenu.set_enabled(!channels.is_empty()).ok();
+    Ok(())
+}
+
 pub fn update_active_count(app: &AppHandle, count: u32) {
     if let Some(item) = DOWNLOADS_ITEM.get() {
         let _ = item.set_text(active_label(count));
@@ -111,6 +156,9 @@ pub fn update_active_count(app: &AppHandle, count: u32) {
     let prev = ICON_COUNT.swap(count, Ordering::Relaxed);
     if prev == count {
         return;
+    }
+    if count == 0 {
+        LAST_SPEED_BUCKET.store(u64::MAX, Ordering::Relaxed);
     }
 
     if let Some(tray) = app.tray_by_id("main-tray") {
@@ -134,6 +182,57 @@ pub fn update_active_count(app: &AppHandle, count: u32) {
             };
             let _ = tray.set_icon(Some(Image::new_owned(rgba, *w, *h)));
         }
+    }
+}
+
+fn now_ms() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_millis() as u64)
+        .unwrap_or(0)
+}
+
+fn format_speed(bps: f64) -> String {
+    if bps < 1024.0 * 1024.0 {
+        format!("{:.0} KB/s", bps / 1024.0)
+    } else {
+        format!("{:.1} MB/s", bps / (1024.0 * 1024.0))
+    }
+}
+
+// Speed lives only in the tooltip (the discreet channel) — the icon stays
+// count-gated because icon re-render is expensive. Writes are hard-throttled
+// and deduped so frequent progress ticks can't flood the system tray.
+pub fn update_speed_tooltip(app: &AppHandle, count: u32, total_speed_bps: f64) {
+    if count == 0 {
+        return;
+    }
+
+    let now = now_ms();
+    let last = LAST_TOOLTIP_MS.load(Ordering::Relaxed);
+    if now.saturating_sub(last) < SPEED_TOOLTIP_MIN_INTERVAL_MS {
+        return;
+    }
+
+    let speed_tenths = (total_speed_bps / (1024.0 * 1024.0) * 10.0).round() as u64;
+    let bucket = (count as u64) << 32 | speed_tenths;
+    if LAST_SPEED_BUCKET.load(Ordering::Relaxed) == bucket {
+        return;
+    }
+    LAST_SPEED_BUCKET.store(bucket, Ordering::Relaxed);
+    LAST_TOOLTIP_MS.store(now, Ordering::Relaxed);
+
+    if let Some(tray) = app.tray_by_id("main-tray") {
+        let tooltip = if total_speed_bps > 0.0 {
+            format!(
+                "OmniGet — {} active · {}",
+                count,
+                format_speed(total_speed_bps)
+            )
+        } else {
+            format!("OmniGet — {} active", count)
+        };
+        let _ = tray.set_tooltip(Some(&tooltip));
     }
 }
 
