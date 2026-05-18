@@ -42,6 +42,11 @@
   </branding>
   <content_rating type="oars-1.1" />
   <releases>
+    <release version="0.6.2" date="2026-05-18">
+      <description>
+        <p>Torrent file selection before download, automatic public trackers and UPnP port mapping, and a tray download-speed readout. New Channel Follow: subscribe to a channel or playlist and auto-download new uploads in the background with notifications. New AI features (bring your own OpenAI, Anthropic or local key, never logged): video summaries, Whisper transcription fallback, and an AI/preset video-tools panel gated by an ffmpeg safety allowlist. New Subtitle Workshop editor with waveform and scene markers. Download scheduling with optional auto-stop, and the system stays awake while downloads run. Localization fixes across the marketplace and settings.</p>
+      </description>
+    </release>
     <release version="0.6.1" date="2026-05-12">
       <description>
         <p>YouTube playlist quality settings now respected. Per-video format picker hidden for playlists. Aria2c progress correctly reported in the queue (was stuck at 0% until completion). Quality chip shown on each queue item to confirm what's being downloaded.</p>
