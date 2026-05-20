@@ -1,3 +1,4 @@
+use omniget_core::models::progress::ProgressUpdate;
 use std::collections::HashSet;
 
 use anyhow::anyhow;
@@ -140,9 +141,9 @@ impl PlatformDownloader for VimeoDownloader {
         &self,
         info: &MediaInfo,
         opts: &DownloadOptions,
-        progress: mpsc::Sender<f64>,
+        progress: mpsc::Sender<ProgressUpdate>,
     ) -> anyhow::Result<DownloadResult> {
-        let _ = progress.send(0.0).await;
+        let _ = progress.send(ProgressUpdate::percent(0.0)).await;
 
         let ytdlp_path = ytdlp::ensure_ytdlp().await?;
 
