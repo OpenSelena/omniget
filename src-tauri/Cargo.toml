@@ -4,7 +4,7 @@ resolver = "2"
 
 [package]
 name = "omniget"
-version = "0.6.2"
+version = "0.6.3"
 description = "A Tauri App"
 authors = ["you"]
 edition = "2021"
@@ -49,12 +49,19 @@ tokio-util = { version = "0.7", features = ["rt"] }
 url = "2"
 urlencoding = "2"
 rand = "0.10.0"
+rusqlite = { version = "0.32", features = ["bundled"] }
 base64 = "0.22.1"
 filetime = "0.2.27"
 zip = { version = "2", default-features = false, features = ["deflate"] }
 tar = "0.4"
 xz2 = { version = "0.1", features = ["static"] }
 sha2 = "0.10"
+md-5 = "0.10"
+murmur3 = "0.5"
+hex = "0.4"
+thiserror = "1"
+hmac = "0.12"
+qrcode = { version = "0.14", default-features = false, features = ["svg"] }
 open = "5"
 omniget-core = { path = "omniget-core", features = ["desktop"] }
 omniget-plugin-sdk = { path = "omniget-plugin-sdk" }
