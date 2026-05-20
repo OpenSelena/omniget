@@ -42,6 +42,22 @@ export type AppSettings = {
     extra_ytdlp_flags?: string[];
     cookie_file: string;
     always_use_managed_cookies: boolean;
+    bilibili_danmaku_enabled: boolean;
+    bilibili_danmaku_format: string;
+    bilibili_container: string;
+    bilibili_nfo_enabled: boolean;
+    bilibili_cover_sidecar: boolean;
+    bilibili_cover_format: string;
+    bilibili_naming_video: string;
+    bilibili_naming_multi_part: string;
+    bilibili_naming_bangumi: string;
+    bilibili_naming_cheese: string;
+    bilibili_naming_collection: string;
+    bilibili_cdn_hosts: string;
+    bilibili_cdn_prefer_alternatives: boolean;
+    bilibili_preferred_qn: number;
+    bilibili_preferred_codec: number;
+    bilibili_preferred_audio_qn: number;
   };
   proxy?: {
     enabled?: boolean;
