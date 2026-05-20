@@ -438,6 +438,7 @@ impl DownloadQueue {
             item.file_path = file_path;
             item.file_size_bytes = file_size_bytes;
             item.speed_bytes_per_sec = 0.0;
+            item.eta_seconds = None;
             crate::core::recovery::remove(id);
 
             if !item.external {
@@ -493,6 +494,12 @@ impl DownloadQueue {
         eta_seconds: Option<u64>,
     ) {
         if let Some(item) = self.items.iter_mut().find(|i| i.id == id) {
+            if item.status != QueueStatus::Active {
+                if torrent_id.is_some() && item.torrent_id.is_none() {
+                    item.torrent_id = torrent_id;
+                }
+                return;
+            }
             item.percent = percent;
             item.speed_bytes_per_sec = speed;
             item.downloaded_bytes = downloaded;
@@ -514,6 +521,7 @@ impl DownloadQueue {
                 }
                 item.status = QueueStatus::Paused;
                 item.speed_bytes_per_sec = 0.0;
+                item.eta_seconds = None;
                 return true;
             }
         }
@@ -544,6 +552,7 @@ impl DownloadQueue {
                 }
                 item.status = QueueStatus::Paused;
                 item.speed_bytes_per_sec = 0.0;
+                item.eta_seconds = None;
                 paused.push((item.id, item.torrent_id));
             }
         }
@@ -1181,29 +1190,75 @@ async fn spawn_download_inner(
     let total_bytes = info.file_size_bytes;
     let item_title = info.title.clone();
     let item_platform = platform_name.clone();
-    let (tx, mut rx) = mpsc::channel::<f64>(32);
+    let (tx, mut rx) = mpsc::channel::<omniget_core::models::progress::ProgressUpdate>(32);
 
     let app_progress = app.clone();
     let queue_progress = queue.clone();
     let torrent_id_slot_progress = torrent_id_slot.clone();
     let progress_forwarder = tokio::spawn(async move {
+        const STALL_AFTER: std::time::Duration = std::time::Duration::from_secs(6);
+
         let mut last_bytes: u64 = 0;
         let mut last_time = std::time::Instant::now();
         let mut throttle = ProgressThrottle::new(250);
         let mut current_speed: f64 = 0.0;
+        let mut last_percent: f64 = 0.0;
+        let mut last_advance = std::time::Instant::now();
+        let mut stalled = false;
 
-        while let Some(percent) = rx.recv().await {
-            if !throttle.should_emit() && percent < 100.0 {
+        loop {
+            let update = tokio::select! {
+                msg = rx.recv() => match msg {
+                    Some(u) => u,
+                    None => break,
+                },
+                _ = tokio::time::sleep(std::time::Duration::from_secs(2)) => {
+                    if !stalled && last_advance.elapsed() >= STALL_AFTER {
+                        stalled = true;
+                        current_speed = 0.0;
+                        {
+                            let mut q = queue_progress.lock().await;
+                            let tid = { *torrent_id_slot_progress.lock().await };
+                            q.update_progress(
+                                item_id, last_percent, 0.0, last_bytes, total_bytes, tid, None,
+                            );
+                        }
+                        let _ = app_progress.emit(
+                            "queue-item-progress",
+                            &QueueItemProgress {
+                                id: item_id,
+                                title: item_title.clone(),
+                                platform: item_platform.clone(),
+                                percent: last_percent,
+                                speed_bytes_per_sec: 0.0,
+                                downloaded_bytes: last_bytes,
+                                total_bytes,
+                                phase: "stalled".to_string(),
+                                eta_seconds: None,
+                            },
+                        );
+                    }
+                    continue;
+                }
+            };
+
+            let percent = update.percent;
+            if !throttle.should_emit() && percent < 100.0 && !update.has_real_metrics() {
                 continue;
             }
 
             let now = std::time::Instant::now();
             let clamped = percent.max(0.0);
-            let downloaded_bytes = total_bytes
-                .map(|total| (clamped / 100.0 * total as f64) as u64)
-                .unwrap_or(0);
+            let resolved_total = update.total_bytes.or(total_bytes);
+            let downloaded_bytes = update.downloaded_bytes.unwrap_or_else(|| {
+                resolved_total
+                    .map(|total| (clamped / 100.0 * total as f64) as u64)
+                    .unwrap_or(last_bytes)
+            });
 
-            if total_bytes.is_some() && downloaded_bytes > last_bytes {
+            if let Some(real) = update.speed_bps {
+                current_speed = real;
+            } else if downloaded_bytes > last_bytes {
                 let dt = now.duration_since(last_time).as_secs_f64();
                 if dt > 0.1 {
                     let instant_speed = (downloaded_bytes - last_bytes) as f64 / dt;
@@ -1215,8 +1270,14 @@ async fn spawn_download_inner(
                 }
             }
 
+            if downloaded_bytes > last_bytes || clamped > last_percent || update.speed_bps.is_some()
+            {
+                last_advance = now;
+                stalled = false;
+            }
             last_bytes = downloaded_bytes;
             last_time = now;
+            last_percent = clamped;
 
             let phase = match percent {
                 p if p < -1.5 => "connecting",
@@ -1226,19 +1287,20 @@ async fn spawn_download_inner(
                 _ => "starting",
             };
 
-            let eta_seconds = omniget_core::core::ytdlp::get_eta(item_id).or_else(|| {
-                if current_speed > 0.0 {
-                    total_bytes.and_then(|total| {
-                        if downloaded_bytes >= total {
-                            None
-                        } else {
-                            Some(((total - downloaded_bytes) as f64 / current_speed) as u64)
-                        }
-                    })
-                } else {
-                    None
-                }
-            });
+            let eta_seconds = update
+                .eta_seconds
+                .or_else(|| omniget_core::core::ytdlp::get_eta(item_id))
+                .or_else(|| {
+                    if current_speed > 0.0 {
+                        resolved_total.and_then(|total| {
+                            (total > downloaded_bytes).then(|| {
+                                ((total - downloaded_bytes) as f64 / current_speed) as u64
+                            })
+                        })
+                    } else {
+                        None
+                    }
+                });
 
             {
                 let mut q = queue_progress.lock().await;
@@ -1248,7 +1310,7 @@ async fn spawn_download_inner(
                     clamped,
                     current_speed,
                     downloaded_bytes,
-                    total_bytes,
+                    resolved_total,
                     tid,
                     eta_seconds,
                 );
@@ -1263,7 +1325,7 @@ async fn spawn_download_inner(
                     percent: clamped,
                     speed_bytes_per_sec: current_speed,
                     downloaded_bytes,
-                    total_bytes,
+                    total_bytes: resolved_total,
                     phase: phase.to_string(),
                     eta_seconds,
                 },

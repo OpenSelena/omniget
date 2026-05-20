@@ -13,6 +13,8 @@ pub mod bilibili;
 #[cfg(not(target_os = "android"))]
 pub mod douyin;
 #[cfg(not(target_os = "android"))]
+pub mod gallerydl;
+#[cfg(not(target_os = "android"))]
 pub mod generic_ytdlp;
 #[cfg(not(target_os = "android"))]
 pub mod instagram;

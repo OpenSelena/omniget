@@ -37,7 +37,7 @@ impl PlatformDownloader for NoopDownloader {
         &self,
         _info: &MediaInfo,
         _opts: &DownloadOptions,
-        _progress: tokio::sync::mpsc::Sender<f64>,
+        _progress: tokio::sync::mpsc::Sender<omniget_core::models::progress::ProgressUpdate>,
     ) -> anyhow::Result<DownloadResult> {
         Err(anyhow::anyhow!(
             "NoopDownloader cannot drive download; this item is driven by an external plugin"

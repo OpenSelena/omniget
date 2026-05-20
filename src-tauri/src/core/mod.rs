@@ -20,6 +20,7 @@ pub use omniget_core::core::ytdlp;
 pub mod awake;
 pub mod channel_poller;
 pub mod channels;
+pub mod db;
 pub mod download_log;
 pub mod events;
 pub mod host_limiter;
