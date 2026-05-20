@@ -12,6 +12,7 @@
   import { queueExternalPrefill, type ExternalUrlEvent } from "$lib/stores/external-url-store.svelte";
   import Toast from "$components/toast/Toast.svelte";
   import DebugPanel from "$components/debug/DebugPanel.svelte";
+  import BilibiliSessionExpiredBanner from "$lib/components/BilibiliSessionExpiredBanner.svelte";
   import { refreshUpdateInfo } from "$lib/stores/update-store.svelte";
   import { startClipboardMonitor, stopClipboardMonitor } from "$lib/stores/clipboard-monitor";
   import { initChangelog } from "$lib/stores/changelog-store.svelte";
@@ -301,6 +302,7 @@
 
 <Toast />
 <DebugPanel />
+<BilibiliSessionExpiredBanner />
 <ChangelogDialog />
 <ConfirmCloseDialog />
 <ShortcutsDialog />

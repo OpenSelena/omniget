@@ -5,6 +5,7 @@
   import { onMount } from "svelte";
   import SupportedServices from "$components/services/SupportedServices.svelte";
   import OmniboxInput from "$components/omnibox/OmniboxInput.svelte";
+  import BilibiliPreviewExtras from "$components/omnibox/BilibiliPreviewExtras.svelte";
   import DownloadModeSelector from "$components/omnibox/DownloadModeSelector.svelte";
   import QualityPicker from "$components/omnibox/QualityPicker.svelte";
   import FormatSelector from "$components/omnibox/FormatSelector.svelte";
@@ -1049,6 +1050,9 @@
       {:else}
         {@const playlistBlocked = omniState.info.content_type === "playlist" && playlistEntries.length > 0 && selectedPlaylistItems.size === 0}
         {@const torrentBlocked = torrentEntries.length > 0 && selectedTorrentFiles.size === 0}
+        {#if omniState.info.platform === "bilibili"}
+          <BilibiliPreviewExtras {url} accountSlug={selectedCookieSlug && !selectedCookieSlug.startsWith("_") ? selectedCookieSlug : null} />
+        {/if}
         <button class="download-primary-btn" disabled={playlistBlocked || torrentBlocked} onclick={handleAction}>
           {$t('omnibox.download')}
         </button>
