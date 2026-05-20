@@ -1,3 +1,4 @@
+use omniget_core::models::progress::ProgressUpdate;
 use std::collections::HashSet;
 
 use anyhow::anyhow;
@@ -280,9 +281,9 @@ impl PlatformDownloader for YouTubeDownloader {
         &self,
         info: &MediaInfo,
         opts: &DownloadOptions,
-        progress: mpsc::Sender<f64>,
+        progress: mpsc::Sender<ProgressUpdate>,
     ) -> anyhow::Result<DownloadResult> {
-        let _ = progress.send(0.0).await;
+        let _ = progress.send(ProgressUpdate::percent(0.0)).await;
 
         let ytdlp_path = if let Some(ref p) = opts.ytdlp_path {
             p.clone()
@@ -343,7 +344,7 @@ impl YouTubeDownloader {
         &self,
         info: &MediaInfo,
         opts: &DownloadOptions,
-        progress: mpsc::Sender<f64>,
+        progress: mpsc::Sender<ProgressUpdate>,
         ytdlp_path: &std::path::Path,
         quality_height: Option<u32>,
     ) -> anyhow::Result<DownloadResult> {
@@ -361,17 +362,19 @@ impl YouTubeDownloader {
                 anyhow::bail!("Download cancelado");
             }
 
-            let (video_tx, mut video_rx) = mpsc::channel::<f64>(16);
+            let (video_tx, mut video_rx) = mpsc::channel::<ProgressUpdate>(16);
             let progress_tx = progress.clone();
             let video_idx = i;
             let video_total = total;
             let forwarder = tokio::spawn(async move {
                 let mut max_pct = 0.0_f64;
-                while let Some(pct) = video_rx.recv().await {
-                    max_pct = max_pct.max(pct);
+                while let Some(pu) = video_rx.recv().await {
+                    max_pct = max_pct.max(pu.percent);
                     let overall = (video_idx as f64 / video_total as f64) * 100.0
                         + (max_pct / video_total as f64);
-                    let _ = progress_tx.send(overall).await;
+                    let _ = progress_tx
+                        .send(ProgressUpdate::rich(overall, None, None, pu.speed_bps, None))
+                        .await;
                 }
             });
 
@@ -406,7 +409,7 @@ impl YouTubeDownloader {
             let _ = forwarder.await;
         }
 
-        let _ = progress.send(100.0).await;
+        let _ = progress.send(ProgressUpdate::percent(100.0)).await;
 
         Ok(DownloadResult {
             file_path: last_path,

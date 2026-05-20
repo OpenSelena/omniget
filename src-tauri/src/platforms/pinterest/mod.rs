@@ -1,3 +1,4 @@
+use omniget_core::models::progress::ProgressUpdate;
 use std::sync::LazyLock;
 
 use anyhow::anyhow;
@@ -200,7 +201,7 @@ impl PlatformDownloader for PinterestDownloader {
         &self,
         info: &MediaInfo,
         opts: &DownloadOptions,
-        progress: mpsc::Sender<f64>,
+        progress: mpsc::Sender<ProgressUpdate>,
     ) -> anyhow::Result<DownloadResult> {
         if let Some(quality) = info.available_qualities.first() {
             if quality.format == "ytdlp" {

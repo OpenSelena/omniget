@@ -1,3 +1,4 @@
+use omniget_core::models::progress::ProgressUpdate;
 use anyhow::anyhow;
 use async_trait::async_trait;
 use tokio::sync::mpsc;
@@ -294,7 +295,7 @@ impl PlatformDownloader for TwitchClipsDownloader {
         &self,
         info: &MediaInfo,
         opts: &DownloadOptions,
-        progress: mpsc::Sender<f64>,
+        progress: mpsc::Sender<ProgressUpdate>,
     ) -> anyhow::Result<DownloadResult> {
         if let Some(quality) = info.available_qualities.first() {
             if quality.format == "ytdlp" {

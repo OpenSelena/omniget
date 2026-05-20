@@ -1,3 +1,4 @@
+use omniget_core::models::progress::ProgressUpdate;
 use std::collections::HashSet;
 
 use anyhow::anyhow;
@@ -257,9 +258,9 @@ impl PlatformDownloader for GenericYtdlpDownloader {
         &self,
         info: &MediaInfo,
         opts: &DownloadOptions,
-        progress: mpsc::Sender<f64>,
+        progress: mpsc::Sender<ProgressUpdate>,
     ) -> anyhow::Result<DownloadResult> {
-        let _ = progress.send(0.0).await;
+        let _ = progress.send(ProgressUpdate::percent(0.0)).await;
 
         let first = info
             .available_qualities
@@ -343,7 +344,7 @@ impl PlatformDownloader for GenericYtdlpDownloader {
             let client = builder.build().unwrap_or_default();
             let downloader = HlsDownloader::with_client(client)
                 .with_user_agent_override(opts.user_agent.clone());
-            let _ = progress.send(0.0).await;
+            let _ = progress.send(ProgressUpdate::percent(0.0)).await;
 
             let result = downloader
                 .download(
@@ -357,7 +358,7 @@ impl PlatformDownloader for GenericYtdlpDownloader {
                 )
                 .await?;
 
-            let _ = progress.send(100.0).await;
+            let _ = progress.send(ProgressUpdate::percent(100.0)).await;
 
             return Ok(DownloadResult {
                 file_path: result.path,

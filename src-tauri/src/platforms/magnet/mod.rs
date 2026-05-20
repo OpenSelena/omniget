@@ -1,3 +1,4 @@
+use omniget_core::models::progress::ProgressUpdate;
 use std::path::PathBuf;
 use std::sync::Arc;
 
@@ -87,9 +88,9 @@ impl PlatformDownloader for MagnetDownloader {
         &self,
         info: &MediaInfo,
         opts: &DownloadOptions,
-        progress: mpsc::Sender<f64>,
+        progress: mpsc::Sender<ProgressUpdate>,
     ) -> anyhow::Result<DownloadResult> {
-        let _ = progress.send(0.0).await;
+        let _ = progress.send(ProgressUpdate::percent(0.0)).await;
 
         let url = match info.available_qualities.first() {
             Some(q) => &q.url,
@@ -242,7 +243,7 @@ impl PlatformDownloader for MagnetDownloader {
 
                     if total > 0 {
                         let pct = (downloaded as f64 / total as f64) * 100.0;
-                        let _ = progress.send(pct).await;
+                        let _ = progress.send(ProgressUpdate::percent(pct)).await;
                         tracing::debug!(
                             "[magnet] progress: {:.1}% ({:.1} MB / {:.1} MB)",
                             pct,
@@ -268,7 +269,7 @@ impl PlatformDownloader for MagnetDownloader {
                     if let Err(e) = res {
                         anyhow::bail!("Torrent download failed: {}", e);
                     }
-                    let _ = progress.send(100.0).await;
+                    let _ = progress.send(ProgressUpdate::percent(100.0)).await;
                     tracing::info!("[magnet] download complete (id={})", torrent_id);
                     break;
                 }

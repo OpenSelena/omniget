@@ -1,3 +1,4 @@
+use omniget_core::models::progress::ProgressUpdate;
 use anyhow::anyhow;
 use async_trait::async_trait;
 use rand::RngExt;
@@ -582,7 +583,7 @@ impl InstagramDownloader {
     async fn ytdlp_download_post(
         post_url: &str,
         opts: &DownloadOptions,
-        progress: mpsc::Sender<f64>,
+        progress: mpsc::Sender<ProgressUpdate>,
     ) -> anyhow::Result<DownloadResult> {
         let ytdlp_path = crate::core::ytdlp::ensure_ytdlp().await?;
         crate::core::ytdlp::download_video(
@@ -755,7 +756,7 @@ impl PlatformDownloader for InstagramDownloader {
         &self,
         info: &MediaInfo,
         opts: &DownloadOptions,
-        progress: mpsc::Sender<f64>,
+        progress: mpsc::Sender<ProgressUpdate>,
     ) -> anyhow::Result<DownloadResult> {
         let count = info.available_qualities.len();
 
@@ -842,7 +843,7 @@ impl PlatformDownloader for InstagramDownloader {
                     last_path = output;
 
                     let percent = ((i + 1) as f64 / count as f64) * 100.0;
-                    let _ = progress.send(percent).await;
+                    let _ = progress.send(ProgressUpdate::percent(percent)).await;
                 }
                 Err(e) => {
                     if Self::is_html_block_error(&e) {

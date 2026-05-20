@@ -1,5 +1,6 @@
 pub mod words;
 
+use omniget_core::models::progress::ProgressUpdate;
 use std::path::PathBuf;
 use std::sync::Arc;
 
@@ -104,7 +105,7 @@ impl PlatformDownloader for P2pDownloader {
         &self,
         info: &MediaInfo,
         opts: &DownloadOptions,
-        progress: mpsc::Sender<f64>,
+        progress: mpsc::Sender<ProgressUpdate>,
     ) -> anyhow::Result<DownloadResult> {
         let url = match info.available_qualities.first() {
             Some(q) => &q.url,
@@ -115,7 +116,7 @@ impl PlatformDownloader for P2pDownloader {
             .strip_prefix("p2p:")
             .ok_or_else(|| anyhow!("Invalid P2P URL"))?;
 
-        let _ = progress.send(-2.0).await;
+        let _ = progress.send(ProgressUpdate::percent(-2.0)).await;
 
         tracing::info!("[p2p] connecting to relay for code: {}", code);
 
@@ -147,7 +148,7 @@ impl PlatformDownloader for P2pDownloader {
         write_half.write_all(b"OK\n").await?;
         write_half.flush().await?;
 
-        let _ = progress.send(0.0).await;
+        let _ = progress.send(ProgressUpdate::percent(0.0)).await;
 
         let sanitized = sanitize_filename::sanitize(&file_name);
         let output_path = opts.output_dir.join(&sanitized);
@@ -176,14 +177,14 @@ impl PlatformDownloader for P2pDownloader {
 
             if file_size > 0 {
                 let pct = (received as f64 / file_size as f64) * 100.0;
-                let _ = progress.send(pct).await;
+                let _ = progress.send(ProgressUpdate::percent(pct)).await;
             }
         }
 
         file.flush().await?;
         drop(file);
 
-        let _ = progress.send(100.0).await;
+        let _ = progress.send(ProgressUpdate::percent(100.0)).await;
 
         tracing::info!("[p2p] download complete: {}", output_path.display());
 

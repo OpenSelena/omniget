@@ -1,3 +1,4 @@
+use omniget_core::models::progress::ProgressUpdate;
 use anyhow::anyhow;
 use async_trait::async_trait;
 use tokio::sync::mpsc;
@@ -205,7 +206,7 @@ impl RedditDownloader {
         &self,
         video_url: &str,
         output: &std::path::Path,
-        progress_tx: mpsc::Sender<f64>,
+        progress_tx: mpsc::Sender<ProgressUpdate>,
         cancel: Option<&tokio_util::sync::CancellationToken>,
     ) -> anyhow::Result<u64> {
         let variants = Self::get_resolution_variants(video_url);
@@ -370,7 +371,7 @@ impl PlatformDownloader for RedditDownloader {
         &self,
         info: &MediaInfo,
         opts: &DownloadOptions,
-        progress: mpsc::Sender<f64>,
+        progress: mpsc::Sender<ProgressUpdate>,
     ) -> anyhow::Result<DownloadResult> {
         if let Some(quality) = info.available_qualities.first() {
             if quality.format == "ytdlp" {
@@ -532,7 +533,7 @@ impl RedditDownloader {
         &self,
         info: &MediaInfo,
         opts: &DownloadOptions,
-        progress: mpsc::Sender<f64>,
+        progress: mpsc::Sender<ProgressUpdate>,
     ) -> anyhow::Result<DownloadResult> {
         match info.media_type {
             MediaType::Video => {
@@ -564,14 +565,16 @@ impl RedditDownloader {
                         .output_dir
                         .join(format!("{}.mp4", sanitize_filename::sanitize(&info.title)));
 
-                    let _ = progress.send(0.0).await;
+                    let _ = progress.send(ProgressUpdate::percent(0.0)).await;
 
-                    let (vtx, mut vrx) = mpsc::channel::<f64>(8);
+                    let (vtx, mut vrx) = mpsc::channel::<ProgressUpdate>(8);
                     let progress_video = progress.clone();
                     tokio::spawn(async move {
                         while let Some(p) = vrx.recv().await {
-                            let scaled = p * 0.6;
-                            let _ = progress_video.send(scaled).await;
+                            let scaled = p.percent * 0.6;
+                            let _ = progress_video
+                                .send(ProgressUpdate::rich(scaled, None, None, p.speed_bps, None))
+                                .await;
                         }
                     });
 
@@ -584,15 +587,17 @@ impl RedditDownloader {
                         )
                         .await?;
 
-                    let _ = progress.send(60.0).await;
+                    let _ = progress.send(ProgressUpdate::percent(60.0)).await;
 
                     let audio_url = &audio_quality.unwrap().url;
-                    let (atx, mut arx) = mpsc::channel::<f64>(8);
+                    let (atx, mut arx) = mpsc::channel::<ProgressUpdate>(8);
                     let progress_audio = progress.clone();
                     tokio::spawn(async move {
                         while let Some(p) = arx.recv().await {
-                            let scaled = 60.0 + p * 0.25;
-                            let _ = progress_audio.send(scaled).await;
+                            let scaled = 60.0 + p.percent * 0.25;
+                            let _ = progress_audio
+                                .send(ProgressUpdate::rich(scaled, None, None, p.speed_bps, None))
+                                .await;
                         }
                     });
 
@@ -606,13 +611,13 @@ impl RedditDownloader {
                     .await
                     .is_ok();
 
-                    let _ = progress.send(85.0).await;
+                    let _ = progress.send(ProgressUpdate::percent(85.0)).await;
 
                     if audio_ok && ffmpeg_available {
                         ffmpeg::mux_video_audio(&video_tmp, &audio_tmp, &output).await?;
                         let _ = tokio::fs::remove_file(&video_tmp).await;
                         let _ = tokio::fs::remove_file(&audio_tmp).await;
-                        let _ = progress.send(100.0).await;
+                        let _ = progress.send(ProgressUpdate::percent(100.0)).await;
 
                         let file_size = tokio::fs::metadata(&output).await?.len();
                         Ok(DownloadResult {
@@ -639,7 +644,7 @@ impl RedditDownloader {
                             let _ = tokio::fs::remove_file(&audio_tmp).await;
                         }
 
-                        let _ = progress.send(100.0).await;
+                        let _ = progress.send(ProgressUpdate::percent(100.0)).await;
 
                         Ok(DownloadResult {
                             file_path: video_final,
@@ -749,7 +754,7 @@ impl RedditDownloader {
                     last_path = output;
 
                     let percent = ((i + 1) as f64 / count as f64) * 100.0;
-                    let _ = progress.send(percent).await;
+                    let _ = progress.send(ProgressUpdate::percent(percent)).await;
                 }
 
                 Ok(DownloadResult {

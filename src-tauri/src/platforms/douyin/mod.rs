@@ -1,3 +1,4 @@
+use omniget_core::models::progress::ProgressUpdate;
 use std::collections::HashSet;
 use std::time::Duration;
 
@@ -205,9 +206,9 @@ impl PlatformDownloader for DouyinDownloader {
         &self,
         info: &MediaInfo,
         opts: &DownloadOptions,
-        progress: mpsc::Sender<f64>,
+        progress: mpsc::Sender<ProgressUpdate>,
     ) -> anyhow::Result<DownloadResult> {
-        let _ = progress.send(0.0).await;
+        let _ = progress.send(ProgressUpdate::percent(0.0)).await;
 
         let ytdlp_path = match &opts.ytdlp_path {
             Some(p) => p.clone(),

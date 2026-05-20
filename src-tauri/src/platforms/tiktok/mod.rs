@@ -1,3 +1,4 @@
+use omniget_core::models::progress::ProgressUpdate;
 use std::sync::Arc;
 
 use anyhow::anyhow;
@@ -501,7 +502,7 @@ impl PlatformDownloader for TikTokDownloader {
         &self,
         info: &MediaInfo,
         opts: &DownloadOptions,
-        progress: mpsc::Sender<f64>,
+        progress: mpsc::Sender<ProgressUpdate>,
     ) -> anyhow::Result<DownloadResult> {
         if let Some(quality) = info.available_qualities.first() {
             if quality.format == "ytdlp" {
@@ -629,7 +630,7 @@ impl PlatformDownloader for TikTokDownloader {
                     last_path = output;
 
                     let percent = ((i + 1) as f64 / count as f64) * 100.0;
-                    let _ = progress.send(percent).await;
+                    let _ = progress.send(ProgressUpdate::percent(percent)).await;
                 }
 
                 Ok(DownloadResult {
