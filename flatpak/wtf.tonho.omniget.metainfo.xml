@@ -42,6 +42,11 @@
   </branding>
   <content_rating type="oars-1.1" />
   <releases>
+    <release version="0.6.3" date="2026-05-18">
+      <description>
+        <p>Real download speed and ETA read straight from the downloader instead of estimated from a percentage, so they stay correct even when the file size is unknown, plus a stall watchdog and ETA cleared on pause. Live streams now report real downloaded size and speed. New image gallery downloader (DeviantArt, Pixiv, ArtStation, Flickr, Tumblr, Imgur albums, Kemono, Newgrounds and image boards). Channel Follow uses lighter incremental polling on YouTube. Download history and followed channels moved to a local SQLite database with a one-time import of the old data. Subtitle Workshop now opens and saves ASS, adds one-click auto-fix, two-point sync and AI grammar fix. yt-dlp is verified by SHA256 before it runs and can track the nightly channel.</p>
+      </description>
+    </release>
     <release version="0.6.2" date="2026-05-18">
       <description>
         <p>Torrent file selection before download, automatic public trackers and UPnP port mapping, and a tray download-speed readout. New Channel Follow: subscribe to a channel or playlist and auto-download new uploads in the background with notifications. New AI features (bring your own OpenAI, Anthropic or local key, never logged): video summaries, Whisper transcription fallback, and an AI/preset video-tools panel gated by an ffmpeg safety allowlist. New Subtitle Workshop editor with waveform and scene markers. Download scheduling with optional auto-stop, and the system stays awake while downloads run. Localization fixes across the marketplace and settings.</p>
