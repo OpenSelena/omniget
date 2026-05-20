@@ -42,8 +42,26 @@ fn is_due(ch: &ChannelFollow, now: u64) -> bool {
 
 async fn poll_channel(ch: &ChannelFollow) -> Option<Vec<NewVideo>> {
     let ytdlp = crate::core::ytdlp::find_ytdlp_cached().await?;
-    let extra = vec!["--playlist-end".to_string(), PLAYLIST_END.to_string()];
-    match crate::core::ytdlp::get_playlist_info(&ytdlp, &ch.url, &extra).await {
+
+    let playlist_end: u32 = PLAYLIST_END.parse().unwrap_or(30);
+    let listing = match crate::core::ytdlp::archive_extractor_prefix(&ch.url) {
+        Some(prefix) if !ch.seen_ids.is_empty() => {
+            crate::core::ytdlp::get_playlist_info_incremental(
+                &ytdlp,
+                &ch.url,
+                &ch.seen_ids,
+                prefix,
+                playlist_end,
+            )
+            .await
+        }
+        _ => {
+            let extra = vec!["--playlist-end".to_string(), PLAYLIST_END.to_string()];
+            crate::core::ytdlp::get_playlist_info(&ytdlp, &ch.url, &extra).await
+        }
+    };
+
+    match listing {
         Ok((_title, entries)) => {
             let fetched_ids: Vec<String> = entries.iter().map(|e| e.id.clone()).collect();
             let new_ids = channels::record_poll(&ch.id, &fetched_ids);

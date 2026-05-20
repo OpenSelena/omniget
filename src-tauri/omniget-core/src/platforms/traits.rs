@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 
 use crate::models::media::{DownloadOptions, DownloadResult, MediaInfo};
+pub use crate::models::progress::ProgressUpdate;
 
 #[async_trait]
 pub trait PlatformDownloader: Send + Sync {
@@ -11,6 +12,6 @@ pub trait PlatformDownloader: Send + Sync {
         &self,
         info: &MediaInfo,
         opts: &DownloadOptions,
-        progress: tokio::sync::mpsc::Sender<f64>,
+        progress: tokio::sync::mpsc::Sender<ProgressUpdate>,
     ) -> anyhow::Result<DownloadResult>;
 }

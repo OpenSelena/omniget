@@ -606,6 +606,70 @@ async fn download_deno() -> anyhow::Result<PathBuf> {
     Ok(deno_target)
 }
 
+pub async fn ensure_gallerydl() -> Option<PathBuf> {
+    if let Some(path) = find_tool("gallery-dl").await {
+        return Some(path);
+    }
+
+    #[cfg(any(target_os = "windows", target_os = "linux"))]
+    {
+        match download_gallerydl().await {
+            Ok(path) => return Some(path),
+            Err(e) => tracing::warn!("Failed to download gallery-dl: {}", e),
+        }
+    }
+
+    None
+}
+
+#[cfg(any(target_os = "windows", target_os = "linux"))]
+async fn download_gallerydl() -> anyhow::Result<PathBuf> {
+    let bin_dir = managed_bin_dir().ok_or_else(|| anyhow!("Could not determine data directory"))?;
+    std::fs::create_dir_all(&bin_dir)?;
+
+    let target = bin_dir.join(bin_name("gallery-dl"));
+
+    #[cfg(target_os = "windows")]
+    let url = "https://github.com/mikf/gallery-dl/releases/latest/download/gallery-dl.exe";
+    #[cfg(target_os = "linux")]
+    let url = "https://github.com/mikf/gallery-dl/releases/latest/download/gallery-dl.bin";
+
+    let client = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
+        .timeout(std::time::Duration::from_secs(180))
+        .build()?;
+
+    let response = client.get(url).send().await?;
+    if !response.status().is_success() {
+        return Err(anyhow!(
+            "Failed to download gallery-dl: HTTP {}",
+            response.status()
+        ));
+    }
+
+    let bytes = response.bytes().await?;
+    let data = bytes.to_vec();
+    let target_clone = target.clone();
+    tokio::task::spawn_blocking(move || -> anyhow::Result<()> {
+        std::fs::write(&target_clone, &data)?;
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let mut perm = std::fs::metadata(&target_clone)?.permissions();
+            perm.set_mode(0o755);
+            std::fs::set_permissions(&target_clone, perm)?;
+        }
+        Ok(())
+    })
+    .await
+    .map_err(|e| anyhow!("Spawn blocking failed: {}", e))??;
+
+    if !target.exists() {
+        return Err(anyhow!("gallery-dl binary not found after download"));
+    }
+
+    Ok(target)
+}
+
 pub async fn ensure_aria2c() -> Option<PathBuf> {
     if let Some(path) = find_tool("aria2c").await {
         return Some(path);

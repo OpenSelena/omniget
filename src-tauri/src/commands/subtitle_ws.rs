@@ -16,10 +16,10 @@ pub async fn subtitle_load(path: String) -> Result<Vec<Cue>, String> {
 #[cfg(not(target_os = "android"))]
 #[tauri::command]
 pub async fn subtitle_save(path: String, cues: Vec<Cue>, format: String) -> Result<(), String> {
-    let body = if format == "vtt" {
-        subtitle_merge::cues_to_vtt(&cues)
-    } else {
-        subtitle_merge::cues_to_srt(&cues)
+    let body = match format.as_str() {
+        "vtt" => subtitle_merge::cues_to_vtt(&cues),
+        "ass" => subtitle_merge::cues_to_ass(&cues),
+        _ => subtitle_merge::cues_to_srt(&cues),
     };
     tokio::fs::write(&path, body)
         .await
@@ -65,6 +65,59 @@ translated numbered lines, nothing else.",
     }
     if map.len() != cues.len() {
         return Err("translation_mismatch".to_string());
+    }
+    let mut result = cues;
+    for (i, c) in result.iter_mut().enumerate() {
+        if let Some(t) = map.get(&(i + 1)) {
+            c.text = t.trim().to_string();
+        }
+    }
+    Ok(result)
+}
+
+#[cfg(not(target_os = "android"))]
+#[tauri::command]
+pub async fn subtitle_grammar_fix(cues: Vec<Cue>, style: String) -> Result<Vec<Cue>, String> {
+    if !omniget_core::core::ai::get().is_configured() {
+        return Err("ai_not_configured".to_string());
+    }
+    if cues.is_empty() {
+        return Ok(cues);
+    }
+    let tone = match style.as_str() {
+        "formal" => "Use a formal register.",
+        "casual" => "Use a casual, conversational register.",
+        _ => "Keep the original register and wording as close as possible.",
+    };
+    let joined: String = cues
+        .iter()
+        .enumerate()
+        .map(|(i, c)| format!("{}\u{241F}{}", i + 1, c.text.replace('\n', "\u{2424}")))
+        .collect::<Vec<_>>()
+        .join("\n");
+    let system = format!(
+        "Fix grammar, spelling and punctuation in each numbered line without \
+changing its meaning. {} Keep the exact same numbering and line count. \
+Preserve the \u{2424} markers as line breaks. Output ONLY the corrected \
+numbered lines, nothing else.",
+        tone
+    );
+    let out = omniget_core::core::ai::chat(&system, &joined).await?;
+
+    let mut map: std::collections::HashMap<usize, String> = std::collections::HashMap::new();
+    for line in out.lines() {
+        let line = line.trim();
+        if line.is_empty() {
+            continue;
+        }
+        if let Some((num, rest)) = line.split_once('\u{241F}') {
+            if let Ok(idx) = num.trim().parse::<usize>() {
+                map.insert(idx, rest.replace('\u{2424}', "\n"));
+            }
+        }
+    }
+    if map.len() != cues.len() {
+        return Err("grammar_mismatch".to_string());
     }
     let mut result = cues;
     for (i, c) in result.iter_mut().enumerate() {

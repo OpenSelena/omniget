@@ -143,6 +143,82 @@ pub struct DownloadSettings {
     pub always_use_managed_cookies: bool,
     #[serde(default)]
     pub continuous_lecture_numbers: bool,
+    #[serde(default)]
+    pub bilibili_danmaku_enabled: bool,
+    #[serde(default = "default_bilibili_danmaku_format")]
+    pub bilibili_danmaku_format: String,
+    #[serde(default = "default_bilibili_container")]
+    pub bilibili_container: String,
+    #[serde(default)]
+    pub bilibili_nfo_enabled: bool,
+    #[serde(default)]
+    pub bilibili_cover_sidecar: bool,
+    #[serde(default = "default_bilibili_cover_format")]
+    pub bilibili_cover_format: String,
+    #[serde(default = "default_bilibili_naming_video")]
+    pub bilibili_naming_video: String,
+    #[serde(default = "default_bilibili_naming_multi_part")]
+    pub bilibili_naming_multi_part: String,
+    #[serde(default = "default_bilibili_naming_bangumi")]
+    pub bilibili_naming_bangumi: String,
+    #[serde(default = "default_bilibili_naming_cheese")]
+    pub bilibili_naming_cheese: String,
+    #[serde(default = "default_bilibili_naming_collection")]
+    pub bilibili_naming_collection: String,
+    #[serde(default)]
+    pub bilibili_cdn_hosts: String,
+    #[serde(default)]
+    pub bilibili_cdn_prefer_alternatives: bool,
+    #[serde(default = "default_bilibili_preferred_qn")]
+    pub bilibili_preferred_qn: u32,
+    #[serde(default = "default_bilibili_preferred_codec")]
+    pub bilibili_preferred_codec: u32,
+    #[serde(default = "default_bilibili_preferred_audio_qn")]
+    pub bilibili_preferred_audio_qn: u32,
+}
+
+fn default_bilibili_preferred_qn() -> u32 {
+    200
+}
+
+fn default_bilibili_preferred_codec() -> u32 {
+    20
+}
+
+fn default_bilibili_preferred_audio_qn() -> u32 {
+    30300
+}
+
+fn default_bilibili_cover_format() -> String {
+    "jpg".to_string()
+}
+
+fn default_bilibili_naming_video() -> String {
+    "{title}".to_string()
+}
+
+fn default_bilibili_naming_multi_part() -> String {
+    "{parent_title}/P{page} - {leaf_title}".to_string()
+}
+
+fn default_bilibili_naming_bangumi() -> String {
+    "{series_title}/Season {season_number}/{episode_number_pad2} - {episode_title}".to_string()
+}
+
+fn default_bilibili_naming_cheese() -> String {
+    "{series_title}/{section_title}/{episode_number_pad2} - {episode_title}".to_string()
+}
+
+fn default_bilibili_naming_collection() -> String {
+    "{collection_title}/{title}".to_string()
+}
+
+fn default_bilibili_danmaku_format() -> String {
+    "xml".to_string()
+}
+
+fn default_bilibili_container() -> String {
+    "mp4".to_string()
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -410,6 +486,22 @@ impl Default for AppSettings {
                 cookie_file: String::new(),
                 always_use_managed_cookies: true,
                 continuous_lecture_numbers: false,
+                bilibili_danmaku_enabled: false,
+                bilibili_danmaku_format: "xml".into(),
+                bilibili_container: "mp4".into(),
+                bilibili_nfo_enabled: false,
+                bilibili_cover_sidecar: false,
+                bilibili_cover_format: "jpg".into(),
+                bilibili_naming_video: default_bilibili_naming_video(),
+                bilibili_naming_multi_part: default_bilibili_naming_multi_part(),
+                bilibili_naming_bangumi: default_bilibili_naming_bangumi(),
+                bilibili_naming_cheese: default_bilibili_naming_cheese(),
+                bilibili_naming_collection: default_bilibili_naming_collection(),
+                bilibili_cdn_hosts: String::new(),
+                bilibili_cdn_prefer_alternatives: false,
+                bilibili_preferred_qn: default_bilibili_preferred_qn(),
+                bilibili_preferred_codec: default_bilibili_preferred_codec(),
+                bilibili_preferred_audio_qn: default_bilibili_preferred_audio_qn(),
             },
             advanced: AdvancedSettings {
                 max_concurrent_segments: 20,

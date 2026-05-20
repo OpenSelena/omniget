@@ -10,6 +10,8 @@ use tokio::io::{AsyncSeekExt, AsyncWriteExt};
 use tokio::sync::{mpsc, Mutex};
 use tokio_util::sync::CancellationToken;
 
+use crate::models::progress::ProgressUpdate;
+
 const SEG_PENDING: u8 = 0;
 const SEG_RUNNING: u8 = 1;
 const SEG_DONE: u8 = 2;
@@ -197,7 +199,7 @@ impl HttpFetcher {
 
     pub async fn download(
         &self,
-        progress_tx: mpsc::Sender<f64>,
+        progress_tx: mpsc::Sender<ProgressUpdate>,
     ) -> anyhow::Result<HttpFetcherResult> {
         let probe = self.probe().await?;
 
@@ -260,7 +262,7 @@ impl HttpFetcher {
                 if self.config.use_sidecar_resume {
                     let _ = tokio::fs::remove_file(&resume_path).await;
                 }
-                let _ = progress_tx.send(100.0).await;
+                let _ = progress_tx.send(ProgressUpdate::percent(100.0)).await;
                 let bytes = tokio::fs::metadata(&self.output_path)
                     .await
                     .map(|m| m.len())
@@ -303,7 +305,7 @@ impl HttpFetcher {
     async fn download_streaming(
         &self,
         part_path: &Path,
-        progress_tx: &mpsc::Sender<f64>,
+        progress_tx: &mpsc::Sender<ProgressUpdate>,
     ) -> anyhow::Result<HttpFetcherResult> {
         let _ = tokio::fs::remove_file(part_path).await;
 
@@ -321,6 +323,11 @@ impl HttpFetcher {
         let mut downloaded: u64 = 0;
         let mut stream = resp.bytes_stream();
 
+        let mut last_emit = std::time::Instant::now();
+        let mut anchor_bytes = 0u64;
+        let mut anchor_time = std::time::Instant::now();
+        let mut speed_ema: f64 = 0.0;
+
         loop {
             if let Some(token) = &self.cancel {
                 if token.is_cancelled() {
@@ -331,9 +338,45 @@ impl HttpFetcher {
                 Ok(Some(Ok(chunk))) => {
                     file.write_all(&chunk).await?;
                     downloaded += chunk.len() as u64;
-                    if let Some(t) = total.filter(|t| *t > 0) {
-                        let pct = (downloaded as f64 / t as f64) * 100.0;
-                        let _ = progress_tx.send(pct.min(99.9)).await;
+                    if last_emit.elapsed() >= Duration::from_millis(250) {
+                        let elapsed = anchor_time.elapsed().as_secs_f64();
+                        if elapsed >= 0.3 {
+                            let instant =
+                                (downloaded.saturating_sub(anchor_bytes)) as f64 / elapsed;
+                            speed_ema = if speed_ema > 0.0 {
+                                speed_ema * 0.6 + instant * 0.4
+                            } else {
+                                instant
+                            };
+                            anchor_bytes = downloaded;
+                            anchor_time = std::time::Instant::now();
+                        }
+                        let speed = (speed_ema > 0.0).then_some(speed_ema);
+                        let (pct, eta) = match total.filter(|t| *t > 0) {
+                            Some(t) => {
+                                let p = ((downloaded as f64 / t as f64) * 100.0).min(99.9);
+                                let e = speed.and_then(|s| {
+                                    (s > 0.0 && t > downloaded)
+                                        .then(|| ((t - downloaded) as f64 / s) as u64)
+                                });
+                                (p, e)
+                            }
+                            None => (
+                                ((downloaded as f64 / (downloaded as f64 + 500_000.0)) * 100.0)
+                                    .min(95.0),
+                                None,
+                            ),
+                        };
+                        let _ = progress_tx
+                            .send(ProgressUpdate::rich(
+                                pct,
+                                Some(downloaded),
+                                total.filter(|t| *t > 0),
+                                speed,
+                                eta,
+                            ))
+                            .await;
+                        last_emit = std::time::Instant::now();
                     }
                 }
                 Ok(Some(Err(e))) => return Err(anyhow!("stream error: {}", e)),
@@ -350,7 +393,7 @@ impl HttpFetcher {
         file.flush().await?;
         drop(file);
         tokio::fs::rename(part_path, &self.output_path).await?;
-        let _ = progress_tx.send(100.0).await;
+        let _ = progress_tx.send(ProgressUpdate::percent(100.0)).await;
         Ok(HttpFetcherResult {
             bytes_written: downloaded,
         })
@@ -363,7 +406,7 @@ impl HttpFetcher {
         seg_specs: Vec<ResumeSegment>,
         resume_path: &Path,
         url_hash: &str,
-        progress_tx: &mpsc::Sender<f64>,
+        progress_tx: &mpsc::Sender<ProgressUpdate>,
     ) -> anyhow::Result<()> {
         let segments: Arc<Mutex<Vec<Arc<Segment>>>> = Arc::new(Mutex::new(
             seg_specs
@@ -385,6 +428,10 @@ impl HttpFetcher {
             let cancel = cancel.clone();
             tokio::spawn(async move {
                 let mut last_emit = std::time::Instant::now() - Duration::from_secs(1);
+                let mut anchor_bytes = 0u64;
+                let mut anchor_time = std::time::Instant::now();
+                let mut speed_ema: f64 = 0.0;
+                let mut anchor_init = false;
                 loop {
                     if cancel.is_cancelled() {
                         break;
@@ -396,9 +443,37 @@ impl HttpFetcher {
                             .map(|s| s.downloaded.load(Ordering::Relaxed))
                             .sum()
                     };
+                    if !anchor_init {
+                        anchor_bytes = dl;
+                        anchor_time = std::time::Instant::now();
+                        anchor_init = true;
+                    }
                     if last_emit.elapsed() >= Duration::from_millis(200) {
-                        let pct = (dl as f64 / total as f64) * 100.0;
-                        let _ = progress_tx.send(pct.min(99.9)).await;
+                        let elapsed = anchor_time.elapsed().as_secs_f64();
+                        if elapsed >= 0.4 {
+                            let instant = (dl.saturating_sub(anchor_bytes)) as f64 / elapsed;
+                            speed_ema = if speed_ema > 0.0 {
+                                speed_ema * 0.6 + instant * 0.4
+                            } else {
+                                instant
+                            };
+                            anchor_bytes = dl;
+                            anchor_time = std::time::Instant::now();
+                        }
+                        let speed = (speed_ema > 0.0).then_some(speed_ema);
+                        let pct = ((dl as f64 / total as f64) * 100.0).min(99.9);
+                        let eta = speed.and_then(|s| {
+                            (s > 0.0 && total > dl).then(|| ((total - dl) as f64 / s) as u64)
+                        });
+                        let _ = progress_tx
+                            .send(ProgressUpdate::rich(
+                                pct,
+                                Some(dl),
+                                Some(total),
+                                speed,
+                                eta,
+                            ))
+                            .await;
                         last_emit = std::time::Instant::now();
                     }
                 }
@@ -1034,11 +1109,11 @@ mod tests {
         let url = format!("http://{}/file.bin", addr);
         let fetcher = HttpFetcher::new(client, url, output.clone());
 
-        let (tx, mut rx) = tokio::sync::mpsc::channel::<f64>(32);
+        let (tx, mut rx) = tokio::sync::mpsc::channel::<ProgressUpdate>(32);
         let progress_collector = tokio::spawn(async move {
             let mut last = 0.0;
             while let Some(p) = rx.recv().await {
-                last = p;
+                last = p.percent;
             }
             last
         });
@@ -1158,11 +1233,11 @@ mod tests {
         };
         let fetcher = HttpFetcher::new(client, url, output.clone()).with_config(cfg);
 
-        let (tx, mut rx) = tokio::sync::mpsc::channel::<f64>(64);
+        let (tx, mut rx) = tokio::sync::mpsc::channel::<ProgressUpdate>(64);
         let progress_collector = tokio::spawn(async move {
             let mut last = 0.0;
             while let Some(p) = rx.recv().await {
-                last = p;
+                last = p.percent;
             }
             last
         });

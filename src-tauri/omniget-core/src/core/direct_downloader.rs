@@ -12,6 +12,7 @@ use tokio_util::sync::CancellationToken;
 use crate::core::http_fetcher::{
     get_global_max_concurrent_segments, HttpFetcher, HttpFetcherConfig,
 };
+use crate::models::progress::ProgressUpdate;
 
 const CHUNK_TIMEOUT: Duration = Duration::from_secs(45);
 const MAX_RETRIES: u32 = 3;
@@ -45,7 +46,7 @@ pub async fn download_direct(
     client: &reqwest::Client,
     url: &str,
     output: &Path,
-    progress_tx: mpsc::Sender<f64>,
+    progress_tx: mpsc::Sender<ProgressUpdate>,
     cancel: Option<&CancellationToken>,
 ) -> anyhow::Result<u64> {
     download_direct_with_headers(client, url, output, progress_tx, None, cancel).await
@@ -55,7 +56,7 @@ pub async fn download_direct_with_headers(
     client: &reqwest::Client,
     url: &str,
     output: &Path,
-    progress_tx: mpsc::Sender<f64>,
+    progress_tx: mpsc::Sender<ProgressUpdate>,
     headers: Option<reqwest::header::HeaderMap>,
     cancel: Option<&CancellationToken>,
 ) -> anyhow::Result<u64> {
@@ -154,7 +155,7 @@ async fn download_attempt(
     client: &reqwest::Client,
     url: &str,
     output: &Path,
-    progress_tx: &mpsc::Sender<f64>,
+    progress_tx: &mpsc::Sender<ProgressUpdate>,
     headers: Option<reqwest::header::HeaderMap>,
     cancel: Option<&CancellationToken>,
 ) -> anyhow::Result<u64> {
@@ -224,7 +225,7 @@ async fn download_attempt(
     }
 
     std::fs::rename(&part_path, output)?;
-    let _ = progress_tx.send(100.0).await;
+    let _ = progress_tx.send(ProgressUpdate::percent(100.0)).await;
 
     let size = std::fs::metadata(output)?.len();
     Ok(size)
@@ -234,7 +235,7 @@ async fn run_http_fetcher(
     client: &reqwest::Client,
     url: &str,
     output: &Path,
-    progress_tx: &mpsc::Sender<f64>,
+    progress_tx: &mpsc::Sender<ProgressUpdate>,
     headers: Option<reqwest::header::HeaderMap>,
     cancel: Option<&CancellationToken>,
 ) -> anyhow::Result<u64> {
@@ -267,7 +268,7 @@ async fn download_single_stream(
     part_path: &Path,
     existing_bytes: u64,
     total_size: Option<u64>,
-    progress_tx: &mpsc::Sender<f64>,
+    progress_tx: &mpsc::Sender<ProgressUpdate>,
     headers: Option<reqwest::header::HeaderMap>,
     cancel: Option<&CancellationToken>,
 ) -> anyhow::Result<()> {
@@ -322,6 +323,11 @@ async fn download_single_stream(
     let mut downloaded = offset;
     let mut stream = response.bytes_stream();
 
+    let mut last_emit = std::time::Instant::now();
+    let mut speed_anchor_bytes = downloaded;
+    let mut speed_anchor_time = std::time::Instant::now();
+    let mut speed_ema: f64 = 0.0;
+
     loop {
         if let Some(token) = cancel {
             if token.is_cancelled() {
@@ -337,14 +343,44 @@ async fn download_single_stream(
                     .map_err(|e| anyhow!("Write error (disk full?): {}", e))?;
                 downloaded += chunk.len() as u64;
 
-                if let Some(total) = total_size {
-                    if total > 0 {
-                        let percent = (downloaded as f64 / total as f64) * 100.0;
-                        let _ = progress_tx.send(percent).await;
+                if last_emit.elapsed() >= std::time::Duration::from_millis(250) {
+                    let dt = speed_anchor_time.elapsed().as_secs_f64();
+                    if dt >= 0.2 {
+                        let instant = (downloaded.saturating_sub(speed_anchor_bytes)) as f64 / dt;
+                        speed_ema = if speed_ema > 0.0 {
+                            speed_ema * 0.6 + instant * 0.4
+                        } else {
+                            instant
+                        };
+                        speed_anchor_bytes = downloaded;
+                        speed_anchor_time = std::time::Instant::now();
                     }
-                } else {
-                    let percent = (downloaded as f64 / (downloaded as f64 + 500_000.0)) * 100.0;
-                    let _ = progress_tx.send(percent.min(95.0)).await;
+                    let speed = (speed_ema > 0.0).then_some(speed_ema);
+                    let (percent, eta) = match total_size {
+                        Some(total) if total > 0 => {
+                            let pct = (downloaded as f64 / total as f64) * 100.0;
+                            let eta = speed.and_then(|s| {
+                                (s > 0.0 && total > downloaded)
+                                    .then(|| ((total - downloaded) as f64 / s) as u64)
+                            });
+                            (pct, eta)
+                        }
+                        _ => (
+                            ((downloaded as f64 / (downloaded as f64 + 500_000.0)) * 100.0)
+                                .min(95.0),
+                            None,
+                        ),
+                    };
+                    let _ = progress_tx
+                        .send(ProgressUpdate::rich(
+                            percent,
+                            Some(downloaded),
+                            total_size.filter(|t| *t > 0),
+                            speed,
+                            eta,
+                        ))
+                        .await;
+                    last_emit = std::time::Instant::now();
                 }
             }
             Ok(Some(Err(e))) => {

@@ -59,6 +59,7 @@ pub fn run() {
         torrent_session.clone(),
     )));
     registry.register(Arc::new(platforms::p2p::P2pDownloader::new()));
+    registry.register(Arc::new(platforms::gallerydl::GalleryDlDownloader::new()));
     registry.register(Arc::new(
         platforms::generic_ytdlp::GenericYtdlpDownloader::new(),
     ));
@@ -126,6 +127,15 @@ pub fn run() {
         ))
         .setup(|app| {
             commands::host_queue::register_event_listeners(app.handle());
+            {
+                let handle = app.handle().clone();
+                platforms::bilibili::notify::set_emitter(Box::new(
+                    move |event: &str, payload: serde_json::Value| {
+                        use tauri::Emitter;
+                        let _ = handle.emit(event, payload);
+                    },
+                ));
+            }
             let settings = storage::config::load_settings(app.handle());
             core::http_client::init_proxy(settings.proxy.clone());
             core::http_fetcher::set_global_max_concurrent_segments(
@@ -457,6 +467,16 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::auth_webview::open_auth_webview,
+            commands::bilibili_auth::bilibili_qr_generate,
+            commands::bilibili_auth::bilibili_qr_poll,
+            commands::bilibili_auth::bilibili_captcha_challenge,
+            commands::bilibili_auth::bilibili_sms_send,
+            commands::bilibili_auth::bilibili_sms_verify,
+            commands::bilibili_auth::bilibili_account_status,
+            commands::bilibili_auth::bilibili_import_watch_later,
+            commands::bilibili_auth::bilibili_import_history,
+            commands::bilibili_auth::bilibili_preview_info,
+            commands::bilibili_auth::bilibili_webview_login,
             commands::browser_extension::browser_extension_status,
             commands::browser_extension::browser_extension_export,
             commands::browser_extension::browser_extension_open_folder,
@@ -504,6 +524,7 @@ pub fn run() {
             commands::subtitle_ws::subtitle_load,
             commands::subtitle_ws::subtitle_save,
             commands::subtitle_ws::subtitle_translate,
+            commands::subtitle_ws::subtitle_grammar_fix,
             commands::downloads::metadata_fetch,
             commands::downloads::thumbnails_list,
             commands::downloads::thumbnail_save,

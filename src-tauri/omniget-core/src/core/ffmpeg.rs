@@ -6,6 +6,8 @@ use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 
+use crate::models::progress::ProgressUpdate;
+
 static FFMPEG_AVAILABLE_CACHE: std::sync::RwLock<Option<bool>> = std::sync::RwLock::new(None);
 
 pub async fn is_ffmpeg_available() -> bool {
@@ -266,7 +268,7 @@ pub async fn get_duration_us(path: &Path) -> anyhow::Result<u64> {
 pub async fn convert(
     opts: &ConversionOptions,
     cancel_token: CancellationToken,
-    progress_tx: mpsc::Sender<f64>,
+    progress_tx: mpsc::Sender<ProgressUpdate>,
 ) -> anyhow::Result<ConversionResult> {
     let input_path = Path::new(&opts.input_path);
     let output_path = Path::new(&opts.output_path);
@@ -360,7 +362,7 @@ pub async fn convert(
             if let Some(us) = parse_out_time_us(&line) {
                 if total_duration_us > 0 {
                     let pct = (us as f64 / total_duration_us as f64 * 100.0).min(100.0);
-                    let _ = progress.send(pct).await;
+                    let _ = progress.send(ProgressUpdate::percent(pct)).await;
                 }
             }
         }
@@ -386,7 +388,7 @@ pub async fn convert(
 
     match result {
         Ok(status) if status.success() => {
-            let _ = progress_tx.send(100.0).await;
+            let _ = progress_tx.send(ProgressUpdate::percent(100.0)).await;
             let meta = std::fs::metadata(output_path);
             let file_size = meta.map(|m| m.len()).unwrap_or(0);
 
