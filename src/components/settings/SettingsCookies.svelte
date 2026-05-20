@@ -10,6 +10,7 @@
   import CookieImportMenu from "$lib/components/cookies/CookieImportMenu.svelte";
   import CookieContentModal from "$lib/components/cookies/CookieContentModal.svelte";
   import CookiePasteModal from "$lib/components/cookies/CookiePasteModal.svelte";
+  import BilibiliQrLogin from "$lib/components/cookies/BilibiliQrLogin.svelte";
 
   type Account = {
     slug: string;
@@ -105,6 +106,7 @@
 
   let addAccountOpen = $state(false);
   let addAccountDomain = $state("");
+  let bilibiliQrOpen = $state(false);
 
   let bucketList = $derived(
     Object.entries(registry.buckets)
@@ -235,7 +237,117 @@
 
   function openAddAccount(domain: string) {
     addAccountDomain = domain;
+    if (domain === "bilibili.com") {
+      bilibiliQrOpen = true;
+      return;
+    }
     addAccountOpen = true;
+  }
+
+  async function handleBilibiliQrSuccess(slug: string, uname: string) {
+    bilibiliQrOpen = false;
+    showToast(
+      "success",
+      ($t("settings.cookies.bilibili.login_qr_success", { uname }) as string) ||
+        `Signed in as ${uname}`,
+    );
+    await reload();
+    const _ = slug;
+  }
+
+  let bilibiliWebviewLoading = $state(false);
+  async function startBilibiliWebviewLogin() {
+    if (bilibiliWebviewLoading) return;
+    bilibiliWebviewLoading = true;
+    try {
+      const res = await invoke<{ slug: string; uname: string; mid: number; is_vip: boolean }>(
+        "bilibili_webview_login",
+      );
+      showToast(
+        "success",
+        ($t("settings.cookies.bilibili.login_qr_success", { uname: res.uname }) as string) ||
+          `Signed in as ${res.uname}`,
+      );
+      await reload();
+    } catch (e) {
+      const key = typeof e === "string" ? e : "errors.bilibili.network_failed";
+      showToast("error", ($t(key) as string) || String(e));
+    } finally {
+      bilibiliWebviewLoading = false;
+    }
+  }
+
+  type BilibiliImportedItem = { url: string; title: string };
+  type BilibiliImportResult = { total: number; items: BilibiliImportedItem[] };
+
+  function bilibiliAccountSlug(): string | null {
+    const bucket = registry.buckets["bilibili.com"];
+    if (!bucket) return null;
+    const real = bucket.accounts.find((a) => !a.slug.startsWith("_") && a.cookie_count > 0);
+    return real?.slug ?? null;
+  }
+
+  async function enqueueImportedUrls(items: BilibiliImportedItem[]) {
+    const settings = getSettings();
+    const outDir = settings?.download?.default_output_dir ?? "";
+    for (const it of items) {
+      try {
+        await invoke("download_from_url", {
+          url: it.url,
+          outputDir: outDir,
+          downloadMode: null,
+          quality: null,
+          formatId: null,
+          referer: "https://www.bilibili.com",
+          cookieSlug: null,
+          timeRange: null,
+          playlistItems: null,
+          torrentFiles: null,
+          scheduledAt: null,
+          stopAt: null,
+        });
+      } catch (e) {
+        console.warn("[bilibili import] enqueue failed", it.url, e);
+      }
+    }
+  }
+
+  async function importBilibiliWatchLater() {
+    const slug = bilibiliAccountSlug();
+    if (!slug) {
+      showToast("error", $t("settings.cookies.bilibili.import_no_account") as string);
+      return;
+    }
+    try {
+      const res = await invoke<BilibiliImportResult>("bilibili_import_watch_later", { slug });
+      showToast(
+        "success",
+        ($t("settings.cookies.bilibili.import_done", { count: String(res.items.length) }) as string) ??
+          `Queued ${res.items.length} items`,
+      );
+      await enqueueImportedUrls(res.items);
+    } catch (e) {
+      showToast("error", typeof e === "string" ? ($t(e) as string) || e : String(e));
+    }
+  }
+
+  async function importBilibiliHistory() {
+    const slug = bilibiliAccountSlug();
+    if (!slug) {
+      showToast("error", $t("settings.cookies.bilibili.import_no_account") as string);
+      return;
+    }
+    try {
+      const res = await invoke<BilibiliImportResult>("bilibili_import_history", { slug });
+      showToast(
+        "success",
+        ($t("settings.cookies.bilibili.import_done", { count: String(res.items.length) }) as string) ??
+          `Queued ${res.items.length} items`,
+      );
+      await enqueueImportedUrls(res.items);
+    } catch (e) {
+      showToast("error", typeof e === "string" ? ($t(e) as string) || e : String(e));
+    }
   }
 
   async function submitAddAccount(content: string, sourceUrl: string, alias: string) {
@@ -368,6 +480,26 @@
           onAddAccount={openAddAccount}
           onTest={handleTest}
         />
+        {#if bucket.domain === "bilibili.com"}
+          {#if bucket.accounts.some((a) => !a.slug.startsWith("_") && a.cookie_count > 0)}
+            <div class="bilibili-importers">
+              <button type="button" class="importer-btn" onclick={importBilibiliWatchLater}>
+                {$t("settings.cookies.bilibili.import_watch_later")}
+              </button>
+              <button type="button" class="importer-btn" onclick={importBilibiliHistory}>
+                {$t("settings.cookies.bilibili.import_history")}
+              </button>
+            </div>
+          {:else}
+            <div class="bilibili-importers">
+              <button type="button" class="importer-btn" onclick={startBilibiliWebviewLogin} disabled={bilibiliWebviewLoading}>
+                {bilibiliWebviewLoading
+                  ? $t("settings.cookies.bilibili.login_webview_loading")
+                  : $t("settings.cookies.bilibili.login_webview_btn")}
+              </button>
+            </div>
+          {/if}
+        {/if}
       {/each}
     </div>
   {/if}
@@ -420,6 +552,12 @@
   open={addAccountOpen}
   onSubmit={submitAddAccount}
   onClose={() => addAccountOpen = false}
+/>
+
+<BilibiliQrLogin
+  open={bilibiliQrOpen}
+  onClose={() => (bilibiliQrOpen = false)}
+  onSuccess={handleBilibiliQrSuccess}
 />
 
 {#if confirmClearOpen}
@@ -602,4 +740,23 @@
     cursor: pointer;
   }
   .danger-btn:hover { filter: brightness(1.1); }
+  .bilibili-importers {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: -8px 0 8px 56px;
+    padding-left: 18px;
+  }
+  .importer-btn {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid color-mix(in oklab, var(--content-border) 60%, transparent);
+    background: color-mix(in oklab, var(--button) 25%, transparent);
+    color: var(--text);
+    font-size: 12px;
+    cursor: pointer;
+  }
+  .importer-btn:hover {
+    background: color-mix(in oklab, var(--text) 6%, transparent);
+  }
 </style>

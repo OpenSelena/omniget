@@ -15,6 +15,11 @@
   let findText = $state("");
   let replaceText = $state("");
   let targetLang = $state("");
+  let grammarStyle = $state<"original" | "formal" | "casual">("original");
+  let tpOldA = $state("");
+  let tpNewA = $state("");
+  let tpOldB = $state("");
+  let tpNewB = $state("");
   let peaks = $state<number[]>([]);
   let shots = $state<number[]>([]);
   let durationMs = $derived(cues.length ? cues[cues.length - 1].end_ms : 0);
@@ -26,7 +31,9 @@
         ? ($t("downloads.sw.not_configured") as string)
         : raw === "translation_mismatch"
           ? ($t("downloads.sw.translate_mismatch") as string)
-          : raw;
+          : raw === "grammar_mismatch"
+            ? ($t("downloads.sw.grammar_mismatch") as string)
+            : raw;
     showToast("error", msg);
   }
 
@@ -52,7 +59,7 @@
   async function loadFile() {
     const sel = await openDialog({
       multiple: false,
-      filters: [{ name: "Subtitles", extensions: ["srt", "vtt"] }],
+      filters: [{ name: "Subtitles", extensions: ["srt", "vtt", "ass"] }],
     });
     if (!sel || typeof sel !== "string") return;
     busy = true;
@@ -159,7 +166,87 @@
     }
   }
 
-  async function saveAs(format: "srt" | "vtt") {
+  async function grammarFix() {
+    if (!cues.length || busy) return;
+    busy = true;
+    try {
+      cues = await invoke<Cue[]>("subtitle_grammar_fix", {
+        cues,
+        style: grammarStyle,
+      });
+      showToast("success", $t("downloads.sw.grammar_done") as string);
+    } catch (e) {
+      err(e);
+    } finally {
+      busy = false;
+    }
+  }
+
+  function autoFix() {
+    if (!cues.length) return;
+    const MIN_MS = 700;
+    const MAX_LINE = 42;
+    let changes = 0;
+
+    let next = cues
+      .filter((c) => c.text.trim().length > 0)
+      .map((c) => ({ ...c, text: c.text.trim() }))
+      .sort((a, b) => a.start_ms - b.start_ms);
+    if (next.length !== cues.length) changes += cues.length - next.length;
+
+    for (let i = 0; i < next.length; i++) {
+      const c = next[i];
+      if (c.end_ms <= c.start_ms) {
+        c.end_ms = c.start_ms + MIN_MS;
+        changes++;
+      }
+      if (c.end_ms - c.start_ms < MIN_MS) {
+        c.end_ms = c.start_ms + MIN_MS;
+        changes++;
+      }
+      if (i < next.length - 1 && c.end_ms > next[i + 1].start_ms) {
+        c.end_ms = Math.max(c.start_ms + 1, next[i + 1].start_ms - 1);
+        changes++;
+      }
+      if (!c.text.includes("\n") && c.text.length > MAX_LINE) {
+        const mid = Math.floor(c.text.length / 2);
+        let sp = c.text.lastIndexOf(" ", mid);
+        if (sp < 1) sp = c.text.indexOf(" ", mid);
+        if (sp > 0) {
+          c.text = c.text.slice(0, sp) + "\n" + c.text.slice(sp + 1);
+          changes++;
+        }
+      }
+    }
+
+    cues = next;
+    showToast(
+      changes ? "success" : "info",
+      changes
+        ? ($t("downloads.sw.autofixed", { count: changes }) as string)
+        : ($t("downloads.sw.autofix_none") as string),
+    );
+  }
+
+  function twoPoint() {
+    const oa = parseTime(tpOldA, NaN);
+    const na = parseTime(tpNewA, NaN);
+    const ob = parseTime(tpOldB, NaN);
+    const nb = parseTime(tpNewB, NaN);
+    if ([oa, na, ob, nb].some((v) => Number.isNaN(v)) || oa === ob) {
+      showToast("error", $t("downloads.sw.tp_invalid") as string);
+      return;
+    }
+    const a = (nb - na) / (ob - oa);
+    const b = na - a * oa;
+    cues = cues.map((c) => ({
+      ...c,
+      start_ms: Math.max(0, Math.round(a * c.start_ms + b)),
+      end_ms: Math.max(0, Math.round(a * c.end_ms + b)),
+    }));
+  }
+
+  async function saveAs(format: "srt" | "vtt" | "ass") {
     if (!cues.length) return;
     const path = await saveDialog({
       filters: [{ name: format.toUpperCase(), extensions: [format] }],
@@ -192,6 +279,7 @@
       <button onclick={loadMedia} disabled={!cues.length}>{$t('downloads.sw.load_media')}</button>
       <button class="primary" onclick={() => saveAs('srt')} disabled={!cues.length}>{$t('downloads.sw.save_srt')}</button>
       <button class="primary" onclick={() => saveAs('vtt')} disabled={!cues.length}>{$t('downloads.sw.save_vtt')}</button>
+      <button class="primary" onclick={() => saveAs('ass')} disabled={!cues.length}>{$t('downloads.sw.save_ass')}</button>
     </div>
 
     {#if cues.length}
@@ -219,6 +307,23 @@
         <div class="op">
           <input type="text" placeholder={$t('downloads.sw.target_lang') as string} bind:value={targetLang} />
           <button onclick={translateAll} disabled={busy}>{$t('downloads.sw.translate')}</button>
+        </div>
+        <div class="op">
+          <label for="sw-gstyle">{$t('downloads.sw.grammar_style')}</label>
+          <select id="sw-gstyle" bind:value={grammarStyle}>
+            <option value="original">{$t('downloads.sw.style_original')}</option>
+            <option value="formal">{$t('downloads.sw.style_formal')}</option>
+            <option value="casual">{$t('downloads.sw.style_casual')}</option>
+          </select>
+          <button onclick={grammarFix} disabled={busy}>{$t('downloads.sw.grammar')}</button>
+          <button onclick={autoFix} disabled={busy}>{$t('downloads.sw.autofix')}</button>
+        </div>
+        <div class="op">
+          <input type="text" placeholder={$t('downloads.sw.tp_old') as string} bind:value={tpOldA} />
+          <input type="text" placeholder={$t('downloads.sw.tp_new') as string} bind:value={tpNewA} />
+          <input type="text" placeholder={$t('downloads.sw.tp_old') as string} bind:value={tpOldB} />
+          <input type="text" placeholder={$t('downloads.sw.tp_new') as string} bind:value={tpNewB} />
+          <button onclick={twoPoint}>{$t('downloads.sw.twopoint')}</button>
         </div>
       </div>
 

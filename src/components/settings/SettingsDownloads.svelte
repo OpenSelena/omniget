@@ -109,6 +109,33 @@
     updateSettings({ download: { sponsorblock_mode: value } });
   }
 
+  function setBilibiliDanmakuFormat(e: Event) {
+    const value = (e.target as HTMLSelectElement).value;
+    updateSettings({ download: { bilibili_danmaku_format: value } });
+  }
+
+  function setBilibiliContainer(e: Event) {
+    const value = (e.target as HTMLSelectElement).value;
+    updateSettings({ download: { bilibili_container: value } });
+  }
+
+  function setBilibiliCoverFormat(e: Event) {
+    const value = (e.target as HTMLSelectElement).value;
+    updateSettings({ download: { bilibili_cover_format: value } });
+  }
+
+  let namingTemplatesOpen = $state(false);
+  let cdnOpen = $state(false);
+
+  async function setBilibiliNamingTemplate(field: string, value: string) {
+    await updateSettings({ download: { [field]: value } });
+  }
+
+  async function setBilibiliCdnHosts(e: Event) {
+    const value = (e.target as HTMLTextAreaElement).value;
+    await updateSettings({ download: { bilibili_cdn_hosts: value } });
+  }
+
   function previewTemplate(template: string): string {
     return template
       .replace("%(title).200s", "My Video Title")
@@ -564,6 +591,135 @@
 </details>
 
 <details class="section">
+  <summary class="section-title">{$t('settings.download.bilibili_section')}</summary>
+  <div class="card">
+    <div class="setting-row">
+      <div class="setting-col">
+        <span class="setting-label">{$t('settings.download.bilibili_container_label')}</span>
+        <span class="setting-path">{$t('settings.download.bilibili_container_desc')}</span>
+      </div>
+      <select class="select" value={settings.download.bilibili_container} onchange={setBilibiliContainer}>
+        <option value="mp4">MP4</option>
+        <option value="mkv">MKV</option>
+      </select>
+    </div>
+    <div class="divider"></div>
+    <div class="setting-row">
+      <div class="setting-col">
+        <span class="setting-label">{$t('settings.download.bilibili_danmaku_label')}</span>
+        <span class="setting-path">{$t('settings.download.bilibili_danmaku_desc')}</span>
+      </div>
+      <button class="toggle" class:on={settings.download.bilibili_danmaku_enabled} onclick={() => toggleBool("download", "bilibili_danmaku_enabled", settings.download.bilibili_danmaku_enabled)} role="switch" aria-checked={settings.download.bilibili_danmaku_enabled} aria-label={$t('settings.download.bilibili_danmaku_label') as string}><span class="toggle-knob"></span></button>
+    </div>
+    {#if settings.download.bilibili_danmaku_enabled}
+      <div class="divider"></div>
+      <div class="setting-row">
+        <div class="setting-col">
+          <span class="setting-label">{$t('settings.download.bilibili_danmaku_format_label')}</span>
+          <span class="setting-path">{$t('settings.download.bilibili_danmaku_format_desc')}</span>
+        </div>
+        <select class="select" value={settings.download.bilibili_danmaku_format} onchange={setBilibiliDanmakuFormat}>
+          <option value="xml">XML</option>
+          <option value="ass">ASS</option>
+          <option value="json">JSON</option>
+        </select>
+      </div>
+    {/if}
+    <div class="divider"></div>
+    <div class="setting-row">
+      <div class="setting-col">
+        <span class="setting-label">{$t('settings.download.bilibili_nfo_label')}</span>
+        <span class="setting-path">{$t('settings.download.bilibili_nfo_desc')}</span>
+      </div>
+      <button class="toggle" class:on={settings.download.bilibili_nfo_enabled} onclick={() => toggleBool("download", "bilibili_nfo_enabled", settings.download.bilibili_nfo_enabled)} role="switch" aria-checked={settings.download.bilibili_nfo_enabled} aria-label={$t('settings.download.bilibili_nfo_label') as string}><span class="toggle-knob"></span></button>
+    </div>
+    <div class="divider"></div>
+    <div class="setting-row">
+      <div class="setting-col">
+        <span class="setting-label">{$t('settings.download.bilibili_cover_sidecar_label')}</span>
+        <span class="setting-path">{$t('settings.download.bilibili_cover_sidecar_desc')}</span>
+      </div>
+      <button class="toggle" class:on={settings.download.bilibili_cover_sidecar} onclick={() => toggleBool("download", "bilibili_cover_sidecar", settings.download.bilibili_cover_sidecar)} role="switch" aria-checked={settings.download.bilibili_cover_sidecar} aria-label={$t('settings.download.bilibili_cover_sidecar_label') as string}><span class="toggle-knob"></span></button>
+    </div>
+    {#if settings.download.bilibili_cover_sidecar}
+      <div class="divider"></div>
+      <div class="setting-row">
+        <div class="setting-col">
+          <span class="setting-label">{$t('settings.download.bilibili_cover_format_label')}</span>
+          <span class="setting-path">{$t('settings.download.bilibili_cover_format_desc')}</span>
+        </div>
+        <select class="select" value={settings.download.bilibili_cover_format} onchange={setBilibiliCoverFormat}>
+          <option value="jpg">JPG</option>
+          <option value="png">PNG</option>
+          <option value="webp">WebP</option>
+          <option value="avif">AVIF</option>
+        </select>
+      </div>
+    {/if}
+    <div class="divider"></div>
+    <div class="setting-row">
+      <div class="setting-col">
+        <span class="setting-label">{$t('settings.download.bilibili_naming_label')}</span>
+        <span class="setting-path">{$t('settings.download.bilibili_naming_desc')}</span>
+      </div>
+      <button type="button" class="ghost-btn" onclick={() => (namingTemplatesOpen = !namingTemplatesOpen)}>
+        {namingTemplatesOpen ? $t('settings.download.bilibili_naming_hide') : $t('settings.download.bilibili_naming_edit')}
+      </button>
+    </div>
+    {#if namingTemplatesOpen}
+      <div class="naming-block">
+        <label class="naming-row">
+          <span class="naming-label">{$t('settings.download.bilibili_naming_video_label')}</span>
+          <input class="naming-input" type="text" value={settings.download.bilibili_naming_video} oninput={(e) => setBilibiliNamingTemplate('bilibili_naming_video', (e.target as HTMLInputElement).value)} />
+        </label>
+        <label class="naming-row">
+          <span class="naming-label">{$t('settings.download.bilibili_naming_multi_part_label')}</span>
+          <input class="naming-input" type="text" value={settings.download.bilibili_naming_multi_part} oninput={(e) => setBilibiliNamingTemplate('bilibili_naming_multi_part', (e.target as HTMLInputElement).value)} />
+        </label>
+        <label class="naming-row">
+          <span class="naming-label">{$t('settings.download.bilibili_naming_bangumi_label')}</span>
+          <input class="naming-input" type="text" value={settings.download.bilibili_naming_bangumi} oninput={(e) => setBilibiliNamingTemplate('bilibili_naming_bangumi', (e.target as HTMLInputElement).value)} />
+        </label>
+        <label class="naming-row">
+          <span class="naming-label">{$t('settings.download.bilibili_naming_cheese_label')}</span>
+          <input class="naming-input" type="text" value={settings.download.bilibili_naming_cheese} oninput={(e) => setBilibiliNamingTemplate('bilibili_naming_cheese', (e.target as HTMLInputElement).value)} />
+        </label>
+        <label class="naming-row">
+          <span class="naming-label">{$t('settings.download.bilibili_naming_collection_label')}</span>
+          <input class="naming-input" type="text" value={settings.download.bilibili_naming_collection} oninput={(e) => setBilibiliNamingTemplate('bilibili_naming_collection', (e.target as HTMLInputElement).value)} />
+        </label>
+        <p class="naming-help">{$t('settings.download.bilibili_naming_help')}</p>
+      </div>
+    {/if}
+    <div class="divider"></div>
+    <div class="setting-row">
+      <div class="setting-col">
+        <span class="setting-label">{$t('settings.download.bilibili_cdn_label')}</span>
+        <span class="setting-path">{$t('settings.download.bilibili_cdn_desc')}</span>
+      </div>
+      <button type="button" class="ghost-btn" onclick={() => (cdnOpen = !cdnOpen)}>
+        {cdnOpen ? $t('settings.download.bilibili_naming_hide') : $t('settings.download.bilibili_naming_edit')}
+      </button>
+    </div>
+    {#if cdnOpen}
+      <div class="naming-block">
+        <label class="naming-row">
+          <span class="naming-label">{$t('settings.download.bilibili_cdn_hosts_label')}</span>
+          <textarea class="naming-input" rows="3" value={settings.download.bilibili_cdn_hosts} oninput={setBilibiliCdnHosts} placeholder={$t('settings.download.bilibili_cdn_hosts_placeholder') as string}></textarea>
+        </label>
+        <div class="setting-row" style="padding: 4px 0;">
+          <div class="setting-col">
+            <span class="setting-label">{$t('settings.download.bilibili_cdn_prefer_label')}</span>
+            <span class="setting-path">{$t('settings.download.bilibili_cdn_prefer_desc')}</span>
+          </div>
+          <button class="toggle" class:on={settings.download.bilibili_cdn_prefer_alternatives} onclick={() => toggleBool("download", "bilibili_cdn_prefer_alternatives", settings.download.bilibili_cdn_prefer_alternatives)} role="switch" aria-checked={settings.download.bilibili_cdn_prefer_alternatives} aria-label={$t('settings.download.bilibili_cdn_prefer_label') as string}><span class="toggle-knob"></span></button>
+        </div>
+      </div>
+    {/if}
+  </div>
+</details>
+
+<details class="section">
   <summary class="section-title">{$t('settings.download.clipboard_detection')}</summary>
   <div class="card">
     <div class="setting-row">
@@ -702,5 +858,53 @@
     font-size: 0.78rem;
     color: var(--text-muted, var(--text));
     opacity: 0.75;
+  }
+  .ghost-btn {
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--content-border, color-mix(in oklab, var(--text) 15%, transparent));
+    background: transparent;
+    color: var(--text);
+    font-size: 0.85rem;
+    cursor: pointer;
+  }
+  .ghost-btn:hover {
+    background: color-mix(in oklab, var(--text) 6%, transparent);
+  }
+  .naming-block {
+    padding: 14px 16px 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .naming-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .naming-label {
+    font-size: 0.78rem;
+    color: var(--text-muted, var(--text));
+    opacity: 0.85;
+  }
+  .naming-input {
+    padding: 6px 10px;
+    border-radius: 6px;
+    border: 1px solid color-mix(in oklab, var(--content-border) 60%, transparent);
+    background: var(--surface);
+    color: var(--text);
+    font-family: ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+    font-size: 0.8rem;
+  }
+  .naming-input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .naming-help {
+    font-size: 0.72rem;
+    color: var(--text-muted, var(--text));
+    opacity: 0.7;
+    margin: 4px 0 0;
+    line-height: 1.4;
   }
 </style>
