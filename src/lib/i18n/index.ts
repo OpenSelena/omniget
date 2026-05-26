@@ -4,10 +4,16 @@ type Payload = [payload?: Record<string, unknown>];
 
 const config = {
   loaders: [
+    
     {
       locale: "en",
       key: "",
       loader: async () => (await import("./en.json")).default,
+    },
+	{
+      locale: "ru",
+      key: "",
+      loader: async () => (await import("./ru.json")).default,
     },
     {
       locale: "el",

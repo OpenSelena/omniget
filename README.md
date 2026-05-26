@@ -9,6 +9,7 @@
 <p align="center">
 <b>English</b>
 | <a href="README_zh_CN.md">中文</a>
+| <a href="README.ru.md">Русский</a>
 </p>
 
 <p align="center">
