@@ -498,9 +498,34 @@ pub async fn check_ytdlp_update(ytdlp: &Path) -> anyhow::Result<bool> {
 }
 
 fn proxy_args() -> Vec<String> {
-    match crate::core::http_client::proxy_url() {
-        Some(url) => vec!["--proxy".to_string(), url],
-        None => Vec::new(),
+    vec![
+        "--proxy".to_string(),
+        crate::core::http_client::proxy_url().unwrap_or_default(),
+    ]
+}
+
+fn redacted_proxy_url(url: &str) -> String {
+    if let Some(at) = url.find('@') {
+        if let Some(scheme_end) = url.find("://") {
+            return format!("{}***{}", &url[..scheme_end + 3], &url[at..]);
+        }
+    }
+    url.to_string()
+}
+
+fn proxy_log_label(proxy_url: Option<&str>) -> String {
+    match proxy_url {
+        Some(url) => format!("proxy={}", redacted_proxy_url(url)),
+        None => {
+            let proxy = crate::core::http_client::get_proxy_snapshot();
+            if proxy.enabled && proxy.host.trim().is_empty() {
+                "proxy=disabled (enabled but host is empty)".to_string()
+            } else if proxy.enabled {
+                "proxy=disabled (invalid proxy settings)".to_string()
+            } else {
+                "proxy=disabled".to_string()
+            }
+        }
     }
 }
 
@@ -625,6 +650,9 @@ fn yt_rate_limiter() -> &'static YtRateLimiter {
 }
 
 const CHROME_UA: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
+pub const VIDEO_INFO_PROCESS_TIMEOUT_SECS: u64 = 90;
+pub const YOUTUBE_VIDEO_INFO_TOTAL_TIMEOUT_SECS: u64 = 190;
+pub const DEFAULT_VIDEO_INFO_TOTAL_TIMEOUT_SECS: u64 = 110;
 
 pub async fn find_ytdlp() -> Option<PathBuf> {
     let _timer_start = std::time::Instant::now();
@@ -1270,7 +1298,18 @@ pub async fn get_video_info(
 
         append_metadata_cookie_args(&mut args, url, extra_flags, "video info");
 
-        args.extend(proxy_args());
+        let proxy = crate::core::http_client::proxy_url();
+        if attempt == 0 {
+            if let Some(dl_id) = log_hook::current_download_id() {
+                let line = format!(
+                    "[network] yt-dlp metadata {}",
+                    proxy_log_label(proxy.as_deref())
+                );
+                log_hook::emit_log(dl_id, &line);
+            }
+        }
+        args.push("--proxy".to_string());
+        args.push(proxy.unwrap_or_default());
         args.extend(extra_flags.iter().cloned());
         args.push(url.to_string());
 
@@ -1278,6 +1317,7 @@ pub async fn get_video_info(
             .args(&args)
             .stdout(Stdio::piped())
             .stderr(Stdio::piped())
+            .kill_on_drop(true)
             .spawn()
             .map_err(|e| anyhow!("Failed to run yt-dlp: {}", e))?;
         tracing::debug!(
@@ -1287,11 +1327,17 @@ pub async fn get_video_info(
         );
 
         let result =
-            tokio::time::timeout(std::time::Duration::from_secs(60), child.wait_with_output())
+            tokio::time::timeout(
+                std::time::Duration::from_secs(VIDEO_INFO_PROCESS_TIMEOUT_SECS),
+                child.wait_with_output(),
+            )
                 .await
                 .map_err(|_| {
                     tracing::debug!("[perf] get_video_info took {:?}", _timer_start.elapsed());
-                    anyhow!("Timeout fetching video info (60s)")
+                    anyhow!(
+                        "Timeout fetching video info ({}s)",
+                        VIDEO_INFO_PROCESS_TIMEOUT_SECS
+                    )
                 })?
                 .map_err(|e| {
                     tracing::debug!("[perf] get_video_info took {:?}", _timer_start.elapsed());
@@ -1764,6 +1810,30 @@ fn parse_destination_line(line: &str) -> Option<String> {
     }
 
     None
+}
+
+fn adjusted_multi_stream_progress(
+    phase: &mut u32,
+    last_raw_percent: &mut Option<f64>,
+    max_reported: f64,
+    percent: f64,
+) -> f64 {
+    // Some external downloader output does not include a second Destination line.
+    // Detect the second stream when the raw percentage resets after the first
+    // stream has reached the 50% boundary.
+    if *phase <= 1
+        && max_reported >= 49.0
+        && last_raw_percent.is_some_and(|last| last >= 95.0 && percent < 95.0)
+    {
+        *phase = 2;
+    }
+    *last_raw_percent = Some(percent);
+
+    if *phase <= 1 {
+        percent * 0.5
+    } else {
+        50.0 + percent * 0.5
+    }
 }
 
 pub async fn write_netscape_cookie_file(
@@ -2313,6 +2383,7 @@ pub async fn download_video(
 
         let line_reader = tokio::spawn(async move {
             let mut phase = 0u32;
+            let mut last_raw_percent: Option<f64> = None;
             let mut max_reported = 0.0f64;
             let mut first_line_logged = false;
             let mut first_progress_logged = false;
@@ -2388,11 +2459,12 @@ pub async fn download_video(
                             last_send = std::time::Instant::now();
                         }
                     } else {
-                        let adjusted = if phase <= 1 {
-                            pct * 0.5
-                        } else {
-                            50.0 + pct * 0.5
-                        };
+                        let adjusted = adjusted_multi_stream_progress(
+                            &mut phase,
+                            &mut last_raw_percent,
+                            max_reported,
+                            pct,
+                        );
                         if adjusted > max_reported
                             && (adjusted >= 99.0 || last_send.elapsed() >= throttle)
                         {
