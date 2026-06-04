@@ -7,7 +7,9 @@ use async_trait::async_trait;
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::sync::mpsc;
 
-use omniget_core::models::media::{DownloadOptions, DownloadResult, MediaInfo, MediaType, VideoQuality};
+use omniget_core::models::media::{
+    DownloadOptions, DownloadResult, MediaInfo, MediaType, VideoQuality,
+};
 use omniget_core::models::progress::ProgressUpdate;
 use omniget_core::platforms::traits::PlatformDownloader;
 
@@ -42,7 +44,9 @@ const GALLERY_HOSTS: &[&str] = &[
 
 pub fn is_gallery_url(url: &str) -> bool {
     let host = match url::Url::parse(url) {
-        Ok(u) => u.host_str().map(|h| h.trim_start_matches("www.").to_lowercase()),
+        Ok(u) => u
+            .host_str()
+            .map(|h| h.trim_start_matches("www.").to_lowercase()),
         Err(_) => None,
     };
     let Some(host) = host else {
@@ -134,7 +138,9 @@ impl PlatformDownloader for GalleryDlDownloader {
         let bin = omniget_core::core::dependencies::ensure_gallerydl()
             .await
             .ok_or_else(|| {
-                anyhow!("gallery-dl is not available. Install gallery-dl to download from this site.")
+                anyhow!(
+                    "gallery-dl is not available. Install gallery-dl to download from this site."
+                )
             })?;
 
         std::fs::create_dir_all(&opts.output_dir)?;
@@ -154,13 +160,17 @@ impl PlatformDownloader for GalleryDlDownloader {
                     .arg(archive_dir.join("gallery-dl.txt"));
             }
             let cookie_file = data_dir.join("chrome-extension-cookies.txt");
-            if std::fs::metadata(&cookie_file).map(|m| m.len() > 0).unwrap_or(false) {
+            if std::fs::metadata(&cookie_file)
+                .map(|m| m.len() > 0)
+                .unwrap_or(false)
+            {
                 cmd.arg("--cookies").arg(&cookie_file);
             }
         }
 
         cmd.arg("--").arg(&url);
 
+        cmd.kill_on_drop(true);
         let mut child = cmd
             .spawn()
             .map_err(|e| anyhow!("Failed to start gallery-dl: {}", e))?;
@@ -296,7 +306,9 @@ mod tests {
 
     #[test]
     fn matches_curated_gallery_hosts() {
-        assert!(is_gallery_url("https://www.deviantart.com/someartist/gallery"));
+        assert!(is_gallery_url(
+            "https://www.deviantart.com/someartist/gallery"
+        ));
         assert!(is_gallery_url("https://www.pixiv.net/en/users/12345"));
         assert!(is_gallery_url("https://danbooru.donmai.us/posts?tags=foo"));
         assert!(is_gallery_url("https://imgur.com/a/abcd"));

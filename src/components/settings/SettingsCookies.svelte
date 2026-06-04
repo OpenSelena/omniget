@@ -54,11 +54,20 @@
   }
 
   let testing = $state<Record<string, boolean>>({});
+  let selectedCookies = $state<Record<string, boolean>>({});
+
+  function cookieTestUrl(domain: string, platformKind: string | undefined): string {
+    if (platformKind === "bilibili") return "https://www.bilibili.com/video/BV1xx411c7mu";
+    if (platformKind === "youtube" || platformKind === "youtube_music") {
+      return "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+    }
+    if (platformKind === "twitch") return "https://www.twitch.tv/videos/1";
+    return `https://${domain}`;
+  }
 
   async function handleTest(domain: string, slug: string) {
     const bucket = registry.buckets[domain];
-    const acc = bucket?.accounts.find((a) => a.slug === slug);
-    const url = acc?.source_url || `https://${domain}`;
+    const url = cookieTestUrl(domain, bucket?.platform_kind);
     const key = healthKey(domain, slug);
     testing = { ...testing, [key]: true };
     try {
@@ -103,6 +112,7 @@
   let confirmClearOpen = $state(false);
   let confirmDomain = $state("");
   let confirmSlug = $state("");
+  let confirmBulkClearOpen = $state(false);
 
   let addAccountOpen = $state(false);
   let addAccountDomain = $state("");
@@ -117,6 +127,18 @@
         return bTime - aTime;
       }),
   );
+  let selectedCookieItems = $derived.by(() => {
+    const items: Array<{ domain: string; slug: string; alias: string }> = [];
+    for (const [domain, bucket] of Object.entries(registry.buckets)) {
+      for (const account of bucket.accounts) {
+        if (selectedCookies[healthKey(domain, account.slug)]) {
+          items.push({ domain, slug: account.slug, alias: account.alias });
+        }
+      }
+    }
+    return items;
+  });
+  let selectedCount = $derived(selectedCookieItems.length);
 
   async function reload() {
     loading = true;
@@ -124,6 +146,14 @@
       const res = await invoke<ListResponse>("cookies_list");
       registry = res.registry;
       cookiesDir = res.cookies_dir;
+      const validSelected: Record<string, boolean> = {};
+      for (const [domain, bucket] of Object.entries(res.registry.buckets)) {
+        for (const account of bucket.accounts) {
+          const key = healthKey(domain, account.slug);
+          if (selectedCookies[key]) validSelected[key] = true;
+        }
+      }
+      selectedCookies = validSelected;
       try {
         const h = await invoke<HealthResponse>("cookies_health");
         const map: Record<string, HealthItem> = {};
@@ -233,6 +263,36 @@
     confirmDomain = domain;
     confirmSlug = slug;
     confirmClearOpen = true;
+  }
+
+  function toggleCookieSelection(domain: string, slug: string, checked: boolean) {
+    const key = healthKey(domain, slug);
+    if (checked) {
+      selectedCookies = { ...selectedCookies, [key]: true };
+      return;
+    }
+    const next = { ...selectedCookies };
+    delete next[key];
+    selectedCookies = next;
+  }
+
+  function selectAllCookies() {
+    const next: Record<string, boolean> = {};
+    for (const bucket of bucketList) {
+      for (const account of bucket.accounts) {
+        next[healthKey(bucket.domain, account.slug)] = true;
+      }
+    }
+    selectedCookies = next;
+  }
+
+  function clearCookieSelection() {
+    selectedCookies = {};
+  }
+
+  function askBulkClear() {
+    if (selectedCount === 0) return;
+    confirmBulkClearOpen = true;
   }
 
   function openAddAccount(domain: string) {
@@ -385,6 +445,28 @@
     }
   }
 
+  async function confirmBulkClear() {
+    const items = selectedCookieItems.map(({ domain, slug }) => ({ domain, slug }));
+    if (items.length === 0) {
+      confirmBulkClearOpen = false;
+      return;
+    }
+    try {
+      const res = await invoke<{ ok: boolean; cleared: number }>("cookies_clear_batch", {
+        request: { items },
+      });
+      confirmBulkClearOpen = false;
+      clearCookieSelection();
+      await reload();
+      showToast(
+        "success",
+        `${$t("settings.cookies.cleared_toast") as string} (${res.cleared})`,
+      );
+    } catch (e) {
+      showToast("error", String(e));
+    }
+  }
+
   async function openCookiesDir() {
     if (!cookiesDir) return;
     try {
@@ -449,6 +531,25 @@
     </label>
   </header>
 
+  {#if bucketList.length > 0}
+    <div class="bulk-bar">
+      <div class="bulk-info">
+        <span>{selectedCount} selected</span>
+      </div>
+      <div class="bulk-actions">
+        <button type="button" class="ghost-btn subtle" onclick={selectAllCookies}>
+          Select all
+        </button>
+        <button type="button" class="ghost-btn subtle" onclick={clearCookieSelection} disabled={selectedCount === 0}>
+          {$t("common.clear")}
+        </button>
+        <button type="button" class="danger-btn" onclick={askBulkClear} disabled={selectedCount === 0}>
+          {$t("settings.cookies.action_clear")}
+        </button>
+      </div>
+    </div>
+  {/if}
+
   {#if loading}
     <div class="loading">
       {#each Array(3) as _, i (i)}
@@ -479,6 +580,8 @@
           onClear={askClear}
           onAddAccount={openAddAccount}
           onTest={handleTest}
+          selected={selectedCookies}
+          onToggleSelection={toggleCookieSelection}
         />
         {#if bucket.domain === "bilibili.com"}
           {#if bucket.accounts.some((a) => !a.slug.startsWith("_") && a.cookie_count > 0)}
@@ -577,6 +680,26 @@
   </div>
 {/if}
 
+{#if confirmBulkClearOpen}
+  <div class="overlay" onclick={(e) => { if (e.target === e.currentTarget) confirmBulkClearOpen = false; }} role="presentation">
+    <div class="confirm" role="dialog" aria-label={$t("settings.cookies.confirm_clear_title") as string}>
+      <h3>{$t("settings.cookies.confirm_clear_title")}</h3>
+      <p>
+        Cookies for {selectedCount} account{selectedCount === 1 ? "" : "s"} go to the trash
+        (recoverable for 24h). Continue?
+      </p>
+      <div class="confirm-actions">
+        <button type="button" class="ghost-btn" onclick={() => confirmBulkClearOpen = false}>
+          {$t("settings.cookies.confirm_clear_cancel")}
+        </button>
+        <button type="button" class="danger-btn" onclick={confirmBulkClear}>
+          {$t("settings.cookies.confirm_clear_action")}
+        </button>
+      </div>
+    </div>
+  </div>
+{/if}
+
 <style>
   .section { display: flex; flex-direction: column; gap: 16px; }
   .section-head { display: flex; flex-direction: column; gap: 8px; }
@@ -614,6 +737,26 @@
   .managed-toggle input[type="checkbox"] {
     margin-top: 3px;
     flex-shrink: 0;
+  }
+  .bulk-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 12px;
+    background: color-mix(in oklab, var(--button) 55%, transparent);
+    border: 1px solid color-mix(in oklab, var(--content-border) 35%, transparent);
+    border-radius: var(--border-radius);
+  }
+  .bulk-info {
+    color: var(--secondary);
+    font-size: 12px;
+  }
+  .bulk-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
   }
   .managed-toggle-text {
     display: flex;
