@@ -57,18 +57,35 @@ pub async fn check_ytdlp_available() -> Result<bool, String> {
 }
 
 #[tauri::command]
-pub async fn install_dependency(name: String, variant: Option<String>) -> Result<String, String> {
+pub async fn install_dependency(
+    name: String,
+    variant: Option<String>,
+    force: Option<bool>,
+) -> Result<String, String> {
+    let force = force.unwrap_or(false);
     match name.as_str() {
         "yt-dlp" => {
-            crate::core::ytdlp::ensure_ytdlp()
-                .await
-                .map_err(|e| e.to_string())?;
+            if force {
+                crate::core::ytdlp::update_ytdlp()
+                    .await
+                    .map_err(|e| e.to_string())?;
+            } else {
+                crate::core::ytdlp::ensure_ytdlp()
+                    .await
+                    .map_err(|e| e.to_string())?;
+            }
             crate::core::ytdlp::reset_ytdlp_cache();
         }
         "FFmpeg" => {
-            dependencies::ensure_ffmpeg()
-                .await
-                .map_err(|e| e.to_string())?;
+            if force {
+                dependencies::update_ffmpeg()
+                    .await
+                    .map_err(|e| e.to_string())?;
+            } else {
+                dependencies::ensure_ffmpeg()
+                    .await
+                    .map_err(|e| e.to_string())?;
+            }
             crate::core::ytdlp::reset_ffmpeg_location_cache();
             crate::core::ffmpeg::reset_ffmpeg_available_cache();
         }

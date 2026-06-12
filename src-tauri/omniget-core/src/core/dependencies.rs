@@ -193,6 +193,57 @@ pub async fn check_version(tool: &str) -> Option<String> {
     result
 }
 
+pub fn replace_managed_binary(
+    temp: &std::path::Path,
+    target: &std::path::Path,
+) -> anyhow::Result<()> {
+    if !target.exists() {
+        std::fs::rename(temp, target)
+            .map_err(|e| anyhow!("Failed to move {} into place: {}", target.display(), e))?;
+        return Ok(());
+    }
+
+    if cfg!(windows) {
+        let file_name = target
+            .file_name()
+            .and_then(|n| n.to_str())
+            .unwrap_or("binary")
+            .to_string();
+        let old = target.with_file_name(format!("{}.old", file_name));
+        let _ = std::fs::remove_file(&old);
+        if let Err(e) = std::fs::rename(target, &old) {
+            let _ = std::fs::remove_file(temp);
+            return Err(anyhow!(
+                "{} is in use by another process ({}). Wait for active downloads to finish or cancel them, then try again.",
+                file_name,
+                e
+            ));
+        }
+        if let Err(e) = std::fs::rename(temp, target) {
+            let _ = std::fs::rename(&old, target);
+            let _ = std::fs::remove_file(temp);
+            return Err(anyhow!("Failed to replace {}: {}", file_name, e));
+        }
+        let _ = std::fs::remove_file(&old);
+        Ok(())
+    } else {
+        std::fs::rename(temp, target)
+            .map_err(|e| anyhow!("Failed to replace {}: {}", target.display(), e))?;
+        Ok(())
+    }
+}
+
+pub async fn update_ffmpeg() -> anyhow::Result<PathBuf> {
+    if is_flatpak() {
+        return Err(anyhow!(
+            "FFmpeg is provided by the Flatpak runtime and cannot be updated from inside the app"
+        ));
+    }
+    let path = download_ffmpeg().await?;
+    crate::core::ytdlp::reset_ffmpeg_location_cache();
+    Ok(path)
+}
+
 pub async fn ensure_ffmpeg() -> anyhow::Result<PathBuf> {
     // Always ensure the managed binary exists — the standalone yt-dlp.exe
     // cannot discover system FFmpeg from PATH.
@@ -270,6 +321,13 @@ async fn download_ffmpeg() -> anyhow::Result<PathBuf> {
         }
 
         let _ = std::fs::remove_file(&temp_path);
+    }
+
+    for name in [&ffmpeg_name, &ffprobe_name] {
+        let staged = bin_dir.join(format!("{}.new", name));
+        if staged.exists() {
+            replace_managed_binary(&staged, &bin_dir.join(name))?;
+        }
     }
 
     #[cfg(unix)]
@@ -409,7 +467,7 @@ async fn extract_zip_ffmpeg(
             let name = entry.name().to_string();
             for target in &targets {
                 if name.ends_with(target) {
-                    let dest = bin_dir.join(target);
+                    let dest = bin_dir.join(format!("{}.new", target));
                     let mut out = std::fs::File::create(&dest)?;
                     std::io::copy(&mut entry, &mut out)?;
                     break;
@@ -454,7 +512,7 @@ async fn extract_tar_xz_ffmpeg(
             let file_name = path.file_name().and_then(|n| n.to_str()).unwrap_or("");
             for target in &targets {
                 if file_name == *target {
-                    let dest = bin_dir.join(target);
+                    let dest = bin_dir.join(format!("{}.new", target));
                     let mut out = std::fs::File::create(&dest)?;
                     std::io::copy(&mut entry, &mut out)?;
                     break;

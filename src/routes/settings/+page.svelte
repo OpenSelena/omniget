@@ -52,11 +52,19 @@
   }
 
   async function handleInstallDep(name: string, variant: string | null = null) {
+    const wasInstalled = deps.find((d) => d.name === name)?.installed ?? false;
     installingDep = name;
     try {
-      await invoke("install_dependency", { name, variant });
+      const version = await invoke<string>("install_dependency", { name, variant, force: wasInstalled });
       await loadDeps();
       await refreshYtdlpStatus();
+      showToast(
+        "success",
+        $t(
+          wasInstalled ? "settings.dependencies.update_success" : "settings.dependencies.install_success",
+          { name, version },
+        ) as string,
+      );
     } catch (e: any) {
       showToast("error", typeof e === "string" ? e : e.message ?? $t("common.error"));
     } finally {

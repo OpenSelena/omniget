@@ -197,8 +197,10 @@ pub async fn plugin_command(
     manager.handle_command(&plugin_id, &command, args).await
 }
 
-const REGISTRY_URL: &str =
-    "https://raw.githubusercontent.com/tonhowtf/omniget-plugins/main/plugins.json";
+const REGISTRY_URLS: &[&str] = &[
+    "https://raw.githubusercontent.com/tonhowtf/omniget-plugins/main/plugins.json",
+    "https://cdn.jsdelivr.net/gh/tonhowtf/omniget-plugins@main/plugins.json",
+];
 
 #[derive(Debug, Serialize)]
 pub struct MarketplaceEntry {
@@ -219,30 +221,59 @@ pub struct MarketplaceEntry {
 pub async fn fetch_marketplace_registry(
     state: tauri::State<'_, Arc<tokio::sync::RwLock<PluginManager>>>,
 ) -> Result<Vec<MarketplaceEntry>, String> {
-    let client = reqwest::Client::builder()
-        .user_agent("OmniGet")
-        .timeout(std::time::Duration::from_secs(15))
-        .build()
-        .map_err(|e| e.to_string())?;
-
-    let response = client
-        .get(REGISTRY_URL)
-        .send()
-        .await
-        .map_err(|e| format!("Failed to fetch registry: {}", e))?;
-
-    let body = response
-        .text()
-        .await
-        .map_err(|e| format!("Failed to read registry: {}", e))?;
+    let client = crate::core::http_client::apply_global_proxy(
+        reqwest::Client::builder()
+            .user_agent("OmniGet")
+            .timeout(std::time::Duration::from_secs(15)),
+    )
+    .build()
+    .map_err(|e| e.to_string())?;
 
     #[derive(Deserialize)]
     struct RegistryFile {
         plugins: Vec<RegistryEntry>,
     }
 
-    let registry: RegistryFile =
-        serde_json::from_str(&body).map_err(|e| format!("Invalid registry: {}", e))?;
+    let mut registry: Option<RegistryFile> = None;
+    let mut last_err = String::from("Failed to fetch registry");
+
+    for url in REGISTRY_URLS {
+        let body = match client.get(*url).send().await {
+            Ok(resp) => match resp.error_for_status() {
+                Ok(resp) => match resp.text().await {
+                    Ok(body) => body,
+                    Err(e) => {
+                        last_err = format!("Failed to read registry: {}", e);
+                        tracing::warn!("registry fetch via {} failed: {}", url, last_err);
+                        continue;
+                    }
+                },
+                Err(e) => {
+                    last_err = format!("Registry request failed: {}", e);
+                    tracing::warn!("registry fetch via {} failed: {}", url, last_err);
+                    continue;
+                }
+            },
+            Err(e) => {
+                last_err = format!("Failed to fetch registry: {}", e);
+                tracing::warn!("registry fetch via {} failed: {}", url, last_err);
+                continue;
+            }
+        };
+
+        match serde_json::from_str::<RegistryFile>(&body) {
+            Ok(parsed) => {
+                registry = Some(parsed);
+                break;
+            }
+            Err(e) => {
+                last_err = format!("Invalid registry: {}", e);
+                tracing::warn!("registry fetch via {} failed: {}", url, last_err);
+            }
+        }
+    }
+
+    let registry = registry.ok_or(last_err)?;
 
     let installed = {
         let manager = state.read().await;
@@ -309,17 +340,18 @@ pub async fn install_plugin_zip_from_repo(
         return Err("Unsupported platform".to_string());
     }
 
-    let client = reqwest::Client::builder()
-        .user_agent("OmniGet")
-        .build()
-        .map_err(|e| e.to_string())?;
+    let client = crate::core::http_client::apply_global_proxy(
+        reqwest::Client::builder().user_agent("OmniGet"),
+    )
+    .build()
+    .map_err(|e| e.to_string())?;
 
     let api_url = format!("https://api.github.com/repos/{}/releases/latest", repo);
     let release: GitHubRelease = client
         .get(&api_url)
         .send()
         .await
-        .map_err(|e| format!("Failed to fetch release: {}", e))?
+        .map_err(|e| format!("NetworkUnreachable|Failed to fetch release: {}", e))?
         .json()
         .await
         .map_err(|e| format!("Invalid release response: {}", e))?;
@@ -334,10 +366,10 @@ pub async fn install_plugin_zip_from_repo(
         .get(&asset.browser_download_url)
         .send()
         .await
-        .map_err(|e| format!("Failed to download: {}", e))?
+        .map_err(|e| format!("NetworkUnreachable|Failed to download: {}", e))?
         .bytes()
         .await
-        .map_err(|e| format!("Failed to read download: {}", e))?;
+        .map_err(|e| format!("NetworkUnreachable|Failed to read download: {}", e))?;
 
     let plugin_dir = {
         let manager = state.read().await;
@@ -452,11 +484,13 @@ pub async fn check_plugin_updates(
         manager.installed_plugins().to_vec()
     };
 
-    let client = reqwest::Client::builder()
-        .user_agent("OmniGet")
-        .timeout(std::time::Duration::from_secs(15))
-        .build()
-        .map_err(|e| e.to_string())?;
+    let client = crate::core::http_client::apply_global_proxy(
+        reqwest::Client::builder()
+            .user_agent("OmniGet")
+            .timeout(std::time::Duration::from_secs(15)),
+    )
+    .build()
+    .map_err(|e| e.to_string())?;
 
     let mut updates = Vec::new();
 

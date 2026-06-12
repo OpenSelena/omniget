@@ -162,7 +162,10 @@
       await invoke("install_plugin_from_registry", { pluginId: id, repo });
       await refreshPlugins();
     } catch (e: any) {
-      const msg = typeof e === "string" ? e : e?.message ?? $t("common.error");
+      const raw = typeof e === "string" ? e : e?.message ?? $t("common.error");
+      const msg = raw.startsWith("NetworkUnreachable|")
+        ? $t("marketplace.install_network_error")
+        : raw;
       showToast("error", msg);
     }
     installingId = null;
@@ -305,7 +308,8 @@
     {:else if browseError}
       <div class="empty">
         <p>{$t("marketplace.browse_error")}</p>
-        <button class="btn btn-secondary retry-btn" onclick={loadBrowse}>{$t("marketplace.browse")}</button>
+        <p class="error-hint">{$t("marketplace.browse_error_hint")}</p>
+        <button class="btn btn-secondary retry-btn" onclick={loadBrowse}>{$t("marketplace.browse_retry")}</button>
       </div>
     {:else if registry.length === 0}
       <div class="empty">
@@ -454,6 +458,13 @@
     flex-direction: column;
     align-items: center;
     gap: var(--padding);
+  }
+
+  .error-hint {
+    max-width: 420px;
+    font-size: 12.5px;
+    line-height: 1.5;
+    color: var(--gray);
   }
 
   .retry-btn {

@@ -32,15 +32,21 @@ impl Default for HlsDownloader {
 
 impl HlsDownloader {
     pub fn new() -> Self {
-        Self::with_client(
+        let builder = crate::core::http_client::apply_global_proxy(
             Client::builder()
                 .connect_timeout(Duration::from_secs(30))
                 .timeout(Duration::from_secs(300))
                 .pool_max_idle_per_host(50)
-                .pool_idle_timeout(Duration::from_secs(30))
-                .build()
-                .unwrap(),
-        )
+                .pool_idle_timeout(Duration::from_secs(30)),
+        );
+        let client = match builder.build() {
+            Ok(c) => c,
+            Err(e) => {
+                tracing::warn!("HLS client build failed, falling back to default: {}", e);
+                Client::new()
+            }
+        };
+        Self::with_client(client)
     }
 
     pub fn with_client(client: Client) -> Self {
