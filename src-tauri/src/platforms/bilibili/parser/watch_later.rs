@@ -8,7 +8,7 @@ const TOVIEW_URL: &str = "https://api.bilibili.com/x/v2/history/toview/web";
 const PAGE_SIZE: u32 = 20;
 
 pub async fn parse(client: &ApiClient, page: u32) -> Result<ParsedContent> {
-    if client.account_slug().is_none() {
+    if client.account_slug().is_none() && client.cookie_header().is_none() {
         return Err(BilibiliError::NotLoggedIn);
     }
 

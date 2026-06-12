@@ -7,7 +7,7 @@ const HISTORY_URL: &str = "https://api.bilibili.com/x/web-interface/history/sear
 const PAGE_SIZE: u32 = 20;
 
 pub async fn parse(client: &ApiClient, page: u32) -> Result<ParsedContent> {
-    if client.account_slug().is_none() {
+    if client.account_slug().is_none() && client.cookie_header().is_none() {
         return Err(BilibiliError::NotLoggedIn);
     }
     let url = format!(

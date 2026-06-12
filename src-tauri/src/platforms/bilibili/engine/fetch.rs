@@ -19,11 +19,13 @@ pub struct FetchOptions<'a> {
 }
 
 fn build_client() -> Result<reqwest::Client> {
-    reqwest::Client::builder()
-        .timeout(Duration::from_secs(60 * 30))
-        .connect_timeout(Duration::from_secs(15))
-        .build()
-        .map_err(BilibiliError::Network)
+    omniget_core::core::http_client::apply_global_proxy(
+        reqwest::Client::builder()
+            .timeout(Duration::from_secs(60 * 30))
+            .connect_timeout(Duration::from_secs(15)),
+    )
+    .build()
+    .map_err(BilibiliError::Network)
 }
 
 fn build_headers(referer: &str, user_agent: &str, cookie_header: Option<&str>) -> HeaderMap {

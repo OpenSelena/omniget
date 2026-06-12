@@ -344,7 +344,9 @@
     const bucket = registry.buckets["bilibili.com"];
     if (!bucket) return null;
     const real = bucket.accounts.find((a) => !a.slug.startsWith("_") && a.cookie_count > 0);
-    return real?.slug ?? null;
+    if (real) return real.slug;
+    const imported = bucket.accounts.find((a) => a.slug === "_default" && a.cookie_count > 0);
+    return imported?.slug ?? null;
   }
 
   async function enqueueImportedUrls(items: BilibiliImportedItem[]) {

@@ -40,18 +40,10 @@ impl BilibiliDownloader {
 }
 
 pub fn has_active_account() -> bool {
-    let registry = crate::cookies::load_registry();
-    let bucket = match registry.buckets.get("bilibili.com") {
-        Some(b) => b,
-        None => return false,
-    };
-    bucket
-        .accounts
-        .iter()
-        .any(|a| a.slug != "_anonymous" && a.cookie_count > 0)
+    active_account_slug().is_some()
 }
 
-fn active_account_slug() -> Option<String> {
+pub fn active_account_slug() -> Option<String> {
     let registry = crate::cookies::load_registry();
     let bucket = registry.buckets.get("bilibili.com")?;
 
@@ -65,12 +57,39 @@ fn active_account_slug() -> Option<String> {
         }
     }
 
+    let native = bucket
+        .accounts
+        .iter()
+        .filter(|a| a.slug != "_anonymous" && a.slug != "_default" && a.cookie_count > 0)
+        .max_by_key(|a| a.last_used_at_ms.unwrap_or(a.captured_at_ms))
+        .map(|a| a.slug.clone());
+    if native.is_some() {
+        return native;
+    }
     bucket
         .accounts
         .iter()
-        .filter(|a| a.slug != "_anonymous" && a.cookie_count > 0)
-        .max_by_key(|a| a.last_used_at_ms.unwrap_or(a.captured_at_ms))
+        .filter(|a| a.slug == "_default" && a.cookie_count > 0)
+        .find(|a| slug_has_session_cookie(&a.slug))
         .map(|a| a.slug.clone())
+}
+
+fn slug_has_session_cookie(slug: &str) -> bool {
+    let path = match crate::cookies::account_path_for_consumer("bilibili.com", Some(slug)) {
+        Some(p) => p,
+        None => return false,
+    };
+    let content = match std::fs::read_to_string(&path) {
+        Ok(c) => c,
+        Err(_) => return false,
+    };
+    content.lines().any(|line| {
+        let line = line.trim();
+        if line.is_empty() || line.starts_with('#') {
+            return false;
+        }
+        line.split('\t').nth(5) == Some("SESSDATA")
+    })
 }
 
 async fn api_engine_download(

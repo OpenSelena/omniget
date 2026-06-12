@@ -71,11 +71,13 @@ pub struct ApiClient {
 
 impl ApiClient {
     pub fn new() -> Result<Self> {
-        let inner = Client::builder()
-            .timeout(Duration::from_secs(REQUEST_TIMEOUT_SECS))
-            .connect_timeout(Duration::from_secs(10))
-            .build()
-            .map_err(BilibiliError::Network)?;
+        let inner = crate::core::http_client::apply_global_proxy(
+            Client::builder()
+                .timeout(Duration::from_secs(REQUEST_TIMEOUT_SECS))
+                .connect_timeout(Duration::from_secs(10)),
+        )
+        .build()
+        .map_err(BilibiliError::Network)?;
         Ok(Self {
             inner,
             referer: DEFAULT_REFERER.to_string(),
@@ -247,11 +249,13 @@ impl ApiClient {
     }
 
     pub async fn resolve_redirect(&self, url: &str) -> Result<String> {
-        let no_follow = Client::builder()
-            .timeout(Duration::from_secs(REQUEST_TIMEOUT_SECS))
-            .redirect(reqwest::redirect::Policy::none())
-            .build()
-            .map_err(BilibiliError::Network)?;
+        let no_follow = crate::core::http_client::apply_global_proxy(
+            Client::builder()
+                .timeout(Duration::from_secs(REQUEST_TIMEOUT_SECS))
+                .redirect(reqwest::redirect::Policy::none()),
+        )
+        .build()
+        .map_err(BilibiliError::Network)?;
         let resp = no_follow
             .get(url)
             .headers(self.build_headers())

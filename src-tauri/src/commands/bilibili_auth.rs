@@ -6,6 +6,11 @@ use crate::platforms::bilibili::parser;
 use crate::platforms::bilibili::preview;
 use crate::platforms::bilibili::url_kind::{self, UrlKind};
 
+fn resolve_account_slug(slug: Option<String>) -> Option<String> {
+    slug.filter(|s| !s.is_empty())
+        .or_else(crate::platforms::bilibili::active_account_slug)
+}
+
 fn build_anonymous_client(user_agent: Option<String>) -> Result<ApiClient, String> {
     let mut client = ApiClient::new().map_err(|e| e.i18n_key().to_string())?;
     if let Some(ua) = user_agent.filter(|s| !s.is_empty()) {
@@ -180,9 +185,9 @@ pub async fn bilibili_preview_info(
 ) -> Result<BilibiliPreviewSummary, String> {
     let _ = crate::platforms::bilibili::cookie::ensure_fresh().await;
     let mut client = ApiClient::new().map_err(|e| e.i18n_key().to_string())?;
-    client = match slug.as_deref() {
-        Some(s) if !s.is_empty() => client.with_account(s),
-        _ => client.with_anonymous_cookies(),
+    client = match resolve_account_slug(slug) {
+        Some(s) => client.with_account(s),
+        None => client.with_anonymous_cookies(),
     };
 
     let mut effective_url = url.clone();
@@ -308,13 +313,16 @@ async fn run_import(slug: String, kind: UrlKind) -> Result<BilibiliImportResult,
 }
 
 #[tauri::command]
-pub async fn bilibili_import_watch_later(slug: String) -> Result<BilibiliImportResult, String> {
-    let _ = parser::watch_later::parse;
+pub async fn bilibili_import_watch_later(slug: Option<String>) -> Result<BilibiliImportResult, String> {
+    let slug = resolve_account_slug(slug)
+        .ok_or_else(|| "errors.bilibili.not_logged_in".to_string())?;
     run_import(slug, UrlKind::WatchLater).await
 }
 
 #[tauri::command]
-pub async fn bilibili_import_history(slug: String) -> Result<BilibiliImportResult, String> {
+pub async fn bilibili_import_history(slug: Option<String>) -> Result<BilibiliImportResult, String> {
+    let slug = resolve_account_slug(slug)
+        .ok_or_else(|| "errors.bilibili.not_logged_in".to_string())?;
     run_import(slug, UrlKind::History).await
 }
 
@@ -322,11 +330,12 @@ pub async fn bilibili_import_history(slug: String) -> Result<BilibiliImportResul
 pub async fn bilibili_account_status(
     slug: Option<String>,
 ) -> Result<BilibiliAccountStatus, String> {
-    let client = match slug.as_deref() {
-        Some(s) if !s.is_empty() => ApiClient::new()
+    let resolved = resolve_account_slug(slug);
+    let client = match resolved.as_deref() {
+        Some(s) => ApiClient::new()
             .map_err(|e| e.i18n_key().to_string())?
             .with_account(s),
-        _ => {
+        None => {
             return Ok(BilibiliAccountStatus {
                 logged_in: false,
                 slug: None,
@@ -339,7 +348,7 @@ pub async fn bilibili_account_status(
     match auth::fetch_account_info(&client).await {
         Ok(info) => Ok(BilibiliAccountStatus {
             logged_in: true,
-            slug,
+            slug: resolved,
             uname: Some(info.uname),
             mid: Some(info.mid),
             is_vip: info.is_vip,
