@@ -18,6 +18,7 @@
   import ReaderTypographyMenu from "$lib/reader-components/ReaderTypographyMenu.svelte";
   import {
     DEFAULT_TYPOGRAPHY,
+    FONT_LIMITS,
     applyIframeTypography,
     loadBookSettings,
     loadGlobal,
@@ -25,6 +26,8 @@
     saveGlobal,
     type Typography,
   } from "$lib/reader-typography";
+  import ReaderZoomIndicator from "$lib/reader-components/ReaderZoomIndicator.svelte";
+  import { wheelZoomDirection } from "$lib/reader-zoom";
   import "$lib/reader-theme.css";
 
   type Book = {
@@ -86,6 +89,41 @@
     cursorY = e.clientY;
   }
 
+  let iframeWheelHandler: ((e: WheelEvent) => void) | null = null;
+  let zoomLabel = $state("");
+  let zoomLabelTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function flashZoomLabel(size: number) {
+    zoomLabel = `${Math.round((size / DEFAULT_TYPOGRAPHY.font_size) * 100)}%`;
+    if (zoomLabelTimer) clearTimeout(zoomLabelTimer);
+    zoomLabelTimer = setTimeout(() => (zoomLabel = ""), 1200);
+  }
+
+  function onWheelZoom(e: WheelEvent) {
+    const dir = wheelZoomDirection(e);
+    if (dir === 0) return;
+    e.preventDefault();
+    const next = Math.max(
+      FONT_LIMITS.size.min,
+      Math.min(FONT_LIMITS.size.max, typography.font_size + dir * FONT_LIMITS.size.step),
+    );
+    if (next !== typography.font_size) {
+      typography = { ...typography, font_size: next };
+    }
+    flashZoomLabel(next);
+  }
+
+  function onIframeLoaded() {
+    applyIframeTypography(frameEl, typography);
+    const doc = frameEl?.contentDocument;
+    if (!doc) return;
+    if (iframeWheelHandler) {
+      doc.removeEventListener("wheel", iframeWheelHandler);
+    }
+    iframeWheelHandler = (e) => onWheelZoom(e);
+    doc.addEventListener("wheel", iframeWheelHandler, { passive: false });
+  }
+
   async function loadBook() {
     try {
       meta = await pluginInvoke<OpenResult>("study", "study:read:html:open", {
@@ -122,11 +160,13 @@
     loadBook();
     window.addEventListener("keydown", onKey);
     window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("wheel", onWheelZoom, { passive: false });
   });
 
   onDestroy(() => {
     window.removeEventListener("keydown", onKey);
     window.removeEventListener("mousemove", onMouseMove);
+    window.removeEventListener("wheel", onWheelZoom);
     applyFocusMode(false);
     popReadingTheme();
     void session?.stop(false);
@@ -231,10 +271,11 @@
         title={book.title ?? "html"}
         sandbox="allow-same-origin"
         bind:this={frameEl}
-        onload={() => applyIframeTypography(frameEl, typography)}
+        onload={onIframeLoaded}
       ></iframe>
     </div>
   {/if}
+  <ReaderZoomIndicator label={zoomLabel} />
   {#if cursorLine && cursorY > 0}
     <div class="reader-cursor-line" style:top="{cursorY}px"></div>
   {/if}

@@ -103,10 +103,10 @@
   class="music-shell"
   class:fullscreen={isFullscreen}
   data-reduce-animations={reduceAnimationsAttr}
-  style:--music-accent={paletteVars?.accent ?? 'transparent'}
+  style:--music-accent={paletteVars?.accent ?? null}
   style:--music-accent-mid={paletteVars?.accentMid ?? 'transparent'}
   style:--music-accent-soft={paletteVars?.accentSoft ?? 'transparent'}
-  style:--music-highlight={paletteVars?.highlight ?? 'transparent'}
+  style:--music-highlight={paletteVars?.highlight ?? null}
   style:--music-bg-tint={paletteVars?.bgTint ?? 'transparent'}
   style:--music-scrubber-gradient={paletteVars?.scrubberGradient ?? null}
   style:--accent={themeAccentOverride ?? null}

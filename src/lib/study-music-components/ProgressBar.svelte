@@ -1,5 +1,6 @@
 <script lang="ts">
   import { fmtSecondsToTime } from "$lib/study-music/format";
+  import { t } from "$lib/i18n";
 
   type Props = {
     current: number;
@@ -48,6 +49,20 @@
     onSeek(dragValue * duration);
     (e.currentTarget as HTMLElement).releasePointerCapture(e.pointerId);
   }
+
+  function onKeyDown(e: KeyboardEvent) {
+    if (!duration || duration <= 0 || !Number.isFinite(duration)) return;
+    let target: number | null = null;
+    if (e.key === "ArrowLeft" || e.key === "ArrowDown") target = current - 5;
+    else if (e.key === "ArrowRight" || e.key === "ArrowUp") target = current + 5;
+    else if (e.key === "PageDown") target = current - 30;
+    else if (e.key === "PageUp") target = current + 30;
+    else if (e.key === "Home") target = 0;
+    else if (e.key === "End") target = duration;
+    if (target === null) return;
+    e.preventDefault();
+    onSeek(Math.max(0, Math.min(duration, target)));
+  }
 </script>
 
 <div class="progress-row">
@@ -56,14 +71,18 @@
   {/if}
   <div
     class="track"
+    class:dragging
     bind:this={trackEl}
     onpointerdown={onPointerDown}
     onpointermove={onPointerMove}
     onpointerup={onPointerUp}
+    onkeydown={onKeyDown}
     role="slider"
+    aria-label={$t("study.music.seek_aria") as string}
     aria-valuemin="0"
     aria-valuemax={duration || 0}
     aria-valuenow={current}
+    aria-valuetext="{fmtSecondsToTime(displayTime)} / {fmtSecondsToTime(duration)}"
     tabindex="0"
   >
     <div class="bar"></div>
@@ -135,7 +154,15 @@
     transition: opacity 120ms ease, background 400ms ease;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
   }
-  .track:hover .thumb {
+  .track:hover .thumb,
+  .track:focus-visible .thumb,
+  .track.dragging .thumb {
     opacity: 1;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .filled,
+    .thumb {
+      transition: none;
+    }
   }
 </style>

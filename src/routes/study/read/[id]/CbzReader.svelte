@@ -15,6 +15,8 @@
     popReadingTheme,
   } from "$lib/reader-theme";
   import ReaderThemeMenu from "$lib/reader-components/ReaderThemeMenu.svelte";
+  import ReaderZoomIndicator from "$lib/reader-components/ReaderZoomIndicator.svelte";
+  import { wheelZoomDirection } from "$lib/reader-zoom";
   import "$lib/reader-theme.css";
 
   type Book = {
@@ -65,6 +67,47 @@
       localStorage.setItem("study.read.view_mode", viewMode);
     }
   });
+
+  const CBZ_ZOOM_MIN = 0.5;
+  const CBZ_ZOOM_MAX = 3;
+  let imageZoom = $state(1);
+  let zoomLabel = $state("");
+  let zoomLabelTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function zoomKey(bookId: number): string {
+    return `study.read.cbz.zoom.${bookId}`;
+  }
+
+  $effect(() => {
+    if (typeof localStorage === "undefined") return;
+    const raw = Number(localStorage.getItem(zoomKey(book.id)));
+    if (Number.isFinite(raw) && raw >= CBZ_ZOOM_MIN && raw <= CBZ_ZOOM_MAX) {
+      imageZoom = raw;
+    }
+  });
+
+  function flashZoomLabel(value: number) {
+    zoomLabel = `${Math.round(value * 100)}%`;
+    if (zoomLabelTimer) clearTimeout(zoomLabelTimer);
+    zoomLabelTimer = setTimeout(() => (zoomLabel = ""), 1200);
+  }
+
+  function onWheelZoom(e: WheelEvent) {
+    const dir = wheelZoomDirection(e);
+    if (dir === 0) return;
+    e.preventDefault();
+    const next = Math.max(
+      CBZ_ZOOM_MIN,
+      Math.min(CBZ_ZOOM_MAX, Math.round((imageZoom + dir * 0.1) * 10) / 10),
+    );
+    if (next !== imageZoom) {
+      imageZoom = next;
+      if (typeof localStorage !== "undefined") {
+        localStorage.setItem(zoomKey(book.id), String(next));
+      }
+    }
+    flashZoomLabel(next);
+  }
 
   function rtlKey(bookId: number): string {
     return `study.read.cbz.rtl.${bookId}`;
@@ -196,11 +239,13 @@
     loadBook();
     window.addEventListener("keydown", onKey);
     window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("wheel", onWheelZoom, { passive: false });
   });
 
   onDestroy(() => {
     window.removeEventListener("keydown", onKey);
     window.removeEventListener("mousemove", onMouseMove);
+    window.removeEventListener("wheel", onWheelZoom);
     applyFocusMode(false);
     popReadingTheme();
     void session?.stop(false);
@@ -331,15 +376,17 @@
             src={convertFileSrc(page.abs_path)}
             alt="page {page.index + 1}"
             loading="lazy"
+            style:zoom={imageZoom}
           />
         {/each}
       </div>
     </div>
   {:else if meta && imageSrc}
     <div class="viewer" class:fit-width={fitMode === "width"}>
-      <img class="page-image" src={imageSrc} alt="page {pageIdx + 1}" />
+      <img class="page-image" src={imageSrc} alt="page {pageIdx + 1}" style:zoom={imageZoom} />
     </div>
   {/if}
+  <ReaderZoomIndicator label={zoomLabel} />
   {#if cursorLine && cursorY > 0}
     <div class="reader-cursor-line" style:top="{cursorY}px"></div>
   {/if}
@@ -482,6 +529,10 @@
     width: auto;
     object-fit: contain;
     box-shadow: 0 4px 18px rgba(0, 0, 0, 0.4);
+  }
+
+  .viewer > .page-image {
+    margin: auto;
   }
 
   .viewer.fit-width .page-image {

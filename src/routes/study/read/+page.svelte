@@ -4,6 +4,7 @@
   import { goto } from "$app/navigation";
   import { pluginInvoke } from "$lib/plugin-invoke";
   import { t } from "$lib/i18n";
+  import { showToast } from "$lib/stores/toast-store.svelte";
   import SegmentedControl from "$lib/study-components/SegmentedControl.svelte";
   import ConfirmDialog from "$lib/study-components/ConfirmDialog.svelte";
 
@@ -455,6 +456,50 @@
 
   function openBook(b: Book) {
     goto(`/study/read/${b.id}`);
+  }
+
+  function confirmDeleteBook(b: Book, ev: Event) {
+    ev.stopPropagation();
+    ev.preventDefault();
+    askConfirm(
+      $t("study.read.delete_book_title"),
+      $t("study.read.delete_book_confirm", { title: deriveTitle(b) }),
+      () => void doDeleteBook(b),
+    );
+  }
+
+  async function doDeleteBook(b: Book) {
+    try {
+      const res = await pluginInvoke<{ file_missing?: boolean }>(
+        "study",
+        "study:read:books:delete",
+        { bookId: b.id, deleteFile: true },
+      );
+      books = books.filter((x) => x.id !== b.id);
+      totalBooks = Math.max(0, totalBooks - 1);
+      byFormatCounts = {
+        ...byFormatCounts,
+        [b.format]: Math.max(0, (byFormatCounts[b.format] ?? 1) - 1),
+      };
+      if (tagBook?.id === b.id) tagBook = null;
+      if (enrichBook?.id === b.id) enrichBook = null;
+      showToast(
+        "success",
+        $t(
+          res?.file_missing
+            ? "study.read.delete_book_done_missing"
+            : "study.read.delete_book_done",
+          { title: deriveTitle(b) },
+        ),
+      );
+    } catch (e) {
+      showToast(
+        "error",
+        $t("study.read.delete_book_failed", {
+          err: e instanceof Error ? e.message : String(e),
+        }),
+      );
+    }
   }
 
   type Collection = { id: number; name: string; sort_order: number };
@@ -1005,6 +1050,25 @@
                 <path d="M11 7v4l3 2" />
               </svg>
             </span>
+            <span
+              class="card-action-btn danger"
+              role="button"
+              tabindex="0"
+              title={$t("study.read.delete_book_title")}
+              aria-label={$t("study.read.delete_book_title")}
+              onclick={(e) => confirmDeleteBook(b, e)}
+              onkeydown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  confirmDeleteBook(b, e);
+                }
+              }}
+            >
+              <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 6h18"></path>
+                <path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+              </svg>
+            </span>
             {#if collectionKey !== "all"}
               <span
                 class="card-action-btn"
@@ -1548,6 +1612,10 @@
     color: var(--accent);
     border-color: var(--accent);
     background: color-mix(in oklab, var(--accent) 18%, var(--primary));
+  }
+  .card-action-btn.danger:hover {
+    color: var(--error);
+    border-color: var(--error);
   }
 
   .enrich-list {

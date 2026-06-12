@@ -20,6 +20,8 @@
     popReadingTheme,
   } from "$lib/reader-theme";
   import ReaderThemeMenu from "$lib/reader-components/ReaderThemeMenu.svelte";
+  import ReaderZoomIndicator from "$lib/reader-components/ReaderZoomIndicator.svelte";
+  import { wheelZoomDirection } from "$lib/reader-zoom";
   import "$lib/reader-theme.css";
   import EpubReader from "./EpubReader.svelte";
   import type {
@@ -1333,13 +1335,61 @@
     }
   }
 
+  const PDF_ZOOM_KEY = "study.read.pdf_zoom_dpi";
+  const PDF_ZOOM_MIN = 48;
+  const PDF_ZOOM_MAX = 300;
+  const PDF_ZOOM_BASE = 120;
+  let zoomLabel = $state("");
+  let zoomLabelTimer: ReturnType<typeof setTimeout> | null = null;
+  let wheelZoomTarget: number | null = null;
+  let wheelZoomTimer: ReturnType<typeof setTimeout> | null = null;
+
+  function loadZoomDpi() {
+    if (typeof localStorage === "undefined") return;
+    const raw = Number(localStorage.getItem(PDF_ZOOM_KEY));
+    if (Number.isFinite(raw) && raw >= PDF_ZOOM_MIN && raw <= PDF_ZOOM_MAX) {
+      zoomDpi = raw;
+    }
+  }
+
+  $effect(() => {
+    if (typeof localStorage !== "undefined") {
+      localStorage.setItem(PDF_ZOOM_KEY, String(zoomDpi));
+    }
+  });
+
+  function flashZoomLabel(text: string) {
+    zoomLabel = text;
+    if (zoomLabelTimer) clearTimeout(zoomLabelTimer);
+    zoomLabelTimer = setTimeout(() => (zoomLabel = ""), 1200);
+  }
+
+  function onWheelZoom(e: WheelEvent) {
+    if (!meta) return;
+    const dir = wheelZoomDirection(e);
+    if (dir === 0) return;
+    e.preventDefault();
+    const base = wheelZoomTarget ?? zoomDpi;
+    const next = Math.max(PDF_ZOOM_MIN, Math.min(PDF_ZOOM_MAX, base + dir * 15));
+    wheelZoomTarget = next;
+    flashZoomLabel(`${Math.round((next / PDF_ZOOM_BASE) * 100)}%`);
+    if (wheelZoomTimer) clearTimeout(wheelZoomTimer);
+    wheelZoomTimer = setTimeout(() => {
+      const target = wheelZoomTarget;
+      wheelZoomTarget = null;
+      if (target === null || target === zoomDpi) return;
+      zoomDpi = target;
+      if (viewMode === "paged") void renderCurrent();
+    }, 160);
+  }
+
   function zoomIn() {
-    zoomDpi = Math.min(300, zoomDpi + 30);
+    zoomDpi = Math.min(PDF_ZOOM_MAX, zoomDpi + 30);
     renderCurrent();
   }
 
   function zoomOut() {
-    zoomDpi = Math.max(48, zoomDpi - 30);
+    zoomDpi = Math.max(PDF_ZOOM_MIN, zoomDpi - 30);
     renderCurrent();
   }
 
@@ -1514,19 +1564,23 @@
     cursorLine = getCursorLine();
     viewMode = getViewMode();
     loadInkPreferences();
+    loadZoomDpi();
     pushReadingTheme();
     loadBook();
     window.addEventListener("keydown", onKey);
     window.addEventListener("mousemove", onMouseMove);
+    window.addEventListener("wheel", onWheelZoom, { passive: false });
     return () => {
       window.removeEventListener("keydown", onKey);
       window.removeEventListener("mousemove", onMouseMove);
+      window.removeEventListener("wheel", onWheelZoom);
     };
   });
 
   onDestroy(() => {
     window.removeEventListener("keydown", onKey);
     window.removeEventListener("mousemove", onMouseMove);
+    window.removeEventListener("wheel", onWheelZoom);
     applyFocusMode(false);
     popReadingTheme();
     void session?.stop(false);
@@ -1900,6 +1954,7 @@
   {#if exportToast}
     <div class="export-toast">{exportToast}</div>
   {/if}
+  <ReaderZoomIndicator label={zoomLabel} />
 
   {#if loadingBook}
     <p class="state">{$t("study.read.loading_book")}</p>
