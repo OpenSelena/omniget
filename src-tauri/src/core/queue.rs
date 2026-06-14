@@ -1282,6 +1282,16 @@ async fn spawn_download_inner(
     } else {
         None
     };
+    let custom_ytdlp_args = {
+        let mut args = custom_ytdlp_args.clone();
+        if settings.download.skip_existing {
+            let flags = args.get_or_insert_with(Vec::new);
+            if !flags.iter().any(|f| f == "--no-overwrites") {
+                flags.push("--no-overwrites".to_string());
+            }
+        }
+        args
+    };
     let opts = crate::models::media::DownloadOptions {
         quality: quality.or_else(|| Some(settings.download.video_quality.clone())),
         output_dir: final_output_dir,
