@@ -1,4 +1,10 @@
+pub mod generic_ytdlp;
 pub mod traits;
+pub mod youtube;
+
+pub use generic_ytdlp::GenericYtdlpDownloader;
+pub use traits::PlatformDownloader;
+pub use youtube::YouTubeDownloader;
 
 use serde::{Deserialize, Serialize};
 use std::fmt;

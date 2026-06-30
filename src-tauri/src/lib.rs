@@ -49,7 +49,7 @@ pub fn run() {
     registry.register(Arc::new(platforms::twitch::TwitchClipsDownloader::new()));
     registry.register(Arc::new(platforms::bluesky::BlueskyDownloader::new()));
     registry.register(Arc::new(platforms::reddit::RedditDownloader::new()));
-    registry.register(Arc::new(platforms::youtube::YouTubeDownloader::new()));
+    registry.register(Arc::new(omniget_core::platforms::YouTubeDownloader::new()));
     registry.register(Arc::new(platforms::vimeo::VimeoDownloader::new()));
     registry.register(Arc::new(platforms::bilibili::BilibiliDownloader::new()));
     registry.register(Arc::new(platforms::douyin::DouyinDownloader::new()));

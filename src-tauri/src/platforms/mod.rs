@@ -1,5 +1,7 @@
 pub use omniget_core::platforms::traits;
 pub use omniget_core::platforms::Platform;
+pub use omniget_core::platforms::GenericYtdlpDownloader;
+pub use omniget_core::platforms::YouTubeDownloader;
 
 pub mod bluesky;
 pub mod direct_file;
@@ -25,5 +27,6 @@ pub mod p2p;
 pub mod reddit;
 #[cfg(not(target_os = "android"))]
 pub mod vimeo;
-#[cfg(not(target_os = "android"))]
-pub mod youtube;
+// YouTube now lives in omniget-core
+// #[cfg(not(target_os = "android"))]
+// pub mod youtube;
