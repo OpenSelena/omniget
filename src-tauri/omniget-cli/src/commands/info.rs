@@ -4,14 +4,24 @@ use omniget_core::core::ytdlp;
 
 use crate::output;
 use crate::reporter::find_yt_dlp;
+use crate::reporter;
 
 pub async fn execute(url: String, proxy: Option<String>) -> Result<()> {
     let ytdlp = find_yt_dlp().await?;
     
-    let extra_flags: Vec<String> = match &proxy {
-        Some(p) => vec!["--proxy".to_string(), p.clone()],
-        None => vec![],
-    };
+    let mut extra_flags: Vec<String> = Vec::new();
+    if let Some(p) = &proxy {
+        extra_flags.push("--proxy".to_string());
+        extra_flags.push(p.clone());
+    }
+
+    // Auto-include cookie file if exists
+    if let Some(cookie_file) = reporter::default_cookie_path() {
+        if cookie_file.exists() {
+            extra_flags.push("--cookies".to_string());
+            extra_flags.push(cookie_file.display().to_string());
+        }
+    }
 
     let info = match tokio::time::timeout(
         std::time::Duration::from_secs(120),

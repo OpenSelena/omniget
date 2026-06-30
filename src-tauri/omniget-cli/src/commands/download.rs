@@ -61,11 +61,19 @@ pub async fn execute(
     let msg = format!("Starting: {}", url);
     pb.set_message(msg);
 
-    // Build extra flags for proxy and subtitles
+    // Build extra flags for proxy, cookies, and subtitles
     let mut extra_flags: Vec<String> = Vec::new();
     if let Some(p) = &proxy {
         extra_flags.push("--proxy".to_string());
         extra_flags.push(p.clone());
+    }
+
+    // Auto-include cookie file if exists
+    if let Some(cookie_file) = reporter::default_cookie_path() {
+        if cookie_file.exists() {
+            extra_flags.push("--cookies".to_string());
+            extra_flags.push(cookie_file.display().to_string());
+        }
     }
 
     let download_subtitles = subs.is_some();

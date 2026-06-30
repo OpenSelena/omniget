@@ -1,6 +1,7 @@
 use clap::Parser;
 
 mod commands;
+mod cookies;
 mod output;
 mod reporter;
 
@@ -52,6 +53,16 @@ enum Commands {
         #[arg(short, long)]
         output: Option<String>,
     },
+    /// Import a cookies.txt file (Netscape format)
+    ImportCookies {
+        file: String,
+
+        #[arg(short, long, help = "Account name (default: cookies.txt)")]
+        name: Option<String>,
+
+        #[arg(long, help = "Preview without importing")]
+        dry_run: bool,
+    },
 }
 
 #[tokio::main]
@@ -89,6 +100,9 @@ async fn main() -> anyhow::Result<()> {
             output,
         } => {
             commands::batch::execute(file, max_concurrent, output, cli.proxy).await?;
+        }
+        Commands::ImportCookies { file, name, dry_run } => {
+            commands::import_cookies::execute(file, name, dry_run).await?;
         }
     }
 
