@@ -46,21 +46,21 @@ pub fn run() {
     registry.register(Arc::new(platforms::pinterest::PinterestDownloader::new()));
     registry.register(Arc::new(platforms::tiktok::TikTokDownloader::new()));
     registry.register(Arc::new(platforms::twitter::TwitterDownloader::new()));
-    registry.register(Arc::new(platforms::twitch::TwitchClipsDownloader::new()));
-    registry.register(Arc::new(platforms::bluesky::BlueskyDownloader::new()));
+    registry.register(Arc::new(omniget_core::platforms::TwitchClipsDownloader::new()));
+    registry.register(Arc::new(omniget_core::platforms::BlueskyDownloader::new()));
     registry.register(Arc::new(platforms::reddit::RedditDownloader::new()));
     registry.register(Arc::new(omniget_core::platforms::YouTubeDownloader::new()));
-    registry.register(Arc::new(platforms::vimeo::VimeoDownloader::new()));
+    registry.register(Arc::new(omniget_core::platforms::VimeoDownloader::new()));
     registry.register(Arc::new(platforms::bilibili::BilibiliDownloader::new()));
-    registry.register(Arc::new(platforms::douyin::DouyinDownloader::new()));
+    registry.register(Arc::new(omniget_core::platforms::DouyinDownloader::new()));
     let torrent_session: Arc<tokio::sync::Mutex<Option<Arc<librqbit::Session>>>> =
         Arc::new(tokio::sync::Mutex::new(None));
     registry.register(Arc::new(platforms::magnet::MagnetDownloader::new(
         torrent_session.clone(),
     )));
-    registry.register(Arc::new(platforms::p2p::P2pDownloader::new()));
+    registry.register(Arc::new(omniget_core::platforms::P2pDownloader::new()));
     registry.register(Arc::new(platforms::gallerydl::GalleryDlDownloader::new()));
-    registry.register(Arc::new(platforms::direct_file::DirectFileDownloader::new()));
+    registry.register(Arc::new(omniget_core::platforms::DirectFileDownloader::new()));
     registry.register(Arc::new(
         platforms::generic_ytdlp::GenericYtdlpDownloader::new(),
     ));

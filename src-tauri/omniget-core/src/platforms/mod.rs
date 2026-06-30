@@ -1,9 +1,24 @@
+pub mod bluesky;
+pub mod direct_file;
+pub mod douyin;
 pub mod generic_ytdlp;
+// pub mod magnet; // needs librqbit + trackers (Tauri-only for now)
+pub mod p2p;
+pub mod p2p_words;
 pub mod traits;
+pub mod twitch;
+pub mod vimeo;
 pub mod youtube;
 
+pub use bluesky::BlueskyDownloader;
+pub use direct_file::DirectFileDownloader;
+pub use douyin::DouyinDownloader;
 pub use generic_ytdlp::GenericYtdlpDownloader;
+// pub use magnet::MagnetDownloader;
+pub use p2p::P2pDownloader;
 pub use traits::PlatformDownloader;
+pub use twitch::TwitchClipsDownloader;
+pub use vimeo::VimeoDownloader;
 pub use youtube::YouTubeDownloader;
 
 use serde::{Deserialize, Serialize};
