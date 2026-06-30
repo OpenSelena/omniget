@@ -42,13 +42,13 @@ pub fn run() {
     tracing_subscriber::fmt::init();
 
     let mut registry = core::registry::PlatformRegistry::new();
-    registry.register(Arc::new(platforms::instagram::InstagramDownloader::new()));
-    registry.register(Arc::new(platforms::pinterest::PinterestDownloader::new()));
-    registry.register(Arc::new(platforms::tiktok::TikTokDownloader::new()));
+    registry.register(Arc::new(omniget_core::platforms::InstagramDownloader::new()));
+    registry.register(Arc::new(omniget_core::platforms::PinterestDownloader::new()));
+    registry.register(Arc::new(omniget_core::platforms::TikTokDownloader::new()));
     registry.register(Arc::new(platforms::twitter::TwitterDownloader::new()));
     registry.register(Arc::new(omniget_core::platforms::TwitchClipsDownloader::new()));
     registry.register(Arc::new(omniget_core::platforms::BlueskyDownloader::new()));
-    registry.register(Arc::new(platforms::reddit::RedditDownloader::new()));
+    registry.register(Arc::new(omniget_core::platforms::RedditDownloader::new()));
     registry.register(Arc::new(omniget_core::platforms::YouTubeDownloader::new()));
     registry.register(Arc::new(omniget_core::platforms::VimeoDownloader::new()));
     registry.register(Arc::new(platforms::bilibili::BilibiliDownloader::new()));
