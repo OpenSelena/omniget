@@ -42,7 +42,7 @@ impl CliReporter {
             println!("{}", json);
         } else {
             if update.percent >= 0.0 {
-                self.pb.set_position((update.percent * 100.0) as u64);
+                self.pb.set_position(update.percent.clamp(0.0, 100.0).round() as u64);
                 self.pb.set_style(
                     ProgressStyle::default_bar()
                         .template(PROGRESS_STYLE)

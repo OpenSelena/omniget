@@ -1,7 +1,7 @@
 # OmniGet 平台提取器移植 — 交接文档
 
 > 日期：2026-07-01  
-> 状态：Phase 0-2 完成，12/15 平台已移植到 `omniget-core`  
+> 状态：Phase 0-4 基本完成；14/15 平台 Downloader 已移植到 `omniget-core`，Bilibili auth 网络流程已移入 core，桌面写入通过 runtime provider 适配  
 > Fork：https://github.com/gkd2323c/omniget  
 > PR：https://github.com/tonhowtf/omniget/pull/163
 
@@ -83,7 +83,8 @@ pub trait PlatformDownloader: Send + Sync {
 
 | 组件 | 文件 | 说明 |
 |------|------|------|
-| PlatformDownloader trait | `omniget-core/src/platforms/traits.ts` | 统一下载接口 |
+| PlatformDownloader trait | `omniget-core/src/platforms/traits.rs` | 统一下载接口 |
+| CookieProvider trait | `omniget-core/src/platforms/cookie_provider.rs` | 框架无关 Cookie 路径/手动 Cookie 抽象，CLI 默认读取 app data cookies.txt |
 | GenericYtdlpDownloader | `omniget-core/src/platforms/generic_ytdlp.rs` | yt-dlp 通用封装，含质量选择、HLS、直链、fallback |
 | Platform 枚举 | `omniget-core/src/platforms/mod.rs` | URL→平台检测 |
 | is_direct_file_url | `omniget-core/src/platforms/mod.rs` | 直链文件检测 |
@@ -101,6 +102,7 @@ pub trait PlatformDownloader: Send + Sync {
 | Reddit | `reddit.rs` | 28KB | cookie + 音频提取 |
 | Instagram | `instagram.rs` | 36KB | cookie + GraphQL API |
 | TikTok | `tiktok.rs` | 24KB | cookie + 浏览器指纹 |
+| Twitter/X | `twitter.rs` | 41KB | CookieProvider + GraphQL guest token + yt-dlp fallback |
 | P2P | `p2p.rs` + `p2p_words.rs` | 16KB | 纯网络传输 |
 | DirectFile | `direct_file.rs` | 5KB | HTTP 直链下载 |
 
@@ -108,36 +110,64 @@ pub trait PlatformDownloader: Send + Sync {
 
 ## 4. 未移植平台分析
 
-### 4.1 Twitter（~41KB） — Phase 3
+### 4.1 Twitter（~41KB） — Phase 3 ✅ core/CLI/桌面注册已完成
 
-**阻塞依赖**：
-- `crate::cookies::account_path_for_consumer` — 多账户 Cookie 路径
-- `crate::storage::config::load_settings_standalone` — 读取 PlaybackQuality
+已完成：
+- `omniget-core/src/platforms/cookie_provider.rs` 定义 `CookieProvider`
+- `omniget-core/src/platforms/twitter.rs` 已移除 Tauri 依赖
+- CLI 核心平台注册表已接入 `TwitterDownloader`
+- 桌面端 `src-tauri/src/lib.rs` 已切换注册 `omniget_core::platforms::TwitterDownloader`
+- 桌面端已实现 `DesktopCookieProvider`，委托 `crate::cookies::account_path_for_consumer` 与设置里的手动 cookie
+- 原生 Twitter 失败时仍保留 yt-dlp fallback
+- 2026-07-01 实测：`omniget-cli --json --proxy http://127.0.0.1:7897 info https://twitter.com/CTVJLaidlaw/status/1600649710662213632` 命中 `platform=twitter`，GraphQL 200，提取 2 个媒体项
+- 2026-07-01 实测：同 URL `download -o target/twitter-smoke` 成功下载 2 个 mp4（16,344,602 + 14,872,817 bytes）
 
-**移植方案**：
-1. 在 `omniget-core` 中定义 `CookieProvider` trait：
-   ```rust
-   pub trait CookieProvider: Send + Sync {
-       fn cookie_path_for(&self, domain: &str) -> Option<PathBuf>;
-   }
-   ```
-2. CLI 实现：返回 `~/.omniget/cookies/cookies.txt`（如果存在）
-3. Tauri 实现：委托给 `crate::cookies::account_path_for_consumer`
+实测修复：
+- DefaultCookieProvider 从全局 `cookies.txt` 读取时必须按 domain 过滤 Netscape cookie，否则会把整份 cookies 拼进 Cookie header，Windows 下触发 yt-dlp `os error 206`
+- Twitter 多媒体下载分支不能把 progress 发到无人消费的 mpsc channel，否则 direct downloader 会在缓冲区满后死锁
 
-### 4.2 Bilibili（~200KB/36 文件） — Phase 4-5
+待收尾：
+- `src-tauri/src/platforms/twitter/` 旧适配层已不再注册，可后续单独删除
+- 桌面 GUI 运行时 smoke test 尚未执行；当前完成的是 `cargo check` 层面的注册切换验证
 
-**阻塞依赖**：
-- Twitter 的两个依赖 +
-- WBI 签名算法（`src-tauri/src/platforms/bilibili/wbi.rs`）
-- 认证模块（auth/：二维码、短信、CAPTCHA）
-- 弹幕系统（danmaku/：ASS/XML/JSON 渲染）
-- 番剧/课程解析器（parser/ 8 个子模块）
+### 4.2 Bilibili（~200KB/36 文件） — Phase 4 基本完成
 
-**移植方案**：
-1. 先解决 CookieProvider/SettingsProvider
-2. 将 wbi.rs、cookie.rs 等辅助模块移到 `omniget-core/src/platforms/bilibili/`
-3. 保持 `mod.rs` 作为入口，子模块按功能分组
-4. 弹幕渲染可保留为可选 feature（`features = ["danmaku"]`）
+已迁移到 `omniget-core/src/platforms/bilibili/`：
+- 底座：`api.rs`, `wbi.rs`, `url_kind.rs`, `cdn.rs`, `cover.rs`, `cookie.rs`
+- 解析：`parser/` 全量子模块（video / bangumi / cheese / favlist / list / space / popular / history / watch_later / festival）
+- 媒体选择与元数据：`preview.rs`, `naming.rs`, `nfo.rs`
+- 弹幕：`danmaku/`（proto/xml/json/ass）
+- 下载执行层：`engine/`（fetch/query/mux）
+- 入口与 fallback：`mod.rs`, `legacy.rs`, `notify.rs`
+
+同步完成的抽象与接线：
+- `CookieProvider` 增加 `cookie_path_for_account(domain, slug)`，支持 Bilibili 精确账户 cookie 读取
+- 默认 `CookieProvider` 支持 core/CLI 写入 `cookies/<domain>/<slug>.txt`
+- 新增 `BilibiliRuntimeProvider`，用于注入 active account、settings、session-expired 通知
+- 桌面端实现 `DesktopBilibiliRuntimeProvider`，保留原 Bilibili active-account 选择语义
+- Bilibili auth（二维码、短信、CAPTCHA、账号探测）已迁移到 `omniget-core/src/platforms/bilibili/auth/`
+- `BilibiliRuntimeProvider::persist_account` 负责登录 cookie 持久化，桌面端实现仍复用现有 `cookies::storage` registry
+- 桌面 registry 已从 `platforms::bilibili::BilibiliDownloader` 切到 `omniget_core::platforms::BilibiliDownloader`
+- CLI registry 已注册 core `BilibiliDownloader`
+- `omniget-core` 新增依赖：`once_cell`, `thiserror`, `md-5`, `hex`, `hmac`, `murmur3`, `qrcode`
+
+当前验证：
+- `cargo check -p omniget-core` ✅
+- `cargo check -p omniget-cli` ✅
+- `cargo check` ✅
+- `cargo test -p omniget-core --lib platforms::bilibili` ✅ 51 passed
+- `cargo test -p omniget-core --lib` ✅ 244 passed
+- 2026-07-01 继续移植 auth 后复验：`cargo check -p omniget-core` ✅，`cargo check` ✅，`cargo test -p omniget-core --lib platforms::bilibili` ✅ 51 passed，`cargo test -p omniget-core --lib` ✅ 244 passed
+
+仍未迁移 / 阻塞：
+- 旧 `src-tauri/src/platforms/bilibili/auth/` 仍保留但桌面命令已改用 core auth；可在确认无其他引用后删除
+- 旧 `src-tauri/src/platforms/bilibili/` 下载相关模块仍保留，供 cleanup 过渡使用；删除需要单独清理引用
+- GUI runtime smoke test 尚未执行
+
+建议下一步：
+1. 跑桌面 GUI Bilibili 登录账号下载 smoke test，确认 core Downloader 与桌面 runtime provider 行为一致
+2. 删除旧 Tauri `platforms/bilibili/auth/`，确认 `bilibili_auth` 命令仍只依赖 core auth
+3. 清理旧 Tauri Bilibili 下载模块，只保留必要 adapter 或完全移除旧目录
 
 ### 4.3 Magnet — 视需求决定
 
@@ -183,7 +213,7 @@ cargo check  # 全 workspace
 1. **`pub use` 不要立即删除**：先添加核心库导出，确认编译通过后再清理旧模块
 2. **Tauri 特有依赖**：如遇到 `crate::cookies::*` 或 `crate::storage::*`，需要引入 trait 抽象
 3. **测试移植**：`#[cfg(test)]` 模块随文件一起搬运，确保单元测试不中断
-4. **文件后缀**：核心库使用单文件（`youtube.rs`），不使用目录（`youtube/mod.rs`）
+4. **文件布局**：小平台使用单文件（如 `youtube.rs`）；Bilibili 这种多子系统平台使用目录模块（`bilibili/mod.rs` + 子模块）
 
 ---
 
@@ -213,7 +243,7 @@ cargo test -p omniget-core --lib platforms::youtube::tests
 cargo test -p omniget-core --lib platforms::instagram::tests
 ```
 
-当前：**191 tests passed**。
+当前：核心库完整测试 **244 tests passed**；Bilibili 子模块定向测试 **51 tests passed**。
 
 ### 6.3 CLI 实操测试
 
@@ -267,9 +297,9 @@ omniget-cli --proxy http://127.0.0.1:7897 batch urls.txt -m 3
 - 包含 `import-cookies` 新命令
 - 包含 `omniget-cli` binary
 
-**PR-B（后续）**：Twitter + Bilibili 移植
-- 需要引入 `CookieProvider` / `SettingsProvider` trait
-- Bilibili 代码量大，需要单独 review
+**PR-B（后续）**：Bilibili smoke + auth/旧模块清理
+- Twitter 已完成 core/CLI/桌面注册切换，旧 `src-tauri/src/platforms/twitter/` 可单独删除
+- Bilibili Downloader 与 auth 已完成 core/CLI/桌面注册切换，仍需 GUI smoke 与旧模块删除
 
 ---
 
@@ -279,24 +309,26 @@ omniget-cli --proxy http://127.0.0.1:7897 batch urls.txt -m 3
 |------|------|------|
 | P2P 代码验证 | ✅ 已修复 | 使用 `super::p2p_words` 替代 `crate::platforms::p2p_words` |
 | Magnet 磁力链 | ⏸ 暂缓 | 需 librqbit 进入核心库 |
-| CLI 平台调度器 | ⏳ 待实现 | 当前 CLI 直接调 ytdlp，尚未使用 PlatformDispatcher 路由 |
-| Bilibili 4K/HDR | ⏳ 待移植 | 原生提取器仍在 Tauri 层 |
+| CLI 平台调度器 | ✅ 已实现 | `info` / `download` 通过核心 PlatformRegistry 路由，非 generic 失败时回退 GenericYtdlp |
+| Twitter CLI 实测 | ✅ 已通过 | info + carousel download 通过，测试产物位于 `src-tauri/target/twitter-smoke/` |
+| Twitter 桌面注册 | ✅ 已切换 | `lib.rs` 注册 core Twitter，并在 setup 安装 `DesktopCookieProvider`；`cargo check` 通过 |
+| Bilibili Downloader 迁移 | ✅ 已切换 | core 已包含 cookie/legacy/notify/mod，CLI 与桌面 registry 已注册 core Bilibili，51 个定向测试通过 |
+| Bilibili auth/旧模块清理 | ⏳ 部分完成 | auth 网络流程已迁入 core，桌面写入由 provider 适配；旧目录暂保留，GUI runtime smoke 未跑 |
 
 ---
 
 ## 10. 下一步
 
-如果要继续 Phase 3（Twitter 移植）：
+如果要继续 Phase 3 清理：
 
-1. 在 `omniget-core/src/platforms/` 创建 `cookie_provider.rs` trait
-2. 实现 `DefaultCookieProvider`（CLI 使用）
-3. 移植 `twitter/mod.rs`，抽象 cookie/settings 访问
-4. 编译测试
+1. 删除未注册的 `src-tauri/src/platforms/twitter/` 旧适配层
+2. 运行桌面 GUI smoke test，确认队列中的 Twitter 下载仍走 core Twitter
+3. 视情况优化 Twitter 多文件下载的聚合进度显示
 
 如果要继续 Bilibili：
-1. 先完成 Twitter（解决 cookie/settings 问题）
-2. 将 Bilibili 辅助模块分批移植（wbi → auth → parser → danmaku）
-3. 考虑将弹幕系统拆分为独立 crate 或 feature flag
+1. 跑桌面 GUI 登录账号下载 smoke test，确认 core Downloader 与 `DesktopBilibiliRuntimeProvider` 行为一致
+2. 删除旧 `src-tauri/src/platforms/bilibili/auth/`，确认桌面 auth 命令仍编译通过
+3. 清理旧 `src-tauri/src/platforms/bilibili/` 下载相关代码，只保留必要 adapter 或完全移除旧目录
 
 ---
 

@@ -268,12 +268,9 @@ impl PlatformDownloader for YouTubeDownloader {
     }
 
     async fn get_media_info(&self, url: &str) -> anyhow::Result<MediaInfo> {
-        let ytdlp_path = ytdlp::ensure_ytdlp().await.map_err(|e| {
-            anyhow!(
-                "YouTube requires yt-dlp. Failed to get yt-dlp: {}",
-                e
-            )
-        })?;
+        let ytdlp_path = ytdlp::ensure_ytdlp()
+            .await
+            .map_err(|e| anyhow!("YouTube requires yt-dlp. Failed to get yt-dlp: {}", e))?;
 
         Self::fetch_with_ytdlp(url, &ytdlp_path).await
     }
@@ -319,6 +316,12 @@ impl PlatformDownloader for YouTubeDownloader {
         };
         let video_url = &selected.url;
 
+        let extra_flags: Vec<String> = opts
+            .custom_ytdlp_args
+            .as_deref()
+            .map(|args| args.to_vec())
+            .unwrap_or_default();
+
         ytdlp::download_video(
             &ytdlp_path,
             video_url,
@@ -333,7 +336,7 @@ impl PlatformDownloader for YouTubeDownloader {
             None,
             opts.concurrent_fragments,
             opts.download_subtitles,
-            &[],
+            &extra_flags,
             opts.audio_format.as_deref(),
         )
         .await
@@ -387,6 +390,12 @@ impl YouTubeDownloader {
                 }
             });
 
+            let extra_flags: Vec<String> = opts
+                .custom_ytdlp_args
+                .as_deref()
+                .map(|args| args.to_vec())
+                .unwrap_or_default();
+
             match ytdlp::download_video(
                 ytdlp_path,
                 &entry.url,
@@ -401,7 +410,7 @@ impl YouTubeDownloader {
                 None,
                 opts.concurrent_fragments,
                 opts.download_subtitles,
-                &[],
+                &extra_flags,
                 opts.audio_format.as_deref(),
             )
             .await
@@ -421,8 +430,9 @@ impl YouTubeDownloader {
         }
 
         if success_count == 0 {
-            return Err(last_err
-                .unwrap_or_else(|| anyhow!("Playlist download finished without any files")));
+            return Err(
+                last_err.unwrap_or_else(|| anyhow!("Playlist download finished without any files"))
+            );
         }
 
         if success_count > 1 {

@@ -1,67 +1,46 @@
 use anyhow::Result;
 
-use omniget_core::core::ytdlp;
-
+use crate::commands::common;
 use crate::output;
-use crate::reporter::find_yt_dlp;
-use crate::reporter;
 
 pub async fn execute(url: String, proxy: Option<String>) -> Result<()> {
-    let ytdlp = find_yt_dlp().await?;
-    
-    let mut extra_flags: Vec<String> = Vec::new();
-    if let Some(p) = &proxy {
-        extra_flags.push("--proxy".to_string());
-        extra_flags.push(p.clone());
-    }
+    common::init_cli_runtime(proxy.as_deref())?;
 
-    // Auto-include cookie file if exists
-    if let Some(cookie_file) = reporter::default_cookie_path() {
-        if cookie_file.exists() {
-            extra_flags.push("--cookies".to_string());
-            extra_flags.push(cookie_file.display().to_string());
-        }
-    }
-
-    let info = match tokio::time::timeout(
-        std::time::Duration::from_secs(120),
-        ytdlp::get_video_info(&ytdlp, &url, &extra_flags)
-    ).await {
-        Ok(Ok(info)) => info,
-        Ok(Err(e)) => return Err(e),
-        Err(_) => anyhow::bail!("Timed out after 120s"),
-    };
-
-    let formats = ytdlp::parse_formats(&info);
+    let registry = common::core_platform_registry();
+    let (platform, info) = common::resolve_media_info(&registry, &url).await?;
 
     if output::is_json_mode() {
-        println!(
-            r#"{{"url":"{}","title":"{}","duration":{},"uploader":"{}","format_count":{}}}"#,
-            url.replace('"', "\\\""),
-            info.get("title").and_then(|v| v.as_str()).unwrap_or("").replace('"', "\\\""),
-            info.get("duration").and_then(|v| v.as_f64()).unwrap_or(0.0),
-            info.get("uploader").and_then(|v| v.as_str()).unwrap_or("").replace('"', "\\\""),
-            formats.len()
-        );
+        let json = serde_json::json!({
+            "url": url,
+            "platform": platform.name(),
+            "title": info.title,
+            "duration": info.duration_seconds.unwrap_or(0.0),
+            "uploader": info.author,
+            "media_type": info.media_type,
+            "format_count": info.available_qualities.len(),
+            "thumbnail_url": info.thumbnail_url,
+            "file_size_bytes": info.file_size_bytes,
+        });
+        println!("{}", json);
     } else {
-        println!(
-            "Title: {}",
-            info.get("title").and_then(|v| v.as_str()).unwrap_or("")
-        );
-        println!(
-            "Duration: {:.0}s",
-            info.get("duration").and_then(|v| v.as_f64()).unwrap_or(0.0)
-        );
-        println!("Uploader: {}", info.get("uploader").and_then(|v| v.as_str()).unwrap_or(""));
-        println!("Formats: {}", formats.len());
-        for f in formats.iter().take(15) {
-            let res = f.resolution.as_deref().unwrap_or("?");
+        println!("Platform: {}", platform.name());
+        println!("Title: {}", info.title);
+        println!("Duration: {:.0}s", info.duration_seconds.unwrap_or(0.0));
+        println!("Uploader: {}", info.author);
+        println!("Type: {:?}", info.media_type);
+        println!("Formats: {}", info.available_qualities.len());
+
+        for quality in info.available_qualities.iter().take(15) {
+            let resolution = if quality.width > 0 && quality.height > 0 {
+                format!("{}x{}", quality.width, quality.height)
+            } else if quality.height > 0 {
+                format!("{}p", quality.height)
+            } else {
+                "?".to_string()
+            };
             println!(
-                "  {:<10} {:<6} {:>5} {}",
-                f.format_id,
-                f.ext,
-                res,
-                f.format_note.as_deref().unwrap_or("")
+                "  {:<14} {:<8} {:>8} {}",
+                quality.label, quality.format, resolution, quality.url
             );
         }
     }

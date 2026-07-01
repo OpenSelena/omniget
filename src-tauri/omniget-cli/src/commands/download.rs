@@ -2,15 +2,15 @@ use anyhow::Result;
 use indicatif::{ProgressBar, ProgressStyle};
 use std::path::PathBuf;
 use tokio::sync::mpsc;
-use tokio_util::sync::CancellationToken;
 
-use omniget_core::core::ytdlp;
 use omniget_core::models::progress::ProgressUpdate;
 
+use crate::commands::common;
 use crate::output;
 use crate::reporter;
 
-const PROGRESS_STYLE: &str = "{spinner:.cyan} [{elapsed_precise}] [{bar:40.cyan/blue}] {bytes}/{total_bytes} ({bytes_per_sec}, ETA {eta})";
+const PROGRESS_STYLE: &str =
+    "{spinner:.cyan} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos:>3}% {msg}";
 const SPINNER_STYLE: &str = "{spinner:.cyan} {msg:.dim}";
 
 pub async fn execute(
@@ -22,19 +22,33 @@ pub async fn execute(
     format: Option<String>,
     proxy: Option<String>,
 ) -> Result<()> {
+    common::init_cli_runtime(proxy.as_deref())?;
+
     let json_mode = output::is_json_mode();
     let pb = ProgressBar::new(100);
-    pb.set_style(ProgressStyle::default_bar().template(SPINNER_STYLE).unwrap());
-    pb.set_message("Searching for yt-dlp...");
-
-    let ytdlp = reporter::find_yt_dlp().await?;
-    pb.set_message("yt-dlp found");
+    pb.set_style(
+        ProgressStyle::default_bar()
+            .template(SPINNER_STYLE)
+            .unwrap(),
+    );
+    pb.set_message("Resolving media info...");
 
     let output_path = match output_dir {
         Some(dir) => PathBuf::from(dir),
         None => reporter::default_output_dir(),
     };
     tokio::fs::create_dir_all(&output_path).await.ok();
+
+    let registry = common::core_platform_registry();
+    let (platform, info) = common::resolve_media_info(&registry, &url).await?;
+
+    if !json_mode {
+        pb.set_message(format!(
+            "Starting {} download: {}",
+            platform.name(),
+            info.title
+        ));
+    }
 
     let (tx, mut rx) = mpsc::channel::<ProgressUpdate>(100);
 
@@ -43,64 +57,39 @@ pub async fn execute(
         while let Some(update) = rx.recv().await {
             if json_mode {
                 println!(
-                    r#"{{"type":"progress","percent":{},"downloaded_bytes":{:?},"total_bytes":{:?}}}"#,
-                    update.percent, update.downloaded_bytes, update.total_bytes
+                    r#"{{"type":"progress","percent":{},"downloaded_bytes":{:?},"total_bytes":{:?},"speed_bps":{:?},"eta_seconds":{:?}}}"#,
+                    update.percent,
+                    update.downloaded_bytes,
+                    update.total_bytes,
+                    update.speed_bps,
+                    update.eta_seconds,
                 );
             } else if update.percent >= 0.0 {
-                pb_clone.set_position((update.percent * 100.0) as u64);
+                pb_clone.set_position(update.percent.clamp(0.0, 100.0).round() as u64);
                 pb_clone.set_style(
                     ProgressStyle::default_bar()
                         .template(PROGRESS_STYLE)
                         .unwrap(),
                 );
+                if let (Some(downloaded), Some(total)) =
+                    (update.downloaded_bytes, update.total_bytes)
+                {
+                    pb_clone.set_message(format!("{} / {} bytes", downloaded, total));
+                }
+            } else if !json_mode {
+                let phase = match update.percent as i32 {
+                    -2 => "Connecting...",
+                    -1 => "Starting...",
+                    _ => "Preparing...",
+                };
+                pb_clone.set_message(phase);
             }
         }
     });
 
-    let download_mode = if audio_only { Some("audio") } else { None };
-    let msg = format!("Starting: {}", url);
-    pb.set_message(msg);
-
-    // Build extra flags for proxy, cookies, and subtitles
-    let mut extra_flags: Vec<String> = Vec::new();
-    if let Some(p) = &proxy {
-        extra_flags.push("--proxy".to_string());
-        extra_flags.push(p.clone());
-    }
-
-    // Auto-include cookie file if exists
-    if let Some(cookie_file) = reporter::default_cookie_path() {
-        if cookie_file.exists() {
-            extra_flags.push("--cookies".to_string());
-            extra_flags.push(cookie_file.display().to_string());
-        }
-    }
-
-    let download_subtitles = subs.is_some();
-    if let Some(lang) = &subs {
-        extra_flags.push("--write-subs".to_string());
-        extra_flags.push("--sub-langs".to_string());
-        extra_flags.push(lang.clone());
-    }
-
-    let result = ytdlp::download_video(
-        &ytdlp,
-        &url,
-        &output_path,
-        quality,
-        tx.clone(),
-        download_mode,
-        format.as_deref(),
-        None,
-        None,
-        CancellationToken::new(),
-        reporter::default_cookie_path().as_deref(),
-        4,
-        download_subtitles,
-        &extra_flags,
-        None,
-    )
-    .await;
+    let ytdlp_path = reporter::find_yt_dlp().await.ok();
+    let opts = common::download_options(output_path, quality, audio_only, subs, format, ytdlp_path);
+    let result = platform.download(&info, &opts, tx.clone()).await;
 
     drop(tx);
     let _ = progress_task.await;
@@ -108,21 +97,30 @@ pub async fn execute(
 
     match result {
         Ok(dl_result) => {
-            if json_mode {
-                println!(
-                    r#"{{"type":"complete","success":true,"file_path":"{}","size":{},"duration":{}}}"#,
-                    dl_result.file_path.display(),
-                    dl_result.file_size_bytes,
-                    dl_result.duration_seconds
-                );
+            if output::is_json_mode() {
+                let json = serde_json::json!({
+                    "type": "complete",
+                    "success": true,
+                    "platform": platform.name(),
+                    "file_path": dl_result.file_path,
+                    "size": dl_result.file_size_bytes,
+                    "duration": dl_result.duration_seconds,
+                });
+                println!("{}", json);
             } else {
                 println!("✓ Downloaded to: {}", dl_result.file_path.display());
             }
             Ok(())
         }
         Err(e) => {
-            if json_mode {
-                println!(r#"{{"type":"complete","success":false,"error":"{}"}}"#, e);
+            if output::is_json_mode() {
+                let json = serde_json::json!({
+                    "type": "complete",
+                    "success": false,
+                    "platform": platform.name(),
+                    "error": e.to_string(),
+                });
+                println!("{}", json);
             } else {
                 eprintln!("✗ Failed: {}", e);
             }
