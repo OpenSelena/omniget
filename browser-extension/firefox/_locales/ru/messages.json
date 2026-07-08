@@ -15,13 +15,13 @@
     "message": "Установить OmniGet"
   },
   "error_page_open_extensions": {
-    "message": "Открыть расширения Chrome"
+    "message": "Открыть настройки расширения"
   },
   "error_host_missing_title": {
-    "message": "Запустите OmniGet один раз, чтобы завершить настройку Chrome"
+    "message": "Запустите OmniGet один раз, чтобы завершить настройку Firefox"
   },
   "error_host_missing_body": {
-    "message": "Chrome пока не может найти мост OmniGet на этом компьютере."
+    "message": "Firefox пока не может найти мост OmniGet на этом компьютере."
   },
   "error_host_missing_detail": {
     "message": "Установите OmniGet при необходимости, затем запустите приложение один раз и нажмите на расширение снова."
@@ -36,7 +36,7 @@
     "message": "Попробуйте снова с прямой страницы видео, рилса, поста, плейлиста или курса."
   },
   "error_launch_failed_title": {
-    "message": "Не удалось запустить OmniGet из Chrome"
+    "message": "Не удалось запустить OmniGet из Firefox"
   },
   "error_launch_failed_body": {
     "message": "Расширение связалось с нативным хостом, но приложение не запустилось корректно."
