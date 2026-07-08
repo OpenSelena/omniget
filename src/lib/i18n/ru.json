@@ -2169,7 +2169,7 @@
       "delete_confirm": "Удалить",
       "refresh_covers_action": "Обновить обложки",
       "refresh_covers_title": "Обновить обложки треков?",
-      "refresh_covers_body": "Мы получим по одной обложке для каждого трека из YouTube для {{count}} треков в этом плейлисте. Это займёт несколько секунд.",
+      "refresh_covers_body": "Мы получим из YouTube по одной обложке для каждого трека в этом плейлисте (всего: {{count}}). Это займёт несколько секунд.",
       "refresh_covers_hint": "Существующие обложки для треков с известным YouTube ID будут заменены.",
       "refresh_covers_confirm": "Обновить сейчас",
       "refresh_covers_progress": "Обновление обложек — {{current}} / {{total}}",
