@@ -15,13 +15,13 @@
     "message": "Installer OmniGet"
   },
   "error_page_open_extensions": {
-    "message": "Ouvrir les extensions Chrome"
+    "message": "Ouvrir les paramètres de l'extension"
   },
   "error_host_missing_title": {
-    "message": "Ouvrez OmniGet une fois pour terminer la configuration de Chrome"
+    "message": "Ouvrez OmniGet une fois pour terminer la configuration de Firefox"
   },
   "error_host_missing_body": {
-    "message": "Chrome n'a pas encore trouvé le pont OmniGet sur cet ordinateur."
+    "message": "Firefox n'a pas encore trouvé le pont OmniGet sur cet ordinateur."
   },
   "error_host_missing_detail": {
     "message": "Installez OmniGet si nécessaire, puis lancez l'application de bureau une fois et cliquez à nouveau sur l'extension."
@@ -36,7 +36,7 @@
     "message": "Réessayez depuis une page directe de vidéo, reel, publication, playlist ou cours."
   },
   "error_launch_failed_title": {
-    "message": "OmniGet n'a pas pu être lancé depuis Chrome"
+    "message": "OmniGet n'a pas pu être lancé depuis Firefox"
   },
   "error_launch_failed_body": {
     "message": "L'extension a bien contacté l'hôte natif, mais l'application de bureau ne s'est pas lancée correctement."

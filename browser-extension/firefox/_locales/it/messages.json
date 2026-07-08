@@ -15,13 +15,13 @@
     "message": "Installa OmniGet"
   },
   "error_page_open_extensions": {
-    "message": "Apri estensioni di Chrome"
+    "message": "Apri le impostazioni dell'estensione"
   },
   "error_host_missing_title": {
-    "message": "Apri OmniGet una volta per completare la configurazione di Chrome"
+    "message": "Apri OmniGet una volta per completare la configurazione di Firefox"
   },
   "error_host_missing_body": {
-    "message": "Chrome non riesce ancora a trovare il bridge di OmniGet su questo computer."
+    "message": "Firefox non riesce ancora a trovare il bridge di OmniGet su questo computer."
   },
   "error_host_missing_detail": {
     "message": "Installa OmniGet se necessario, poi avvia una volta l'app desktop e fai di nuovo clic sull'estensione."
@@ -36,7 +36,7 @@
     "message": "Riprova da una pagina diretta di video, reel, post, playlist o corso."
   },
   "error_launch_failed_title": {
-    "message": "OmniGet non è stato avviato da Chrome"
+    "message": "OmniGet non è stato avviato da Firefox"
   },
   "error_launch_failed_body": {
     "message": "L'estensione ha comunicato con l'host nativo, ma l'app desktop non si è avviata correttamente."

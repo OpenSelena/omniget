@@ -15,13 +15,13 @@
     "message": "Εγκατάσταση του OmniGet"
   },
   "error_page_open_extensions": {
-    "message": "Άνοιγμα επεκτάσεων Chrome"
+    "message": "Άνοιγμα ρυθμίσεων επέκτασης"
   },
   "error_host_missing_title": {
-    "message": "Ανοίξτε το OmniGet μία φορά για να ολοκληρώσετε τη ρύθμιση του Chrome"
+    "message": "Ανοίξτε το OmniGet μία φορά για να ολοκληρώσετε τη ρύθμιση του Firefox"
   },
   "error_host_missing_body": {
-    "message": "Το Chrome δεν μπόρεσε ακόμη να βρει τη γέφυρα OmniGet σε αυτόν τον υπολογιστή."
+    "message": "Το Firefox δεν μπόρεσε ακόμη να βρει τη γέφυρα OmniGet σε αυτόν τον υπολογιστή."
   },
   "error_host_missing_detail": {
     "message": "Εγκαταστήστε το OmniGet αν χρειάζεται, έπειτα ανοίξτε μία φορά την εφαρμογή υπολογιστή και πατήστε ξανά την επέκταση."
@@ -36,7 +36,7 @@
     "message": "Δοκιμάστε ξανά από μια άμεση σελίδα βίντεο, reel, ανάρτησης, λίστας αναπαραγωγής ή μαθήματος."
   },
   "error_launch_failed_title": {
-    "message": "Το OmniGet δεν μπόρεσε να εκκινηθεί από το Chrome"
+    "message": "Το OmniGet δεν μπόρεσε να εκκινηθεί από το Firefox"
   },
   "error_launch_failed_body": {
     "message": "Η επέκταση επικοινώνησε με το native host, αλλά η εφαρμογή υπολογιστή δεν ξεκίνησε σωστά."
