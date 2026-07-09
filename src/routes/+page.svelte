@@ -60,6 +60,9 @@
     format_note: string | null;
   };
 
+  // Platforms whose content is downloaded via the Courses page (courses
+  // plugin + logged-in account), not from a pasted URL.
+  const COURSE_PLATFORMS = new Set(["hotmart", "udemy"]);
 
   let url = $state(getOmniboxDraftUrl());
   let homeInputMode = $state<HomeInputMode>("url");
@@ -142,7 +145,7 @@
     if (!pendingAutoDownload) return;
     if (omniState.kind === "detected") {
       const info = omniState.info;
-      if (info.platform === "hotmart" || info.platform === "p2p") {
+      if (COURSE_PLATFORMS.has(info.platform) || info.platform === "p2p") {
         pendingAutoDownload = false;
         return;
       }
@@ -398,7 +401,9 @@
       const result = await invoke<PlatformInfo>("detect_platform", { url: value });
       if (result.supported) {
         omniState = { kind: "detected", info: result };
-        invoke("prefetch_media_info", { url: value }).catch(() => {});
+        if (!COURSE_PLATFORMS.has(result.platform)) {
+          invoke("prefetch_media_info", { url: value }).catch(() => {});
+        }
         loadCookieAccounts(value);
         if (result.content_type === "playlist") {
           loadPlaylistEntries(value);
@@ -623,8 +628,8 @@
     if (omniState.kind !== "detected") return;
     const info = omniState.info;
 
-    if (info.platform === "hotmart") {
-      goto(`/courses?platform=${encodeURIComponent(info.platform)}`);
+    if (COURSE_PLATFORMS.has(info.platform)) {
+      goto(`/courses/${encodeURIComponent(info.platform)}`);
       return;
     }
 
@@ -1056,8 +1061,8 @@
             <button type="button" class="cookie-hint-link" onclick={() => goto("/settings?tab=cookies")}>{$t("omnibox.cookie_hint_action")}</button>
           </p>
         {/if}
-        {#if omniState.info.platform === "hotmart"}
-          <button class="button action-btn" onclick={handleAction}>{$t('omnibox.go_to_hotmart')}</button>
+        {#if COURSE_PLATFORMS.has(omniState.info.platform)}
+          <button class="button action-btn" onclick={handleAction}>{$t(omniState.info.platform === "udemy" ? 'omnibox.go_to_udemy' : 'omnibox.go_to_hotmart')}</button>
         {:else}
           {@const playlistBlocked = omniState.info.content_type === "playlist" && playlistEntries.length > 0 && selectedPlaylistItems.size === 0}
           {@const torrentBlocked = torrentEntries.length > 0 && selectedTorrentFiles.size === 0}

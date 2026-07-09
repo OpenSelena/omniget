@@ -87,16 +87,31 @@ pub async fn open_auth_webview(
             let mut is_success = false;
 
             if let Some(ref pattern) = success_pattern {
-                if url_str.contains(pattern) {
+                // An explicit success pattern from the plugin config is
+                // authoritative: never fall back to the fuzzy heuristic.
+                // Match against host + path only, so encoded redirect params in
+                // the login URL itself (e.g. sso.hotmart.com/login?redirect=
+                // https%3A%2F%2Fconsumer.hotmart.com) can't trigger a false
+                // success.
+                if let Ok(nav_url) = url::Url::parse(&url_str) {
+                    let host_and_path =
+                        format!("{}{}", nav_url.host_str().unwrap_or(""), nav_url.path());
+                    if host_and_path.contains(pattern) {
+                        is_success = true;
+                    }
+                } else if url_str.contains(pattern) {
                     is_success = true;
                 }
-            }
-
-            if !is_success && !login_host.is_empty() {
+            } else if !login_host.is_empty() {
                 if let Ok(nav_url) = url::Url::parse(&url_str) {
                     let nav_host = nav_url.host_str().unwrap_or("");
                     let nav_path = nav_url.path();
-                    if nav_host.contains(&login_host) || login_host.contains(nav_host) {
+                    // Same host, or a subdomain of the login host. The old
+                    // bidirectional substring check treated unrelated hosts
+                    // (e.g. hotmart.com vs sso.hotmart.com) as a match.
+                    let same_host = nav_host == login_host
+                        || nav_host.ends_with(&format!(".{login_host}"));
+                    if same_host {
                         if nav_path != login_path
                             && !nav_path.contains("login")
                             && !nav_path.contains("signin")
