@@ -660,6 +660,8 @@
       "pair_waiting": "等待中…",
       "pair_active": "視窗已開啟——擴充功能將自動連線（剩餘 {{secs}} 秒）。",
       "pair_unavailable": "請先啟用瀏覽器橋接。",
+      "pair_success": "擴充功能已連線 — 一切就緒。",
+      "pair_expired": "配對視窗已過期 — 擴充功能是否已安裝且瀏覽器已開啟？",
       "endpoint_label": "端點 URL",
       "token_label": "配對權杖",
       "rotate_label": "重新產生權杖",
@@ -851,6 +853,7 @@
     "search_empty": "找不到結果",
     "unsupported": "此平台尚未支援",
     "go_to_hotmart": "前往 Hotmart",
+    "go_to_udemy": "前往 Udemy",
     "download": "下載",
     "options": "选项",
     "advanced": "高级",
@@ -1276,7 +1279,8 @@
     "path_too_long": "下載資料夾路徑過長 ({{current}}/{{limit}} 字元)。請選擇更短的資料夾。",
     "console_encoding": "Console encoding issue (non-UTF-8 locale). Update yt-dlp in Settings → Dependencies, or run \"chcp 65001\" in a terminal and reopen the app.",
     "extractor_broken": "The site extractor is broken. Update yt-dlp in Settings → Dependencies, then retry.",
-    "output_missing": "下載已完成，但資料夾中沒有出現檔案（或檔案為空）。請檢查磁碟空間與防毒軟體設定後重試。"
+    "output_missing": "下載已完成，但資料夾中沒有出現檔案（或檔案為空）。請檢查磁碟空間與防毒軟體設定後重試。",
+    "course_platform_url": "課程平台無法透過 URL 下載。請開啟課程頁面（需要課程外掛並登入帳號）。"
   },
   "debug": {
     "title": "活動記錄",

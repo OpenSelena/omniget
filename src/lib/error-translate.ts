@@ -39,6 +39,8 @@ const BACKEND_ERROR_MAP: Record<string, string> = {
     "errors.extractor_broken",
   "Download reported success but the file is missing or empty. Check disk space and antivirus exclusions, then retry.":
     "errors.output_missing",
+  "Course platforms can't be downloaded from a URL. Open the Courses page (requires the Courses plugin and a logged-in account).":
+    "errors.course_platform_url",
 };
 
 /**

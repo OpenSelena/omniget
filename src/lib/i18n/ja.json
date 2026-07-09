@@ -660,6 +660,8 @@
       "pair_waiting": "待機中…",
       "pair_active": "ウィンドウ開放中 — 拡張機能が自動接続します（残り {{secs}}秒）。",
       "pair_unavailable": "先にブラウザブリッジを有効にしてください。",
+      "pair_success": "拡張機能が接続されました — 設定完了です。",
+      "pair_expired": "ペアリング時間が切れました — 拡張機能はインストール済みで、ブラウザは開いていますか？",
       "endpoint_label": "エンドポイントURL",
       "token_label": "ペアリングトークン",
       "rotate_label": "トークンを再発行",
@@ -851,6 +853,7 @@
     "search_empty": "結果が見つかりません",
     "unsupported": "このプラットフォームはまだサポートされていません",
     "go_to_hotmart": "Hotmartへ移動",
+    "go_to_udemy": "Udemyへ移動",
     "download": "ダウンロード",
     "options": "オプション",
     "advanced": "詳細",
@@ -1276,7 +1279,8 @@
     "path_too_long": "ダウンロードフォルダのパスが長すぎます ({{current}}/{{limit}} 文字)。より短いフォルダを選択してください。",
     "console_encoding": "Console encoding issue (non-UTF-8 locale). Update yt-dlp in Settings → Dependencies, or run \"chcp 65001\" in a terminal and reopen the app.",
     "extractor_broken": "The site extractor is broken. Update yt-dlp in Settings → Dependencies, then retry.",
-    "output_missing": "ダウンロードは完了しましたが、フォルダにファイルが見つからないか空です。ディスク容量とウイルス対策ソフトの設定を確認して、もう一度お試しください。"
+    "output_missing": "ダウンロードは完了しましたが、フォルダにファイルが見つからないか空です。ディスク容量とウイルス対策ソフトの設定を確認して、もう一度お試しください。",
+    "course_platform_url": "コースプラットフォームはURLからダウンロードできません。コースページを開いてください（コースプラグインとログイン済みアカウントが必要です）。"
   },
   "debug": {
     "title": "アクティビティログ",

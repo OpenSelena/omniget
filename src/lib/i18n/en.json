@@ -660,6 +660,8 @@
       "pair_waiting": "Waiting…",
       "pair_active": "Window open — the extension will connect automatically ({{secs}}s left).",
       "pair_unavailable": "Enable the browser bridge first.",
+      "pair_success": "Extension connected — you're all set.",
+      "pair_expired": "Pairing window expired — is the extension installed and the browser open?",
       "endpoint_label": "Endpoint URL",
       "token_label": "Pairing token",
       "rotate_label": "Rotate token",
@@ -851,6 +853,7 @@
     "search_empty": "No results found",
     "unsupported": "Platform not supported yet",
     "go_to_hotmart": "Go to Hotmart",
+    "go_to_udemy": "Go to Udemy",
     "download": "Download",
     "options": "Options",
     "advanced": "Advanced",
@@ -1276,7 +1279,8 @@
     "path_too_long": "Download folder path is too long ({{current}}/{{limit}} chars). Choose a shorter folder.",
     "console_encoding": "Console encoding issue (non-UTF-8 locale). Update yt-dlp in Settings → Dependencies, or run \"chcp 65001\" in a terminal and reopen the app.",
     "extractor_broken": "The site extractor is broken. Update yt-dlp in Settings → Dependencies, then retry.",
-    "output_missing": "Download finished, but no file appeared in the folder (or it's empty). Check disk space and antivirus exclusions, then try again."
+    "output_missing": "Download finished, but no file appeared in the folder (or it's empty). Check disk space and antivirus exclusions, then try again.",
+    "course_platform_url": "Course platforms can't be downloaded from a URL. Open the Courses page (requires the Courses plugin and a logged-in account)."
   },
   "debug": {
     "title": "Activity Log",

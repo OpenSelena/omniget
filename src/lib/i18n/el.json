@@ -660,6 +660,8 @@
       "pair_waiting": "Αναμονή…",
       "pair_active": "Παράθυρο ανοιχτό — η επέκταση θα συνδεθεί αυτόματα (απομένουν {{secs}}s).",
       "pair_unavailable": "Ενεργοποίησε πρώτα τη γέφυρα του προγράμματος περιήγησης.",
+      "pair_success": "Η επέκταση συνδέθηκε — όλα έτοιμα.",
+      "pair_expired": "Το παράθυρο σύζευξης έληξε — είναι εγκατεστημένη η επέκταση και ανοιχτός ο περιηγητής;",
       "endpoint_label": "Endpoint URL",
       "token_label": "Pairing token",
       "rotate_label": "Rotate token",
@@ -851,6 +853,7 @@
     "search_empty": "Δεν βρέθηκαν αποτελέσματα",
     "unsupported": "Η πλατφόρμα αυτή δεν υποστηρίζεται ακόμα",
     "go_to_hotmart": "Πήγαινε σε Hotmart",
+    "go_to_udemy": "Πήγαινε σε Udemy",
     "download": "Λήψη",
     "options": "Επιλογές",
     "advanced": "Προχωρημένα",
@@ -1276,7 +1279,8 @@
     "path_too_long": "Η διαδρομή του φακέλου λήψης είναι πολύ μεγάλη ({{current}}/{{limit}} χαρακτήρες). Επιλέξτε συντομότερο φάκελο.",
     "console_encoding": "Console encoding issue (non-UTF-8 locale). Update yt-dlp in Settings → Dependencies, or run \"chcp 65001\" in a terminal and reopen the app.",
     "extractor_broken": "The site extractor is broken. Update yt-dlp in Settings → Dependencies, then retry.",
-    "output_missing": "Η λήψη ολοκληρώθηκε, αλλά δεν εμφανίστηκε αρχείο στον φάκελο (ή είναι κενό). Ελέγξτε τον χώρο στον δίσκο και το antivirus και δοκιμάστε ξανά."
+    "output_missing": "Η λήψη ολοκληρώθηκε, αλλά δεν εμφανίστηκε αρχείο στον φάκελο (ή είναι κενό). Ελέγξτε τον χώρο στον δίσκο και το antivirus και δοκιμάστε ξανά.",
+    "course_platform_url": "Οι πλατφόρμες μαθημάτων δεν μπορούν να ληφθούν από URL. Ανοίξτε τη σελίδα «Μαθήματα» (απαιτείται το πρόσθετο μαθημάτων και συνδεδεμένος λογαριασμός)."
   },
   "debug": {
     "title": "Αρχείο καταγραφής",

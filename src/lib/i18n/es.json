@@ -660,6 +660,8 @@
       "pair_waiting": "Esperando…",
       "pair_active": "Ventana abierta — la extensión se conectará sola (quedan {{secs}}s).",
       "pair_unavailable": "Activa primero el puente del navegador.",
+      "pair_success": "Extensión conectada — todo listo.",
+      "pair_expired": "La ventana de emparejamiento expiró — ¿la extensión está instalada y el navegador abierto?",
       "endpoint_label": "Endpoint URL",
       "token_label": "Pairing token",
       "rotate_label": "Rotate token",
@@ -851,6 +853,7 @@
     "search_empty": "Sin resultados",
     "unsupported": "Plataforma aún no admitida",
     "go_to_hotmart": "Ir a Hotmart",
+    "go_to_udemy": "Ir a Udemy",
     "download": "Descargar",
     "options": "Opciones",
     "advanced": "Avanzado",
@@ -1276,7 +1279,8 @@
     "path_too_long": "La ruta de la carpeta de descargas es demasiado larga ({{current}}/{{limit}} caracteres). Elige una más corta.",
     "console_encoding": "Problema de codificación de consola (locale no UTF-8). Actualiza yt-dlp en Configuración → Dependencias, o ejecuta \"chcp 65001\" en una terminal y reabre la app.",
     "extractor_broken": "El extractor del sitio está roto. Actualiza yt-dlp en Configuración → Dependencias y reintenta.",
-    "output_missing": "La descarga terminó, pero no apareció ningún archivo en la carpeta (o está vacío). Revisa el espacio en disco y el antivirus, y reintenta."
+    "output_missing": "La descarga terminó, pero no apareció ningún archivo en la carpeta (o está vacío). Revisa el espacio en disco y el antivirus, y reintenta.",
+    "course_platform_url": "Las plataformas de cursos no se pueden descargar desde una URL. Abre la página Cursos (requiere el plugin de Cursos y una cuenta con sesión iniciada)."
   },
   "debug": {
     "title": "Registro de actividad",

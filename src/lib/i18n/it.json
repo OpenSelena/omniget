@@ -660,6 +660,8 @@
       "pair_waiting": "In attesa…",
       "pair_active": "Finestra aperta — l'estensione si collegherà da sola ({{secs}}s rimanenti).",
       "pair_unavailable": "Abilita prima il bridge del browser.",
+      "pair_success": "Estensione connessa — tutto pronto.",
+      "pair_expired": "La finestra di associazione è scaduta — l'estensione è installata e il browser è aperto?",
       "endpoint_label": "URL dell'endpoint",
       "token_label": "Token di abbinamento",
       "rotate_label": "Rigenera token",
@@ -851,6 +853,7 @@
     "search_empty": "Nessun risultato trovato",
     "unsupported": "Piattaforma non ancora supportata",
     "go_to_hotmart": "Vai a Hotmart",
+    "go_to_udemy": "Vai a Udemy",
     "download": "Scarica",
     "options": "Opzioni",
     "advanced": "Avanzato",
@@ -1276,7 +1279,8 @@
     "path_too_long": "Il percorso della cartella è troppo lungo ({{current}}/{{limit}} caratteri). Scegli una cartella più corta.",
     "console_encoding": "Console encoding issue (non-UTF-8 locale). Update yt-dlp in Settings → Dependencies, or run \"chcp 65001\" in a terminal and reopen the app.",
     "extractor_broken": "The site extractor is broken. Update yt-dlp in Settings → Dependencies, then retry.",
-    "output_missing": "Il download è terminato, ma nessun file è apparso nella cartella (o è vuoto). Controlla lo spazio su disco e l'antivirus, poi riprova."
+    "output_missing": "Il download è terminato, ma nessun file è apparso nella cartella (o è vuoto). Controlla lo spazio su disco e l'antivirus, poi riprova.",
+    "course_platform_url": "Le piattaforme di corsi non possono essere scaricate da un URL. Apri la pagina Corsi (richiede il plugin Corsi e un account connesso)."
   },
   "debug": {
     "title": "Registro attività",

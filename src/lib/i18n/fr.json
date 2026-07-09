@@ -660,6 +660,8 @@
       "pair_waiting": "En attente…",
       "pair_active": "Fenêtre ouverte — l'extension se connectera automatiquement ({{secs}}s restantes).",
       "pair_unavailable": "Activez d'abord le pont du navigateur.",
+      "pair_success": "Extension connectée — tout est prêt.",
+      "pair_expired": "La fenêtre d'appairage a expiré — l'extension est-elle installée et le navigateur ouvert ?",
       "endpoint_label": "URL du point d'accès",
       "token_label": "Jeton d'appairage",
       "rotate_label": "Régénérer le jeton",
@@ -851,6 +853,7 @@
     "search_empty": "Aucun résultat trouvé",
     "unsupported": "Plateforme pas encore prise en charge",
     "go_to_hotmart": "Aller sur Hotmart",
+    "go_to_udemy": "Aller sur Udemy",
     "download": "Télécharger",
     "options": "Options",
     "advanced": "Avancé",
@@ -1276,7 +1279,8 @@
     "path_too_long": "Le chemin du dossier est trop long ({{current}}/{{limit}} caractères). Choisissez un dossier plus court.",
     "console_encoding": "Console encoding issue (non-UTF-8 locale). Update yt-dlp in Settings → Dependencies, or run \"chcp 65001\" in a terminal and reopen the app.",
     "extractor_broken": "The site extractor is broken. Update yt-dlp in Settings → Dependencies, then retry.",
-    "output_missing": "Le téléchargement est terminé, mais aucun fichier n'est apparu dans le dossier (ou il est vide). Vérifiez l'espace disque et l'antivirus, puis réessayez."
+    "output_missing": "Le téléchargement est terminé, mais aucun fichier n'est apparu dans le dossier (ou il est vide). Vérifiez l'espace disque et l'antivirus, puis réessayez.",
+    "course_platform_url": "Les plateformes de cours ne peuvent pas être téléchargées depuis une URL. Ouvrez la page Cours (nécessite le plugin Cours et un compte connecté)."
   },
   "debug": {
     "title": "Journal d'activité",

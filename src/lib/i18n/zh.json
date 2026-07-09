@@ -660,6 +660,8 @@
       "pair_waiting": "等待中…",
       "pair_active": "窗口已开启——扩展将自动连接（剩余 {{secs}} 秒）。",
       "pair_unavailable": "请先启用浏览器桥接。",
+      "pair_success": "扩展已连接 — 一切就绪。",
+      "pair_expired": "配对窗口已过期 — 扩展是否已安装且浏览器已打开？",
       "endpoint_label": "端点 URL",
       "token_label": "配对令牌",
       "rotate_label": "重新生成令牌",
@@ -851,6 +853,7 @@
     "search_empty": "未找到结果",
     "unsupported": "暂不支持该平台",
     "go_to_hotmart": "前往 Hotmart",
+    "go_to_udemy": "前往 Udemy",
     "download": "下载",
     "options": "选项",
     "advanced": "高级",
@@ -1276,7 +1279,8 @@
     "path_too_long": "下载文件夹路径过长 ({{current}}/{{limit}} 字符)。请选择更短的文件夹。",
     "console_encoding": "Console encoding issue (non-UTF-8 locale). Update yt-dlp in Settings → Dependencies, or run \"chcp 65001\" in a terminal and reopen the app.",
     "extractor_broken": "The site extractor is broken. Update yt-dlp in Settings → Dependencies, then retry.",
-    "output_missing": "下载已完成，但文件夹中没有出现文件（或文件为空）。请检查磁盘空间和杀毒软件设置后重试。"
+    "output_missing": "下载已完成，但文件夹中没有出现文件（或文件为空）。请检查磁盘空间和杀毒软件设置后重试。",
+    "course_platform_url": "课程平台无法通过 URL 下载。请打开课程页面（需要课程插件并登录账号）。"
   },
   "debug": {
     "title": "活动日志",

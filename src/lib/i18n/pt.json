@@ -660,6 +660,8 @@
       "pair_waiting": "Aguardando…",
       "pair_active": "Janela aberta — a extensão vai conectar sozinha (faltam {{secs}}s).",
       "pair_unavailable": "Ative o bridge do navegador primeiro.",
+      "pair_success": "Extensão conectada — tudo pronto.",
+      "pair_expired": "A janela de pareamento expirou — a extensão está instalada e o navegador aberto?",
       "endpoint_label": "URL do endpoint",
       "token_label": "Token de pareamento",
       "rotate_label": "Gerar novo token",
@@ -851,6 +853,7 @@
     "search_empty": "Nenhum resultado encontrado",
     "unsupported": "Plataforma não suportada ainda",
     "go_to_hotmart": "Ir para Hotmart",
+    "go_to_udemy": "Ir para Udemy",
     "download": "Baixar",
     "options": "Opções",
     "advanced": "Avançado",
@@ -1276,7 +1279,8 @@
     "path_too_long": "Caminho da pasta é muito longo ({{current}}/{{limit}} caracteres). Escolha uma pasta mais curta.",
     "console_encoding": "Console encoding issue (non-UTF-8 locale). Update yt-dlp in Settings → Dependencies, or run \"chcp 65001\" in a terminal and reopen the app.",
     "extractor_broken": "The site extractor is broken. Update yt-dlp in Settings → Dependencies, then retry.",
-    "output_missing": "O download terminou, mas nenhum arquivo apareceu na pasta (ou está vazio). Verifique o espaço em disco e o antivírus e tente novamente."
+    "output_missing": "O download terminou, mas nenhum arquivo apareceu na pasta (ou está vazio). Verifique o espaço em disco e o antivírus e tente novamente.",
+    "course_platform_url": "Plataformas de cursos não podem ser baixadas por URL. Abra a página Cursos (requer o plugin de Cursos e uma conta conectada)."
   },
   "debug": {
     "title": "Registro de Atividade",
