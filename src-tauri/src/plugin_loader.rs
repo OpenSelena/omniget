@@ -267,10 +267,62 @@ fn load_single_plugin(
             PluginLoadError::simple("missing_init_symbol", "Missing omniget_plugin_init symbol")
         })?;
 
-    let mut plugin = unsafe { Box::from_raw(init_fn()) };
-    plugin
-        .initialize(host)
-        .map_err(|e| PluginLoadError::simple("initialize", format!("Plugin init failed: {e}")))?;
+    // A plugin's init entrypoint runs arbitrary foreign code; convert panics
+    // into load errors instead of aborting the whole app.
+    let plugin_ptr =
+        match std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| init_fn())) {
+            Ok(ptr) => ptr,
+            Err(_) => {
+                // The plugin may already have spawned threads before panicking;
+                // leak the library instead of dropping it (dlclose would unmap
+                // code those threads are still executing → SIGSEGV). Mirrors
+                // the deliberate leak in `PluginManager::unregister`.
+                std::mem::forget(lib);
+                return Err(PluginLoadError::simple(
+                    "initialize",
+                    "Plugin panicked in omniget_plugin_init",
+                ));
+            }
+        };
+    if plugin_ptr.is_null() {
+        std::mem::forget(lib);
+        return Err(PluginLoadError::simple(
+            "initialize",
+            "omniget_plugin_init returned a null plugin",
+        ));
+    }
+    let mut plugin = unsafe { Box::from_raw(plugin_ptr) };
+
+    let init_result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        plugin.initialize(host)
+    }));
+    match init_result {
+        Ok(Ok(())) => {}
+        Ok(Err(e)) => {
+            // `initialize` may have spawned threads before failing. Dropping
+            // the `Library` here would dlclose and unmap the plugin's code
+            // while those threads still run → SIGSEGV. Deliberately leak it
+            // instead, mirroring `PluginManager::unregister`. The plugin box
+            // is leaked too: its Drop impl lives in the (possibly half
+            // initialized) plugin and isn't safe to run after a failed init.
+            std::mem::forget(plugin);
+            std::mem::forget(lib);
+            return Err(PluginLoadError::simple(
+                "initialize",
+                format!("Plugin init failed: {e}"),
+            ));
+        }
+        Err(_) => {
+            // Same reasoning as above, but the plugin state is additionally
+            // unknown after a panic — never run its Drop.
+            std::mem::forget(plugin);
+            std::mem::forget(lib);
+            return Err(PluginLoadError::simple(
+                "initialize",
+                "Plugin panicked during initialize",
+            ));
+        }
+    }
 
     Ok(LoadedPlugin {
         _lib: Some(lib),
