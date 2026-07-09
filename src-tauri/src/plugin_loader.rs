@@ -240,7 +240,7 @@ fn load_single_plugin(
         unsafe { lib.get(b"omniget_plugin_abi_version") }.map_err(|_| {
             PluginLoadError {
                 message: format!(
-                    "Missing omniget_plugin_abi_version symbol (plugin built against an older SDK; core expects ABI v{})",
+                    "This plugin was built for an older version of OmniGet (no ABI handshake; this version requires ABI v{}). Update the plugin: reinstall it from the Marketplace to get a compatible build.",
                     ABI_VERSION
                 ),
                 kind: "missing_abi_symbol".to_string(),
@@ -253,7 +253,7 @@ fn load_single_plugin(
     if plugin_abi != ABI_VERSION {
         return Err(PluginLoadError {
             message: format!(
-                "ABI mismatch: plugin has v{}, core expects v{}",
+                "This plugin was built for an older version of OmniGet (plugin ABI v{}, this version requires v{}). Update the plugin: reinstall it from the Marketplace to get a compatible build.",
                 plugin_abi, ABI_VERSION
             ),
             kind: "abi_mismatch".to_string(),
@@ -261,6 +261,61 @@ fn load_single_plugin(
             expected_abi: Some(ABI_VERSION),
         });
     }
+
+    // ABI_VERSION alone cannot detect a plugin compiled by a different rustc.
+    // Rust has no stable ABI — trait-object vtables, fat-pointer conventions
+    // and std/serde type layouts can change between compiler releases — and
+    // every non-C-ABI type crossing this boundary (Box<dyn OmnigetPlugin>,
+    // Arc<dyn PluginHost>, String, serde_json::Value, boxed futures) is UB on
+    // a mismatch. This is exactly what crashed v0.7.1 (host: rustc 1.97.0)
+    // with registry plugins built by rustc 1.95/1.96: they passed the ABI v2
+    // handshake, loaded, then jumped through corrupted pointers on the first
+    // plugin command (SIGSEGV on a tokio worker). Since ABI v3 the
+    // export_plugin! macro also exports a build-info symbol; require it and
+    // require the plugin's rustc fingerprint to match ours exactly.
+    let build_info_fn: libloading::Symbol<extern "C" fn() -> *const std::os::raw::c_char> =
+        unsafe { lib.get(b"omniget_plugin_build_info") }.map_err(|_| PluginLoadError {
+            message: format!(
+                "This plugin was built for an older version of OmniGet (missing toolchain handshake; this version requires ABI v{}). Update the plugin: reinstall it from the Marketplace to get a compatible build.",
+                ABI_VERSION
+            ),
+            kind: "abi_mismatch".to_string(),
+            plugin_abi: Some(plugin_abi),
+            expected_abi: Some(ABI_VERSION),
+        })?;
+
+    // Reading a thin `*const c_char` from an extern "C" fn is FFI-safe on any
+    // rustc, unlike the Rust-ABI surface it guards.
+    let plugin_build_info = {
+        let raw = build_info_fn();
+        if raw.is_null() {
+            String::new()
+        } else {
+            unsafe { std::ffi::CStr::from_ptr(raw) }
+                .to_string_lossy()
+                .into_owned()
+        }
+    };
+    let host_info = omniget_plugin_sdk::build_info_str();
+    let host_rustc = omniget_plugin_sdk::rustc_component(host_info);
+    let plugin_rustc = omniget_plugin_sdk::rustc_component(&plugin_build_info);
+    if plugin_rustc.is_none() || plugin_rustc != host_rustc {
+        return Err(PluginLoadError {
+            message: format!(
+                "This plugin was built with a different Rust toolchain ('{}') than this version of OmniGet ('{}') and cannot be loaded safely. Update the plugin: reinstall it from the Marketplace to get a compatible build.",
+                plugin_rustc.unwrap_or("unknown"),
+                host_rustc.unwrap_or("unknown"),
+            ),
+            kind: "abi_mismatch".to_string(),
+            plugin_abi: Some(plugin_abi),
+            expected_abi: Some(ABI_VERSION),
+        });
+    }
+    tracing::debug!(
+        "[plugins] toolchain handshake ok: plugin '{}' / host '{}'",
+        plugin_build_info,
+        host_info
+    );
 
     let init_fn: libloading::Symbol<extern "C" fn() -> *mut dyn OmnigetPlugin> =
         unsafe { lib.get(b"omniget_plugin_init") }.map_err(|_| {
