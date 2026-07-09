@@ -207,6 +207,9 @@ pub fn run() {
     tracing_subscriber::fmt::init();
 
     let mut registry = core::registry::PlatformRegistry::new();
+    // gallery-dl first: it claims bulk-listing URLs (profiles, subreddits)
+    // that the single-post Twitter/Reddit downloaders would otherwise match
+    registry.register(Arc::new(platforms::gallerydl::GalleryDlDownloader::new()));
     registry.register(Arc::new(omniget_core::platforms::InstagramDownloader::new()));
     registry.register(Arc::new(omniget_core::platforms::PinterestDownloader::new()));
     registry.register(Arc::new(omniget_core::platforms::TikTokDownloader::new()));
@@ -226,7 +229,6 @@ pub fn run() {
         torrent_session.clone(),
     )));
     registry.register(Arc::new(omniget_core::platforms::P2pDownloader::new()));
-    registry.register(Arc::new(platforms::gallerydl::GalleryDlDownloader::new()));
     registry.register(Arc::new(
         omniget_core::platforms::DirectFileDownloader::new(),
     ));
@@ -605,12 +607,21 @@ pub fn run() {
                 std::thread::Builder::new()
                     .name("plugins-bootstrap".into())
                     .spawn(move || {
+                        use tauri::Emitter;
+
+                        // Load already-installed plugins first so they are
+                        // usable immediately (and offline), without waiting
+                        // on any of the network calls below.
+                        {
+                            let mut mgr = mgr_for_plugins.blocking_write();
+                            mgr.load_all(std::sync::Arc::clone(&host));
+                        }
+                        let _ = app_emit.emit("plugins-changed", ());
+
                         let rt = match tokio::runtime::Runtime::new() {
                             Ok(rt) => rt,
                             Err(e) => {
                                 tracing::warn!("plugins-bootstrap runtime failed: {}", e);
-                                let mut mgr = mgr_for_plugins.blocking_write();
-                                mgr.load_all(host);
                                 return;
                             }
                         };
@@ -621,12 +632,22 @@ pub fn run() {
                             std::sync::Arc::clone(&mgr_for_plugins),
                         ));
 
+                        // Load anything newly installed above. load_all is
+                        // not idempotent (re-inserting drops the previously
+                        // loaded plugin and its dylib), so only load entries
+                        // that are not loaded yet.
                         {
                             let mut mgr = mgr_for_plugins.blocking_write();
-                            mgr.load_all(host);
+                            let to_load: Vec<String> = mgr
+                                .installed_plugins()
+                                .iter()
+                                .filter(|p| p.enabled && !mgr.is_loaded(&p.id))
+                                .map(|p| p.id.clone())
+                                .collect();
+                            for id in &to_load {
+                                let _ = mgr.load_one(id, std::sync::Arc::clone(&host));
+                            }
                         }
-
-                        use tauri::Emitter;
                         let _ = app_emit.emit("plugins-changed", ());
                     })
                     .ok();

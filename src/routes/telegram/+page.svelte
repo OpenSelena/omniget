@@ -252,7 +252,7 @@
     }
   }
 
-  onMount(async () => {
+  async function checkPluginStatus() {
     try {
       const plugins = await invoke<{
         id: string;
@@ -278,10 +278,33 @@
         }
         return;
       }
+      loadError = null;
       pluginStatus = "ready";
     } catch {
       pluginStatus = "ready";
     }
+  }
+
+  onMount(() => {
+    let pluginsUnlisten: UnlistenFn | null = null;
+    let destroyed = false;
+
+    checkPluginStatus();
+    listen("plugins-changed", () => {
+      checkPluginStatus();
+    }).then((unlisten) => {
+      if (destroyed) {
+        unlisten();
+      } else {
+        pluginsUnlisten = unlisten;
+      }
+    });
+
+    return () => {
+      destroyed = true;
+      pluginsUnlisten?.();
+      pluginsUnlisten = null;
+    };
   });
 
   $effect(() => {

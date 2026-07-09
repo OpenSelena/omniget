@@ -366,7 +366,10 @@ pub async fn install_plugin_zip_from_repo(
     }
 
     let client = crate::core::http_client::apply_global_proxy(
-        reqwest::Client::builder().user_agent("OmniGet"),
+        reqwest::Client::builder()
+            .user_agent("OmniGet")
+            .timeout(std::time::Duration::from_secs(60))
+            .connect_timeout(std::time::Duration::from_secs(15)),
     )
     .build()
     .map_err(|e| e.to_string())?;

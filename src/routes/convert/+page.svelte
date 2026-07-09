@@ -1,5 +1,6 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
+  import { listen, type UnlistenFn } from "@tauri-apps/api/event";
   import { open } from "@tauri-apps/plugin-dialog";
   import { onMount } from "svelte";
   import { t } from "$lib/i18n";
@@ -38,7 +39,7 @@
   let pluginStatus = $state<PluginStatus>("checking");
   let loadError = $state<PluginLoadError | null>(null);
 
-  onMount(async () => {
+  async function checkPluginStatus() {
     try {
       const plugins = await invoke<{
         id: string;
@@ -64,10 +65,33 @@
         }
         return;
       }
+      loadError = null;
       pluginStatus = "ready";
     } catch {
       pluginStatus = "ready";
     }
+  }
+
+  onMount(() => {
+    let pluginsUnlisten: UnlistenFn | null = null;
+    let destroyed = false;
+
+    checkPluginStatus();
+    listen("plugins-changed", () => {
+      checkPluginStatus();
+    }).then((unlisten) => {
+      if (destroyed) {
+        unlisten();
+      } else {
+        pluginsUnlisten = unlisten;
+      }
+    });
+
+    return () => {
+      destroyed = true;
+      pluginsUnlisten?.();
+      pluginsUnlisten = null;
+    };
   });
 
   let files = $derived(getFiles());

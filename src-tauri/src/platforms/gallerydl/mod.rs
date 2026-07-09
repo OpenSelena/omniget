@@ -57,6 +57,55 @@ pub fn is_gallery_url(url: &str) -> bool {
         .any(|h| host == *h || host.ends_with(&format!(".{}", h)))
 }
 
+/// Twitter path segments that are app routes, not usernames.
+const TWITTER_RESERVED: &[&str] = &[
+    "home", "explore", "notifications", "messages", "settings", "search",
+    "hashtag", "intent", "share", "login", "logout", "signup", "i", "about",
+    "tos", "privacy", "compose", "jobs",
+];
+
+/// Bulk-listing URLs (profiles, subreddits) that the single-post platform
+/// downloaders can't handle but gallery-dl can enumerate and download.
+pub fn is_bulk_media_url(url: &str) -> bool {
+    let Ok(parsed) = url::Url::parse(url) else {
+        return false;
+    };
+    let Some(host) = parsed
+        .host_str()
+        .map(|h| h.trim_start_matches("www.").to_lowercase())
+    else {
+        return false;
+    };
+    let segments: Vec<&str> = parsed
+        .path_segments()
+        .map(|s| s.filter(|p| !p.is_empty()).collect())
+        .unwrap_or_default();
+
+    if host == "reddit.com" || host.ends_with(".reddit.com") {
+        return match segments.as_slice() {
+            // subreddit root or its listing sorts, but never a post
+            ["r", _] => true,
+            ["r", _, sort] => matches!(*sort, "hot" | "new" | "top" | "rising" | "best"),
+            // user profile / submitted media
+            ["user" | "u", _] => true,
+            ["user" | "u", _, tail] => matches!(*tail, "submitted" | "posts"),
+            _ => false,
+        };
+    }
+
+    if host == "twitter.com" || host == "x.com" {
+        return match segments.as_slice() {
+            [user] => !TWITTER_RESERVED.contains(user),
+            [user, tail] => {
+                !TWITTER_RESERVED.contains(user) && matches!(*tail, "media" | "likes")
+            }
+            _ => false,
+        };
+    }
+
+    false
+}
+
 pub struct GalleryDlDownloader;
 
 impl GalleryDlDownloader {
@@ -100,7 +149,7 @@ impl PlatformDownloader for GalleryDlDownloader {
     }
 
     fn can_handle(&self, url: &str) -> bool {
-        is_gallery_url(url)
+        is_gallery_url(url) || is_bulk_media_url(url)
     }
 
     async fn get_media_info(&self, url: &str) -> anyhow::Result<MediaInfo> {
@@ -302,7 +351,7 @@ fn collect_new_files(dir: &Path, since: SystemTime) -> (PathBuf, u64) {
 
 #[cfg(test)]
 mod tests {
-    use super::is_gallery_url;
+    use super::{is_bulk_media_url, is_gallery_url};
 
     #[test]
     fn matches_curated_gallery_hosts() {
@@ -321,5 +370,28 @@ mod tests {
         assert!(!is_gallery_url("https://www.instagram.com/p/abc/"));
         assert!(!is_gallery_url("https://example.com/image.jpg"));
         assert!(!is_gallery_url("not a url"));
+    }
+
+    #[test]
+    fn bulk_matches_subreddits_and_profiles() {
+        assert!(is_bulk_media_url("https://www.reddit.com/r/pics"));
+        assert!(is_bulk_media_url("https://www.reddit.com/r/pics/top"));
+        assert!(is_bulk_media_url("https://reddit.com/user/spez"));
+        assert!(is_bulk_media_url("https://www.reddit.com/u/spez/submitted"));
+        assert!(is_bulk_media_url("https://twitter.com/nasa"));
+        assert!(is_bulk_media_url("https://x.com/nasa/media"));
+    }
+
+    #[test]
+    fn bulk_ignores_single_posts_and_app_routes() {
+        assert!(!is_bulk_media_url(
+            "https://www.reddit.com/r/pics/comments/abc123/title/"
+        ));
+        assert!(!is_bulk_media_url("https://v.redd.it/abc"));
+        assert!(!is_bulk_media_url("https://x.com/nasa/status/123456"));
+        assert!(!is_bulk_media_url("https://x.com/home"));
+        assert!(!is_bulk_media_url("https://twitter.com/i/web/status/1"));
+        assert!(!is_bulk_media_url("https://x.com/search?q=foo"));
+        assert!(!is_bulk_media_url("https://www.reddit.com/"));
     }
 }
