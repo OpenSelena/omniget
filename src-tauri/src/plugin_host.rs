@@ -120,11 +120,22 @@ impl<R: Runtime + 'static> PluginHost for PluginHostImpl<R> {
             );
         }
 
-        let base = dirs::cache_dir().ok_or_else(|| {
-            anyhow::anyhow!("external_data_cache: OS cache dir unavailable on this platform")
-        })?;
+        // portable installs keep every file next to the app, so the cache
+        // lives under the app data dir instead of the OS cache dir
+        let base = if std::env::var("OMNIGET_PORTABLE").is_ok() {
+            omniget_core::core::paths::app_data_dir()
+                .ok_or_else(|| anyhow::anyhow!("external_data_cache: app data dir unavailable"))?
+                .join("cache")
+        } else {
+            dirs::cache_dir()
+                .ok_or_else(|| {
+                    anyhow::anyhow!(
+                        "external_data_cache: OS cache dir unavailable on this platform"
+                    )
+                })?
+                .join("wtf.tonho.omniget")
+        };
         let dir = base
-            .join("wtf.tonho.omniget")
             .join("external-cache")
             .join(plugin_id)
             .join(namespace);

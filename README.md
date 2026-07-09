@@ -259,6 +259,9 @@ Online courses, YouTube, TikTok, Instagram, Twitter/X, Reddit, Twitch, Vimeo, Bi
 **Does it work on Windows, macOS, and Linux?**
 Yes, all three. Windows is a portable `.exe`, macOS is a `.dmg`, Linux is a Flatpak or bundle.
 
+**Can I keep everything in one folder (true portable mode, e.g. on a USB stick)?**
+Yes. Create an empty file named `portable.txt` (or `.portable`) next to the `.exe` and relaunch. OmniGet then stores settings, the database, cookies, plugins, caches, and the bundled yt-dlp/FFmpeg in a `data` folder beside the executable — nothing is written to `AppData\Roaming` or other user folders. Without that file, the app uses the standard per-user data directory.
+
 **Can it download audio only, or just a clip?**
 Yes. Extract audio as MP3, M4A, Opus, FLAC, or WAV, or set a start and end time to download only the part you need.
 
