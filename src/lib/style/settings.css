@@ -755,7 +755,7 @@
     width: 44px;
     height: 24px;
     border-radius: var(--radius-full);
-    background: var(--surface-hi);
+    background: var(--toggle-off, var(--surface-hi));
     border: none;
     cursor: pointer;
     padding: 0;

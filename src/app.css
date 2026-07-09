@@ -432,6 +432,7 @@
   --danger: var(--error);
   --on-status: #ffffff;
   --on-warning: #1a1a1a;
+  --toggle-off: var(--surface-hi);
 }
 
 [data-theme="light"],
@@ -441,6 +442,9 @@
 [data-theme="nyxvamp-radiance"] {
   --bg-overlay: black;
   --on-warning: #5c3d00;
+  /* light themes: elevated surfaces sit ≈1.1:1 against cards, leaving the
+     off-toggle track invisible; mix in tertiary to clear WCAG 3:1 */
+  --toggle-off: color-mix(in srgb, var(--tertiary) 65%, var(--button-elevated));
 }
 
 :root, [data-theme="dark"] {

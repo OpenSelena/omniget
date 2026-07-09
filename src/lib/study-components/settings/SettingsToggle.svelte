@@ -36,7 +36,7 @@
     width: 38px;
     height: 22px;
     border-radius: 12px;
-    background: color-mix(in oklab, var(--content-border) 70%, transparent);
+    background: var(--toggle-off, color-mix(in oklab, var(--content-border) 70%, transparent));
     border: none;
     padding: 0;
     cursor: pointer;
