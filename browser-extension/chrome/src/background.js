@@ -6,9 +6,16 @@ import { summarizeCookies } from "./cookie-summary.js";
 import { loadSnifferState, isSnifferEnabled, setSnifferEnabled } from "./sniffer-toggle.js";
 import { registerContextMenu, getContextMenuId } from "./context-menu.js";
 import { openOmnigetScheme } from "./send-via-scheme.js";
-import { sendViaBridge, sendCookiesViaBridge, autoPair, loadBridgeConfig } from "./bridge-client.js";
+import {
+  sendViaBridge,
+  sendCookiesViaBridge,
+  autoPair,
+  loadBridgeConfig,
+  AUTOPAIR_ALARM_NAME,
+  STORAGE_KEY_TOKEN,
+} from "./bridge-client.js";
 
-const AUTOPAIR_ALARM = "omniget-autopair";
+const AUTOPAIR_ALARM = AUTOPAIR_ALARM_NAME;
 
 async function isPaired() {
   try {
@@ -53,6 +60,19 @@ async function ensureAutoPairAlarm() {
 if (chrome.alarms?.onAlarm) {
   chrome.alarms.onAlarm.addListener((alarm) => {
     if (alarm?.name === AUTOPAIR_ALARM) void runAutoPairTick();
+  });
+}
+
+// If the stored token is ever cleared (401 recovery in bridge-client.js, or
+// the user wiping it from the options page), go back to polling for a fresh
+// pairing window so the browser can re-pair without a reinstall.
+if (chrome.storage?.onChanged) {
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName !== "local") return;
+    const change = changes?.[STORAGE_KEY_TOKEN];
+    if (!change) return;
+    const newToken = typeof change.newValue === "string" ? change.newValue.trim() : "";
+    if (!newToken) void ensureAutoPairAlarm();
   });
 }
 

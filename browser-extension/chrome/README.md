@@ -72,14 +72,41 @@ If the user clicks Download before completing the pairing flow, the extension fa
 
 Mirror domains are also recognized: `youtu.be`, `youtube-nocookie.com`, `ddinstagram.com`, `vxtwitter.com`, `fixvx.com`, `v.redd.it`, `redd.it`, `clips.twitch.tv`, `pin.it`, `b23.tv`, `t.me`, `telegram.me`.
 
-## Install
+## Install & pair
 
-1. Install the OmniGet desktop app and launch it once (it generates a pairing token and starts the local bridge).
-2. Open `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, select `browser-extension/chrome/`.
-3. The extension's onboarding tab opens automatically. The endpoint is auto-detected; just copy the token from **OmniGet → Settings → Network → Browser extension** (Copy button), paste it in the **Pairing token** field, and click **Save**.
-4. Click the OmniGet icon on any page.
+### 1. Install the desktop app
 
-If the bridge isn't paired (or the app is closed), clicks fall back to the `omniget://` URL scheme, which still queues the URL but won't carry cookies.
+Install OmniGet from [github.com/tonhowtf/omniget/releases](https://github.com/tonhowtf/omniget/releases/latest) and **launch it once**. On first launch it generates a per-installation pairing token and starts the local bridge on `127.0.0.1:47720` (or the next free port up to `47729`).
+
+### 2. Install the extension
+
+- **Unpacked (development):** open `chrome://extensions`, enable **Developer mode**, click **Load unpacked**, select `browser-extension/chrome/`.
+- **Chrome Web Store:** install from the store listing when available — the pairing flow is identical.
+
+The extension's onboarding tab opens automatically after install (and after updates, if this browser isn't paired yet).
+
+### 3. Pair (pick either path)
+
+**Recommended — one click in the app:**
+
+1. In OmniGet, go to **Settings → Network → Browser extension** and click **Pair extension**. This opens a single-use pairing window for 120 seconds.
+2. Keep the extension's options page open (or click **Pair now** on it). The page polls the app every 5 seconds while visible, so pairing completes within seconds; the app shows "Extension connected" when it succeeds. Even with the options page closed, the extension's background worker retries about once per minute, so pairing can take up to ~60 s in the worst case.
+
+**Manual — paste the token:**
+
+1. In OmniGet, go to **Settings → Network → Browser extension**, reveal/copy the **token**.
+2. Open the extension's options page (right-click the toolbar icon → Options). The endpoint is auto-detected; paste the token into the **Pairing token** field and click **Save**.
+
+### 4. Use it
+
+Click the OmniGet icon on any page. If the bridge isn't paired (or the app is closed), clicks fall back to the `omniget://` URL scheme, which still queues the URL but won't carry cookies.
+
+### Troubleshooting
+
+- **Pairing window expired without connecting** — make sure the extension is installed and the browser is open, then click **Pair extension** in the app again with the extension's options page visible (it polls every 5 s while visible).
+- **Downloads suddenly stopped working / HTTP 401 (stale token)** — if you clicked **Rotate token** (or reset settings) in OmniGet, the token stored in this browser is no longer valid. The extension detects the 401, clears the stale token, and automatically goes back to pairing mode; open **Settings → Network → Browser extension → Pair extension** in the app (or paste the new token manually) to re-pair.
+- **"OmniGet doesn't seem to be running" / all ports busy** — the bridge binds the first free port in `47720–47729` and falls back to an OS-picked port if all ten are taken. Check the endpoint URL shown in **Settings → Network → Browser extension**, then enter it under **Advanced: change endpoint URL** on the options page.
+- **App not running** — launch the desktop app first; the health probe (`GET /v1/health`) must answer before pairing can work.
 
 ## Permissions
 

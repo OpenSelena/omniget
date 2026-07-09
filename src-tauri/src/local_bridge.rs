@@ -32,7 +32,7 @@ use axum::{
 use base64::Engine;
 use serde::{Deserialize, Serialize};
 use socket2::{Domain, Protocol, Socket, Type};
-use tauri::AppHandle;
+use tauri::{AppHandle, Emitter};
 use tokio::net::TcpListener;
 use tower_http::cors::{Any, CorsLayer};
 
@@ -261,7 +261,7 @@ struct PairResponse {
     token: Option<String>,
 }
 
-async fn pair(State(state): State<BridgeState>) -> Response {
+async fn pair(State(state): State<BridgeState>, headers: HeaderMap) -> Response {
     if !pairing_open() {
         return (
             StatusCode::FORBIDDEN,
@@ -274,6 +274,20 @@ async fn pair(State(state): State<BridgeState>) -> Response {
     }
     PAIR_OPEN_UNTIL_MS.store(0, Ordering::SeqCst);
     tracing::info!("[bridge] pairing token handed out (window closed, single-use)");
+
+    // Tell the Settings UI that pairing actually succeeded, so it can flip
+    // from the countdown to a success state instead of silently expiring.
+    let user_agent = headers
+        .get("user-agent")
+        .and_then(|v| v.to_str().ok())
+        .map(str::to_string);
+    if let Err(error) = state.app.emit(
+        "bridge-paired",
+        serde_json::json!({ "userAgent": user_agent }),
+    ) {
+        tracing::warn!("[bridge] failed to emit bridge-paired event: {error}");
+    }
+
     (
         StatusCode::OK,
         Json(PairResponse {

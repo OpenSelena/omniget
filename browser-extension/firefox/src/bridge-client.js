@@ -15,6 +15,9 @@
 
 export const STORAGE_KEY_ENDPOINT = "bridge_endpoint";
 export const STORAGE_KEY_TOKEN = "bridge_token";
+// Name of the low-frequency autopair alarm owned by background.js. Exported
+// so the 401 recovery path below can re-arm it without duplicating the name.
+export const AUTOPAIR_ALARM_NAME = "omniget-autopair";
 const HEALTH_TIMEOUT_MS = 1500;
 const ENQUEUE_TIMEOUT_MS = 8000;
 const PROTOCOL_VERSION = 1;
@@ -62,6 +65,35 @@ export async function saveBridgeConfig(
       () => resolve(true)
     );
   });
+}
+
+// Forget the stored token (keep the endpoint — it's still valid). Used when
+// the desktop app rejects our bearer, e.g. after the user rotated the token
+// in Settings; keeping the stale token around would leave this browser
+// permanently unable to re-pair.
+export async function clearStoredToken({ storage = globalThis.chrome?.storage?.local } = {}) {
+  if (!storage?.set) return false;
+  return new Promise((resolve) => {
+    storage.set({ [STORAGE_KEY_TOKEN]: "" }, () => resolve(true));
+  });
+}
+
+// 401/403 from the bridge means our token is stale (rotated or reset on the
+// desktop side). Clear it and re-arm the autopair alarm so the extension can
+// pick up a fresh token the next time the user opens a pairing window.
+async function handleUnauthorized(storage) {
+  try {
+    await clearStoredToken({ storage });
+  } catch {}
+  try {
+    const alarms = globalThis.chrome?.alarms;
+    if (alarms?.create) {
+      const existing = alarms.get ? await alarms.get(AUTOPAIR_ALARM_NAME) : null;
+      if (!existing) {
+        alarms.create(AUTOPAIR_ALARM_NAME, { periodInMinutes: 1 });
+      }
+    }
+  } catch {}
 }
 
 function withTimeout(promise, ms, controller) {
@@ -233,6 +265,9 @@ export async function sendViaBridge(
   }
 
   if (response.status === 401 || response.status === 403) {
+    // Stale token (rotated/reset in the app) — drop it and re-arm autopair
+    // so this browser can pair again instead of being locked out forever.
+    await handleUnauthorized(storage);
     return {
       ok: false,
       reason: "unauthorized",
@@ -321,6 +356,9 @@ export async function sendCookiesViaBridge(
   }
 
   if (response.status === 401 || response.status === 403) {
+    // Stale token (rotated/reset in the app) — drop it and re-arm autopair
+    // so this browser can pair again instead of being locked out forever.
+    await handleUnauthorized(storage);
     return {
       ok: false,
       reason: "unauthorized",

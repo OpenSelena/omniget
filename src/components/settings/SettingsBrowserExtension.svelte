@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
+  import { listen } from "@tauri-apps/api/event";
   import { t } from "$lib/i18n";
   import { showToast } from "$lib/stores/toast-store.svelte";
 
@@ -56,7 +57,14 @@
 
   let pairing = $state(false);
   let pairSecondsLeft = $state(0);
+  let pairResult = $state<"none" | "success" | "expired">("none");
   let pairTimer: ReturnType<typeof setInterval> | null = null;
+  let unlistenPaired: (() => void) | undefined;
+
+  function stopPairTimer() {
+    if (pairTimer) clearInterval(pairTimer);
+    pairTimer = null;
+  }
 
   async function startPairing() {
     try {
@@ -68,14 +76,15 @@
         return;
       }
       pairing = true;
+      pairResult = "none";
       pairSecondsLeft = res.window_secs;
-      if (pairTimer) clearInterval(pairTimer);
+      stopPairTimer();
       pairTimer = setInterval(() => {
         pairSecondsLeft -= 1;
         if (pairSecondsLeft <= 0) {
           pairing = false;
-          if (pairTimer) clearInterval(pairTimer);
-          pairTimer = null;
+          pairResult = "expired";
+          stopPairTimer();
         }
       }, 1000);
     } catch (e: any) {
@@ -83,8 +92,24 @@
     }
   }
 
+  onMount(() => {
+    // The backend emits `bridge-paired` the moment the extension fetches the
+    // token from GET /v1/pair, so we can flip the countdown into a success
+    // state instead of letting it silently expire.
+    listen("bridge-paired", () => {
+      if (!pairing) return;
+      pairing = false;
+      pairResult = "success";
+      stopPairTimer();
+      showToast("success", $t("settings.bridge.pair_success") as string);
+    }).then((fn) => {
+      unlistenPaired = fn;
+    });
+  });
+
   onDestroy(() => {
-    if (pairTimer) clearInterval(pairTimer);
+    stopPairTimer();
+    unlistenPaired?.();
   });
 
   function maskedToken(value: string): string {
@@ -113,11 +138,21 @@
       <div class="setting-row">
         <div class="setting-col">
           <span class="setting-label">{$t("settings.bridge.pair_label")}</span>
-          <span class="setting-hint">
-            {pairing
-              ? $t("settings.bridge.pair_active", { secs: pairSecondsLeft })
-              : $t("settings.bridge.pair_hint")}
-          </span>
+          {#if pairing}
+            <span class="setting-hint">
+              {$t("settings.bridge.pair_active", { secs: pairSecondsLeft })}
+            </span>
+          {:else if pairResult === "success"}
+            <span class="setting-hint pair-success" role="status">
+              {$t("settings.bridge.pair_success")}
+            </span>
+          {:else if pairResult === "expired"}
+            <span class="setting-hint pair-expired" role="status">
+              {$t("settings.bridge.pair_expired")}
+            </span>
+          {:else}
+            <span class="setting-hint">{$t("settings.bridge.pair_hint")}</span>
+          {/if}
         </div>
         <button
           class="bridge-action primary"
@@ -188,6 +223,12 @@
     color: var(--color-text-muted, #95a0b7);
     font-size: 13px;
     line-height: 1.5;
+  }
+  .pair-success {
+    color: var(--success, #4caf50);
+  }
+  .pair-expired {
+    color: var(--warning, #e0a030);
   }
   .token-display {
     font-family: var(--font-mono, "IBM Plex Mono", monospace);
