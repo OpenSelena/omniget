@@ -15,13 +15,13 @@
     "message": "Install OmniGet"
   },
   "error_page_open_extensions": {
-    "message": "Open Chrome Extensions"
+    "message": "Open extension settings"
   },
   "error_host_missing_title": {
-    "message": "Open OmniGet once to finish Chrome setup"
+    "message": "Open OmniGet once to finish setup"
   },
   "error_host_missing_body": {
-    "message": "Chrome could not find the OmniGet bridge on this computer yet."
+    "message": "Your browser could not find the OmniGet bridge on this computer yet."
   },
   "error_host_missing_detail": {
     "message": "Install OmniGet if needed, then launch the desktop app once and click the extension again."
@@ -36,7 +36,7 @@
     "message": "Try again from a direct video, reel, post, playlist, or course page."
   },
   "error_launch_failed_title": {
-    "message": "OmniGet could not be launched from Chrome"
+    "message": "OmniGet could not be launched from your browser"
   },
   "error_launch_failed_body": {
     "message": "The extension talked to the native host, but the desktop app did not start correctly."

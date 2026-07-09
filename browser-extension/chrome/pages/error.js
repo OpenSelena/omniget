@@ -29,5 +29,12 @@ installLink.textContent = content.installLabel;
 openExtensionsBtn.textContent = content.openExtensionsLabel;
 
 openExtensionsBtn.addEventListener("click", () => {
-  chrome.tabs.create({ url: "chrome://extensions" });
+  // Firefox blocks opening privileged about:addons from extensions, so fall
+  // back to our own options page there; Chromium can deep-link its manager.
+  const isFirefox = typeof browser !== "undefined" && !!browser.runtime;
+  if (isFirefox) {
+    chrome.runtime.openOptionsPage();
+  } else {
+    chrome.tabs.create({ url: "chrome://extensions" });
+  }
 });

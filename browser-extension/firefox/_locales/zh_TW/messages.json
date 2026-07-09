@@ -18,10 +18,10 @@
     "message": "開啟擴充功能設定"
   },
   "error_host_missing_title": {
-    "message": "請先開啟一次 OmniGet 以完成 Firefox 設定"
+    "message": "請先開啟一次 OmniGet 以完成設定"
   },
   "error_host_missing_body": {
-    "message": "Firefox 目前還找不到這台電腦上的 OmniGet 橋接程式。"
+    "message": "瀏覽器目前還找不到這台電腦上的 OmniGet 橋接程式。"
   },
   "error_host_missing_detail": {
     "message": "如有需要請安裝 OmniGet，然後先啟動一次桌面應用程式，再次點擊擴充功能。"
@@ -36,7 +36,7 @@
     "message": "請從影片、Reel、貼文、播放清單或課程的直接頁面再試一次。"
   },
   "error_launch_failed_title": {
-    "message": "Firefox 無法啟動 OmniGet"
+    "message": "瀏覽器無法啟動 OmniGet"
   },
   "error_launch_failed_body": {
     "message": "擴充功能已與原生主機通訊，但桌面應用程式未能正確啟動。"

@@ -15,13 +15,13 @@
     "message": "Instalar OmniGet"
   },
   "error_page_open_extensions": {
-    "message": "Abrir extensões do Chrome"
+    "message": "Abrir configurações da extensão"
   },
   "error_host_missing_title": {
-    "message": "Abra o OmniGet uma vez para concluir a configuração do Chrome"
+    "message": "Abra o OmniGet uma vez para concluir a configuração"
   },
   "error_host_missing_body": {
-    "message": "O Chrome ainda não conseguiu encontrar a ponte do OmniGet neste computador."
+    "message": "O navegador ainda não conseguiu encontrar a ponte do OmniGet neste computador."
   },
   "error_host_missing_detail": {
     "message": "Instale o OmniGet se necessário, depois abra o aplicativo de desktop uma vez e clique novamente na extensão."
@@ -36,7 +36,7 @@
     "message": "Tente novamente a partir de uma página direta de vídeo, reel, publicação, playlist ou curso."
   },
   "error_launch_failed_title": {
-    "message": "O OmniGet não pôde ser iniciado pelo Chrome"
+    "message": "O OmniGet não pôde ser iniciado pelo navegador"
   },
   "error_launch_failed_body": {
     "message": "A extensão falou com o host nativo, mas o aplicativo de desktop não iniciou corretamente."

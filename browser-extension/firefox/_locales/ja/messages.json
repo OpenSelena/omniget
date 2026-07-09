@@ -18,10 +18,10 @@
     "message": "拡張機能の設定を開く"
   },
   "error_host_missing_title": {
-    "message": "Firefox のセットアップを完了するには OmniGet を一度開いてください"
+    "message": "セットアップを完了するには OmniGet を一度開いてください"
   },
   "error_host_missing_body": {
-    "message": "Firefox はこのコンピューター上の OmniGet ブリッジをまだ見つけられませんでした。"
+    "message": "ブラウザはこのコンピューター上の OmniGet ブリッジをまだ見つけられませんでした。"
   },
   "error_host_missing_detail": {
     "message": "必要なら OmniGet をインストールし、デスクトップアプリを一度起動してからもう一度拡張機能をクリックしてください。"
@@ -36,7 +36,7 @@
     "message": "動画、リール、投稿、再生リスト、またはコースの直接ページからもう一度お試しください。"
   },
   "error_launch_failed_title": {
-    "message": "Firefox から OmniGet を起動できませんでした"
+    "message": "ブラウザから OmniGet を起動できませんでした"
   },
   "error_launch_failed_body": {
     "message": "拡張機能はネイティブホストと通信しましたが、デスクトップアプリは正しく起動しませんでした。"

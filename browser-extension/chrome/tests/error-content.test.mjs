@@ -59,5 +59,5 @@ test("falls back to LAUNCH_FAILED content for unknown error codes", () => {
   });
 
   assert.equal(content.code, "LAUNCH_FAILED");
-  assert.equal(content.title, "OmniGet could not be launched from Chrome");
+  assert.equal(content.title, "OmniGet could not be launched from your browser");
 });
