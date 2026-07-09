@@ -302,11 +302,11 @@ impl PlatformDownloader for GenericYtdlpDownloader {
             let output_path = opts.output_dir.join(&filename);
             let output_str = output_path.to_string_lossy().to_string();
 
-            let referer = opts
-                .referer
-                .as_deref()
-                .or_else(|| platform_referer(&selected.url))
-                .unwrap_or("");
+            let referer = build_hls_referer(
+                opts.referer.as_deref(),
+                opts.page_url.as_deref(),
+                &selected.url,
+            );
 
             let mut builder =
                 crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
@@ -343,14 +343,15 @@ impl PlatformDownloader for GenericYtdlpDownloader {
 
             let client = builder.build().unwrap_or_default();
             let downloader = HlsDownloader::with_client(client)
-                .with_user_agent_override(opts.user_agent.clone());
+                .with_user_agent_override(opts.user_agent.clone())
+                .with_progress(progress.clone());
             let _ = progress.send(ProgressUpdate::percent(0.0)).await;
 
             let result = downloader
                 .download(
                     &selected.url,
                     &output_str,
-                    referer,
+                    &referer,
                     None,
                     opts.cancel_token.clone(),
                     20,
@@ -505,6 +506,37 @@ impl PlatformDownloader for GenericYtdlpDownloader {
     }
 }
 
+/// Build the Referer for a raw HLS download, in priority order:
+/// explicit referer from options → the page URL the stream was found on →
+/// a known per-platform referer → the m3u8 URL's own origin.
+/// Returns an empty string only for unparseable URLs, in which case the
+/// downloader sends no Referer header at all.
+fn build_hls_referer(
+    explicit_referer: Option<&str>,
+    page_url: Option<&str>,
+    m3u8_url: &str,
+) -> String {
+    if let Some(r) = explicit_referer.map(str::trim).filter(|r| !r.is_empty()) {
+        return r.to_string();
+    }
+    if let Some(p) = page_url.map(str::trim).filter(|p| !p.is_empty()) {
+        return p.to_string();
+    }
+    if let Some(r) = platform_referer(m3u8_url) {
+        return r.to_string();
+    }
+    url::Url::parse(m3u8_url)
+        .ok()
+        .and_then(|u| {
+            let host = u.host_str()?.to_string();
+            Some(match u.port() {
+                Some(port) => format!("{}://{}:{}/", u.scheme(), host, port),
+                None => format!("{}://{}/", u.scheme(), host),
+            })
+        })
+        .unwrap_or_default()
+}
+
 fn platform_extra_flags(url: &str) -> Vec<String> {
     match platform_referer(url) {
         Some(r) => vec!["--referer".into(), r.to_string()],
@@ -541,4 +573,74 @@ fn platform_referer(url: &str) -> Option<&'static str> {
     }
 
     None
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn hls_referer_prefers_explicit() {
+        assert_eq!(
+            build_hls_referer(
+                Some("https://page.example.com/watch"),
+                Some("https://other.example.com/"),
+                "https://cdn.douyin.com/v/master.m3u8"
+            ),
+            "https://page.example.com/watch"
+        );
+    }
+
+    #[test]
+    fn hls_referer_falls_back_to_page_url() {
+        assert_eq!(
+            build_hls_referer(
+                None,
+                Some("https://page.example.com/watch"),
+                "https://cdn.example.com/v/master.m3u8"
+            ),
+            "https://page.example.com/watch"
+        );
+    }
+
+    #[test]
+    fn hls_referer_ignores_empty_and_whitespace() {
+        assert_eq!(
+            build_hls_referer(
+                Some("  "),
+                Some(""),
+                "https://cdn.example.com/v/master.m3u8"
+            ),
+            "https://cdn.example.com/"
+        );
+    }
+
+    #[test]
+    fn hls_referer_uses_platform_referer() {
+        assert_eq!(
+            build_hls_referer(None, None, "https://cdn.douyin.com/v/master.m3u8"),
+            "https://www.douyin.com/"
+        );
+    }
+
+    #[test]
+    fn hls_referer_defaults_to_m3u8_origin() {
+        assert_eq!(
+            build_hls_referer(None, None, "https://cdn.example.com/v/master.m3u8?tok=1"),
+            "https://cdn.example.com/"
+        );
+    }
+
+    #[test]
+    fn hls_referer_keeps_port_in_origin() {
+        assert_eq!(
+            build_hls_referer(None, None, "http://cdn.example.com:8080/v/master.m3u8"),
+            "http://cdn.example.com:8080/"
+        );
+    }
+
+    #[test]
+    fn hls_referer_empty_for_unparseable_url() {
+        assert_eq!(build_hls_referer(None, None, "not a url"), "");
+    }
 }

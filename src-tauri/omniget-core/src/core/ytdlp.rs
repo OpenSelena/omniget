@@ -1633,12 +1633,13 @@ pub async fn get_playlist_info(
     }
 
     let stdout = String::from_utf8_lossy(&output.stdout);
-    Ok(parse_playlist_dump(&stdout))
+    Ok(parse_playlist_dump(&stdout, url))
 }
 
-fn parse_playlist_dump(stdout: &str) -> (String, Vec<PlaylistEntry>) {
+fn parse_playlist_dump(stdout: &str, source_url: &str) -> (String, Vec<PlaylistEntry>) {
     let mut entries = Vec::new();
     let mut playlist_title = String::new();
+    let source_is_youtube = is_youtube_url(source_url);
 
     for line in stdout.lines() {
         if line.trim().is_empty() {
@@ -1664,11 +1665,37 @@ fn parse_playlist_dump(stdout: &str) -> (String, Vec<PlaylistEntry>) {
                 .and_then(|v| v.as_str())
                 .unwrap_or("unknown")
                 .to_string();
+            // Flat-playlist entries usually carry a top-level "url"; some
+            // extractors (e.g. Bilibili cheese seasons) emit full info dicts
+            // that only have "webpage_url".
             let url = json
                 .get("url")
+                .or_else(|| json.get("webpage_url"))
                 .and_then(|v| v.as_str())
-                .map(|s| s.to_string())
-                .unwrap_or_else(|| format!("https://www.youtube.com/watch?v={}", id));
+                .map(|s| s.to_string());
+            let url = match url {
+                Some(u) => u,
+                None => {
+                    // Only fabricate a youtube.com/watch URL when the entry is
+                    // actually a YouTube video; otherwise skip the entry rather
+                    // than produce a bogus URL (issue #157).
+                    let entry_is_youtube = json
+                        .get("ie_key")
+                        .or_else(|| json.get("extractor_key"))
+                        .and_then(|v| v.as_str())
+                        .map(|k| k.eq_ignore_ascii_case("youtube"))
+                        .unwrap_or(source_is_youtube);
+                    if entry_is_youtube && !id.is_empty() {
+                        format!("https://www.youtube.com/watch?v={}", id)
+                    } else {
+                        tracing::warn!(
+                            "[ytdlp] skipping playlist entry without url/webpage_url: id={}",
+                            id
+                        );
+                        continue;
+                    }
+                }
+            };
             let duration = json.get("duration").and_then(|v| v.as_f64());
 
             if !id.is_empty() {
@@ -1787,7 +1814,7 @@ pub async fn get_playlist_info_incremental(
         .map_err(|e| anyhow!("Failed to run yt-dlp: {}", e))?;
 
     let stdout = String::from_utf8_lossy(&output.stdout);
-    let (title, entries) = parse_playlist_dump(&stdout);
+    let (title, entries) = parse_playlist_dump(&stdout, url);
 
     if !output.status.success() && entries.is_empty() {
         let stderr = String::from_utf8_lossy(&output.stderr);
@@ -2070,8 +2097,15 @@ pub async fn download_video(
         format_selector,
         "--encoding".to_string(),
         "utf-8".to_string(),
+        // NOTE: `after_move` is the only print stage where yt-dlp populates
+        // %(filepath)s (it is NA at `after_video`). Any --print implies
+        // --quiet (and therefore noprogress), which would starve our stdout
+        // parsing of progress / Destination / Merger lines — so explicitly
+        // restore verbose output and progress below.
         "--print".to_string(),
-        "after_video:OMNIGET_FILEPATH:%(filepath)s".to_string(),
+        "after_move:OMNIGET_FILEPATH:%(filepath)s".to_string(),
+        "--no-quiet".to_string(),
+        "--progress".to_string(),
     ];
     base_args.extend(js_runtime_args());
 
@@ -2363,7 +2397,7 @@ pub async fn download_video(
                     Some(url) => format!(" --all-proxy={}", url),
                     None => String::new(),
                 };
-                args.push(format!("aria2c:-x {} -k 1M -j {} --min-split-size=1M --file-allocation=none --optimize-concurrent-downloads=true --auto-file-renaming=false --summary-interval=1 --console-log-level=warn{}", conns, conns, aria2c_proxy));
+                args.push(format!("aria2c:-x {} -k 1M -j {} --min-split-size=1M --file-allocation=none --optimize-concurrent-downloads=true --auto-file-renaming=false --summary-interval=1 --console-log-level=notice{}", conns, conns, aria2c_proxy));
             }
         }
 
@@ -2569,13 +2603,22 @@ pub async fn download_video(
                         if mp4_candidate.exists() {
                             mp4_candidate
                         } else {
+                            tracing::warn!(
+                                "[yt-dlp] captured path {} has an audio extension for a video download and no .mp4 sibling; falling back to output-dir glob scan",
+                                p.display()
+                            );
                             find_downloaded_file(output_dir, url).await.unwrap_or(p)
                         }
                     } else {
                         p
                     }
                 }
-                _ => find_downloaded_file(output_dir, url).await?,
+                _ => {
+                    tracing::warn!(
+                        "[yt-dlp] no output path captured from yt-dlp stdout (OMNIGET_FILEPATH / Destination / Merger); falling back to output-dir glob scan"
+                    );
+                    find_downloaded_file(output_dir, url).await?
+                }
             };
             if download_subtitles {
                 let moved = ensure_subtitles_next_to_media(
@@ -3436,6 +3479,53 @@ fn extract_id_from_url(url: &str) -> Option<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn playlist_dump_uses_top_level_url() {
+        let dump = r#"{"id":"abc","title":"Video A","url":"https://example.com/video/abc","playlist_title":"My List"}"#;
+        let (title, entries) = parse_playlist_dump(dump, "https://example.com/playlist/1");
+        assert_eq!(title, "My List");
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].url, "https://example.com/video/abc");
+    }
+
+    #[test]
+    fn playlist_dump_falls_back_to_webpage_url() {
+        // Bilibili cheese season entries are full info dicts with webpage_url
+        // but no top-level "url" (issue #157).
+        let dump = r#"{"id":"12345","title":"Lesson 1","webpage_url":"https://www.bilibili.com/cheese/play/ep12345","extractor_key":"BiliBiliCheese"}"#;
+        let (_, entries) =
+            parse_playlist_dump(dump, "https://www.bilibili.com/cheese/play/ss999");
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].url, "https://www.bilibili.com/cheese/play/ep12345");
+    }
+
+    #[test]
+    fn playlist_dump_fabricates_youtube_url_only_for_youtube_entries() {
+        let dump = r#"{"id":"dQw4w9WgXcQ","title":"YT Video","ie_key":"Youtube"}"#;
+        let (_, entries) = parse_playlist_dump(dump, "https://example.com/playlist");
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].url, "https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+    }
+
+    #[test]
+    fn playlist_dump_fabricates_youtube_url_for_youtube_source() {
+        let dump = r#"{"id":"dQw4w9WgXcQ","title":"YT Video"}"#;
+        let (_, entries) = parse_playlist_dump(
+            dump,
+            "https://www.youtube.com/playlist?list=PL123",
+        );
+        assert_eq!(entries.len(), 1);
+        assert_eq!(entries[0].url, "https://www.youtube.com/watch?v=dQw4w9WgXcQ");
+    }
+
+    #[test]
+    fn playlist_dump_skips_non_youtube_entry_without_url() {
+        let dump = r#"{"id":"12345","title":"Lesson 1","extractor_key":"BiliBiliCheese"}"#;
+        let (_, entries) =
+            parse_playlist_dump(dump, "https://www.bilibili.com/cheese/play/ss999");
+        assert!(entries.is_empty());
+    }
 
     #[test]
     fn parse_progress_download_prefix() {

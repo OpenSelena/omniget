@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, HashMap};
 use std::path::PathBuf;
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
 
@@ -10,6 +10,8 @@ use reqwest::Client;
 use tokio::sync::mpsc::{self, UnboundedSender};
 use tokio::sync::Semaphore;
 use tokio_util::sync::CancellationToken;
+
+use crate::models::progress::ProgressUpdate;
 
 const USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 
@@ -22,6 +24,9 @@ pub struct HlsDownloadResult {
 pub struct HlsDownloader {
     client: Client,
     user_agent_override: Option<String>,
+    /// Optional rich progress channel; receives percent (completed/total
+    /// segments) plus accumulated downloaded bytes as segments finish.
+    progress_tx: Option<mpsc::Sender<ProgressUpdate>>,
 }
 
 impl Default for HlsDownloader {
@@ -53,11 +58,19 @@ impl HlsDownloader {
         Self {
             client,
             user_agent_override: None,
+            progress_tx: None,
         }
     }
 
     pub fn with_user_agent_override(mut self, ua: Option<String>) -> Self {
         self.user_agent_override = ua;
+        self
+    }
+
+    /// Attach a channel that receives per-segment progress updates
+    /// (percent = completed / total segments, with accumulated bytes).
+    pub fn with_progress(mut self, tx: mpsc::Sender<ProgressUpdate>) -> Self {
+        self.progress_tx = Some(tx);
         self
     }
 
@@ -151,18 +164,20 @@ impl HlsDownloader {
     ) -> anyhow::Result<String> {
         let mut last_err = None;
         for attempt in 0..max_retries {
-            match self
-                .client
-                .get(url)
-                .header("Referer", referer)
-                .header("User-Agent", self.effective_user_agent())
-                .send()
-                .await
-            {
-                Ok(resp) => match resp.text().await {
-                    Ok(text) => return Ok(text),
-                    Err(e) => last_err = Some(anyhow::anyhow!(e)),
-                },
+            let req = apply_referer_headers(self.client.get(url), referer)
+                .header("User-Agent", self.effective_user_agent());
+            match req.send().await {
+                Ok(resp) => {
+                    if !resp.status().is_success() {
+                        last_err =
+                            Some(anyhow::anyhow!("HTTP {} fetching playlist", resp.status()));
+                    } else {
+                        match resp.text().await {
+                            Ok(text) => return Ok(text),
+                            Err(e) => last_err = Some(anyhow::anyhow!(e)),
+                        }
+                    }
+                }
                 Err(e) => last_err = Some(anyhow::anyhow!(e)),
             }
             if attempt < max_retries - 1 {
@@ -187,13 +202,14 @@ impl HlsDownloader {
         max_concurrent: u32,
         max_retries: u32,
     ) -> anyhow::Result<HlsDownloadResult> {
-        let resp = self
-            .client
-            .get(m3u8_url)
-            .header("Referer", referer)
+        let resp = apply_referer_headers(self.client.get(m3u8_url), referer)
             .header("User-Agent", self.effective_user_agent())
             .send()
             .await?;
+
+        if !resp.status().is_success() {
+            anyhow::bail!("HTTP {} fetching playlist", resp.status());
+        }
 
         let text = resp.text().await?;
 
@@ -233,6 +249,7 @@ impl HlsDownloader {
 
         let semaphore = Arc::new(Semaphore::new(max_concurrent as usize));
         let completed = Arc::new(AtomicUsize::new(0));
+        let downloaded_bytes = Arc::new(AtomicU64::new(0));
         let fail_token = cancel_token.child_token();
         let errors: Arc<tokio::sync::Mutex<HashMap<String, u32>>> =
             Arc::new(tokio::sync::Mutex::new(HashMap::new()));
@@ -247,10 +264,12 @@ impl HlsDownloader {
         let client = &self.client;
         let errors_ref = &errors;
         let completed_ref = &completed;
+        let downloaded_ref = &downloaded_bytes;
         let fail_ref = &fail_token;
         let sem_ref = &semaphore;
         let user_agent = self.effective_user_agent().to_string();
         let user_agent_ref = &user_agent;
+        let progress_ref = &self.progress_tx;
 
         stream::iter(segment_urls)
             .map(|(i, url)| {
@@ -276,7 +295,26 @@ impl HlsDownloader {
                             if let Some(ref btx) = bytes_tx {
                                 let _ = btx.send(data.len() as u64);
                             }
-                            completed_ref.fetch_add(1, Ordering::Relaxed);
+                            let done = completed_ref.fetch_add(1, Ordering::Relaxed) + 1;
+                            let total_dl = downloaded_ref
+                                .fetch_add(data.len() as u64, Ordering::Relaxed)
+                                + data.len() as u64;
+                            if let Some(ptx) = progress_ref {
+                                let percent = if total_segments > 0 {
+                                    (done as f64 / total_segments as f64) * 100.0
+                                } else {
+                                    0.0
+                                };
+                                // try_send: progress is best-effort and must
+                                // never stall segment downloads.
+                                let _ = ptx.try_send(ProgressUpdate::rich(
+                                    percent,
+                                    Some(total_dl),
+                                    None,
+                                    None,
+                                    None,
+                                ));
+                            }
                             let _ = seg_tx.send((i, data)).await;
                         }
                         Err(e) => {
@@ -369,14 +407,9 @@ impl HlsDownloader {
     ) -> anyhow::Result<Vec<u8>> {
         let mut last_err = None;
         for attempt in 0..max_retries {
-            match self
-                .client
-                .get(url)
-                .header("Referer", referer)
-                .header("User-Agent", self.effective_user_agent())
-                .send()
-                .await
-            {
+            let req = apply_referer_headers(self.client.get(url), referer)
+                .header("User-Agent", self.effective_user_agent());
+            match req.send().await {
                 Ok(resp) => {
                     if !resp.status().is_success() {
                         last_err = Some(anyhow::anyhow!("HTTP {} fetching AES key", resp.status()));
@@ -404,6 +437,34 @@ impl HlsDownloader {
 struct EncryptionInfo {
     key_bytes: Vec<u8>,
     iv: Option<[u8; 16]>,
+}
+
+/// Attach `Referer` (and a matching `Origin`) headers to a request.
+/// An empty referer means "send no Referer/Origin at all" — some CDNs
+/// reject requests with a wrong Referer but accept ones without any.
+fn apply_referer_headers(
+    req: reqwest::RequestBuilder,
+    referer: &str,
+) -> reqwest::RequestBuilder {
+    if referer.is_empty() {
+        return req;
+    }
+    let req = req.header("Referer", referer);
+    match url_origin(referer) {
+        Some(origin) => req.header("Origin", origin),
+        None => req,
+    }
+}
+
+/// Origin (`scheme://host[:port]`, no path, no trailing slash) of a URL.
+fn url_origin(url: &str) -> Option<String> {
+    let parsed = url::Url::parse(url).ok()?;
+    let host = parsed.host_str()?;
+    let scheme = parsed.scheme();
+    Some(match parsed.port() {
+        Some(port) => format!("{}://{}:{}", scheme, host, port),
+        None => format!("{}://{}", scheme, host),
+    })
 }
 
 fn select_best_variant(master: &MasterPlaylist, max_height: u32) -> Option<&VariantStream> {
@@ -519,9 +580,7 @@ async fn download_segment_with_retry(
         }
 
         let result = tokio::time::timeout(SEGMENT_TIMEOUT, async {
-            let resp = client
-                .get(url)
-                .header("Referer", referer)
+            let resp = apply_referer_headers(client.get(url), referer)
                 .header("User-Agent", user_agent)
                 .send()
                 .await?;
@@ -587,6 +646,28 @@ fn parse_hex_iv(iv_str: &str) -> [u8; 16] {
 mod tests {
     use super::*;
     use m3u8_rs::{MasterPlaylist, Resolution, VariantStream};
+
+    #[test]
+    fn url_origin_basic() {
+        assert_eq!(
+            url_origin("https://cdn.example.com/path/master.m3u8?token=abc").as_deref(),
+            Some("https://cdn.example.com")
+        );
+    }
+
+    #[test]
+    fn url_origin_with_port() {
+        assert_eq!(
+            url_origin("http://cdn.example.com:8080/video/seg.ts").as_deref(),
+            Some("http://cdn.example.com:8080")
+        );
+    }
+
+    #[test]
+    fn url_origin_invalid_returns_none() {
+        assert_eq!(url_origin("not a url"), None);
+        assert_eq!(url_origin(""), None);
+    }
 
     #[test]
     fn resolve_url_absolute_passthrough() {
