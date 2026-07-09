@@ -29,5 +29,7 @@ installLink.textContent = content.installLabel;
 openExtensionsBtn.textContent = content.openExtensionsLabel;
 
 openExtensionsBtn.addEventListener("click", () => {
-  chrome.tabs.create({ url: "chrome://extensions" });
+  // about:addons is a privileged URL that extensions cannot open in Firefox,
+  // so open the extension's own settings page instead.
+  chrome.runtime.openOptionsPage();
 });

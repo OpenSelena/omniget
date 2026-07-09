@@ -2,9 +2,9 @@ const ERROR_PAGE_MESSAGES = Object.freeze({
   error_page_document_title: "OmniGet Extension",
   error_page_eyebrow: "OmniGet Extension",
   error_page_install_cta: "Install OmniGet",
-  error_page_open_extensions: "Open Chrome Extensions",
-  error_host_missing_title: "Open OmniGet once to finish Chrome setup",
-  error_host_missing_body: "Chrome could not find the OmniGet bridge on this computer yet.",
+  error_page_open_extensions: "Open extension settings",
+  error_host_missing_title: "Open OmniGet once to finish Firefox setup",
+  error_host_missing_body: "Firefox could not find the OmniGet bridge on this computer yet.",
   error_host_missing_detail:
     "Install OmniGet if needed, then launch the desktop app once and click the extension again.",
   error_invalid_url_title: "This page URL cannot be sent to OmniGet",
@@ -12,7 +12,7 @@ const ERROR_PAGE_MESSAGES = Object.freeze({
     "The current page is not a supported media page for the OmniGet extension.",
   error_invalid_url_detail:
     "Try again from a direct video, reel, post, playlist, or course page.",
-  error_launch_failed_title: "OmniGet could not be launched from Chrome",
+  error_launch_failed_title: "OmniGet could not be launched from Firefox",
   error_launch_failed_body:
     "The extension talked to the native host, but the desktop app did not start correctly.",
   error_launch_failed_detail:

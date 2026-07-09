@@ -15,13 +15,13 @@
     "message": "安装 OmniGet"
   },
   "error_page_open_extensions": {
-    "message": "打开 Chrome 扩展程序"
+    "message": "打开扩展设置"
   },
   "error_host_missing_title": {
-    "message": "先打开一次 OmniGet 以完成 Chrome 设置"
+    "message": "先打开一次 OmniGet 以完成 Firefox 设置"
   },
   "error_host_missing_body": {
-    "message": "Chrome 目前还找不到这台电脑上的 OmniGet 桥接程序。"
+    "message": "Firefox 目前还找不到这台电脑上的 OmniGet 桥接程序。"
   },
   "error_host_missing_detail": {
     "message": "如有需要请安装 OmniGet，然后先启动一次桌面应用，再次点击扩展程序。"
@@ -36,7 +36,7 @@
     "message": "请从视频、Reel、帖子、播放列表或课程的直接页面重试。"
   },
   "error_launch_failed_title": {
-    "message": "Chrome 无法启动 OmniGet"
+    "message": "Firefox 无法启动 OmniGet"
   },
   "error_launch_failed_body": {
     "message": "扩展程序已与原生主机通信，但桌面应用未能正确启动。"
