@@ -12,7 +12,12 @@ use crate::models::media::{
 pub fn is_playlist_or_series(url: &str) -> bool {
     if let Ok(parsed) = url::Url::parse(url) {
         let path = parsed.path();
-        if path.starts_with("/bangumi/") || path.starts_with("/cheese/") {
+        // Note: /cheese/ URLs are intentionally NOT classified as playlists.
+        // Single-episode cheese URLs (/cheese/play/epNNN) must go through
+        // get_video_info with --no-playlist; yt-dlp's cheese season extractor
+        // emits flat-playlist entries without a top-level "url" key, which
+        // breaks the playlist path (issue #157).
+        if path.starts_with("/bangumi/") {
             return true;
         }
         if path.contains("/channel/") || path.contains("/favlist/") || path.contains("/medialist/")
@@ -228,6 +233,8 @@ async fn download_playlist(
         duration_seconds: 0.0,
         torrent_id: None,
     };
+    let mut success_count: usize = 0;
+    let mut first_error: Option<anyhow::Error> = None;
 
     for (i, quality) in info.available_qualities.iter().enumerate() {
         if opts.cancel_token.is_cancelled() {
@@ -270,16 +277,71 @@ async fn download_playlist(
         .await
         {
             Ok(result) => {
+                success_count += 1;
                 last_result.file_size_bytes += result.file_size_bytes;
                 last_result.duration_seconds += result.duration_seconds;
                 last_result.file_path = result.file_path;
             }
             Err(e) => {
                 tracing::error!("[bilibili] playlist item {} failed: {}", i + 1, e);
+                if first_error.is_none() {
+                    first_error = Some(e);
+                }
             }
         }
     }
 
+    if success_count == 0 {
+        let detail = first_error
+            .map(|e| e.to_string())
+            .unwrap_or_else(|| "unknown error".to_string());
+        return Err(anyhow!(
+            "All {} playlist item(s) failed to download. First error: {}",
+            total,
+            detail
+        ));
+    }
+
     let _ = progress.send(ProgressUpdate::percent(100.0)).await;
     Ok(last_result)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn cheese_episode_is_not_playlist() {
+        assert!(!is_playlist_or_series(
+            "https://www.bilibili.com/cheese/play/ep2143"
+        ));
+    }
+
+    #[test]
+    fn cheese_season_is_not_playlist() {
+        assert!(!is_playlist_or_series(
+            "https://www.bilibili.com/cheese/play/ss123"
+        ));
+    }
+
+    #[test]
+    fn bangumi_is_playlist() {
+        assert!(is_playlist_or_series(
+            "https://www.bilibili.com/bangumi/play/ss12345"
+        ));
+    }
+
+    #[test]
+    fn medialist_is_playlist() {
+        assert!(is_playlist_or_series(
+            "https://www.bilibili.com/medialist/detail/ml123"
+        ));
+    }
+
+    #[test]
+    fn plain_video_is_not_playlist() {
+        assert!(!is_playlist_or_series(
+            "https://www.bilibili.com/video/BV1xx411c7mu"
+        ));
+    }
 }

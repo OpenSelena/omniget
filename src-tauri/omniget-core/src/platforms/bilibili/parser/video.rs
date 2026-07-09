@@ -78,48 +78,68 @@ pub async fn parse(
         // Try to match the requested bvid against ugc_season episodes.
         // If found, return only that single episode (preserving user intent).
         // If not found, fall through to normal single-video handling below.
-        if let Some(sections) = season.get("sections").and_then(Value::as_array) {
-            for sec in sections {
-                if let Some(eps) = sec.get("episodes").and_then(Value::as_array) {
-                    for ep in eps {
-                        let ep_bvid = ep.get("bvid").and_then(Value::as_str).unwrap_or("");
-                        if ep_bvid == bvid {
-                            let ep_aid = ep.get("aid").and_then(Value::as_u64);
-                            let ep_cid = ep.get("cid").and_then(Value::as_u64);
-                            let ep_title = ep
-                                .get("title")
-                                .and_then(Value::as_str)
-                                .unwrap_or("")
-                                .to_string();
-                            let arc = ep.get("arc");
-                            let dur = arc.and_then(|a| a.get("duration")).and_then(Value::as_f64);
-                            let cover_ep = arc
-                                .and_then(|a| a.get("pic"))
-                                .and_then(Value::as_str)
-                                .map(String::from);
-                            let pub_ep = arc.and_then(|a| a.get("pubdate")).and_then(Value::as_u64);
-                            let item = EpisodeItem {
-                                episode_id: format!("ugc:{}", ep_bvid),
-                                title: ep_title,
-                                aid: ep_aid,
-                                bvid: Some(ep_bvid.to_string()),
-                                cid: ep_cid,
-                                duration_seconds: dur,
-                                cover_url: cover_ep,
-                                pub_time_secs: pub_ep,
-                                section_title: sec
+        //
+        // Skip this shortcut when the caller requested a specific page (?p=N)
+        // or when the video itself has multiple pages: a multi-page video
+        // inside a collection must be handled by the pages branch below,
+        // otherwise only page 1 gets downloaded (issue #146).
+        let has_multiple_pages = data
+            .get("pages")
+            .and_then(Value::as_array)
+            .map(|p| p.len() > 1)
+            .unwrap_or(false);
+        if page_filter.is_none() && !has_multiple_pages {
+            if let Some(sections) = season.get("sections").and_then(Value::as_array) {
+                let mut ep_index: u32 = 0;
+                for sec in sections {
+                    if let Some(eps) = sec.get("episodes").and_then(Value::as_array) {
+                        for ep in eps {
+                            ep_index += 1;
+                            let ep_bvid = ep.get("bvid").and_then(Value::as_str).unwrap_or("");
+                            if ep_bvid == bvid {
+                                let ep_aid = ep.get("aid").and_then(Value::as_u64);
+                                let ep_cid = ep.get("cid").and_then(Value::as_u64);
+                                let ep_title = ep
                                     .get("title")
                                     .and_then(Value::as_str)
-                                    .map(String::from),
-                                url: Some(format!("https://www.bilibili.com/video/{}", ep_bvid)),
-                                ..EpisodeItem::default()
-                            };
-                            return Ok(ParsedContent {
-                                title,
-                                items: vec![item],
-                                metadata,
-                                pagination: None,
-                            });
+                                    .unwrap_or("")
+                                    .to_string();
+                                let arc = ep.get("arc");
+                                let dur =
+                                    arc.and_then(|a| a.get("duration")).and_then(Value::as_f64);
+                                let cover_ep = arc
+                                    .and_then(|a| a.get("pic"))
+                                    .and_then(Value::as_str)
+                                    .map(String::from);
+                                let pub_ep =
+                                    arc.and_then(|a| a.get("pubdate")).and_then(Value::as_u64);
+                                let item = EpisodeItem {
+                                    episode_id: format!("ugc:{}", ep_bvid),
+                                    title: ep_title,
+                                    aid: ep_aid,
+                                    bvid: Some(ep_bvid.to_string()),
+                                    cid: ep_cid,
+                                    duration_seconds: dur,
+                                    cover_url: cover_ep,
+                                    pub_time_secs: pub_ep,
+                                    section_title: sec
+                                        .get("title")
+                                        .and_then(Value::as_str)
+                                        .map(String::from),
+                                    episode_number: Some(ep_index),
+                                    url: Some(format!(
+                                        "https://www.bilibili.com/video/{}",
+                                        ep_bvid
+                                    )),
+                                    ..EpisodeItem::default()
+                                };
+                                return Ok(ParsedContent {
+                                    title,
+                                    items: vec![item],
+                                    metadata,
+                                    pagination: None,
+                                });
+                            }
                         }
                     }
                 }
