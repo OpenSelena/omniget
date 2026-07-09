@@ -142,14 +142,9 @@ pub fn cookie_header_from_netscape(content: &str) -> Option<String> {
 }
 
 pub fn cookie_header_for_domains(domains: &[&str]) -> Option<String> {
+    // managed account cookies take precedence over the manual settings
+    // cookie, which is only a fallback (matches pre-port desktop behavior)
     for domain in domains {
-        if let Some(header) = manual_cookie_header(domain) {
-            let trimmed = header.trim();
-            if !trimmed.is_empty() {
-                return Some(trimmed.to_string());
-            }
-        }
-
         let Some(path) = cookie_path_for(domain) else {
             continue;
         };
@@ -158,6 +153,15 @@ pub fn cookie_header_for_domains(domains: &[&str]) -> Option<String> {
         };
         if let Some(header) = cookie_header_from_netscape_for_domain(&content, domain) {
             return Some(header);
+        }
+    }
+
+    for domain in domains {
+        if let Some(header) = manual_cookie_header(domain) {
+            let trimmed = header.trim();
+            if !trimmed.is_empty() {
+                return Some(trimmed.to_string());
+            }
         }
     }
 
