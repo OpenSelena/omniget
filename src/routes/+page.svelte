@@ -819,12 +819,20 @@
   }
 
   function handleHomeModeChange(mode: HomeInputMode) {
+    // batch/torrent/p2p are momentary actions, not persistent input modes:
+    // return to "url" so the tab bar never strands on an empty state when
+    // the picker/dialog is cancelled
     if (mode === "p2p") {
       showP2pSendDialog = true;
+      homeInputMode = "url";
     } else if (mode === "torrent") {
-      void openTorrentFile();
+      void openTorrentFile().finally(() => {
+        homeInputMode = "url";
+      });
     } else if (mode === "batch") {
-      void openBatchFile();
+      void openBatchFile().finally(() => {
+        homeInputMode = "url";
+      });
     }
   }
 
@@ -936,7 +944,7 @@
       </div>
     {/if}
 
-    {#if showOmnibox && homeInputMode === "url"}
+    {#if showOmnibox}
       <HomeUrlBar bind:url bind:mode={homeInputMode} onInput={handleInput} onModeChange={handleHomeModeChange} />
     {/if}
 
