@@ -442,9 +442,13 @@
 [data-theme="nyxvamp-radiance"] {
   --bg-overlay: black;
   --on-warning: #5c3d00;
-  /* light themes: elevated surfaces sit ≈1.1:1 against cards, leaving the
-     off-toggle track invisible; mix in tertiary to clear WCAG 3:1 */
-  --toggle-off: color-mix(in srgb, var(--tertiary) 65%, var(--button-elevated));
+  /* Light themes: elevated surfaces sit ≈1.1:1 against cards, leaving the
+     off-toggle track invisible. A literal gray is used rather than a mix of
+     surface tokens because macos-shell.css re-points those tokens to white
+     on the settings screens, which washed the mix out to ~2:1.
+     Measured against every light theme's card surface: worst case is
+     Catppuccin Latte at 3.12:1, and the white knob sits at 4.8:1. */
+  --toggle-off: #727272;
 }
 
 :root, [data-theme="dark"] {
