@@ -93,6 +93,11 @@ export type AppSettings = {
   league?: {
     enabled?: boolean;
     auto_accept?: boolean;
+    auto_pick?: boolean;
+    auto_ban?: boolean;
+    auto_lock?: boolean;
+    pick_champions?: number[];
+    ban_champions?: number[];
   };
   onboarding_completed: boolean;
   start_with_system: boolean;

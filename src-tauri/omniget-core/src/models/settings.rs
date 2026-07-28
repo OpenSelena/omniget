@@ -39,6 +39,16 @@ pub struct LeagueSettings {
     pub enabled: bool,
     #[serde(default)]
     pub auto_accept: bool,
+    #[serde(default)]
+    pub auto_pick: bool,
+    #[serde(default)]
+    pub auto_ban: bool,
+    #[serde(default)]
+    pub auto_lock: bool,
+    #[serde(default)]
+    pub pick_champions: Vec<i64>,
+    #[serde(default)]
+    pub ban_champions: Vec<i64>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -10,6 +10,8 @@
 
   type LeagueStatus = { connected: boolean; port: number | null; region: string | null };
   type RankedEntry = { tier?: string; division?: string; leaguePoints?: number; wins?: number; losses?: number };
+  type Champion = { id: number; name: string; alias: string };
+  type LobbyQueue = { id: number; name: string; shortName: string; gameMode: string };
 
   let settings = $derived(getSettings());
   let enabled = $derived(settings?.league?.enabled ?? false);
@@ -23,15 +25,45 @@
   let autoAccept = $state(false);
   let pollTimer: ReturnType<typeof setInterval> | null = null;
 
+  let champions = $state<Champion[]>([]);
+  let championById = $derived(new Map(champions.map((c) => [c.id, c])));
+  let championByAlias = $derived(new Map(champions.map((c) => [c.alias.toLowerCase(), c])));
+
+  let queues = $state<LobbyQueue[]>([]);
+  let lobby = $state<any>(null);
+  let champSelect = $state<any>(null);
+  let liveGame = $state<any>(null);
+  let actionError = $state("");
+
+  let pickSearch = $state("");
+  let banSearch = $state("");
+
+  const PHASE_KEYS: Record<string, string> = {
+    Lobby: "league.phase_lobby",
+    Matchmaking: "league.phase_matchmaking",
+    ReadyCheck: "league.phase_ready_check",
+    ChampSelect: "league.phase_champ_select",
+    GameStart: "league.phase_in_progress",
+    InProgress: "league.phase_in_progress",
+    WaitingForStats: "league.phase_end_of_game",
+    PreEndOfGame: "league.phase_end_of_game",
+    EndOfGame: "league.phase_end_of_game",
+  };
+
+  function phaseLabel(p: string): string {
+    const key = PHASE_KEYS[p];
+    return key ? ($t(key) as string) : p;
+  }
+
   const QUEUE_NAMES: Record<number, string> = {
     420: "Solo/Duo",
     440: "Flex",
     400: "Draft",
     430: "Blind",
     450: "ARAM",
+    480: "Swiftplay",
     900: "URF",
     1700: "Arena",
-    490: "Quickplay",
   };
 
   function queueName(id: number, mode: string): string {
@@ -53,6 +85,9 @@
     if (!status.connected) {
       summoner = null;
       phase = "";
+      lobby = null;
+      champSelect = null;
+      liveGame = null;
       return;
     }
     try {
@@ -62,6 +97,43 @@
     }
     if (!summoner) {
       await loadProfile();
+    }
+    if (champions.length === 0) {
+      loadChampions();
+    }
+    if (queues.length === 0) {
+      loadQueues();
+    }
+    refreshPhaseData();
+  }
+
+  async function refreshPhaseData() {
+    if (phase === "ChampSelect") {
+      try {
+        champSelect = await invoke<any>("league_champ_select_session");
+      } catch {
+        champSelect = null;
+      }
+    } else {
+      champSelect = null;
+    }
+    if (phase === "InProgress") {
+      try {
+        liveGame = await invoke<any>("league_live_game");
+      } catch {
+        liveGame = null;
+      }
+    } else {
+      liveGame = null;
+    }
+    if (phase === "Lobby" || phase === "Matchmaking") {
+      try {
+        lobby = await invoke<any>("league_get", { path: "/lol-lobby/v2/lobby" });
+      } catch {
+        lobby = null;
+      }
+    } else {
+      lobby = null;
     }
   }
 
@@ -81,6 +153,26 @@
     loadHistory();
   }
 
+  async function loadChampions() {
+    try {
+      const data = await invoke<any[]>("league_get", { path: "/lol-game-data/assets/v1/champion-summary.json" });
+      champions = (data ?? [])
+        .filter((c) => c.id > 0)
+        .map((c) => ({ id: c.id, name: c.name, alias: c.alias }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+    } catch {
+      champions = [];
+    }
+  }
+
+  async function loadQueues() {
+    try {
+      queues = await invoke<LobbyQueue[]>("league_lobby_queues");
+    } catch {
+      queues = [];
+    }
+  }
+
   async function loadHistory() {
     if (loadingHistory) return;
     loadingHistory = true;
@@ -91,6 +183,16 @@
       games = [];
     } finally {
       loadingHistory = false;
+    }
+  }
+
+  async function action(cmd: string, args?: Record<string, unknown>) {
+    actionError = "";
+    try {
+      await invoke(cmd, args ?? {});
+      refreshStatus();
+    } catch (e: any) {
+      actionError = typeof e === "string" ? e : e.message ?? String(e);
     }
   }
 
@@ -105,10 +207,63 @@
     }
   }
 
-  async function acceptNow() {
-    try {
-      await invoke("league_accept_ready_check");
-    } catch {}
+  function toggleLeagueFlag(field: "auto_pick" | "auto_ban" | "auto_lock") {
+    const current = (settings?.league as any)?.[field] ?? false;
+    updateSettings({ league: { [field]: !current } });
+  }
+
+  function listFor(kind: "pick" | "ban"): number[] {
+    const l = settings?.league as any;
+    return (kind === "pick" ? l?.pick_champions : l?.ban_champions) ?? [];
+  }
+
+  function saveList(kind: "pick" | "ban", ids: number[]) {
+    updateSettings({ league: kind === "pick" ? { pick_champions: ids } : { ban_champions: ids } });
+  }
+
+  function addToList(kind: "pick" | "ban", id: number) {
+    const ids = listFor(kind);
+    if (ids.includes(id)) return;
+    saveList(kind, [...ids, id]);
+    if (kind === "pick") pickSearch = "";
+    else banSearch = "";
+  }
+
+  function removeFromList(kind: "pick" | "ban", id: number) {
+    saveList(kind, listFor(kind).filter((x) => x !== id));
+  }
+
+  function searchResults(query: string, kind: "pick" | "ban"): Champion[] {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+    const existing = new Set(listFor(kind));
+    return champions
+      .filter((c) => !existing.has(c.id))
+      .filter((c) => c.name.toLowerCase().includes(q) || c.alias.toLowerCase().includes(q))
+      .slice(0, 8);
+  }
+
+  function liveChampionId(player: any): number | null {
+    const raw: string = player?.rawChampionName ?? "";
+    const alias = raw.split("_").pop() ?? "";
+    return championByAlias.get(alias.toLowerCase())?.id ?? null;
+  }
+
+  function liveTeams(players: any[]): { order: any[]; chaos: any[] } {
+    return {
+      order: players.filter((p) => p.team === "ORDER"),
+      chaos: players.filter((p) => p.team === "CHAOS"),
+    };
+  }
+
+  function formatGameTime(seconds: number): string {
+    const m = Math.floor(seconds / 60);
+    const s = Math.floor(seconds % 60);
+    return `${m}:${String(s).padStart(2, "0")}`;
+  }
+
+  function myTeamPicks(session: any): { cellId: number; championId: number }[] {
+    return (session?.myTeam ?? []).map((m: any) => ({ cellId: m.cellId, championId: m.championId }));
   }
 
   function playerStats(game: any): { championId: number; kills: number; deaths: number; assists: number; win: boolean } {
@@ -187,33 +342,210 @@
         </section>
       {/if}
 
-      <section class="actions-card">
+      {#if actionError}
+        <div class="action-error" role="alert">{actionError}</div>
+      {/if}
+
+      {#if phase === "ChampSelect" && champSelect}
+        <section class="card">
+          <div class="card-head">
+            <h3>{$t("league.champ_select_title")}</h3>
+            <span class="phase-tag">{phaseLabel(phase)}</span>
+          </div>
+          <div class="team-picks">
+            {#each myTeamPicks(champSelect) as pick (pick.cellId)}
+              {#if pick.championId > 0}
+                <img class="champ-icon" src={`${CDRAGON}/champion-icons/${pick.championId}.png`} alt={championById.get(pick.championId)?.name ?? ""} title={championById.get(pick.championId)?.name ?? ""} loading="lazy" />
+              {:else}
+                <div class="champ-icon champ-empty" aria-hidden="true"></div>
+              {/if}
+            {/each}
+          </div>
+          {#if champSelect.benchEnabled}
+            <div class="bench-row">
+              <span class="bench-label">{$t("league.bench_title")}</span>
+              <div class="bench-champs">
+                {#each champSelect.benchChampions ?? [] as bc (bc.championId)}
+                  <button
+                    class="bench-swap"
+                    onclick={() => action("league_bench_swap", { championId: bc.championId })}
+                    title={championById.get(bc.championId)?.name ?? ""}
+                    aria-label={`${$t("league.swap")} ${championById.get(bc.championId)?.name ?? bc.championId}`}
+                  >
+                    <img class="champ-icon" src={`${CDRAGON}/champion-icons/${bc.championId}.png`} alt="" loading="lazy" />
+                  </button>
+                {/each}
+              </div>
+              <button class="button" onclick={() => action("league_reroll")}>{$t("league.reroll")}</button>
+            </div>
+          {/if}
+        </section>
+      {:else if phase === "InProgress" && liveGame?.stats}
+        <section class="card">
+          <div class="card-head">
+            <h3>{$t("league.live_title")}</h3>
+            <span class="phase-tag">{formatGameTime(liveGame.stats.gameTime ?? 0)}</span>
+          </div>
+          {#if Array.isArray(liveGame.players)}
+            {@const teams = liveTeams(liveGame.players)}
+            <div class="live-teams">
+              {#each [teams.order, teams.chaos] as team, ti}
+                <div class="live-team">
+                  {#each team as p (p.riotId ?? p.summonerName ?? p.championName)}
+                    {@const cid = liveChampionId(p)}
+                    <div class="live-row" class:me={(p.riotId ?? p.summonerName) === liveGame.activePlayer}>
+                      {#if cid}
+                        <img class="champ-icon small" src={`${CDRAGON}/champion-icons/${cid}.png`} alt="" loading="lazy" />
+                      {:else}
+                        <div class="champ-icon small champ-empty" aria-hidden="true"></div>
+                      {/if}
+                      <span class="live-name">{p.championName}</span>
+                      <span class="live-kda">{p.scores?.kills ?? 0}/{p.scores?.deaths ?? 0}/{p.scores?.assists ?? 0}</span>
+                      {#if p.isDead && p.respawnTimer > 0}
+                        <span class="live-respawn">{$t("league.respawn_in")} {Math.ceil(p.respawnTimer)}s</span>
+                      {/if}
+                    </div>
+                  {/each}
+                </div>
+              {/each}
+            </div>
+          {/if}
+        </section>
+      {:else}
+        <section class="card">
+          <div class="card-head">
+            <h3>{$t("league.lobby_title")}</h3>
+            {#if phase && phase !== "None"}
+              <span class="phase-tag">{phaseLabel(phase)}</span>
+            {/if}
+          </div>
+          {#if phase === "ReadyCheck"}
+            <div class="lobby-actions">
+              <button class="button primary" onclick={() => action("league_accept_ready_check")}>{$t("league.accept_now")}</button>
+            </div>
+          {:else if phase === "Matchmaking"}
+            <div class="lobby-actions">
+              <span class="searching-hint">{$t("league.searching")}</span>
+              <button class="button" onclick={() => action("league_stop_matchmaking")}>{$t("league.stop_queue")}</button>
+            </div>
+          {:else if phase === "Lobby" && lobby}
+            <div class="lobby-actions">
+              <button class="button primary" onclick={() => action("league_start_matchmaking")}>{$t("league.start_queue")}</button>
+              <button class="button" onclick={() => action("league_leave_lobby")}>{$t("league.leave_lobby")}</button>
+            </div>
+          {:else if phase === "EndOfGame" || phase === "PreEndOfGame" || phase === "WaitingForStats"}
+            <div class="lobby-actions">
+              <button class="button primary" onclick={() => action("league_play_again")}>{$t("league.play_again")}</button>
+            </div>
+          {:else if queues.length > 0}
+            <div class="queue-grid">
+              {#each queues as q (q.id)}
+                <button class="button" onclick={() => action("league_create_lobby", { queueId: q.id })}>{q.shortName || q.name}</button>
+              {/each}
+            </div>
+          {:else}
+            <p class="empty-hint">{$t("league.lobby_hint")}</p>
+          {/if}
+        </section>
+      {/if}
+
+      <section class="card">
+        <div class="card-head">
+          <h3>{$t("league.automation_title")}</h3>
+        </div>
         <div class="action-row">
           <div class="action-col">
             <span class="action-label">{$t("league.auto_accept")}</span>
             <span class="action-hint">{$t("league.auto_accept_desc")}</span>
           </div>
-          <button
-            class="toggle"
-            class:on={autoAccept}
-            onclick={toggleAutoAccept}
-            role="switch"
-            aria-checked={autoAccept}
-            aria-label={$t("league.auto_accept") as string}
-          >
+          <button class="toggle" class:on={autoAccept} onclick={toggleAutoAccept} role="switch" aria-checked={autoAccept} aria-label={$t("league.auto_accept") as string}>
             <span class="toggle-knob"></span>
           </button>
         </div>
-        {#if phase && phase !== "None"}
+        <div class="divider"></div>
+        <div class="action-row">
+          <div class="action-col">
+            <span class="action-label">{$t("league.auto_pick")}</span>
+            <span class="action-hint">{$t("league.auto_pick_desc")}</span>
+          </div>
+          <button class="toggle" class:on={settings?.league?.auto_pick} onclick={() => toggleLeagueFlag("auto_pick")} role="switch" aria-checked={settings?.league?.auto_pick ?? false} aria-label={$t("league.auto_pick") as string}>
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
+        {#if settings?.league?.auto_pick}
+          <div class="champ-list-block">
+            <span class="list-label">{$t("league.pick_list")} <span class="list-hint">({$t("league.list_hint")})</span></span>
+            <div class="champ-chips">
+              {#each listFor("pick") as id (id)}
+                <span class="champ-chip">
+                  <img class="champ-icon tiny" src={`${CDRAGON}/champion-icons/${id}.png`} alt="" loading="lazy" />
+                  {championById.get(id)?.name ?? id}
+                  <button class="chip-remove" onclick={() => removeFromList("pick", id)} aria-label={`${$t("league.remove")} ${championById.get(id)?.name ?? id}`}>×</button>
+                </span>
+              {/each}
+            </div>
+            <div class="champ-search">
+              <input type="text" class="input-text" placeholder={$t("league.search_champion") as string} bind:value={pickSearch} />
+              {#if searchResults(pickSearch, "pick").length > 0}
+                <div class="search-results">
+                  {#each searchResults(pickSearch, "pick") as c (c.id)}
+                    <button class="search-result" onclick={() => addToList("pick", c.id)}>
+                      <img class="champ-icon tiny" src={`${CDRAGON}/champion-icons/${c.id}.png`} alt="" loading="lazy" />
+                      {c.name}
+                    </button>
+                  {/each}
+                </div>
+              {/if}
+            </div>
+          </div>
+        {/if}
+        <div class="divider"></div>
+        <div class="action-row">
+          <div class="action-col">
+            <span class="action-label">{$t("league.auto_ban")}</span>
+            <span class="action-hint">{$t("league.auto_ban_desc")}</span>
+          </div>
+          <button class="toggle" class:on={settings?.league?.auto_ban} onclick={() => toggleLeagueFlag("auto_ban")} role="switch" aria-checked={settings?.league?.auto_ban ?? false} aria-label={$t("league.auto_ban") as string}>
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
+        {#if settings?.league?.auto_ban}
+          <div class="champ-list-block">
+            <span class="list-label">{$t("league.ban_list")} <span class="list-hint">({$t("league.list_hint")})</span></span>
+            <div class="champ-chips">
+              {#each listFor("ban") as id (id)}
+                <span class="champ-chip">
+                  <img class="champ-icon tiny" src={`${CDRAGON}/champion-icons/${id}.png`} alt="" loading="lazy" />
+                  {championById.get(id)?.name ?? id}
+                  <button class="chip-remove" onclick={() => removeFromList("ban", id)} aria-label={`${$t("league.remove")} ${championById.get(id)?.name ?? id}`}>×</button>
+                </span>
+              {/each}
+            </div>
+            <div class="champ-search">
+              <input type="text" class="input-text" placeholder={$t("league.search_champion") as string} bind:value={banSearch} />
+              {#if searchResults(banSearch, "ban").length > 0}
+                <div class="search-results">
+                  {#each searchResults(banSearch, "ban") as c (c.id)}
+                    <button class="search-result" onclick={() => addToList("ban", c.id)}>
+                      <img class="champ-icon tiny" src={`${CDRAGON}/champion-icons/${c.id}.png`} alt="" loading="lazy" />
+                      {c.name}
+                    </button>
+                  {/each}
+                </div>
+              {/if}
+            </div>
+          </div>
+        {/if}
+        {#if settings?.league?.auto_pick}
           <div class="divider"></div>
           <div class="action-row">
             <div class="action-col">
-              <span class="action-label">{$t("league.phase_label")}</span>
-              <span class="action-hint">{phase}</span>
+              <span class="action-label">{$t("league.auto_lock")}</span>
+              <span class="action-hint">{$t("league.auto_lock_desc")}</span>
             </div>
-            {#if phase === "ReadyCheck"}
-              <button class="button primary" onclick={acceptNow}>{$t("league.accept_now")}</button>
-            {/if}
+            <button class="toggle" class:on={settings?.league?.auto_lock} onclick={() => toggleLeagueFlag("auto_lock")} role="switch" aria-checked={settings?.league?.auto_lock ?? false} aria-label={$t("league.auto_lock") as string}>
+              <span class="toggle-knob"></span>
+            </button>
           </div>
         {/if}
       </section>
@@ -224,20 +556,15 @@
           <button class="button" onclick={loadHistory} disabled={loadingHistory}>{$t("league.refresh")}</button>
         </div>
         {#if games.length === 0}
-          <p class="history-empty">{$t("league.history_empty")}</p>
+          <p class="empty-hint">{$t("league.history_empty")}</p>
         {:else}
           <div class="game-list">
             {#each games as game (game.gameId)}
               {@const p = playerStats(game)}
-              <div class="game-row" class:win={p.win} class:loss={!p.win}>
-                <img
-                  class="champ-icon"
-                  src={`${CDRAGON}/champion-icons/${p.championId}.png`}
-                  alt=""
-                  loading="lazy"
-                />
+              <div class="game-row">
+                <img class="champ-icon" src={`${CDRAGON}/champion-icons/${p.championId}.png`} alt="" loading="lazy" />
                 <div class="game-info">
-                  <span class="game-result">{p.win ? $t("league.victory") : $t("league.defeat")}</span>
+                  <span class="game-result" class:win={p.win} class:loss={!p.win}>{p.win ? $t("league.victory") : $t("league.defeat")}</span>
                   <span class="game-mode">{queueName(game.queueId, game.gameMode)}</span>
                 </div>
                 <span class="game-kda">{p.kills} / {p.deaths} / {p.assists}</span>
@@ -320,7 +647,7 @@
   }
 
   .status-chip.connected .dot {
-    background: var(--green, #4ade80);
+    background: var(--success);
   }
 
   .status-chip .region {
@@ -399,13 +726,159 @@
     font-size: 13px;
   }
 
-  .actions-card {
+  .card {
     display: flex;
     flex-direction: column;
     padding: var(--padding);
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--border-radius);
+  }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 10px;
+  }
+
+  .card-head h3 {
+    margin: 0;
+    font-size: 15px;
+  }
+
+  .phase-tag {
+    font-size: 12px;
+    color: var(--gray);
+    padding: 3px 10px;
+    background: var(--button);
+    border: 1px solid var(--input-border);
+    border-radius: 999px;
+  }
+
+  .action-error {
+    font-size: 12.5px;
+    color: var(--danger);
+    padding: 8px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: calc(var(--border-radius) - 2px);
+  }
+
+  .lobby-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .searching-hint {
+    font-size: 13px;
+    color: var(--gray);
+  }
+
+  .queue-grid {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .empty-hint {
+    color: var(--gray);
+    font-size: 13px;
+    margin: 0;
+  }
+
+  .team-picks {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .bench-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  .bench-label {
+    font-size: 12.5px;
+    color: var(--gray);
+  }
+
+  .bench-champs {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .bench-swap {
+    padding: 0;
+    background: none;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    cursor: pointer;
+    line-height: 0;
+  }
+
+  .bench-swap:hover,
+  .bench-swap:focus-visible {
+    border-color: var(--accent);
+    outline: none;
+  }
+
+  .live-teams {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+
+  @media (max-width: 560px) {
+    .live-teams {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .live-team {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .live-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 8px;
+    border-radius: calc(var(--border-radius) - 4px);
+    min-width: 0;
+  }
+
+  .live-row.me {
+    background: var(--accent-soft, var(--button));
+  }
+
+  .live-name {
+    font-size: 12.5px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+
+  .live-kda {
+    margin-left: auto;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    color: var(--gray);
+  }
+
+  .live-respawn {
+    font-size: 11.5px;
+    color: var(--danger);
   }
 
   .action-row {
@@ -437,6 +910,109 @@
     margin: 10px 0;
   }
 
+  .champ-list-block {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .list-label {
+    font-size: 12.5px;
+    color: var(--gray);
+  }
+
+  .list-hint {
+    font-size: 11.5px;
+  }
+
+  .champ-chips {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .champ-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 6px 3px 3px;
+    font-size: 12.5px;
+    background: var(--button);
+    border: 1px solid var(--input-border);
+    border-radius: 999px;
+  }
+
+  .chip-remove {
+    background: none;
+    border: none;
+    color: var(--gray);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0 3px;
+    line-height: 1;
+  }
+
+  .chip-remove:hover,
+  .chip-remove:focus-visible {
+    color: var(--danger);
+    outline: none;
+  }
+
+  .champ-search {
+    position: relative;
+    max-width: 260px;
+  }
+
+  .input-text {
+    width: 100%;
+    padding: 7px 10px;
+    font-size: 13px;
+    background: var(--button);
+    border: 1px solid var(--input-border);
+    border-radius: calc(var(--border-radius) - 2px);
+    color: var(--text);
+  }
+
+  .input-text:focus-visible {
+    border-color: var(--accent);
+    outline: none;
+  }
+
+  .search-results {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: calc(var(--border-radius) - 2px);
+    overflow: hidden;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  }
+
+  .search-result {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 10px;
+    font-size: 13px;
+    background: none;
+    border: none;
+    color: var(--text);
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .search-result:hover,
+  .search-result:focus-visible {
+    background: var(--button);
+    outline: none;
+  }
+
   .history-section {
     display: flex;
     flex-direction: column;
@@ -454,12 +1030,6 @@
     font-size: 15px;
   }
 
-  .history-empty {
-    color: var(--gray);
-    font-size: 13px;
-    margin: 0;
-  }
-
   .game-list {
     display: flex;
     flex-direction: column;
@@ -473,16 +1043,7 @@
     padding: 9px 12px;
     background: var(--surface);
     border: 1px solid var(--border);
-    border-left-width: 3px;
     border-radius: calc(var(--border-radius) - 2px);
-  }
-
-  .game-row.win {
-    border-left-color: var(--green, #4ade80);
-  }
-
-  .game-row.loss {
-    border-left-color: var(--red, #f87171);
   }
 
   .champ-icon {
@@ -490,6 +1051,23 @@
     height: 34px;
     border-radius: 6px;
     object-fit: cover;
+    background: var(--button);
+  }
+
+  .champ-icon.small {
+    width: 24px;
+    height: 24px;
+    border-radius: 5px;
+  }
+
+  .champ-icon.tiny {
+    width: 20px;
+    height: 20px;
+    border-radius: 4px;
+  }
+
+  .champ-empty {
+    border: 1px dashed var(--input-border);
   }
 
   .game-info {
@@ -502,6 +1080,14 @@
   .game-result {
     font-size: 13px;
     font-weight: 600;
+  }
+
+  .game-result.win {
+    color: var(--success);
+  }
+
+  .game-result.loss {
+    color: var(--danger);
   }
 
   .game-mode {
@@ -532,9 +1118,18 @@
     cursor: pointer;
   }
 
+  .button:hover {
+    background: var(--button-elevated, var(--button));
+  }
+
+  .button:focus-visible {
+    border-color: var(--accent);
+    outline: none;
+  }
+
   .button.primary {
-    background: var(--accent, var(--secondary));
-    color: var(--on-accent, var(--primary));
+    background: var(--accent);
+    color: var(--on-accent);
     border-color: transparent;
   }
 
@@ -554,6 +1149,11 @@
     flex-shrink: 0;
   }
 
+  .toggle:focus-visible {
+    border-color: var(--accent);
+    outline: none;
+  }
+
   .toggle .toggle-knob {
     position: absolute;
     top: 2px;
@@ -567,6 +1167,12 @@
 
   .toggle.on .toggle-knob {
     transform: translateX(18px);
-    background: var(--accent, var(--secondary));
+    background: var(--accent);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .toggle .toggle-knob {
+      transition: none;
+    }
   }
 </style>
