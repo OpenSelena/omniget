@@ -208,6 +208,27 @@ Settings are grouped and quiet. Common choices are right there, the deep options
 
 ---
 
+## For League of Legends players, if you want it
+
+OmniGet has a League of Legends menu built in. It ships **off**. Nothing connects, nothing watches, and the menu does not even appear in the sidebar until you switch it on in **Settings → Advanced → League of Legends**. Leave it off and OmniGet behaves exactly as it always did.
+
+Turn it on and it reads your running League client the same way the client reads itself, with no account, no login, and no third-party build site in the loop.
+
+- **Match scouting** for both teams. Rank, recent form, KDA, the champions each player actually plays, and short notes it works out on its own: hot streak, one-trick, low win rate. Write your own note on a player and it comes back the next time you meet them.
+- **Win probability** that does the statistics properly. Win rates are shrunk toward the baseline by sample size, so fifty percent over a thousand games and fifty percent over ten are not treated as the same evidence, and the result always carries a range instead of a fake decimal. Matchmaking aims for even games, so the honest answer usually sits near even, and the app says so rather than pretending otherwise.
+- **Live economy** while you play. Gold, CS and level for all ten players, and the gap against the opponent in your own lane.
+- **Goals per role** you can edit. A support is not judged on CS and a jungler is not judged like a marksman.
+- **Runes and summoner spells** recommended by the game client itself, applied in one click. It only ever replaces the page OmniGet created, never yours.
+- **Champion tiers** by role with win, pick and ban rates.
+- **Player search** for any Riot ID, with rank, champion record and mastery.
+- **Automation**, all opt-in: accept matches, pick and ban from your own priority list, and grab a champion off the ARAM bench.
+
+<p align="center">
+  <em>Everything above is off by default and every automation has its own switch.</em>
+</p>
+
+---
+
 ## Plugins that install themselves
 
 OmniGet ships with its full set of plugins (courses, study, Telegram, convert, and more) and they set themselves up on first launch. They also update on their own when a new version is released, so you never chase a download. Turn any of them on or off from the sidebar, and uninstall the ones you do not want. What you remove stays removed.
