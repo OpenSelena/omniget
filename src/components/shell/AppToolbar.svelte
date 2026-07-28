@@ -14,12 +14,12 @@
   });
 </script>
 
-<header class="mac-titlebar" data-tauri-drag-region>
-  <span class="mac-titlebar-title" data-tauri-drag-region>{pageTitle}</span>
+<header class="mac-titlebar">
+  <span class="mac-titlebar-title">{pageTitle}</span>
   <div class="mac-titlebar-actions">
-    <button type="button" class="btn btn-secondary btn-sm" onclick={() => openCommandPalette()}>
+    <button type="button" class="btn btn-ghost btn-sm" onclick={() => openCommandPalette()}>
       {$t("command_palette.open")}
-      <span class="mac-kbd">⌘K</span>
+      <span class="kbd">⌘K</span>
     </button>
   </div>
 </header>

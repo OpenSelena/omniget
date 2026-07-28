@@ -1268,29 +1268,34 @@
 
   .mode-toggle-row {
     display: inline-flex;
-    background: var(--button);
-    border-radius: var(--border-radius);
-    padding: 3px;
+    background: var(--fill-1);
+    border-radius: var(--radius-md);
+    padding: 2px;
     gap: 2px;
     margin-bottom: 4px;
   }
   .mode-toggle-btn {
-    padding: 5px 14px;
-    font-size: 11.5px;
+    padding: 4px 12px;
+    font-size: var(--text-sm);
     font-weight: 500;
-    color: var(--gray);
+    color: var(--text-muted);
     background: transparent;
     border: none;
-    border-radius: calc(var(--border-radius) - 3px);
+    border-radius: calc(var(--radius-md) - 2px);
     cursor: pointer;
+    transition: background var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
   }
   .mode-toggle-btn.active {
-    background: var(--cta);
-    color: var(--on-cta);
+    background: var(--surface-hi);
+    color: var(--text);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
   }
   .mode-toggle-btn:not(.active):hover {
-    color: var(--secondary);
-    background: var(--button-elevated);
+    color: var(--text);
+  }
+  .mode-toggle-btn:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: -1px;
   }
 
   .loop-icon {
