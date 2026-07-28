@@ -155,28 +155,28 @@
   }
 
   .markdown-content {
-    font-size: 13px;
+    font-size: var(--text-base);
     font-weight: 400;
     line-height: 1.7;
     color: var(--secondary);
   }
 
   .markdown-content :global(h2) {
-    font-size: 18px;
-    font-weight: 500;
+    font-size: var(--text-lg);
+    font-weight: 600;
     margin: 0 0 calc(var(--padding) / 2);
-    letter-spacing: -0.5px;
+    letter-spacing: var(--track-snug);
   }
 
   .markdown-content :global(h3) {
-    font-size: 15px;
-    font-weight: 500;
+    font-size: var(--text-md);
+    font-weight: 600;
     margin: var(--padding) 0 calc(var(--padding) / 2);
   }
 
   .markdown-content :global(h4) {
-    font-size: 13px;
-    font-weight: 500;
+    font-size: var(--text-base);
+    font-weight: 600;
     margin: var(--padding) 0 calc(var(--padding) / 4);
     color: var(--gray);
   }

@@ -1169,6 +1169,7 @@
   },
   "about": {
     "tab": {
+      "overview": "Overview",
       "terms": "conditions",
       "project": "projet",
       "roadmap": "roadmap",
@@ -1184,6 +1185,12 @@
       "copy_failed": "Impossible de copier"
     },
     "debug_disabled_redirect": "Debug page is hidden. Enable it in Settings → Advanced → Diagnostics.",
+    "card_changelog_title": "What's new",
+    "card_changelog_desc": "Release notes for every version.",
+    "card_project_title": "The project",
+    "card_project_desc": "Roadmap, philosophy and how to contribute.",
+    "card_terms_title": "Terms & ethics",
+    "card_terms_desc": "What OmniGet expects from you, and what you can expect back.",
     "description": "votre gestionnaire de téléchargement. open source et gratuit.",
     "terms_title": "conditions d'utilisation",
     "terms_text": "OmniGet est fourni tel quel, sans aucune garantie. l'application facilite le téléchargement de contenu accessible publiquement sur internet, mais nous déclinons toute responsabilité quant à ce que vous téléchargez ou ce que vous en faites. en utilisant OmniGet, vous acceptez ces conditions.",

@@ -1169,6 +1169,7 @@
   },
   "about": {
     "tab": {
+      "overview": "Overview",
       "terms": "termos",
       "project": "projeto",
       "roadmap": "roadmap",
@@ -1184,6 +1185,12 @@
       "copy_failed": "Não foi possível copiar"
     },
     "debug_disabled_redirect": "Página de debug está oculta. Ative em Configurações → Avançado → Diagnósticos.",
+    "card_changelog_title": "What's new",
+    "card_changelog_desc": "Release notes for every version.",
+    "card_project_title": "The project",
+    "card_project_desc": "Roadmap, philosophy and how to contribute.",
+    "card_terms_title": "Terms & ethics",
+    "card_terms_desc": "What OmniGet expects from you, and what you can expect back.",
     "description": "o seu downloader de mídia. código aberto e gratuito.",
     "terms_title": "termos de uso",
     "terms_text": "OmniGet é fornecido como está e sem garantias. o app facilita o download de conteúdo disponível publicamente na internet, mas não nos responsabilizamos pelo que você baixa ou pelo que faz com o conteúdo. ao usar o OmniGet, você concorda com isso.",

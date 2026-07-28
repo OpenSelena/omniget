@@ -1169,6 +1169,7 @@
   },
   "about": {
     "tab": {
+      "overview": "Overview",
       "terms": "όροι",
       "project": "σχέδιο",
       "roadmap": "πλάνο",
@@ -1184,6 +1185,12 @@
       "copy_failed": "Αποτυχία αντιγραφής"
     },
     "debug_disabled_redirect": "Debug page is hidden. Enable it in Settings → Advanced → Diagnostics.",
+    "card_changelog_title": "What's new",
+    "card_changelog_desc": "Release notes for every version.",
+    "card_project_title": "The project",
+    "card_project_desc": "Roadmap, philosophy and how to contribute.",
+    "card_terms_title": "Terms & ethics",
+    "card_terms_desc": "What OmniGet expects from you, and what you can expect back.",
     "description": "το πρόγραμμα λήψης πολυμέσων σας. ανοιχτού κώδικα και δωρεάν.",
     "terms_title": "όροι χρήσης",
     "terms_text": "Το OmniGet παρέχεται όπως είναι και δεν παρέχουμε καμία εγγύηση. Η εφαρμογή διευκολύνει τη λήψη περιεχομένου που είναι δημόσια διαθέσιμο στο διαδίκτυο, αλλά δεν φέρουμε καμία ευθύνη για το τι κατεβάζετε ή τι κάνετε με αυτό. Χρησιμοποιώντας το OmniGet, συμφωνείτε με αυτό.",

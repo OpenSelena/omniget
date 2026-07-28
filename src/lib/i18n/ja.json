@@ -1169,6 +1169,7 @@
   },
   "about": {
     "tab": {
+      "overview": "Overview",
       "terms": "利用規約",
       "project": "プロジェクト",
       "roadmap": "ロードマップ",
@@ -1184,6 +1185,12 @@
       "copy_failed": "クリップボードにコピーできませんでした"
     },
     "debug_disabled_redirect": "Debug page is hidden. Enable it in Settings → Advanced → Diagnostics.",
+    "card_changelog_title": "What's new",
+    "card_changelog_desc": "Release notes for every version.",
+    "card_project_title": "The project",
+    "card_project_desc": "Roadmap, philosophy and how to contribute.",
+    "card_terms_title": "Terms & ethics",
+    "card_terms_desc": "What OmniGet expects from you, and what you can expect back.",
     "description": "あなたのメディアダウンローダー。オープンソースで無料。",
     "terms_title": "利用規約",
     "terms_text": "OmniGetは現状のまま提供され、いかなる保証もありません。このアプリはインターネット上で公開されているコンテンツのダウンロードを容易にしますが、ダウンロードした内容やその使い方について一切の責任を負いません。OmniGetを使用することで、これに同意したものとみなします。",
