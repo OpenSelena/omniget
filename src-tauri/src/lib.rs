@@ -484,6 +484,7 @@ pub fn run() {
             core::channels::init_from_disk();
             core::channel_poller::start(app.handle().clone());
             core::queue::start_scheduler(app.handle().clone());
+            commands::league::start_background();
             {
                 let app_handle = app.handle().clone();
                 tauri::async_runtime::spawn(async move {
@@ -702,6 +703,15 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::auth_webview::open_auth_webview,
+            commands::league::league_status,
+            commands::league::league_get,
+            commands::league::league_summoner,
+            commands::league::league_ranked,
+            commands::league::league_gameflow,
+            commands::league::league_match_history,
+            commands::league::league_accept_ready_check,
+            commands::league::league_auto_accept_set,
+            commands::league::league_auto_accept_get,
             commands::bilibili_auth::bilibili_qr_generate,
             commands::bilibili_auth::bilibili_qr_poll,
             commands::bilibili_auth::bilibili_captcha_challenge,

@@ -36,7 +36,13 @@
 
   let pluginNavItems = $state<NavItem[]>([]);
 
-  let allNav = $derived([...CORE_NAV_ITEMS, ...pluginNavItems].sort((a, b) => (a.order ?? 50) - (b.order ?? 50)));
+  let leagueNavItems = $derived<NavItem[]>(
+    getSettings()?.league?.enabled
+      ? [{ href: "/league", labelKey: "league.nav", icon: "league", group: "app", order: 45 }]
+      : []
+  );
+
+  let allNav = $derived([...CORE_NAV_ITEMS, ...leagueNavItems, ...pluginNavItems].sort((a, b) => (a.order ?? 50) - (b.order ?? 50)));
   let primaryNav = $derived(allNav.filter((item) => item.group === "primary"));
   let appNav = $derived(allNav.filter((item) => item.group === "app"));
   let pluginNav = $derived(allNav.filter((item) => item.group === "plugins"));
@@ -55,6 +61,7 @@
     page.url.pathname.startsWith("/downloads") ||
     page.url.pathname.startsWith("/settings") ||
     page.url.pathname.startsWith("/marketplace") ||
+    page.url.pathname.startsWith("/league") ||
     page.url.pathname.startsWith("/about"),
   );
 

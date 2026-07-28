@@ -29,6 +29,16 @@ pub struct AppSettings {
     pub rpc: RpcSettings,
     #[serde(default)]
     pub bridge: BridgeSettings,
+    #[serde(default)]
+    pub league: LeagueSettings,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+pub struct LeagueSettings {
+    #[serde(default)]
+    pub enabled: bool,
+    #[serde(default)]
+    pub auto_accept: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -541,6 +551,7 @@ impl Default for AppSettings {
             typography: TypographySettings::default(),
             rpc: RpcSettings::default(),
             bridge: BridgeSettings::default(),
+            league: LeagueSettings::default(),
         }
     }
 }

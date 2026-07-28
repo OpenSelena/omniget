@@ -10,6 +10,7 @@ pub mod diagnostics;
 pub mod downloads;
 pub mod host_queue;
 pub mod integration;
+pub mod league;
 pub mod p2p;
 pub mod plugins;
 pub mod reencode;

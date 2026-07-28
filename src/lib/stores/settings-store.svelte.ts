@@ -90,6 +90,10 @@ export type AppSettings = {
     app_id: string;
     large_image_key: string;
   };
+  league?: {
+    enabled?: boolean;
+    auto_accept?: boolean;
+  };
   onboarding_completed: boolean;
   start_with_system: boolean;
   start_minimized: boolean;
