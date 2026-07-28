@@ -9,16 +9,19 @@
   import { goto } from "$app/navigation";
   import { invoke } from "@tauri-apps/api/core";
   import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-  import { t, locale } from "$lib/i18n";
-  import { getSettings, updateSettings } from "$lib/stores/settings-store.svelte";
-  import timeAgo from "$lib/time-ago";
-
-  const CDRAGON = "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1";
+  import { t } from "$lib/i18n";
+  import { getSettings } from "$lib/stores/settings-store.svelte";
+  import OverviewTab from "$components/league/OverviewTab.svelte";
+  import AnalysisTab from "$components/league/AnalysisTab.svelte";
+  import MetaTab from "$components/league/MetaTab.svelte";
+  import SearchTab from "$components/league/SearchTab.svelte";
+  import LiveTab from "$components/league/LiveTab.svelte";
+  import GoalsTab from "$components/league/GoalsTab.svelte";
+  import AutomationTab from "$components/league/AutomationTab.svelte";
+  import HistoryTab from "$components/league/HistoryTab.svelte";
+  import type { Champion, GoalKey, LobbyQueue, RankedEntry, Role, ScoutPlayer } from "$components/league/shared";
 
   type LeagueStatus = { connected: boolean; port: number | null; region: string | null };
-  type RankedEntry = { tier?: string; division?: string; leaguePoints?: number; wins?: number; losses?: number };
-  type Champion = { id: number; name: string; alias: string };
-  type LobbyQueue = { id: number; name: string; shortName: string; gameMode: string };
 
   let settings = $derived(getSettings());
   let enabled = $derived(settings?.league?.enabled ?? true);
@@ -29,7 +32,6 @@
   let phase = $state<string>("");
   let games = $state<any[]>([]);
   let loadingHistory = $state(false);
-  let autoAccept = $state(false);
   let liveTimer: ReturnType<typeof setInterval> | null = null;
   let unlisteners: UnlistenFn[] = [];
 
@@ -43,21 +45,30 @@
   let liveGame = $state<any>(null);
   let actionError = $state("");
 
-  let pickSearch = $state("");
-  let banSearch = $state("");
-
-  type ScoutPlayer = { puuid: string; gameName: string; tagLine: string; championId: number; cellId: number | null; isAlly: boolean; summonerLevel?: number };
   let scoutPlayers = $state<ScoutPlayer[]>([]);
   let scoutReports = $state<Record<string, any>>({});
   let scoutLoading = $state(false);
   let notes = $state<Record<string, string>>({});
-  let openNotes = $state<Record<string, boolean>>({});
 
   const NOTES_KEY = "league-player-notes";
   const ENCOUNTERS_KEY = "league-encounters";
 
   type Encounter = { count: number; lastSeen: number; name?: string };
   let encounters = $state<Record<string, Encounter>>({});
+
+  function loadNotes() {
+    try {
+      notes = JSON.parse(localStorage.getItem(NOTES_KEY) ?? "{}");
+    } catch {
+      notes = {};
+    }
+  }
+
+  function saveNote(puuid: string, text: string) {
+    notes = { ...notes, [puuid]: text };
+    const clean = Object.fromEntries(Object.entries(notes).filter(([, v]) => (v as string).trim() !== ""));
+    localStorage.setItem(NOTES_KEY, JSON.stringify(clean));
+  }
 
   function loadEncounters() {
     try {
@@ -94,33 +105,6 @@
     return recordedEncounters.has(puuid) ? e.count - 1 : e.count;
   }
 
-  const TAG_KEYS: Record<string, string> = {
-    hot_streak: "league.tag_hot_streak",
-    cold_streak: "league.tag_cold_streak",
-    high_winrate: "league.tag_high_winrate",
-    low_winrate: "league.tag_low_winrate",
-    one_trick: "league.tag_one_trick",
-    high_kda: "league.tag_high_kda",
-    low_kda: "league.tag_low_kda",
-    flash_swap: "league.tag_flash_swap",
-    high_damage_efficiency: "league.tag_high_damage_efficiency",
-    low_damage_efficiency: "league.tag_low_damage_efficiency",
-  };
-
-  function loadNotes() {
-    try {
-      notes = JSON.parse(localStorage.getItem(NOTES_KEY) ?? "{}");
-    } catch {
-      notes = {};
-    }
-  }
-
-  function saveNote(puuid: string, text: string) {
-    notes = { ...notes, [puuid]: text };
-    const clean = Object.fromEntries(Object.entries(notes).filter(([, v]) => (v as string).trim() !== ""));
-    localStorage.setItem(NOTES_KEY, JSON.stringify(clean));
-  }
-
   async function loadScouting() {
     if (scoutLoading) return;
     scoutLoading = true;
@@ -143,13 +127,6 @@
     }
   }
 
-  function scoutGroups(): { label: string; ally: boolean; list: ScoutPlayer[] }[] {
-    return [
-      { label: $t("league.scout_enemies") as string, ally: false, list: scoutPlayers.filter((p) => !p.isAlly) },
-      { label: $t("league.scout_allies") as string, ally: true, list: scoutPlayers.filter((p) => p.isAlly) },
-    ];
-  }
-
   const TAB_IDS = ["overview", "analysis", "meta", "search", "live", "goals", "automation", "history"] as const;
   type Tab = (typeof TAB_IDS)[number];
   let tab = $state<Tab>("overview");
@@ -157,17 +134,9 @@
   let analysis = $state<any>(null);
   let analysisLoading = $state(false);
   let liveMetrics = $state<any>(null);
+  let cooldowns = $state<any>(null);
 
-  const ROLES = ["TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"] as const;
-  type Role = (typeof ROLES)[number];
   const GOALS_KEY = "league-role-goals";
-  const GOAL_FIELDS = [
-    { key: "csPerMin", labelKey: "league.goal_cs", step: 0.1 },
-    { key: "goldPerMin", labelKey: "league.goal_gold", step: 10 },
-    { key: "kda", labelKey: "league.goal_kda", step: 0.1 },
-    { key: "visionPerMin", labelKey: "league.goal_vision", step: 0.1 },
-  ] as const;
-  type GoalKey = (typeof GOAL_FIELDS)[number]["key"];
 
   // Baselines mirror the Rust defaults; a support is not judged on CS.
   const DEFAULT_GOALS: Record<Role, Record<GoalKey, number>> = {
@@ -178,7 +147,6 @@
     UTILITY: { csPerMin: 1.5, goldPerMin: 260, kda: 3.0, visionPerMin: 2.0 },
   };
 
-  let goalRole = $state<Role>("MIDDLE");
   let goals = $state<Record<string, Record<string, number>>>({});
 
   function loadGoals() {
@@ -226,181 +194,13 @@
     }
   }
 
-  let selfRow = $derived(liveMetrics?.players?.find((r: any) => r.isSelf) ?? null);
-  let myTeam = $derived(selfRow?.team ?? "ORDER");
-  let enemyTeam = $derived(myTeam === "ORDER" ? "CHAOS" : "ORDER");
-  let teamGoldLead = $derived(
-    (liveMetrics?.teamGold?.[myTeam] ?? 0) - (liveMetrics?.teamGold?.[enemyTeam] ?? 0)
-  );
-
-  let liveGoals = $derived.by(() => {
-    if (!selfRow) return [];
-    const role: Role = (ROLES as readonly string[]).includes(selfRow.position)
-      ? (selfRow.position as Role)
-      : "MIDDLE";
-    const minutes = Math.max((liveMetrics?.gameTime ?? 0) / 60, 0.1);
-    const visionPerMin = (selfRow.visionScore ?? 0) / minutes;
-    return [
-      {
-        key: "csPerMin",
-        labelKey: "league.goal_cs",
-        current: (selfRow.csPerMin ?? 0).toFixed(1),
-        target: goalValue(role, "csPerMin").toFixed(1),
-        ratio: (selfRow.csPerMin ?? 0) / goalValue(role, "csPerMin"),
-      },
-      {
-        key: "goldPerMin",
-        labelKey: "league.goal_gold",
-        current: String(selfRow.goldPerMin ?? 0),
-        target: String(goalValue(role, "goldPerMin")),
-        ratio: (selfRow.goldPerMin ?? 0) / goalValue(role, "goldPerMin"),
-      },
-      {
-        key: "kda",
-        labelKey: "league.goal_kda",
-        current: (selfRow.kda ?? 0).toFixed(2),
-        target: goalValue(role, "kda").toFixed(1),
-        ratio: (selfRow.kda ?? 0) / goalValue(role, "kda"),
-      },
-      {
-        key: "visionPerMin",
-        labelKey: "league.goal_vision",
-        current: visionPerMin.toFixed(1),
-        target: goalValue(role, "visionPerMin").toFixed(1),
-        ratio: visionPerMin / goalValue(role, "visionPerMin"),
-      },
-    ];
-  });
-
-  let searchQuery = $state("");
-  let searchResult = $state<any>(null);
-  let searchLoading = $state(false);
-  let searchError = $state("");
-  let jungleReport = $state<any>(null);
-  let duos = $state<any>(null);
-  let duosLoading = $state(false);
-  let chatSending = $state(false);
-  let chatPreview = $state("");
-
-  async function runSearch() {
-    const raw = searchQuery.trim();
-    if (!raw || searchLoading) return;
-    const [namePart, tagPart = ""] = raw.split("#");
-    searchLoading = true;
-    searchError = "";
-    jungleReport = null;
+  async function loadCooldowns() {
     try {
-      searchResult = await invoke<any>("league_search_player", {
-        gameName: namePart.trim(),
-        tagLine: tagPart.trim(),
-      });
-      const puuid = searchResult?.summoner?.puuid;
-      if (puuid) {
-        invoke<any>("league_jungle_report", { puuid, sample: 8 })
-          .then((r) => { jungleReport = r; })
-          .catch(() => { jungleReport = null; });
-      }
-    } catch (e: any) {
-      searchResult = null;
-      searchError = typeof e === "string" ? e : (e?.message ?? String(e));
-    } finally {
-      searchLoading = false;
-    }
-  }
-
-  let spectateLoading = $state(false);
-  let spectateError = $state("");
-
-  async function spectateSearched() {
-    const s = searchResult?.summoner;
-    if (!s?.puuid || spectateLoading) return;
-    spectateLoading = true;
-    spectateError = "";
-    try {
-      await invoke("league_spectate", {
-        puuid: s.puuid,
-        riotId: `${s.gameName}#${s.tagLine}`,
-      });
-    } catch (e: any) {
-      const raw = typeof e === "string" ? e : (e?.message ?? String(e));
-      spectateError = raw.includes(" 404") || raw.includes("not in")
-        ? ($t("league.spectate_not_in_game") as string)
-        : raw;
-    } finally {
-      spectateLoading = false;
-    }
-  }
-
-  let dodgeConfirming = $state(false);
-  let dodgeLoading = $state(false);
-
-  async function dodgeChampSelect() {
-    if (dodgeLoading) return;
-    dodgeLoading = true;
-    actionError = "";
-    try {
-      await invoke("league_dodge");
-    } catch (e: any) {
-      actionError = typeof e === "string" ? e : (e?.message ?? String(e));
-    } finally {
-      dodgeLoading = false;
-      dodgeConfirming = false;
-    }
-  }
-
-  async function loadDuos() {
-    if (duosLoading) return;
-    duosLoading = true;
-    try {
-      duos = await invoke<any>("league_duos", { sample: 20 });
+      cooldowns = await invoke<any>("league_ability_cooldowns");
     } catch {
-      duos = { duos: [] };
-    } finally {
-      duosLoading = false;
+      cooldowns = null;
     }
   }
-
-  // Builds the one-line-per-player summary that gets posted to champ select.
-  function buildChatSummary(): string {
-    const parts: string[] = [];
-    for (const p of scoutPlayers.filter((x) => !x.isAlly)) {
-      const r = p.puuid ? scoutReports[p.puuid] : null;
-      if (!r?.stats?.games) continue;
-      const champ = championById.get(p.championId)?.name ?? "";
-      parts.push(`${champ || p.gameName}: ${r.stats.winrate}%WR ${r.stats.kda}KDA (${r.stats.games})`);
-    }
-    return parts.join(" | ");
-  }
-
-  async function sendChatSummary() {
-    const text = chatPreview.trim();
-    if (!text || chatSending) return;
-    chatSending = true;
-    actionError = "";
-    try {
-      await invoke("league_send_chat", { message: text });
-      chatPreview = "";
-    } catch (e: any) {
-      actionError = typeof e === "string" ? e : (e?.message ?? String(e));
-    } finally {
-      chatSending = false;
-    }
-  }
-
-  const TIER_POSITIONS = ["TOP", "JUNGLE", "MID", "ADC", "SUPPORT"] as const;
-  let tierPosition = $state<string>("JUNGLE");
-  let tiers = $state<any>(null);
-  let tiersLoading = $state(false);
-  let tiersError = $state("");
-
-  let runePages = $state<any[]>([]);
-  let runeApplying = $state(false);
-  let runeError = $state("");
-  let appliedRuneIndex = $state<number | null>(null);
-  let lastRuneChampion = 0;
-
-  let perkMeta = $state<Record<number, string>>({});
-  let spellMeta = $state<Record<number, string>>({});
 
   // Champion the local player has locked in (or hovered) during champ select.
   let champSelectChampionId = $derived.by(() => {
@@ -415,300 +215,6 @@
     const me = (champSelect?.myTeam ?? []).find((m: any) => m.cellId === cell);
     return (me?.assignedPosition ?? "").toUpperCase();
   });
-
-  function perkName(id: number): string {
-    return perkMeta[id] ?? String(id);
-  }
-
-  function spellName(id: number): string {
-    return spellMeta[id] ?? String(id);
-  }
-
-  // op.gg encodes tiers as 1 = best; the labels mirror what their site shows.
-  function tierLabel(tier: number): string {
-    if (tier <= 1) return "S+";
-    if (tier === 2) return "S";
-    if (tier === 3) return "A";
-    if (tier === 4) return "B";
-    if (tier === 5) return "C";
-    return "D";
-  }
-
-  let tierRows = $derived.by(() => {
-    const wanted = tierPosition;
-    const rows: any[] = [];
-    for (const champ of tiers?.champions ?? []) {
-      const entry = (champ.positions ?? []).find((p: any) => (p.position ?? "").toUpperCase() === wanted);
-      if (!entry || entry.tier === null || entry.tier === undefined) continue;
-      rows.push({
-        championId: champ.championId,
-        tier: entry.tier,
-        rank: entry.rank ?? 999,
-        winRate: Math.round((entry.winRate ?? 0) * 1000) / 10,
-        pickRate: Math.round((entry.pickRate ?? 0) * 1000) / 10,
-        banRate: Math.round((entry.banRate ?? 0) * 1000) / 10,
-      });
-    }
-    rows.sort((a, b) => a.tier - b.tier || a.rank - b.rank);
-    return rows.slice(0, 40);
-  });
-
-  async function loadTiers() {
-    if (tiersLoading) return;
-    tiersLoading = true;
-    tiersError = "";
-    try {
-      tiers = await invoke<any>("league_champion_tiers", {
-        region: (status.region ?? "br").toLowerCase(),
-      });
-    } catch (e: any) {
-      tiers = null;
-      tiersError = typeof e === "string" ? e : (e?.message ?? String(e));
-    } finally {
-      tiersLoading = false;
-    }
-  }
-
-  async function loadPerkMeta() {
-    try {
-      const perks = await invoke<any[]>("league_get", { path: "/lol-perks/v1/perks" });
-      const map: Record<number, string> = {};
-      for (const p of perks ?? []) map[p.id] = p.name;
-      perkMeta = map;
-    } catch {
-      perkMeta = {};
-    }
-    try {
-      const spells = await invoke<any[]>("league_get", {
-        path: "/lol-game-data/assets/v1/summoner-spells.json",
-      });
-      const map: Record<number, string> = {};
-      for (const s of spells ?? []) map[s.id] = s.name;
-      spellMeta = map;
-    } catch {
-      spellMeta = {};
-    }
-  }
-
-  async function loadRunes(championId: number) {
-    if (championId <= 0) {
-      runePages = [];
-      return;
-    }
-    runeError = "";
-    try {
-      const result = await invoke<any>("league_rune_recommendations", {
-        championId,
-        position: myAssignedPosition || null,
-      });
-      runePages = result?.pages ?? [];
-      appliedRuneIndex = null;
-    } catch (e: any) {
-      runePages = [];
-      runeError = typeof e === "string" ? e : (e?.message ?? String(e));
-    }
-  }
-
-  async function applyRunePage(index: number) {
-    const page = runePages[index];
-    if (!page || runeApplying) return;
-    runeApplying = true;
-    runeError = "";
-    try {
-      const champName = championById.get(champSelectChampionId)?.name ?? "";
-      await invoke("league_apply_runes", {
-        name: `${champName} ${page.keystoneName ?? ""}`.trim(),
-        primaryStyleId: page.primaryStyleId,
-        subStyleId: page.subStyleId,
-        selectedPerkIds: page.selectedPerkIds,
-        spell1: page.summonerSpellIds?.[0] ?? null,
-        spell2: page.summonerSpellIds?.[1] ?? null,
-      });
-      appliedRuneIndex = index;
-    } catch (e: any) {
-      runeError = typeof e === "string" ? e : (e?.message ?? String(e));
-    } finally {
-      runeApplying = false;
-    }
-  }
-
-  // Load recommendations when the locked champion changes; apply the first one
-  // automatically only when the user asked for it.
-  $effect(() => {
-    const champ = champSelectChampionId;
-    if (champ > 0 && champ !== lastRuneChampion) {
-      lastRuneChampion = champ;
-      loadRunes(champ).then(() => {
-        if (settings?.league?.auto_runes && runePages.length > 0) {
-          applyRunePage(0);
-        }
-      });
-    } else if (champ === 0 && lastRuneChampion !== 0) {
-      lastRuneChampion = 0;
-      runePages = [];
-    }
-  });
-
-  let buildChampionId = $state<number>(0);
-  let buildInfo = $state<any>(null);
-  let buildLoading = $state(false);
-
-  async function loadBuild(championId: number) {
-    if (championId <= 0 || buildLoading) return;
-    buildLoading = true;
-    try {
-      buildInfo = await invoke<any>("league_champion_build", { championId, sample: 20 });
-    } catch {
-      buildInfo = null;
-    } finally {
-      buildLoading = false;
-    }
-  }
-
-  const RAW_CDRAGON = "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default";
-  let cooldowns = $state<any>(null);
-
-  // The client returns icon paths rooted at /lol-game-data/assets; the public
-  // mirror serves the same files lowercased under its own prefix.
-  function assetUrl(path: string | null | undefined): string {
-    if (!path) return "";
-    const clean = path.replace(/^\/lol-game-data\/assets/i, "").toLowerCase();
-    return `${RAW_CDRAGON}${clean}`;
-  }
-
-  async function loadCooldowns() {
-    try {
-      cooldowns = await invoke<any>("league_ability_cooldowns");
-    } catch {
-      cooldowns = null;
-    }
-  }
-
-  let enemyCooldowns = $derived(
-    (cooldowns?.players ?? []).filter((p: any) => p.team && p.team !== myTeam)
-  );
-
-  let spellTimers = $state<Record<string, number>>({});
-  let timerNow = $state(Date.now());
-
-  $effect(() => {
-    if (Object.keys(spellTimers).length === 0) return;
-    const tick = setInterval(() => {
-      timerNow = Date.now();
-      const expired = Object.entries(spellTimers).filter(([, end]) => end <= Date.now());
-      if (expired.length > 0) {
-        const next = { ...spellTimers };
-        for (const [key] of expired) delete next[key];
-        spellTimers = next;
-      }
-    }, 500);
-    return () => clearInterval(tick);
-  });
-
-  function toggleSpellTimer(riotId: string, spell: any) {
-    const key = `${riotId}:${spell.name}`;
-    if (spellTimers[key]) {
-      const next = { ...spellTimers };
-      delete next[key];
-      spellTimers = next;
-    } else if (spell.cooldown > 0) {
-      timerNow = Date.now();
-      spellTimers = { ...spellTimers, [key]: Date.now() + spell.cooldown * 1000 };
-    }
-  }
-
-  function spellRemaining(riotId: string, spell: any): number | null {
-    const end = spellTimers[`${riotId}:${spell.name}`];
-    if (!end) return null;
-    return Math.max(0, Math.ceil((end - timerNow) / 1000));
-  }
-
-  let expandedGame = $state<number | null>(null);
-  let gameDetails = $state<Record<number, any>>({});
-  let gameDetailLoading = $state<number | null>(null);
-
-  async function toggleGameDetail(gameId: number) {
-    if (expandedGame === gameId) {
-      expandedGame = null;
-      return;
-    }
-    expandedGame = gameId;
-    if (gameDetails[gameId]) return;
-    gameDetailLoading = gameId;
-    try {
-      const detail = await invoke<any>("league_get", {
-        path: `/lol-match-history/v1/games/${gameId}`,
-      });
-      gameDetails = { ...gameDetails, [gameId]: detail };
-    } catch {
-      gameDetails = { ...gameDetails, [gameId]: null };
-    } finally {
-      gameDetailLoading = null;
-    }
-  }
-
-  function scoreboardTeams(detail: any): { teamId: number; players: any[] }[] {
-    const participants: any[] = detail?.participants ?? [];
-    const identities: any[] = detail?.participantIdentities ?? [];
-    const nameOf = (pid: number): string => {
-      const player = identities.find((i) => i.participantId === pid)?.player;
-      if (!player) return "";
-      return player.gameName || player.summonerName || "";
-    };
-    const rows = participants.map((p) => ({
-      participantId: p.participantId,
-      teamId: p.teamId,
-      championId: p.championId,
-      name: nameOf(p.participantId),
-      kills: p.stats?.kills ?? 0,
-      deaths: p.stats?.deaths ?? 0,
-      assists: p.stats?.assists ?? 0,
-      cs: (p.stats?.totalMinionsKilled ?? 0) + (p.stats?.neutralMinionsKilled ?? 0),
-      gold: p.stats?.goldEarned ?? 0,
-      damage: p.stats?.totalDamageDealtToChampions ?? 0,
-      win: p.stats?.win ?? false,
-    }));
-    const teamIds = [...new Set(rows.map((r) => r.teamId))];
-    return teamIds.map((teamId) => ({ teamId, players: rows.filter((r) => r.teamId === teamId) }));
-  }
-
-  const PHASE_KEYS: Record<string, string> = {
-    Lobby: "league.phase_lobby",
-    Matchmaking: "league.phase_matchmaking",
-    ReadyCheck: "league.phase_ready_check",
-    ChampSelect: "league.phase_champ_select",
-    GameStart: "league.phase_in_progress",
-    InProgress: "league.phase_in_progress",
-    WaitingForStats: "league.phase_end_of_game",
-    PreEndOfGame: "league.phase_end_of_game",
-    EndOfGame: "league.phase_end_of_game",
-  };
-
-  function phaseLabel(p: string): string {
-    const key = PHASE_KEYS[p];
-    return key ? ($t(key) as string) : p;
-  }
-
-  const QUEUE_NAMES: Record<number, string> = {
-    420: "Solo/Duo",
-    440: "Flex",
-    400: "Draft",
-    430: "Blind",
-    450: "ARAM",
-    480: "Swiftplay",
-    900: "URF",
-    1700: "Arena",
-  };
-
-  function queueName(id: number, mode: string): string {
-    return QUEUE_NAMES[id] ?? mode ?? "";
-  }
-
-  function rankLabel(entry: RankedEntry | undefined): string {
-    if (!entry?.tier || entry.tier === "NONE" || entry.tier === "") return $t("league.unranked") as string;
-    const tier = entry.tier.charAt(0) + entry.tier.slice(1).toLowerCase();
-    return `${tier} ${entry.division ?? ""} · ${entry.leaguePoints ?? 0} LP`;
-  }
 
   async function refreshStatus() {
     try {
@@ -844,87 +350,6 @@
     }
   }
 
-  async function toggleAutoAccept() {
-    const next = !autoAccept;
-    autoAccept = next;
-    updateSettings({ league: { auto_accept: next } });
-    try {
-      await invoke("league_auto_accept_set", { enabled: next });
-    } catch {
-      autoAccept = !next;
-    }
-  }
-
-  function toggleLeagueFlag(field: "auto_pick" | "auto_ban" | "auto_lock" | "auto_runes" | "auto_honor" | "auto_play_again" | "auto_reconnect") {
-    const current = (settings?.league as any)?.[field] ?? false;
-    updateSettings({ league: { [field]: !current } });
-  }
-
-  function listFor(kind: "pick" | "ban"): number[] {
-    const l = settings?.league as any;
-    return (kind === "pick" ? l?.pick_champions : l?.ban_champions) ?? [];
-  }
-
-  function saveList(kind: "pick" | "ban", ids: number[]) {
-    updateSettings({ league: kind === "pick" ? { pick_champions: ids } : { ban_champions: ids } });
-  }
-
-  function addToList(kind: "pick" | "ban", id: number) {
-    const ids = listFor(kind);
-    if (ids.includes(id)) return;
-    saveList(kind, [...ids, id]);
-    if (kind === "pick") pickSearch = "";
-    else banSearch = "";
-  }
-
-  function removeFromList(kind: "pick" | "ban", id: number) {
-    saveList(kind, listFor(kind).filter((x) => x !== id));
-  }
-
-  function searchResults(query: string, kind: "pick" | "ban"): Champion[] {
-    const q = query.trim().toLowerCase();
-    if (!q) return [];
-    const existing = new Set(listFor(kind));
-    return champions
-      .filter((c) => !existing.has(c.id))
-      .filter((c) => c.name.toLowerCase().includes(q) || c.alias.toLowerCase().includes(q))
-      .slice(0, 8);
-  }
-
-  function liveChampionId(player: any): number | null {
-    const raw: string = player?.rawChampionName ?? "";
-    const alias = raw.split("_").pop() ?? "";
-    return championByAlias.get(alias.toLowerCase())?.id ?? null;
-  }
-
-  function liveTeams(players: any[]): { order: any[]; chaos: any[] } {
-    return {
-      order: players.filter((p) => p.team === "ORDER"),
-      chaos: players.filter((p) => p.team === "CHAOS"),
-    };
-  }
-
-  function formatGameTime(seconds: number): string {
-    const m = Math.floor(seconds / 60);
-    const s = Math.floor(seconds % 60);
-    return `${m}:${String(s).padStart(2, "0")}`;
-  }
-
-  function myTeamPicks(session: any): { cellId: number; championId: number }[] {
-    return (session?.myTeam ?? []).map((m: any) => ({ cellId: m.cellId, championId: m.championId }));
-  }
-
-  function playerStats(game: any): { championId: number; kills: number; deaths: number; assists: number; win: boolean } {
-    const p = game?.participants?.[0];
-    return {
-      championId: p?.championId ?? 0,
-      kills: p?.stats?.kills ?? 0,
-      deaths: p?.stats?.deaths ?? 0,
-      assists: p?.stats?.assists ?? 0,
-      win: p?.stats?.win ?? false,
-    };
-  }
-
   // The backend keeps a websocket to the client and pushes changes; the only
   // thing still polled is the in-game data server, which has no push channel.
   $effect(() => {
@@ -942,10 +367,6 @@
     loadNotes();
     loadGoals();
     loadEncounters();
-    loadPerkMeta();
-    invoke<boolean>("league_auto_accept_get")
-      .then((v) => { autoAccept = v; })
-      .catch(() => {});
     refreshStatus();
     listen<any>("league-connected", (e) => {
       status = {
@@ -1014,960 +435,33 @@
         {/each}
       </nav>
 
-      {#if tab === "overview"}
-      {#if summoner}
-        <section class="profile-card">
-          <img
-            class="profile-icon"
-            src={`${CDRAGON}/profile-icons/${summoner.profileIconId}.jpg`}
-            alt=""
-            loading="lazy"
-          />
-          <div class="profile-info">
-            <span class="profile-name">
-              {summoner.gameName ?? summoner.displayName}{#if summoner.tagLine}<span class="tag">#{summoner.tagLine}</span>{/if}
-            </span>
-            <span class="profile-level">{$t("league.level")} {summoner.summonerLevel}</span>
-          </div>
-          <div class="ranked-chips">
-            <div class="ranked-chip">
-              <span class="ranked-queue">{$t("league.ranked_solo")}</span>
-              <span class="ranked-value">{rankLabel(ranked?.RANKED_SOLO_5x5)}</span>
-            </div>
-            <div class="ranked-chip">
-              <span class="ranked-queue">{$t("league.ranked_flex")}</span>
-              <span class="ranked-value">{rankLabel(ranked?.RANKED_FLEX_SR)}</span>
-            </div>
-          </div>
-        </section>
-      {/if}
-      {#if actionError}
-        <div class="action-error" role="alert">{actionError}</div>
-      {/if}
-      {#if phase === "ChampSelect" && champSelect}
-        <section class="card">
-          <div class="card-head">
-            <h3>{$t("league.champ_select_title")}</h3>
-            <span class="phase-tag">{phaseLabel(phase)}</span>
-          </div>
-          <div class="team-picks">
-            {#each myTeamPicks(champSelect) as pick (pick.cellId)}
-              {#if pick.championId > 0}
-                <img class="champ-icon" src={`${CDRAGON}/champion-icons/${pick.championId}.png`} alt={championById.get(pick.championId)?.name ?? ""} title={championById.get(pick.championId)?.name ?? ""} loading="lazy" />
-              {:else}
-                <div class="champ-icon champ-empty" aria-hidden="true"></div>
-              {/if}
-            {/each}
-          </div>
-          {#if champSelect.benchEnabled}
-            <div class="bench-row">
-              <span class="bench-label">{$t("league.bench_title")}</span>
-              <div class="bench-champs">
-                {#each champSelect.benchChampions ?? [] as bc (bc.championId)}
-                  <button
-                    class="bench-swap"
-                    onclick={() => action("league_bench_swap", { championId: bc.championId })}
-                    title={championById.get(bc.championId)?.name ?? ""}
-                    aria-label={`${$t("league.swap")} ${championById.get(bc.championId)?.name ?? bc.championId}`}
-                  >
-                    <img class="champ-icon" src={`${CDRAGON}/champion-icons/${bc.championId}.png`} alt="" loading="lazy" />
-                  </button>
-                {/each}
-              </div>
-              <button class="button" onclick={() => action("league_reroll")}>{$t("league.reroll")}</button>
-            </div>
-          {/if}
-          <div class="dodge-row">
-            {#if dodgeConfirming}
-              <span class="dodge-warning">{$t("league.dodge_warning")}</span>
-              <button class="button" onclick={() => (dodgeConfirming = false)}>{$t("league.dodge_cancel")}</button>
-              <button class="button danger" onclick={dodgeChampSelect} disabled={dodgeLoading}>{$t("league.dodge_confirm")}</button>
-            {:else}
-              <button class="button subtle-danger" onclick={() => (dodgeConfirming = true)}>{$t("league.dodge")}</button>
-            {/if}
-          </div>
-        </section>
-      {:else if phase === "InProgress" && liveGame?.stats}
-        <section class="card">
-          <div class="card-head">
-            <h3>{$t("league.live_title")}</h3>
-            <span class="phase-tag">{formatGameTime(liveGame.stats.gameTime ?? 0)}</span>
-          </div>
-          {#if Array.isArray(liveGame.players)}
-            {@const teams = liveTeams(liveGame.players)}
-            <div class="live-teams">
-              {#each [teams.order, teams.chaos] as team, ti}
-                <div class="live-team">
-                  {#each team as p (p.riotId ?? p.summonerName ?? p.championName)}
-                    {@const cid = liveChampionId(p)}
-                    <div class="live-row" class:me={(p.riotId ?? p.summonerName) === liveGame.activePlayer}>
-                      {#if cid}
-                        <img class="champ-icon small" src={`${CDRAGON}/champion-icons/${cid}.png`} alt="" loading="lazy" />
-                      {:else}
-                        <div class="champ-icon small champ-empty" aria-hidden="true"></div>
-                      {/if}
-                      <span class="live-name">{p.championName}</span>
-                      <span class="live-kda">{p.scores?.kills ?? 0}/{p.scores?.deaths ?? 0}/{p.scores?.assists ?? 0}</span>
-                      {#if p.isDead && p.respawnTimer > 0}
-                        <span class="live-respawn">{$t("league.respawn_in")} {Math.ceil(p.respawnTimer)}s</span>
-                      {/if}
-                    </div>
-                  {/each}
-                </div>
-              {/each}
-            </div>
-          {/if}
-        </section>
-      {:else}
-        <section class="card">
-          <div class="card-head">
-            <h3>{$t("league.lobby_title")}</h3>
-            {#if phase && phase !== "None"}
-              <span class="phase-tag">{phaseLabel(phase)}</span>
-            {/if}
-          </div>
-          {#if phase === "ReadyCheck"}
-            <div class="lobby-actions">
-              <button class="button primary" onclick={() => action("league_accept_ready_check")}>{$t("league.accept_now")}</button>
-            </div>
-          {:else if phase === "Matchmaking"}
-            <div class="lobby-actions">
-              <span class="searching-hint">{$t("league.searching")}</span>
-              <button class="button" onclick={() => action("league_stop_matchmaking")}>{$t("league.stop_queue")}</button>
-            </div>
-          {:else if phase === "Lobby" && lobby}
-            <div class="lobby-actions">
-              <button class="button primary" onclick={() => action("league_start_matchmaking")}>{$t("league.start_queue")}</button>
-              <button class="button" onclick={() => action("league_leave_lobby")}>{$t("league.leave_lobby")}</button>
-            </div>
-          {:else if phase === "EndOfGame" || phase === "PreEndOfGame" || phase === "WaitingForStats"}
-            <div class="lobby-actions">
-              <button class="button primary" onclick={() => action("league_play_again")}>{$t("league.play_again")}</button>
-            </div>
-          {:else if queues.length > 0}
-            <div class="queue-grid">
-              {#each queues as q (q.id)}
-                <button class="button" onclick={() => action("league_create_lobby", { queueId: q.id })}>{q.shortName || q.name}</button>
-              {/each}
-            </div>
-          {:else}
-            <p class="empty-hint">{$t("league.lobby_hint")}</p>
-          {/if}
-        </section>
-      {/if}
-      {/if}
-
-      {#if tab === "analysis"}
-        {#if analysis}
-          <section class="card">
-            <div class="card-head">
-              <h3>{$t("league.win_title")}</h3>
-              <button class="button" onclick={loadAnalysis} disabled={analysisLoading}>{$t("league.refresh")}</button>
-            </div>
-            <div class="winbar-wrap">
-              <div class="winbar" role="img" aria-label={`${$t("league.win_allies")} ${analysis.winProbability}%`}>
-                <div class="winbar-fill" style={`width:${analysis.winProbability}%`}></div>
-                <div class="winbar-range" style={`left:${analysis.winLow}%;width:${Math.max(analysis.winHigh - analysis.winLow, 0)}%`}></div>
-              </div>
-              <div class="winbar-legend">
-                <span class="win-value">{analysis.winProbability}%</span>
-                <span class="win-range">{$t("league.win_interval")} {analysis.winLow}%–{analysis.winHigh}%</span>
-              </div>
-            </div>
-            <p class="win-note">
-              {$t("league.win_gap")} {analysis.ratingGap > 0 ? "+" : ""}{analysis.ratingGap} · {analysis.knownPlayers}/{analysis.totalPlayers} {$t("league.win_known")}
-            </p>
-            <p class="win-disclaimer">{$t("league.win_disclaimer")}</p>
-            <div class="chat-send">
-              <input
-                class="input-text"
-                placeholder={$t("league.chat_placeholder") as string}
-                bind:value={chatPreview}
-              />
-              <button class="button" onclick={() => (chatPreview = buildChatSummary())}>{$t("league.chat_build")}</button>
-              <button class="button primary" onclick={sendChatSummary} disabled={chatSending || !chatPreview.trim()}>{$t("league.chat_send")}</button>
-            </div>
-            {#if analysis.premades?.length}
-              <div class="premade-row">
-                <span class="bench-label">{$t("league.premades")}</span>
-                {#each analysis.premades as group (group.label)}
-                  <span class="scout-tag">{group.label}: {group.puuids.length} {$t("league.players")}</span>
-                {/each}
-              </div>
-            {/if}
-          </section>
-        {:else}
-          <div class="guard-card">
-            <p>{$t("league.win_unavailable")}</p>
-            <button class="button" onclick={loadAnalysis} disabled={analysisLoading}>{$t("league.refresh")}</button>
-          </div>
-        {/if}
-
-      {#if (phase === "ChampSelect" || phase === "InProgress") && scoutPlayers.length > 0}
-        <section class="card">
-          <div class="card-head">
-            <h3>{$t("league.scout_title")}</h3>
-            <button class="button" onclick={loadScouting} disabled={scoutLoading}>{$t("league.refresh")}</button>
-          </div>
-          <div class="scout-teams">
-            {#each scoutGroups() as group (group.label)}
-              <div class="scout-team">
-                <h4 class="scout-team-title" class:enemy={!group.ally}>{group.label}</h4>
-                {#if group.list.length === 0}
-                  <p class="empty-hint">{$t("league.scout_enemies_hidden")}</p>
-                {:else}
-                  {#each group.list as p (p.puuid || String(p.cellId))}
-                    {@const r = p.puuid ? scoutReports[p.puuid] : null}
-                    <div class="scout-row">
-                      <div class="scout-main">
-                        {#if p.championId > 0}
-                          <img class="champ-icon small" src={`${CDRAGON}/champion-icons/${p.championId}.png`} alt="" title={championById.get(p.championId)?.name ?? ""} loading="lazy" />
-                        {:else}
-                          <div class="champ-icon small champ-empty" aria-hidden="true"></div>
-                        {/if}
-                        <div class="scout-id">
-                          <span class="scout-name">
-                            {p.gameName || "—"}{#if p.tagLine}<span class="tag">#{p.tagLine}</span>{/if}
-                            {#if p.puuid && timesSeenBefore(p.puuid) > 0}
-                              <span class="seen-badge" title={$t("league.seen_before_hint") as string}>{$t("league.seen_before")} ×{timesSeenBefore(p.puuid)}</span>
-                            {/if}
-                          </span>
-                          <span class="scout-rank">{r ? rankLabel(r.solo) : "…"}</span>
-                        </div>
-                        {#if r?.stats?.games > 0}
-                          <div class="scout-stats">
-                            <span class="scout-wr" class:good={r.stats.winrate >= 55} class:bad={r.stats.winrate <= 45}>{r.stats.winrate}% WR</span>
-                            <span class="scout-kda">
-                              {r.stats.kda} KDA{#if r.impact !== null && r.impact !== undefined} · <span class="impact" title={$t("league.impact_hint") as string}>{r.impact}</span>{/if}
-                            </span>
-                          </div>
-                        {:else if r?.privateProfile}
-                          <span class="scout-private">{$t("league.scout_private")}</span>
-                        {:else if r?.historyUnavailable}
-                          <span class="scout-private">{$t("league.scout_no_history")}</span>
-                        {:else if r}
-                          <span class="scout-private">…</span>
-                        {/if}
-                        {#if p.puuid}
-                          <button class="note-toggle" class:has-note={(notes[p.puuid] ?? "").trim() !== ""} onclick={() => { openNotes = { ...openNotes, [p.puuid]: !openNotes[p.puuid] }; }} aria-label={$t("league.scout_note_placeholder") as string} aria-expanded={openNotes[p.puuid] ?? false}>✎</button>
-                        {/if}
-                      </div>
-                      {#if r?.stats?.topChampions?.length}
-                        <div class="scout-champs">
-                          {#each r.stats.topChampions as tc (tc.championId)}
-                            <span class="scout-champ">
-                              <img class="champ-icon tiny" src={`${CDRAGON}/champion-icons/${tc.championId}.png`} alt="" title={championById.get(tc.championId)?.name ?? ""} loading="lazy" />
-                              <span class="scout-champ-record">{tc.wins}/{tc.games}</span>
-                            </span>
-                          {/each}
-                          {#if r?.stats?.insights?.length}
-                            {#each r.stats.insights as tag (tag)}
-                              <span class="scout-tag">{$t(TAG_KEYS[tag] ?? tag)}</span>
-                            {/each}
-                          {/if}
-                        </div>
-                      {/if}
-                      {#if p.puuid && (openNotes[p.puuid] || (notes[p.puuid] ?? "").trim() !== "")}
-                        <input class="input-text note-input" placeholder={$t("league.scout_note_placeholder") as string} value={notes[p.puuid] ?? ""} onchange={(e) => saveNote(p.puuid, e.currentTarget.value)} />
-                      {/if}
-                    </div>
-                  {/each}
-                {/if}
-              </div>
-            {/each}
-          </div>
-        </section>
-      {/if}
-      {/if}
-
-      {#if tab === "meta"}
-        <section class="card">
-          <div class="card-head">
-            <h3>{$t("league.runes_title")}</h3>
-            {#if champSelectChampionId > 0}
-              <span class="phase-tag">{championById.get(champSelectChampionId)?.name ?? champSelectChampionId}</span>
-            {/if}
-          </div>
-          <p class="win-disclaimer">{$t("league.runes_desc")}</p>
-          <div class="action-row">
-            <div class="action-col">
-              <span class="action-label">{$t("league.runes_auto")}</span>
-              <span class="action-hint">{$t("league.runes_auto_desc")}</span>
-            </div>
-            <button
-              class="toggle"
-              class:on={settings?.league?.auto_runes}
-              onclick={() => toggleLeagueFlag("auto_runes")}
-              role="switch"
-              aria-checked={settings?.league?.auto_runes ?? false}
-              aria-label={$t("league.runes_auto") as string}
-            >
-              <span class="toggle-knob"></span>
-            </button>
-          </div>
-          {#if runeError}
-            <p class="action-error" role="alert">{runeError}</p>
-          {/if}
-          {#if runePages.length > 0}
-            <div class="rune-list">
-              {#each runePages as page, i (page.recommendationId ?? i)}
-                <div class="rune-card" class:applied={appliedRuneIndex === i}>
-                  <div class="rune-head">
-                    <span class="rune-keystone">{page.keystoneName ?? page.keystoneId}</span>
-                    {#if page.isDefault}
-                      <span class="scout-tag">{$t("league.runes_default")}</span>
-                    {/if}
-                  </div>
-                  <div class="rune-perks">
-                    {#each page.selectedPerkIds as perkId (perkId)}
-                      <img
-                        class="perk-icon"
-                        src={`${CDRAGON}/perk-images/styles/${perkId}.png`}
-                        alt=""
-                        title={perkName(perkId)}
-                        loading="lazy"
-                        onerror={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = "hidden"; }}
-                      />
-                    {/each}
-                  </div>
-                  <div class="rune-foot">
-                    <span class="dim">{$t("league.runes_spells")}: {(page.summonerSpellIds ?? []).map(spellName).join(" + ")}</span>
-                    <button class="button" onclick={() => applyRunePage(i)} disabled={runeApplying}>
-                      {$t("league.runes_apply")}
-                    </button>
-                  </div>
-                </div>
-              {/each}
-            </div>
-          {:else}
-            <p class="empty-hint">{$t("league.runes_empty")}</p>
-          {/if}
-        </section>
-
-        <section class="card">
-          <div class="card-head">
-            <h3>{$t("league.build_title")}</h3>
-            <button
-              class="button"
-              onclick={() => loadBuild(champSelectChampionId || (buildChampionId ?? 0))}
-              disabled={buildLoading || (!champSelectChampionId && !buildChampionId)}
-            >{$t("league.refresh")}</button>
-          </div>
-          <p class="win-disclaimer">{$t("league.build_desc")}</p>
-          <div class="build-picker">
-            <select class="select-role" bind:value={buildChampionId} aria-label={$t("league.build_champion") as string}>
-              <option value={0}>{$t("league.build_champion")}</option>
-              {#each champions as ch (ch.id)}
-                <option value={ch.id}>{ch.name}</option>
-              {/each}
-            </select>
-          </div>
-          {#if buildInfo && buildInfo.gamesSeen > 0}
-            <p class="win-note">
-              {buildInfo.gamesSeen} {$t("league.build_samples")} · {buildInfo.winrate}% {$t("league.stat_winrate")}
-            </p>
-            <div class="build-items">
-              {#each buildInfo.items as it (it.itemId)}
-                <span class="build-item">
-                  <img class="item-icon" src={`${CDRAGON}/../../game/assets/items/icons2d/${it.itemId}.png`} alt="" loading="lazy" onerror={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = "hidden"; }} />
-                  <span class="dim">{it.pickRate}%</span>
-                </span>
-              {/each}
-            </div>
-            {#if buildInfo.spells?.length}
-              <p class="win-note">{$t("league.runes_spells")}: {buildInfo.spells.map((s: any) => s.spellIds.map(spellName).join(" + ")).join(" / ")}</p>
-            {/if}
-          {:else if buildInfo}
-            <p class="empty-hint">{$t("league.build_empty")}</p>
-          {/if}
-        </section>
-
-        <section class="card">
-          <div class="card-head">
-            <h3>{$t("league.tiers_title")}</h3>
-            <div class="tier-controls">
-              <select class="select-role" bind:value={tierPosition} aria-label={$t("league.tiers_position") as string}>
-                {#each TIER_POSITIONS as pos (pos)}
-                  <option value={pos}>{$t(`league.role_${pos.toLowerCase()}`)}</option>
-                {/each}
-              </select>
-              <button class="button" onclick={loadTiers} disabled={tiersLoading}>{$t("league.refresh")}</button>
-            </div>
-          </div>
-          <p class="win-disclaimer">{$t("league.tiers_desc")}</p>
-          {#if tiersError}
-            <p class="action-error" role="alert">{tiersError}</p>
-          {:else if tierRows.length > 0}
-            <div class="champ-table">
-              {#each tierRows as row (row.championId)}
-                <div class="champ-row">
-                  <span class={`tier-badge tier-${row.tier}`}>{tierLabel(row.tier)}</span>
-                  <img class="champ-icon tiny" src={`${CDRAGON}/champion-icons/${row.championId}.png`} alt="" loading="lazy" />
-                  <span class="champ-row-name">{championById.get(row.championId)?.name ?? row.championId}</span>
-                  <span class="champ-row-wr" class:good={row.winRate >= 52} class:bad={row.winRate <= 48}>{row.winRate}%</span>
-                  <span class="champ-row-games dim">{$t("league.tiers_pick")} {row.pickRate}%</span>
-                  <span class="champ-row-kda dim">{$t("league.tiers_ban")} {row.banRate}%</span>
-                </div>
-              {/each}
-            </div>
-          {:else}
-            <p class="empty-hint">{tiersLoading ? $t("league.searching_player") : $t("league.tiers_empty")}</p>
-          {/if}
-        </section>
-      {/if}
-
-      {#if tab === "search"}
-        <section class="card">
-          <div class="card-head">
-            <h3>{$t("league.search_title")}</h3>
-          </div>
-          <form class="search-form" onsubmit={(e) => { e.preventDefault(); runSearch(); }}>
-            <input
-              class="input-text"
-              placeholder={$t("league.search_placeholder") as string}
-              bind:value={searchQuery}
-              spellcheck="false"
-            />
-            <button class="button primary" type="submit" disabled={searchLoading}>
-              {searchLoading ? $t("league.searching_player") : $t("league.search_button")}
-            </button>
-          </form>
-          {#if searchError}
-            <p class="action-error" role="alert">{searchError}</p>
-          {:else}
-            <p class="win-disclaimer">{$t("league.search_hint")}</p>
-          {/if}
-        </section>
-
-        {#if searchResult}
-          {@const s = searchResult.summoner}
-          {@const r = searchResult.report}
-          <section class="profile-card">
-            <img class="profile-icon" src={`${CDRAGON}/profile-icons/${s.profileIconId}.jpg`} alt="" loading="lazy" />
-            <div class="profile-info">
-              <span class="profile-name">{s.gameName}<span class="tag">#{s.tagLine}</span></span>
-              <span class="profile-level">{$t("league.level")} {s.summonerLevel ?? "—"}</span>
-            </div>
-            <div class="ranked-chips">
-              <div class="ranked-chip">
-                <span class="ranked-queue">{$t("league.ranked_solo")}</span>
-                <span class="ranked-value">{rankLabel(r?.solo)}</span>
-              </div>
-              <div class="ranked-chip">
-                <span class="ranked-queue">{$t("league.ranked_flex")}</span>
-                <span class="ranked-value">{rankLabel(r?.flex)}</span>
-              </div>
-            </div>
-            <button class="button" onclick={spectateSearched} disabled={spectateLoading}>
-              {spectateLoading ? $t("league.spectate_loading") : $t("league.spectate")}
-            </button>
-          </section>
-          {#if spectateError}
-            <p class="action-error">{spectateError}</p>
-          {/if}
-
-          {#if r?.stats?.games > 0}
-            <section class="card">
-              <div class="card-head"><h3>{$t("league.search_recent")}</h3></div>
-              <div class="stat-grid">
-                <div class="stat-cell">
-                  <span class="stat-value" class:good={r.stats.winrate >= 55} class:bad={r.stats.winrate <= 45}>{r.stats.winrate}%</span>
-                  <span class="stat-label">{$t("league.stat_winrate")} ({r.stats.games})</span>
-                </div>
-                <div class="stat-cell">
-                  <span class="stat-value">{r.stats.kda}</span>
-                  <span class="stat-label">KDA</span>
-                </div>
-                <div class="stat-cell">
-                  <span class="stat-value">{r.stats.streak?.length ?? 0}</span>
-                  <span class="stat-label">{r.stats.streak?.win ? $t("league.tag_hot_streak") : $t("league.tag_cold_streak")}</span>
-                </div>
-                {#if r.impact !== null && r.impact !== undefined}
-                  <div class="stat-cell">
-                    <span class="stat-value">{r.impact}<span class="dim">/10</span></span>
-                    <span class="stat-label">{$t("league.impact_label")} ({r.impactGames})</span>
-                  </div>
-                {/if}
-                {#if searchResult.deep}
-                  <div class="stat-cell">
-                    <span class="stat-value">{searchResult.deep.soloKillsPerGame}</span>
-                    <span class="stat-label">{$t("league.solo_kills_label")} ({searchResult.deep.analysedGames})</span>
-                  </div>
-                  <div class="stat-cell">
-                    <span class="stat-value">{searchResult.deep.earlyDeathsPerGame}</span>
-                    <span class="stat-label">{$t("league.early_deaths_label")} ({searchResult.deep.analysedGames})</span>
-                  </div>
-                {/if}
-              </div>
-              {#if r.stats.insights?.length}
-                <div class="scout-champs">
-                  {#each r.stats.insights as tagId (tagId)}
-                    <span class="scout-tag">{$t(TAG_KEYS[tagId] ?? tagId)}</span>
-                  {/each}
-                </div>
-              {/if}
-            </section>
-          {/if}
-
-          {#if searchResult.champions?.length}
-            <section class="card">
-              <div class="card-head">
-                <h3>{$t("league.search_champions")}</h3>
-                <span class="phase-tag">{$t("league.search_champions_hint")}</span>
-              </div>
-              <div class="champ-table">
-                {#each searchResult.champions as ch (ch.championId)}
-                  <div class="champ-row">
-                    <img class="champ-icon small" src={`${CDRAGON}/champion-icons/${ch.championId}.png`} alt="" loading="lazy" />
-                    <span class="champ-row-name">{championById.get(ch.championId)?.name ?? ch.championId}</span>
-                    <span class="champ-row-games">{ch.games} {$t("league.games_short")}</span>
-                    <span class="champ-row-wr" class:good={ch.winrate >= 55} class:bad={ch.winrate <= 45}>{ch.winrate}%</span>
-                    <span class="champ-row-kda">{ch.kda} KDA</span>
-                    <span class="champ-row-cs dim">{ch.csPerMin}/m</span>
-                  </div>
-                {/each}
-              </div>
-            </section>
-          {/if}
-
-          {#if r?.mastery?.length}
-            <section class="card">
-              <div class="card-head"><h3>{$t("league.search_mastery")}</h3></div>
-              <div class="scout-champs">
-                {#each r.mastery as m (m.championId)}
-                  <span class="champ-chip">
-                    <img class="champ-icon tiny" src={`${CDRAGON}/champion-icons/${m.championId}.png`} alt="" loading="lazy" />
-                    {championById.get(m.championId)?.name ?? m.championId}
-                    <span class="dim">M{m.championLevel} · {Math.round((m.championPoints ?? 0) / 1000)}k</span>
-                  </span>
-                {/each}
-              </div>
-            </section>
-          {/if}
-
-          {#if jungleReport}
-            <section class="card">
-              <div class="card-head">
-                <h3>{$t("league.jungle_title")}</h3>
-                <span class="phase-tag">{jungleReport.analysedGames} {$t("league.games_short")}</span>
-              </div>
-              {#if jungleReport.analysedGames > 0}
-                <div class="zone-bars">
-                  {#each [["top", jungleReport.zones.top], ["mid", jungleReport.zones.mid], ["bot", jungleReport.zones.bot]] as [zone, pct] (zone)}
-                    <div class="zone-row">
-                      <span class="zone-name">{$t(`league.zone_${zone}`)}</span>
-                      <div class="goal-bar"><div class="goal-fill" style={`width:${pct}%`}></div></div>
-                      <span class="goal-value">{pct}%</span>
-                    </div>
-                  {/each}
-                </div>
-                <p class="win-note">
-                  {$t(`league.pref_${jungleReport.preference}`)} · {$t("league.jungle_invade")} {jungleReport.invadeRate}% · {$t("league.jungle_gank3")} {jungleReport.level3GankRate}%
-                </p>
-              {:else}
-                <p class="empty-hint">{$t("league.jungle_empty")}</p>
-              {/if}
-            </section>
-          {/if}
-        {/if}
-
-        <section class="card">
-          <div class="card-head">
-            <h3>{$t("league.duos_title")}</h3>
-            <button class="button" onclick={loadDuos} disabled={duosLoading}>{$t("league.refresh")}</button>
-          </div>
-          <p class="win-disclaimer">{$t("league.duos_desc")}</p>
-          {#if duos?.duos?.length}
-            <div class="champ-table">
-              {#each duos.duos as d (d.puuid)}
-                <div class="champ-row">
-                  <span class="champ-row-name">{d.gameName ?? "—"}{#if d.tagLine}<span class="dim">#{d.tagLine}</span>{/if}</span>
-                  <span class="champ-row-games">{d.games} {$t("league.games_short")}</span>
-                  <span class="champ-row-wr" class:good={d.winrate >= 55} class:bad={d.winrate <= 45}>{d.winrate}%</span>
-                  <span class="champ-row-kda dim">{$t("league.duos_score")} {d.score}%</span>
-                </div>
-              {/each}
-            </div>
-          {:else if duos}
-            <p class="empty-hint">{$t("league.duos_empty")}</p>
-          {/if}
-        </section>
-      {/if}
-
-      {#if tab === "live"}
-        {#if liveMetrics?.players?.length}
-          <section class="card">
-            <div class="card-head">
-              <h3>{$t("league.gold_title")}</h3>
-              <span class="phase-tag">{formatGameTime(liveMetrics.gameTime ?? 0)}</span>
-            </div>
-            <p class="win-disclaimer">{$t("league.col_gold_hint")}</p>
-            <div class="gold-summary">
-              <span class="gold-team">{$t("league.your_team")}: <strong>{liveMetrics.teamGold?.[myTeam] ?? 0}</strong></span>
-              <span class="gold-diff" class:good={teamGoldLead > 0} class:bad={teamGoldLead < 0}>
-                {teamGoldLead > 0 ? "+" : ""}{teamGoldLead}
-              </span>
-              <span class="gold-team">{$t("league.enemy_team")}: <strong>{liveMetrics.teamGold?.[enemyTeam] ?? 0}</strong></span>
-            </div>
-            <div class="metric-table" role="table">
-              <div class="metric-head" role="row">
-                <span role="columnheader">{$t("league.col_player")}</span>
-                <span role="columnheader">KDA</span>
-                <span role="columnheader">CS</span>
-                <span role="columnheader" title={$t("league.col_gold_hint") as string}>{$t("league.col_gold")}</span>
-                <span role="columnheader">{$t("league.col_diff")}</span>
-              </div>
-              {#each liveMetrics.players as row (row.riotId)}
-                <div class="metric-row" role="row" class:self={row.isSelf}>
-                  <span class="metric-name" role="cell">
-                    <span class="pos-chip">{(row.position ?? "?").slice(0, 3)}</span>
-                    {row.championName}
-                  </span>
-                  <span role="cell">{row.kills}/{row.deaths}/{row.assists}</span>
-                  <span role="cell">{row.cs} <span class="dim">({row.csPerMin}/m)</span></span>
-                  <span role="cell">{row.itemGold}</span>
-                  <span role="cell" class="diff" class:good={(row.goldDiff ?? 0) > 0} class:bad={(row.goldDiff ?? 0) < 0}>
-                    {#if row.goldDiff !== undefined && row.goldDiff !== null}
-                      {row.goldDiff > 0 ? "+" : ""}{row.goldDiff}g
-                      <span class="dim">{(row.csDiff ?? 0) > 0 ? "+" : ""}{Math.round(row.csDiff ?? 0)}cs</span>
-                    {:else}—{/if}
-                  </span>
-                </div>
-              {/each}
-            </div>
-          </section>
-
-          {#if enemyCooldowns.length > 0}
-            <section class="card">
-              <div class="card-head">
-                <h3>{$t("league.cd_title")}</h3>
-                <span class="phase-tag">{$t("league.cd_estimated")}</span>
-              </div>
-              <p class="win-disclaimer">{$t("league.cd_desc")}</p>
-              <div class="cd-list">
-                {#each enemyCooldowns as p (p.riotId)}
-                  <div class="cd-row">
-                    <div class="cd-champ">
-                      {#if p.championId > 0}
-                        <img class="champ-icon small" src={`${CDRAGON}/champion-icons/${p.championId}.png`} alt="" loading="lazy" />
-                      {/if}
-                      <div class="cd-id">
-                        <span class="cd-name">{p.championName}</span>
-                        <span class="dim">{$t("league.cd_haste")} {p.abilityHaste} · lv{p.level}</span>
-                      </div>
-                    </div>
-                    <div class="cd-abilities">
-                      {#each p.abilities as ab (ab.key)}
-                        <span class="cd-ability" title={`${ab.name ?? ""} (${ab.key})`}>
-                          {#if ab.iconPath}
-                            <img class="ability-icon" src={assetUrl(ab.iconPath)} alt="" loading="lazy" onerror={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = "hidden"; }} />
-                          {/if}
-                          <span class="cd-key">{ab.key}</span>
-                          <span class="cd-value">{ab.cooldown > 0 ? `${ab.cooldown}s` : "—"}</span>
-                        </span>
-                      {/each}
-                      {#each p.spellTimers ?? [] as sp (sp.name)}
-                        {@const remaining = spellRemaining(p.riotId, sp)}
-                        <button
-                          class="cd-ability spell-timer"
-                          class:running={remaining !== null}
-                          onclick={() => toggleSpellTimer(p.riotId, sp)}
-                          title={`${sp.name} — ${$t("league.spell_timer_hint")}`}
-                          aria-pressed={remaining !== null}
-                        >
-                          {#if sp.iconPath}
-                            <img class="ability-icon" src={assetUrl(sp.iconPath)} alt="" loading="lazy" onerror={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = "hidden"; }} />
-                          {/if}
-                          <span class="cd-value">{remaining !== null ? `${remaining}s` : sp.cooldown > 0 ? `${sp.cooldown}s` : "—"}</span>
-                        </button>
-                      {/each}
-                    </div>
-                  </div>
-                {/each}
-              </div>
-            </section>
-          {/if}
-
-          {#if selfRow}
-            <section class="card">
-              <div class="card-head">
-                <h3>{$t("league.goals_live")}</h3>
-                <span class="phase-tag">{selfRow.position ?? "?"}</span>
-              </div>
-              <div class="goal-list">
-                {#each liveGoals as goal (goal.key)}
-                  <div class="goal-row">
-                    <span class="goal-name">{$t(goal.labelKey)}</span>
-                    <div class="goal-bar"><div class="goal-fill" class:met={goal.ratio >= 1} style={`width:${Math.min(goal.ratio * 100, 100)}%`}></div></div>
-                    <span class="goal-value" class:met={goal.ratio >= 1}>{goal.current} <span class="dim">/ {goal.target}</span></span>
-                  </div>
-                {/each}
-              </div>
-            </section>
-          {/if}
-        {:else}
-          <div class="guard-card">
-            <p>{$t("league.gold_unavailable")}</p>
-          </div>
-        {/if}
-      {/if}
-
-      {#if tab === "goals"}
-        <section class="card">
-          <div class="card-head">
-            <h3>{$t("league.goals_title")}</h3>
-            <select class="select-role" bind:value={goalRole} aria-label={$t("league.goals_role") as string}>
-              {#each ROLES as r (r)}
-                <option value={r}>{$t(`league.role_${r.toLowerCase()}`)}</option>
-              {/each}
-            </select>
-          </div>
-          <p class="win-disclaimer">{$t("league.goals_desc")}</p>
-          <div class="goal-config">
-            {#each GOAL_FIELDS as field (field.key)}
-              <label class="goal-field">
-                <span class="goal-field-label">{$t(field.labelKey)}</span>
-                <input
-                  type="number"
-                  class="input-text"
-                  min="0"
-                  step={field.step}
-                  value={goalValue(goalRole, field.key)}
-                  onchange={(e) => setGoal(goalRole, field.key, Number(e.currentTarget.value))}
-                />
-              </label>
-            {/each}
-          </div>
-          <button class="button" onclick={() => resetGoals(goalRole)}>{$t("league.goals_reset")}</button>
-        </section>
-      {/if}
-
-      {#if tab === "automation"}
-      <section class="card">
-        <div class="card-head">
-          <h3>{$t("league.automation_title")}</h3>
-        </div>
-        <div class="action-row">
-          <div class="action-col">
-            <span class="action-label">{$t("league.auto_accept")}</span>
-            <span class="action-hint">{$t("league.auto_accept_desc")}</span>
-          </div>
-          <button class="toggle" class:on={autoAccept} onclick={toggleAutoAccept} role="switch" aria-checked={autoAccept} aria-label={$t("league.auto_accept") as string}>
-            <span class="toggle-knob"></span>
-          </button>
-        </div>
-        <div class="divider"></div>
-        <div class="action-row">
-          <div class="action-col">
-            <span class="action-label">{$t("league.auto_pick")}</span>
-            <span class="action-hint">{$t("league.auto_pick_desc")}</span>
-          </div>
-          <button class="toggle" class:on={settings?.league?.auto_pick} onclick={() => toggleLeagueFlag("auto_pick")} role="switch" aria-checked={settings?.league?.auto_pick ?? false} aria-label={$t("league.auto_pick") as string}>
-            <span class="toggle-knob"></span>
-          </button>
-        </div>
-        {#if settings?.league?.auto_pick}
-          <div class="champ-list-block">
-            <span class="list-label">{$t("league.pick_list")} <span class="list-hint">({$t("league.list_hint")})</span></span>
-            <div class="champ-chips">
-              {#each listFor("pick") as id (id)}
-                <span class="champ-chip">
-                  <img class="champ-icon tiny" src={`${CDRAGON}/champion-icons/${id}.png`} alt="" loading="lazy" />
-                  {championById.get(id)?.name ?? id}
-                  <button class="chip-remove" onclick={() => removeFromList("pick", id)} aria-label={`${$t("league.remove")} ${championById.get(id)?.name ?? id}`}>×</button>
-                </span>
-              {/each}
-            </div>
-            <div class="champ-search">
-              <input type="text" class="input-text" placeholder={$t("league.search_champion") as string} bind:value={pickSearch} />
-              {#if searchResults(pickSearch, "pick").length > 0}
-                <div class="search-results">
-                  {#each searchResults(pickSearch, "pick") as c (c.id)}
-                    <button class="search-result" onclick={() => addToList("pick", c.id)}>
-                      <img class="champ-icon tiny" src={`${CDRAGON}/champion-icons/${c.id}.png`} alt="" loading="lazy" />
-                      {c.name}
-                    </button>
-                  {/each}
-                </div>
-              {/if}
-            </div>
-          </div>
-        {/if}
-        <div class="divider"></div>
-        <div class="action-row">
-          <div class="action-col">
-            <span class="action-label">{$t("league.auto_ban")}</span>
-            <span class="action-hint">{$t("league.auto_ban_desc")}</span>
-          </div>
-          <button class="toggle" class:on={settings?.league?.auto_ban} onclick={() => toggleLeagueFlag("auto_ban")} role="switch" aria-checked={settings?.league?.auto_ban ?? false} aria-label={$t("league.auto_ban") as string}>
-            <span class="toggle-knob"></span>
-          </button>
-        </div>
-        {#if settings?.league?.auto_ban}
-          <div class="champ-list-block">
-            <span class="list-label">{$t("league.ban_list")} <span class="list-hint">({$t("league.list_hint")})</span></span>
-            <div class="champ-chips">
-              {#each listFor("ban") as id (id)}
-                <span class="champ-chip">
-                  <img class="champ-icon tiny" src={`${CDRAGON}/champion-icons/${id}.png`} alt="" loading="lazy" />
-                  {championById.get(id)?.name ?? id}
-                  <button class="chip-remove" onclick={() => removeFromList("ban", id)} aria-label={`${$t("league.remove")} ${championById.get(id)?.name ?? id}`}>×</button>
-                </span>
-              {/each}
-            </div>
-            <div class="champ-search">
-              <input type="text" class="input-text" placeholder={$t("league.search_champion") as string} bind:value={banSearch} />
-              {#if searchResults(banSearch, "ban").length > 0}
-                <div class="search-results">
-                  {#each searchResults(banSearch, "ban") as c (c.id)}
-                    <button class="search-result" onclick={() => addToList("ban", c.id)}>
-                      <img class="champ-icon tiny" src={`${CDRAGON}/champion-icons/${c.id}.png`} alt="" loading="lazy" />
-                      {c.name}
-                    </button>
-                  {/each}
-                </div>
-              {/if}
-            </div>
-          </div>
-        {/if}
-        {#if settings?.league?.auto_pick}
-          <div class="divider"></div>
-          <div class="action-row">
-            <div class="action-col">
-              <span class="action-label">{$t("league.auto_lock")}</span>
-              <span class="action-hint">{$t("league.auto_lock_desc")}</span>
-            </div>
-            <button class="toggle" class:on={settings?.league?.auto_lock} onclick={() => toggleLeagueFlag("auto_lock")} role="switch" aria-checked={settings?.league?.auto_lock ?? false} aria-label={$t("league.auto_lock") as string}>
-              <span class="toggle-knob"></span>
-            </button>
-          </div>
-        {/if}
-        <div class="divider"></div>
-        <div class="action-row">
-          <div class="action-col">
-            <span class="action-label">{$t("league.auto_honor")}</span>
-            <span class="action-hint">{$t("league.auto_honor_desc")}</span>
-          </div>
-          <button class="toggle" class:on={settings?.league?.auto_honor} onclick={() => toggleLeagueFlag("auto_honor")} role="switch" aria-checked={settings?.league?.auto_honor ?? false} aria-label={$t("league.auto_honor") as string}>
-            <span class="toggle-knob"></span>
-          </button>
-        </div>
-        <div class="divider"></div>
-        <div class="action-row">
-          <div class="action-col">
-            <span class="action-label">{$t("league.auto_play_again")}</span>
-            <span class="action-hint">{$t("league.auto_play_again_desc")}</span>
-          </div>
-          <button class="toggle" class:on={settings?.league?.auto_play_again} onclick={() => toggleLeagueFlag("auto_play_again")} role="switch" aria-checked={settings?.league?.auto_play_again ?? false} aria-label={$t("league.auto_play_again") as string}>
-            <span class="toggle-knob"></span>
-          </button>
-        </div>
-        <div class="divider"></div>
-        <div class="action-row">
-          <div class="action-col">
-            <span class="action-label">{$t("league.auto_reconnect")}</span>
-            <span class="action-hint">{$t("league.auto_reconnect_desc")}</span>
-          </div>
-          <button class="toggle" class:on={settings?.league?.auto_reconnect} onclick={() => toggleLeagueFlag("auto_reconnect")} role="switch" aria-checked={settings?.league?.auto_reconnect ?? false} aria-label={$t("league.auto_reconnect") as string}>
-            <span class="toggle-knob"></span>
-          </button>
-        </div>
-        <div class="divider"></div>
-        <div class="action-row">
-          <div class="action-col">
-            <span class="action-label">{$t("league.auto_trade")}</span>
-            <span class="action-hint">{$t("league.auto_trade_desc")}</span>
-          </div>
-          <div class="seg-group" role="radiogroup" aria-label={$t("league.auto_trade") as string}>
-            {#each [["", "auto_trade_off"], ["accept", "auto_trade_accept"], ["decline", "auto_trade_decline"]] as [value, key] (value)}
-              <button
-                class="seg"
-                class:on={(settings?.league?.auto_trade ?? "") === value}
-                role="radio"
-                aria-checked={(settings?.league?.auto_trade ?? "") === value}
-                onclick={() => updateSettings({ league: { auto_trade: value } })}
-              >{$t(`league.${key}`)}</button>
-            {/each}
-          </div>
-        </div>
-        <div class="divider"></div>
-        <div class="action-row stacked">
-          <div class="action-col">
-            <span class="action-label">{$t("league.auto_message")}</span>
-            <span class="action-hint">{$t("league.auto_message_desc")}</span>
-          </div>
-          <input
-            class="input-text message-input"
-            type="text"
-            maxlength="120"
-            placeholder={$t("league.auto_message_placeholder") as string}
-            value={settings?.league?.auto_message ?? ""}
-            onchange={(e) => updateSettings({ league: { auto_message: e.currentTarget.value } })}
-          />
-        </div>
-      </section>
-
-      {/if}
-
-      {#if tab === "history"}
-      <section class="history-section">
-        <div class="history-head">
-          <h3>{$t("league.history_title")}</h3>
-          <button class="button" onclick={loadHistory} disabled={loadingHistory}>{$t("league.refresh")}</button>
-        </div>
-        {#if games.length === 0}
-          <p class="empty-hint">{$t("league.history_empty")}</p>
-        {:else}
-          <div class="game-list">
-            {#each games as game (game.gameId)}
-              {@const p = playerStats(game)}
-              <button
-                class="game-row"
-                class:expanded={expandedGame === game.gameId}
-                onclick={() => toggleGameDetail(game.gameId)}
-                aria-expanded={expandedGame === game.gameId}
-              >
-                <img class="champ-icon" src={`${CDRAGON}/champion-icons/${p.championId}.png`} alt="" loading="lazy" />
-                <div class="game-info">
-                  <span class="game-result" class:win={p.win} class:loss={!p.win}>{p.win ? $t("league.victory") : $t("league.defeat")}</span>
-                  <span class="game-mode">{queueName(game.queueId, game.gameMode)}</span>
-                </div>
-                <span class="game-kda">{p.kills} / {p.deaths} / {p.assists}</span>
-                <span class="game-time">{timeAgo(game.gameCreation, $locale)}</span>
-                <span class="game-chevron" aria-hidden="true">{expandedGame === game.gameId ? "▾" : "▸"}</span>
-              </button>
-              {#if expandedGame === game.gameId}
-                {#if gameDetailLoading === game.gameId}
-                  <p class="empty-hint">…</p>
-                {:else if gameDetails[game.gameId]}
-                  <div class="scoreboard">
-                    {#each scoreboardTeams(gameDetails[game.gameId]) as team (team.teamId)}
-                      <div class="scoreboard-team">
-                        <span class="scoreboard-result" class:win={team.players[0]?.win} class:loss={!team.players[0]?.win}>
-                          {team.players[0]?.win ? $t("league.victory") : $t("league.defeat")}
-                        </span>
-                        {#each team.players as sp (sp.participantId)}
-                          <div class="scoreboard-row">
-                            <img class="champ-icon tiny" src={`${CDRAGON}/champion-icons/${sp.championId}.png`} alt="" loading="lazy" />
-                            <span class="scoreboard-name">{sp.name || championById.get(sp.championId)?.name || "—"}</span>
-                            <span class="scoreboard-kda">{sp.kills}/{sp.deaths}/{sp.assists}</span>
-                            <span class="scoreboard-cs dim">{sp.cs} CS</span>
-                            <span class="scoreboard-gold dim">{(sp.gold / 1000).toFixed(1)}k</span>
-                            <span class="scoreboard-dmg dim">{(sp.damage / 1000).toFixed(1)}k {$t("league.match_damage")}</span>
-                          </div>
-                        {/each}
-                      </div>
-                    {/each}
-                  </div>
-                {:else}
-                  <p class="empty-hint">{$t("league.match_detail_unavailable")}</p>
-                {/if}
-              {/if}
-            {/each}
-          </div>
-        {/if}
-      </section>
-      {/if}
+      <!-- Panels stay mounted while hidden so tab state (search results, spell
+           timers, expanded games) survives switching, and the meta tab's
+           auto-rune effect keeps working from any tab. -->
+      <div class="tab-panel" class:active={tab === "overview"}>
+        <OverviewTab {summoner} {ranked} {phase} {champSelect} {liveGame} {lobby} {queues} {actionError} {championById} {championByAlias} onAction={action} />
+      </div>
+      <div class="tab-panel" class:active={tab === "analysis"}>
+        <AnalysisTab {analysis} {analysisLoading} onRefreshAnalysis={loadAnalysis} {phase} {scoutPlayers} {scoutReports} {scoutLoading} onRefreshScouting={loadScouting} {championById} {notes} onSaveNote={saveNote} {timesSeenBefore} />
+      </div>
+      <div class="tab-panel" class:active={tab === "meta"}>
+        <MetaTab {champSelectChampionId} {myAssignedPosition} {championById} {champions} region={status.region} />
+      </div>
+      <div class="tab-panel" class:active={tab === "search"}>
+        <SearchTab {championById} />
+      </div>
+      <div class="tab-panel" class:active={tab === "live"}>
+        <LiveTab {liveMetrics} {cooldowns} {goalValue} />
+      </div>
+      <div class="tab-panel" class:active={tab === "goals"}>
+        <GoalsTab {goalValue} {setGoal} {resetGoals} />
+      </div>
+      <div class="tab-panel" class:active={tab === "automation"}>
+        <AutomationTab {champions} {championById} />
+      </div>
+      <div class="tab-panel" class:active={tab === "history"}>
+        <HistoryTab {games} loading={loadingHistory} onRefresh={loadHistory} {championById} />
+      </div>
     {/if}
   {/if}
 </div>
@@ -1981,9 +475,19 @@
     max-width: 720px;
     margin: 0 auto;
     width: 100%;
-  }
+    }
 
-  .guard-card {
+  .league-page :global(.tab-panel) {
+    display: none;
+    }
+
+  .league-page :global(.tab-panel.active) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--padding);
+    }
+
+  .league-page :global(.guard-card) {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
@@ -1992,32 +496,32 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--border-radius);
-  }
+    }
 
-  .guard-card h2 {
+  .league-page :global(.guard-card h2) {
     margin: 0;
     font-size: 18px;
-  }
+    }
 
-  .guard-card p {
+  .league-page :global(.guard-card p) {
     margin: 0;
     color: var(--gray);
     font-size: 13.5px;
-  }
+    }
 
-  .league-header {
+  .league-page :global(.league-header) {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 10px;
-  }
+    }
 
-  .league-header h2 {
+  .league-page :global(.league-header h2) {
     margin: 0;
     font-size: 20px;
-  }
+    }
 
-  .status-chip {
+  .league-page :global(.status-chip) {
     display: inline-flex;
     align-items: center;
     gap: 7px;
@@ -2027,29 +531,29 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 999px;
-  }
+    }
 
-  .status-chip .dot {
+  .league-page :global(.status-chip .dot) {
     width: 8px;
     height: 8px;
     border-radius: 50%;
     background: var(--gray);
-  }
+    }
 
-  .status-chip.connected {
+  .league-page :global(.status-chip.connected) {
     color: var(--text);
-  }
+    }
 
-  .status-chip.connected .dot {
+  .league-page :global(.status-chip.connected .dot) {
     background: var(--success);
-  }
+    }
 
-  .status-chip .region {
+  .league-page :global(.status-chip .region) {
     color: var(--gray);
     text-transform: uppercase;
-  }
+    }
 
-  .profile-card {
+  .league-page :global(.profile-card) {
     display: flex;
     align-items: center;
     gap: 14px;
@@ -2057,49 +561,49 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--border-radius);
-  }
+    }
 
-  .profile-icon {
+  .league-page :global(.profile-icon) {
     width: 56px;
     height: 56px;
     border-radius: 50%;
     border: 2px solid var(--border);
     object-fit: cover;
-  }
+    }
 
-  .profile-info {
+  .league-page :global(.profile-info) {
     display: flex;
     flex-direction: column;
     gap: 2px;
     min-width: 0;
-  }
+    }
 
-  .profile-name {
+  .league-page :global(.profile-name) {
     font-size: 16px;
     font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
+    }
 
-  .profile-name .tag {
+  .league-page :global(.profile-name .tag) {
     color: var(--gray);
     font-weight: 400;
-  }
+    }
 
-  .profile-level {
+  .league-page :global(.profile-level) {
     font-size: 12.5px;
     color: var(--gray);
-  }
+    }
 
-  .ranked-chips {
+  .league-page :global(.ranked-chips) {
     display: flex;
     gap: 8px;
     margin-left: auto;
     flex-wrap: wrap;
-  }
+    }
 
-  .ranked-chip {
+  .league-page :global(.ranked-chip) {
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -2107,226 +611,226 @@
     background: var(--button);
     border: 1px solid var(--input-border);
     border-radius: calc(var(--border-radius) - 2px);
-  }
+    }
 
-  .ranked-queue {
+  .league-page :global(.ranked-queue) {
     font-size: 11px;
     color: var(--gray);
     text-transform: uppercase;
     letter-spacing: 0.04em;
-  }
+    }
 
-  .ranked-value {
+  .league-page :global(.ranked-value) {
     font-size: 13px;
-  }
+    }
 
-  .card {
+  .league-page :global(.card) {
     display: flex;
     flex-direction: column;
     padding: var(--padding);
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--border-radius);
-  }
+    }
 
-  .card-head {
+  .league-page :global(.card-head) {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-bottom: 10px;
-  }
+    }
 
-  .card-head h3 {
+  .league-page :global(.card-head h3) {
     margin: 0;
     font-size: 15px;
-  }
+    }
 
-  .phase-tag {
+  .league-page :global(.phase-tag) {
     font-size: 12px;
     color: var(--gray);
     padding: 3px 10px;
     background: var(--button);
     border: 1px solid var(--input-border);
     border-radius: 999px;
-  }
+    }
 
-  .action-error {
+  .league-page :global(.action-error) {
     font-size: 12.5px;
     color: var(--danger);
     padding: 8px 12px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: calc(var(--border-radius) - 2px);
-  }
+    }
 
-  .lobby-actions {
+  .league-page :global(.lobby-actions) {
     display: flex;
     align-items: center;
     gap: 8px;
     flex-wrap: wrap;
-  }
+    }
 
-  .searching-hint {
+  .league-page :global(.searching-hint) {
     font-size: 13px;
     color: var(--gray);
-  }
+    }
 
-  .queue-grid {
+  .league-page :global(.queue-grid) {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
-  }
+    }
 
-  .empty-hint {
+  .league-page :global(.empty-hint) {
     color: var(--gray);
     font-size: 13px;
     margin: 0;
-  }
+    }
 
-  .team-picks {
+  .league-page :global(.team-picks) {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
-  }
+    }
 
-  .bench-row {
+  .league-page :global(.bench-row) {
     display: flex;
     align-items: center;
     gap: 10px;
     margin-top: 12px;
     flex-wrap: wrap;
-  }
+    }
 
-  .bench-label {
+  .league-page :global(.bench-label) {
     font-size: 12.5px;
     color: var(--gray);
-  }
+    }
 
-  .bench-champs {
+  .league-page :global(.bench-champs) {
     display: flex;
     gap: 6px;
     flex-wrap: wrap;
-  }
+    }
 
-  .bench-swap {
+  .league-page :global(.bench-swap) {
     padding: 0;
     background: none;
     border: 2px solid transparent;
     border-radius: 8px;
     cursor: pointer;
     line-height: 0;
-  }
+    }
 
-  .bench-swap:hover,
-  .bench-swap:focus-visible {
+  .league-page :global(.bench-swap:hover),
+  .league-page :global(.bench-swap:focus-visible) {
     border-color: var(--accent);
     outline: none;
-  }
+    }
 
-  .live-teams {
+  .league-page :global(.live-teams) {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
-  }
+    }
 
   @media (max-width: 560px) {
-    .live-teams {
+    .league-page :global(.live-teams) {
       grid-template-columns: 1fr;
+        }
     }
-  }
 
-  .live-team {
+  .league-page :global(.live-team) {
     display: flex;
     flex-direction: column;
     gap: 4px;
     min-width: 0;
-  }
+    }
 
-  .live-row {
+  .league-page :global(.live-row) {
     display: flex;
     align-items: center;
     gap: 8px;
     padding: 4px 8px;
     border-radius: calc(var(--border-radius) - 4px);
     min-width: 0;
-  }
+    }
 
-  .live-row.me {
+  .league-page :global(.live-row.me) {
     background: var(--accent-soft, var(--button));
-  }
+    }
 
-  .live-name {
+  .league-page :global(.live-name) {
     font-size: 12.5px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
     min-width: 0;
-  }
+    }
 
-  .live-kda {
+  .league-page :global(.live-kda) {
     margin-left: auto;
     font-size: 12px;
     font-variant-numeric: tabular-nums;
     color: var(--gray);
-  }
+    }
 
-  .live-respawn {
+  .league-page :global(.live-respawn) {
     font-size: 11.5px;
     color: var(--danger);
-  }
+    }
 
-  .action-row {
+  .league-page :global(.action-row) {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-  }
+    }
 
-  .action-col {
+  .league-page :global(.action-col) {
     display: flex;
     flex-direction: column;
     gap: 2px;
     min-width: 0;
-  }
+    }
 
-  .action-label {
+  .league-page :global(.action-label) {
     font-size: 14px;
-  }
+    }
 
-  .action-hint {
+  .league-page :global(.action-hint) {
     font-size: 12.5px;
     color: var(--gray);
-  }
+    }
 
-  .divider {
+  .league-page :global(.divider) {
     height: 1px;
     background: var(--border);
     margin: 10px 0;
-  }
+    }
 
-  .champ-list-block {
+  .league-page :global(.champ-list-block) {
     display: flex;
     flex-direction: column;
     gap: 8px;
     margin-top: 10px;
-  }
+    }
 
-  .list-label {
+  .league-page :global(.list-label) {
     font-size: 12.5px;
     color: var(--gray);
-  }
+    }
 
-  .list-hint {
+  .league-page :global(.list-hint) {
     font-size: 11.5px;
-  }
+    }
 
-  .champ-chips {
+  .league-page :global(.champ-chips) {
     display: flex;
     gap: 6px;
     flex-wrap: wrap;
-  }
+    }
 
-  .champ-chip {
+  .league-page :global(.champ-chip) {
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -2335,9 +839,9 @@
     background: var(--button);
     border: 1px solid var(--input-border);
     border-radius: 999px;
-  }
+    }
 
-  .chip-remove {
+  .league-page :global(.chip-remove) {
     background: none;
     border: none;
     color: var(--gray);
@@ -2345,20 +849,20 @@
     cursor: pointer;
     padding: 0 3px;
     line-height: 1;
-  }
+    }
 
-  .chip-remove:hover,
-  .chip-remove:focus-visible {
+  .league-page :global(.chip-remove:hover),
+  .league-page :global(.chip-remove:focus-visible) {
     color: var(--danger);
     outline: none;
-  }
+    }
 
-  .champ-search {
+  .league-page :global(.champ-search) {
     position: relative;
     max-width: 260px;
-  }
+    }
 
-  .input-text {
+  .league-page :global(.input-text) {
     width: 100%;
     padding: 7px 10px;
     font-size: 13px;
@@ -2366,14 +870,14 @@
     border: 1px solid var(--input-border);
     border-radius: calc(var(--border-radius) - 2px);
     color: var(--text);
-  }
+    }
 
-  .input-text:focus-visible {
+  .league-page :global(.input-text:focus-visible) {
     border-color: var(--accent);
     outline: none;
-  }
+    }
 
-  .search-results {
+  .league-page :global(.search-results) {
     position: absolute;
     top: calc(100% + 4px);
     left: 0;
@@ -2386,9 +890,9 @@
     border-radius: calc(var(--border-radius) - 2px);
     overflow: hidden;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-  }
+    }
 
-  .search-result {
+  .league-page :global(.search-result) {
     display: flex;
     align-items: center;
     gap: 8px;
@@ -2399,23 +903,23 @@
     color: var(--text);
     cursor: pointer;
     text-align: left;
-  }
+    }
 
-  .search-result:hover,
-  .search-result:focus-visible {
+  .league-page :global(.search-result:hover),
+  .league-page :global(.search-result:focus-visible) {
     background: var(--button);
     outline: none;
-  }
+    }
 
-  .league-tabs {
+  .league-page :global(.league-tabs) {
     display: flex;
     gap: 4px;
     flex-wrap: wrap;
     padding-bottom: 2px;
     border-bottom: 1px solid var(--border);
-  }
+    }
 
-  .league-tab {
+  .league-page :global(.league-tab) {
     padding: 6px 12px;
     font-size: 12.5px;
     background: none;
@@ -2423,88 +927,88 @@
     border-bottom: 2px solid transparent;
     color: var(--gray);
     cursor: pointer;
-  }
+    }
 
-  .league-tab:hover {
+  .league-page :global(.league-tab:hover) {
     color: var(--text);
-  }
+    }
 
-  .league-tab.on {
+  .league-page :global(.league-tab.on) {
     color: var(--text);
     border-bottom-color: var(--accent);
-  }
+    }
 
-  .league-tab:focus-visible {
+  .league-page :global(.league-tab:focus-visible) {
     outline: 1px solid var(--accent);
     outline-offset: -1px;
-  }
+    }
 
-  .winbar-wrap {
+  .league-page :global(.winbar-wrap) {
     display: flex;
     flex-direction: column;
     gap: 6px;
-  }
+    }
 
-  .winbar {
+  .league-page :global(.winbar) {
     position: relative;
     height: 12px;
     border-radius: 999px;
     background: var(--button);
     border: 1px solid var(--input-border);
     overflow: hidden;
-  }
+    }
 
-  .winbar-fill {
+  .league-page :global(.winbar-fill) {
     height: 100%;
     background: var(--accent);
-  }
+    }
 
-  .winbar-range {
+  .league-page :global(.winbar-range) {
     position: absolute;
     top: 0;
     height: 100%;
     background: var(--accent);
     opacity: 0.25;
-  }
+    }
 
-  .winbar-legend {
+  .league-page :global(.winbar-legend) {
     display: flex;
     align-items: baseline;
     gap: 10px;
-  }
+    }
 
-  .win-value {
+  .league-page :global(.win-value) {
     font-size: 22px;
     font-weight: 600;
     font-variant-numeric: tabular-nums;
-  }
+    }
 
-  .win-range,
-  .win-note {
+  .league-page :global(.win-range),
+  .league-page :global(.win-note) {
     font-size: 12px;
     color: var(--gray);
-  }
+    }
 
-  .win-note {
+  .league-page :global(.win-note) {
     margin: 8px 0 0;
-  }
+    }
 
-  .win-disclaimer {
+  .league-page :global(.win-disclaimer) {
     margin: 4px 0 0;
     font-size: 11.5px;
     color: var(--gray);
     line-height: 1.45;
-  }
+    }
 
-  .premade-row {
+  .league-page :global(.premade-row) {
     display: flex;
     align-items: center;
     gap: 6px;
     flex-wrap: wrap;
     margin-top: 10px;
-  }
+    }
 
-  .gold-summary {
+  .league-page :global(.gold-summary) {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -2512,37 +1016,37 @@
     margin-bottom: 10px;
     font-size: 13px;
     flex-wrap: wrap;
-  }
+    }
 
-  .gold-team {
+  .league-page :global(.gold-team) {
     color: var(--gray);
-  }
+    }
 
-  .gold-diff {
+  .league-page :global(.gold-diff) {
     font-size: 17px;
     font-weight: 600;
     font-variant-numeric: tabular-nums;
-  }
+    }
 
-  .gold-diff.good,
-  .diff.good {
+  .league-page :global(.gold-diff.good),
+  .league-page :global(.diff.good) {
     color: var(--success);
-  }
+    }
 
-  .gold-diff.bad,
-  .diff.bad {
+  .league-page :global(.gold-diff.bad),
+  .league-page :global(.diff.bad) {
     color: var(--danger);
-  }
+    }
 
-  .metric-table {
+  .league-page :global(.metric-table) {
     display: flex;
     flex-direction: column;
     gap: 2px;
     overflow-x: auto;
-  }
+    }
 
-  .metric-head,
-  .metric-row {
+  .league-page :global(.metric-head),
+  .league-page :global(.metric-row) {
     display: grid;
     grid-template-columns: minmax(120px, 1.6fr) 68px 92px 64px minmax(110px, 1fr);
     gap: 8px;
@@ -2551,135 +1055,135 @@
     font-size: 12px;
     font-variant-numeric: tabular-nums;
     min-width: 460px;
-  }
+    }
 
-  .metric-head {
+  .league-page :global(.metric-head) {
     color: var(--gray);
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-  }
+    }
 
-  .metric-row {
+  .league-page :global(.metric-row) {
     border-radius: calc(var(--border-radius) - 4px);
     background: var(--button);
-  }
+    }
 
-  .metric-row.self {
+  .league-page :global(.metric-row.self) {
     background: var(--accent-soft, var(--surface));
-  }
+    }
 
-  .metric-name {
+  .league-page :global(.metric-name) {
     display: flex;
     align-items: center;
     gap: 6px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
+    }
 
-  .pos-chip {
+  .league-page :global(.pos-chip) {
     font-size: 9.5px;
     padding: 1px 5px;
     border-radius: 4px;
     background: var(--surface);
     color: var(--gray);
     letter-spacing: 0.03em;
-  }
+    }
 
-  .dim {
+  .league-page :global(.dim) {
     color: var(--gray);
-  }
+    }
 
-  .goal-list {
+  .league-page :global(.goal-list) {
     display: flex;
     flex-direction: column;
     gap: 8px;
-  }
+    }
 
-  .goal-row {
+  .league-page :global(.goal-row) {
     display: grid;
     grid-template-columns: minmax(80px, 1fr) minmax(90px, 2fr) minmax(90px, 1fr);
     gap: 10px;
     align-items: center;
     font-size: 12.5px;
-  }
+    }
 
-  .goal-name {
+  .league-page :global(.goal-name) {
     color: var(--gray);
-  }
+    }
 
-  .goal-bar {
+  .league-page :global(.goal-bar) {
     height: 8px;
     border-radius: 999px;
     background: var(--button);
     border: 1px solid var(--input-border);
     overflow: hidden;
-  }
+    }
 
-  .goal-fill {
+  .league-page :global(.goal-fill) {
     height: 100%;
     background: var(--gray);
-  }
+    }
 
-  .goal-fill.met {
+  .league-page :global(.goal-fill.met) {
     background: var(--success);
-  }
+    }
 
-  .goal-value {
+  .league-page :global(.goal-value) {
     text-align: right;
     font-variant-numeric: tabular-nums;
-  }
+    }
 
-  .goal-value.met {
+  .league-page :global(.goal-value.met) {
     color: var(--success);
-  }
+    }
 
-  .goal-config {
+  .league-page :global(.goal-config) {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 10px;
     margin: 10px 0;
-  }
+    }
 
-  .goal-field {
+  .league-page :global(.goal-field) {
     display: flex;
     flex-direction: column;
     gap: 4px;
-  }
+    }
 
-  .goal-field-label {
+  .league-page :global(.goal-field-label) {
     font-size: 12px;
     color: var(--gray);
-  }
+    }
 
-  .select-role {
+  .league-page :global(.select-role) {
     padding: 5px 10px;
     font-size: 12.5px;
     background: var(--button);
     border: 1px solid var(--input-border);
     border-radius: calc(var(--border-radius) - 2px);
     color: var(--text);
-  }
+    }
 
-  .search-form {
+  .league-page :global(.search-form) {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
-  }
+    }
 
-  .search-form .input-text {
+  .league-page :global(.search-form .input-text) {
     flex: 1;
     min-width: 180px;
-  }
+    }
 
-  .stat-grid {
+  .league-page :global(.stat-grid) {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
     gap: 10px;
-  }
+    }
 
-  .stat-cell {
+  .league-page :global(.stat-cell) {
     display: flex;
     flex-direction: column;
     gap: 2px;
@@ -2687,34 +1191,34 @@
     background: var(--button);
     border: 1px solid var(--input-border);
     border-radius: calc(var(--border-radius) - 2px);
-  }
+    }
 
-  .stat-value {
+  .league-page :global(.stat-value) {
     font-size: 19px;
     font-weight: 600;
     font-variant-numeric: tabular-nums;
-  }
+    }
 
-  .stat-value.good {
+  .league-page :global(.stat-value.good) {
     color: var(--success);
-  }
+    }
 
-  .stat-value.bad {
+  .league-page :global(.stat-value.bad) {
     color: var(--danger);
-  }
+    }
 
-  .stat-label {
+  .league-page :global(.stat-label) {
     font-size: 11.5px;
     color: var(--gray);
-  }
+    }
 
-  .champ-table {
+  .league-page :global(.champ-table) {
     display: flex;
     flex-direction: column;
     gap: 3px;
-  }
+    }
 
-  .champ-row {
+  .league-page :global(.champ-row) {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -2723,79 +1227,79 @@
     border-radius: calc(var(--border-radius) - 4px);
     font-size: 12.5px;
     font-variant-numeric: tabular-nums;
-  }
+    }
 
-  .champ-row-name {
+  .league-page :global(.champ-row-name) {
     flex: 1;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
+    }
 
-  .champ-row-games,
-  .champ-row-kda,
-  .champ-row-cs {
+  .league-page :global(.champ-row-games),
+  .league-page :global(.champ-row-kda),
+  .league-page :global(.champ-row-cs) {
     color: var(--gray);
     flex-shrink: 0;
-  }
+    }
 
-  .champ-row-wr {
+  .league-page :global(.champ-row-wr) {
     flex-shrink: 0;
     font-weight: 600;
-  }
+    }
 
-  .champ-row-wr.good {
+  .league-page :global(.champ-row-wr.good) {
     color: var(--success);
-  }
+    }
 
-  .champ-row-wr.bad {
+  .league-page :global(.champ-row-wr.bad) {
     color: var(--danger);
-  }
+    }
 
-  .zone-bars {
+  .league-page :global(.zone-bars) {
     display: flex;
     flex-direction: column;
     gap: 7px;
-  }
+    }
 
-  .zone-row {
+  .league-page :global(.zone-row) {
     display: grid;
     grid-template-columns: 60px 1fr 52px;
     gap: 10px;
     align-items: center;
     font-size: 12.5px;
-  }
+    }
 
-  .zone-name {
+  .league-page :global(.zone-name) {
     color: var(--gray);
-  }
+    }
 
-  .chat-send {
+  .league-page :global(.chat-send) {
     display: flex;
     gap: 8px;
     margin-top: 12px;
     flex-wrap: wrap;
-  }
+    }
 
-  .chat-send .input-text {
+  .league-page :global(.chat-send .input-text) {
     flex: 1;
     min-width: 180px;
-  }
+    }
 
-  .impact {
+  .league-page :global(.impact) {
     color: var(--accent);
     font-weight: 600;
-  }
+    }
 
-  .rune-list {
+  .league-page :global(.rune-list) {
     display: flex;
     flex-direction: column;
     gap: 8px;
     margin-top: 10px;
-  }
+    }
 
-  .rune-card {
+  .league-page :global(.rune-card) {
     display: flex;
     flex-direction: column;
     gap: 7px;
@@ -2803,52 +1307,52 @@
     background: var(--button);
     border: 1px solid var(--input-border);
     border-radius: calc(var(--border-radius) - 2px);
-  }
+    }
 
-  .rune-card.applied {
+  .league-page :global(.rune-card.applied) {
     border-color: var(--accent);
-  }
+    }
 
-  .rune-head {
+  .league-page :global(.rune-head) {
     display: flex;
     align-items: center;
     gap: 8px;
-  }
+    }
 
-  .rune-keystone {
+  .league-page :global(.rune-keystone) {
     font-size: 13px;
     font-weight: 600;
-  }
+    }
 
-  .rune-perks {
+  .league-page :global(.rune-perks) {
     display: flex;
     gap: 5px;
     flex-wrap: wrap;
-  }
+    }
 
-  .perk-icon {
+  .league-page :global(.perk-icon) {
     width: 26px;
     height: 26px;
     border-radius: 50%;
     background: var(--surface);
-  }
+    }
 
-  .rune-foot {
+  .league-page :global(.rune-foot) {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 10px;
     font-size: 12px;
     flex-wrap: wrap;
-  }
+    }
 
-  .tier-controls {
+  .league-page :global(.tier-controls) {
     display: flex;
     gap: 6px;
     align-items: center;
-  }
+    }
 
-  .tier-badge {
+  .league-page :global(.tier-badge) {
     flex-shrink: 0;
     min-width: 30px;
     text-align: center;
@@ -2858,56 +1362,56 @@
     font-weight: 700;
     background: var(--surface);
     border: 1px solid var(--border);
-  }
+    }
 
-  .tier-badge.tier-1 {
+  .league-page :global(.tier-badge.tier-1) {
     color: var(--on-accent);
     background: var(--accent);
     border-color: transparent;
-  }
+    }
 
-  .tier-badge.tier-2 {
+  .league-page :global(.tier-badge.tier-2) {
     color: var(--success);
     border-color: var(--success);
-  }
+    }
 
-  .tier-badge.tier-3 {
+  .league-page :global(.tier-badge.tier-3) {
     color: var(--text);
-  }
+    }
 
-  .build-picker {
+  .league-page :global(.build-picker) {
     margin: 8px 0;
-  }
+    }
 
-  .build-items {
+  .league-page :global(.build-items) {
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
     margin: 8px 0;
-  }
+    }
 
-  .build-item {
+  .league-page :global(.build-item) {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 2px;
     font-size: 10.5px;
-  }
+    }
 
-  .item-icon {
+  .league-page :global(.item-icon) {
     width: 34px;
     height: 34px;
     border-radius: 6px;
     background: var(--button);
-  }
+    }
 
-  .cd-list {
+  .league-page :global(.cd-list) {
     display: flex;
     flex-direction: column;
     gap: 5px;
-  }
+    }
 
-  .cd-row {
+  .league-page :global(.cd-row) {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -2915,93 +1419,93 @@
     background: var(--button);
     border-radius: calc(var(--border-radius) - 4px);
     flex-wrap: wrap;
-  }
+    }
 
-  .cd-champ {
+  .league-page :global(.cd-champ) {
     display: flex;
     align-items: center;
     gap: 8px;
     min-width: 130px;
-  }
+    }
 
-  .cd-id {
+  .league-page :global(.cd-id) {
     display: flex;
     flex-direction: column;
     gap: 1px;
     font-size: 11.5px;
-  }
+    }
 
-  .cd-name {
+  .league-page :global(.cd-name) {
     font-size: 12.5px;
     font-weight: 600;
-  }
+    }
 
-  .cd-abilities {
+  .league-page :global(.cd-abilities) {
     display: flex;
     gap: 8px;
     margin-left: auto;
     flex-wrap: wrap;
-  }
+    }
 
-  .cd-ability {
+  .league-page :global(.cd-ability) {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 1px;
     min-width: 38px;
-  }
+    }
 
-  .ability-icon {
+  .league-page :global(.ability-icon) {
     width: 26px;
     height: 26px;
     border-radius: 5px;
     background: var(--surface);
-  }
+    }
 
-  .cd-key {
+  .league-page :global(.cd-key) {
     font-size: 9.5px;
     color: var(--gray);
     letter-spacing: 0.05em;
-  }
+    }
 
-  .cd-value {
+  .league-page :global(.cd-value) {
     font-size: 11.5px;
     font-variant-numeric: tabular-nums;
-  }
+    }
 
-  .scout-teams {
+  .league-page :global(.scout-teams) {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 14px;
-  }
+    }
 
   @media (max-width: 620px) {
-    .scout-teams {
+    .league-page :global(.scout-teams) {
       grid-template-columns: 1fr;
+        }
     }
-  }
 
-  .scout-team {
+  .league-page :global(.scout-team) {
     display: flex;
     flex-direction: column;
     gap: 6px;
     min-width: 0;
-  }
+    }
 
-  .scout-team-title {
+  .league-page :global(.scout-team-title) {
     margin: 0 0 2px;
     font-size: 11.5px;
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     color: var(--gray);
-  }
+    }
 
-  .scout-team-title.enemy {
+  .league-page :global(.scout-team-title.enemy) {
     color: var(--danger);
-  }
+    }
 
-  .scout-row {
+  .league-page :global(.scout-row) {
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -3009,75 +1513,75 @@
     background: var(--button);
     border: 1px solid var(--input-border);
     border-radius: calc(var(--border-radius) - 3px);
-  }
+    }
 
-  .scout-main {
+  .league-page :global(.scout-main) {
     display: flex;
     align-items: center;
     gap: 8px;
     min-width: 0;
-  }
+    }
 
-  .scout-id {
+  .league-page :global(.scout-id) {
     display: flex;
     flex-direction: column;
     gap: 1px;
     min-width: 0;
     flex: 1;
-  }
+    }
 
-  .scout-name {
+  .league-page :global(.scout-name) {
     font-size: 12.5px;
     font-weight: 600;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
+    }
 
-  .scout-name .tag {
+  .league-page :global(.scout-name .tag) {
     color: var(--gray);
     font-weight: 400;
-  }
+    }
 
-  .scout-rank {
+  .league-page :global(.scout-rank) {
     font-size: 11px;
     color: var(--gray);
-  }
+    }
 
-  .scout-stats {
+  .league-page :global(.scout-stats) {
     display: flex;
     flex-direction: column;
     gap: 1px;
     align-items: flex-end;
     flex-shrink: 0;
-  }
+    }
 
-  .scout-wr {
+  .league-page :global(.scout-wr) {
     font-size: 12px;
     font-variant-numeric: tabular-nums;
-  }
+    }
 
-  .scout-wr.good {
+  .league-page :global(.scout-wr.good) {
     color: var(--success);
-  }
+    }
 
-  .scout-wr.bad {
+  .league-page :global(.scout-wr.bad) {
     color: var(--danger);
-  }
+    }
 
-  .scout-kda {
+  .league-page :global(.scout-kda) {
     font-size: 11px;
     color: var(--gray);
     font-variant-numeric: tabular-nums;
-  }
+    }
 
-  .scout-private {
+  .league-page :global(.scout-private) {
     font-size: 11.5px;
     color: var(--gray);
     flex-shrink: 0;
-  }
+    }
 
-  .note-toggle {
+  .league-page :global(.note-toggle) {
     background: none;
     border: none;
     color: var(--gray);
@@ -3086,72 +1590,72 @@
     padding: 2px 4px;
     border-radius: 4px;
     flex-shrink: 0;
-  }
+    }
 
-  .note-toggle.has-note,
-  .note-toggle:hover,
-  .note-toggle:focus-visible {
+  .league-page :global(.note-toggle.has-note),
+  .league-page :global(.note-toggle:hover),
+  .league-page :global(.note-toggle:focus-visible) {
     color: var(--accent);
     outline: none;
-  }
+    }
 
-  .scout-champs {
+  .league-page :global(.scout-champs) {
     display: flex;
     align-items: center;
     gap: 6px;
     flex-wrap: wrap;
-  }
+    }
 
-  .scout-champ {
+  .league-page :global(.scout-champ) {
     display: inline-flex;
     align-items: center;
     gap: 3px;
-  }
+    }
 
-  .scout-champ-record {
+  .league-page :global(.scout-champ-record) {
     font-size: 10.5px;
     color: var(--gray);
     font-variant-numeric: tabular-nums;
-  }
+    }
 
-  .scout-tag {
+  .league-page :global(.scout-tag) {
     font-size: 10.5px;
     padding: 2px 7px;
     border-radius: 999px;
     background: var(--surface);
     border: 1px solid var(--border);
     color: var(--text);
-  }
+    }
 
-  .note-input {
+  .league-page :global(.note-input) {
     font-size: 12px;
     padding: 5px 8px;
-  }
+    }
 
-  .history-section {
+  .league-page :global(.history-section) {
     display: flex;
     flex-direction: column;
     gap: 8px;
-  }
+    }
 
-  .history-head {
+  .league-page :global(.history-head) {
     display: flex;
     align-items: center;
     justify-content: space-between;
-  }
+    }
 
-  .history-head h3 {
+  .league-page :global(.history-head h3) {
     margin: 0;
     font-size: 15px;
-  }
+    }
 
-  .game-list {
+  .league-page :global(.game-list) {
     display: flex;
     flex-direction: column;
     gap: 6px;
-  }
+    }
 
-  .game-row {
+  .league-page :global(.game-row) {
     display: flex;
     align-items: center;
     gap: 12px;
@@ -3164,76 +1668,76 @@
     text-align: left;
     width: 100%;
     cursor: pointer;
-  }
+    }
 
-  .game-row:hover,
-  .game-row.expanded {
+  .league-page :global(.game-row:hover),
+  .league-page :global(.game-row.expanded) {
     border-color: var(--accent);
-  }
+    }
 
-  .champ-icon {
+  .league-page :global(.champ-icon) {
     width: 34px;
     height: 34px;
     border-radius: 6px;
     object-fit: cover;
     background: var(--button);
-  }
+    }
 
-  .champ-icon.small {
+  .league-page :global(.champ-icon.small) {
     width: 24px;
     height: 24px;
     border-radius: 5px;
-  }
+    }
 
-  .champ-icon.tiny {
+  .league-page :global(.champ-icon.tiny) {
     width: 20px;
     height: 20px;
     border-radius: 4px;
-  }
+    }
 
-  .champ-empty {
+  .league-page :global(.champ-empty) {
     border: 1px dashed var(--input-border);
-  }
+    }
 
-  .game-info {
+  .league-page :global(.game-info) {
     display: flex;
     flex-direction: column;
     gap: 1px;
     min-width: 0;
-  }
+    }
 
-  .game-result {
+  .league-page :global(.game-result) {
     font-size: 13px;
     font-weight: 600;
-  }
+    }
 
-  .game-result.win {
+  .league-page :global(.game-result.win) {
     color: var(--success);
-  }
+    }
 
-  .game-result.loss {
+  .league-page :global(.game-result.loss) {
     color: var(--danger);
-  }
+    }
 
-  .game-mode {
+  .league-page :global(.game-mode) {
     font-size: 11.5px;
     color: var(--gray);
-  }
+    }
 
-  .game-kda {
+  .league-page :global(.game-kda) {
     margin-left: auto;
     font-size: 13px;
     font-variant-numeric: tabular-nums;
-  }
+    }
 
-  .game-time {
+  .league-page :global(.game-time) {
     font-size: 11.5px;
     color: var(--gray);
     min-width: 70px;
     text-align: right;
-  }
+    }
 
-  .button {
+  .league-page :global(.button) {
     padding: 6px 14px;
     font-size: 13px;
     background: var(--button);
@@ -3241,94 +1745,94 @@
     border-radius: calc(var(--border-radius) - 2px);
     color: var(--text);
     cursor: pointer;
-  }
+    }
 
-  .button:hover {
+  .league-page :global(.button:hover) {
     background: var(--button-elevated, var(--button));
-  }
+    }
 
-  .button:focus-visible {
+  .league-page :global(.button:focus-visible) {
     border-color: var(--accent);
     outline: none;
-  }
+    }
 
-  .button.primary {
+  .league-page :global(.button.primary) {
     background: var(--accent);
     color: var(--on-accent);
     border-color: transparent;
-  }
+    }
 
-  .button:disabled {
+  .league-page :global(.button:disabled) {
     opacity: 0.6;
     cursor: default;
-  }
+    }
 
-  .button.danger {
+  .league-page :global(.button.danger) {
     background: var(--danger);
     color: var(--on-status, var(--on-accent));
     border-color: transparent;
-  }
+    }
 
-  .button.subtle-danger {
+  .league-page :global(.button.subtle-danger) {
     color: var(--danger);
     border-color: color-mix(in oklab, var(--danger) 35%, transparent);
     background: transparent;
-  }
+    }
 
-  .button.subtle-danger:hover {
+  .league-page :global(.button.subtle-danger:hover) {
     background: color-mix(in oklab, var(--danger) 10%, transparent);
-  }
+    }
 
-  .dodge-row {
+  .league-page :global(.dodge-row) {
     display: flex;
     align-items: center;
     justify-content: flex-end;
     gap: 8px;
     margin-top: 10px;
-  }
+    }
 
-  .dodge-warning {
+  .league-page :global(.dodge-warning) {
     font-size: 12.5px;
     color: var(--text-secondary, var(--text));
     margin-right: auto;
-  }
+    }
 
-  .seg-group {
+  .league-page :global(.seg-group) {
     display: flex;
     border: 1px solid var(--input-border);
     border-radius: calc(var(--border-radius) - 2px);
     overflow: hidden;
-  }
+    }
 
-  .seg {
+  .league-page :global(.seg) {
     padding: 5px 12px;
     font-size: 12.5px;
     background: transparent;
     border: none;
     color: var(--text-secondary, var(--text));
     cursor: pointer;
-  }
+    }
 
-  .seg + .seg {
+  .league-page :global(.seg + .seg) {
     border-left: 1px solid var(--input-border);
-  }
+    }
 
-  .seg.on {
+  .league-page :global(.seg.on) {
     background: var(--accent);
     color: var(--on-accent);
-  }
+    }
 
-  .action-row.stacked {
+  .league-page :global(.action-row.stacked) {
     flex-direction: column;
     align-items: stretch;
     gap: 8px;
-  }
+    }
 
-  .message-input {
+  .league-page :global(.message-input) {
     width: 100%;
-  }
+    }
 
-  .seen-badge {
+  .league-page :global(.seen-badge) {
     font-size: 11px;
     padding: 1px 6px;
     border-radius: 999px;
@@ -3336,32 +1840,32 @@
     color: var(--accent);
     margin-left: 6px;
     white-space: nowrap;
-  }
+    }
 
-  .spell-timer {
+  .league-page :global(.spell-timer) {
     cursor: pointer;
     border: 1px solid var(--input-border);
     background: var(--surface);
     font: inherit;
     color: inherit;
-  }
+    }
 
-  .spell-timer.running {
+  .league-page :global(.spell-timer.running) {
     border-color: var(--accent);
     background: color-mix(in oklab, var(--accent) 12%, transparent);
-  }
+    }
 
-  .spell-timer.running .cd-value {
+  .league-page :global(.spell-timer.running .cd-value) {
     color: var(--accent);
     font-weight: 600;
-  }
+    }
 
-  .game-chevron {
+  .league-page :global(.game-chevron) {
     color: var(--text-secondary, var(--text));
     font-size: 12px;
-  }
+    }
 
-  .scoreboard {
+  .league-page :global(.scoreboard) {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
@@ -3369,66 +1873,66 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: calc(var(--border-radius) - 2px);
-  }
+    }
 
-  .scoreboard-team {
+  .league-page :global(.scoreboard-team) {
     display: flex;
     flex-direction: column;
     gap: 4px;
     min-width: 0;
-  }
+    }
 
-  .scoreboard-result {
+  .league-page :global(.scoreboard-result) {
     font-size: 12px;
     font-weight: 600;
-  }
+    }
 
-  .scoreboard-result.win {
+  .league-page :global(.scoreboard-result.win) {
     color: var(--success, var(--accent));
-  }
+    }
 
-  .scoreboard-result.loss {
+  .league-page :global(.scoreboard-result.loss) {
     color: var(--danger);
-  }
+    }
 
-  .scoreboard-row {
+  .league-page :global(.scoreboard-row) {
     display: flex;
     align-items: center;
     gap: 6px;
     font-size: 12px;
     min-width: 0;
-  }
+    }
 
-  .scoreboard-name {
+  .league-page :global(.scoreboard-name) {
     flex: 1;
     min-width: 0;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
+    }
 
-  .scoreboard-kda {
+  .league-page :global(.scoreboard-kda) {
     white-space: nowrap;
-  }
+    }
 
-  .scoreboard-cs,
-  .scoreboard-gold,
-  .scoreboard-dmg {
+  .league-page :global(.scoreboard-cs),
+  .league-page :global(.scoreboard-gold),
+  .league-page :global(.scoreboard-dmg) {
     white-space: nowrap;
-  }
+    }
 
   @media (max-width: 560px) {
-    .scoreboard {
+    .league-page :global(.scoreboard) {
       grid-template-columns: 1fr;
-    }
+        }
 
-    .scoreboard-cs,
-    .scoreboard-dmg {
+    .league-page :global(.scoreboard-cs),
+    .league-page :global(.scoreboard-dmg) {
       display: none;
+        }
     }
-  }
 
-  .toggle {
+  .league-page :global(.toggle) {
     position: relative;
     width: 40px;
     height: 22px;
@@ -3437,14 +1941,14 @@
     border: 1px solid var(--input-border);
     cursor: pointer;
     flex-shrink: 0;
-  }
+    }
 
-  .toggle:focus-visible {
+  .league-page :global(.toggle:focus-visible) {
     border-color: var(--accent);
     outline: none;
-  }
+    }
 
-  .toggle .toggle-knob {
+  .league-page :global(.toggle .toggle-knob) {
     position: absolute;
     top: 2px;
     left: 2px;
@@ -3453,16 +1957,16 @@
     border-radius: 50%;
     background: var(--gray);
     transition: transform 0.15s ease, background 0.15s ease;
-  }
+    }
 
-  .toggle.on .toggle-knob {
+  .league-page :global(.toggle.on .toggle-knob) {
     transform: translateX(18px);
     background: var(--accent);
-  }
+    }
 
   @media (prefers-reduced-motion: reduce) {
-    .toggle .toggle-knob {
+    .league-page :global(.toggle .toggle-knob) {
       transition: none;
+        }
     }
-  }
 </style>
