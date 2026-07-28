@@ -1,4 +1,5 @@
 @import './lib/style/buttons.css';
+@import './lib/style/primitives.css';
 @import './lib/style/settings.css';
 @import './lib/style/macos-shell.css';
 @import '@fontsource/ibm-plex-mono/400.css';

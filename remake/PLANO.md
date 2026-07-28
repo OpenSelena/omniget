@@ -6,8 +6,8 @@ Regra: atualizar o status após CADA item concluído. `[ ]` pendente, `[~]` em p
 
 - [x] A1. Branch `remake/visual-v2` + checkpoint (`ec8b9aa4`)
 - [x] A2. Baseline check/test/build registrado em REMAKE-LOG.md
-- [~] A3. `scripts/shots.mjs` (Playwright, 390×844 / 834×1194 / 1440×900, light+dark, mocks Tauri)
-- [ ] A4. Shots baseline em `remake/shots/baseline/`
+- [x] A3. `scripts/shots.mjs` (Playwright, 390×844 / 834×1194 / 1440×900, light+dark, mocks Tauri)
+- [x] A4. Shots baseline em `remake/shots/baseline/`
 - [x] A5. REMAKE-LOG.md
 - [x] A6. remake/PLANO.md (este arquivo)
 
@@ -21,25 +21,25 @@ Regra: atualizar o status após CADA item concluído. `[ ]` pendente, `[~]` em p
 
 ## Fase C — Primitivos (ordem obrigatória; todos os estados; foco visível; 2 temas)
 
-- [ ] C1. Button
-- [ ] C2. Input/Field
-- [ ] C3. Select/Picker
-- [ ] C4. Toggle/Checkbox/Radio
-- [ ] C5. Badge/Tag
-- [ ] C6. Avatar
-- [ ] C7. Card/Surface
-- [ ] C8. List row
-- [ ] C9. Section header
-- [ ] C10. Separator
-- [ ] C11. Tooltip
-- [ ] C12. Menu/Popover
-- [ ] C13. Sheet/Modal
-- [ ] C14. Toast
-- [ ] C15. Tabs
-- [ ] C16. Skeleton/Loading
-- [ ] C17. Empty state
-- [ ] C18. Progress
-- [ ] C19. Rota `/_kitchen-sink` com todos os primitivos em todos os estados
+- [x] C1. Button
+- [x] C2. Input/Field
+- [x] C3. Select/Picker
+- [x] C4. Toggle/Checkbox/Radio
+- [x] C5. Badge/Tag
+- [x] C6. Avatar
+- [x] C7. Card/Surface
+- [x] C8. List row
+- [x] C9. Section header
+- [x] C10. Separator
+- [x] C11. Tooltip
+- [x] C12. Menu/Popover
+- [x] C13. Sheet/Modal
+- [x] C14. Toast
+- [x] C15. Tabs
+- [x] C16. Skeleton/Loading
+- [x] C17. Empty state
+- [x] C18. Progress
+- [x] C19. Rota `/_kitchen-sink` com todos os primitivos em todos os estados
 
 ## Fase D — Telas (ciclo: ≥6 refs → implementar → estados → shots → auto-crítica)
 

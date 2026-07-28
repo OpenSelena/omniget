@@ -29,6 +29,7 @@ const VIEWPORTS = [
 const THEMES = (argOf("themes") || "light,dark").split(",");
 
 const DEFAULT_ROUTES = [
+  "/_kitchen-sink",
   "/",
   "/downloads",
   "/marketplace",
