@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onDestroy } from "svelte";
   import { t } from "$lib/i18n";
   import { getSettings, updateSettings, toggleBool, changeNumber } from "./settings-helpers";
 
@@ -7,14 +8,50 @@
   let proxyHost = $state("");
   let proxyUsername = $state("");
   let proxyPassword = $state("");
-  let proxyTimer: ReturnType<typeof setTimeout> | null = null;
+
+  type ProxyField = "host" | "username" | "password";
+  const proxyTimers: Partial<Record<ProxyField, ReturnType<typeof setTimeout>>> = {};
+  const pendingProxy: Partial<Record<ProxyField, string>> = {};
 
   $effect(() => {
     if (settings) {
-      proxyHost = settings.proxy?.host ?? "";
-      proxyUsername = settings.proxy?.username ?? "";
-      proxyPassword = settings.proxy?.password ?? "";
+      if (!("host" in pendingProxy)) proxyHost = settings.proxy?.host ?? "";
+      if (!("username" in pendingProxy)) proxyUsername = settings.proxy?.username ?? "";
+      if (!("password" in pendingProxy)) proxyPassword = settings.proxy?.password ?? "";
     }
+  });
+
+  function proxyPatch(field: ProxyField, value: string) {
+    if (field === "host") return { proxy: { host: value } };
+    if (field === "username") return { proxy: { username: value } };
+    return { proxy: { password: value } };
+  }
+
+  function flushProxyField(field: ProxyField) {
+    const timer = proxyTimers[field];
+    if (timer) {
+      clearTimeout(timer);
+      delete proxyTimers[field];
+    }
+    const value = pendingProxy[field];
+    if (value === undefined) return;
+    delete pendingProxy[field];
+    updateSettings(proxyPatch(field, value)).catch(() => {
+      pendingProxy[field] = value;
+    });
+  }
+
+  function queueProxyField(field: ProxyField, value: string) {
+    pendingProxy[field] = value;
+    const timer = proxyTimers[field];
+    if (timer) clearTimeout(timer);
+    proxyTimers[field] = setTimeout(() => flushProxyField(field), 800);
+  }
+
+  onDestroy(() => {
+    flushProxyField("host");
+    flushProxyField("username");
+    flushProxyField("password");
   });
 
   async function changeProxyType(e: Event) {
@@ -25,28 +62,19 @@
   function handleProxyHost(e: Event) {
     const value = (e.target as HTMLInputElement).value;
     proxyHost = value;
-    if (proxyTimer) clearTimeout(proxyTimer);
-    proxyTimer = setTimeout(async () => {
-      await updateSettings({ proxy: { host: value } });
-    }, 800);
+    queueProxyField("host", value);
   }
 
   function handleProxyUsername(e: Event) {
     const value = (e.target as HTMLInputElement).value;
     proxyUsername = value;
-    if (proxyTimer) clearTimeout(proxyTimer);
-    proxyTimer = setTimeout(async () => {
-      await updateSettings({ proxy: { username: value } });
-    }, 800);
+    queueProxyField("username", value);
   }
 
   function handleProxyPassword(e: Event) {
     const value = (e.target as HTMLInputElement).value;
     proxyPassword = value;
-    if (proxyTimer) clearTimeout(proxyTimer);
-    proxyTimer = setTimeout(async () => {
-      await updateSettings({ proxy: { password: value } });
-    }, 800);
+    queueProxyField("password", value);
   }
 </script>
 
@@ -82,7 +110,7 @@
       <div class="divider"></div>
       <div class="setting-row">
         <span class="setting-label">{$t('settings.proxy.host')}</span>
-        <input type="text" class="input-text" value={proxyHost} oninput={handleProxyHost} placeholder="127.0.0.1" spellcheck="false" />
+        <input type="text" class="input-text" value={proxyHost} oninput={handleProxyHost} onchange={() => flushProxyField("host")} placeholder="127.0.0.1" spellcheck="false" />
       </div>
       <div class="divider"></div>
       <div class="setting-row">
@@ -92,12 +120,12 @@
       <div class="divider"></div>
       <div class="setting-row">
         <span class="setting-label">{$t('settings.proxy.username')}</span>
-        <input type="text" class="input-text" value={proxyUsername} oninput={handleProxyUsername} placeholder="" spellcheck="false" />
+        <input type="text" class="input-text" value={proxyUsername} oninput={handleProxyUsername} onchange={() => flushProxyField("username")} placeholder="" spellcheck="false" />
       </div>
       <div class="divider"></div>
       <div class="setting-row">
         <span class="setting-label">{$t('settings.proxy.password')}</span>
-        <input type="password" class="input-text" value={proxyPassword} oninput={handleProxyPassword} placeholder="" />
+        <input type="password" class="input-text" value={proxyPassword} oninput={handleProxyPassword} onchange={() => flushProxyField("password")} placeholder="" />
       </div>
     {/if}
   </div>

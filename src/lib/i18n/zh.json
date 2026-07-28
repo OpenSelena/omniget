@@ -1279,6 +1279,7 @@
     "path_too_long": "下载文件夹路径过长 ({{current}}/{{limit}} 字符)。请选择更短的文件夹。",
     "console_encoding": "Console encoding issue (non-UTF-8 locale). Update yt-dlp in Settings → Dependencies, or run \"chcp 65001\" in a terminal and reopen the app.",
     "extractor_broken": "The site extractor is broken. Update yt-dlp in Settings → Dependencies, then retry.",
+    "drm_protected": "下载的流受 DRM 保护，无法合并。不支持此内容。",
     "output_missing": "下载已完成，但文件夹中没有出现文件（或文件为空）。请检查磁盘空间和杀毒软件设置后重试。",
     "course_platform_url": "课程平台无法通过 URL 下载。请打开课程页面（需要课程插件并登录账号）。"
   },

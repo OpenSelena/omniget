@@ -1279,6 +1279,7 @@
     "path_too_long": "Le chemin du dossier est trop long ({{current}}/{{limit}} caractères). Choisissez un dossier plus court.",
     "console_encoding": "Console encoding issue (non-UTF-8 locale). Update yt-dlp in Settings → Dependencies, or run \"chcp 65001\" in a terminal and reopen the app.",
     "extractor_broken": "The site extractor is broken. Update yt-dlp in Settings → Dependencies, then retry.",
+    "drm_protected": "Les flux téléchargés sont protégés par DRM et ne peuvent pas être fusionnés. Ce contenu n'est pas pris en charge.",
     "output_missing": "Le téléchargement est terminé, mais aucun fichier n'est apparu dans le dossier (ou il est vide). Vérifiez l'espace disque et l'antivirus, puis réessayez.",
     "course_platform_url": "Les plateformes de cours ne peuvent pas être téléchargées depuis une URL. Ouvrez la page Cours (nécessite le plugin Cours et un compte connecté)."
   },

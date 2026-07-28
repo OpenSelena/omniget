@@ -330,7 +330,7 @@ impl Default for TelegramSettings {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ProxySettings {
     #[serde(default)]
     pub enabled: bool,
@@ -344,6 +344,19 @@ pub struct ProxySettings {
     pub username: String,
     #[serde(default)]
     pub password: String,
+}
+
+impl Default for ProxySettings {
+    fn default() -> Self {
+        Self {
+            enabled: false,
+            proxy_type: default_proxy_type(),
+            host: String::new(),
+            port: default_proxy_port(),
+            username: String::new(),
+            password: String::new(),
+        }
+    }
 }
 
 fn default_proxy_type() -> String {

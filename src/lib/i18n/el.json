@@ -1279,6 +1279,7 @@
     "path_too_long": "Η διαδρομή του φακέλου λήψης είναι πολύ μεγάλη ({{current}}/{{limit}} χαρακτήρες). Επιλέξτε συντομότερο φάκελο.",
     "console_encoding": "Console encoding issue (non-UTF-8 locale). Update yt-dlp in Settings → Dependencies, or run \"chcp 65001\" in a terminal and reopen the app.",
     "extractor_broken": "The site extractor is broken. Update yt-dlp in Settings → Dependencies, then retry.",
+    "drm_protected": "Οι ροές που κατέβηκαν προστατεύονται από DRM και δεν μπορούν να συγχωνευθούν. Αυτό το περιεχόμενο δεν υποστηρίζεται.",
     "output_missing": "Η λήψη ολοκληρώθηκε, αλλά δεν εμφανίστηκε αρχείο στον φάκελο (ή είναι κενό). Ελέγξτε τον χώρο στον δίσκο και το antivirus και δοκιμάστε ξανά.",
     "course_platform_url": "Οι πλατφόρμες μαθημάτων δεν μπορούν να ληφθούν από URL. Ανοίξτε τη σελίδα «Μαθήματα» (απαιτείται το πρόσθετο μαθημάτων και συνδεδεμένος λογαριασμός)."
   },

@@ -303,6 +303,7 @@ export type TranslationKeys =
   | 'errors.course_platform_url'
   | 'errors.disk_full'
   | 'errors.download_timeout'
+  | 'errors.drm_protected'
   | 'errors.extraction_failed'
   | 'errors.extractor_broken'
   | 'errors.ffmpeg_missing'

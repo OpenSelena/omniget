@@ -222,6 +222,8 @@ async fn download_playlist(
     ytdlp_path: &std::path::Path,
 ) -> anyhow::Result<DownloadResult> {
     let total = info.available_qualities.len().max(1);
+    let mut succeeded = 0usize;
+    let mut last_error: Option<anyhow::Error> = None;
     let mut last_result = DownloadResult {
         file_path: opts.output_dir.clone(),
         file_size_bytes: 0,
@@ -270,13 +272,21 @@ async fn download_playlist(
         .await
         {
             Ok(result) => {
+                succeeded += 1;
                 last_result.file_size_bytes += result.file_size_bytes;
                 last_result.duration_seconds += result.duration_seconds;
                 last_result.file_path = result.file_path;
             }
             Err(e) => {
                 tracing::error!("[bilibili] playlist item {} failed: {}", i + 1, e);
+                last_error = Some(e);
             }
+        }
+    }
+
+    if succeeded == 0 {
+        if let Some(e) = last_error {
+            return Err(e);
         }
     }
 

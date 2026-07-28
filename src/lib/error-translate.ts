@@ -39,6 +39,8 @@ const BACKEND_ERROR_MAP: Record<string, string> = {
     "errors.extractor_broken",
   "Download reported success but the file is missing or empty. Check disk space and antivirus exclusions, then retry.":
     "errors.output_missing",
+  "Downloaded streams are DRM-protected and cannot be merged. This content is not supported.":
+    "errors.drm_protected",
   "Course platforms can't be downloaded from a URL. Open the Courses page (requires the Courses plugin and a logged-in account).":
     "errors.course_platform_url",
 };
@@ -79,6 +81,8 @@ export function translateBackendError(
   if (lower.includes("tiktok") && lower.includes("blocking")) return t("errors.tiktok_blocked");
   if (lower.includes("download reported success but no matching file"))
     return t("errors.console_encoding");
+  if (lower.includes("invalid data found when processing input") || lower.includes("drm-protected"))
+    return t("errors.drm_protected");
 
   return stripped || msg;
 }

@@ -1279,6 +1279,7 @@
     "path_too_long": "ダウンロードフォルダのパスが長すぎます ({{current}}/{{limit}} 文字)。より短いフォルダを選択してください。",
     "console_encoding": "Console encoding issue (non-UTF-8 locale). Update yt-dlp in Settings → Dependencies, or run \"chcp 65001\" in a terminal and reopen the app.",
     "extractor_broken": "The site extractor is broken. Update yt-dlp in Settings → Dependencies, then retry.",
+    "drm_protected": "ダウンロードしたストリームはDRMで保護されているため結合できません。このコンテンツはサポートされていません。",
     "output_missing": "ダウンロードは完了しましたが、フォルダにファイルが見つからないか空です。ディスク容量とウイルス対策ソフトの設定を確認して、もう一度お試しください。",
     "course_platform_url": "コースプラットフォームはURLからダウンロードできません。コースページを開いてください（コースプラグインとログイン済みアカウントが必要です）。"
   },

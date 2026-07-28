@@ -1279,6 +1279,7 @@
     "path_too_long": "下載資料夾路徑過長 ({{current}}/{{limit}} 字元)。請選擇更短的資料夾。",
     "console_encoding": "Console encoding issue (non-UTF-8 locale). Update yt-dlp in Settings → Dependencies, or run \"chcp 65001\" in a terminal and reopen the app.",
     "extractor_broken": "The site extractor is broken. Update yt-dlp in Settings → Dependencies, then retry.",
+    "drm_protected": "下載的串流受 DRM 保護，無法合併。不支援此內容。",
     "output_missing": "下載已完成，但資料夾中沒有出現檔案（或檔案為空）。請檢查磁碟空間與防毒軟體設定後重試。",
     "course_platform_url": "課程平台無法透過 URL 下載。請開啟課程頁面（需要課程外掛並登入帳號）。"
   },

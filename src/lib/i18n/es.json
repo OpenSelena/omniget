@@ -1279,6 +1279,7 @@
     "path_too_long": "La ruta de la carpeta de descargas es demasiado larga ({{current}}/{{limit}} caracteres). Elige una más corta.",
     "console_encoding": "Problema de codificación de consola (locale no UTF-8). Actualiza yt-dlp en Configuración → Dependencias, o ejecuta \"chcp 65001\" en una terminal y reabre la app.",
     "extractor_broken": "El extractor del sitio está roto. Actualiza yt-dlp en Configuración → Dependencias y reintenta.",
+    "drm_protected": "Los streams descargados están protegidos por DRM y no se pueden combinar. Este contenido no es compatible.",
     "output_missing": "La descarga terminó, pero no apareció ningún archivo en la carpeta (o está vacío). Revisa el espacio en disco y el antivirus, y reintenta.",
     "course_platform_url": "Las plataformas de cursos no se pueden descargar desde una URL. Abre la página Cursos (requiere el plugin de Cursos y una cuenta con sesión iniciada)."
   },

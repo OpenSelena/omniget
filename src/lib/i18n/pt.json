@@ -1279,6 +1279,7 @@
     "path_too_long": "Caminho da pasta é muito longo ({{current}}/{{limit}} caracteres). Escolha uma pasta mais curta.",
     "console_encoding": "Console encoding issue (non-UTF-8 locale). Update yt-dlp in Settings → Dependencies, or run \"chcp 65001\" in a terminal and reopen the app.",
     "extractor_broken": "The site extractor is broken. Update yt-dlp in Settings → Dependencies, then retry.",
+    "drm_protected": "Os streams baixados são protegidos por DRM e não podem ser mesclados. Este conteúdo não é suportado.",
     "output_missing": "O download terminou, mas nenhum arquivo apareceu na pasta (ou está vazio). Verifique o espaço em disco e o antivírus e tente novamente.",
     "course_platform_url": "Plataformas de cursos não podem ser baixadas por URL. Abra a página Cursos (requer o plugin de Cursos e uma conta conectada)."
   },

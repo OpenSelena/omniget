@@ -498,10 +498,10 @@ pub async fn check_ytdlp_update(ytdlp: &Path) -> anyhow::Result<bool> {
 }
 
 fn proxy_args() -> Vec<String> {
-    vec![
-        "--proxy".to_string(),
-        crate::core::http_client::proxy_url().unwrap_or_default(),
-    ]
+    match crate::core::http_client::proxy_url() {
+        Some(url) => vec!["--proxy".to_string(), url],
+        None => Vec::new(),
+    }
 }
 
 fn redacted_proxy_url(url: &str) -> String {
@@ -519,11 +519,11 @@ fn proxy_log_label(proxy_url: Option<&str>) -> String {
         None => {
             let proxy = crate::core::http_client::get_proxy_snapshot();
             if proxy.enabled && proxy.host.trim().is_empty() {
-                "proxy=disabled (enabled but host is empty)".to_string()
+                "proxy=system/env fallback (enabled but host is empty)".to_string()
             } else if proxy.enabled {
-                "proxy=disabled (invalid proxy settings)".to_string()
+                "proxy=system/env fallback (invalid proxy settings)".to_string()
             } else {
-                "proxy=disabled".to_string()
+                "proxy=none (system/env honored if set)".to_string()
             }
         }
     }
@@ -1328,8 +1328,10 @@ pub async fn get_video_info(
                 log_hook::emit_log(dl_id, &line);
             }
         }
-        args.push("--proxy".to_string());
-        args.push(proxy.unwrap_or_default());
+        if let Some(proxy_url) = proxy {
+            args.push("--proxy".to_string());
+            args.push(proxy_url);
+        }
         args.extend(extra_flags.iter().cloned());
         args.push(url.to_string());
 
@@ -3087,6 +3089,11 @@ fn translate_ytdlp_error(stderr: &str) -> anyhow::Error {
     {
         return anyhow!(
             "This video requires login. Import cookies for this site in Settings → Cookies, then retry."
+        );
+    }
+    if lower.contains("invalid data found when processing input") {
+        return anyhow!(
+            "Downloaded streams are DRM-protected and cannot be merged. This content is not supported."
         );
     }
     if lower.contains("nsig extraction failed") || lower.contains("nsig") {
