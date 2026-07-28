@@ -2,6 +2,7 @@
   import { onMount, onDestroy } from "svelte";
   import { goto } from "$app/navigation";
   import { invoke } from "@tauri-apps/api/core";
+  import { listen, type UnlistenFn } from "@tauri-apps/api/event";
   import { t, locale } from "$lib/i18n";
   import { getSettings, updateSettings } from "$lib/stores/settings-store.svelte";
   import timeAgo from "$lib/time-ago";
@@ -23,7 +24,8 @@
   let games = $state<any[]>([]);
   let loadingHistory = $state(false);
   let autoAccept = $state(false);
-  let pollTimer: ReturnType<typeof setInterval> | null = null;
+  let liveTimer: ReturnType<typeof setInterval> | null = null;
+  let unlisteners: UnlistenFn[] = [];
 
   let champions = $state<Champion[]>([]);
   let championById = $derived(new Map(champions.map((c) => [c.id, c])));
@@ -254,6 +256,46 @@
       searchError = typeof e === "string" ? e : (e?.message ?? String(e));
     } finally {
       searchLoading = false;
+    }
+  }
+
+  let spectateLoading = $state(false);
+  let spectateError = $state("");
+
+  async function spectateSearched() {
+    const s = searchResult?.summoner;
+    if (!s?.puuid || spectateLoading) return;
+    spectateLoading = true;
+    spectateError = "";
+    try {
+      await invoke("league_spectate", {
+        puuid: s.puuid,
+        riotId: `${s.gameName}#${s.tagLine}`,
+      });
+    } catch (e: any) {
+      const raw = typeof e === "string" ? e : (e?.message ?? String(e));
+      spectateError = raw.includes(" 404") || raw.includes("not in")
+        ? ($t("league.spectate_not_in_game") as string)
+        : raw;
+    } finally {
+      spectateLoading = false;
+    }
+  }
+
+  let dodgeConfirming = $state(false);
+  let dodgeLoading = $state(false);
+
+  async function dodgeChampSelect() {
+    if (dodgeLoading) return;
+    dodgeLoading = true;
+    actionError = "";
+    try {
+      await invoke("league_dodge");
+    } catch (e: any) {
+      actionError = typeof e === "string" ? e : (e?.message ?? String(e));
+    } finally {
+      dodgeLoading = false;
+      dodgeConfirming = false;
     }
   }
 
@@ -680,7 +722,7 @@
     }
   }
 
-  function toggleLeagueFlag(field: "auto_pick" | "auto_ban" | "auto_lock" | "auto_runes") {
+  function toggleLeagueFlag(field: "auto_pick" | "auto_ban" | "auto_lock" | "auto_runes" | "auto_honor" | "auto_play_again" | "auto_reconnect") {
     const current = (settings?.league as any)?.[field] ?? false;
     updateSettings({ league: { [field]: !current } });
   }
@@ -750,6 +792,18 @@
     };
   }
 
+  // The backend keeps a websocket to the client and pushes changes; the only
+  // thing still polled is the in-game data server, which has no push channel.
+  $effect(() => {
+    if (phase === "InProgress") {
+      liveTimer = setInterval(refreshPhaseData, 4000);
+      return () => {
+        if (liveTimer) clearInterval(liveTimer);
+        liveTimer = null;
+      };
+    }
+  });
+
   onMount(() => {
     if (!enabled) return;
     loadNotes();
@@ -759,11 +813,38 @@
       .then((v) => { autoAccept = v; })
       .catch(() => {});
     refreshStatus();
-    pollTimer = setInterval(refreshStatus, 4000);
+    listen<any>("league-connected", (e) => {
+      status = {
+        connected: e.payload?.connected ?? false,
+        port: e.payload?.port ?? null,
+        region: e.payload?.region ?? null,
+      };
+      if (status.connected) {
+        refreshStatus();
+      } else {
+        summoner = null;
+        phase = "";
+        lobby = null;
+        champSelect = null;
+        liveGame = null;
+      }
+    }).then((u) => unlisteners.push(u));
+    listen<string>("league-phase", (e) => {
+      phase = e.payload ?? "";
+      refreshPhaseData();
+    }).then((u) => unlisteners.push(u));
+    listen<any>("league-champ-select", (e) => {
+      if (phase === "ChampSelect") champSelect = e.payload;
+    }).then((u) => unlisteners.push(u));
+    listen<any>("league-lobby", (e) => {
+      if (phase === "Lobby" || phase === "Matchmaking") lobby = e.payload;
+    }).then((u) => unlisteners.push(u));
   });
 
   onDestroy(() => {
-    if (pollTimer) clearInterval(pollTimer);
+    if (liveTimer) clearInterval(liveTimer);
+    for (const u of unlisteners) u();
+    unlisteners = [];
   });
 </script>
 
@@ -862,6 +943,15 @@
               <button class="button" onclick={() => action("league_reroll")}>{$t("league.reroll")}</button>
             </div>
           {/if}
+          <div class="dodge-row">
+            {#if dodgeConfirming}
+              <span class="dodge-warning">{$t("league.dodge_warning")}</span>
+              <button class="button" onclick={() => (dodgeConfirming = false)}>{$t("league.dodge_cancel")}</button>
+              <button class="button danger" onclick={dodgeChampSelect} disabled={dodgeLoading}>{$t("league.dodge_confirm")}</button>
+            {:else}
+              <button class="button subtle-danger" onclick={() => (dodgeConfirming = true)}>{$t("league.dodge")}</button>
+            {/if}
+          </div>
         </section>
       {:else if phase === "InProgress" && liveGame?.stats}
         <section class="card">
@@ -1229,7 +1319,13 @@
                 <span class="ranked-value">{rankLabel(r?.flex)}</span>
               </div>
             </div>
+            <button class="button" onclick={spectateSearched} disabled={spectateLoading}>
+              {spectateLoading ? $t("league.spectate_loading") : $t("league.spectate")}
+            </button>
           </section>
+          {#if spectateError}
+            <p class="action-error">{spectateError}</p>
+          {/if}
 
           {#if r?.stats?.games > 0}
             <section class="card">
@@ -1582,6 +1678,36 @@
             </button>
           </div>
         {/if}
+        <div class="divider"></div>
+        <div class="action-row">
+          <div class="action-col">
+            <span class="action-label">{$t("league.auto_honor")}</span>
+            <span class="action-hint">{$t("league.auto_honor_desc")}</span>
+          </div>
+          <button class="toggle" class:on={settings?.league?.auto_honor} onclick={() => toggleLeagueFlag("auto_honor")} role="switch" aria-checked={settings?.league?.auto_honor ?? false} aria-label={$t("league.auto_honor") as string}>
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
+        <div class="divider"></div>
+        <div class="action-row">
+          <div class="action-col">
+            <span class="action-label">{$t("league.auto_play_again")}</span>
+            <span class="action-hint">{$t("league.auto_play_again_desc")}</span>
+          </div>
+          <button class="toggle" class:on={settings?.league?.auto_play_again} onclick={() => toggleLeagueFlag("auto_play_again")} role="switch" aria-checked={settings?.league?.auto_play_again ?? false} aria-label={$t("league.auto_play_again") as string}>
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
+        <div class="divider"></div>
+        <div class="action-row">
+          <div class="action-col">
+            <span class="action-label">{$t("league.auto_reconnect")}</span>
+            <span class="action-hint">{$t("league.auto_reconnect_desc")}</span>
+          </div>
+          <button class="toggle" class:on={settings?.league?.auto_reconnect} onclick={() => toggleLeagueFlag("auto_reconnect")} role="switch" aria-checked={settings?.league?.auto_reconnect ?? false} aria-label={$t("league.auto_reconnect") as string}>
+            <span class="toggle-knob"></span>
+          </button>
+        </div>
       </section>
 
       {/if}
@@ -2895,6 +3021,36 @@
   .button:disabled {
     opacity: 0.6;
     cursor: default;
+  }
+
+  .button.danger {
+    background: var(--danger);
+    color: var(--on-status, var(--on-accent));
+    border-color: transparent;
+  }
+
+  .button.subtle-danger {
+    color: var(--danger);
+    border-color: color-mix(in oklab, var(--danger) 35%, transparent);
+    background: transparent;
+  }
+
+  .button.subtle-danger:hover {
+    background: color-mix(in oklab, var(--danger) 10%, transparent);
+  }
+
+  .dodge-row {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .dodge-warning {
+    font-size: 12.5px;
+    color: var(--text-secondary, var(--text));
+    margin-right: auto;
   }
 
   .toggle {

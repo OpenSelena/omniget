@@ -97,6 +97,9 @@ export type AppSettings = {
     auto_ban?: boolean;
     auto_lock?: boolean;
     auto_runes?: boolean;
+    auto_honor?: boolean;
+    auto_play_again?: boolean;
+    auto_reconnect?: boolean;
     pick_champions?: number[];
     ban_champions?: number[];
   };

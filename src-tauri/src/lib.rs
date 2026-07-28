@@ -484,7 +484,7 @@ pub fn run() {
             core::channels::init_from_disk();
             core::channel_poller::start(app.handle().clone());
             core::queue::start_scheduler(app.handle().clone());
-            commands::league::start_background();
+            commands::league::start_background(app.handle().clone());
             {
                 let app_handle = app.handle().clone();
                 tauri::async_runtime::spawn(async move {
@@ -735,6 +735,8 @@ pub fn run() {
             commands::league::league_champion_tiers,
             commands::league::league_champion_build,
             commands::league::league_ability_cooldowns,
+            commands::league::league_spectate,
+            commands::league::league_dodge,
             commands::bilibili_auth::bilibili_qr_generate,
             commands::bilibili_auth::bilibili_qr_poll,
             commands::bilibili_auth::bilibili_captcha_challenge,

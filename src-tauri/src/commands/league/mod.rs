@@ -1,5 +1,6 @@
 pub mod analysis;
 pub mod stats;
+pub mod ws;
 
 use once_cell::sync::Lazy;
 use serde::Serialize;
@@ -24,7 +25,6 @@ pub struct LeagueStatus {
 
 static CACHED_CLIENT: Lazy<Mutex<Option<LcuClient>>> = Lazy::new(|| Mutex::new(None));
 static AUTO_ACCEPT: AtomicBool = AtomicBool::new(false);
-static POLLER_STARTED: AtomicBool = AtomicBool::new(false);
 static CS_HANDLED: Lazy<Mutex<HashSet<i64>>> = Lazy::new(|| Mutex::new(HashSet::new()));
 
 fn extract_arg(cmdline: &str, key: &str) -> Option<String> {
@@ -196,8 +196,89 @@ async fn lcu_send_once(
     Ok(resp.json::<Value>().await.unwrap_or(Value::Null))
 }
 
+/// Static game data changes only with a patch, and finished games never change
+/// at all, so both are answered from memory instead of hitting the client again.
+enum CacheKind {
+    PatchStatic,
+    Immutable,
+}
+
+const PATCH_STATIC_TTL: std::time::Duration = std::time::Duration::from_secs(15 * 60);
+const IMMUTABLE_CAP: usize = 400;
+
+static PATCH_CACHE: Lazy<Mutex<std::collections::HashMap<String, (std::time::Instant, Value)>>> =
+    Lazy::new(|| Mutex::new(std::collections::HashMap::new()));
+static IMMUTABLE_CACHE: Lazy<
+    Mutex<(
+        std::collections::VecDeque<String>,
+        std::collections::HashMap<String, Value>,
+    )>,
+> = Lazy::new(|| Mutex::new((std::collections::VecDeque::new(), std::collections::HashMap::new())));
+
+fn cache_kind(path: &str) -> Option<CacheKind> {
+    if path.starts_with("/lol-game-data/assets/") || path == "/lol-perks/v1/perks" {
+        return Some(CacheKind::PatchStatic);
+    }
+    if path.starts_with("/lol-match-history/v1/games/")
+        || path.starts_with("/lol-match-history/v1/game-timelines/")
+    {
+        return Some(CacheKind::Immutable);
+    }
+    None
+}
+
+async fn cache_lookup(path: &str) -> Option<Value> {
+    match cache_kind(path)? {
+        CacheKind::PatchStatic => {
+            let cache = PATCH_CACHE.lock().await;
+            cache.get(path).and_then(|(when, value)| {
+                if when.elapsed() < PATCH_STATIC_TTL {
+                    Some(value.clone())
+                } else {
+                    None
+                }
+            })
+        }
+        CacheKind::Immutable => {
+            let cache = IMMUTABLE_CACHE.lock().await;
+            cache.1.get(path).cloned()
+        }
+    }
+}
+
+async fn cache_store(path: &str, value: &Value) {
+    if value.is_null() {
+        return;
+    }
+    match cache_kind(path) {
+        Some(CacheKind::PatchStatic) => {
+            let mut cache = PATCH_CACHE.lock().await;
+            cache.insert(path.to_string(), (std::time::Instant::now(), value.clone()));
+        }
+        Some(CacheKind::Immutable) => {
+            let mut cache = IMMUTABLE_CACHE.lock().await;
+            if cache.1.contains_key(path) {
+                return;
+            }
+            if cache.0.len() >= IMMUTABLE_CAP {
+                if let Some(evicted) = cache.0.pop_front() {
+                    cache.1.remove(&evicted);
+                }
+            }
+            cache.0.push_back(path.to_string());
+            cache.1.insert(path.to_string(), value.clone());
+        }
+        None => {}
+    }
+}
+
 async fn lcu_get_raw(client: &LcuClient, path: &str) -> Result<Value, String> {
-    lcu_send(client, reqwest::Method::GET, path, None).await
+    if let Some(cached) = cache_lookup(path).await {
+        return Ok(cached);
+    }
+    let value = lcu_send(client, reqwest::Method::GET, path, None).await?;
+    cache_store(path, &value).await;
+    Ok(value)
 }
 
 async fn lcu_post_raw(client: &LcuClient, path: &str) -> Result<Value, String> {
@@ -229,7 +310,6 @@ pub async fn league_status() -> LeagueStatus {
             region: None,
         };
     }
-    spawn_poller();
     match get_client().await {
         Ok(client) => LeagueStatus {
             connected: true,
@@ -2238,6 +2318,49 @@ fn estimated_ranks(level: i64) -> [i64; 4] {
     ranks
 }
 
+static HASTE_TABLE: Lazy<Mutex<Option<(std::time::Instant, std::collections::HashMap<i64, i64>)>>> =
+    Lazy::new(|| Mutex::new(None));
+const HASTE_TABLE_TTL: std::time::Duration = std::time::Duration::from_secs(6 * 60 * 60);
+
+/// Ability-haste per item, from the English game-data mirror. The client
+/// localises item text, so the number cannot be read from the local copy.
+async fn load_haste_table(http: &reqwest::Client) -> std::collections::HashMap<i64, i64> {
+    {
+        let cached = HASTE_TABLE.lock().await;
+        if let Some((when, table)) = cached.as_ref() {
+            if when.elapsed() < HASTE_TABLE_TTL {
+                return table.clone();
+            }
+        }
+    }
+    let items_data = http
+        .get("https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/items.json")
+        .send()
+        .await
+        .ok()
+        .and_then(|r| if r.status().is_success() { Some(r) } else { None });
+    let items_data = match items_data {
+        Some(r) => r.json::<Value>().await.unwrap_or(Value::Null),
+        None => Value::Null,
+    };
+    let mut table: std::collections::HashMap<i64, i64> = std::collections::HashMap::new();
+    if let Some(arr) = items_data.as_array() {
+        for item in arr {
+            let id = item.get("id").and_then(Value::as_i64).unwrap_or(0);
+            let desc = item.get("description").and_then(Value::as_str).unwrap_or("");
+            let haste = item_ability_haste(desc);
+            if id > 0 && haste > 0 {
+                table.insert(id, haste);
+            }
+        }
+    }
+    if !table.is_empty() {
+        let mut cached = HASTE_TABLE.lock().await;
+        *cached = Some((std::time::Instant::now(), table.clone()));
+    }
+    table
+}
+
 /// Live cooldown estimates for every champion in the running game.
 #[tauri::command]
 pub async fn league_ability_cooldowns() -> Result<Value, String> {
@@ -2258,32 +2381,7 @@ pub async fn league_ability_cooldowns() -> Result<Value, String> {
         return Err("no players in the live game".to_string());
     }
 
-    // Item descriptions and champion spell data both come from the client, so
-    // they always match the installed patch.
-    // The client localises item text, so the haste number is read from the
-    // English game-data mirror instead of the localised copy.
-    let items_data = http
-        .get("https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/items.json")
-        .send()
-        .await
-        .ok()
-        .and_then(|r| if r.status().is_success() { Some(r) } else { None });
-    let items_data = match items_data {
-        Some(r) => r.json::<Value>().await.unwrap_or(Value::Null),
-        None => Value::Null,
-    };
-    let mut haste_by_item: std::collections::HashMap<i64, i64> =
-        std::collections::HashMap::new();
-    if let Some(arr) = items_data.as_array() {
-        for item in arr {
-            let id = item.get("id").and_then(Value::as_i64).unwrap_or(0);
-            let desc = item.get("description").and_then(Value::as_str).unwrap_or("");
-            let haste = item_ability_haste(desc);
-            if id > 0 && haste > 0 {
-                haste_by_item.insert(id, haste);
-            }
-        }
-    }
+    let haste_by_item = load_haste_table(&http).await;
 
     let summary = lcu_get_raw(&client, "/lol-game-data/assets/v1/champion-summary.json")
         .await
@@ -2392,13 +2490,49 @@ pub async fn league_ability_cooldowns() -> Result<Value, String> {
     Ok(json!({ "players": rows, "estimated": true }))
 }
 
+/// Launches the spectator client on another player's running game.
+#[tauri::command]
+pub async fn league_spectate(puuid: String, riot_id: String) -> Result<(), String> {
+    ensure_enabled()?;
+    if puuid.is_empty() {
+        return Err("empty puuid".to_string());
+    }
+    let client = get_client().await?;
+    lcu_send(
+        &client,
+        reqwest::Method::POST,
+        "/lol-spectator/v1/spectate/launch",
+        Some(json!({
+            "allowObserveMode": "ALL",
+            "dropInSpectateGameId": riot_id,
+            "gameQueueType": "",
+            "puuid": puuid,
+            "spectatorKey": "",
+        })),
+    )
+    .await?;
+    Ok(())
+}
+
+/// Quits champion select through the login-session proxy, taking the dodge
+/// penalty. There is no supported endpoint for this, hence the raw invoke.
+#[tauri::command]
+pub async fn league_dodge() -> Result<(), String> {
+    ensure_enabled()?;
+    let client = get_client().await?;
+    let args = urlencoding::encode(r#"["","teambuilder-draft","quitV2",""]"#).into_owned();
+    let path = format!(
+        "/lol-login/v1/session/invoke?destination=lcdsServiceProxy&method=call&args={}",
+        args
+    );
+    lcu_send(&client, reqwest::Method::POST, &path, None).await?;
+    Ok(())
+}
+
 #[tauri::command]
 pub async fn league_auto_accept_set(enabled: bool) -> Result<(), String> {
     ensure_enabled()?;
     AUTO_ACCEPT.store(enabled, Ordering::Relaxed);
-    if enabled {
-        spawn_poller();
-    }
     tracing::info!("[league] auto-accept {}", if enabled { "on" } else { "off" });
     Ok(())
 }
@@ -2422,8 +2556,8 @@ fn action_champion_lists(
 async fn handle_champ_select(
     client: &LcuClient,
     settings: &omniget_core::models::settings::LeagueSettings,
+    session: &Value,
 ) -> Result<(), String> {
-    let session = lcu_get_raw(client, "/lol-champ-select/v1/session").await?;
     let cell = session
         .get("localPlayerCellId")
         .and_then(Value::as_i64)
@@ -2561,58 +2695,8 @@ async fn handle_champ_select(
     Ok(())
 }
 
-fn spawn_poller() {
-    if POLLER_STARTED.swap(true, Ordering::SeqCst) {
-        return;
-    }
-    tauri::async_runtime::spawn(async move {
-        loop {
-            tokio::time::sleep(std::time::Duration::from_secs(2)).await;
-            let settings = league_settings();
-            if !settings.enabled {
-                continue;
-            }
-            let auto_accept = AUTO_ACCEPT.load(Ordering::Relaxed);
-            let champ_select_auto = settings.auto_pick || settings.auto_ban;
-            if !auto_accept && !champ_select_auto {
-                continue;
-            }
-            let client = match get_client().await {
-                Ok(c) => c,
-                Err(_) => continue,
-            };
-            let phase = match lcu_get_raw(&client, "/lol-gameflow/v1/gameflow-phase").await {
-                Ok(v) => v,
-                Err(_) => continue,
-            };
-            let phase = phase.as_str().unwrap_or("");
-            if phase == "ReadyCheck" && auto_accept {
-                if let Err(e) =
-                    lcu_post_raw(&client, "/lol-matchmaking/v1/ready-check/accept").await
-                {
-                    tracing::warn!("[league] auto-accept failed: {}", e);
-                } else {
-                    tracing::info!("[league] ready check accepted");
-                }
-            }
-            if phase == "ChampSelect" && champ_select_auto {
-                if let Err(e) = handle_champ_select(&client, &settings).await {
-                    tracing::debug!("[league] champ select tick: {}", e);
-                }
-            } else if phase != "ChampSelect" {
-                let mut handled = CS_HANDLED.lock().await;
-                if !handled.is_empty() {
-                    handled.clear();
-                }
-            }
-        }
-    });
-}
-
-pub fn start_background() {
+pub fn start_background(app: tauri::AppHandle) {
     let settings = crate::storage::config::load_settings_standalone();
-    if settings.league.enabled {
-        AUTO_ACCEPT.store(settings.league.auto_accept, Ordering::Relaxed);
-        spawn_poller();
-    }
+    AUTO_ACCEPT.store(settings.league.auto_accept, Ordering::Relaxed);
+    ws::start(app);
 }

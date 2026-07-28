@@ -48,6 +48,12 @@ pub struct LeagueSettings {
     #[serde(default)]
     pub auto_runes: bool,
     #[serde(default)]
+    pub auto_honor: bool,
+    #[serde(default)]
+    pub auto_play_again: bool,
+    #[serde(default)]
+    pub auto_reconnect: bool,
+    #[serde(default)]
     pub pick_champions: Vec<i64>,
     #[serde(default)]
     pub ban_champions: Vec<i64>,
@@ -66,6 +72,9 @@ impl Default for LeagueSettings {
             auto_ban: false,
             auto_lock: false,
             auto_runes: false,
+            auto_honor: false,
+            auto_play_again: false,
+            auto_reconnect: false,
             pick_champions: Vec::new(),
             ban_champions: Vec::new(),
         }
