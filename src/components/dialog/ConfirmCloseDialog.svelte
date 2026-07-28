@@ -95,12 +95,12 @@
   }
 
   .button-danger {
-    background: var(--red, #ed2236);
-    color: var(--on-accent, #fff);
+    background: var(--danger);
+    color: var(--on-status);
   }
 
   .button-danger:hover {
-    filter: brightness(1.08);
+    background: color-mix(in srgb, var(--danger) 88%, var(--bg-overlay));
   }
 
   .button:focus-visible {

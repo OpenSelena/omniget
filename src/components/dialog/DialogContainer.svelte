@@ -71,9 +71,9 @@
 
 <style>
   .dialog-container {
-    border: none;
-    border-radius: var(--radius-lg);
-    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xl);
+    background: var(--popup-bg);
     color: var(--text);
     padding: 0;
     width: 92%;
@@ -84,9 +84,7 @@
   }
 
   .dialog-container::backdrop {
-    background: rgba(0, 0, 0, 0.55);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: var(--dialog-backdrop);
     animation: backdrop-in var(--duration-base) var(--ease-out);
   }
 

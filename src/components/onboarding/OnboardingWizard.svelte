@@ -626,22 +626,20 @@
   .install-all-btn {
     margin-top: calc(var(--padding) / 2);
     padding: calc(var(--padding) / 2) var(--padding);
-    font-size: 13px;
-    background: var(--blue);
-    color: #fff;
+    font-size: var(--text-base);
+    background: var(--cta);
+    color: var(--on-cta);
     box-shadow: none;
   }
 
   @media (hover: hover) {
     .install-all-btn:hover {
-      opacity: 0.9;
-      background: var(--blue);
+      background: var(--cta-hover);
     }
   }
 
   .install-all-btn:active {
-    opacity: 0.85;
-    background: var(--blue);
+    background: var(--cta-press);
   }
 
   .wizard-footer {
@@ -666,7 +664,7 @@
   }
 
   .dot.active {
-    background: var(--blue);
+    background: var(--accent);
   }
 
   .footer-actions {
@@ -683,25 +681,23 @@
   .next-btn,
   .finish-btn {
     padding: calc(var(--padding) / 2) calc(var(--padding) * 1.5);
-    font-size: 13px;
+    font-size: var(--text-base);
     font-weight: 500;
-    background: var(--secondary);
-    color: var(--secondary);
+    background: var(--cta);
+    color: var(--on-cta);
     box-shadow: none;
   }
 
   @media (hover: hover) {
     .next-btn:hover,
     .finish-btn:hover {
-      opacity: 0.9;
-      background: var(--secondary);
+      background: var(--cta-hover);
     }
   }
 
   .next-btn:active,
   .finish-btn:active {
-    opacity: 0.85;
-    background: var(--secondary);
+    background: var(--cta-press);
   }
 
   .next-btn:focus-visible,

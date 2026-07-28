@@ -141,7 +141,7 @@
     max-width: 480px;
     max-height: 80vh;
     animation: dialog-in 0.15s ease-out;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    box-shadow: var(--elev-3);
   }
 
   .changelog-dialog::backdrop {
@@ -222,12 +222,12 @@
   }
 
   .version-badge {
-    font-size: 11px;
+    font-size: var(--text-xs);
     font-weight: 500;
-    color: var(--blue);
-    background: rgba(47, 138, 249, 0.12);
+    color: var(--accent-hi);
+    background: var(--accent-soft);
     padding: 2px 8px;
-    border-radius: 6px;
+    border-radius: var(--radius-full);
   }
 
   .close-btn {
