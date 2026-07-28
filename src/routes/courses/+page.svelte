@@ -107,6 +107,10 @@
     if (!usingFallback) {
       for (const platform of platforms) {
         authStatus[platform.id] = { checked: false, email: null, error: false };
+        if (!platform.commands?.check_session) {
+          authStatus[platform.id] = { checked: true, email: null, error: true };
+          continue;
+        }
         pluginInvoke<string>("courses", platform.commands.check_session)
           .then((email) => {
             console.log(`[courses] ${platform.id} session:`, email);

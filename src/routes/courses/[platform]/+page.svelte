@@ -380,7 +380,11 @@
       showToast("info", $t("toast.download_preparing"));
     } catch (e: any) {
       const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
-      showToast("error", msg);
+      if (msg.includes("Unknown command") || msg.includes("not found") || msg.includes("No handler")) {
+        showToast("error", $t("courses.update_plugin_for_platform"));
+      } else {
+        showToast("error", msg);
+      }
     }
   }
 

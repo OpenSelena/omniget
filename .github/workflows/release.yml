@@ -91,6 +91,20 @@ jobs:
 
             **Easier alternative**: download the `.deb` instead — works out of the
             box on Debian 12+ and Ubuntu 22.04+.
+
+            ---
+
+            ### macOS users — "OmniGet is damaged and can't be opened"
+
+            The app is not notarized with Apple yet, so Gatekeeper quarantines it.
+            After moving the app to `/Applications`, run:
+
+            ```bash
+            xattr -cr /Applications/omniget.app
+            ```
+
+            Then open it normally. If it still refuses, allow it under
+            **System Settings → Privacy & Security**.
           releaseDraft: true
           prerelease: false
           includeUpdaterJson: false
