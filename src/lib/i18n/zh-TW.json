@@ -1220,6 +1220,12 @@
   "marketplace": {
     "title": "插件市场",
     "installed": "已安装",
+    "installed_hint": "Installed plugins show up in the sidebar. Toggle one off to hide it without uninstalling.",
+    "section_in_sidebar": "In the sidebar",
+    "section_hidden": "Hidden",
+    "status_in_sidebar": "In the sidebar",
+    "status_hidden": "Hidden",
+    "show_in_sidebar": "Show in sidebar",
     "browse": "发现",
     "no_plugins": "还没有安装任何插件",
     "enable": "启用",

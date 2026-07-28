@@ -1220,6 +1220,12 @@
   "marketplace": {
     "title": "Marketplace",
     "installed": "Installati",
+    "installed_hint": "Installed plugins show up in the sidebar. Toggle one off to hide it without uninstalling.",
+    "section_in_sidebar": "In the sidebar",
+    "section_hidden": "Hidden",
+    "status_in_sidebar": "In the sidebar",
+    "status_hidden": "Hidden",
+    "show_in_sidebar": "Show in sidebar",
     "browse": "Scopri",
     "no_plugins": "Nessun plugin installato",
     "enable": "Attiva",

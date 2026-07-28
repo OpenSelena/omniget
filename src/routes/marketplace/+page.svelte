@@ -539,13 +539,13 @@
 
   .plugin-card {
     background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    box-shadow: var(--elev-1);
-    padding: var(--space-5);
+    padding: var(--space-4);
     display: flex;
     flex-direction: column;
-    gap: var(--space-3);
-    transition: transform var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
+    gap: var(--space-2);
+    transition: background var(--duration-fast) var(--ease-out);
   }
 
   .plugin-card.skeleton {
@@ -586,17 +586,13 @@
 
   @media (hover: hover) {
     .plugin-card:hover {
-      transform: translateY(-1px);
-      box-shadow: var(--elev-2);
+      background: var(--surface-hi);
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .plugin-card {
       transition: none;
-    }
-    .plugin-card:hover {
-      transform: none;
     }
   }
 
@@ -694,7 +690,7 @@
   }
 
   .plugin-card.active-sidebar {
-    background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+    background: var(--surface);
   }
 
   .status-pill {
@@ -818,21 +814,26 @@
   }
 
   .uninstall-btn {
-    padding: 6px 14px;
-    font-size: 12px;
+    padding: 4px 12px;
+    font-size: var(--text-sm);
     font-weight: 500;
     border: none;
-    border-radius: calc(var(--border-radius) - 2px);
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    background: var(--button);
-    color: var(--red);
-    box-shadow: var(--button-box-shadow);
+    background: transparent;
+    color: var(--text-muted);
   }
 
   @media (hover: hover) {
     .uninstall-btn:hover {
-      background: var(--button-hover);
+      background: color-mix(in srgb, var(--danger) 10%, transparent);
+      color: var(--danger);
     }
+  }
+
+  .uninstall-btn:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
   }
 
   .install-btn:disabled {
