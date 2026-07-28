@@ -100,6 +100,8 @@ export type AppSettings = {
     auto_honor?: boolean;
     auto_play_again?: boolean;
     auto_reconnect?: boolean;
+    auto_trade?: string;
+    auto_message?: string;
     pick_champions?: number[];
     ban_champions?: number[];
   };

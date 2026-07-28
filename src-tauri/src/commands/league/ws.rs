@@ -12,6 +12,9 @@ use tokio_tungstenite::Connector;
 static APP: OnceCell<tauri::AppHandle> = OnceCell::new();
 static STARTED: AtomicBool = AtomicBool::new(false);
 static WS_CONNECTED: AtomicBool = AtomicBool::new(false);
+static MESSAGE_SENT: AtomicBool = AtomicBool::new(false);
+static TRADES_HANDLED: once_cell::sync::Lazy<tokio::sync::Mutex<std::collections::HashSet<i64>>> =
+    once_cell::sync::Lazy::new(|| tokio::sync::Mutex::new(std::collections::HashSet::new()));
 
 pub fn is_connected() -> bool {
     WS_CONNECTED.load(Ordering::Relaxed)
@@ -175,8 +178,9 @@ async fn handle_event(client: &LcuClient, value: &Value) {
         }
         "/lol-champ-select/v1/session" => {
             if event_type == "Delete" {
-                let mut handled = super::CS_HANDLED.lock().await;
-                handled.clear();
+                super::CS_HANDLED.lock().await.clear();
+                TRADES_HANDLED.lock().await.clear();
+                MESSAGE_SENT.store(false, Ordering::SeqCst);
                 emit("league-champ-select", Value::Null);
                 return;
             }
@@ -187,6 +191,8 @@ async fn handle_event(client: &LcuClient, value: &Value) {
                     tracing::debug!("[league] champ select handling: {}", e);
                 }
             }
+            handle_trades(client, &settings, &data).await;
+            send_auto_message(client, &settings);
         }
         "/lol-lobby/v2/lobby" => {
             emit(
@@ -235,13 +241,78 @@ async fn on_phase(client: &LcuClient, phase: &str) {
         }
         _ => {
             if phase != "ChampSelect" {
-                let mut handled = super::CS_HANDLED.lock().await;
-                if !handled.is_empty() {
-                    handled.clear();
-                }
+                super::CS_HANDLED.lock().await.clear();
+                TRADES_HANDLED.lock().await.clear();
+                MESSAGE_SENT.store(false, Ordering::SeqCst);
             }
         }
     }
+}
+
+/// Answers incoming champion-trade requests according to the configured
+/// strategy; anything other than "accept" or "decline" leaves them alone.
+async fn handle_trades(
+    client: &LcuClient,
+    settings: &omniget_core::models::settings::LeagueSettings,
+    session: &Value,
+) {
+    let strategy = settings.auto_trade.as_str();
+    if strategy != "accept" && strategy != "decline" {
+        return;
+    }
+    let trades: Vec<Value> = session
+        .get("trades")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default();
+    for trade in trades {
+        let state = trade.get("state").and_then(Value::as_str).unwrap_or("");
+        let id = trade.get("id").and_then(Value::as_i64).unwrap_or(-1);
+        if state != "RECEIVED" || id < 0 {
+            continue;
+        }
+        {
+            let handled = TRADES_HANDLED.lock().await;
+            if handled.contains(&id) {
+                continue;
+            }
+        }
+        let path = format!(
+            "/lol-champ-select/v1/session/trades/{}/{}",
+            id,
+            if strategy == "accept" { "accept" } else { "decline" }
+        );
+        match lcu_post_raw(client, &path).await {
+            Ok(_) => {
+                TRADES_HANDLED.lock().await.insert(id);
+                tracing::info!("[league] trade request {}: {}ed", id, strategy);
+            }
+            Err(e) => tracing::debug!("[league] trade {} failed: {}", strategy, e),
+        }
+    }
+}
+
+/// Posts the configured greeting once per champion select. The chat room can
+/// lag behind the session by a few seconds, so the send is retried briefly.
+fn send_auto_message(
+    client: &LcuClient,
+    settings: &omniget_core::models::settings::LeagueSettings,
+) {
+    let text = settings.auto_message.trim().to_string();
+    if text.is_empty() || MESSAGE_SENT.swap(true, Ordering::SeqCst) {
+        return;
+    }
+    let client = client.clone();
+    tauri::async_runtime::spawn(async move {
+        for _ in 0..6 {
+            if super::send_champ_select_chat(&client, &text).await.is_ok() {
+                tracing::info!("[league] champ select greeting sent");
+                return;
+            }
+            tokio::time::sleep(std::time::Duration::from_secs(2)).await;
+        }
+        tracing::debug!("[league] champ select greeting never sent");
+    });
 }
 
 /// Honors one eligible ally from the end-of-game ballot. The lobby members the

@@ -54,6 +54,10 @@ pub struct LeagueSettings {
     #[serde(default)]
     pub auto_reconnect: bool,
     #[serde(default)]
+    pub auto_trade: String,
+    #[serde(default)]
+    pub auto_message: String,
+    #[serde(default)]
     pub pick_champions: Vec<i64>,
     #[serde(default)]
     pub ban_champions: Vec<i64>,
@@ -75,6 +79,8 @@ impl Default for LeagueSettings {
             auto_honor: false,
             auto_play_again: false,
             auto_reconnect: false,
+            auto_trade: String::new(),
+            auto_message: String::new(),
             pick_champions: Vec::new(),
             ban_champions: Vec::new(),
         }

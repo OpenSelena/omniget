@@ -702,6 +702,10 @@ fn compute_history_stats(games: &[Value], puuid: &str) -> Value {
     let mut streak_done = false;
     let mut champ_games: std::collections::HashMap<i64, (usize, usize)> =
         std::collections::HashMap::new();
+    let mut flash_on_d = 0usize;
+    let mut flash_on_f = 0usize;
+    let mut total_damage = 0.0f64;
+    let mut total_gold = 0.0f64;
 
     for game in games {
         let participant = game
@@ -742,6 +746,20 @@ fn compute_history_stats(games: &[Value], puuid: &str) -> Value {
         kills += stats.get("kills").and_then(Value::as_i64).unwrap_or(0);
         deaths += stats.get("deaths").and_then(Value::as_i64).unwrap_or(0);
         assists += stats.get("assists").and_then(Value::as_i64).unwrap_or(0);
+        total_damage += stats
+            .get("totalDamageDealtToChampions")
+            .and_then(Value::as_f64)
+            .unwrap_or(0.0);
+        total_gold += stats.get("goldEarned").and_then(Value::as_f64).unwrap_or(0.0);
+        // Slot 1 is the D key, slot 2 the F key; Flash is spell id 4.
+        match (
+            participant.get("spell1Id").and_then(Value::as_i64),
+            participant.get("spell2Id").and_then(Value::as_i64),
+        ) {
+            (Some(4), _) => flash_on_d += 1,
+            (_, Some(4)) => flash_on_f += 1,
+            _ => {}
+        }
         if !streak_done {
             match streak_kind {
                 None => {
@@ -808,7 +826,24 @@ fn compute_history_stats(games: &[Value], puuid: &str) -> Value {
         if kda <= 1.5 && deaths > 0 {
             insights.push("low_kda");
         }
+        if flash_on_d > 0 && flash_on_f > 0 {
+            insights.push("flash_swap");
+        }
+        if total_gold > 0.0 {
+            let ratio = total_damage / total_gold;
+            if ratio >= 1.3 {
+                insights.push("high_damage_efficiency");
+            } else if ratio <= 0.65 {
+                insights.push("low_damage_efficiency");
+            }
+        }
     }
+
+    let damage_per_gold = if total_gold > 0.0 {
+        json!(((total_damage / total_gold) * 100.0).round() / 100.0)
+    } else {
+        Value::Null
+    };
 
     json!({
         "games": total,
@@ -818,6 +853,7 @@ fn compute_history_stats(games: &[Value], puuid: &str) -> Value {
         "streak": { "win": streak_kind.unwrap_or(false), "length": streak_len },
         "topChampions": top.iter().map(|(id, g, w)| json!({ "championId": id, "games": g, "wins": w })).collect::<Vec<_>>(),
         "insights": insights,
+        "damagePerGold": damage_per_gold,
     })
 }
 
@@ -1434,6 +1470,99 @@ fn champion_records_json(records: &[analysis::ChampionRecord]) -> Vec<Value> {
         .collect()
 }
 
+/// Timeline-derived aggressiveness markers: kills taken alone and deaths
+/// before the 15-minute mark, averaged over recent Summoner's Rift games.
+async fn deep_timeline_stats(client: &LcuClient, puuid: &str, games: &[Value]) -> Value {
+    let ids: Vec<i64> = games
+        .iter()
+        .filter(|g| g.get("mapId").and_then(Value::as_i64) == Some(11))
+        .filter_map(|g| g.get("gameId").and_then(Value::as_i64))
+        .take(8)
+        .collect();
+
+    let mut tasks = Vec::new();
+    for game_id in ids {
+        let task_client = client.clone();
+        let task_puuid = puuid.to_string();
+        tasks.push(tauri::async_runtime::spawn(async move {
+            let detail = lcu_get_raw(
+                &task_client,
+                &format!("/lol-match-history/v1/games/{}", game_id),
+            )
+            .await
+            .ok()?;
+            let timeline = lcu_get_raw(
+                &task_client,
+                &format!("/lol-match-history/v1/game-timelines/{}", game_id),
+            )
+            .await
+            .ok()?;
+            let pid = detail
+                .get("participantIdentities")
+                .and_then(Value::as_array)?
+                .iter()
+                .find(|i| {
+                    i.get("player")
+                        .and_then(|p| p.get("puuid"))
+                        .and_then(Value::as_str)
+                        == Some(task_puuid.as_str())
+                })
+                .and_then(|i| i.get("participantId").and_then(Value::as_i64))?;
+
+            let mut solo_kills = 0u32;
+            let mut early_deaths = 0u32;
+            for frame in timeline.get("frames").and_then(Value::as_array)? {
+                for event in frame
+                    .get("events")
+                    .and_then(Value::as_array)
+                    .unwrap_or(&Vec::new())
+                {
+                    if event.get("type").and_then(Value::as_str) != Some("CHAMPION_KILL") {
+                        continue;
+                    }
+                    let ts = event.get("timestamp").and_then(Value::as_i64).unwrap_or(0);
+                    if event.get("killerId").and_then(Value::as_i64) == Some(pid) {
+                        let assisted = event
+                            .get("assistingParticipantIds")
+                            .and_then(Value::as_array)
+                            .map(|a| !a.is_empty())
+                            .unwrap_or(false);
+                        if !assisted {
+                            solo_kills += 1;
+                        }
+                    }
+                    if event.get("victimId").and_then(Value::as_i64) == Some(pid)
+                        && ts <= 900_000
+                    {
+                        early_deaths += 1;
+                    }
+                }
+            }
+            Some((solo_kills, early_deaths))
+        }));
+    }
+
+    let mut analysed = 0u32;
+    let mut solo_total = 0u32;
+    let mut early_total = 0u32;
+    for task in tasks {
+        if let Ok(Some((solo, early))) = task.await {
+            analysed += 1;
+            solo_total += solo;
+            early_total += early;
+        }
+    }
+
+    if analysed == 0 {
+        return Value::Null;
+    }
+    json!({
+        "analysedGames": analysed,
+        "soloKillsPerGame": ((solo_total as f64 / analysed as f64) * 10.0).round() / 10.0,
+        "earlyDeathsPerGame": ((early_total as f64 / analysed as f64) * 10.0).round() / 10.0,
+    })
+}
+
 /// Resolves a Riot ID to a full profile: rank, level, champion records and
 /// mastery, in the shape a profile page needs.
 #[tauri::command]
@@ -1484,12 +1613,14 @@ pub async fn league_search_player(game_name: String, tag_line: String) -> Result
         .cloned()
         .unwrap_or_default();
     let records = champion_records_from_history(&games);
+    let deep = deep_timeline_stats(&client, &puuid, &games).await;
 
     Ok(json!({
         "summoner": summoner,
         "report": profile,
         "champions": champion_records_json(&records),
         "games": games,
+        "deep": deep,
     }))
 }
 
@@ -1951,7 +2082,11 @@ pub async fn league_send_chat(message: String) -> Result<(), String> {
         return Err("empty message".to_string());
     }
     let client = get_client().await?;
-    let conversations = lcu_get_raw(&client, "/lol-chat/v1/conversations").await?;
+    send_champ_select_chat(&client, text).await
+}
+
+async fn send_champ_select_chat(client: &LcuClient, text: &str) -> Result<(), String> {
+    let conversations = lcu_get_raw(client, "/lol-chat/v1/conversations").await?;
     let target = conversations
         .as_array()
         .and_then(|arr| {
@@ -2399,6 +2534,38 @@ pub async fn league_ability_cooldowns() -> Result<Value, String> {
         }
     }
 
+    // Summoner spells are matched by their localized name, since that is the
+    // only identifier the in-game data server exposes.
+    let spell_meta = lcu_get_raw(&client, "/lol-game-data/assets/v1/summoner-spells.json")
+        .await
+        .unwrap_or(Value::Null);
+    let mut spell_by_name: std::collections::HashMap<String, (f64, String)> =
+        std::collections::HashMap::new();
+    if let Some(arr) = spell_meta.as_array() {
+        for spell in arr {
+            if let (Some(name), Some(cd)) = (
+                spell.get("name").and_then(Value::as_str),
+                spell.get("cooldown").and_then(Value::as_f64),
+            ) {
+                let icon = spell
+                    .get("iconPath")
+                    .and_then(Value::as_str)
+                    .unwrap_or("")
+                    .to_string();
+                // Game-mode variants reuse the same name with a zero cooldown;
+                // a real cooldown must never be replaced by one of those.
+                spell_by_name
+                    .entry(name.to_string())
+                    .and_modify(|existing| {
+                        if existing.0 <= 0.0 && cd > 0.0 {
+                            *existing = (cd, icon.clone());
+                        }
+                    })
+                    .or_insert((cd, icon));
+            }
+        }
+    }
+
     let mut rows: Vec<Value> = Vec::new();
     let mut spell_cache: std::collections::HashMap<i64, Value> =
         std::collections::HashMap::new();
@@ -2473,6 +2640,28 @@ pub async fn league_ability_cooldowns() -> Result<Value, String> {
             })
             .unwrap_or_default();
 
+        // Boots of Lucidity are the only summoner-haste source visible from
+        // item data; runes are hidden, so the number stays an estimate.
+        let summoner_haste = if item_ids.contains(&3158) { 10 } else { 0 };
+        let spell_slots = ["summonerSpellOne", "summonerSpellTwo"];
+        let spell_timers: Vec<Value> = spell_slots
+            .iter()
+            .filter_map(|slot| {
+                let name = p
+                    .get("summonerSpells")
+                    .and_then(|s| s.get(slot))
+                    .and_then(|s| s.get("displayName"))
+                    .and_then(Value::as_str)?;
+                let (cd, icon) = spell_by_name.get(name).cloned().unwrap_or((0.0, String::new()));
+                Some(json!({
+                    "name": name,
+                    "baseCooldown": cd,
+                    "cooldown": haste_cooldown(cd, summoner_haste),
+                    "iconPath": icon,
+                }))
+            })
+            .collect();
+
         rows.push(json!({
             "riotId": p.get("riotId"),
             "championName": p.get("championName"),
@@ -2484,6 +2673,7 @@ pub async fn league_ability_cooldowns() -> Result<Value, String> {
             "items": item_ids,
             "abilities": abilities,
             "summonerSpells": p.get("summonerSpells"),
+            "spellTimers": spell_timers,
         }));
     }
 

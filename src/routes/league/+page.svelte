@@ -1,3 +1,9 @@
+<script lang="ts" module>
+  // Survives remounts so the same lobby is not counted as a new encounter
+  // every time the page is opened.
+  const recordedEncounters = new Set<string>();
+</script>
+
 <script lang="ts">
   import { onMount, onDestroy } from "svelte";
   import { goto } from "$app/navigation";
@@ -48,6 +54,45 @@
   let openNotes = $state<Record<string, boolean>>({});
 
   const NOTES_KEY = "league-player-notes";
+  const ENCOUNTERS_KEY = "league-encounters";
+
+  type Encounter = { count: number; lastSeen: number; name?: string };
+  let encounters = $state<Record<string, Encounter>>({});
+
+  function loadEncounters() {
+    try {
+      encounters = JSON.parse(localStorage.getItem(ENCOUNTERS_KEY) ?? "{}");
+    } catch {
+      encounters = {};
+    }
+  }
+
+  function recordEncounters(players: ScoutPlayer[]) {
+    const myPuuid = summoner?.puuid ?? "";
+    let changed = false;
+    const next = { ...encounters };
+    for (const p of players) {
+      if (!p.puuid || p.puuid === myPuuid || recordedEncounters.has(p.puuid)) continue;
+      recordedEncounters.add(p.puuid);
+      const e = next[p.puuid] ?? { count: 0, lastSeen: 0 };
+      next[p.puuid] = {
+        count: e.count + 1,
+        lastSeen: Date.now(),
+        name: p.gameName ? `${p.gameName}#${p.tagLine}` : e.name,
+      };
+      changed = true;
+    }
+    if (changed) {
+      encounters = next;
+      localStorage.setItem(ENCOUNTERS_KEY, JSON.stringify(next));
+    }
+  }
+
+  function timesSeenBefore(puuid: string): number {
+    const e = encounters[puuid];
+    if (!e) return 0;
+    return recordedEncounters.has(puuid) ? e.count - 1 : e.count;
+  }
 
   const TAG_KEYS: Record<string, string> = {
     hot_streak: "league.tag_hot_streak",
@@ -57,6 +102,9 @@
     one_trick: "league.tag_one_trick",
     high_kda: "league.tag_high_kda",
     low_kda: "league.tag_low_kda",
+    flash_swap: "league.tag_flash_swap",
+    high_damage_efficiency: "league.tag_high_damage_efficiency",
+    low_damage_efficiency: "league.tag_low_damage_efficiency",
   };
 
   function loadNotes() {
@@ -79,6 +127,7 @@
     try {
       const data = await invoke<any>("league_game_players");
       scoutPlayers = (data?.players ?? []).filter((p: any) => p);
+      recordEncounters(scoutPlayers);
       for (const p of scoutPlayers) {
         if (!p.puuid || scoutReports[p.puuid]) continue;
         invoke<any>("league_player_report", { puuid: p.puuid, withImpact: false })
@@ -539,6 +588,90 @@
     (cooldowns?.players ?? []).filter((p: any) => p.team && p.team !== myTeam)
   );
 
+  let spellTimers = $state<Record<string, number>>({});
+  let timerNow = $state(Date.now());
+
+  $effect(() => {
+    if (Object.keys(spellTimers).length === 0) return;
+    const tick = setInterval(() => {
+      timerNow = Date.now();
+      const expired = Object.entries(spellTimers).filter(([, end]) => end <= Date.now());
+      if (expired.length > 0) {
+        const next = { ...spellTimers };
+        for (const [key] of expired) delete next[key];
+        spellTimers = next;
+      }
+    }, 500);
+    return () => clearInterval(tick);
+  });
+
+  function toggleSpellTimer(riotId: string, spell: any) {
+    const key = `${riotId}:${spell.name}`;
+    if (spellTimers[key]) {
+      const next = { ...spellTimers };
+      delete next[key];
+      spellTimers = next;
+    } else if (spell.cooldown > 0) {
+      timerNow = Date.now();
+      spellTimers = { ...spellTimers, [key]: Date.now() + spell.cooldown * 1000 };
+    }
+  }
+
+  function spellRemaining(riotId: string, spell: any): number | null {
+    const end = spellTimers[`${riotId}:${spell.name}`];
+    if (!end) return null;
+    return Math.max(0, Math.ceil((end - timerNow) / 1000));
+  }
+
+  let expandedGame = $state<number | null>(null);
+  let gameDetails = $state<Record<number, any>>({});
+  let gameDetailLoading = $state<number | null>(null);
+
+  async function toggleGameDetail(gameId: number) {
+    if (expandedGame === gameId) {
+      expandedGame = null;
+      return;
+    }
+    expandedGame = gameId;
+    if (gameDetails[gameId]) return;
+    gameDetailLoading = gameId;
+    try {
+      const detail = await invoke<any>("league_get", {
+        path: `/lol-match-history/v1/games/${gameId}`,
+      });
+      gameDetails = { ...gameDetails, [gameId]: detail };
+    } catch {
+      gameDetails = { ...gameDetails, [gameId]: null };
+    } finally {
+      gameDetailLoading = null;
+    }
+  }
+
+  function scoreboardTeams(detail: any): { teamId: number; players: any[] }[] {
+    const participants: any[] = detail?.participants ?? [];
+    const identities: any[] = detail?.participantIdentities ?? [];
+    const nameOf = (pid: number): string => {
+      const player = identities.find((i) => i.participantId === pid)?.player;
+      if (!player) return "";
+      return player.gameName || player.summonerName || "";
+    };
+    const rows = participants.map((p) => ({
+      participantId: p.participantId,
+      teamId: p.teamId,
+      championId: p.championId,
+      name: nameOf(p.participantId),
+      kills: p.stats?.kills ?? 0,
+      deaths: p.stats?.deaths ?? 0,
+      assists: p.stats?.assists ?? 0,
+      cs: (p.stats?.totalMinionsKilled ?? 0) + (p.stats?.neutralMinionsKilled ?? 0),
+      gold: p.stats?.goldEarned ?? 0,
+      damage: p.stats?.totalDamageDealtToChampions ?? 0,
+      win: p.stats?.win ?? false,
+    }));
+    const teamIds = [...new Set(rows.map((r) => r.teamId))];
+    return teamIds.map((teamId) => ({ teamId, players: rows.filter((r) => r.teamId === teamId) }));
+  }
+
   const PHASE_KEYS: Record<string, string> = {
     Lobby: "league.phase_lobby",
     Matchmaking: "league.phase_matchmaking",
@@ -808,6 +941,7 @@
     if (!enabled) return;
     loadNotes();
     loadGoals();
+    loadEncounters();
     loadPerkMeta();
     invoke<boolean>("league_auto_accept_get")
       .then((v) => { autoAccept = v; })
@@ -1092,7 +1226,12 @@
                           <div class="champ-icon small champ-empty" aria-hidden="true"></div>
                         {/if}
                         <div class="scout-id">
-                          <span class="scout-name">{p.gameName || "—"}{#if p.tagLine}<span class="tag">#{p.tagLine}</span>{/if}</span>
+                          <span class="scout-name">
+                            {p.gameName || "—"}{#if p.tagLine}<span class="tag">#{p.tagLine}</span>{/if}
+                            {#if p.puuid && timesSeenBefore(p.puuid) > 0}
+                              <span class="seen-badge" title={$t("league.seen_before_hint") as string}>{$t("league.seen_before")} ×{timesSeenBefore(p.puuid)}</span>
+                            {/if}
+                          </span>
                           <span class="scout-rank">{r ? rankLabel(r.solo) : "…"}</span>
                         </div>
                         {#if r?.stats?.games > 0}
@@ -1349,6 +1488,16 @@
                     <span class="stat-label">{$t("league.impact_label")} ({r.impactGames})</span>
                   </div>
                 {/if}
+                {#if searchResult.deep}
+                  <div class="stat-cell">
+                    <span class="stat-value">{searchResult.deep.soloKillsPerGame}</span>
+                    <span class="stat-label">{$t("league.solo_kills_label")} ({searchResult.deep.analysedGames})</span>
+                  </div>
+                  <div class="stat-cell">
+                    <span class="stat-value">{searchResult.deep.earlyDeathsPerGame}</span>
+                    <span class="stat-label">{$t("league.early_deaths_label")} ({searchResult.deep.analysedGames})</span>
+                  </div>
+                {/if}
               </div>
               {#if r.stats.insights?.length}
                 <div class="scout-champs">
@@ -1516,6 +1665,21 @@
                           <span class="cd-key">{ab.key}</span>
                           <span class="cd-value">{ab.cooldown > 0 ? `${ab.cooldown}s` : "—"}</span>
                         </span>
+                      {/each}
+                      {#each p.spellTimers ?? [] as sp (sp.name)}
+                        {@const remaining = spellRemaining(p.riotId, sp)}
+                        <button
+                          class="cd-ability spell-timer"
+                          class:running={remaining !== null}
+                          onclick={() => toggleSpellTimer(p.riotId, sp)}
+                          title={`${sp.name} — ${$t("league.spell_timer_hint")}`}
+                          aria-pressed={remaining !== null}
+                        >
+                          {#if sp.iconPath}
+                            <img class="ability-icon" src={assetUrl(sp.iconPath)} alt="" loading="lazy" onerror={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = "hidden"; }} />
+                          {/if}
+                          <span class="cd-value">{remaining !== null ? `${remaining}s` : sp.cooldown > 0 ? `${sp.cooldown}s` : "—"}</span>
+                        </button>
                       {/each}
                     </div>
                   </div>
@@ -1708,6 +1872,39 @@
             <span class="toggle-knob"></span>
           </button>
         </div>
+        <div class="divider"></div>
+        <div class="action-row">
+          <div class="action-col">
+            <span class="action-label">{$t("league.auto_trade")}</span>
+            <span class="action-hint">{$t("league.auto_trade_desc")}</span>
+          </div>
+          <div class="seg-group" role="radiogroup" aria-label={$t("league.auto_trade") as string}>
+            {#each [["", "auto_trade_off"], ["accept", "auto_trade_accept"], ["decline", "auto_trade_decline"]] as [value, key] (value)}
+              <button
+                class="seg"
+                class:on={(settings?.league?.auto_trade ?? "") === value}
+                role="radio"
+                aria-checked={(settings?.league?.auto_trade ?? "") === value}
+                onclick={() => updateSettings({ league: { auto_trade: value } })}
+              >{$t(`league.${key}`)}</button>
+            {/each}
+          </div>
+        </div>
+        <div class="divider"></div>
+        <div class="action-row stacked">
+          <div class="action-col">
+            <span class="action-label">{$t("league.auto_message")}</span>
+            <span class="action-hint">{$t("league.auto_message_desc")}</span>
+          </div>
+          <input
+            class="input-text message-input"
+            type="text"
+            maxlength="120"
+            placeholder={$t("league.auto_message_placeholder") as string}
+            value={settings?.league?.auto_message ?? ""}
+            onchange={(e) => updateSettings({ league: { auto_message: e.currentTarget.value } })}
+          />
+        </div>
       </section>
 
       {/if}
@@ -1724,7 +1921,12 @@
           <div class="game-list">
             {#each games as game (game.gameId)}
               {@const p = playerStats(game)}
-              <div class="game-row">
+              <button
+                class="game-row"
+                class:expanded={expandedGame === game.gameId}
+                onclick={() => toggleGameDetail(game.gameId)}
+                aria-expanded={expandedGame === game.gameId}
+              >
                 <img class="champ-icon" src={`${CDRAGON}/champion-icons/${p.championId}.png`} alt="" loading="lazy" />
                 <div class="game-info">
                   <span class="game-result" class:win={p.win} class:loss={!p.win}>{p.win ? $t("league.victory") : $t("league.defeat")}</span>
@@ -1732,7 +1934,35 @@
                 </div>
                 <span class="game-kda">{p.kills} / {p.deaths} / {p.assists}</span>
                 <span class="game-time">{timeAgo(game.gameCreation, $locale)}</span>
-              </div>
+                <span class="game-chevron" aria-hidden="true">{expandedGame === game.gameId ? "▾" : "▸"}</span>
+              </button>
+              {#if expandedGame === game.gameId}
+                {#if gameDetailLoading === game.gameId}
+                  <p class="empty-hint">…</p>
+                {:else if gameDetails[game.gameId]}
+                  <div class="scoreboard">
+                    {#each scoreboardTeams(gameDetails[game.gameId]) as team (team.teamId)}
+                      <div class="scoreboard-team">
+                        <span class="scoreboard-result" class:win={team.players[0]?.win} class:loss={!team.players[0]?.win}>
+                          {team.players[0]?.win ? $t("league.victory") : $t("league.defeat")}
+                        </span>
+                        {#each team.players as sp (sp.participantId)}
+                          <div class="scoreboard-row">
+                            <img class="champ-icon tiny" src={`${CDRAGON}/champion-icons/${sp.championId}.png`} alt="" loading="lazy" />
+                            <span class="scoreboard-name">{sp.name || championById.get(sp.championId)?.name || "—"}</span>
+                            <span class="scoreboard-kda">{sp.kills}/{sp.deaths}/{sp.assists}</span>
+                            <span class="scoreboard-cs dim">{sp.cs} CS</span>
+                            <span class="scoreboard-gold dim">{(sp.gold / 1000).toFixed(1)}k</span>
+                            <span class="scoreboard-dmg dim">{(sp.damage / 1000).toFixed(1)}k {$t("league.match_damage")}</span>
+                          </div>
+                        {/each}
+                      </div>
+                    {/each}
+                  </div>
+                {:else}
+                  <p class="empty-hint">{$t("league.match_detail_unavailable")}</p>
+                {/if}
+              {/if}
             {/each}
           </div>
         {/if}
@@ -2929,6 +3159,16 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: calc(var(--border-radius) - 2px);
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    width: 100%;
+    cursor: pointer;
+  }
+
+  .game-row:hover,
+  .game-row.expanded {
+    border-color: var(--accent);
   }
 
   .champ-icon {
@@ -3051,6 +3291,141 @@
     font-size: 12.5px;
     color: var(--text-secondary, var(--text));
     margin-right: auto;
+  }
+
+  .seg-group {
+    display: flex;
+    border: 1px solid var(--input-border);
+    border-radius: calc(var(--border-radius) - 2px);
+    overflow: hidden;
+  }
+
+  .seg {
+    padding: 5px 12px;
+    font-size: 12.5px;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary, var(--text));
+    cursor: pointer;
+  }
+
+  .seg + .seg {
+    border-left: 1px solid var(--input-border);
+  }
+
+  .seg.on {
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+
+  .action-row.stacked {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .message-input {
+    width: 100%;
+  }
+
+  .seen-badge {
+    font-size: 11px;
+    padding: 1px 6px;
+    border-radius: 999px;
+    background: color-mix(in oklab, var(--accent) 14%, transparent);
+    color: var(--accent);
+    margin-left: 6px;
+    white-space: nowrap;
+  }
+
+  .spell-timer {
+    cursor: pointer;
+    border: 1px solid var(--input-border);
+    background: var(--surface);
+    font: inherit;
+    color: inherit;
+  }
+
+  .spell-timer.running {
+    border-color: var(--accent);
+    background: color-mix(in oklab, var(--accent) 12%, transparent);
+  }
+
+  .spell-timer.running .cd-value {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .game-chevron {
+    color: var(--text-secondary, var(--text));
+    font-size: 12px;
+  }
+
+  .scoreboard {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: calc(var(--border-radius) - 2px);
+  }
+
+  .scoreboard-team {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+
+  .scoreboard-result {
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .scoreboard-result.win {
+    color: var(--success, var(--accent));
+  }
+
+  .scoreboard-result.loss {
+    color: var(--danger);
+  }
+
+  .scoreboard-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    min-width: 0;
+  }
+
+  .scoreboard-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .scoreboard-kda {
+    white-space: nowrap;
+  }
+
+  .scoreboard-cs,
+  .scoreboard-gold,
+  .scoreboard-dmg {
+    white-space: nowrap;
+  }
+
+  @media (max-width: 560px) {
+    .scoreboard {
+      grid-template-columns: 1fr;
+    }
+
+    .scoreboard-cs,
+    .scoreboard-dmg {
+      display: none;
+    }
   }
 
   .toggle {
