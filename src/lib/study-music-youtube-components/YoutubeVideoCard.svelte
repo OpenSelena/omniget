@@ -189,7 +189,7 @@
     background: transparent;
     border: 0;
     color: var(--tertiary);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     cursor: pointer;
     text-align: left;
     align-self: flex-start;
@@ -203,7 +203,7 @@
   }
   .stats {
     margin: 0;
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     color: var(--tertiary);
   }
 </style>

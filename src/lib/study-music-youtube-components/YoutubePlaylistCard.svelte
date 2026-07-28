@@ -94,5 +94,5 @@
     overflow: hidden;
   }
   .card:hover .title { color: #fff; }
-  .meta { margin: 0; font-size: 12.5px; color: #aaa; }
+  .meta { margin: 0; font-size: var(--text-sm); color: #aaa; }
 </style>

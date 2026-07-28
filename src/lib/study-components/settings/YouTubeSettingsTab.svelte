@@ -335,7 +335,7 @@
     background: var(--bg);
     color: var(--text);
     cursor: pointer;
-    font-size: 12.5px;
+    font-size: var(--text-sm);
   }
   .btn:hover:not(:disabled) {
     background: color-mix(in oklab, var(--text) 6%, transparent);
@@ -356,7 +356,7 @@
     display: grid;
     grid-template-columns: max-content 1fr;
     gap: 4px 16px;
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     margin: 0;
   }
   .status-grid dt { color: var(--secondary); }
@@ -411,7 +411,7 @@
     border: 1px solid color-mix(in oklab, var(--text) 14%, transparent);
     background: var(--bg);
     color: var(--text);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
   }
   .test-summary {
     font-size: 13px;

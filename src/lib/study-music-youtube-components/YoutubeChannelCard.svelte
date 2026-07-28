@@ -62,7 +62,7 @@
   }
   .handle, .subs {
     margin: 0;
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     color: #aaa;
   }
 </style>
