@@ -1275,6 +1275,7 @@
     margin-bottom: 4px;
   }
   .mode-toggle-btn {
+    min-height: 24px;
     padding: 4px 12px;
     font-size: var(--text-sm);
     font-weight: 500;
@@ -1925,5 +1926,15 @@
     .loop-pulse {
       animation: none;
     }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .feedback-spinner {
+      animation: feedback-soft-pulse calc(var(--duration-bounce) * 3) var(--ease-in-out) infinite;
+    }
+  }
+
+  @keyframes feedback-soft-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.45; }
   }
 </style>

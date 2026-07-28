@@ -777,6 +777,7 @@ export function studyMediaThumbSet(args: {
 }
 
 const TG_PEER_COLORS: Array<[string, string]> = [
+// Paleta oficial de avatares do Telegram (dado da plataforma, não é cor de UI do app).
   ["#ff845e", "#d45246"],
   ["#febb5b", "#f68136"],
   ["#5caffa", "#408acf"],

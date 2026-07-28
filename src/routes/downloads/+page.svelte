@@ -1694,6 +1694,7 @@
     margin-top: calc(var(--padding) / 2);
     display: inline-flex;
     align-items: center;
+    min-height: 24px;
     gap: 5px;
     font-size: var(--text-sm);
     color: var(--tertiary);

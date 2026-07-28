@@ -170,7 +170,7 @@
 }
 [data-surface="notes"] .tiptap code {
   background: color-mix(in oklab, var(--accent) 8%, transparent);
-  padding: 1px 5px;
+  padding: 1px calc(var(--space-1) * 1.25);
   border-radius: 4px;
   font-family: var(--font-mono);
   font-size: 0.95em;
@@ -307,18 +307,18 @@
   font-family: var(--font-mono);
   font-size: var(--text-sm);
   background: color-mix(in oklab, var(--input-border) 30%, transparent);
-  padding: 1px 4px;
+  padding: 1px var(--space-1);
   border-radius: 3px;
 }
 [data-surface="notes"] .tiptap .tiptap-page-mention {
   display: inline-block;
-  padding: 0 4px;
+  padding: 0 var(--space-1);
   background: color-mix(in oklab, var(--accent) 14%, transparent);
   color: var(--accent);
   border-radius: 4px;
   font-size: 0.95em;
   cursor: pointer;
-  transition: background 120ms ease;
+  transition: background var(--duration-fast) var(--ease-out);
 }
 [data-surface="notes"] .tiptap .tiptap-page-mention:hover {
   background: color-mix(in oklab, var(--accent) 24%, transparent);
@@ -326,16 +326,16 @@
 [data-surface="notes"] .tiptap .tiptap-page-mention::before {
   content: "[[";
   opacity: 0.4;
-  margin-right: 2px;
+  margin-right: calc(var(--space-1) / 2);
 }
 [data-surface="notes"] .tiptap .tiptap-page-mention::after {
   content: "]]";
   opacity: 0.4;
-  margin-left: 2px;
+  margin-left: calc(var(--space-1) / 2);
 }
 [data-surface="notes"] .tiptap .tiptap-tag-mention {
   display: inline-block;
-  padding: 0 4px;
+  padding: 0 var(--space-1);
   background: color-mix(in oklab, var(--secondary) 14%, transparent);
   color: var(--secondary);
   border-radius: 999px;

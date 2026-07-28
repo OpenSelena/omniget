@@ -28,7 +28,9 @@
   border-bottom: 1px solid var(--border);
   background: var(--bg);
   flex-shrink: 0;
-  -webkit-app-region: drag;
+  /* Arrastar é feito por `data-tauri-drag-region` no markup, não por
+     `-webkit-app-region` — essa propriedade é do Chromium/Electron e o WKWebView
+     do macOS a ignora, o que deixava a janela impossível de arrastar. */
   user-select: none;
 }
 
@@ -44,7 +46,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  -webkit-app-region: no-drag;
 }
 
 .mac-toolbar {
@@ -150,7 +151,7 @@
 .mac-nav-badge {
   min-width: 18px;
   height: 18px;
-  padding: 0 5px;
+  padding: 0 calc(var(--space-1) * 1.25);
   font-size: 11px;
   font-weight: 600;
   line-height: 18px;
@@ -183,14 +184,15 @@
 
 .mac-segmented {
   display: inline-flex;
-  padding: 2px;
+  padding: calc(var(--space-1) / 2);
   background: var(--surface-mut);
   border-radius: var(--radius-md);
   border: 1px solid var(--border);
 }
 
 .mac-segmented-btn {
-  padding: 5px 12px;
+  min-height: 24px;
+  padding: calc(var(--space-1) * 1.25) var(--space-3);
   font-size: var(--text-sm);
   font-weight: 500;
   border: none;
@@ -271,7 +273,7 @@
   align-items: center;
   gap: var(--space-3);
   width: 100%;
-  padding: 8px var(--space-3);
+  padding: var(--space-2) var(--space-3);
   border: none;
   background: transparent;
   border-radius: var(--radius-sm);
@@ -303,7 +305,7 @@
 .mac-kbd {
   display: inline-flex;
   align-items: center;
-  padding: 1px 5px;
+  padding: 1px calc(var(--space-1) * 1.25);
   border-radius: 4px;
   background: var(--surface-mut);
   border: 1px solid var(--border);
@@ -341,7 +343,7 @@
   gap: var(--space-2);
   width: 100%;
   text-align: left;
-  padding: 6px var(--space-3);
+  padding: calc(var(--space-3) / 2) var(--space-3);
   border: none;
   background: transparent;
   border-radius: var(--radius-sm);
@@ -363,7 +365,7 @@
 .settings-cat-match-count {
   flex-shrink: 0;
   min-width: 1.25rem;
-  padding: 0 6px;
+  padding: 0 calc(var(--space-3) / 2);
   font-size: 11px;
   font-weight: 600;
   line-height: 1.4;
@@ -455,7 +457,7 @@
 
 .downloads-table th {
   text-align: left;
-  padding: 8px var(--space-3);
+  padding: var(--space-2) var(--space-3);
   font-weight: 600;
   color: var(--text-muted);
   background: var(--surface-mut);
@@ -466,7 +468,7 @@
 }
 
 .downloads-table td {
-  padding: 10px var(--space-3);
+  padding: calc(var(--space-5) / 2.4) var(--space-3);
   border-bottom: 1px solid var(--border);
   color: var(--text);
   vertical-align: middle;
@@ -567,6 +569,6 @@
 
   .mac-nav-item {
     justify-content: center;
-    padding: 8px;
+    padding: var(--space-2);
   }
 }

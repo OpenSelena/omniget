@@ -910,4 +910,14 @@
     color: var(--green);
     pointer-events: none;
   }
+  @media (prefers-reduced-motion: reduce) {
+    .loading :global(.spinner) {
+      animation: mp-soft-pulse calc(var(--duration-bounce) * 3) var(--ease-in-out) infinite;
+    }
+  }
+
+  @keyframes mp-soft-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.45; }
+  }
 </style>
