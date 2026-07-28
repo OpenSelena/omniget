@@ -2,62 +2,6 @@
   --sidebar-width: 220px;  --titlebar-height: 44px;
   --toolbar-height: 44px;
   --inspector-width: 320px;
-
-  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
-  --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
-
-  --radius-xs: 4px;
-  --radius-sm: 6px;
-  --radius-md: 8px;
-  --radius-lg: 10px;
-}
-
-[data-shell="mac"][data-theme="light"],
-[data-shell="mac"][data-theme="catppuccin-latte"],
-[data-shell="mac"][data-theme="eink-day"],
-[data-shell="mac"][data-theme="eink-sepia"],
-[data-shell="mac"][data-theme="nyxvamp-radiance"] {
-  --sidebar-bg: #EBEBED;
-  --sidebar-highlight: #E0E0E4;
-  --content-border: #D1D1D6;
-  --primary: #F5F5F7;
-  --secondary: #1D1D1F;
-  --tertiary: #8E8E93;
-  --accent: #007AFF;
-  --button: #FFFFFF;
-  --button-hover: #F0F0F2;
-  --button-press: #E5E5EA;
-  --button-elevated: #FFFFFF;
-  --button-elevated-hover: #F5F5F7;
-  --input-bg: #FFFFFF;
-  --input-border: #D1D1D6;
-  --cta: #007AFF;
-  --on-cta: #FFFFFF;
-}
-
-[data-shell="mac"][data-theme="dark"],
-[data-shell="mac"][data-theme="system"] {
-  color-scheme: dark;
-}
-
-[data-shell="mac"][data-theme="dark"],
-[data-shell="mac"]:not([data-theme="light"]):not([data-theme="catppuccin-latte"]):not([data-theme="eink-day"]):not([data-theme="eink-sepia"]):not([data-theme="nyxvamp-radiance"]) {
-  --sidebar-bg: #252527;
-  --sidebar-highlight: #2C2C2E;
-  --content-border: #38383A;
-  --primary: #1C1C1E;
-  --secondary: #F5F5F7;
-  --tertiary: #8E8E93;
-  --accent: #0A84FF;
-  --button: #2C2C2E;
-  --button-hover: #3A3A3C;
-  --button-press: #48484A;
-  --button-elevated: #2C2C2E;
-  --button-elevated-hover: #3A3A3C;
-  --input-bg: #1C1C1E;
-  --input-border: #48484A;
-  --cta: #0A84FF;
-  --on-cta: #FFFFFF;
 }
 
 .mac-shell {
@@ -84,10 +28,7 @@
   border-bottom: 1px solid var(--border);
   background: var(--bg);
   flex-shrink: 0;
-  /* Arrastar é feito por `data-tauri-drag-region` no markup, não por
-     `-webkit-app-region` — essa propriedade é do Chromium/Electron e o
-     WKWebView do macOS a ignora, o que deixava a janela impossível de
-     arrastar. */
+  -webkit-app-region: drag;
   user-select: none;
 }
 
@@ -103,6 +44,7 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  -webkit-app-region: no-drag;
 }
 
 .mac-toolbar {

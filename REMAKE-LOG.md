@@ -12,6 +12,10 @@ Início: 2026-07-28
 - **D-005** (2026-07-28): Escopo de telas: rotas core + hubs de plugins recebem redesign completo; as ~70 sub-rotas de `/study` herdam tokens/primitivos globais com redesign dirigido só nas superfícies representativas (player, read, music, notes, anki hub, focus). Study é um "segundo app" — refazer tela a tela seria escopo infinito sem ganho proporcional.
 - **D-006** (2026-07-28): `remake/shots/` entra no `.gitignore` — screenshots são artefato de trabalho (852KB+ por rodada), não código. Os arquivos `.md` da missão (REMAKE-LOG, PLANO, DESIGN-SYSTEM) são commitados por pedido explícito.
 - **D-007** (2026-07-28): Shots de plugins renderizam o estado degradado (comandos de plugin mockados como `null`) — suficiente para comparação antes/depois de tokens/layout, que é o objetivo.
+- **D-008** (2026-07-28): Bug herdado corrigido: `macos-shell.css` sobrescrevia `--primary/--accent/--button/...` de TODOS os temas (o seletor `:not(...)` capturava catppuccin/dracula/nyxvamp/eink e os pintava de Apple dark). Cores movidas para os blocos de tema em `app.css`; os 12 temas alternativos voltam a valer. Temas mudam cor, não estrutura.
+- **D-009** (2026-07-28): Corpo de texto 14px→13px (padrão macOS desktop), escala HIG (caption 10 / footnote 11 / callout 12 / body 13 / headline 15 / title3 17 / title2 20 / title1 26 / large 34). Raios efetivos mantidos (4/6/8/10) agora como fonte única em `:root`.
+- **D-010** (2026-07-28): Preset tipográfico default muda de Bricolage+Inter para **System** (SF no macOS). Usuários com escolha salva mantêm a sua — só o default muda. Apple-first: sem fonte de personalidade no chrome do app.
+- **D-011** (2026-07-28): CTA fill unificado `#0071E3` (branco 4.70:1 ✓ AA) nos dois temas core; accent de seleção `#0A84FF`/`#007AFF`; laranja removido da UI (permanece só no mascote). Texto accent sobre superfícies escuras usa `--accent-hi` (4.92:1).
 
 ## Contornos
 
@@ -25,7 +29,7 @@ Início: 2026-07-28
 - [x] Fase A.4 — 132/132 shots baseline em `remake/shots/baseline/` (22 rotas × 3 viewports × 2 temas, zero falhas)
 - [x] Fase A.5 — REMAKE-LOG.md criado
 - [x] Fase A.6 — remake/PLANO.md criado
-- [ ] Fase B — design system
+- [x] Fase B — design system (remake/DESIGN-SYSTEM.md; tokens em app.css; temas core dark/light retunados p/ HIG; contraste AA 14/14 temas via scripts/contrast-audit.mjs; tipografia default → System; overrides de cor removidos do macos-shell.css)
 - [ ] Fase C — primitivos
 - [ ] Fase D — telas
 

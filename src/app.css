@@ -26,9 +26,10 @@
   --space-8: 64px;
   --space-9: 96px;
 
-  --text-xs: 12px;       --leading-xs: 1.45;
-  --text-sm: 13px;       --leading-sm: 1.5;
-  --text-base: 14px;     --leading-base: 1.55;
+  --text-caption: 10px;  --leading-caption: 1.3;
+  --text-xs: 11px;       --leading-xs: 1.45;
+  --text-sm: 12px;       --leading-sm: 1.5;
+  --text-base: 13px;     --leading-base: 1.55;
   --text-md: 15px;       --leading-md: 1.5;
   --text-lg: 17px;       --leading-lg: 1.4;
   --text-xl: 20px;       --leading-xl: 1.35;
@@ -36,12 +37,20 @@
   --text-3xl: 34px;      --leading-3xl: 1.15;
   --text-display: 48px;  --leading-display: 1.05;
 
-  --radius-xs: 6px;
-  --radius-sm: 10px;
-  --radius-md: 14px;
-  --radius-lg: 20px;
-  --radius-xl: 28px;
+  --track-tight: -0.02em;
+  --track-snug: -0.01em;
+  --track-caps: 0.06em;
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 16px;
   --radius-full: 9999px;
+
+  --row-compact: 28px;
+  --row-base: 44px;
+  --hairline: 0.5px;
 
   --elev-0: none;
   --elev-1:
@@ -66,6 +75,7 @@
   --duration-bounce: 480ms;
   --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
   --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-in-out: cubic-bezier(0.45, 0, 0.25, 1);
 
   --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
   --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
@@ -432,7 +442,12 @@
   --danger: var(--error);
   --on-status: #ffffff;
   --on-warning: #1a1a1a;
-  --toggle-off: var(--surface-hi);
+  --text-faint: color-mix(in srgb, var(--tertiary) 55%, transparent);
+  --fill-1: color-mix(in srgb, var(--secondary) 8%, transparent);
+  --fill-2: color-mix(in srgb, var(--secondary) 12%, transparent);
+  --fill-3: color-mix(in srgb, var(--secondary) 17%, transparent);
+  --material: color-mix(in srgb, var(--bg) 78%, transparent);
+  --material-blur: blur(24px) saturate(180%);
 }
 
 [data-theme="light"],
@@ -442,49 +457,53 @@
 [data-theme="nyxvamp-radiance"] {
   --bg-overlay: black;
   --on-warning: #5c3d00;
-  /* Light themes: elevated surfaces sit ≈1.1:1 against cards, leaving the
-     off-toggle track invisible. A literal gray is used rather than a mix of
-     surface tokens because macos-shell.css re-points those tokens to white
-     on the settings screens, which washed the mix out to ~2:1.
-     Measured against every light theme's card surface: worst case is
-     Catppuccin Latte at 3.12:1, and the white knob sits at 4.8:1. */
-  --toggle-off: #727272;
+  --elev-1:
+    0 1px 2px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(0, 0, 0, 0.04);
+  --elev-2:
+    0 4px 12px rgba(0, 0, 0, 0.10),
+    0 1px 2px rgba(0, 0, 0, 0.06),
+    0 0 0 1px rgba(0, 0, 0, 0.05);
+  --elev-3:
+    0 24px 48px rgba(0, 0, 0, 0.18),
+    0 8px 16px rgba(0, 0, 0, 0.08),
+    0 0 0 1px rgba(0, 0, 0, 0.06);
 }
 
 :root, [data-theme="dark"] {
   color-scheme: dark;
-  --primary: #0a0a0a;
-  --secondary: #e8e8e8;
-  --tertiary: #999999;
+  --primary: #1C1C1E;
+  --secondary: #F5F5F7;
+  --tertiary: #98989D;
 
-  --accent: #FF7D38;
-  --success: #2E9B5A;
-  --error: #ff4757;
-  --warning: #f59e0b;
+  --accent: #0A84FF;
+  --success: #30D158;
+  --error: #FF453A;
+  --warning: #FF9F0A;
 
-  --button: #1a1a1a;
-  --button-hover: #2a2a2a;
-  --button-press: #3a3a3a;
+  --button: #2C2C2E;
+  --button-hover: #3A3A3C;
+  --button-press: #48484A;
   --button-text: var(--secondary);
-  --button-stroke: rgba(255, 255, 255, 0.12);
+  --button-stroke: rgba(255, 255, 255, 0.10);
   --button-box-shadow: 0 0 0 1px var(--button-stroke) inset;
 
-  --button-elevated: #252525;
-  --button-elevated-hover: #323232;
-  --button-elevated-press: #3a3a3a;
+  --button-elevated: #3A3A3C;
+  --button-elevated-hover: #48484A;
+  --button-elevated-press: #545456;
 
-  --sidebar-bg: #0f0f0f;
-  --sidebar-highlight: #1f1f1f;
-  --content-border: rgba(255, 255, 255, 0.08);
-  --input-border: #3a3a3a;
-  --input-bg: #1a1a1a;
+  --sidebar-bg: #252527;
+  --sidebar-highlight: #2C2C2E;
+  --content-border: #38383A;
+  --input-border: #48484A;
+  --input-bg: #1C1C1E;
 
-  --popup-bg: #1a1a1a;
-  --dialog-backdrop: rgba(0, 0, 0, 0.6);
+  --popup-bg: #2C2C2E;
+  --dialog-backdrop: rgba(0, 0, 0, 0.5);
 
   --on-primary: var(--secondary);
   --on-accent: #ffffff;
-  --on-success: #ffffff;
+  --on-success: #1C1C1E;
   --on-error: #ffffff;
   --on-button: var(--button-text);
   --on-button-elevated: var(--secondary);
@@ -496,9 +515,9 @@
 
   --gray: var(--tertiary);
 
-  --cta: #2D9CDB;
-  --cta-hover: #2690CC;
-  --cta-press: #1E7FB8;
+  --cta: #0071E3;
+  --cta-hover: #0077ED;
+  --cta-press: #0068D0;
   --on-cta: #ffffff;
 
   --focus-ring: solid 2px var(--accent);
@@ -510,34 +529,34 @@
 
 [data-theme="light"] {
   color-scheme: light;
-  --primary: #fafafa;
-  --secondary: #1a1a1a;
-  --tertiary: #595959;
+  --primary: #F5F5F7;
+  --secondary: #1D1D1F;
+  --tertiary: #67676C;
 
-  --accent: #E05500;
-  --success: #1a7a3a;
-  --error: #c41e3a;
-  --warning: #e8940a;
+  --accent: #007AFF;
+  --success: #217E38;
+  --error: #D70015;
+  --warning: #B25000;
 
-  --button: #eaeaea;
-  --button-hover: #dfdfdf;
-  --button-press: #d2d2d2;
+  --button: #FFFFFF;
+  --button-hover: #F0F0F2;
+  --button-press: #E5E5EA;
   --button-text: var(--secondary);
   --button-stroke: rgba(0, 0, 0, 0.10);
   --button-box-shadow: 0 0 0 1px var(--button-stroke) inset;
 
-  --button-elevated: #e0e0e0;
-  --button-elevated-hover: #d4d4d4;
-  --button-elevated-press: #c8c8c8;
+  --button-elevated: #FFFFFF;
+  --button-elevated-hover: #F5F5F7;
+  --button-elevated-press: #E8E8EA;
 
-  --sidebar-bg: #f0f0f0;
-  --sidebar-highlight: #e4e4e4;
-  --content-border: rgba(0, 0, 0, 0.10);
-  --input-border: #a0a0a0;
-  --input-bg: #ffffff;
+  --sidebar-bg: #EBEBED;
+  --sidebar-highlight: #E0E0E4;
+  --content-border: #D1D1D6;
+  --input-border: #D1D1D6;
+  --input-bg: #FFFFFF;
 
-  --popup-bg: #ffffff;
-  --dialog-backdrop: rgba(0, 0, 0, 0.4);
+  --popup-bg: #FFFFFF;
+  --dialog-backdrop: rgba(0, 0, 0, 0.35);
 
   --on-primary: var(--secondary);
   --on-accent: #ffffff;
@@ -553,9 +572,9 @@
 
   --gray: var(--tertiary);
 
-  --cta: #1A8AC4;
-  --cta-hover: #1578B0;
-  --cta-press: #126A9E;
+  --cta: #0071E3;
+  --cta-hover: #0077ED;
+  --cta-press: #0068D0;
   --on-cta: #ffffff;
 
   --focus-ring: solid 2px var(--accent);

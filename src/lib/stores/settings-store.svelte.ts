@@ -126,12 +126,12 @@ export type TypographySettings = {
 };
 
 const TYPOGRAPHY_DEFAULTS: TypographySettings = {
-  font_display: "Bricolage Grotesque Variable",
-  font_body: "Inter",
+  font_display: "System",
+  font_body: "System",
   font_mono: "IBM Plex Mono",
   line_height_base: 1.55,
   spacing_scale: 1.0,
-  preset_name: "omniget-default",
+  preset_name: "system",
 };
 
 const SPACING_BASE_PX: Record<string, number> = {
@@ -148,6 +148,9 @@ const SPACING_BASE_PX: Record<string, number> = {
 
 function fontStack(fontDisplay: string): string {
   const display = fontDisplay.trim();
+  if (display === "System") {
+    return `-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', system-ui, sans-serif`;
+  }
   if (display === "Bricolage Grotesque Variable") {
     return `'Bricolage Grotesque Variable', 'Bricolage Grotesque', ui-sans-serif, system-ui, sans-serif`;
   }
@@ -168,6 +171,9 @@ function fontStack(fontDisplay: string): string {
 
 function bodyFontStack(fontBody: string): string {
   const body = fontBody.trim();
+  if (body === "System") {
+    return `-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif`;
+  }
   if (body === "Inter") {
     return `'Inter', 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif`;
   }

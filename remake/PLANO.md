@@ -13,11 +13,11 @@ Regra: atualizar o status após CADA item concluído. `[ ]` pendente, `[~]` em p
 
 ## Fase B — Design system
 
-- [ ] B1. Abrir referências (≥6 por eixo: tipografia, cor, forma) — parcialmente feito (8 imagens: Apple Music, Apple Mail, Linear ×1, Things 3, App Store, Bear, Raycast, Apple Fitness)
-- [ ] B2. remake/DESIGN-SYSTEM.md (tipografia, espaçamento, cor, elevação, raio, motion)
-- [ ] B3. Tokens implementados em src/app.css (formato CSS vars existente)
-- [ ] B4. Verificação programática de contraste AA (script)
-- [ ] B5. Aplicação global + check/test/build verdes + commit
+- [x] B1. Abrir referências (≥6 por eixo: tipografia, cor, forma) — parcialmente feito (8 imagens: Apple Music, Apple Mail, Linear ×1, Things 3, App Store, Bear, Raycast, Apple Fitness)
+- [x] B2. remake/DESIGN-SYSTEM.md (tipografia, espaçamento, cor, elevação, raio, motion)
+- [x] B3. Tokens implementados em src/app.css (formato CSS vars existente)
+- [x] B4. Verificação programática de contraste AA (script)
+- [x] B5. Aplicação global + check/test/build verdes + commit
 
 ## Fase C — Primitivos (ordem obrigatória; todos os estados; foco visível; 2 temas)
 
