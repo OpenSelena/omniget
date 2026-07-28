@@ -88,5 +88,6 @@ Remake visual completo, Apple-first ("The Clipboard Utility"): design system HIG
 
 ## Não cumprido
 
-- **PR aberto**: ver AUDITORIA §14 — status registrado após a tentativa nesta sessão (a branch contém, por decisão da missão original, o checkpoint com trabalho pré-existente de `feat/plugin-hot-load` não presente na main; o diff do PR inclui esse material além do remake).
-- Fora isso: **nenhum** — todos os demais critérios da Definição de Pronto estão com evidência em `remake/AUDITORIA.md`.
+**Nenhum.** Todos os critérios da Definição de Pronto estão com evidência em `remake/AUDITORIA.md`. PR aberto: https://github.com/tonhowtf/omniget/pull/200.
+
+Observação de escopo do PR (não é critério): a branch parte de `feat/plugin-hot-load` e inclui, por decisão da missão original, o checkpoint do trabalho pré-existente dessa branch (724 arquivos) — o diff contra a main contém esse material além do remake. As dívidas declaradas (music sub-rotas, copy de erro do library, validação com DLLs no Windows) estão na seção "Dívida conhecida" — são follow-ups, não critérios da DoD.

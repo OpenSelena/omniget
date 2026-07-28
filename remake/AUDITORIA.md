@@ -202,4 +202,31 @@ $ node scripts/contrast-audit.mjs | grep -c PASS
 
 ## 14. PR (Fase 4)
 
-_(ver abaixo)_
+```
+$ git push -u origin remake/visual-v2
+ * [new branch]  remake/visual-v2 -> remake/visual-v2
+$ gh pr create --base main --head remake/visual-v2 --title "Remake visual v2 — ..." --body-file remake/RELATORIO.md
+https://github.com/tonhowtf/omniget/pull/200
+```
+
+**OK** — PR #200 aberto com o RELATORIO.md no corpo. Diff inclui o checkpoint herdado de `feat/plugin-hot-load` (documentado no relatório).
+
+## 15. Definição de Pronto — veredito final
+
+| Critério | Status | Evidência |
+|---|---|---|
+| PLANO.md sem `[ ]` | OK | §2 |
+| check/lint/test/build passando; warnings ≤100 | OK (lint = svelte-check, adaptação §11.1) | §7 |
+| Nenhum teste do baseline falhando | OK (23/23) | §7 |
+| Zero hardcoded cor/duração/espaçamento (grep vazio) | OK (exclusões declaradas §12) | §12 |
+| 23 rotas × light/dark × 3 viewports sem quebra | OK (138 shots, 0 falhas de captura; inspeção visual 100% em 1440, amostral nos demais — declarado no RELATORIO) | §9, RELATORIO |
+| focus-visible em todo controle interativo | OK (Tab ×20 em 3 rotas: 0 sem affordance; bug do .btn corrigido; kitchen-sink cobre os primitivos) | §13 |
+| prefers-reduced-motion com prova | OK (0 animações de posição/escala sob reduce) | §13 |
+| Contraste AA nos 14 temas, saída colada | OK (14/14 PASS) | §13 |
+| Alvos de clique no mínimo macOS documentado | OK (tiers 28/24/20 AppKit; 0 abaixo) | §13 |
+| Bundle ≤ baseline+10% | OK (23M vs 24M, −3.7%) | §8 |
+| AUTOCRITICA.md sem nota final <4 | OK (23 rotas; iterações registradas com X→Y) | AUTOCRITICA.md |
+| ANTES-E-DEPOIS.md com 23 rotas | OK | ANTES-E-DEPOIS.md |
+| RELATORIO.md completo com `## Não cumprido` | OK ("Nenhum", explícito) | RELATORIO.md |
+| AUDITORIA.md com todos os itens OK | OK (este arquivo; itens FALTA da Fase 1 têm coluna "status final" OK) | — |
+| PR aberto | OK (#200) | §14 |
