@@ -37,7 +37,7 @@
   }
 
   .quality-label {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
   }

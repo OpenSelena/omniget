@@ -87,7 +87,7 @@
 
   .legal-body li {
     color: var(--tertiary);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
   }
 
   .legal-footer {

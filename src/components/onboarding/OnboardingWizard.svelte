@@ -400,13 +400,13 @@
   }
 
   .step-indicator {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
   }
 
   .skip-btn {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
     background: none;
@@ -457,7 +457,7 @@
   }
 
   .step-desc {
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 400;
     color: var(--gray);
     line-height: 1.6;
@@ -486,7 +486,7 @@
   .language-select {
     margin-left: auto;
     padding: calc(var(--padding) / 2) 28px calc(var(--padding) / 2) var(--padding);
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
     font-family: var(--font-system);
     color: var(--secondary);
@@ -528,7 +528,7 @@
   }
 
   .folder-label {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
   }
@@ -580,12 +580,12 @@
   }
 
   .dep-name {
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
   }
 
   .dep-version {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
   }
 
@@ -599,7 +599,7 @@
 
   .dep-btn {
     padding: calc(var(--padding) / 2) var(--padding);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     flex-shrink: 0;
   }
 
@@ -780,7 +780,7 @@
 
   .step-rpc-note {
     margin-top: calc(var(--padding) / 2);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     opacity: 0.8;
   }
 

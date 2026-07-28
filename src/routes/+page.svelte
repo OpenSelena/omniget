@@ -1228,7 +1228,7 @@
 
   .study-maintenance-text strong {
     font-weight: 500;
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     color: var(--text);
   }
 
@@ -1363,7 +1363,7 @@
   }
 
   .feedback-text {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
   }
 
@@ -1455,7 +1455,7 @@
   }
 
   .playlist-count {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--secondary);
   }
@@ -1483,7 +1483,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     color: var(--gray);
   }
 
@@ -1540,7 +1540,7 @@
   }
 
   .options-toggle {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
     cursor: pointer;
@@ -1579,7 +1579,7 @@
   }
 
   .referer-label {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
   }
@@ -1609,7 +1609,7 @@
   }
 
   .timerange-label {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
   }
@@ -1721,7 +1721,7 @@
     justify-content: center;
     gap: 6px;
     padding: var(--padding) calc(var(--padding) * 2);
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
     background: var(--button);
     border: none;

@@ -100,13 +100,13 @@
   }
 
   .version-label {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
   }
 
   .version-value {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--blue);
   }
@@ -149,7 +149,7 @@
   }
 
   .empty-text {
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
     color: var(--gray);
   }

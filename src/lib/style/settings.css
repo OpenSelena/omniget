@@ -139,7 +139,7 @@
   }
 
   .settings-section-hint {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--text-dim, var(--gray));
     margin: 0 0 var(--space-2) 0;
@@ -147,7 +147,7 @@
   }
 
   .platform-subhead {
-    font-size: 13px;
+    font-size: var(--text-base);
     font-weight: 600;
     color: var(--text);
     margin: var(--space-3) 0 var(--space-2) 0;
@@ -422,13 +422,13 @@
   }
 
   .settings-drill-item-title {
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 600;
     color: var(--text);
   }
 
   .settings-drill-item-hint {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--text-dim, var(--gray));
     line-height: 1.35;
@@ -458,7 +458,7 @@
     border: none;
     background: transparent;
     color: var(--accent);
-    font-size: 13px;
+    font-size: var(--text-base);
     font-weight: 500;
     cursor: pointer;
     border-radius: var(--radius-sm);
@@ -489,7 +489,7 @@
   }
 
   .settings-subsection-head {
-    font-size: 13px;
+    font-size: var(--text-base);
     font-weight: 600;
     color: var(--text);
     margin: var(--space-3) 0 var(--space-2) 0;
@@ -509,7 +509,7 @@
   .deps-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 13px;
+    font-size: var(--text-base);
   }
 
   .deps-table thead {
@@ -519,7 +519,7 @@
   .deps-table th {
     padding: 8px 12px;
     text-align: left;
-    font-size: 11px;
+    font-size: var(--text-xs);
     font-weight: 600;
     letter-spacing: 0.03em;
     text-transform: uppercase;
@@ -559,7 +559,7 @@
 
   .card {
     background: var(--surface);
-    box-shadow: var(--elev-1);
+    border: 1px solid var(--border);
     border-radius: var(--radius-md);
     padding: 0 var(--space-4);
   }
@@ -582,13 +582,13 @@
   }
 
   .setting-label {
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
     color: var(--secondary);
   }
 
   .setting-path {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
     overflow: hidden;
@@ -603,7 +603,7 @@
 
   .select {
     padding: calc(var(--padding) / 2) 28px calc(var(--padding) / 2) var(--padding);
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
     background: var(--button-elevated);
     border-radius: calc(var(--border-radius) / 2);
@@ -626,7 +626,7 @@
   .input-number {
     width: 72px;
     padding: calc(var(--padding) / 2);
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
     text-align: center;
     background: var(--button-elevated);
@@ -644,7 +644,7 @@
   .input-hotkey {
     width: 180px;
     padding: calc(var(--padding) / 2);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     background: var(--button-elevated);
     border-radius: calc(var(--border-radius) / 2);
@@ -729,7 +729,7 @@
   .input-template {
     width: 100%;
     padding: calc(var(--padding) / 2);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     background: var(--button-elevated);
     border-radius: calc(var(--border-radius) / 2);
@@ -797,7 +797,7 @@
 
   .reset-btn {
     padding: calc(var(--padding) / 2) var(--padding);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     color: var(--red);
   }
 
@@ -812,7 +812,7 @@
   }
 
   .update-text {
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
     color: #fff;
   }
@@ -823,7 +823,7 @@
     justify-content: center;
     gap: calc(var(--padding) / 2);
     padding: calc(var(--padding) / 2) var(--padding);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     background: #fff;
     color: var(--blue);
@@ -868,7 +868,7 @@
 
   .dep-btn {
     padding: calc(var(--padding) / 2) var(--padding);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     flex-shrink: 0;
   }
 
@@ -887,7 +887,7 @@
     min-width: 120px;
     max-width: 200px;
     padding: calc(var(--padding) / 2);
-    font-size: 13px;
+    font-size: var(--text-base);
     font-weight: 500;
     background: var(--button-elevated);
     border-radius: calc(var(--border-radius) / 2);
@@ -931,7 +931,7 @@
   .flag-value-input {
     width: 70px;
     padding: 2px 6px;
-    font-size: 11px;
+    font-size: var(--text-xs);
     background: var(--button-elevated);
     color: var(--secondary);
     border: 1px solid var(--input-border);
@@ -997,7 +997,7 @@
     margin: 0 var(--padding) var(--padding);
     padding: 8px 12px;
     text-align: left;
-    font-size: 13px;
+    font-size: var(--text-base);
     font-weight: 500;
     color: var(--accent);
     background: transparent;
@@ -1111,7 +1111,7 @@
   }
 
   .theme-name {
-    font-size: 11px;
+    font-size: var(--text-xs);
     color: var(--tertiary);
     text-align: center;
   }

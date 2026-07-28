@@ -401,7 +401,7 @@
     color: color-mix(in srgb, var(--warning) 82%, var(--text));
     border: 1px solid color-mix(in srgb, var(--warning) 34%, var(--border));
     border-radius: var(--border-radius);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
   }
 

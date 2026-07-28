@@ -1644,7 +1644,7 @@
   }
 
   .session-info {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
     overflow: hidden;
@@ -1662,7 +1662,7 @@
 
   .session-bar :global(.button) {
     padding: calc(var(--padding) / 2) var(--padding);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
   }
 
   .spinning {
@@ -1726,7 +1726,7 @@
   }
 
   .qr-instruction {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
     line-height: 1.6;
@@ -1745,7 +1745,7 @@
   }
 
   .separator-text {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
   }
@@ -1770,7 +1770,7 @@
   }
 
   .field-label {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
   }
@@ -1785,7 +1785,7 @@
   .input {
     width: 100%;
     padding: var(--padding);
-    font-size: 14.5px;
+    font-size: var(--text-base);
     background: var(--button);
     border-radius: var(--border-radius);
     color: var(--secondary);
@@ -1812,7 +1812,7 @@
 
   .error-msg {
     color: var(--red);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
   }
 
@@ -1846,7 +1846,7 @@
   }
 
   .spinner-text {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
   }
@@ -1861,7 +1861,7 @@
 
   .empty-text {
     color: var(--gray);
-    font-size: 14.5px;
+    font-size: var(--text-base);
     text-align: center;
     padding: calc(var(--padding) * 4) 0;
   }
@@ -1897,7 +1897,7 @@
     border: none;
     color: var(--gray);
     font-family: inherit;
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     cursor: pointer;
     border-radius: calc(var(--border-radius) - 2px);
@@ -1936,7 +1936,7 @@
     align-items: center;
     gap: 6px;
     padding: calc(var(--padding) / 2) calc(var(--padding) * 1.25);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
   }
 
   .create-folder-overlay {
@@ -2011,7 +2011,7 @@
   }
 
   .subtext {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
   }
@@ -2058,7 +2058,7 @@
     align-items: center;
     gap: calc(var(--padding) / 2);
     padding: calc(var(--padding) / 2) var(--padding);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
   }
 
   .transfers-btn {
@@ -2101,7 +2101,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
   }
 
@@ -2127,7 +2127,7 @@
   }
 
   .chat-title {
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
     color: var(--secondary);
     overflow: hidden;
@@ -2154,7 +2154,7 @@
 
   .filter-btn {
     padding: calc(var(--padding) / 2) var(--padding);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
   }
 
   .media-header {
@@ -2171,7 +2171,7 @@
   .batch-download-btn,
   .batch-cancel-btn {
     padding: calc(var(--padding) / 2) var(--padding);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
   }
 
   .batch-cancel-btn {
@@ -2265,7 +2265,7 @@
 
   .media-download-btn {
     padding: calc(var(--padding) / 2) var(--padding);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     flex-shrink: 0;
   }
 
@@ -2285,7 +2285,7 @@
   .load-more-btn {
     align-self: center;
     padding: calc(var(--padding) / 2) calc(var(--padding) * 2);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     display: flex;
     align-items: center;
     gap: calc(var(--padding) / 2);
@@ -2356,7 +2356,7 @@
     }
 
     .media-name {
-      font-size: 12.5px;
+      font-size: var(--text-sm);
     }
 
     .media-meta {

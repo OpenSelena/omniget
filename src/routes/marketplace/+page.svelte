@@ -508,7 +508,7 @@
 
   .error-hint {
     max-width: 420px;
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     line-height: 1.5;
     color: var(--gray);
   }
@@ -617,7 +617,7 @@
   }
 
   .plugin-name {
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
     color: var(--secondary);
   }

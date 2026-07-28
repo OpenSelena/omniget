@@ -158,7 +158,7 @@
     border-radius: calc(var(--border-radius) / 2);
     color: var(--text);
     font-family: ui-monospace, monospace;
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     outline: none;
   }
   .rpc-input:focus-visible {

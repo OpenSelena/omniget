@@ -1157,7 +1157,7 @@
   }
 
   .empty-text {
-    font-size: 14.5px;
+    font-size: var(--text-base);
   }
 
   .downloads-page {
@@ -1196,7 +1196,7 @@
   }
 
   .clear-btn {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     padding: calc(var(--padding) / 3) calc(var(--padding) * 0.75);
     background: var(--button-elevated);
@@ -1450,7 +1450,7 @@
   }
 
   .item-detail {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
     overflow: hidden;
@@ -1462,7 +1462,7 @@
     display: flex;
     align-items: center;
     gap: calc(var(--padding) / 3);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
     font-variant-numeric: tabular-nums;
@@ -1473,7 +1473,7 @@
   }
 
   .item-error {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--red);
   }
@@ -1695,7 +1695,7 @@
     display: inline-flex;
     align-items: center;
     gap: 5px;
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     color: var(--tertiary);
     background: transparent;
     border: none;

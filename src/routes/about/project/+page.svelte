@@ -60,7 +60,7 @@
   }
 
   .star-description {
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
     color: var(--secondary);
   }
@@ -77,7 +77,7 @@
     gap: calc(var(--padding) / 2);
     width: 100%;
     padding: calc(var(--padding) + 2px) calc(var(--padding) * 2);
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
     color: #fff;
     background: var(--orange);
@@ -121,7 +121,7 @@
   }
 
   .project-description {
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 400;
     line-height: 1.8;
     color: var(--gray);
@@ -162,7 +162,7 @@
   }
 
   .version {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
     text-align: center;
