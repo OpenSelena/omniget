@@ -735,6 +735,7 @@ pub async fn league_player_report(puuid: String) -> Result<Value, String> {
         ),
     )
     .await;
+    let mut history_ids: Vec<i64> = Vec::new();
     let (stats, private_profile) = match history {
         Ok(h) => {
             let games: Vec<Value> = h
@@ -743,9 +744,42 @@ pub async fn league_player_report(puuid: String) -> Result<Value, String> {
                 .and_then(Value::as_array)
                 .cloned()
                 .unwrap_or_default();
+            history_ids = games
+                .iter()
+                .filter_map(|g| g.get("gameId").and_then(Value::as_i64))
+                .collect();
             (compute_history_stats(&games, &puuid), games.is_empty())
         }
         Err(_) => (json!({ "games": 0, "insights": [] }), true),
+    };
+
+    // Impact needs team totals, which only the full game detail carries, so it
+    // is computed over a small sample instead of the whole history.
+    let recent_ids: Vec<i64> = history_ids.into_iter().take(5).collect();
+    let mut impact_tasks = Vec::new();
+    for game_id in recent_ids {
+        let task_client = client.clone();
+        let task_puuid = puuid.clone();
+        impact_tasks.push(tauri::async_runtime::spawn(async move {
+            let detail = lcu_get_raw(
+                &task_client,
+                &format!("/lol-match-history/v1/games/{}", game_id),
+            )
+            .await
+            .ok()?;
+            impact_from_detail(&detail, &task_puuid)
+        }));
+    }
+    let mut impacts: Vec<f64> = Vec::new();
+    for task in impact_tasks {
+        if let Ok(Some(score)) = task.await {
+            impacts.push(score);
+        }
+    }
+    let impact = if impacts.is_empty() {
+        Value::Null
+    } else {
+        json!(((impacts.iter().sum::<f64>() / impacts.len() as f64) * 10.0).round() / 10.0)
     };
 
     let mastery = lcu_get_raw(
@@ -776,6 +810,8 @@ pub async fn league_player_report(puuid: String) -> Result<Value, String> {
         "flex": flex,
         "stats": stats,
         "mastery": mastery,
+        "impact": impact,
+        "impactGames": impacts.len(),
         "privateProfile": private_profile,
     }))
 }
@@ -1131,6 +1167,63 @@ pub async fn league_live_metrics() -> Result<Value, String> {
         "teamGold": { "ORDER": team_gold("ORDER"), "CHAOS": team_gold("CHAOS") },
         "teamGoldDiff": team_gold("ORDER") - team_gold("CHAOS"),
     }))
+}
+
+/// Computes the composite impact score for one player in one finished game.
+fn impact_from_detail(detail: &Value, puuid: &str) -> Option<f64> {
+    let identities = detail.get("participantIdentities")?.as_array()?;
+    let participants = detail.get("participants")?.as_array()?;
+    let pid = identities
+        .iter()
+        .find(|i| {
+            i.get("player")
+                .and_then(|p| p.get("puuid"))
+                .and_then(Value::as_str)
+                == Some(puuid)
+        })
+        .and_then(|i| i.get("participantId").and_then(Value::as_i64))?;
+    let me = participants
+        .iter()
+        .find(|p| p.get("participantId").and_then(Value::as_i64) == Some(pid))?;
+    let team_id = me.get("teamId").and_then(Value::as_i64)?;
+    let team: Vec<&Value> = participants
+        .iter()
+        .filter(|p| p.get("teamId").and_then(Value::as_i64) == Some(team_id))
+        .collect();
+    if team.is_empty() {
+        return None;
+    }
+
+    let stat = |p: &Value, key: &str| -> f64 {
+        p.get("stats")
+            .and_then(|s| s.get(key))
+            .and_then(Value::as_f64)
+            .unwrap_or(0.0)
+    };
+    let sum = |key: &str| -> f64 { team.iter().map(|p| stat(p, key)).sum() };
+    let count = |p: &Value, key: &str| -> u32 { stat(p, key).max(0.0) as u32 };
+
+    let input = stats::ImpactInput {
+        kills: count(me, "kills"),
+        deaths: count(me, "deaths"),
+        assists: count(me, "assists"),
+        team_kills: sum("kills").max(0.0) as u32,
+        damage_to_champions: stat(me, "totalDamageDealtToChampions"),
+        team_damage: sum("totalDamageDealtToChampions"),
+        damage_taken: stat(me, "totalDamageTaken"),
+        team_damage_taken: sum("totalDamageTaken"),
+        gold: stat(me, "goldEarned"),
+        team_gold: sum("goldEarned"),
+        cs: stat(me, "totalMinionsKilled") + stat(me, "neutralMinionsKilled"),
+        vision_score: stat(me, "visionScore"),
+        team_vision: sum("visionScore"),
+        duration_seconds: detail
+            .get("gameDuration")
+            .and_then(Value::as_f64)
+            .unwrap_or(0.0),
+        team_size: team.len(),
+    };
+    Some(stats::impact_score(&input))
 }
 
 /// Aggregates a player's champion records the way a profile page shows them.
@@ -1742,6 +1835,139 @@ pub async fn league_send_chat(message: String) -> Result<(), String> {
     )
     .await?;
     Ok(())
+}
+
+/// Rune and summoner-spell setups the game client itself recommends.
+///
+/// This is the client's own recommendation engine, so it always matches the
+/// installed patch and comes localized — no scraping involved.
+#[tauri::command]
+pub async fn league_rune_recommendations(
+    champion_id: i64,
+    position: Option<String>,
+) -> Result<Value, String> {
+    ensure_enabled()?;
+    let client = get_client().await?;
+    let pos = position
+        .map(|p| p.to_ascii_uppercase())
+        .filter(|p| !p.is_empty())
+        .unwrap_or_else(|| "NONE".to_string());
+    let path = format!(
+        "/lol-perks/v1/recommended-pages/champion/{}/position/{}/map/11",
+        champion_id, pos
+    );
+    let pages = lcu_get_raw(&client, &path).await?;
+
+    let list: Vec<Value> = pages
+        .as_array()
+        .map(|arr| {
+            arr.iter()
+                .map(|p| {
+                    let perks: Vec<i64> = p
+                        .get("perks")
+                        .and_then(Value::as_array)
+                        .map(|a| a.iter().filter_map(|x| x.get("id").and_then(Value::as_i64)).collect())
+                        .unwrap_or_default();
+                    json!({
+                        "recommendationId": p.get("recommendationId"),
+                        "keystoneId": p.get("keystone").and_then(|k| k.get("id")),
+                        "keystoneName": p.get("keystone").and_then(|k| k.get("name")),
+                        "primaryStyleId": p.get("primaryPerkStyleId"),
+                        "subStyleId": p.get("secondaryPerkStyleId"),
+                        "selectedPerkIds": perks,
+                        "summonerSpellIds": p.get("summonerSpellIds"),
+                        "primaryAttribute": p.get("primaryRecommendationAttribute"),
+                        "secondaryAttribute": p.get("secondaryRecommendationAttribute"),
+                        "isDefault": p.get("isDefaultPosition"),
+                    })
+                })
+                .collect()
+        })
+        .unwrap_or_default();
+
+    Ok(json!({ "championId": champion_id, "position": pos, "pages": list }))
+}
+
+/// Champion tier rankings, per position, from op.gg's public champion API.
+///
+/// The response is passed through with only the fields the UI needs; the
+/// numeric `tier` (1 = best) is what op.gg renders as S+/S/A and friends.
+#[tauri::command]
+pub async fn league_champion_tiers(
+    region: Option<String>,
+    tier: Option<String>,
+) -> Result<Value, String> {
+    ensure_enabled()?;
+    let region = region.unwrap_or_else(|| "br".to_string());
+    let bracket = tier.unwrap_or_else(|| "emerald_plus".to_string());
+    if !region.chars().all(|c| c.is_ascii_alphanumeric())
+        || !bracket.chars().all(|c| c.is_ascii_alphanumeric() || c == '_')
+    {
+        return Err("invalid region or tier".to_string());
+    }
+    let url = format!(
+        "https://lol-api-champion.op.gg/api/{}/champions/ranked?tier={}",
+        region, bracket
+    );
+    let http = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(20))
+        .user_agent("OmniGet")
+        .build()
+        .map_err(|e| e.to_string())?;
+    let resp = http
+        .get(&url)
+        .send()
+        .await
+        .map_err(|e| format!("tier list unavailable: {}", e))?;
+    if !resp.status().is_success() {
+        return Err(format!("tier list returned {}", resp.status().as_u16()));
+    }
+    let body = resp
+        .json::<Value>()
+        .await
+        .map_err(|e| format!("invalid tier list response: {}", e))?;
+
+    let entries: Vec<Value> = body
+        .get("data")
+        .and_then(Value::as_array)
+        .map(|arr| {
+            arr.iter()
+                .filter_map(|c| {
+                    let id = c.get("id").and_then(Value::as_i64)?;
+                    let positions: Vec<Value> = c
+                        .get("positions")
+                        .and_then(Value::as_array)
+                        .map(|ps| {
+                            ps.iter()
+                                .filter_map(|p| {
+                                    let stats = p.get("stats")?;
+                                    Some(json!({
+                                        "position": p.get("name"),
+                                        "tier": stats.get("tier_data").and_then(|t| t.get("tier")),
+                                        "rank": stats.get("tier_data").and_then(|t| t.get("rank")),
+                                        "winRate": stats.get("win_rate"),
+                                        "pickRate": stats.get("pick_rate"),
+                                        "banRate": stats.get("ban_rate"),
+                                        "roleRate": stats.get("role_rate"),
+                                        "games": stats.get("play"),
+                                    }))
+                                })
+                                .collect()
+                        })
+                        .unwrap_or_default();
+                    if positions.is_empty() {
+                        return None;
+                    }
+                    Some(json!({ "championId": id, "positions": positions }))
+                })
+                .collect()
+        })
+        .unwrap_or_default();
+
+    if entries.is_empty() {
+        return Err("tier list returned no champions".to_string());
+    }
+    Ok(json!({ "region": region, "bracket": bracket, "champions": entries }))
 }
 
 #[tauri::command]

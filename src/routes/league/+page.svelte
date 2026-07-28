@@ -99,7 +99,7 @@
     ];
   }
 
-  const TAB_IDS = ["overview", "analysis", "search", "live", "goals", "automation", "history"] as const;
+  const TAB_IDS = ["overview", "analysis", "meta", "search", "live", "goals", "automation", "history"] as const;
   type Tab = (typeof TAB_IDS)[number];
   let tab = $state<Tab>("overview");
 
@@ -296,6 +296,168 @@
     }
   }
 
+  const TIER_POSITIONS = ["TOP", "JUNGLE", "MID", "ADC", "SUPPORT"] as const;
+  let tierPosition = $state<string>("JUNGLE");
+  let tiers = $state<any>(null);
+  let tiersLoading = $state(false);
+  let tiersError = $state("");
+
+  let runePages = $state<any[]>([]);
+  let runeApplying = $state(false);
+  let runeError = $state("");
+  let appliedRuneIndex = $state<number | null>(null);
+  let lastRuneChampion = 0;
+
+  let perkMeta = $state<Record<number, string>>({});
+  let spellMeta = $state<Record<number, string>>({});
+
+  // Champion the local player has locked in (or hovered) during champ select.
+  let champSelectChampionId = $derived.by(() => {
+    const cell = champSelect?.localPlayerCellId;
+    if (cell === undefined || cell === null) return 0;
+    const me = (champSelect?.myTeam ?? []).find((m: any) => m.cellId === cell);
+    return me?.championId ?? 0;
+  });
+
+  let myAssignedPosition = $derived.by(() => {
+    const cell = champSelect?.localPlayerCellId;
+    const me = (champSelect?.myTeam ?? []).find((m: any) => m.cellId === cell);
+    return (me?.assignedPosition ?? "").toUpperCase();
+  });
+
+  function perkName(id: number): string {
+    return perkMeta[id] ?? String(id);
+  }
+
+  function spellName(id: number): string {
+    return spellMeta[id] ?? String(id);
+  }
+
+  // op.gg encodes tiers as 1 = best; the labels mirror what their site shows.
+  function tierLabel(tier: number): string {
+    if (tier <= 1) return "S+";
+    if (tier === 2) return "S";
+    if (tier === 3) return "A";
+    if (tier === 4) return "B";
+    if (tier === 5) return "C";
+    return "D";
+  }
+
+  let tierRows = $derived.by(() => {
+    const wanted = tierPosition;
+    const rows: any[] = [];
+    for (const champ of tiers?.champions ?? []) {
+      const entry = (champ.positions ?? []).find((p: any) => (p.position ?? "").toUpperCase() === wanted);
+      if (!entry || entry.tier === null || entry.tier === undefined) continue;
+      rows.push({
+        championId: champ.championId,
+        tier: entry.tier,
+        rank: entry.rank ?? 999,
+        winRate: Math.round((entry.winRate ?? 0) * 1000) / 10,
+        pickRate: Math.round((entry.pickRate ?? 0) * 1000) / 10,
+        banRate: Math.round((entry.banRate ?? 0) * 1000) / 10,
+      });
+    }
+    rows.sort((a, b) => a.tier - b.tier || a.rank - b.rank);
+    return rows.slice(0, 40);
+  });
+
+  async function loadTiers() {
+    if (tiersLoading) return;
+    tiersLoading = true;
+    tiersError = "";
+    try {
+      tiers = await invoke<any>("league_champion_tiers", {
+        region: (status.region ?? "br").toLowerCase(),
+      });
+    } catch (e: any) {
+      tiers = null;
+      tiersError = typeof e === "string" ? e : (e?.message ?? String(e));
+    } finally {
+      tiersLoading = false;
+    }
+  }
+
+  async function loadPerkMeta() {
+    try {
+      const perks = await invoke<any[]>("league_get", { path: "/lol-perks/v1/perks" });
+      const map: Record<number, string> = {};
+      for (const p of perks ?? []) map[p.id] = p.name;
+      perkMeta = map;
+    } catch {
+      perkMeta = {};
+    }
+    try {
+      const spells = await invoke<any[]>("league_get", {
+        path: "/lol-game-data/assets/v1/summoner-spells.json",
+      });
+      const map: Record<number, string> = {};
+      for (const s of spells ?? []) map[s.id] = s.name;
+      spellMeta = map;
+    } catch {
+      spellMeta = {};
+    }
+  }
+
+  async function loadRunes(championId: number) {
+    if (championId <= 0) {
+      runePages = [];
+      return;
+    }
+    runeError = "";
+    try {
+      const result = await invoke<any>("league_rune_recommendations", {
+        championId,
+        position: myAssignedPosition || null,
+      });
+      runePages = result?.pages ?? [];
+      appliedRuneIndex = null;
+    } catch (e: any) {
+      runePages = [];
+      runeError = typeof e === "string" ? e : (e?.message ?? String(e));
+    }
+  }
+
+  async function applyRunePage(index: number) {
+    const page = runePages[index];
+    if (!page || runeApplying) return;
+    runeApplying = true;
+    runeError = "";
+    try {
+      const champName = championById.get(champSelectChampionId)?.name ?? "";
+      await invoke("league_apply_runes", {
+        name: `${champName} ${page.keystoneName ?? ""}`.trim(),
+        primaryStyleId: page.primaryStyleId,
+        subStyleId: page.subStyleId,
+        selectedPerkIds: page.selectedPerkIds,
+        spell1: page.summonerSpellIds?.[0] ?? null,
+        spell2: page.summonerSpellIds?.[1] ?? null,
+      });
+      appliedRuneIndex = index;
+    } catch (e: any) {
+      runeError = typeof e === "string" ? e : (e?.message ?? String(e));
+    } finally {
+      runeApplying = false;
+    }
+  }
+
+  // Load recommendations when the locked champion changes; apply the first one
+  // automatically only when the user asked for it.
+  $effect(() => {
+    const champ = champSelectChampionId;
+    if (champ > 0 && champ !== lastRuneChampion) {
+      lastRuneChampion = champ;
+      loadRunes(champ).then(() => {
+        if (settings?.league?.auto_runes && runePages.length > 0) {
+          applyRunePage(0);
+        }
+      });
+    } else if (champ === 0 && lastRuneChampion !== 0) {
+      lastRuneChampion = 0;
+      runePages = [];
+    }
+  });
+
   const PHASE_KEYS: Record<string, string> = {
     Lobby: "league.phase_lobby",
     Matchmaking: "league.phase_matchmaking",
@@ -477,7 +639,7 @@
     }
   }
 
-  function toggleLeagueFlag(field: "auto_pick" | "auto_ban" | "auto_lock") {
+  function toggleLeagueFlag(field: "auto_pick" | "auto_ban" | "auto_lock" | "auto_runes") {
     const current = (settings?.league as any)?.[field] ?? false;
     updateSettings({ league: { [field]: !current } });
   }
@@ -551,6 +713,7 @@
     if (!enabled) return;
     loadNotes();
     loadGoals();
+    loadPerkMeta();
     invoke<boolean>("league_auto_accept_get")
       .then((v) => { autoAccept = v; })
       .catch(() => {});
@@ -804,7 +967,9 @@
                         {#if r?.stats?.games > 0}
                           <div class="scout-stats">
                             <span class="scout-wr" class:good={r.stats.winrate >= 55} class:bad={r.stats.winrate <= 45}>{r.stats.winrate}% WR</span>
-                            <span class="scout-kda">{r.stats.kda} KDA</span>
+                            <span class="scout-kda">
+                              {r.stats.kda} KDA{#if r.impact !== null && r.impact !== undefined} · <span class="impact" title={$t("league.impact_hint") as string}>{r.impact}</span>{/if}
+                            </span>
                           </div>
                         {:else if r?.privateProfile}
                           <span class="scout-private">{$t("league.scout_private")}</span>
@@ -839,6 +1004,104 @@
           </div>
         </section>
       {/if}
+      {/if}
+
+      {#if tab === "meta"}
+        <section class="card">
+          <div class="card-head">
+            <h3>{$t("league.runes_title")}</h3>
+            {#if champSelectChampionId > 0}
+              <span class="phase-tag">{championById.get(champSelectChampionId)?.name ?? champSelectChampionId}</span>
+            {/if}
+          </div>
+          <p class="win-disclaimer">{$t("league.runes_desc")}</p>
+          <div class="action-row">
+            <div class="action-col">
+              <span class="action-label">{$t("league.runes_auto")}</span>
+              <span class="action-hint">{$t("league.runes_auto_desc")}</span>
+            </div>
+            <button
+              class="toggle"
+              class:on={settings?.league?.auto_runes}
+              onclick={() => toggleLeagueFlag("auto_runes")}
+              role="switch"
+              aria-checked={settings?.league?.auto_runes ?? false}
+              aria-label={$t("league.runes_auto") as string}
+            >
+              <span class="toggle-knob"></span>
+            </button>
+          </div>
+          {#if runeError}
+            <p class="action-error" role="alert">{runeError}</p>
+          {/if}
+          {#if runePages.length > 0}
+            <div class="rune-list">
+              {#each runePages as page, i (page.recommendationId ?? i)}
+                <div class="rune-card" class:applied={appliedRuneIndex === i}>
+                  <div class="rune-head">
+                    <span class="rune-keystone">{page.keystoneName ?? page.keystoneId}</span>
+                    {#if page.isDefault}
+                      <span class="scout-tag">{$t("league.runes_default")}</span>
+                    {/if}
+                  </div>
+                  <div class="rune-perks">
+                    {#each page.selectedPerkIds as perkId (perkId)}
+                      <img
+                        class="perk-icon"
+                        src={`${CDRAGON}/perk-images/styles/${perkId}.png`}
+                        alt=""
+                        title={perkName(perkId)}
+                        loading="lazy"
+                        onerror={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = "hidden"; }}
+                      />
+                    {/each}
+                  </div>
+                  <div class="rune-foot">
+                    <span class="dim">{$t("league.runes_spells")}: {(page.summonerSpellIds ?? []).map(spellName).join(" + ")}</span>
+                    <button class="button" onclick={() => applyRunePage(i)} disabled={runeApplying}>
+                      {$t("league.runes_apply")}
+                    </button>
+                  </div>
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <p class="empty-hint">{$t("league.runes_empty")}</p>
+          {/if}
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h3>{$t("league.tiers_title")}</h3>
+            <div class="tier-controls">
+              <select class="select-role" bind:value={tierPosition} aria-label={$t("league.tiers_position") as string}>
+                {#each TIER_POSITIONS as pos (pos)}
+                  <option value={pos}>{$t(`league.role_${pos.toLowerCase()}`)}</option>
+                {/each}
+              </select>
+              <button class="button" onclick={loadTiers} disabled={tiersLoading}>{$t("league.refresh")}</button>
+            </div>
+          </div>
+          <p class="win-disclaimer">{$t("league.tiers_desc")}</p>
+          {#if tiersError}
+            <p class="action-error" role="alert">{tiersError}</p>
+          {:else if tierRows.length > 0}
+            <div class="champ-table">
+              {#each tierRows as row (row.championId)}
+                <div class="champ-row">
+                  <span class={`tier-badge tier-${row.tier}`}>{tierLabel(row.tier)}</span>
+                  <img class="champ-icon tiny" src={`${CDRAGON}/champion-icons/${row.championId}.png`} alt="" loading="lazy" />
+                  <span class="champ-row-name">{championById.get(row.championId)?.name ?? row.championId}</span>
+                  <span class="champ-row-wr" class:good={row.winRate >= 52} class:bad={row.winRate <= 48}>{row.winRate}%</span>
+                  <span class="champ-row-games dim">{$t("league.tiers_pick")} {row.pickRate}%</span>
+                  <span class="champ-row-kda dim">{$t("league.tiers_ban")} {row.banRate}%</span>
+                </div>
+              {/each}
+            </div>
+          {:else}
+            <p class="empty-hint">{tiersLoading ? $t("league.searching_player") : $t("league.tiers_empty")}</p>
+          {/if}
+        </section>
       {/if}
 
       {#if tab === "search"}
@@ -901,6 +1164,12 @@
                   <span class="stat-value">{r.stats.streak?.length ?? 0}</span>
                   <span class="stat-label">{r.stats.streak?.win ? $t("league.tag_hot_streak") : $t("league.tag_cold_streak")}</span>
                 </div>
+                {#if r.impact !== null && r.impact !== undefined}
+                  <div class="stat-cell">
+                    <span class="stat-value">{r.impact}<span class="dim">/10</span></span>
+                    <span class="stat-label">{$t("league.impact_label")} ({r.impactGames})</span>
+                  </div>
+                {/if}
               </div>
               {#if r.stats.insights?.length}
                 <div class="scout-champs">
@@ -2036,6 +2305,98 @@
   .chat-send .input-text {
     flex: 1;
     min-width: 180px;
+  }
+
+  .impact {
+    color: var(--accent);
+    font-weight: 600;
+  }
+
+  .rune-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 10px;
+  }
+
+  .rune-card {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    padding: 9px 11px;
+    background: var(--button);
+    border: 1px solid var(--input-border);
+    border-radius: calc(var(--border-radius) - 2px);
+  }
+
+  .rune-card.applied {
+    border-color: var(--accent);
+  }
+
+  .rune-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .rune-keystone {
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .rune-perks {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+
+  .perk-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--surface);
+  }
+
+  .rune-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    font-size: 12px;
+    flex-wrap: wrap;
+  }
+
+  .tier-controls {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+
+  .tier-badge {
+    flex-shrink: 0;
+    min-width: 30px;
+    text-align: center;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  .tier-badge.tier-1 {
+    color: var(--on-accent);
+    background: var(--accent);
+    border-color: transparent;
+  }
+
+  .tier-badge.tier-2 {
+    color: var(--success);
+    border-color: var(--success);
+  }
+
+  .tier-badge.tier-3 {
+    color: var(--text);
   }
 
   .scout-teams {

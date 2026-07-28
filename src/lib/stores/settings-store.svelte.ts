@@ -96,6 +96,7 @@ export type AppSettings = {
     auto_pick?: boolean;
     auto_ban?: boolean;
     auto_lock?: boolean;
+    auto_runes?: boolean;
     pick_champions?: number[];
     ban_champions?: number[];
   };

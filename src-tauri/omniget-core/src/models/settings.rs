@@ -46,6 +46,8 @@ pub struct LeagueSettings {
     #[serde(default)]
     pub auto_lock: bool,
     #[serde(default)]
+    pub auto_runes: bool,
+    #[serde(default)]
     pub pick_champions: Vec<i64>,
     #[serde(default)]
     pub ban_champions: Vec<i64>,
