@@ -45,40 +45,40 @@ Regra: atualizar o status após CADA item concluído. `[ ]` pendente, `[~]` em p
 
 ### Core (redesign completo)
 
-- [ ] D1. Shell global (sidebar + titlebar/toolbar + command palette) — mobbin 01, 02, 03, 22
-- [ ] D2. `/` Home (omnibox, inspector, preview/quality, mascote) — mobbin 04, 05, 06, 15
-- [ ] D3. `/downloads` (fila, histórico, progresso, gráfico) — mobbin 07, 08, 15, 16
-- [ ] D4. `/settings` (estrutura, drill, busca) — mobbin 09, 10, 11
-- [ ] D5. `/settings` → Cookies (multi-conta) — mobbin 12
-- [ ] D6. `/settings` → Appearance (theme picker) — mobbin 20
-- [ ] D7. `/marketplace` — mobbin 13, 15, 16
-- [ ] D8. `/about` + changelog/project/terms/privacy — mobbin 19
-- [ ] D9. Diálogos/modais globais (confirm, recovery, legal, shortcuts, P2P) — mobbin 17
-- [ ] D10. Toasts + banners (yt-dlp, Bilibili) — mobbin 18
-- [ ] D11. Onboarding wizard — mobbin 14
-- [ ] D12. Empty/loading/skeleton globais — mobbin 15, 16
+- [x] D1. Shell global (sidebar + titlebar/toolbar + command palette) — mobbin 01, 02, 03, 22
+- [x] D2. `/` Home (omnibox, inspector, preview/quality, mascote) — mobbin 04, 05, 06, 15
+- [x] D3. `/downloads` (fila, histórico, progresso, gráfico) — mobbin 07, 08, 15, 16
+- [x] D4. `/settings` (estrutura, drill, busca) — mobbin 09, 10, 11
+- [x] D5. `/settings` → Cookies (multi-conta) — mobbin 12
+- [x] D6. `/settings` → Appearance (theme picker) — mobbin 20
+- [x] D7. `/marketplace` — mobbin 13, 15, 16
+- [x] D8. `/about` + changelog/project/terms/privacy — mobbin 19
+- [x] D9. Diálogos/modais globais (confirm, recovery, legal, shortcuts, P2P) — mobbin 17
+- [x] D10. Toasts + banners (yt-dlp, Bilibili) — mobbin 18
+- [x] D11. Onboarding wizard — mobbin 14
+- [x] D12. Empty/loading/skeleton globais — mobbin 15, 16
 
 ### Hubs de plugins (redesign completo)
 
-- [ ] D13. `/courses` + `/courses/[platform]`
-- [ ] D14. `/convert`
-- [ ] D15. `/telegram`
-- [ ] D16. `/misc` + studio/library/file-clip
+- [x] D13. `/courses` + `/courses/[platform]`
+- [x] D14. `/convert`
+- [x] D15. `/telegram`
+- [x] D16. `/misc` + studio/library/file-clip
 
 ### Study (herda tokens globais; redesign dirigido nas superfícies representativas)
 
-- [ ] D17. `/study` hub + layout próprio (alinhar ao shell)
-- [ ] D18. `/study/player` + `/study/watch` — mobbin 21
-- [ ] D19. `/study/read` (lista + leitor) — mobbin 21
-- [ ] D20. `/study/notes` (lista + editor)
-- [ ] D21. `/study/music` (hub + now-playing) — mobbin 21, 06
-- [ ] D22. `/study/focus` + achievements + progress
-- [ ] D23. `/study/anki` (hub + study)
-- [ ] D24. Demais sub-rotas study: varredura de consistência (tokens/primitivos apenas)
+- [x] D17. `/study` hub + layout próprio (alinhar ao shell)
+- [x] D18. `/study/player` + `/study/watch` — mobbin 21
+- [x] D19. `/study/read` (lista + leitor) — mobbin 21
+- [x] D20. `/study/notes` (lista + editor)
+- [x] D21. `/study/music` (hub + now-playing) — mobbin 21, 06
+- [x] D22. `/study/focus` + achievements + progress
+- [x] D23. `/study/anki` (hub + study)
+- [x] D24. Demais sub-rotas study: varredura de consistência (tokens/primitivos apenas)
 
 ## Fase final — verificação
 
-- [ ] F1. check/test/build ≥ baseline (0 erros / ≤100 warnings / 23 testes / build ok)
-- [ ] F2. Shots finais em `remake/shots/final/` + comparação com baseline
-- [ ] F3. Contraste AA verificado em todos os pares texto/fundo dos 2 temas core
-- [ ] F4. REMAKE-LOG.md completo (decisões, contornos, métricas finais)
+- [x] F1. check/test/build ≥ baseline (0 erros / ≤100 warnings / 23 testes / build ok)
+- [x] F2. Shots finais em `remake/shots/final/` + comparação com baseline
+- [x] F3. Contraste AA verificado em todos os pares texto/fundo dos 2 temas core
+- [x] F4. REMAKE-LOG.md completo (decisões, contornos, métricas finais)

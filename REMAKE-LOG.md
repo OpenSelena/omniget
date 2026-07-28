@@ -19,7 +19,9 @@ Início: 2026-07-28
 
 ## Contornos
 
-(nenhum ainda)
+- **C-001** (2026-07-28): 4 subagentes paralelos (downloads/marketplace/about/settings) morreram no limite de sessão da API logo após o lançamento. Contorno: todo o trabalho de Fase D passou a ser executado inline e sequencialmente pela sessão principal. O agente de about completou a edição principal antes de cair (aproveitada e verificada).
+- **C-002** (2026-07-28): As ~70 sub-rotas de study e os hubs de plugins recebem o remake via herança de tokens + varredura de tipografia legada + correção de anti-padrões pontuais, em vez de redesign tela-a-tela — consistente com D-005 e com o orçamento de sessão. Cores hex remanescentes nessas áreas são brand colors de plataformas (Spotify/YouTube/Hotmart etc.) ou fallbacks `var(--token, #hex)` inertes — legítimas.
+- **C-003** (2026-07-28): O harness de shots captura o estado de aterrissagem de cada rota (sem interação). Sub-views de drill de settings (Cookies, Appearance abertos) e overlays (palette, diálogos) são auditados via kitchen-sink e leitura de código, não via screenshot automatizado.
 
 ## Progresso
 
@@ -30,8 +32,8 @@ Início: 2026-07-28
 - [x] Fase A.5 — REMAKE-LOG.md criado
 - [x] Fase A.6 — remake/PLANO.md criado
 - [x] Fase B — design system (remake/DESIGN-SYSTEM.md; tokens em app.css; temas core dark/light retunados p/ HIG; contraste AA 14/14 temas via scripts/contrast-audit.mjs; tipografia default → System; overrides de cor removidos do macos-shell.css)
-- [ ] Fase C — primitivos
-- [ ] Fase D — telas
+- [x] Fase C — primitivos (src/lib/style/primitives.css + buttons.css v2 + rota /_kitchen-sink com todos os estados, validada em light/dark)
+- [x] Fase D — telas: D1 shell, D2 home, D3 downloads, D4-D6 settings, D7 marketplace (+6 chaves i18n faltantes corrigidas), D8 about, D9 diálogos, D10 toasts/banners (faixa lateral removida, CTA do banner AA), D11 onboarding (CTA cta/on-cta, bug de texto invisível corrigido), D12 empty/loading via primitivos, D13-D16 hubs por herança de tokens, D17-D24 study por herança + varredura (ver C-002)
 
 ## Métricas
 
@@ -45,3 +47,21 @@ Início: 2026-07-28
 | lint | script inexistente (ver D-003) |
 
 Piso inviolável: check 0 erros / ≤100 warnings; test ≥23 passando; build sucesso.
+
+### Final (2026-07-28, após o remake)
+
+| Verificação | Resultado | vs. baseline |
+|---|---|---|
+| `pnpm check` | 0 erros, 100 warnings, 1331 arquivos | igual (2 arquivos novos: kitchen-sink + primitives) |
+| `pnpm test` | 23/23 passando | igual |
+| `pnpm build` | sucesso | igual |
+| Contraste AA | 14/14 temas PASS (`scripts/contrast-audit.mjs`) | era N/A |
+| Shots finais | 138/138 em `remake/shots/final/` (23 rotas × 3 viewports × 2 temas) | baseline 132 em `remake/shots/baseline/` |
+| Chaves i18n cruas na UI | 0 (13 chaves faltantes adicionadas: 6 marketplace + 7 about, sincronizadas nos 11 locales) | 13 visíveis |
+
+### Bugs reais corrigidos de carona
+
+- 12 temas alternativos atropelados pelo mac-shell (D-008)
+- Texto invisível no botão next/finish do onboarding (bg e cor iguais)
+- 13 chaves i18n faltantes renderizando cruas em marketplace e about
+- CTA do banner yt-dlp sem contraste AA no light (ISSUE-002 da auditoria antiga)
