@@ -71,35 +71,36 @@
   }
 
   .star-button {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: calc(var(--padding) / 2);
-    width: 100%;
-    padding: calc(var(--padding) + 2px) calc(var(--padding) * 2);
+    margin: 0 auto;
+    padding: calc(var(--padding) / 2) calc(var(--padding) * 1.5);
     font-size: var(--text-base);
     font-weight: 500;
-    color: #fff;
-    background: var(--orange);
-    border: none;
-    border-radius: var(--border-radius);
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
     cursor: pointer;
-    transition: transform 0.15s;
+    transition: background var(--duration-fast) var(--ease-out);
   }
 
   .star-button svg {
     pointer-events: none;
     flex-shrink: 0;
+    color: var(--warning);
   }
 
   @media (hover: hover) {
     .star-button:hover {
-      transform: scale(1.05);
+      background: var(--surface-hi);
     }
   }
 
   .star-button:active {
-    transform: scale(0.98);
+    background: var(--fill-2);
   }
 
   .star-button:focus-visible {
