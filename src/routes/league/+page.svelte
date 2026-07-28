@@ -99,7 +99,7 @@
     ];
   }
 
-  const TAB_IDS = ["overview", "analysis", "live", "goals", "automation", "history"] as const;
+  const TAB_IDS = ["overview", "analysis", "search", "live", "goals", "automation", "history"] as const;
   type Tab = (typeof TAB_IDS)[number];
   let tab = $state<Tab>("overview");
 
@@ -220,6 +220,81 @@
       },
     ];
   });
+
+  let searchQuery = $state("");
+  let searchResult = $state<any>(null);
+  let searchLoading = $state(false);
+  let searchError = $state("");
+  let jungleReport = $state<any>(null);
+  let duos = $state<any>(null);
+  let duosLoading = $state(false);
+  let chatSending = $state(false);
+  let chatPreview = $state("");
+
+  async function runSearch() {
+    const raw = searchQuery.trim();
+    if (!raw || searchLoading) return;
+    const [namePart, tagPart = ""] = raw.split("#");
+    searchLoading = true;
+    searchError = "";
+    jungleReport = null;
+    try {
+      searchResult = await invoke<any>("league_search_player", {
+        gameName: namePart.trim(),
+        tagLine: tagPart.trim(),
+      });
+      const puuid = searchResult?.summoner?.puuid;
+      if (puuid) {
+        invoke<any>("league_jungle_report", { puuid, sample: 8 })
+          .then((r) => { jungleReport = r; })
+          .catch(() => { jungleReport = null; });
+      }
+    } catch (e: any) {
+      searchResult = null;
+      searchError = typeof e === "string" ? e : (e?.message ?? String(e));
+    } finally {
+      searchLoading = false;
+    }
+  }
+
+  async function loadDuos() {
+    if (duosLoading) return;
+    duosLoading = true;
+    try {
+      duos = await invoke<any>("league_duos", { sample: 20 });
+    } catch {
+      duos = { duos: [] };
+    } finally {
+      duosLoading = false;
+    }
+  }
+
+  // Builds the one-line-per-player summary that gets posted to champ select.
+  function buildChatSummary(): string {
+    const parts: string[] = [];
+    for (const p of scoutPlayers.filter((x) => !x.isAlly)) {
+      const r = p.puuid ? scoutReports[p.puuid] : null;
+      if (!r?.stats?.games) continue;
+      const champ = championById.get(p.championId)?.name ?? "";
+      parts.push(`${champ || p.gameName}: ${r.stats.winrate}%WR ${r.stats.kda}KDA (${r.stats.games})`);
+    }
+    return parts.join(" | ");
+  }
+
+  async function sendChatSummary() {
+    const text = chatPreview.trim();
+    if (!text || chatSending) return;
+    chatSending = true;
+    actionError = "";
+    try {
+      await invoke("league_send_chat", { message: text });
+      chatPreview = "";
+    } catch (e: any) {
+      actionError = typeof e === "string" ? e : (e?.message ?? String(e));
+    } finally {
+      chatSending = false;
+    }
+  }
 
   const PHASE_KEYS: Record<string, string> = {
     Lobby: "league.phase_lobby",
@@ -675,6 +750,15 @@
               {$t("league.win_gap")} {analysis.ratingGap > 0 ? "+" : ""}{analysis.ratingGap} · {analysis.knownPlayers}/{analysis.totalPlayers} {$t("league.win_known")}
             </p>
             <p class="win-disclaimer">{$t("league.win_disclaimer")}</p>
+            <div class="chat-send">
+              <input
+                class="input-text"
+                placeholder={$t("league.chat_placeholder") as string}
+                bind:value={chatPreview}
+              />
+              <button class="button" onclick={() => (chatPreview = buildChatSummary())}>{$t("league.chat_build")}</button>
+              <button class="button primary" onclick={sendChatSummary} disabled={chatSending || !chatPreview.trim()}>{$t("league.chat_send")}</button>
+            </div>
             {#if analysis.premades?.length}
               <div class="premade-row">
                 <span class="bench-label">{$t("league.premades")}</span>
@@ -755,6 +839,162 @@
           </div>
         </section>
       {/if}
+      {/if}
+
+      {#if tab === "search"}
+        <section class="card">
+          <div class="card-head">
+            <h3>{$t("league.search_title")}</h3>
+          </div>
+          <form class="search-form" onsubmit={(e) => { e.preventDefault(); runSearch(); }}>
+            <input
+              class="input-text"
+              placeholder={$t("league.search_placeholder") as string}
+              bind:value={searchQuery}
+              spellcheck="false"
+            />
+            <button class="button primary" type="submit" disabled={searchLoading}>
+              {searchLoading ? $t("league.searching_player") : $t("league.search_button")}
+            </button>
+          </form>
+          {#if searchError}
+            <p class="action-error" role="alert">{searchError}</p>
+          {:else}
+            <p class="win-disclaimer">{$t("league.search_hint")}</p>
+          {/if}
+        </section>
+
+        {#if searchResult}
+          {@const s = searchResult.summoner}
+          {@const r = searchResult.report}
+          <section class="profile-card">
+            <img class="profile-icon" src={`${CDRAGON}/profile-icons/${s.profileIconId}.jpg`} alt="" loading="lazy" />
+            <div class="profile-info">
+              <span class="profile-name">{s.gameName}<span class="tag">#{s.tagLine}</span></span>
+              <span class="profile-level">{$t("league.level")} {s.summonerLevel ?? "—"}</span>
+            </div>
+            <div class="ranked-chips">
+              <div class="ranked-chip">
+                <span class="ranked-queue">{$t("league.ranked_solo")}</span>
+                <span class="ranked-value">{rankLabel(r?.solo)}</span>
+              </div>
+              <div class="ranked-chip">
+                <span class="ranked-queue">{$t("league.ranked_flex")}</span>
+                <span class="ranked-value">{rankLabel(r?.flex)}</span>
+              </div>
+            </div>
+          </section>
+
+          {#if r?.stats?.games > 0}
+            <section class="card">
+              <div class="card-head"><h3>{$t("league.search_recent")}</h3></div>
+              <div class="stat-grid">
+                <div class="stat-cell">
+                  <span class="stat-value" class:good={r.stats.winrate >= 55} class:bad={r.stats.winrate <= 45}>{r.stats.winrate}%</span>
+                  <span class="stat-label">{$t("league.stat_winrate")} ({r.stats.games})</span>
+                </div>
+                <div class="stat-cell">
+                  <span class="stat-value">{r.stats.kda}</span>
+                  <span class="stat-label">KDA</span>
+                </div>
+                <div class="stat-cell">
+                  <span class="stat-value">{r.stats.streak?.length ?? 0}</span>
+                  <span class="stat-label">{r.stats.streak?.win ? $t("league.tag_hot_streak") : $t("league.tag_cold_streak")}</span>
+                </div>
+              </div>
+              {#if r.stats.insights?.length}
+                <div class="scout-champs">
+                  {#each r.stats.insights as tagId (tagId)}
+                    <span class="scout-tag">{$t(TAG_KEYS[tagId] ?? tagId)}</span>
+                  {/each}
+                </div>
+              {/if}
+            </section>
+          {/if}
+
+          {#if searchResult.champions?.length}
+            <section class="card">
+              <div class="card-head">
+                <h3>{$t("league.search_champions")}</h3>
+                <span class="phase-tag">{$t("league.search_champions_hint")}</span>
+              </div>
+              <div class="champ-table">
+                {#each searchResult.champions as ch (ch.championId)}
+                  <div class="champ-row">
+                    <img class="champ-icon small" src={`${CDRAGON}/champion-icons/${ch.championId}.png`} alt="" loading="lazy" />
+                    <span class="champ-row-name">{championById.get(ch.championId)?.name ?? ch.championId}</span>
+                    <span class="champ-row-games">{ch.games} {$t("league.games_short")}</span>
+                    <span class="champ-row-wr" class:good={ch.winrate >= 55} class:bad={ch.winrate <= 45}>{ch.winrate}%</span>
+                    <span class="champ-row-kda">{ch.kda} KDA</span>
+                    <span class="champ-row-cs dim">{ch.csPerMin}/m</span>
+                  </div>
+                {/each}
+              </div>
+            </section>
+          {/if}
+
+          {#if r?.mastery?.length}
+            <section class="card">
+              <div class="card-head"><h3>{$t("league.search_mastery")}</h3></div>
+              <div class="scout-champs">
+                {#each r.mastery as m (m.championId)}
+                  <span class="champ-chip">
+                    <img class="champ-icon tiny" src={`${CDRAGON}/champion-icons/${m.championId}.png`} alt="" loading="lazy" />
+                    {championById.get(m.championId)?.name ?? m.championId}
+                    <span class="dim">M{m.championLevel} · {Math.round((m.championPoints ?? 0) / 1000)}k</span>
+                  </span>
+                {/each}
+              </div>
+            </section>
+          {/if}
+
+          {#if jungleReport}
+            <section class="card">
+              <div class="card-head">
+                <h3>{$t("league.jungle_title")}</h3>
+                <span class="phase-tag">{jungleReport.analysedGames} {$t("league.games_short")}</span>
+              </div>
+              {#if jungleReport.analysedGames > 0}
+                <div class="zone-bars">
+                  {#each [["top", jungleReport.zones.top], ["mid", jungleReport.zones.mid], ["bot", jungleReport.zones.bot]] as [zone, pct] (zone)}
+                    <div class="zone-row">
+                      <span class="zone-name">{$t(`league.zone_${zone}`)}</span>
+                      <div class="goal-bar"><div class="goal-fill" style={`width:${pct}%`}></div></div>
+                      <span class="goal-value">{pct}%</span>
+                    </div>
+                  {/each}
+                </div>
+                <p class="win-note">
+                  {$t(`league.pref_${jungleReport.preference}`)} · {$t("league.jungle_invade")} {jungleReport.invadeRate}% · {$t("league.jungle_gank3")} {jungleReport.level3GankRate}%
+                </p>
+              {:else}
+                <p class="empty-hint">{$t("league.jungle_empty")}</p>
+              {/if}
+            </section>
+          {/if}
+        {/if}
+
+        <section class="card">
+          <div class="card-head">
+            <h3>{$t("league.duos_title")}</h3>
+            <button class="button" onclick={loadDuos} disabled={duosLoading}>{$t("league.refresh")}</button>
+          </div>
+          <p class="win-disclaimer">{$t("league.duos_desc")}</p>
+          {#if duos?.duos?.length}
+            <div class="champ-table">
+              {#each duos.duos as d (d.puuid)}
+                <div class="champ-row">
+                  <span class="champ-row-name">{d.gameName ?? "—"}{#if d.tagLine}<span class="dim">#{d.tagLine}</span>{/if}</span>
+                  <span class="champ-row-games">{d.games} {$t("league.games_short")}</span>
+                  <span class="champ-row-wr" class:good={d.winrate >= 55} class:bad={d.winrate <= 45}>{d.winrate}%</span>
+                  <span class="champ-row-kda dim">{$t("league.duos_score")} {d.score}%</span>
+                </div>
+              {/each}
+            </div>
+          {:else if duos}
+            <p class="empty-hint">{$t("league.duos_empty")}</p>
+          {/if}
+        </section>
       {/if}
 
       {#if tab === "live"}
@@ -1675,6 +1915,127 @@
     border: 1px solid var(--input-border);
     border-radius: calc(var(--border-radius) - 2px);
     color: var(--text);
+  }
+
+  .search-form {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .search-form .input-text {
+    flex: 1;
+    min-width: 180px;
+  }
+
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+    gap: 10px;
+  }
+
+  .stat-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 12px;
+    background: var(--button);
+    border: 1px solid var(--input-border);
+    border-radius: calc(var(--border-radius) - 2px);
+  }
+
+  .stat-value {
+    font-size: 19px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .stat-value.good {
+    color: var(--success);
+  }
+
+  .stat-value.bad {
+    color: var(--danger);
+  }
+
+  .stat-label {
+    font-size: 11.5px;
+    color: var(--gray);
+  }
+
+  .champ-table {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .champ-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    background: var(--button);
+    border-radius: calc(var(--border-radius) - 4px);
+    font-size: 12.5px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .champ-row-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .champ-row-games,
+  .champ-row-kda,
+  .champ-row-cs {
+    color: var(--gray);
+    flex-shrink: 0;
+  }
+
+  .champ-row-wr {
+    flex-shrink: 0;
+    font-weight: 600;
+  }
+
+  .champ-row-wr.good {
+    color: var(--success);
+  }
+
+  .champ-row-wr.bad {
+    color: var(--danger);
+  }
+
+  .zone-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+
+  .zone-row {
+    display: grid;
+    grid-template-columns: 60px 1fr 52px;
+    gap: 10px;
+    align-items: center;
+    font-size: 12.5px;
+  }
+
+  .zone-name {
+    color: var(--gray);
+  }
+
+  .chat-send {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+  }
+
+  .chat-send .input-text {
+    flex: 1;
+    min-width: 180px;
   }
 
   .scout-teams {
