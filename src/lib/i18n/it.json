@@ -37,6 +37,11 @@
     "nav_downloads": "Vai ai Download"
   },
   "league": {
+    "build_title": "Build di oggetti",
+    "build_desc": "Costruita dalle partite di quel campione nella tua cronologia recente — nessun sito di build di terze parti, quindi il campione è piccolo e dichiarato.",
+    "build_champion": "Scegli un campione",
+    "build_samples": "partite viste",
+    "build_empty": "Nessuna partita con questo campione nel campione.",
     "tab_meta": "Meta",
     "runes_title": "Rune",
     "runes_desc": "Pagine rune e incantesimi consigliati dal client del gioco per il campione bloccato, sempre alla patch corrente.",

@@ -37,6 +37,11 @@
     "nav_downloads": "Go to Downloads"
   },
   "league": {
+    "build_title": "Item build",
+    "build_desc": "Built from the champion's games inside your own recent matches — no third-party build site involved, so the sample is small and honest about it.",
+    "build_champion": "Pick a champion",
+    "build_samples": "games seen",
+    "build_empty": "No games with this champion in the sample yet.",
     "tab_meta": "Meta",
     "runes_title": "Runes",
     "runes_desc": "Rune pages and summoner spells recommended by the game client itself for the champion you locked, so they always match the current patch.",

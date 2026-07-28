@@ -37,6 +37,11 @@
     "nav_downloads": "前往下载"
   },
   "league": {
+    "build_title": "出装",
+    "build_desc": "根据你自己近期对局中该英雄的出装统计得出——不使用第三方出装网站，因此样本较小且如实标注。",
+    "build_champion": "选择英雄",
+    "build_samples": "场对局",
+    "build_empty": "样本中还没有该英雄的对局。",
     "tab_meta": "版本",
     "runes_title": "符文",
     "runes_desc": "由游戏客户端本身为你锁定的英雄推荐的符文页与召唤师技能，始终对应当前版本。",

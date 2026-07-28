@@ -733,6 +733,7 @@ pub fn run() {
             commands::league::league_send_chat,
             commands::league::league_rune_recommendations,
             commands::league::league_champion_tiers,
+            commands::league::league_champion_build,
             commands::bilibili_auth::bilibili_qr_generate,
             commands::bilibili_auth::bilibili_qr_poll,
             commands::bilibili_auth::bilibili_captcha_challenge,

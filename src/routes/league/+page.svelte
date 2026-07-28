@@ -458,6 +458,22 @@
     }
   });
 
+  let buildChampionId = $state<number>(0);
+  let buildInfo = $state<any>(null);
+  let buildLoading = $state(false);
+
+  async function loadBuild(championId: number) {
+    if (championId <= 0 || buildLoading) return;
+    buildLoading = true;
+    try {
+      buildInfo = await invoke<any>("league_champion_build", { championId, sample: 20 });
+    } catch {
+      buildInfo = null;
+    } finally {
+      buildLoading = false;
+    }
+  }
+
   const PHASE_KEYS: Record<string, string> = {
     Lobby: "league.phase_lobby",
     Matchmaking: "league.phase_matchmaking",
@@ -1067,6 +1083,44 @@
             </div>
           {:else}
             <p class="empty-hint">{$t("league.runes_empty")}</p>
+          {/if}
+        </section>
+
+        <section class="card">
+          <div class="card-head">
+            <h3>{$t("league.build_title")}</h3>
+            <button
+              class="button"
+              onclick={() => loadBuild(champSelectChampionId || (buildChampionId ?? 0))}
+              disabled={buildLoading || (!champSelectChampionId && !buildChampionId)}
+            >{$t("league.refresh")}</button>
+          </div>
+          <p class="win-disclaimer">{$t("league.build_desc")}</p>
+          <div class="build-picker">
+            <select class="select-role" bind:value={buildChampionId} aria-label={$t("league.build_champion") as string}>
+              <option value={0}>{$t("league.build_champion")}</option>
+              {#each champions as ch (ch.id)}
+                <option value={ch.id}>{ch.name}</option>
+              {/each}
+            </select>
+          </div>
+          {#if buildInfo && buildInfo.gamesSeen > 0}
+            <p class="win-note">
+              {buildInfo.gamesSeen} {$t("league.build_samples")} · {buildInfo.winrate}% {$t("league.stat_winrate")}
+            </p>
+            <div class="build-items">
+              {#each buildInfo.items as it (it.itemId)}
+                <span class="build-item">
+                  <img class="item-icon" src={`${CDRAGON}/../../game/assets/items/icons2d/${it.itemId}.png`} alt="" loading="lazy" onerror={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = "hidden"; }} />
+                  <span class="dim">{it.pickRate}%</span>
+                </span>
+              {/each}
+            </div>
+            {#if buildInfo.spells?.length}
+              <p class="win-note">{$t("league.runes_spells")}: {buildInfo.spells.map((s: any) => s.spellIds.map(spellName).join(" + ")).join(" / ")}</p>
+            {/if}
+          {:else if buildInfo}
+            <p class="empty-hint">{$t("league.build_empty")}</p>
           {/if}
         </section>
 
@@ -2397,6 +2451,32 @@
 
   .tier-badge.tier-3 {
     color: var(--text);
+  }
+
+  .build-picker {
+    margin: 8px 0;
+  }
+
+  .build-items {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin: 8px 0;
+  }
+
+  .build-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    font-size: 10.5px;
+  }
+
+  .item-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 6px;
+    background: var(--button);
   }
 
   .scout-teams {

@@ -1970,6 +1970,153 @@ pub async fn league_champion_tiers(
     Ok(json!({ "region": region, "bracket": bracket, "champions": entries }))
 }
 
+/// Item build for a champion, derived from games this client can actually see.
+///
+/// Third-party build sites either forbid third-party use of their API or ask
+/// crawlers to stay out, and Riot's own `recommended` blocks ship empty, so the
+/// sample here is the player's own recent matches: every participant on that
+/// champion across those games contributes their finished items. The response
+/// always reports how many games backed it so a thin sample is obvious.
+#[tauri::command]
+pub async fn league_champion_build(
+    champion_id: i64,
+    sample: Option<u32>,
+) -> Result<Value, String> {
+    ensure_enabled()?;
+    if champion_id <= 0 {
+        return Err("invalid champion".to_string());
+    }
+    let client = get_client().await?;
+    let me = lcu_get_raw(&client, "/lol-summoner/v1/current-summoner").await?;
+    let my_puuid = me
+        .get("puuid")
+        .and_then(Value::as_str)
+        .unwrap_or("")
+        .to_string();
+    let count = sample.unwrap_or(20).clamp(5, 40);
+    let history = lcu_get_raw(
+        &client,
+        &format!(
+            "/lol-match-history/v1/products/lol/{}/matches?begIndex=0&endIndex={}",
+            my_puuid,
+            count.saturating_sub(1)
+        ),
+    )
+    .await?;
+    let game_ids: Vec<i64> = history
+        .get("games")
+        .and_then(|g| g.get("games"))
+        .and_then(Value::as_array)
+        .map(|arr| {
+            arr.iter()
+                .filter_map(|g| g.get("gameId").and_then(Value::as_i64))
+                .collect()
+        })
+        .unwrap_or_default();
+
+    let mut tasks = Vec::new();
+    for game_id in game_ids {
+        let task_client = client.clone();
+        tasks.push(tauri::async_runtime::spawn(async move {
+            lcu_get_raw(
+                &task_client,
+                &format!("/lol-match-history/v1/games/{}", game_id),
+            )
+            .await
+            .ok()
+        }));
+    }
+
+    // (games seen, games won) per item and per summoner-spell pair.
+    let mut items: std::collections::HashMap<i64, (u32, u32)> = std::collections::HashMap::new();
+    let mut spells: std::collections::HashMap<(i64, i64), (u32, u32)> =
+        std::collections::HashMap::new();
+    let mut seen = 0u32;
+    let mut wins = 0u32;
+
+    for task in tasks {
+        let detail = match task.await {
+            Ok(Some(d)) => d,
+            _ => continue,
+        };
+        let participants = detail
+            .get("participants")
+            .and_then(Value::as_array)
+            .cloned()
+            .unwrap_or_default();
+        for p in &participants {
+            if p.get("championId").and_then(Value::as_i64) != Some(champion_id) {
+                continue;
+            }
+            let stats = p.get("stats").cloned().unwrap_or(Value::Null);
+            let won = stats.get("win").and_then(Value::as_bool).unwrap_or(false);
+            seen += 1;
+            if won {
+                wins += 1;
+            }
+            // Slot 6 is the trinket, which is not part of a build.
+            for slot in 0..6 {
+                let item = stats
+                    .get(format!("item{}", slot))
+                    .and_then(Value::as_i64)
+                    .unwrap_or(0);
+                if item > 0 {
+                    let e = items.entry(item).or_insert((0, 0));
+                    e.0 += 1;
+                    if won {
+                        e.1 += 1;
+                    }
+                }
+            }
+            let s1 = p.get("spell1Id").and_then(Value::as_i64).unwrap_or(0);
+            let s2 = p.get("spell2Id").and_then(Value::as_i64).unwrap_or(0);
+            if s1 > 0 && s2 > 0 {
+                let key = if s1 <= s2 { (s1, s2) } else { (s2, s1) };
+                let e = spells.entry(key).or_insert((0, 0));
+                e.0 += 1;
+                if won {
+                    e.1 += 1;
+                }
+            }
+        }
+    }
+
+    let mut item_rows: Vec<(i64, u32, u32)> =
+        items.into_iter().map(|(id, (g, w))| (id, g, w)).collect();
+    item_rows.sort_by(|a, b| b.1.cmp(&a.1).then(b.2.cmp(&a.2)));
+    let core: Vec<Value> = item_rows
+        .iter()
+        .take(8)
+        .map(|(id, games, wins)| {
+            json!({
+                "itemId": id,
+                "games": games,
+                "wins": wins,
+                "pickRate": if seen > 0 { ((*games as f64 / seen as f64) * 1000.0).round() / 10.0 } else { 0.0 },
+            })
+        })
+        .collect();
+
+    let mut spell_rows: Vec<((i64, i64), u32, u32)> =
+        spells.into_iter().map(|(k, (g, w))| (k, g, w)).collect();
+    spell_rows.sort_by(|a, b| b.1.cmp(&a.1));
+    let spell_list: Vec<Value> = spell_rows
+        .iter()
+        .take(2)
+        .map(|((a, b), games, _)| json!({ "spellIds": [a, b], "games": games }))
+        .collect();
+
+    Ok(json!({
+        "championId": champion_id,
+        "gamesSeen": seen,
+        "wins": wins,
+        "winrate": if seen > 0 { ((wins as f64 / seen as f64) * 1000.0).round() / 10.0 } else { 0.0 },
+        "items": core,
+        "spells": spell_list,
+        "source": "local-history",
+    }))
+}
+
 #[tauri::command]
 pub async fn league_auto_accept_set(enabled: bool) -> Result<(), String> {
     ensure_enabled()?;

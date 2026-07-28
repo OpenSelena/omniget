@@ -37,6 +37,11 @@
     "nav_downloads": "Aller aux Téléchargements"
   },
   "league": {
+    "build_title": "Build d'objets",
+    "build_desc": "Construite à partir des parties de ce champion dans votre propre historique récent — sans site de build tiers, donc l'échantillon est petit et annoncé comme tel.",
+    "build_champion": "Choisir un champion",
+    "build_samples": "parties vues",
+    "build_empty": "Aucune partie avec ce champion dans l'échantillon.",
     "tab_meta": "Méta",
     "runes_title": "Runes",
     "runes_desc": "Pages de runes et sorts recommandés par le client du jeu lui-même pour le champion verrouillé, toujours au patch actuel.",

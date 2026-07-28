@@ -37,6 +37,11 @@
     "nav_downloads": "Ir a Descargas"
   },
   "league": {
+    "build_title": "Build de objetos",
+    "build_desc": "Construida con las partidas de ese campeón dentro de tu propio historial reciente — sin sitios de builds de terceros, así que la muestra es pequeña y se indica.",
+    "build_champion": "Elige un campeón",
+    "build_samples": "partidas vistas",
+    "build_empty": "Aún no hay partidas con este campeón en la muestra.",
     "tab_meta": "Meta",
     "runes_title": "Runas",
     "runes_desc": "Páginas de runas y hechizos recomendados por el propio cliente del juego para el campeón que bloqueaste, siempre del parche actual.",

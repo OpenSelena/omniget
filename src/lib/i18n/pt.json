@@ -37,6 +37,11 @@
     "nav_downloads": "Ir para Downloads"
   },
   "league": {
+    "build_title": "Build de itens",
+    "build_desc": "Montada a partir das partidas desse campeão dentro do seu próprio histórico recente — sem site de build de terceiros, então a amostra é pequena e assumida como tal.",
+    "build_champion": "Escolha um campeão",
+    "build_samples": "partidas vistas",
+    "build_empty": "Nenhuma partida com esse campeão na amostra ainda.",
     "tab_meta": "Meta",
     "runes_title": "Runas",
     "runes_desc": "Páginas de runas e feitiços recomendados pelo próprio cliente do jogo para o campeão que você travou, sempre no patch atual.",
