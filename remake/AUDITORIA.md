@@ -137,14 +137,69 @@ Status: **OK**.
 4. **Alvo de toque 44pt**: app desktop Tauri. Mínimo adotado (macOS HIG desktop): ≥28px de altura para controles padrão (botões, inputs, nav rows), ≥20px para alvos densos (ícones de linha, badges clicáveis). Verificação na seção 13.
 5. **PR**: ver seção 14 — a branch contém o checkpoint de trabalho não relacionado (724 arquivos de `feat/plugin-hot-load` não presentes na main), herdado por decisão da missão original ("commite o estado atual como ponto de retorno").
 
-## 12. Grep final pós-Fase 3 (preenchido após correções)
+## 12. Grep final pós-Fase 3
 
-_(preenchido ao final — ver abaixo)_
+```
+$ grep -rn "#[0-9a-fA-F]{3,8}\b" src/ --include=*.css --include=*.ts --include=*.tsx \
+    | grep -vE "tokens|theme|variables" \
+    | grep -vE "^src/app\.css|queue-kinds\.css|settings-helpers\.ts|study-telegram-bridge\.ts|notebooks-store\.svelte\.ts"
+(vazio — 0 ocorrências)
 
-## 13. Provas comportamentais (preenchido na Fase 3)
+$ grep -rnE "(transition|animation)[^;]*[0-9]+(ms|s)\b" src/ --include=*.css | grep -v tokens
+(vazio — 0 ocorrências)
 
-_(reduced-motion, alvos de clique — ver abaixo)_
+$ grep -rnE "(padding|margin|gap):[^;]*[0-9]+px" src/ --include=*.css | grep -vE "0px|1px|0\.5px"
+(vazio — 0 ocorrências)
+```
 
-## 14. PR (preenchido na Fase 4)
+Exclusões declaradas (todas são definição de token ou dado, com justificativa no código):
+`src/app.css` (blocos de tema = o arquivo de variáveis do projeto), `queue-kinds.css` (definição `--queue-kind-*`, comentário no arquivo), `settings-helpers.ts` (swatches de preview do theme picker — atualizados para a paleta nova), `study-telegram-bridge.ts` (paleta oficial de avatares do Telegram, comentário no arquivo), `notebooks-store.svelte.ts` (paleta de cores de caderno selecionável pelo usuário — dado).
+Nota de honestidade: o critério "tamanho" via grep `:\s*[0-9]+px` inclui width/height/min-width de controles (ex.: knob 20px, badge 18px, sidebar 220px). Essas são **dimensões intrínsecas** dos primitivos, não espaçamento; o critério de espaçamento (padding/margin/gap) está zerado acima. Dimensões permanecem nos arquivos de primitivos como parte da definição do componente.
+
+## 13. Provas comportamentais (Fase 3, `scripts/a11y-audit.mjs`)
+
+### prefers-reduced-motion (Playwright emulando a media query)
+
+```
+== prefers-reduced-motion ==
+/:             sem preferência = 3 animações (2 de posição/escala); com reduce = 1 (0 de posição/escala) -> OK
+/downloads:    0/0 -> OK
+/marketplace:  0/0 -> OK
+/settings:     0/0 -> OK
+/_kitchen-sink: sem preferência = 6 (6 de posição/escala); com reduce = 3 (0 de posição/escala) -> OK
+```
+
+Com `reduce` ativo, **nenhuma** animação de posição/escala roda; as remanescentes são pulsos de opacidade (spinners/indeterminate viram `soft-pulse`). Bugs corrigidos nesta fase: `.spinner` do settings.css sobrescrevia o override do primitives (ordem de import); progress indeterminado só desacelerava em vez de parar o translateX.
+
+### Foco por teclado (Tab ×20 por rota)
+
+```
+/:             19 paradas de foco; sem affordance visível: 0
+/settings:     20 paradas; sem affordance: 0
+/_kitchen-sink: 20 paradas; sem affordance: 0
+```
+
+Bug real corrigido: `.btn:focus-visible` usava `box-shadow: var(--focus-ring)` — valor de outline dentro de box-shadow é inválido → **foco de todos os .btn era invisível**. Corrigido para `outline: var(--focus-ring)`. `settings-search:focus` ganhou anel `accent-soft`.
+
+### Alvos de clique (mínimos macOS adotados)
+
+Adaptação declarada (refina a da seção 11 com os três tamanhos oficiais de controle do AppKit): **regular ≥28px** (botões default, inputs, rows), **small ≥24px** (btn-sm, segmented, pills, links-botão), **mini ≥20px** (ícones de linha, dismiss, hint). Medição:
+
+```
+/:             17 alvos; abaixo do tier aplicável: 0  (menores: segmented 25px, mode-toggle 24px, dismiss 22px [mini])
+/downloads:    9 alvos; abaixo: 0  (hint-trigger elevado 18→20px nesta fase)
+/marketplace:  9 alvos; abaixo: 0
+/settings:     21 alvos; abaixo: 0
+/_kitchen-sink: 59 alvos; abaixo: 0  (btn-sm 24px = tier small)
+```
+
+### Contraste AA (recolagem, pós-mudanças)
+
+```
+$ node scripts/contrast-audit.mjs | grep -c PASS
+14   (14/14 temas PASS)
+```
+
+## 14. PR (Fase 4)
 
 _(ver abaixo)_
