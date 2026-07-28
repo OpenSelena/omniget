@@ -1,3 +1,5 @@
+pub mod stats;
+
 use once_cell::sync::Lazy;
 use serde::Serialize;
 use serde_json::{json, Value};
@@ -774,6 +776,359 @@ pub async fn league_player_report(puuid: String) -> Result<Value, String> {
         "stats": stats,
         "mastery": mastery,
         "privateProfile": private_profile,
+    }))
+}
+
+/// Extracts rank plus, when trustworthy, the season win/loss record.
+///
+/// For anyone other than the local player the client reports `losses = 0` and a
+/// career-long `wins` total, so a non-zero win count with zero losses is treated
+/// as "hidden" instead of a perfect record.
+fn ranked_entry_parts(entry: &Value) -> (Option<f64>, u32, u32) {
+    let tier = entry.get("tier").and_then(Value::as_str).unwrap_or("");
+    let division = entry.get("division").and_then(Value::as_str).unwrap_or("");
+    let lp = entry
+        .get("leaguePoints")
+        .and_then(Value::as_i64)
+        .unwrap_or(0)
+        .max(0) as u32;
+    let wins = entry.get("wins").and_then(Value::as_i64).unwrap_or(0).max(0) as u32;
+    let losses = entry
+        .get("losses")
+        .and_then(Value::as_i64)
+        .unwrap_or(0)
+        .max(0) as u32;
+    let rank = stats::rank_rating(tier, division, lp);
+    if losses == 0 && wins > 0 {
+        return (rank, 0, 0);
+    }
+    (rank, wins, losses)
+}
+
+/// Full pre-game analysis: per-player strength, team win probability and the
+/// premade groups inferred from overlapping match histories.
+#[tauri::command]
+pub async fn league_match_analysis() -> Result<Value, String> {
+    ensure_enabled()?;
+    let client = get_client().await?;
+    let roster = league_game_players().await?;
+    let players: Vec<Value> = roster
+        .get("players")
+        .and_then(Value::as_array)
+        .cloned()
+        .unwrap_or_default();
+    if players.is_empty() {
+        return Err("no players in the current game".to_string());
+    }
+
+    let mut tasks = Vec::new();
+    for (index, player) in players.iter().enumerate() {
+        let puuid = player
+            .get("puuid")
+            .and_then(Value::as_str)
+            .unwrap_or("")
+            .to_string();
+        let task_client = client.clone();
+        tasks.push(tauri::async_runtime::spawn(async move {
+            if puuid.is_empty() {
+                return (index, Value::Null, Vec::new());
+            }
+            let ranked = lcu_get_raw(
+                &task_client,
+                &format!("/lol-ranked/v1/ranked-stats/{}", puuid),
+            )
+            .await
+            .unwrap_or(Value::Null);
+            let history = lcu_get_raw(
+                &task_client,
+                &format!(
+                    "/lol-match-history/v1/products/lol/{}/matches?begIndex=0&endIndex=19",
+                    puuid
+                ),
+            )
+            .await
+            .unwrap_or(Value::Null);
+            let game_ids: Vec<i64> = history
+                .get("games")
+                .and_then(|g| g.get("games"))
+                .and_then(Value::as_array)
+                .map(|arr| {
+                    arr.iter()
+                        .filter_map(|g| g.get("gameId").and_then(Value::as_i64))
+                        .collect()
+                })
+                .unwrap_or_default();
+            (index, json!({ "ranked": ranked, "history": history }), game_ids)
+        }));
+    }
+
+    let mut fetched: Vec<Value> = vec![Value::Null; players.len()];
+    let mut histories: Vec<Vec<i64>> = vec![Vec::new(); players.len()];
+    for task in tasks {
+        if let Ok((index, data, ids)) = task.await {
+            fetched[index] = data;
+            histories[index] = ids;
+        }
+    }
+
+    let mut ally_strengths = Vec::new();
+    let mut enemy_strengths = Vec::new();
+    let mut detail: Vec<Value> = Vec::new();
+
+    for (index, player) in players.iter().enumerate() {
+        let is_ally = player.get("isAlly").and_then(Value::as_bool).unwrap_or(false);
+        let data = &fetched[index];
+        let solo = data
+            .get("ranked")
+            .and_then(|r| r.get("queueMap"))
+            .and_then(|q| q.get("RANKED_SOLO_5x5"))
+            .cloned()
+            .unwrap_or(Value::Null);
+        let (rank, season_wins, season_losses) = if solo.is_null() {
+            (None, 0, 0)
+        } else {
+            ranked_entry_parts(&solo)
+        };
+
+        let games: Vec<Value> = data
+            .get("history")
+            .and_then(|h| h.get("games"))
+            .and_then(|g| g.get("games"))
+            .and_then(Value::as_array)
+            .cloned()
+            .unwrap_or_default();
+        let mut recent_wins = 0u32;
+        let mut recent_losses = 0u32;
+        for game in &games {
+            let win = game
+                .get("participants")
+                .and_then(Value::as_array)
+                .and_then(|p| p.first())
+                .and_then(|p| p.get("stats"))
+                .and_then(|s| s.get("win"))
+                .and_then(Value::as_bool)
+                .unwrap_or(false);
+            if win {
+                recent_wins += 1;
+            } else {
+                recent_losses += 1;
+            }
+        }
+
+        let strength =
+            stats::player_strength(rank, season_wins, season_losses, recent_wins, recent_losses);
+        if is_ally {
+            ally_strengths.push(strength);
+        } else {
+            enemy_strengths.push(strength);
+        }
+
+        let season_shrunk =
+            stats::shrunk_winrate(season_wins, season_losses, stats::PRIOR_GAMES);
+        let (wilson_low, wilson_high) =
+            stats::wilson_interval(season_wins, season_losses, stats::Z_90);
+
+        detail.push(json!({
+            "puuid": player.get("puuid"),
+            "isAlly": is_ally,
+            "rating": strength.rating.round(),
+            "sigma": strength.sigma.round(),
+            "known": strength.known,
+            "rankRating": rank.map(|r| r.round()),
+            "seasonWins": season_wins,
+            "seasonLosses": season_losses,
+            "seasonWinrate": if season_wins + season_losses > 0 {
+                json!(((season_wins as f64 / (season_wins + season_losses) as f64) * 100.0).round())
+            } else { Value::Null },
+            "seasonAvailable": season_wins + season_losses > 0,
+            "recentWinrate": if recent_wins + recent_losses > 0 {
+                json!(((recent_wins as f64 / (recent_wins + recent_losses) as f64) * 100.0).round())
+            } else { Value::Null },
+            "shrunkWinrate": (season_shrunk * 1000.0).round() / 10.0,
+            "wilsonLow": (wilson_low * 1000.0).round() / 10.0,
+            "wilsonHigh": (wilson_high * 1000.0).round() / 10.0,
+            "recentWins": recent_wins,
+            "recentGames": recent_wins + recent_losses,
+        }));
+    }
+
+    let win = stats::team_win_probability(&ally_strengths, &enemy_strengths);
+
+    // Two players who keep appearing in the same games are queueing together.
+    let mut pairs: Vec<(usize, usize, u32)> = Vec::new();
+    for i in 0..players.len() {
+        for j in (i + 1)..players.len() {
+            let a: HashSet<i64> = histories[i].iter().copied().collect();
+            let shared = histories[j].iter().filter(|id| a.contains(id)).count() as u32;
+            if shared > 0 {
+                pairs.push((i, j, shared));
+            }
+        }
+    }
+    let groups = stats::premade_groups(players.len(), &pairs, 3);
+    let premades: Vec<Value> = groups
+        .iter()
+        .enumerate()
+        .map(|(gi, group)| {
+            json!({
+                "label": char::from(b'A' + (gi.min(25) as u8)).to_string(),
+                "puuids": group
+                    .iter()
+                    .filter_map(|i| players[*i].get("puuid").cloned())
+                    .collect::<Vec<_>>(),
+            })
+        })
+        .collect();
+
+    Ok(json!({
+        "winProbability": (win.probability * 1000.0).round() / 10.0,
+        "winLow": (win.low * 1000.0).round() / 10.0,
+        "winHigh": (win.high * 1000.0).round() / 10.0,
+        "ratingGap": win.rating_gap.round(),
+        "knownPlayers": win.known_players,
+        "totalPlayers": win.total_players,
+        "players": detail,
+        "premades": premades,
+    }))
+}
+
+/// Live economy snapshot: gold carried in items, CS and level for every player,
+/// plus the difference against the opponent in the same position.
+#[tauri::command]
+pub async fn league_live_metrics() -> Result<Value, String> {
+    ensure_enabled()?;
+    let http = http_client()?;
+    let base = "https://127.0.0.1:2999/liveclientdata";
+    let stats_value = http
+        .get(format!("{}/gamestats", base))
+        .send()
+        .await
+        .map_err(|e| format!("live client not reachable: {}", e))?
+        .json::<Value>()
+        .await
+        .map_err(|e| format!("invalid live client response: {}", e))?;
+    let players = http
+        .get(format!("{}/playerlist", base))
+        .send()
+        .await
+        .map_err(|e| format!("live client not reachable: {}", e))?
+        .json::<Value>()
+        .await
+        .map_err(|e| format!("invalid live client response: {}", e))?;
+    let active = http
+        .get(format!("{}/activeplayername", base))
+        .send()
+        .await
+        .ok();
+    let active_name = match active {
+        Some(r) => r
+            .json::<Value>()
+            .await
+            .ok()
+            .and_then(|v| v.as_str().map(String::from))
+            .unwrap_or_default(),
+        None => String::new(),
+    };
+
+    let seconds = stats_value
+        .get("gameTime")
+        .and_then(Value::as_f64)
+        .unwrap_or(0.0);
+    let list = players.as_array().cloned().unwrap_or_default();
+
+    let mut rows: Vec<Value> = Vec::new();
+    for p in &list {
+        let scores = p.get("scores").cloned().unwrap_or(Value::Null);
+        let cs = scores
+            .get("creepScore")
+            .and_then(Value::as_f64)
+            .unwrap_or(0.0);
+        let prices: Vec<(u32, u32)> = p
+            .get("items")
+            .and_then(Value::as_array)
+            .map(|items| {
+                items
+                    .iter()
+                    .map(|i| {
+                        (
+                            i.get("price").and_then(Value::as_i64).unwrap_or(0).max(0) as u32,
+                            i.get("count").and_then(Value::as_i64).unwrap_or(1).max(0) as u32,
+                        )
+                    })
+                    .collect()
+            })
+            .unwrap_or_default();
+        let item_gold = stats::items_gold(&prices);
+        let riot_id = p
+            .get("riotId")
+            .and_then(Value::as_str)
+            .unwrap_or("")
+            .to_string();
+        rows.push(json!({
+            "riotId": riot_id,
+            "championName": p.get("championName"),
+            "rawChampionName": p.get("rawChampionName"),
+            "team": p.get("team"),
+            "position": p.get("position"),
+            "level": p.get("level"),
+            "isDead": p.get("isDead"),
+            "respawnTimer": p.get("respawnTimer"),
+            "kills": scores.get("kills"),
+            "deaths": scores.get("deaths"),
+            "assists": scores.get("assists"),
+            "cs": cs,
+            "csPerMin": (stats::per_minute(cs, seconds) * 10.0).round() / 10.0,
+            "visionScore": scores.get("wardScore"),
+            "itemGold": item_gold,
+            "goldPerMin": (stats::per_minute(item_gold as f64, seconds)).round(),
+            "kda": (stats::kda(
+                scores.get("kills").and_then(Value::as_i64).unwrap_or(0).max(0) as u32,
+                scores.get("deaths").and_then(Value::as_i64).unwrap_or(0).max(0) as u32,
+                scores.get("assists").and_then(Value::as_i64).unwrap_or(0).max(0) as u32,
+            ) * 100.0).round() / 100.0,
+            "isSelf": !active_name.is_empty() && riot_id == active_name,
+        }));
+    }
+
+    // Match each player against the opponent holding the same position.
+    let mut enriched: Vec<Value> = Vec::new();
+    for row in &rows {
+        let position = row.get("position").and_then(Value::as_str).unwrap_or("");
+        let team = row.get("team").and_then(Value::as_str).unwrap_or("");
+        let opponent = rows.iter().find(|other| {
+            other.get("position").and_then(Value::as_str) == Some(position)
+                && other.get("team").and_then(Value::as_str) != Some(team)
+                && !position.is_empty()
+        });
+        let mut row = row.clone();
+        if let Some(o) = opponent {
+            let gold = row.get("itemGold").and_then(Value::as_i64).unwrap_or(0);
+            let ogold = o.get("itemGold").and_then(Value::as_i64).unwrap_or(0);
+            let cs = row.get("cs").and_then(Value::as_f64).unwrap_or(0.0);
+            let ocs = o.get("cs").and_then(Value::as_f64).unwrap_or(0.0);
+            let level = row.get("level").and_then(Value::as_i64).unwrap_or(0);
+            let olevel = o.get("level").and_then(Value::as_i64).unwrap_or(0);
+            row["goldDiff"] = json!(gold - ogold);
+            row["csDiff"] = json!(cs - ocs);
+            row["levelDiff"] = json!(level - olevel);
+            row["opponent"] = o.get("championName").cloned().unwrap_or(Value::Null);
+        }
+        enriched.push(row);
+    }
+
+    let team_gold = |team: &str| -> i64 {
+        enriched
+            .iter()
+            .filter(|r| r.get("team").and_then(Value::as_str) == Some(team))
+            .filter_map(|r| r.get("itemGold").and_then(Value::as_i64))
+            .sum()
+    };
+
+    Ok(json!({
+        "gameTime": seconds.round(),
+        "players": enriched,
+        "teamGold": { "ORDER": team_gold("ORDER"), "CHAOS": team_gold("CHAOS") },
+        "teamGoldDiff": team_gold("ORDER") - team_gold("CHAOS"),
     }))
 }
 

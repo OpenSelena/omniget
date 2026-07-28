@@ -99,6 +99,128 @@
     ];
   }
 
+  const TAB_IDS = ["overview", "analysis", "live", "goals", "automation", "history"] as const;
+  type Tab = (typeof TAB_IDS)[number];
+  let tab = $state<Tab>("overview");
+
+  let analysis = $state<any>(null);
+  let analysisLoading = $state(false);
+  let liveMetrics = $state<any>(null);
+
+  const ROLES = ["TOP", "JUNGLE", "MIDDLE", "BOTTOM", "UTILITY"] as const;
+  type Role = (typeof ROLES)[number];
+  const GOALS_KEY = "league-role-goals";
+  const GOAL_FIELDS = [
+    { key: "csPerMin", labelKey: "league.goal_cs", step: 0.1 },
+    { key: "goldPerMin", labelKey: "league.goal_gold", step: 10 },
+    { key: "kda", labelKey: "league.goal_kda", step: 0.1 },
+    { key: "visionPerMin", labelKey: "league.goal_vision", step: 0.1 },
+  ] as const;
+  type GoalKey = (typeof GOAL_FIELDS)[number]["key"];
+
+  // Baselines mirror the Rust defaults; a support is not judged on CS.
+  const DEFAULT_GOALS: Record<Role, Record<GoalKey, number>> = {
+    TOP: { csPerMin: 7.0, goldPerMin: 380, kda: 2.5, visionPerMin: 0.6 },
+    JUNGLE: { csPerMin: 5.5, goldPerMin: 360, kda: 3.0, visionPerMin: 1.0 },
+    MIDDLE: { csPerMin: 7.5, goldPerMin: 400, kda: 3.0, visionPerMin: 0.7 },
+    BOTTOM: { csPerMin: 8.0, goldPerMin: 420, kda: 3.0, visionPerMin: 0.6 },
+    UTILITY: { csPerMin: 1.5, goldPerMin: 260, kda: 3.0, visionPerMin: 2.0 },
+  };
+
+  let goalRole = $state<Role>("MIDDLE");
+  let goals = $state<Record<string, Record<string, number>>>({});
+
+  function loadGoals() {
+    try {
+      goals = JSON.parse(localStorage.getItem(GOALS_KEY) ?? "{}");
+    } catch {
+      goals = {};
+    }
+  }
+
+  function goalValue(role: Role, key: GoalKey): number {
+    return goals[role]?.[key] ?? DEFAULT_GOALS[role][key];
+  }
+
+  function setGoal(role: Role, key: GoalKey, value: number) {
+    if (!Number.isFinite(value) || value < 0) return;
+    goals = { ...goals, [role]: { ...(goals[role] ?? {}), [key]: value } };
+    localStorage.setItem(GOALS_KEY, JSON.stringify(goals));
+  }
+
+  function resetGoals(role: Role) {
+    const next = { ...goals };
+    delete next[role];
+    goals = next;
+    localStorage.setItem(GOALS_KEY, JSON.stringify(goals));
+  }
+
+  async function loadAnalysis() {
+    if (analysisLoading) return;
+    analysisLoading = true;
+    try {
+      analysis = await invoke<any>("league_match_analysis");
+    } catch {
+      analysis = null;
+    } finally {
+      analysisLoading = false;
+    }
+  }
+
+  async function loadLiveMetrics() {
+    try {
+      liveMetrics = await invoke<any>("league_live_metrics");
+    } catch {
+      liveMetrics = null;
+    }
+  }
+
+  let selfRow = $derived(liveMetrics?.players?.find((r: any) => r.isSelf) ?? null);
+  let myTeam = $derived(selfRow?.team ?? "ORDER");
+  let enemyTeam = $derived(myTeam === "ORDER" ? "CHAOS" : "ORDER");
+  let teamGoldLead = $derived(
+    (liveMetrics?.teamGold?.[myTeam] ?? 0) - (liveMetrics?.teamGold?.[enemyTeam] ?? 0)
+  );
+
+  let liveGoals = $derived.by(() => {
+    if (!selfRow) return [];
+    const role: Role = (ROLES as readonly string[]).includes(selfRow.position)
+      ? (selfRow.position as Role)
+      : "MIDDLE";
+    const minutes = Math.max((liveMetrics?.gameTime ?? 0) / 60, 0.1);
+    const visionPerMin = (selfRow.visionScore ?? 0) / minutes;
+    return [
+      {
+        key: "csPerMin",
+        labelKey: "league.goal_cs",
+        current: (selfRow.csPerMin ?? 0).toFixed(1),
+        target: goalValue(role, "csPerMin").toFixed(1),
+        ratio: (selfRow.csPerMin ?? 0) / goalValue(role, "csPerMin"),
+      },
+      {
+        key: "goldPerMin",
+        labelKey: "league.goal_gold",
+        current: String(selfRow.goldPerMin ?? 0),
+        target: String(goalValue(role, "goldPerMin")),
+        ratio: (selfRow.goldPerMin ?? 0) / goalValue(role, "goldPerMin"),
+      },
+      {
+        key: "kda",
+        labelKey: "league.goal_kda",
+        current: (selfRow.kda ?? 0).toFixed(2),
+        target: goalValue(role, "kda").toFixed(1),
+        ratio: (selfRow.kda ?? 0) / goalValue(role, "kda"),
+      },
+      {
+        key: "visionPerMin",
+        labelKey: "league.goal_vision",
+        current: visionPerMin.toFixed(1),
+        target: goalValue(role, "visionPerMin").toFixed(1),
+        ratio: visionPerMin / goalValue(role, "visionPerMin"),
+      },
+    ];
+  });
+
   const PHASE_KEYS: Record<string, string> = {
     Lobby: "league.phase_lobby",
     Matchmaking: "league.phase_matchmaking",
@@ -189,8 +311,15 @@
     }
     if (phase === "ChampSelect" || phase === "InProgress") {
       if (scoutPlayers.length === 0) loadScouting();
+      if (!analysis && !analysisLoading) loadAnalysis();
     } else if (scoutPlayers.length > 0) {
       scoutPlayers = [];
+      analysis = null;
+    }
+    if (phase === "InProgress") {
+      loadLiveMetrics();
+    } else if (liveMetrics) {
+      liveMetrics = null;
     }
     if (phase === "Lobby" || phase === "Matchmaking") {
       try {
@@ -346,6 +475,7 @@
   onMount(() => {
     if (!enabled) return;
     loadNotes();
+    loadGoals();
     invoke<boolean>("league_auto_accept_get")
       .then((v) => { autoAccept = v; })
       .catch(() => {});
@@ -382,6 +512,15 @@
         <p>{$t("league.disconnected_body")}</p>
       </div>
     {:else}
+      <nav class="league-tabs" aria-label={$t("league.nav") as string}>
+        {#each TAB_IDS as id (id)}
+          <button class="league-tab" class:on={tab === id} onclick={() => (tab = id)} aria-current={tab === id}>
+            {$t(`league.tab_${id}`)}
+          </button>
+        {/each}
+      </nav>
+
+      {#if tab === "overview"}
       {#if summoner}
         <section class="profile-card">
           <img
@@ -408,11 +547,9 @@
           </div>
         </section>
       {/if}
-
       {#if actionError}
         <div class="action-error" role="alert">{actionError}</div>
       {/if}
-
       {#if phase === "ChampSelect" && champSelect}
         <section class="card">
           <div class="card-head">
@@ -515,6 +652,44 @@
           {/if}
         </section>
       {/if}
+      {/if}
+
+      {#if tab === "analysis"}
+        {#if analysis}
+          <section class="card">
+            <div class="card-head">
+              <h3>{$t("league.win_title")}</h3>
+              <button class="button" onclick={loadAnalysis} disabled={analysisLoading}>{$t("league.refresh")}</button>
+            </div>
+            <div class="winbar-wrap">
+              <div class="winbar" role="img" aria-label={`${$t("league.win_allies")} ${analysis.winProbability}%`}>
+                <div class="winbar-fill" style={`width:${analysis.winProbability}%`}></div>
+                <div class="winbar-range" style={`left:${analysis.winLow}%;width:${Math.max(analysis.winHigh - analysis.winLow, 0)}%`}></div>
+              </div>
+              <div class="winbar-legend">
+                <span class="win-value">{analysis.winProbability}%</span>
+                <span class="win-range">{$t("league.win_interval")} {analysis.winLow}%–{analysis.winHigh}%</span>
+              </div>
+            </div>
+            <p class="win-note">
+              {$t("league.win_gap")} {analysis.ratingGap > 0 ? "+" : ""}{analysis.ratingGap} · {analysis.knownPlayers}/{analysis.totalPlayers} {$t("league.win_known")}
+            </p>
+            <p class="win-disclaimer">{$t("league.win_disclaimer")}</p>
+            {#if analysis.premades?.length}
+              <div class="premade-row">
+                <span class="bench-label">{$t("league.premades")}</span>
+                {#each analysis.premades as group (group.label)}
+                  <span class="scout-tag">{group.label}: {group.puuids.length} {$t("league.players")}</span>
+                {/each}
+              </div>
+            {/if}
+          </section>
+        {:else}
+          <div class="guard-card">
+            <p>{$t("league.win_unavailable")}</p>
+            <button class="button" onclick={loadAnalysis} disabled={analysisLoading}>{$t("league.refresh")}</button>
+          </div>
+        {/if}
 
       {#if (phase === "ChampSelect" || phase === "InProgress") && scoutPlayers.length > 0}
         <section class="card">
@@ -580,7 +755,105 @@
           </div>
         </section>
       {/if}
+      {/if}
 
+      {#if tab === "live"}
+        {#if liveMetrics?.players?.length}
+          <section class="card">
+            <div class="card-head">
+              <h3>{$t("league.gold_title")}</h3>
+              <span class="phase-tag">{formatGameTime(liveMetrics.gameTime ?? 0)}</span>
+            </div>
+            <div class="gold-summary">
+              <span class="gold-team">{$t("league.your_team")}: <strong>{liveMetrics.teamGold?.[myTeam] ?? 0}</strong></span>
+              <span class="gold-diff" class:good={teamGoldLead > 0} class:bad={teamGoldLead < 0}>
+                {teamGoldLead > 0 ? "+" : ""}{teamGoldLead}
+              </span>
+              <span class="gold-team">{$t("league.enemy_team")}: <strong>{liveMetrics.teamGold?.[enemyTeam] ?? 0}</strong></span>
+            </div>
+            <div class="metric-table" role="table">
+              <div class="metric-head" role="row">
+                <span role="columnheader">{$t("league.col_player")}</span>
+                <span role="columnheader">KDA</span>
+                <span role="columnheader">CS</span>
+                <span role="columnheader">{$t("league.col_gold")}</span>
+                <span role="columnheader">{$t("league.col_diff")}</span>
+              </div>
+              {#each liveMetrics.players as row (row.riotId)}
+                <div class="metric-row" role="row" class:self={row.isSelf}>
+                  <span class="metric-name" role="cell">
+                    <span class="pos-chip">{(row.position ?? "?").slice(0, 3)}</span>
+                    {row.championName}
+                  </span>
+                  <span role="cell">{row.kills}/{row.deaths}/{row.assists}</span>
+                  <span role="cell">{row.cs} <span class="dim">({row.csPerMin}/m)</span></span>
+                  <span role="cell">{row.itemGold}</span>
+                  <span role="cell" class="diff" class:good={(row.goldDiff ?? 0) > 0} class:bad={(row.goldDiff ?? 0) < 0}>
+                    {#if row.goldDiff !== undefined && row.goldDiff !== null}
+                      {row.goldDiff > 0 ? "+" : ""}{row.goldDiff}g
+                      <span class="dim">{(row.csDiff ?? 0) > 0 ? "+" : ""}{Math.round(row.csDiff ?? 0)}cs</span>
+                    {:else}—{/if}
+                  </span>
+                </div>
+              {/each}
+            </div>
+          </section>
+
+          {#if selfRow}
+            <section class="card">
+              <div class="card-head">
+                <h3>{$t("league.goals_live")}</h3>
+                <span class="phase-tag">{selfRow.position ?? "?"}</span>
+              </div>
+              <div class="goal-list">
+                {#each liveGoals as goal (goal.key)}
+                  <div class="goal-row">
+                    <span class="goal-name">{$t(goal.labelKey)}</span>
+                    <div class="goal-bar"><div class="goal-fill" class:met={goal.ratio >= 1} style={`width:${Math.min(goal.ratio * 100, 100)}%`}></div></div>
+                    <span class="goal-value" class:met={goal.ratio >= 1}>{goal.current} <span class="dim">/ {goal.target}</span></span>
+                  </div>
+                {/each}
+              </div>
+            </section>
+          {/if}
+        {:else}
+          <div class="guard-card">
+            <p>{$t("league.gold_unavailable")}</p>
+          </div>
+        {/if}
+      {/if}
+
+      {#if tab === "goals"}
+        <section class="card">
+          <div class="card-head">
+            <h3>{$t("league.goals_title")}</h3>
+            <select class="select-role" bind:value={goalRole} aria-label={$t("league.goals_role") as string}>
+              {#each ROLES as r (r)}
+                <option value={r}>{$t(`league.role_${r.toLowerCase()}`)}</option>
+              {/each}
+            </select>
+          </div>
+          <p class="win-disclaimer">{$t("league.goals_desc")}</p>
+          <div class="goal-config">
+            {#each GOAL_FIELDS as field (field.key)}
+              <label class="goal-field">
+                <span class="goal-field-label">{$t(field.labelKey)}</span>
+                <input
+                  type="number"
+                  class="input-text"
+                  min="0"
+                  step={field.step}
+                  value={goalValue(goalRole, field.key)}
+                  onchange={(e) => setGoal(goalRole, field.key, Number(e.currentTarget.value))}
+                />
+              </label>
+            {/each}
+          </div>
+          <button class="button" onclick={() => resetGoals(goalRole)}>{$t("league.goals_reset")}</button>
+        </section>
+      {/if}
+
+      {#if tab === "automation"}
       <section class="card">
         <div class="card-head">
           <h3>{$t("league.automation_title")}</h3>
@@ -682,6 +955,9 @@
         {/if}
       </section>
 
+      {/if}
+
+      {#if tab === "history"}
       <section class="history-section">
         <div class="history-head">
           <h3>{$t("league.history_title")}</h3>
@@ -706,6 +982,7 @@
           </div>
         {/if}
       </section>
+      {/if}
     {/if}
   {/if}
 </div>
@@ -1143,6 +1420,261 @@
   .search-result:focus-visible {
     background: var(--button);
     outline: none;
+  }
+
+  .league-tabs {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
+    padding-bottom: 2px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .league-tab {
+    padding: 6px 12px;
+    font-size: 12.5px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--gray);
+    cursor: pointer;
+  }
+
+  .league-tab:hover {
+    color: var(--text);
+  }
+
+  .league-tab.on {
+    color: var(--text);
+    border-bottom-color: var(--accent);
+  }
+
+  .league-tab:focus-visible {
+    outline: 1px solid var(--accent);
+    outline-offset: -1px;
+  }
+
+  .winbar-wrap {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .winbar {
+    position: relative;
+    height: 12px;
+    border-radius: 999px;
+    background: var(--button);
+    border: 1px solid var(--input-border);
+    overflow: hidden;
+  }
+
+  .winbar-fill {
+    height: 100%;
+    background: var(--accent);
+  }
+
+  .winbar-range {
+    position: absolute;
+    top: 0;
+    height: 100%;
+    background: var(--accent);
+    opacity: 0.25;
+  }
+
+  .winbar-legend {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+  }
+
+  .win-value {
+    font-size: 22px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .win-range,
+  .win-note {
+    font-size: 12px;
+    color: var(--gray);
+  }
+
+  .win-note {
+    margin: 8px 0 0;
+  }
+
+  .win-disclaimer {
+    margin: 4px 0 0;
+    font-size: 11.5px;
+    color: var(--gray);
+    line-height: 1.45;
+  }
+
+  .premade-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  .gold-summary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin-bottom: 10px;
+    font-size: 13px;
+    flex-wrap: wrap;
+  }
+
+  .gold-team {
+    color: var(--gray);
+  }
+
+  .gold-diff {
+    font-size: 17px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .gold-diff.good,
+  .diff.good {
+    color: var(--success);
+  }
+
+  .gold-diff.bad,
+  .diff.bad {
+    color: var(--danger);
+  }
+
+  .metric-table {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    overflow-x: auto;
+  }
+
+  .metric-head,
+  .metric-row {
+    display: grid;
+    grid-template-columns: minmax(120px, 1.6fr) 68px 92px 64px minmax(110px, 1fr);
+    gap: 8px;
+    align-items: center;
+    padding: 5px 7px;
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+    min-width: 460px;
+  }
+
+  .metric-head {
+    color: var(--gray);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .metric-row {
+    border-radius: calc(var(--border-radius) - 4px);
+    background: var(--button);
+  }
+
+  .metric-row.self {
+    background: var(--accent-soft, var(--surface));
+  }
+
+  .metric-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .pos-chip {
+    font-size: 9.5px;
+    padding: 1px 5px;
+    border-radius: 4px;
+    background: var(--surface);
+    color: var(--gray);
+    letter-spacing: 0.03em;
+  }
+
+  .dim {
+    color: var(--gray);
+  }
+
+  .goal-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .goal-row {
+    display: grid;
+    grid-template-columns: minmax(80px, 1fr) minmax(90px, 2fr) minmax(90px, 1fr);
+    gap: 10px;
+    align-items: center;
+    font-size: 12.5px;
+  }
+
+  .goal-name {
+    color: var(--gray);
+  }
+
+  .goal-bar {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--button);
+    border: 1px solid var(--input-border);
+    overflow: hidden;
+  }
+
+  .goal-fill {
+    height: 100%;
+    background: var(--gray);
+  }
+
+  .goal-fill.met {
+    background: var(--success);
+  }
+
+  .goal-value {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .goal-value.met {
+    color: var(--success);
+  }
+
+  .goal-config {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+    margin: 10px 0;
+  }
+
+  .goal-field {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .goal-field-label {
+    font-size: 12px;
+    color: var(--gray);
+  }
+
+  .select-role {
+    padding: 5px 10px;
+    font-size: 12.5px;
+    background: var(--button);
+    border: 1px solid var(--input-border);
+    border-radius: calc(var(--border-radius) - 2px);
+    color: var(--text);
   }
 
   .scout-teams {
