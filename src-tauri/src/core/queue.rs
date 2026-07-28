@@ -775,24 +775,15 @@ impl DownloadQueue {
         let to_remove: Vec<u64> = self
             .items
             .iter()
-            .filter(|i| {
-                matches!(
-                    i.status,
-                    QueueStatus::Complete { .. } | QueueStatus::Error { .. }
-                )
-            })
+            .filter(|i| matches!(i.status, QueueStatus::Complete { .. }))
             .map(|i| i.id)
             .collect();
         for id in &to_remove {
             crate::core::recovery::remove(*id);
             crate::core::queue_history::remove(*id);
         }
-        self.items.retain(|i| {
-            !matches!(
-                i.status,
-                QueueStatus::Complete { .. } | QueueStatus::Error { .. }
-            )
-        });
+        self.items
+            .retain(|i| !matches!(i.status, QueueStatus::Complete { .. }));
     }
 
     pub fn get_state(&self) -> Vec<QueueItemInfo> {
@@ -1068,9 +1059,9 @@ async fn spawn_download_inner(
         let proxy = settings.proxy.clone();
         crate::core::http_client::init_proxy(proxy.clone());
         let proxy_status = if !proxy.enabled {
-            "disabled; direct connection enforced".to_string()
+            "disabled; system/env proxy honored if set".to_string()
         } else if proxy.host.trim().is_empty() {
-            "enabled but host is empty; direct connection enforced".to_string()
+            "enabled but host is empty; falling back to system/env proxy".to_string()
         } else {
             format!("enabled; {}://{}:{}", proxy.proxy_type, proxy.host, proxy.port)
         };
@@ -1810,8 +1801,12 @@ async fn fetch_and_cache_info(
                 omniget_core::platforms::YouTubeDownloader::fetch_with_ytdlp(url, ytdlp).await?
             }
             "generic" => {
-                let json = crate::core::ytdlp::get_video_info(ytdlp, url, &[]).await?;
-                crate::platforms::generic_ytdlp::GenericYtdlpDownloader::parse_video_info(&json)?
+                if crate::platforms::generic_ytdlp::is_direct_media_url(url).is_some() {
+                    downloader.get_media_info(url).await?
+                } else {
+                    let json = crate::core::ytdlp::get_video_info(ytdlp, url, &[]).await?;
+                    crate::platforms::generic_ytdlp::GenericYtdlpDownloader::parse_video_info(&json)?
+                }
             }
             _ => downloader.get_media_info(url).await?,
         }

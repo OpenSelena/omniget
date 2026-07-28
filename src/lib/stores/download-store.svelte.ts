@@ -212,7 +212,7 @@ export function markComplete(courseName: string, success: boolean, error?: strin
 export function clearFinished() {
   let changed = false;
   for (const [id, item] of downloads) {
-    if (item.status === "complete" || item.status === "error") {
+    if (item.status === "complete") {
       downloads.delete(id);
       clearSpeedHistory(id);
       changed = true;
@@ -224,7 +224,11 @@ export function clearFinished() {
 }
 
 export function getFinishedCount(): number {
-  return getCounts().finished;
+  let n = 0;
+  for (const item of downloads.values()) {
+    if (item.status === "complete") n++;
+  }
+  return n;
 }
 
 type QueueItemInfo = {

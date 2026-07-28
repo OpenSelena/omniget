@@ -9,6 +9,16 @@ fn check_portable_mode() {
                 std::env::set_var("OMNIGET_PORTABLE", "1");
                 std::env::set_var("OMNIGET_DATA_DIR", data_dir.to_string_lossy().to_string());
 
+                #[cfg(windows)]
+                if std::env::var("WEBVIEW2_USER_DATA_FOLDER").is_err() {
+                    let webview_dir = data_dir.join("webview");
+                    let _ = std::fs::create_dir_all(&webview_dir);
+                    std::env::set_var(
+                        "WEBVIEW2_USER_DATA_FOLDER",
+                        webview_dir.to_string_lossy().to_string(),
+                    );
+                }
+
                 // Older versions resolved the settings store against Tauri's
                 // own AppData dir, so portable users' settings landed in the
                 // OS profile. Adopt that file once if the portable dir has none.

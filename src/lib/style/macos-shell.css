@@ -461,6 +461,7 @@
   gap: var(--space-3);
   flex: 1;
   min-height: 0;
+  overflow-y: auto;
 }
 
 .downloads-mac .downloads-header {

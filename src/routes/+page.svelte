@@ -316,9 +316,29 @@
 
   function toEpochMs(v: string): number | null {
     if (!v) return null;
-    const ms = new Date(v).getTime();
+    const ms = new Date(v.includes("T") ? v : `${v}T00:00`).getTime();
     if (Number.isNaN(ms)) return null;
     return ms;
+  }
+
+  function schedulePart(v: string, part: "date" | "time"): string {
+    if (!v) return "";
+    const [date, time = ""] = v.split("T");
+    return part === "date" ? date : time;
+  }
+
+  function withSchedulePart(current: string, part: "date" | "time", value: string): string {
+    const pad = (n: number) => String(n).padStart(2, "0");
+    let [date, time = ""] = current ? current.split("T") : ["", ""];
+    if (part === "date") date = value;
+    else time = value;
+    if (!date && !time) return "";
+    if (!date) {
+      const now = new Date();
+      date = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+    }
+    if (!time) time = "00:00";
+    return `${date}T${time}`;
   }
 
   function setSchedulePreset(kind: "1h" | "tonight" | "1d") {
@@ -1109,10 +1129,12 @@
                           <button type="button" class="schedule-preset" onclick={() => { scheduleAt = ""; scheduleStop = ""; }}>{$t('omnibox.schedule_clear')}</button>
                         {/if}
                       </div>
-                      <div class="timerange-inputs">
-                        <input class="timerange-input schedule-input" type="datetime-local" bind:value={scheduleAt} aria-label={$t('omnibox.schedule_start') as string} />
+                      <div class="timerange-inputs schedule-row">
+                        <input class="timerange-input schedule-date" type="date" value={schedulePart(scheduleAt, "date")} oninput={(e) => { scheduleAt = withSchedulePart(scheduleAt, "date", e.currentTarget.value); }} aria-label={$t('omnibox.schedule_start') as string} />
+                        <input class="timerange-input schedule-time" type="time" step="60" value={schedulePart(scheduleAt, "time")} oninput={(e) => { scheduleAt = withSchedulePart(scheduleAt, "time", e.currentTarget.value); }} aria-label={$t('omnibox.schedule_start') as string} />
                         <span class="timerange-sep" aria-hidden="true">—</span>
-                        <input class="timerange-input schedule-input" type="datetime-local" bind:value={scheduleStop} aria-label={$t('omnibox.schedule_stop') as string} />
+                        <input class="timerange-input schedule-date" type="date" value={schedulePart(scheduleStop, "date")} oninput={(e) => { scheduleStop = withSchedulePart(scheduleStop, "date", e.currentTarget.value); }} aria-label={$t('omnibox.schedule_stop') as string} />
+                        <input class="timerange-input schedule-time" type="time" step="60" value={schedulePart(scheduleStop, "time")} oninput={(e) => { scheduleStop = withSchedulePart(scheduleStop, "time", e.currentTarget.value); }} aria-label={$t('omnibox.schedule_stop') as string} />
                       </div>
                       <span class="timerange-hint">{$t('omnibox.schedule_hint')}</span>
                     </div>
@@ -1634,10 +1656,20 @@
     background: var(--button-elevated);
   }
 
-  .schedule-input {
+  .schedule-row {
+    flex-wrap: wrap;
+  }
+
+  .schedule-date {
     width: auto;
-    flex: 1;
-    min-width: 0;
+    flex: 1 1 auto;
+    min-width: 8.6em;
+  }
+
+  .schedule-time {
+    width: auto;
+    flex: 0 1 auto;
+    min-width: 5.4em;
   }
 
   .cookie-hint {

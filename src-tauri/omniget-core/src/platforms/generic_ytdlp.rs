@@ -147,7 +147,7 @@ impl GenericYtdlpDownloader {
     }
 }
 
-fn is_direct_media_url(url: &str) -> Option<&'static str> {
+pub fn is_direct_media_url(url: &str) -> Option<&'static str> {
     let path = url::Url::parse(url).ok().map(|u| u.path().to_lowercase())?;
 
     if path.contains(".m3u8") {
