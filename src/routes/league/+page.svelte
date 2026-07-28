@@ -14,7 +14,7 @@
   type LobbyQueue = { id: number; name: string; shortName: string; gameMode: string };
 
   let settings = $derived(getSettings());
-  let enabled = $derived(settings?.league?.enabled ?? false);
+  let enabled = $derived(settings?.league?.enabled ?? true);
 
   let status = $state<LeagueStatus>({ connected: false, port: null, region: null });
   let summoner = $state<any>(null);
@@ -79,7 +79,7 @@
       scoutPlayers = (data?.players ?? []).filter((p: any) => p);
       for (const p of scoutPlayers) {
         if (!p.puuid || scoutReports[p.puuid]) continue;
-        invoke<any>("league_player_report", { puuid: p.puuid })
+        invoke<any>("league_player_report", { puuid: p.puuid, withImpact: false })
           .then((r) => {
             scoutReports = { ...scoutReports, [p.puuid]: r };
           })
@@ -474,6 +474,29 @@
     }
   }
 
+  const RAW_CDRAGON = "https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default";
+  let cooldowns = $state<any>(null);
+
+  // The client returns icon paths rooted at /lol-game-data/assets; the public
+  // mirror serves the same files lowercased under its own prefix.
+  function assetUrl(path: string | null | undefined): string {
+    if (!path) return "";
+    const clean = path.replace(/^\/lol-game-data\/assets/i, "").toLowerCase();
+    return `${RAW_CDRAGON}${clean}`;
+  }
+
+  async function loadCooldowns() {
+    try {
+      cooldowns = await invoke<any>("league_ability_cooldowns");
+    } catch {
+      cooldowns = null;
+    }
+  }
+
+  let enemyCooldowns = $derived(
+    (cooldowns?.players ?? []).filter((p: any) => p.team && p.team !== myTeam)
+  );
+
   const PHASE_KEYS: Record<string, string> = {
     Lobby: "league.phase_lobby",
     Matchmaking: "league.phase_matchmaking",
@@ -571,8 +594,10 @@
     }
     if (phase === "InProgress") {
       loadLiveMetrics();
+      loadCooldowns();
     } else if (liveMetrics) {
       liveMetrics = null;
+      cooldowns = null;
     }
     if (phase === "Lobby" || phase === "Matchmaking") {
       try {
@@ -989,6 +1014,10 @@
                           </div>
                         {:else if r?.privateProfile}
                           <span class="scout-private">{$t("league.scout_private")}</span>
+                        {:else if r?.historyUnavailable}
+                          <span class="scout-private">{$t("league.scout_no_history")}</span>
+                        {:else if r}
+                          <span class="scout-private">…</span>
                         {/if}
                         {#if p.puuid}
                           <button class="note-toggle" class:has-note={(notes[p.puuid] ?? "").trim() !== ""} onclick={() => { openNotes = { ...openNotes, [p.puuid]: !openNotes[p.puuid] }; }} aria-label={$t("league.scout_note_placeholder") as string} aria-expanded={openNotes[p.puuid] ?? false}>✎</button>
@@ -1327,6 +1356,7 @@
               <h3>{$t("league.gold_title")}</h3>
               <span class="phase-tag">{formatGameTime(liveMetrics.gameTime ?? 0)}</span>
             </div>
+            <p class="win-disclaimer">{$t("league.col_gold_hint")}</p>
             <div class="gold-summary">
               <span class="gold-team">{$t("league.your_team")}: <strong>{liveMetrics.teamGold?.[myTeam] ?? 0}</strong></span>
               <span class="gold-diff" class:good={teamGoldLead > 0} class:bad={teamGoldLead < 0}>
@@ -1339,7 +1369,7 @@
                 <span role="columnheader">{$t("league.col_player")}</span>
                 <span role="columnheader">KDA</span>
                 <span role="columnheader">CS</span>
-                <span role="columnheader">{$t("league.col_gold")}</span>
+                <span role="columnheader" title={$t("league.col_gold_hint") as string}>{$t("league.col_gold")}</span>
                 <span role="columnheader">{$t("league.col_diff")}</span>
               </div>
               {#each liveMetrics.players as row (row.riotId)}
@@ -1361,6 +1391,42 @@
               {/each}
             </div>
           </section>
+
+          {#if enemyCooldowns.length > 0}
+            <section class="card">
+              <div class="card-head">
+                <h3>{$t("league.cd_title")}</h3>
+                <span class="phase-tag">{$t("league.cd_estimated")}</span>
+              </div>
+              <p class="win-disclaimer">{$t("league.cd_desc")}</p>
+              <div class="cd-list">
+                {#each enemyCooldowns as p (p.riotId)}
+                  <div class="cd-row">
+                    <div class="cd-champ">
+                      {#if p.championId > 0}
+                        <img class="champ-icon small" src={`${CDRAGON}/champion-icons/${p.championId}.png`} alt="" loading="lazy" />
+                      {/if}
+                      <div class="cd-id">
+                        <span class="cd-name">{p.championName}</span>
+                        <span class="dim">{$t("league.cd_haste")} {p.abilityHaste} · lv{p.level}</span>
+                      </div>
+                    </div>
+                    <div class="cd-abilities">
+                      {#each p.abilities as ab (ab.key)}
+                        <span class="cd-ability" title={`${ab.name ?? ""} (${ab.key})`}>
+                          {#if ab.iconPath}
+                            <img class="ability-icon" src={assetUrl(ab.iconPath)} alt="" loading="lazy" onerror={(e) => { (e.currentTarget as HTMLImageElement).style.visibility = "hidden"; }} />
+                          {/if}
+                          <span class="cd-key">{ab.key}</span>
+                          <span class="cd-value">{ab.cooldown > 0 ? `${ab.cooldown}s` : "—"}</span>
+                        </span>
+                      {/each}
+                    </div>
+                  </div>
+                {/each}
+              </div>
+            </section>
+          {/if}
 
           {#if selfRow}
             <section class="card">
@@ -2477,6 +2543,74 @@
     height: 34px;
     border-radius: 6px;
     background: var(--button);
+  }
+
+  .cd-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+
+  .cd-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 8px;
+    background: var(--button);
+    border-radius: calc(var(--border-radius) - 4px);
+    flex-wrap: wrap;
+  }
+
+  .cd-champ {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 130px;
+  }
+
+  .cd-id {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    font-size: 11.5px;
+  }
+
+  .cd-name {
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+
+  .cd-abilities {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+    flex-wrap: wrap;
+  }
+
+  .cd-ability {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1px;
+    min-width: 38px;
+  }
+
+  .ability-icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 5px;
+    background: var(--surface);
+  }
+
+  .cd-key {
+    font-size: 9.5px;
+    color: var(--gray);
+    letter-spacing: 0.05em;
+  }
+
+  .cd-value {
+    font-size: 11.5px;
+    font-variant-numeric: tabular-nums;
   }
 
   .scout-teams {

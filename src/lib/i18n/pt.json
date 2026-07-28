@@ -37,6 +37,12 @@
     "nav_downloads": "Ir para Downloads"
   },
   "league": {
+    "cd_title": "Cooldowns inimigos",
+    "cd_desc": "Cooldowns base vindos dos dados de campeão do próprio jogo, divididos pela aceleração de habilidade que os itens dele dão. Os ranks das habilidades são estimados pelo nível, então trate como aproximado, não exato.",
+    "cd_estimated": "estimado",
+    "cd_haste": "aceleração",
+    "col_gold_hint": "O ouro mostrado é o que cada jogador carrega em itens, precificado pelos dados de item do próprio jogo — é o único número de economia visível para os outros jogadores.",
+    "scout_no_history": "Sem partidas recentes",
     "build_title": "Build de itens",
     "build_desc": "Montada a partir das partidas desse campeão dentro do seu próprio histórico recente — sem site de build de terceiros, então a amostra é pequena e assumida como tal.",
     "build_champion": "Escolha um campeão",

@@ -120,12 +120,48 @@ async fn lcu_reachable(client: &LcuClient) -> bool {
         .is_ok()
 }
 
+/// The client's own web server is easy to swamp: a scouting pass touches ten
+/// players at once, so requests are queued instead of fired all together.
+static LCU_GATE: Lazy<tokio::sync::Semaphore> = Lazy::new(|| tokio::sync::Semaphore::new(4));
+
 async fn lcu_send(
     client: &LcuClient,
     method: reqwest::Method,
     path: &str,
     body: Option<Value>,
 ) -> Result<Value, String> {
+    let mut attempt = 0;
+    loop {
+        let result = lcu_send_once(client, method.clone(), path, body.clone()).await;
+        match result {
+            Ok(v) => return Ok(v),
+            Err(e) => {
+                // Retry transient failures only; a 404 means the resource is
+                // genuinely absent and retrying would just waste time.
+                let transient = e.contains("request failed")
+                    || e.contains(" 429 ")
+                    || e.contains(" 500 ")
+                    || e.contains(" 503 ");
+                if !transient || attempt >= 2 {
+                    return Err(e);
+                }
+                attempt += 1;
+                tokio::time::sleep(std::time::Duration::from_millis(120 * attempt as u64)).await;
+            }
+        }
+    }
+}
+
+async fn lcu_send_once(
+    client: &LcuClient,
+    method: reqwest::Method,
+    path: &str,
+    body: Option<Value>,
+) -> Result<Value, String> {
+    let _permit = LCU_GATE
+        .acquire()
+        .await
+        .map_err(|_| "request gate closed".to_string())?;
     let url = format!("https://127.0.0.1:{}{}", client.port, path);
     let mut req = http_client()?
         .request(method, &url)
@@ -706,7 +742,11 @@ fn compute_history_stats(games: &[Value], puuid: &str) -> Value {
 }
 
 #[tauri::command]
-pub async fn league_player_report(puuid: String) -> Result<Value, String> {
+pub async fn league_player_report(
+    puuid: String,
+    with_impact: Option<bool>,
+) -> Result<Value, String> {
+    let with_impact = with_impact.unwrap_or(false);
     ensure_enabled()?;
     if puuid.is_empty() {
         return Err("empty puuid".to_string());
@@ -727,6 +767,17 @@ pub async fn league_player_report(puuid: String) -> Result<Value, String> {
         .cloned()
         .unwrap_or(Value::Null);
 
+    // The summoner record states privacy explicitly; an empty history only
+    // means the request came back thin, which is not the same thing.
+    let summoner = lcu_get_raw(&client, &format!("/lol-summoner/v2/summoners/puuid/{}", puuid))
+        .await
+        .unwrap_or(Value::Null);
+    let is_private = summoner
+        .get("privacy")
+        .and_then(Value::as_str)
+        .map(|p| p.eq_ignore_ascii_case("PRIVATE"))
+        .unwrap_or(false);
+
     let history = lcu_get_raw(
         &client,
         &format!(
@@ -736,7 +787,8 @@ pub async fn league_player_report(puuid: String) -> Result<Value, String> {
     )
     .await;
     let mut history_ids: Vec<i64> = Vec::new();
-    let (stats, private_profile) = match history {
+    let mut history_failed = false;
+    let (stats, history_empty) = match history {
         Ok(h) => {
             let games: Vec<Value> = h
                 .get("games")
@@ -750,12 +802,20 @@ pub async fn league_player_report(puuid: String) -> Result<Value, String> {
                 .collect();
             (compute_history_stats(&games, &puuid), games.is_empty())
         }
-        Err(_) => (json!({ "games": 0, "insights": [] }), true),
+        Err(_) => {
+            history_failed = true;
+            (json!({ "games": 0, "insights": [] }), true)
+        }
     };
 
-    // Impact needs team totals, which only the full game detail carries, so it
-    // is computed over a small sample instead of the whole history.
-    let recent_ids: Vec<i64> = history_ids.into_iter().take(5).collect();
+    // Impact needs team totals, which only the full game detail carries. Five
+    // extra requests per player would swamp the client during a scouting pass,
+    // so it is only computed when the caller asks for it.
+    let recent_ids: Vec<i64> = if with_impact {
+        history_ids.into_iter().take(5).collect()
+    } else {
+        Vec::new()
+    };
     let mut impact_tasks = Vec::new();
     for game_id in recent_ids {
         let task_client = client.clone();
@@ -812,7 +872,12 @@ pub async fn league_player_report(puuid: String) -> Result<Value, String> {
         "mastery": mastery,
         "impact": impact,
         "impactGames": impacts.len(),
-        "privateProfile": private_profile,
+        "privateProfile": is_private,
+        "historyUnavailable": history_failed || (history_empty && !is_private),
+        "gameName": summoner.get("gameName"),
+        "tagLine": summoner.get("tagLine"),
+        "summonerLevel": summoner.get("summonerLevel"),
+        "profileIconId": summoner.get("profileIconId"),
     }))
 }
 
@@ -1322,7 +1387,7 @@ pub async fn league_search_player(game_name: String, tag_line: String) -> Result
         return Err("player not found".to_string());
     }
 
-    let profile = league_player_report(puuid.clone()).await?;
+    let profile = league_player_report(puuid.clone(), Some(true)).await?;
     let history = lcu_get_raw(
         &client,
         &format!(
@@ -2115,6 +2180,216 @@ pub async fn league_champion_build(
         "spells": spell_list,
         "source": "local-history",
     }))
+}
+
+/// Ability haste granted by an item, read from its own description text.
+///
+/// The game data files expose stats only as markup, so the number is pulled
+/// from the `<attention>N</attention> Ability Haste` fragment.
+fn item_ability_haste(description: &str) -> i64 {
+    let lower = description.to_ascii_lowercase();
+    let Some(idx) = lower.find("ability haste") else {
+        return 0;
+    };
+    let head = &description[..idx];
+    let Some(close) = head.rfind("</attention>") else {
+        return 0;
+    };
+    let Some(open) = head[..close].rfind('>') else {
+        return 0;
+    };
+    head[open + 1..close].trim().parse::<i64>().unwrap_or(0)
+}
+
+/// Cooldown after ability haste, using the game's own diminishing formula.
+fn haste_cooldown(base: f64, haste: i64) -> f64 {
+    if base <= 0.0 {
+        return 0.0;
+    }
+    let reduced = base / (1.0 + haste as f64 / 100.0);
+    (reduced * 10.0).round() / 10.0
+}
+
+/// Ability ranks a player of a given level most likely has.
+///
+/// Levelling order varies, so this is the standard shape — ultimate at 6/11/16,
+/// the remaining points spread across the basic abilities — and it is labelled
+/// as an estimate wherever it is shown.
+fn estimated_ranks(level: i64) -> [i64; 4] {
+    let level = level.clamp(1, 18);
+    let ult = if level >= 16 {
+        3
+    } else if level >= 11 {
+        2
+    } else if level >= 6 {
+        1
+    } else {
+        0
+    };
+    let spent_on_ult = ult;
+    let basic_points = (level - spent_on_ult).max(0);
+    // Spread the basic points across Q, W and E, favouring the earlier slots.
+    let base = basic_points / 3;
+    let extra = basic_points % 3;
+    let mut ranks = [base.min(5), base.min(5), base.min(5), ult];
+    for slot in ranks.iter_mut().take(extra as usize) {
+        *slot = (*slot + 1).min(5);
+    }
+    ranks
+}
+
+/// Live cooldown estimates for every champion in the running game.
+#[tauri::command]
+pub async fn league_ability_cooldowns() -> Result<Value, String> {
+    ensure_enabled()?;
+    let client = get_client().await?;
+    let http = http_client()?;
+
+    let players = http
+        .get("https://127.0.0.1:2999/liveclientdata/playerlist")
+        .send()
+        .await
+        .map_err(|e| format!("live client not reachable: {}", e))?
+        .json::<Value>()
+        .await
+        .map_err(|e| format!("invalid live client response: {}", e))?;
+    let list = players.as_array().cloned().unwrap_or_default();
+    if list.is_empty() {
+        return Err("no players in the live game".to_string());
+    }
+
+    // Item descriptions and champion spell data both come from the client, so
+    // they always match the installed patch.
+    // The client localises item text, so the haste number is read from the
+    // English game-data mirror instead of the localised copy.
+    let items_data = http
+        .get("https://raw.communitydragon.org/latest/plugins/rcp-be-lol-game-data/global/default/v1/items.json")
+        .send()
+        .await
+        .ok()
+        .and_then(|r| if r.status().is_success() { Some(r) } else { None });
+    let items_data = match items_data {
+        Some(r) => r.json::<Value>().await.unwrap_or(Value::Null),
+        None => Value::Null,
+    };
+    let mut haste_by_item: std::collections::HashMap<i64, i64> =
+        std::collections::HashMap::new();
+    if let Some(arr) = items_data.as_array() {
+        for item in arr {
+            let id = item.get("id").and_then(Value::as_i64).unwrap_or(0);
+            let desc = item.get("description").and_then(Value::as_str).unwrap_or("");
+            let haste = item_ability_haste(desc);
+            if id > 0 && haste > 0 {
+                haste_by_item.insert(id, haste);
+            }
+        }
+    }
+
+    let summary = lcu_get_raw(&client, "/lol-game-data/assets/v1/champion-summary.json")
+        .await
+        .unwrap_or(Value::Null);
+    let mut id_by_alias: std::collections::HashMap<String, i64> =
+        std::collections::HashMap::new();
+    if let Some(arr) = summary.as_array() {
+        for champ in arr {
+            if let (Some(id), Some(alias)) = (
+                champ.get("id").and_then(Value::as_i64),
+                champ.get("alias").and_then(Value::as_str),
+            ) {
+                id_by_alias.insert(alias.to_ascii_lowercase(), id);
+            }
+        }
+    }
+
+    let mut rows: Vec<Value> = Vec::new();
+    let mut spell_cache: std::collections::HashMap<i64, Value> =
+        std::collections::HashMap::new();
+
+    for p in &list {
+        let raw_name = p.get("rawChampionName").and_then(Value::as_str).unwrap_or("");
+        let alias = raw_name.rsplit('_').next().unwrap_or("").to_ascii_lowercase();
+        let champion_id = id_by_alias.get(&alias).copied().unwrap_or(0);
+        let level = p.get("level").and_then(Value::as_i64).unwrap_or(1);
+
+        let mut haste = 0i64;
+        let mut item_ids: Vec<i64> = Vec::new();
+        if let Some(items) = p.get("items").and_then(Value::as_array) {
+            for item in items {
+                let id = item.get("itemID").and_then(Value::as_i64).unwrap_or(0);
+                if id > 0 {
+                    item_ids.push(id);
+                    haste += haste_by_item.get(&id).copied().unwrap_or(0);
+                }
+            }
+        }
+
+        let spells = if champion_id > 0 {
+            if let Some(cached) = spell_cache.get(&champion_id) {
+                cached.clone()
+            } else {
+                let detail = lcu_get_raw(
+                    &client,
+                    &format!("/lol-game-data/assets/v1/champions/{}.json", champion_id),
+                )
+                .await
+                .unwrap_or(Value::Null);
+                let value = detail.get("spells").cloned().unwrap_or(Value::Null);
+                spell_cache.insert(champion_id, value.clone());
+                value
+            }
+        } else {
+            Value::Null
+        };
+
+        let ranks = estimated_ranks(level);
+        let keys = ["Q", "W", "E", "R"];
+        let abilities: Vec<Value> = spells
+            .as_array()
+            .map(|arr| {
+                arr.iter()
+                    .take(4)
+                    .enumerate()
+                    .map(|(i, spell)| {
+                        let coefficients: Vec<f64> = spell
+                            .get("cooldownCoefficients")
+                            .and_then(Value::as_array)
+                            .map(|c| c.iter().filter_map(Value::as_f64).collect())
+                            .unwrap_or_default();
+                        let rank = ranks[i].max(1) as usize;
+                        let base = coefficients
+                            .get(rank.saturating_sub(1))
+                            .or_else(|| coefficients.first())
+                            .copied()
+                            .unwrap_or(0.0);
+                        json!({
+                            "key": keys[i],
+                            "name": spell.get("name"),
+                            "iconPath": spell.get("abilityIconPath"),
+                            "rank": ranks[i],
+                            "baseCooldown": base,
+                            "cooldown": haste_cooldown(base, haste),
+                            "allRanks": coefficients,
+                        })
+                    })
+                    .collect()
+            })
+            .unwrap_or_default();
+
+        rows.push(json!({
+            "riotId": p.get("riotId"),
+            "championName": p.get("championName"),
+            "championId": champion_id,
+            "team": p.get("team"),
+            "position": p.get("position"),
+            "level": level,
+            "abilityHaste": haste,
+            "items": item_ids,
+            "abilities": abilities,
+            "summonerSpells": p.get("summonerSpells"),
+        }));
+    }
+
+    Ok(json!({ "players": rows, "estimated": true }))
 }
 
 #[tauri::command]

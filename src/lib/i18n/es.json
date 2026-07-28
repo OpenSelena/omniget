@@ -37,6 +37,12 @@
     "nav_downloads": "Ir a Descargas"
   },
   "league": {
+    "cd_title": "Enfriamientos enemigos",
+    "cd_desc": "Enfriamientos base de los propios datos de campeón del juego, divididos por la aceleración de habilidad que le dan sus objetos. Los rangos se estiman por nivel, así que tómalos como aproximados.",
+    "cd_estimated": "estimado",
+    "cd_haste": "aceleración",
+    "col_gold_hint": "El oro mostrado es lo que cada jugador lleva en objetos, valorado con los datos de objetos del juego: es el único número de economía visible para los demás.",
+    "scout_no_history": "Sin partidas recientes",
     "build_title": "Build de objetos",
     "build_desc": "Construida con las partidas de ese campeón dentro de tu propio historial reciente — sin sitios de builds de terceros, así que la muestra es pequeña y se indica.",
     "build_champion": "Elige un campeón",

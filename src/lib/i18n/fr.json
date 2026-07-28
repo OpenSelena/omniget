@@ -37,6 +37,12 @@
     "nav_downloads": "Aller aux Téléchargements"
   },
   "league": {
+    "cd_title": "Temps de recharge ennemis",
+    "cd_desc": "Temps de recharge de base issus des données de champion du jeu, divisés par l'accélération de compétence de leurs objets. Les rangs sont estimés d'après le niveau, donc à prendre comme approximatifs.",
+    "cd_estimated": "estimé",
+    "cd_haste": "accélération",
+    "col_gold_hint": "L'or affiché est ce que chaque joueur porte en objets, valorisé avec les données d'objets du jeu — le seul chiffre d'économie visible pour les autres.",
+    "scout_no_history": "Aucune partie récente",
     "build_title": "Build d'objets",
     "build_desc": "Construite à partir des parties de ce champion dans votre propre historique récent — sans site de build tiers, donc l'échantillon est petit et annoncé comme tel.",
     "build_champion": "Choisir un champion",

@@ -37,6 +37,12 @@
     "nav_downloads": "Go to Downloads"
   },
   "league": {
+    "cd_title": "Enemy cooldowns",
+    "cd_desc": "Base cooldowns from the game's own champion data, divided by the ability haste their items give them. Ability ranks are estimated from level, so treat these as close, not exact.",
+    "cd_estimated": "estimated",
+    "cd_haste": "haste",
+    "col_gold_hint": "Gold shown is what each player is carrying in items, priced from the game's own item data — the only economy number visible for other players.",
+    "scout_no_history": "No recent games",
     "build_title": "Item build",
     "build_desc": "Built from the champion's games inside your own recent matches — no third-party build site involved, so the sample is small and honest about it.",
     "build_champion": "Pick a champion",

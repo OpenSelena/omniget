@@ -33,9 +33,9 @@ pub struct AppSettings {
     pub league: LeagueSettings,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct LeagueSettings {
-    #[serde(default)]
+    #[serde(default = "default_league_enabled")]
     pub enabled: bool,
     #[serde(default)]
     pub auto_accept: bool,
@@ -51,6 +51,25 @@ pub struct LeagueSettings {
     pub pick_champions: Vec<i64>,
     #[serde(default)]
     pub ban_champions: Vec<i64>,
+}
+
+fn default_league_enabled() -> bool {
+    true
+}
+
+impl Default for LeagueSettings {
+    fn default() -> Self {
+        Self {
+            enabled: default_league_enabled(),
+            auto_accept: false,
+            auto_pick: false,
+            auto_ban: false,
+            auto_lock: false,
+            auto_runes: false,
+            pick_champions: Vec::new(),
+            ban_champions: Vec::new(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

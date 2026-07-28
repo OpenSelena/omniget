@@ -37,6 +37,12 @@
     "nav_downloads": "Vai ai Download"
   },
   "league": {
+    "cd_title": "Ricariche nemiche",
+    "cd_desc": "Ricariche base dai dati campione del gioco, divise per l'accelerazione abilità dei loro oggetti. I ranghi sono stimati dal livello, quindi consideralo approssimativo.",
+    "cd_estimated": "stimato",
+    "cd_haste": "accelerazione",
+    "col_gold_hint": "L'oro mostrato è quello che ogni giocatore porta negli oggetti, valorizzato con i dati oggetti del gioco: è l'unico dato economico visibile per gli altri.",
+    "scout_no_history": "Nessuna partita recente",
     "build_title": "Build di oggetti",
     "build_desc": "Costruita dalle partite di quel campione nella tua cronologia recente — nessun sito di build di terze parti, quindi il campione è piccolo e dichiarato.",
     "build_champion": "Scegli un campione",
