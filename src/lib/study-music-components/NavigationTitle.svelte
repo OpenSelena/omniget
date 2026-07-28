@@ -33,14 +33,14 @@
     font-size: 20px;
     font-weight: 800;
     letter-spacing: -0.01em;
-    color: rgba(255, 255, 255, 0.95);
+    color: var(--text);
   }
   .see-all {
     background: transparent;
     border: 0;
     padding: 4px 8px;
     border-radius: 8px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--text-muted);
     font: inherit;
     font-size: 12px;
     font-weight: 600;
@@ -49,7 +49,7 @@
     transition: color 160ms ease;
   }
   .see-all:hover {
-    color: white;
+    color: var(--text);
   }
   .arr {
     display: inline-block;

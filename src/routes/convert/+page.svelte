@@ -519,7 +519,7 @@
 
   .hwaccel-badge.detected {
     color: var(--green);
-    background: rgba(48, 189, 27, 0.1);
+    background: color-mix(in srgb, var(--success) 10%, transparent);
   }
 
   .hwaccel-badge.none {

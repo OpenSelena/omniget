@@ -422,7 +422,7 @@
     display: flex;
     flex-direction: column;
     gap: 28px;
-    color: rgba(255, 255, 255, 0.95);
+    color: var(--text);
     position: relative;
   }
   .page-head h1 {
@@ -430,7 +430,7 @@
     font-size: clamp(28px, 3.5vw, 40px);
     font-weight: 900;
     letter-spacing: -0.02em;
-    color: white;
+    color: var(--text);
   }
   .pull-indicator {
     position: sticky;
@@ -439,7 +439,7 @@
     text-align: center;
     padding: 6px 0;
     background: linear-gradient(180deg, rgba(0, 0, 0, 0.6), transparent);
-    color: rgba(255, 255, 255, 0.78);
+    color: var(--text-muted);
     font-size: 12px;
     font-weight: 600;
     opacity: var(--p, 1);
@@ -491,7 +491,7 @@
     aspect-ratio: 1 / 1;
     border-radius: 12px;
     overflow: hidden;
-    background: rgba(40, 40, 40, 0.6);
+    background: var(--fill-2);
     margin-bottom: 10px;
     transition: transform 200ms ease;
   }
@@ -515,7 +515,7 @@
     right: 6px;
     bottom: 6px;
     height: 3px;
-    background: rgba(0, 0, 0, 0.5);
+    background: var(--dialog-backdrop);
     border-radius: 2px;
     overflow: hidden;
   }
@@ -539,7 +539,7 @@
   .artist-initial {
     font-size: 42px;
     font-weight: 900;
-    color: rgba(255, 255, 255, 0.92);
+    color: var(--text);
     letter-spacing: -0.02em;
   }
   .artist-name {
@@ -555,7 +555,7 @@
     margin: 0;
     font-size: 13px;
     font-weight: 700;
-    color: white;
+    color: var(--text);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -565,7 +565,7 @@
     margin: 2px 0 0;
     font-size: 11px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.55);
+    color: var(--text-dim);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -577,18 +577,18 @@
     align-items: center;
     gap: 14px;
     padding: 14px 18px;
-    background: rgba(255, 255, 255, 0.04);
+    background: var(--fill-1);
     border: 1px solid rgba(255, 255, 255, 0.07);
     border-radius: 14px;
-    color: rgba(255, 255, 255, 0.92);
+    color: var(--text);
     text-decoration: none;
     transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
     max-width: 480px;
     align-self: flex-start;
   }
   .yt-cta:hover {
-    background: rgba(255, 255, 255, 0.07);
-    border-color: rgba(255, 255, 255, 0.15);
+    background: var(--fill-2);
+    border-color: var(--border-hi);
     transform: translateY(-1px);
   }
   .yt-cta-icon {
@@ -611,17 +611,17 @@
   .yt-cta-title {
     font-size: 14px;
     font-weight: 700;
-    color: white;
+    color: var(--text);
   }
   .yt-cta-sub {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--text-dim);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
   .yt-cta-arrow {
-    color: rgba(255, 255, 255, 0.6);
+    color: var(--text-dim);
     font-size: 18px;
     flex-shrink: 0;
   }

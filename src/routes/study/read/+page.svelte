@@ -1381,8 +1381,9 @@
     flex-wrap: wrap;
   }
   .row-primary h1 {
-    flex: 1;
-    min-width: 0;
+    flex: 0 0 auto;
+    min-width: fit-content;
+    margin-right: auto;
   }
   .row-formats {
     display: flex;

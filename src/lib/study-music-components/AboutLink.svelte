@@ -62,10 +62,10 @@
     gap: 8px;
     width: 100%;
     padding: 18px 20px;
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--fill-1);
+    border: 1px solid var(--border);
     border-radius: 12px;
-    color: rgba(255, 255, 255, 0.95);
+    color: var(--text);
     font-family: inherit;
     text-align: left;
     cursor: pointer;
@@ -86,7 +86,7 @@
     font-size: 14px;
     font-weight: 600;
     line-height: 1.5;
-    color: rgba(255, 255, 255, 0.9);
+    color: var(--text);
   }
   .about-cta {
     display: inline-flex;
@@ -105,7 +105,7 @@
     background: transparent;
     border: 0;
     border-radius: 6px;
-    color: rgba(255, 255, 255, 0.45);
+    color: var(--text-dim);
     font-family: inherit;
     font-size: 11px;
     font-weight: 500;
@@ -114,7 +114,7 @@
     transition: color 120ms ease, background 120ms ease;
   }
   .about-footer:hover {
-    color: rgba(255, 255, 255, 0.95);
+    color: var(--text);
     background: color-mix(in oklab, white 6%, transparent);
   }
   .about-inline {
@@ -123,7 +123,7 @@
     gap: 4px;
     background: transparent;
     border: 0;
-    color: rgba(255, 255, 255, 0.5);
+    color: var(--text-muted);
     font-family: inherit;
     font-size: 11px;
     cursor: pointer;

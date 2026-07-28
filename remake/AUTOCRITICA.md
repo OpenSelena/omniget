@@ -15,3 +15,10 @@ Eixos: hier(arquia) · respiro · alinh(amento) · tipo(grafia) · acab(amento) 
 | `/about/project` | 4 | 4 | 4 | 4 | 4 | 3→4 | Iteração 1: botão "star on GitHub" em laranja sólido violava a One Accent Rule (Don't do explícito do DESIGN.md); virou secundário quieto com estrela tingida; recapturado. |
 | `/about/terms` | 4 | 4 | 4 | 4 | 4 | 4 | Cards de leitura com títulos headline e corpo confortável; sem correção. |
 | `/about/privacy` | 4 | 4 | 4 | 4 | 4 | 4 | Mesma família visual do terms (verificado light+dark); sem correção. |
+| `/courses` | 4 | 4 | 4 | 4 | 4 | 4 | Refs: Things 3 ×2, Apple Fitness ×2 (01/02). Grid de plataformas com brand colors legítimas; aviso de update quieto; busca .input. |
+| `/convert` | 4 | 4 | 4 | 4 | 4 | 4 | Coluna única centrada (foco em tarefa única, aceitável); 1ª leitura acusou "título gigante", medição de coordenadas mostrou .page-title correto (registrado por honestidade). rgba hardcoded do badge hwaccel tokenizado nesta fase. |
+| `/telegram` | 4 | 4 | 4 | 4 | 4 | 4 | Estado mockado (loading chats); chrome (toolbar de conta, sync pill, ações) coerente com o sistema nos 2 temas. Estado feliz exige DLL real (D-007/C-002). |
+| `/misc` | 4 | 4 | 4 | 4 | 4 | 4 | Cards de ferramenta com ícone tintado + tags BETA/NEW discretas; 2 temas ok. |
+| `/misc/studio` | 4 | 4 | 4 | 5 | 4 | 4 | Painel de stats em mono tabular (movimento Apple Fitness); botão destrutivo desabilitado legível; 2 temas ok. |
+| `/misc/library` | 4 | 4 | 4 | 4 | 3* | 4 | *Sob mock, o comando de plugin nulo vaza exceção JS crua ("Cannot read properties of null") + "Loading…" simultâneo — viola a regra de copy de erro. Causa é o mock (backend real fornece dados), mas a robustez de copy é dívida real registrada no RELATORIO (correção exige tocar o catch — lógica, fora do guardrail visual). Chrome da tela (título, busca, pills) ≥4. |
+| `/misc/file-clip` | 4 | 4 | 4 | 4 | 4 | 4 | Card único com ação + hint em footnote; 2 temas ok. |
