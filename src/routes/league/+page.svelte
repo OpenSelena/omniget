@@ -38,6 +38,67 @@
   let pickSearch = $state("");
   let banSearch = $state("");
 
+  type ScoutPlayer = { puuid: string; gameName: string; tagLine: string; championId: number; cellId: number | null; isAlly: boolean; summonerLevel?: number };
+  let scoutPlayers = $state<ScoutPlayer[]>([]);
+  let scoutReports = $state<Record<string, any>>({});
+  let scoutLoading = $state(false);
+  let notes = $state<Record<string, string>>({});
+  let openNotes = $state<Record<string, boolean>>({});
+
+  const NOTES_KEY = "league-player-notes";
+
+  const TAG_KEYS: Record<string, string> = {
+    hot_streak: "league.tag_hot_streak",
+    cold_streak: "league.tag_cold_streak",
+    high_winrate: "league.tag_high_winrate",
+    low_winrate: "league.tag_low_winrate",
+    one_trick: "league.tag_one_trick",
+    high_kda: "league.tag_high_kda",
+    low_kda: "league.tag_low_kda",
+  };
+
+  function loadNotes() {
+    try {
+      notes = JSON.parse(localStorage.getItem(NOTES_KEY) ?? "{}");
+    } catch {
+      notes = {};
+    }
+  }
+
+  function saveNote(puuid: string, text: string) {
+    notes = { ...notes, [puuid]: text };
+    const clean = Object.fromEntries(Object.entries(notes).filter(([, v]) => (v as string).trim() !== ""));
+    localStorage.setItem(NOTES_KEY, JSON.stringify(clean));
+  }
+
+  async function loadScouting() {
+    if (scoutLoading) return;
+    scoutLoading = true;
+    try {
+      const data = await invoke<any>("league_game_players");
+      scoutPlayers = (data?.players ?? []).filter((p: any) => p);
+      for (const p of scoutPlayers) {
+        if (!p.puuid || scoutReports[p.puuid]) continue;
+        invoke<any>("league_player_report", { puuid: p.puuid })
+          .then((r) => {
+            scoutReports = { ...scoutReports, [p.puuid]: r };
+          })
+          .catch(() => {});
+      }
+    } catch {
+      scoutPlayers = [];
+    } finally {
+      scoutLoading = false;
+    }
+  }
+
+  function scoutGroups(): { label: string; ally: boolean; list: ScoutPlayer[] }[] {
+    return [
+      { label: $t("league.scout_enemies") as string, ally: false, list: scoutPlayers.filter((p) => !p.isAlly) },
+      { label: $t("league.scout_allies") as string, ally: true, list: scoutPlayers.filter((p) => p.isAlly) },
+    ];
+  }
+
   const PHASE_KEYS: Record<string, string> = {
     Lobby: "league.phase_lobby",
     Matchmaking: "league.phase_matchmaking",
@@ -125,6 +186,11 @@
       }
     } else {
       liveGame = null;
+    }
+    if (phase === "ChampSelect" || phase === "InProgress") {
+      if (scoutPlayers.length === 0) loadScouting();
+    } else if (scoutPlayers.length > 0) {
+      scoutPlayers = [];
     }
     if (phase === "Lobby" || phase === "Matchmaking") {
       try {
@@ -279,6 +345,7 @@
 
   onMount(() => {
     if (!enabled) return;
+    loadNotes();
     invoke<boolean>("league_auto_accept_get")
       .then((v) => { autoAccept = v; })
       .catch(() => {});
@@ -446,6 +513,71 @@
           {:else}
             <p class="empty-hint">{$t("league.lobby_hint")}</p>
           {/if}
+        </section>
+      {/if}
+
+      {#if (phase === "ChampSelect" || phase === "InProgress") && scoutPlayers.length > 0}
+        <section class="card">
+          <div class="card-head">
+            <h3>{$t("league.scout_title")}</h3>
+            <button class="button" onclick={loadScouting} disabled={scoutLoading}>{$t("league.refresh")}</button>
+          </div>
+          <div class="scout-teams">
+            {#each scoutGroups() as group (group.label)}
+              <div class="scout-team">
+                <h4 class="scout-team-title" class:enemy={!group.ally}>{group.label}</h4>
+                {#if group.list.length === 0}
+                  <p class="empty-hint">{$t("league.scout_enemies_hidden")}</p>
+                {:else}
+                  {#each group.list as p (p.puuid || String(p.cellId))}
+                    {@const r = p.puuid ? scoutReports[p.puuid] : null}
+                    <div class="scout-row">
+                      <div class="scout-main">
+                        {#if p.championId > 0}
+                          <img class="champ-icon small" src={`${CDRAGON}/champion-icons/${p.championId}.png`} alt="" title={championById.get(p.championId)?.name ?? ""} loading="lazy" />
+                        {:else}
+                          <div class="champ-icon small champ-empty" aria-hidden="true"></div>
+                        {/if}
+                        <div class="scout-id">
+                          <span class="scout-name">{p.gameName || "—"}{#if p.tagLine}<span class="tag">#{p.tagLine}</span>{/if}</span>
+                          <span class="scout-rank">{r ? rankLabel(r.solo) : "…"}</span>
+                        </div>
+                        {#if r?.stats?.games > 0}
+                          <div class="scout-stats">
+                            <span class="scout-wr" class:good={r.stats.winrate >= 55} class:bad={r.stats.winrate <= 45}>{r.stats.winrate}% WR</span>
+                            <span class="scout-kda">{r.stats.kda} KDA</span>
+                          </div>
+                        {:else if r?.privateProfile}
+                          <span class="scout-private">{$t("league.scout_private")}</span>
+                        {/if}
+                        {#if p.puuid}
+                          <button class="note-toggle" class:has-note={(notes[p.puuid] ?? "").trim() !== ""} onclick={() => { openNotes = { ...openNotes, [p.puuid]: !openNotes[p.puuid] }; }} aria-label={$t("league.scout_note_placeholder") as string} aria-expanded={openNotes[p.puuid] ?? false}>✎</button>
+                        {/if}
+                      </div>
+                      {#if r?.stats?.topChampions?.length}
+                        <div class="scout-champs">
+                          {#each r.stats.topChampions as tc (tc.championId)}
+                            <span class="scout-champ">
+                              <img class="champ-icon tiny" src={`${CDRAGON}/champion-icons/${tc.championId}.png`} alt="" title={championById.get(tc.championId)?.name ?? ""} loading="lazy" />
+                              <span class="scout-champ-record">{tc.wins}/{tc.games}</span>
+                            </span>
+                          {/each}
+                          {#if r?.stats?.insights?.length}
+                            {#each r.stats.insights as tag (tag)}
+                              <span class="scout-tag">{$t(TAG_KEYS[tag] ?? tag)}</span>
+                            {/each}
+                          {/if}
+                        </div>
+                      {/if}
+                      {#if p.puuid && (openNotes[p.puuid] || (notes[p.puuid] ?? "").trim() !== "")}
+                        <input class="input-text note-input" placeholder={$t("league.scout_note_placeholder") as string} value={notes[p.puuid] ?? ""} onchange={(e) => saveNote(p.puuid, e.currentTarget.value)} />
+                      {/if}
+                    </div>
+                  {/each}
+                {/if}
+              </div>
+            {/each}
+          </div>
         </section>
       {/if}
 
@@ -1011,6 +1143,165 @@
   .search-result:focus-visible {
     background: var(--button);
     outline: none;
+  }
+
+  .scout-teams {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+  }
+
+  @media (max-width: 620px) {
+    .scout-teams {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .scout-team {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+
+  .scout-team-title {
+    margin: 0 0 2px;
+    font-size: 11.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--gray);
+  }
+
+  .scout-team-title.enemy {
+    color: var(--danger);
+  }
+
+  .scout-row {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    padding: 7px 9px;
+    background: var(--button);
+    border: 1px solid var(--input-border);
+    border-radius: calc(var(--border-radius) - 3px);
+  }
+
+  .scout-main {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+
+  .scout-id {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    min-width: 0;
+    flex: 1;
+  }
+
+  .scout-name {
+    font-size: 12.5px;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .scout-name .tag {
+    color: var(--gray);
+    font-weight: 400;
+  }
+
+  .scout-rank {
+    font-size: 11px;
+    color: var(--gray);
+  }
+
+  .scout-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    align-items: flex-end;
+    flex-shrink: 0;
+  }
+
+  .scout-wr {
+    font-size: 12px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .scout-wr.good {
+    color: var(--success);
+  }
+
+  .scout-wr.bad {
+    color: var(--danger);
+  }
+
+  .scout-kda {
+    font-size: 11px;
+    color: var(--gray);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .scout-private {
+    font-size: 11.5px;
+    color: var(--gray);
+    flex-shrink: 0;
+  }
+
+  .note-toggle {
+    background: none;
+    border: none;
+    color: var(--gray);
+    font-size: 13px;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+
+  .note-toggle.has-note,
+  .note-toggle:hover,
+  .note-toggle:focus-visible {
+    color: var(--accent);
+    outline: none;
+  }
+
+  .scout-champs {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .scout-champ {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+  }
+
+  .scout-champ-record {
+    font-size: 10.5px;
+    color: var(--gray);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .scout-tag {
+    font-size: 10.5px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+
+  .note-input {
+    font-size: 12px;
+    padding: 5px 8px;
   }
 
   .history-section {

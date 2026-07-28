@@ -722,6 +722,8 @@ pub fn run() {
             commands::league::league_bench_swap,
             commands::league::league_reroll,
             commands::league::league_live_game,
+            commands::league::league_game_players,
+            commands::league::league_player_report,
             commands::bilibili_auth::bilibili_qr_generate,
             commands::bilibili_auth::bilibili_qr_poll,
             commands::bilibili_auth::bilibili_captcha_challenge,

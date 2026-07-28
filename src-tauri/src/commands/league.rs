@@ -427,6 +427,356 @@ pub async fn league_live_game() -> Result<Value, String> {
     Ok(json!({ "stats": stats, "players": players, "activePlayer": active }))
 }
 
+fn player_identity(entry: &Value, is_ally: bool) -> Value {
+    let game_name = entry
+        .get("gameName")
+        .and_then(Value::as_str)
+        .filter(|s| !s.is_empty())
+        .or_else(|| entry.get("summonerName").and_then(Value::as_str))
+        .unwrap_or("");
+    json!({
+        "puuid": entry.get("puuid").and_then(Value::as_str).unwrap_or(""),
+        "summonerId": entry.get("summonerId").and_then(Value::as_i64).unwrap_or(0),
+        "gameName": game_name,
+        "tagLine": entry.get("tagLine").and_then(Value::as_str).unwrap_or(""),
+        "championId": entry.get("championId").and_then(Value::as_i64).unwrap_or(0),
+        "cellId": entry.get("cellId").and_then(Value::as_i64),
+        "isAlly": is_ally,
+    })
+}
+
+#[tauri::command]
+pub async fn league_game_players() -> Result<Value, String> {
+    ensure_enabled()?;
+    let client = get_client().await?;
+    let phase = lcu_get_raw(&client, "/lol-gameflow/v1/gameflow-phase").await?;
+    let phase = phase.as_str().unwrap_or("");
+
+    let mut players: Vec<Value> = Vec::new();
+
+    if phase == "ChampSelect" {
+        let session = lcu_get_raw(&client, "/lol-champ-select/v1/session").await?;
+        for (team_key, is_ally) in [("myTeam", true), ("theirTeam", false)] {
+            if let Some(team) = session.get(team_key).and_then(Value::as_array) {
+                for member in team {
+                    players.push(player_identity(member, is_ally));
+                }
+            }
+        }
+    } else {
+        let session = lcu_get_raw(&client, "/lol-gameflow/v1/session").await?;
+        let my_puuid = lcu_get_raw(&client, "/lol-summoner/v1/current-summoner")
+            .await
+            .ok()
+            .and_then(|s| {
+                s.get("puuid").and_then(Value::as_str).map(String::from)
+            })
+            .unwrap_or_default();
+        let game_data = session.get("gameData").cloned().unwrap_or(Value::Null);
+        let team_one: Vec<Value> = game_data
+            .get("teamOne")
+            .and_then(Value::as_array)
+            .cloned()
+            .unwrap_or_default();
+        let team_two: Vec<Value> = game_data
+            .get("teamTwo")
+            .and_then(Value::as_array)
+            .cloned()
+            .unwrap_or_default();
+        let one_has_me = team_one.iter().any(|m| {
+            m.get("puuid").and_then(Value::as_str) == Some(my_puuid.as_str())
+        });
+        for (team, mine) in [(team_one, one_has_me), (team_two, !one_has_me)] {
+            for member in &team {
+                players.push(player_identity(member, mine));
+            }
+        }
+    }
+
+    let mut resolved: Vec<Value> = Vec::new();
+    let mut to_lookup: Vec<(usize, String, String)> = Vec::new();
+    for (i, p) in players.iter().enumerate() {
+        let puuid = p.get("puuid").and_then(Value::as_str).unwrap_or("");
+        let name = p.get("gameName").and_then(Value::as_str).unwrap_or("");
+        if puuid.is_empty() && name.contains('#') {
+            let mut parts = name.splitn(2, '#');
+            let game_name = parts.next().unwrap_or("").to_string();
+            let tag = parts.next().unwrap_or("").to_string();
+            to_lookup.push((i, game_name, tag));
+        }
+        resolved.push(p.clone());
+    }
+    if !to_lookup.is_empty() {
+        let body: Vec<Value> = to_lookup
+            .iter()
+            .map(|(_, g, t)| json!({ "gameName": g, "tagLine": t }))
+            .collect();
+        if let Ok(found) = lcu_send(
+            &client,
+            reqwest::Method::POST,
+            "/lol-summoner/v1/summoners/aliases",
+            Some(Value::Array(body)),
+        )
+        .await
+        {
+            if let Some(arr) = found.as_array() {
+                for (slot, (idx, g, _)) in to_lookup.iter().enumerate() {
+                    let hit = arr.get(slot).or_else(|| {
+                        arr.iter().find(|s| {
+                            s.get("gameName").and_then(Value::as_str) == Some(g.as_str())
+                        })
+                    });
+                    if let Some(s) = hit {
+                        if let Some(puuid) = s.get("puuid").and_then(Value::as_str) {
+                            resolved[*idx]["puuid"] = json!(puuid);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    let mut name_tasks = Vec::new();
+    for (i, p) in resolved.iter().enumerate() {
+        let puuid = p.get("puuid").and_then(Value::as_str).unwrap_or("").to_string();
+        let has_name = p
+            .get("gameName")
+            .and_then(Value::as_str)
+            .map(|s| !s.is_empty())
+            .unwrap_or(false);
+        if puuid.is_empty() || has_name {
+            continue;
+        }
+        let task_client = client.clone();
+        name_tasks.push(tauri::async_runtime::spawn(async move {
+            let path = format!("/lol-summoner/v2/summoners/puuid/{}", puuid);
+            (i, lcu_get_raw(&task_client, &path).await.ok())
+        }));
+    }
+    for task in name_tasks {
+        if let Ok((i, Some(summoner))) = task.await {
+            if let Some(name) = summoner.get("gameName").and_then(Value::as_str) {
+                resolved[i]["gameName"] = json!(name);
+            }
+            if let Some(tag) = summoner.get("tagLine").and_then(Value::as_str) {
+                resolved[i]["tagLine"] = json!(tag);
+            }
+            if let Some(level) = summoner.get("summonerLevel").and_then(Value::as_i64) {
+                resolved[i]["summonerLevel"] = json!(level);
+            }
+            if let Some(icon) = summoner.get("profileIconId").and_then(Value::as_i64) {
+                resolved[i]["profileIconId"] = json!(icon);
+            }
+        }
+    }
+
+    Ok(json!({ "phase": phase, "players": resolved }))
+}
+
+fn compute_history_stats(games: &[Value], puuid: &str) -> Value {
+    let mut wins = 0usize;
+    let mut kills = 0i64;
+    let mut deaths = 0i64;
+    let mut assists = 0i64;
+    let mut streak_kind: Option<bool> = None;
+    let mut streak_len = 0usize;
+    let mut streak_done = false;
+    let mut champ_games: std::collections::HashMap<i64, (usize, usize)> =
+        std::collections::HashMap::new();
+
+    for game in games {
+        let participant = game
+            .get("participants")
+            .and_then(Value::as_array)
+            .and_then(|arr| {
+                if arr.len() == 1 {
+                    arr.first()
+                } else {
+                    let identities = game.get("participantIdentities").and_then(Value::as_array);
+                    let pid = identities.and_then(|ids| {
+                        ids.iter()
+                            .find(|i| {
+                                i.get("player")
+                                    .and_then(|p| p.get("puuid"))
+                                    .and_then(Value::as_str)
+                                    == Some(puuid)
+                            })
+                            .and_then(|i| i.get("participantId").and_then(Value::as_i64))
+                    });
+                    match pid {
+                        Some(pid) => arr.iter().find(|p| {
+                            p.get("participantId").and_then(Value::as_i64) == Some(pid)
+                        }),
+                        None => arr.first(),
+                    }
+                }
+            });
+        let participant = match participant {
+            Some(p) => p,
+            None => continue,
+        };
+        let stats = participant.get("stats").cloned().unwrap_or(Value::Null);
+        let win = stats.get("win").and_then(Value::as_bool).unwrap_or(false);
+        if win {
+            wins += 1;
+        }
+        kills += stats.get("kills").and_then(Value::as_i64).unwrap_or(0);
+        deaths += stats.get("deaths").and_then(Value::as_i64).unwrap_or(0);
+        assists += stats.get("assists").and_then(Value::as_i64).unwrap_or(0);
+        if !streak_done {
+            match streak_kind {
+                None => {
+                    streak_kind = Some(win);
+                    streak_len = 1;
+                }
+                Some(k) if k == win => streak_len += 1,
+                Some(_) => streak_done = true,
+            }
+        }
+        let champ = participant
+            .get("championId")
+            .and_then(Value::as_i64)
+            .unwrap_or(0);
+        if champ > 0 {
+            let e = champ_games.entry(champ).or_insert((0, 0));
+            e.0 += 1;
+            if win {
+                e.1 += 1;
+            }
+        }
+    }
+
+    let total = games.len();
+    let kda = if deaths > 0 {
+        (kills + assists) as f64 / deaths as f64
+    } else {
+        (kills + assists) as f64
+    };
+    let mut top: Vec<(i64, usize, usize)> = champ_games
+        .into_iter()
+        .map(|(id, (g, w))| (id, g, w))
+        .collect();
+    top.sort_by(|a, b| b.1.cmp(&a.1));
+    top.truncate(3);
+
+    let winrate = if total > 0 {
+        (wins as f64 / total as f64 * 100.0).round()
+    } else {
+        0.0
+    };
+
+    let mut insights: Vec<&str> = Vec::new();
+    if total >= 5 {
+        if let Some(kind) = streak_kind {
+            if streak_len >= 3 {
+                insights.push(if kind { "hot_streak" } else { "cold_streak" });
+            }
+        }
+        if total >= 10 && winrate >= 60.0 {
+            insights.push("high_winrate");
+        }
+        if total >= 10 && winrate <= 40.0 {
+            insights.push("low_winrate");
+        }
+        if let Some((_, g, _)) = top.first() {
+            if *g * 2 >= total {
+                insights.push("one_trick");
+            }
+        }
+        if kda >= 4.0 {
+            insights.push("high_kda");
+        }
+        if kda <= 1.5 && deaths > 0 {
+            insights.push("low_kda");
+        }
+    }
+
+    json!({
+        "games": total,
+        "wins": wins,
+        "winrate": winrate,
+        "kda": (kda * 10.0).round() / 10.0,
+        "streak": { "win": streak_kind.unwrap_or(false), "length": streak_len },
+        "topChampions": top.iter().map(|(id, g, w)| json!({ "championId": id, "games": g, "wins": w })).collect::<Vec<_>>(),
+        "insights": insights,
+    })
+}
+
+#[tauri::command]
+pub async fn league_player_report(puuid: String) -> Result<Value, String> {
+    ensure_enabled()?;
+    if puuid.is_empty() {
+        return Err("empty puuid".to_string());
+    }
+    let client = get_client().await?;
+
+    let ranked = lcu_get_raw(&client, &format!("/lol-ranked/v1/ranked-stats/{}", puuid))
+        .await
+        .unwrap_or(Value::Null);
+    let solo = ranked
+        .get("queueMap")
+        .and_then(|q| q.get("RANKED_SOLO_5x5"))
+        .cloned()
+        .unwrap_or(Value::Null);
+    let flex = ranked
+        .get("queueMap")
+        .and_then(|q| q.get("RANKED_FLEX_SR"))
+        .cloned()
+        .unwrap_or(Value::Null);
+
+    let history = lcu_get_raw(
+        &client,
+        &format!(
+            "/lol-match-history/v1/products/lol/{}/matches?begIndex=0&endIndex=19",
+            puuid
+        ),
+    )
+    .await;
+    let (stats, private_profile) = match history {
+        Ok(h) => {
+            let games: Vec<Value> = h
+                .get("games")
+                .and_then(|g| g.get("games"))
+                .and_then(Value::as_array)
+                .cloned()
+                .unwrap_or_default();
+            (compute_history_stats(&games, &puuid), games.is_empty())
+        }
+        Err(_) => (json!({ "games": 0, "insights": [] }), true),
+    };
+
+    let mastery = lcu_get_raw(
+        &client,
+        &format!("/lol-champion-mastery/v1/{}/champion-mastery", puuid),
+    )
+    .await
+    .ok()
+    .and_then(|m| {
+        m.as_array().map(|arr| {
+            arr.iter()
+                .take(3)
+                .map(|c| {
+                    json!({
+                        "championId": c.get("championId"),
+                        "championLevel": c.get("championLevel"),
+                        "championPoints": c.get("championPoints"),
+                    })
+                })
+                .collect::<Vec<_>>()
+        })
+    })
+    .unwrap_or_default();
+
+    Ok(json!({
+        "puuid": puuid,
+        "solo": solo,
+        "flex": flex,
+        "stats": stats,
+        "mastery": mastery,
+        "privateProfile": private_profile,
+    }))
+}
+
 #[tauri::command]
 pub async fn league_auto_accept_set(enabled: bool) -> Result<(), String> {
     ensure_enabled()?;
