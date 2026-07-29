@@ -1912,6 +1912,48 @@
     border-color: transparent;
     }
 
+  .league-page :global(.button.subtle) {
+    color: var(--text-secondary);
+    background: transparent;
+    }
+
+  .league-page :global(.button.subtle:hover) {
+    color: var(--text);
+    background: var(--surface-hover);
+    }
+
+  .league-page :global(.objective-line) {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-size: 11.5px;
+    color: var(--text-secondary);
+    margin: 4px 0;
+    }
+
+  .league-page :global(.ban-line) {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-wrap: wrap;
+    font-size: 11.5px;
+    margin-bottom: 6px;
+    }
+
+  .league-page :global(.repair-row) {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 10px;
+    }
+
+  .league-page :global(.repair-note) {
+    font-size: 12px;
+    color: var(--text-secondary);
+    }
+
   .league-page :global(.button.subtle-danger) {
     color: var(--danger);
     border-color: color-mix(in oklab, var(--danger) 35%, transparent);
