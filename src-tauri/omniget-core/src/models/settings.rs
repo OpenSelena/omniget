@@ -64,11 +64,17 @@ pub struct LeagueSettings {
     #[serde(default)]
     pub auto_lock: bool,
     #[serde(default)]
+    pub auto_lock_at_timeout: bool,
+    #[serde(default)]
     pub auto_runes: bool,
     #[serde(default)]
     pub auto_honor: bool,
     #[serde(default)]
     pub auto_play_again: bool,
+    #[serde(default)]
+    pub auto_requeue: bool,
+    #[serde(default)]
+    pub auto_accept_swaps: bool,
     #[serde(default)]
     pub auto_reconnect: bool,
     #[serde(default)]
@@ -100,9 +106,12 @@ impl Default for LeagueSettings {
             auto_ban: false,
             auto_ban_delay: 0,
             auto_lock: false,
+            auto_lock_at_timeout: false,
             auto_runes: false,
             auto_honor: false,
             auto_play_again: false,
+            auto_requeue: false,
+            auto_accept_swaps: false,
             auto_reconnect: false,
             auto_trade: String::new(),
             auto_message: String::new(),
