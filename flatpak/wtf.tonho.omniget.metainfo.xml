@@ -42,6 +42,41 @@
   </branding>
   <content_rating type="oars-1.1" />
   <releases>
+    <release version="0.7.7" date="2026-07-28">
+      <description>
+        <p>Security release. Fragmented manifests (HLS/DASH) are no longer handed to aria2c, closing the arbitrary code execution vector of CVE-2026-50574; the external downloader is now scoped to plain http and ftp. TLS certificate verification is enabled by default for every download, metadata fetch and search, with an opt-out for networks that intercept TLS. Every managed binary (yt-dlp, FFmpeg, Deno, gallery-dl, aria2c) is verified against a published SHA-256 and refused on mismatch. The YouTube rate-limit throttle now actually applies, after two conflicting flags were being sent. Corrupted settings, cookie and plugin state files are quarantined instead of being silently replaced and overwritten. Settings now flag a yt-dlp older than 2026.06.09 as outdated. Fixes the global download hotkey failing silently, the macOS window not being draggable, and the macOS hotkey recorder never capturing keys. Batch downloads can now pick audio-only or no-sound mode.</p>
+      </description>
+    </release>
+    <release version="0.7.6" date="2026-07-28">
+      <description>
+        <p>League of Legends menu gains trade auto-response, champion select greeting, deep analysis tags, a match scoreboard, summoner spell timers and encounter tracking. Live client updates now arrive over a websocket with response caching, and spectate and dodge actions were added.</p>
+      </description>
+    </release>
+    <release version="0.7.5" date="2026-07-28">
+      <description>
+        <p>Fixes reachable League profiles being mislabelled as private, and enables the opt-in League menu by default in settings.</p>
+      </description>
+    </release>
+    <release version="0.7.4" date="2026-07-28">
+      <description>
+        <p>League of Legends menu gains item builds derived from local match history, a Meta tab with client-recommended runes and champion tiers, player search, best duos, jungle pathing and chat summary, plus a statistical match model with live economy and configurable role goals.</p>
+      </description>
+    </release>
+    <release version="0.7.3" date="2026-07-28">
+      <description>
+        <p>New opt-in League of Legends menu, off by default, with lobby and champion select tools, ARAM bench, live game panel and match scouting. Fixes the schedule date and time fields, scrolling in the downloads list, the scope of clear-finished, native direct media downloads and the portable WebView2 directory. The configured proxy is honoured when the host is empty, proxy settings save reliably, and DRM merge errors are reported properly.</p>
+      </description>
+    </release>
+    <release version="0.7.2" date="2026-07-10">
+      <description>
+        <p>Plugins built against an incompatible ABI or toolchain are now rejected with a clear error instead of segfaulting the app. The settings store is anchored to the portable data directory and plugin caches stay in the app data directory in portable mode. The asset protocol now works on paths containing dot components such as ~/.local on Linux. Browser extension pairing gained a feedback loop and a stale-token deadlock was fixed. New Russian locale for the browser extension.</p>
+      </description>
+    </release>
+    <release version="0.7.0" date="2026-06-14">
+      <description>
+        <p>Plugins install and update themselves at runtime with no restart, using defaults from the registry and honouring uninstalls. Redesigned marketplace with a My Plugins view and live install state. Settings were restructured into a grouped sidebar with drill-down sections, a search that filters and highlights, and controls removed for fields the backend ignored. New macOS shell with a source-list sidebar and command palette. The home omnibox was rebuilt around a URL bar, inspector and hero.</p>
+      </description>
+    </release>
     <release version="0.6.4" date="2026-06-11">
       <description>
         <p>Plain file URLs (zip, rar, exe, pdf and more) now download natively through the segmented HTTP engine with resume, skipping yt-dlp and the quality picker. Quality tags only appear on actual video files. Douyin share links are resolved and canonicalized. Subtitle language is probed from the video before download, the keep-VTT option works and subtitle files always land next to the video. Downloads that produce no file are reported as failures instead of fake successes. The dependency updater really updates yt-dlp and FFmpeg now, with safe in-place replacement on Windows. The configured proxy applies to every connection (marketplace, plugin installs, bilibili, HLS, app updater) and the plugin registry falls back to jsDelivr on restricted networks. Bilibili premium playback, watch-later and history import work with cookies imported through the cookie manager. Cookies can be selected and deleted in bulk. The study reader gains Ctrl+wheel zoom for every format and permanent ebook deletion, and the music player progress bar is always visible with keyboard seeking. New Russian translation.</p>
