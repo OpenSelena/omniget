@@ -266,6 +266,7 @@ async fn handle_event(client: &LcuClient, value: &Value) {
         "/lol-champ-select/v1/session" => {
             if event_type == "Delete" {
                 super::CS_HANDLED.lock().await.clear();
+                super::CS_FIRST_SEEN.lock().await.clear();
                 TRADES_HANDLED.lock().await.clear();
                 MESSAGE_SENT.store(false, Ordering::SeqCst);
                 emit("league-champ-select", Value::Null);
@@ -329,6 +330,7 @@ async fn on_phase(client: &LcuClient, phase: &str) {
         _ => {
             if phase != "ChampSelect" {
                 super::CS_HANDLED.lock().await.clear();
+                super::CS_FIRST_SEEN.lock().await.clear();
                 TRADES_HANDLED.lock().await.clear();
                 MESSAGE_SENT.store(false, Ordering::SeqCst);
             }
@@ -377,6 +379,16 @@ async fn handle_trades(
             Ok(_) => {
                 TRADES_HANDLED.lock().await.insert(id);
                 tracing::info!("[league] trade request {}: {}ed", id, strategy);
+                // Without clearing it the client keeps the request pending in the
+                // UI even though it was already answered.
+                let cleared = lcu_post_raw(
+                    client,
+                    &format!("/lol-champ-select/v1/ongoing-trade/{}/clear", id),
+                )
+                .await;
+                if let Err(e) = cleared {
+                    tracing::debug!("[league] clearing trade {} failed: {}", id, e);
+                }
             }
             Err(e) => tracing::debug!("[league] trade {} failed: {}", strategy, e),
         }

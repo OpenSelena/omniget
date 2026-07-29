@@ -1,4 +1,5 @@
 pub mod analysis;
+pub mod champ_select;
 pub mod live;
 pub mod locator;
 pub mod stats;
@@ -28,6 +29,8 @@ pub struct LeagueStatus {
 static CACHED_CLIENT: Lazy<Mutex<Option<LcuClient>>> = Lazy::new(|| Mutex::new(None));
 static AUTO_ACCEPT: AtomicBool = AtomicBool::new(false);
 static CS_HANDLED: Lazy<Mutex<HashSet<i64>>> = Lazy::new(|| Mutex::new(HashSet::new()));
+static CS_FIRST_SEEN: Lazy<Mutex<std::collections::HashMap<i64, std::time::Instant>>> =
+    Lazy::new(|| Mutex::new(std::collections::HashMap::new()));
 
 async fn discover_client() -> Option<LcuClient> {
     let (credentials, source) = locator::discover().await?;
@@ -474,6 +477,33 @@ pub async fn league_reroll() -> Result<(), String> {
     let client = get_client().await?;
     lcu_post_raw(&client, "/lol-champ-select/v1/session/my-selection/reroll").await?;
     Ok(())
+}
+
+/// Spends the reroll to widen the bench but keeps the champion the user already
+/// had: the roll is read before it happens, then swapped back from the bench.
+#[tauri::command]
+pub async fn league_reroll_keeping_champion() -> Result<Value, String> {
+    ensure_enabled()?;
+    let client = get_client().await?;
+    let before = lcu_get_raw(&client, "/lol-champ-select/v1/current-champion")
+        .await
+        .ok()
+        .and_then(|v| v.as_i64());
+    lcu_post_raw(&client, "/lol-champ-select/v1/session/my-selection/reroll").await?;
+    let Some(champion_id) = before.filter(|id| *id > 0) else {
+        // Without knowing the previous champion there is nothing to restore, and
+        // the reroll itself already went through.
+        return Ok(json!({ "restored": false, "championId": Value::Null }));
+    };
+    let swapped = lcu_post_raw(
+        &client,
+        &format!("/lol-champ-select/v1/session/bench/swap/{}", champion_id),
+    )
+    .await;
+    Ok(json!({
+        "restored": swapped.is_ok(),
+        "championId": champion_id,
+    }))
 }
 
 #[tauri::command]
@@ -2842,6 +2872,8 @@ async fn handle_champ_select(
         }
     }
 
+    let ally_intents = champ_select::ally_pick_intents(session, cell);
+
     let mut pickable: Option<HashSet<i64>> = None;
     let mut bannable: Option<HashSet<i64>> = None;
 
@@ -2910,14 +2942,28 @@ async fn handle_champ_select(
                 Some(p) => p,
                 None => continue,
             };
-            let choice = list
-                .iter()
-                .find(|c| pool.contains(c) && !taken.contains(c))
-                .copied();
-            let choice = match choice {
+            let avoid: HashSet<i64> = if action_type == "ban" {
+                ally_intents.clone()
+            } else {
+                HashSet::new()
+            };
+            let choice = match champ_select::choose_champion(&list, pool, &taken, &avoid) {
                 Some(c) => c,
                 None => continue,
             };
+            if action_type == "ban" {
+                let delay = champ_select::ban_delay_seconds(settings.auto_ban_delay);
+                let elapsed = {
+                    let mut seen = CS_FIRST_SEEN.lock().await;
+                    let first = seen
+                        .entry(action_id)
+                        .or_insert_with(std::time::Instant::now);
+                    first.elapsed().as_secs_f64()
+                };
+                if !champ_select::delay_elapsed(elapsed, delay) {
+                    continue;
+                }
+            }
             let complete_action = settings.auto_lock || action_type == "ban";
             let path = format!("/lol-champ-select/v1/session/actions/{}", action_id);
             let body = json!({ "championId": choice, "completed": complete_action });
