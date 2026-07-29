@@ -88,7 +88,7 @@
     align-items: center;
     gap: 6px;
     padding: 6px 10px;
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
     background: var(--button);
@@ -141,7 +141,7 @@
     gap: 2px;
     width: 100%;
     padding: 8px 10px;
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     color: var(--secondary);
     background: transparent;
     border: none;

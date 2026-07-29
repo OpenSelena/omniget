@@ -514,7 +514,7 @@
   }
 
   .status-text {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     color: var(--gray);
   }
 

@@ -55,9 +55,9 @@
   .shimmer {
     background: linear-gradient(
       90deg,
-      #1f1f1f 0%,
-      #303030 50%,
-      #1f1f1f 100%
+      var(--fill-1) 0%,
+      var(--fill-2) 50%,
+      var(--fill-1) 100%
     );
     background-size: 200% 100%;
     animation: shimmer 1.6s linear infinite;
@@ -67,6 +67,6 @@
     100% { background-position: -200% 0; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .shimmer { animation: none; background: #272727; }
+    .shimmer { animation: none; background: var(--fill-1); }
   }
 </style>

@@ -1169,6 +1169,7 @@
   },
   "about": {
     "tab": {
+      "overview": "Overview",
       "terms": "使用條款",
       "project": "專案",
       "roadmap": "開發計畫",
@@ -1184,6 +1185,12 @@
       "copy_failed": "無法複製到剪貼簿"
     },
     "debug_disabled_redirect": "Debug page is hidden. Enable it in Settings → Advanced → Diagnostics.",
+    "card_changelog_title": "What's new",
+    "card_changelog_desc": "Release notes for every version.",
+    "card_project_title": "The project",
+    "card_project_desc": "Roadmap, philosophy and how to contribute.",
+    "card_terms_title": "Terms & ethics",
+    "card_terms_desc": "What OmniGet expects from you, and what you can expect back.",
     "description": "您的媒體下載好幫手。開源且免費。",
     "terms_title": "使用條款",
     "terms_text": "OmniGet 以現況提供，我們不提供任何保證。此應用程式可協助下載網路上公開可取得的內容，但對於您下載的內容或其用途，我們不負任何責任。使用 OmniGet 即表示您同意此條款。",
@@ -1220,6 +1227,12 @@
   "marketplace": {
     "title": "插件市场",
     "installed": "已安装",
+    "installed_hint": "Installed plugins show up in the sidebar. Toggle one off to hide it without uninstalling.",
+    "section_in_sidebar": "In the sidebar",
+    "section_hidden": "Hidden",
+    "status_in_sidebar": "In the sidebar",
+    "status_hidden": "Hidden",
+    "show_in_sidebar": "Show in sidebar",
     "browse": "发现",
     "no_plugins": "还没有安装任何插件",
     "enable": "启用",

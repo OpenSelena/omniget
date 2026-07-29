@@ -1173,7 +1173,8 @@
       "project": "проект",
       "roadmap": "план",
       "changelog": "история изменений",
-      "debug": "отладочная информация"
+      "debug": "отладочная информация",
+      "overview": "Overview"
     },
     "debug": {
       "title": "Отладочная информация",
@@ -1215,11 +1216,23 @@
     "roadmap_community_discord": "свяжитесь с нами в Discord:",
     "roadmap_community_issue": "или откройте задачу в репозитории:",
     "tagline": "Скачивайте что угодно, откуда угодно.",
-    "credit": "Сделано с любовью tonho.wtf"
+    "credit": "Сделано с любовью tonho.wtf",
+    "card_changelog_title": "What's new",
+    "card_changelog_desc": "Release notes for every version.",
+    "card_project_title": "The project",
+    "card_project_desc": "Roadmap, philosophy and how to contribute.",
+    "card_terms_title": "Terms & ethics",
+    "card_terms_desc": "What OmniGet expects from you, and what you can expect back."
   },
   "marketplace": {
     "title": "Маркетплейс",
     "installed": "Установленные",
+    "installed_hint": "Installed plugins show up in the sidebar. Toggle one off to hide it without uninstalling.",
+    "section_in_sidebar": "In the sidebar",
+    "section_hidden": "Hidden",
+    "status_in_sidebar": "In the sidebar",
+    "status_hidden": "Hidden",
+    "show_in_sidebar": "Show in sidebar",
     "browse": "Обзор",
     "no_plugins": "Плагины не установлены",
     "enable": "Включить",

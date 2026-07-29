@@ -11,10 +11,12 @@
     vcodec: string | null;
     acodec: string | null;
     filesize: number | null;
+    filesize_is_estimate?: boolean;
     tbr: number | null;
     has_video: boolean;
     has_audio: boolean;
     format_note: string | null;
+    audio_language?: string | null;
   };
 
   let {
@@ -31,12 +33,29 @@
     onPresetMusic,
   } = $props();
 
-  function formatFilesize(bytes: number | null): string {
+  function formatFilesize(bytes: number | null, isEstimate = false): string {
     if (bytes === null) return "—";
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(0)} KB`;
-    if (bytes < 1024 * 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-    return `${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+    // O `~` é um contrato com o usuário: número sem til é o que o site
+    // informou; com til, foi calculado por bitrate × duração.
+    const prefix = isEstimate ? "~" : "";
+    if (bytes < 1024) return `${prefix}${bytes} B`;
+    if (bytes < 1024 * 1024) return `${prefix}${(bytes / 1024).toFixed(0)} KB`;
+    if (bytes < 1024 * 1024 * 1024) return `${prefix}${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+    return `${prefix}${(bytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+  }
+
+  const languageNames =
+    typeof Intl !== "undefined" && "DisplayNames" in Intl
+      ? new Intl.DisplayNames(undefined, { type: "language" })
+      : null;
+
+  function formatAudioLanguage(code: string | null | undefined): string | null {
+    if (!code) return null;
+    try {
+      return languageNames?.of(code) ?? code;
+    } catch {
+      return code;
+    }
   }
 
   function formatCodec(codec: string | null): string {
@@ -230,8 +249,10 @@
                 {/if}
               </span>
               <span class="format-vcodec">{formatCodec(fmt.vcodec)}</span>
-              <span class="format-acodec">{formatCodec(fmt.acodec)}</span>
-              <span class="format-size">{formatFilesize(fmt.filesize)}</span>
+              <span class="format-acodec">
+                {formatCodec(fmt.acodec)}{#if formatAudioLanguage(fmt.audio_language)}<span class="format-lang"> · {formatAudioLanguage(fmt.audio_language)}</span>{/if}
+              </span>
+              <span class="format-size">{formatFilesize(fmt.filesize, fmt.filesize_is_estimate)}</span>
               {#if fmt.tbr}
                 <span class="format-tbr">{fmt.tbr.toFixed(0)}k</span>
               {:else}
@@ -250,7 +271,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: 14.5px;
+    font-size: var(--text-base);
   }
 
   .formats-playlist-note {
@@ -258,7 +279,7 @@
     background: var(--button-elevated);
     border-radius: calc(var(--border-radius) - 2px);
     border-left: 3px solid var(--cta);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     color: var(--secondary);
     line-height: 1.4;
   }
@@ -281,7 +302,7 @@
   }
 
   .formats-error-text {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--secondary);
     flex: 1;
@@ -292,7 +313,7 @@
   }
 
   .formats-retry-btn {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     padding: 4px 10px;
     flex-shrink: 0;
   }
@@ -432,6 +453,10 @@
   .format-row-selected {
     background: var(--button-elevated);
     color: var(--secondary);
+  }
+
+  .format-lang {
+    color: var(--tertiary);
   }
 
   .format-id {

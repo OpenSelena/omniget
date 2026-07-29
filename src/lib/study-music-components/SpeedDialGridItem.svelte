@@ -39,9 +39,9 @@
     gap: 8px;
     padding: 14px 8px 12px;
     background: var(--tint);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: 1px solid var(--border);
     border-radius: 16px;
-    color: white;
+    color: var(--text);
     font: inherit;
     cursor: pointer;
     text-decoration: none;
@@ -50,21 +50,21 @@
   }
   .dial-item:hover {
     transform: translateY(-2px);
-    border-color: rgba(255, 255, 255, 0.2);
+    border-color: var(--border-hi);
   }
   .icon-wrap {
     width: 44px;
     height: 44px;
     border-radius: 14px;
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--fill-2);
     display: grid;
     place-items: center;
-    color: white;
+    color: var(--text);
   }
   .label {
     font-size: 12px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.92);
+    color: var(--text);
     text-align: center;
     line-height: 1.2;
     overflow: hidden;

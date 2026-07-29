@@ -17,27 +17,42 @@
   });
 
   function renderMarkdown(md: string): string {
-    return md
-      .split("\n")
-      .map((line) => {
-        if (line.startsWith("### ")) {
-          return `<h4>${escapeHtml(line.slice(4))}</h4>`;
+    const out: string[] = [];
+    let inFence = false;
+    let fenceLines: string[] = [];
+    for (const line of md.split("\n")) {
+      if (line.trim().startsWith("```")) {
+        if (inFence) {
+          out.push(`<pre><code>${escapeHtml(fenceLines.join("\n"))}</code></pre>`);
+          fenceLines = [];
         }
-        if (line.startsWith("## ")) {
-          return `<h3>${escapeHtml(line.slice(3))}</h3>`;
-        }
-        if (line.startsWith("# ")) {
-          return `<h2>${escapeHtml(line.slice(2))}</h2>`;
-        }
-        if (line.startsWith("- ") || line.startsWith("* ")) {
-          return `<li>${formatInline(line.slice(2))}</li>`;
-        }
-        if (line.trim() === "") {
-          return "<br />";
-        }
-        return `<p>${formatInline(line)}</p>`;
-      })
-      .join("");
+        inFence = !inFence;
+        continue;
+      }
+      if (inFence) {
+        fenceLines.push(line);
+        continue;
+      }
+      if (/^\s*(---|\*\*\*|___)\s*$/.test(line)) {
+        out.push("<hr />");
+      } else if (line.startsWith("### ")) {
+        out.push(`<h4>${escapeHtml(line.slice(4))}</h4>`);
+      } else if (line.startsWith("## ")) {
+        out.push(`<h3>${escapeHtml(line.slice(3))}</h3>`);
+      } else if (line.startsWith("# ")) {
+        out.push(`<h2>${escapeHtml(line.slice(2))}</h2>`);
+      } else if (line.startsWith("- ") || line.startsWith("* ")) {
+        out.push(`<li>${formatInline(line.slice(2))}</li>`);
+      } else if (line.trim() === "") {
+        out.push("<br />");
+      } else {
+        out.push(`<p>${formatInline(line)}</p>`);
+      }
+    }
+    if (inFence && fenceLines.length) {
+      out.push(`<pre><code>${escapeHtml(fenceLines.join("\n"))}</code></pre>`);
+    }
+    return out.join("");
   }
 
   function escapeHtml(str: string): string {
@@ -100,13 +115,13 @@
   }
 
   .version-label {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
   }
 
   .version-value {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--blue);
   }
@@ -149,34 +164,34 @@
   }
 
   .empty-text {
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
     color: var(--gray);
   }
 
   .markdown-content {
-    font-size: 13px;
+    font-size: var(--text-base);
     font-weight: 400;
     line-height: 1.7;
     color: var(--secondary);
   }
 
   .markdown-content :global(h2) {
-    font-size: 18px;
-    font-weight: 500;
+    font-size: var(--text-lg);
+    font-weight: 600;
     margin: 0 0 calc(var(--padding) / 2);
-    letter-spacing: -0.5px;
+    letter-spacing: var(--track-snug);
   }
 
   .markdown-content :global(h3) {
-    font-size: 15px;
-    font-weight: 500;
+    font-size: var(--text-md);
+    font-weight: 600;
     margin: var(--padding) 0 calc(var(--padding) / 2);
   }
 
   .markdown-content :global(h4) {
-    font-size: 13px;
-    font-weight: 500;
+    font-size: var(--text-base);
+    font-weight: 600;
     margin: var(--padding) 0 calc(var(--padding) / 4);
     color: var(--gray);
   }
@@ -199,6 +214,26 @@
 
   .markdown-content :global(strong) {
     font-weight: 600;
+  }
+
+  .markdown-content :global(pre) {
+    background: var(--fill-1);
+    border-radius: var(--radius-sm);
+    padding: var(--space-3);
+    overflow-x: auto;
+    margin: var(--space-2) 0;
+  }
+
+  .markdown-content :global(pre code) {
+    background: transparent;
+    padding: 0;
+  }
+
+  .markdown-content :global(hr) {
+    border: none;
+    height: 1px;
+    background: var(--border);
+    margin: var(--space-4) 0;
   }
 
   .markdown-content :global(code) {

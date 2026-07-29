@@ -747,7 +747,7 @@
   }
   .tool-desc {
     margin: 0;
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     color: var(--text-muted);
     line-height: 1.45;
   }
@@ -886,7 +886,7 @@
     align-items: baseline;
     padding: 5px 0;
     border-bottom: 1px solid color-mix(in oklab, var(--border) 40%, transparent);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
   }
   .cc-author {
     font-weight: 600;

@@ -511,7 +511,7 @@
   }
 
   .hwaccel-badge {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     padding: calc(var(--padding) / 3) calc(var(--padding) / 1.5);
     border-radius: calc(var(--border-radius) / 2);
@@ -519,7 +519,7 @@
 
   .hwaccel-badge.detected {
     color: var(--green);
-    background: rgba(48, 189, 27, 0.1);
+    background: color-mix(in srgb, var(--success) 10%, transparent);
   }
 
   .hwaccel-badge.none {
@@ -569,7 +569,7 @@
   }
 
   .file-name {
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
     color: var(--secondary);
     overflow: hidden;
@@ -580,7 +580,7 @@
   .file-meta {
     display: flex;
     gap: calc(var(--padding) / 2);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
     flex-wrap: wrap;
@@ -598,7 +598,7 @@
   }
 
   .status-label {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
   }
@@ -616,7 +616,7 @@
   }
 
   .percent {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--blue);
     font-variant-numeric: tabular-nums;
@@ -663,14 +663,14 @@
   }
 
   .setting-label {
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
     color: var(--secondary);
   }
 
   .select {
     padding: calc(var(--padding) / 2) 28px calc(var(--padding) / 2) var(--padding);
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
     background: var(--button-elevated);
     border-radius: calc(var(--border-radius) / 2);
@@ -693,7 +693,7 @@
   .input-text {
     width: 100px;
     padding: calc(var(--padding) / 2);
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
     text-align: center;
     background: var(--button-elevated);
@@ -716,7 +716,7 @@
 
   .convert-btn {
     padding: calc(var(--padding) / 1.5) calc(var(--padding) * 2);
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
     background: var(--blue);
     color: #fff;
@@ -743,13 +743,13 @@
 
   .cancel-btn {
     padding: calc(var(--padding) / 1.5) calc(var(--padding) * 2);
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
     color: var(--red);
   }
 
   .clear-btn {
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
     color: var(--gray);
   }
@@ -762,7 +762,7 @@
   }
 
   .empty-text {
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
     color: var(--gray);
     text-align: center;

@@ -76,7 +76,7 @@
 
   .button {
     padding: 8px 16px;
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     border-radius: var(--border-radius);
     border: none;
@@ -95,12 +95,12 @@
   }
 
   .button-danger {
-    background: var(--red, #ed2236);
-    color: var(--on-accent, #fff);
+    background: var(--danger);
+    color: var(--on-status);
   }
 
   .button-danger:hover {
-    filter: brightness(1.08);
+    background: color-mix(in srgb, var(--danger) 88%, var(--bg-overlay));
   }
 
   .button:focus-visible {

@@ -401,7 +401,7 @@
     color: color-mix(in srgb, var(--warning) 82%, var(--text));
     border: 1px solid color-mix(in srgb, var(--warning) 34%, var(--border));
     border-radius: var(--border-radius);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
   }
 
@@ -418,12 +418,13 @@
   }
 
   .ytdlp-banner-link {
-    background: var(--warning);
-    color: #fff;
+    background: var(--cta);
+    color: var(--on-cta);
     border: none;
-    font-size: 12px;
+    font-size: var(--text-sm);
+    font-weight: 500;
     padding: 4px 10px;
-    border-radius: calc(var(--border-radius) - 4px);
+    border-radius: var(--radius-sm);
     cursor: pointer;
     white-space: nowrap;
     box-shadow: none;
@@ -431,8 +432,17 @@
 
   @media (hover: hover) {
     .ytdlp-banner-link:hover {
-      background: color-mix(in srgb, var(--warning) 65%, black);
+      background: var(--cta-hover);
     }
+  }
+
+  .ytdlp-banner-link:active {
+    background: var(--cta-press);
+  }
+
+  .ytdlp-banner-link:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
   }
 
   .ytdlp-banner-close {

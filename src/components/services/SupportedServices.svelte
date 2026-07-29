@@ -140,7 +140,7 @@
     background: var(--button-elevated);
     border-radius: calc(var(--border-radius) / 2);
     padding: 4px 8px;
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--secondary);
     user-select: none;

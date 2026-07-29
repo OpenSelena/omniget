@@ -39,10 +39,10 @@
   .chip {
     flex: 0 0 auto;
     padding: 8px 16px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--fill-1);
+    border: 1px solid var(--border);
     border-radius: 999px;
-    color: rgba(255, 255, 255, 0.78);
+    color: var(--text-muted);
     font: inherit;
     font-size: 13px;
     font-weight: 600;
@@ -51,8 +51,8 @@
     transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
   }
   .chip:hover {
-    background: rgba(255, 255, 255, 0.1);
-    color: white;
+    background: var(--fill-2);
+    color: var(--text);
   }
   .chip.active {
     background: var(--accent);

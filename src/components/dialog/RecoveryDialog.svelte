@@ -172,7 +172,7 @@
 
   .button {
     padding: 8px 16px;
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     border-radius: var(--border-radius);
     border: none;

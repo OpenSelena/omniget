@@ -659,7 +659,7 @@
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
     margin-bottom: var(--padding);
@@ -701,7 +701,7 @@
   }
 
   .session-info {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
   }
@@ -715,7 +715,7 @@
 
   .session-bar :global(.button) {
     padding: calc(var(--padding) / 2) var(--padding);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
   }
 
   .search-bar {
@@ -726,7 +726,7 @@
 
   .search-bar .search-input {
     padding: calc(var(--padding) / 2) var(--padding);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     background: var(--input-bg);
     border: 1px solid var(--input-border);
     border-radius: var(--border-radius);
@@ -751,7 +751,7 @@
   .courses-header h2 { margin-block: 0; }
 
   .subtext {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
   }
@@ -775,7 +775,7 @@
   }
 
   .pagination-info {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
   }
@@ -793,14 +793,14 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14.5px;
+    font-size: var(--text-base);
   }
 
   .pagination-ellipsis {
     min-width: 36px;
     text-align: center;
     color: var(--gray);
-    font-size: 14.5px;
+    font-size: var(--text-base);
   }
 
   .login-card {
@@ -824,7 +824,7 @@
   .login-tab {
     flex: 1;
     border-radius: 0;
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     padding: calc(var(--padding) * 0.75) var(--padding);
   }
 
@@ -849,7 +849,7 @@
   }
 
   .field-label {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
   }
@@ -857,7 +857,7 @@
   .input {
     width: 100%;
     padding: var(--padding);
-    font-size: 14.5px;
+    font-size: var(--text-base);
     background: var(--button);
     border-radius: var(--border-radius);
     color: var(--secondary);
@@ -872,11 +872,11 @@
     min-height: 80px;
     resize: vertical;
     font-family: var(--font-mono);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
   }
 
   .otp-hint {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     color: var(--green);
     text-align: center;
     font-weight: 500;
@@ -890,7 +890,7 @@
   }
 
   .browser-hint {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     color: var(--gray);
     text-align: center;
   }
@@ -905,19 +905,19 @@
   }
 
   .file-btn {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     cursor: pointer;
   }
 
   .error-msg {
     color: var(--red);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
   }
 
   .captcha-warning {
     color: var(--orange);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
   }
 
@@ -941,7 +941,7 @@
   @keyframes spin { to { transform: rotate(360deg); } }
 
   .spinner-text {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
   }
@@ -956,7 +956,7 @@
 
   .empty-text {
     color: var(--gray);
-    font-size: 14.5px;
+    font-size: var(--text-base);
     text-align: center;
     padding: calc(var(--padding) * 4) 0;
   }

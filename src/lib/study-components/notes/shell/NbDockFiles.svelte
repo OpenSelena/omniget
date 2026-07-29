@@ -573,7 +573,7 @@
     background: transparent;
     color: var(--text);
     font: inherit;
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     text-align: left;
     cursor: pointer;

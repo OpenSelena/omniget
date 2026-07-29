@@ -41,10 +41,10 @@
     gap: 8px;
     padding: 40px 24px;
     text-align: center;
-    color: rgba(255, 255, 255, 0.85);
+    color: var(--text);
     border-radius: 16px;
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px dashed rgba(255, 255, 255, 0.06);
+    background: var(--fill-1);
+    border: 1px dashed var(--border);
   }
   .empty.compact {
     padding: 24px 16px;
@@ -55,18 +55,18 @@
     height: 44px;
     display: grid;
     place-items: center;
-    color: rgba(255, 255, 255, 0.55);
+    color: var(--text-muted);
     margin-bottom: 4px;
   }
   h3 {
     margin: 0;
     font-size: 16px;
     font-weight: 700;
-    color: white;
+    color: var(--text);
   }
   p {
     margin: 0;
-    color: rgba(255, 255, 255, 0.55);
+    color: var(--text-muted);
     font-size: 13px;
     line-height: 1.5;
     max-width: 42ch;

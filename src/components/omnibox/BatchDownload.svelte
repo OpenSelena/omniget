@@ -26,7 +26,7 @@
   }
 
   .feedback-text {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
   }
 
@@ -36,7 +36,7 @@
     justify-content: center;
     gap: 6px;
     padding: var(--padding) calc(var(--padding) * 2);
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
     background: var(--button);
     border: none;

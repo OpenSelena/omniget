@@ -400,13 +400,13 @@
   }
 
   .step-indicator {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
   }
 
   .skip-btn {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
     background: none;
@@ -457,7 +457,7 @@
   }
 
   .step-desc {
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 400;
     color: var(--gray);
     line-height: 1.6;
@@ -486,7 +486,7 @@
   .language-select {
     margin-left: auto;
     padding: calc(var(--padding) / 2) 28px calc(var(--padding) / 2) var(--padding);
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
     font-family: var(--font-system);
     color: var(--secondary);
@@ -528,7 +528,7 @@
   }
 
   .folder-label {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
   }
@@ -580,12 +580,12 @@
   }
 
   .dep-name {
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
   }
 
   .dep-version {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
   }
 
@@ -599,7 +599,7 @@
 
   .dep-btn {
     padding: calc(var(--padding) / 2) var(--padding);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     flex-shrink: 0;
   }
 
@@ -626,22 +626,20 @@
   .install-all-btn {
     margin-top: calc(var(--padding) / 2);
     padding: calc(var(--padding) / 2) var(--padding);
-    font-size: 13px;
-    background: var(--blue);
-    color: #fff;
+    font-size: var(--text-base);
+    background: var(--cta);
+    color: var(--on-cta);
     box-shadow: none;
   }
 
   @media (hover: hover) {
     .install-all-btn:hover {
-      opacity: 0.9;
-      background: var(--blue);
+      background: var(--cta-hover);
     }
   }
 
   .install-all-btn:active {
-    opacity: 0.85;
-    background: var(--blue);
+    background: var(--cta-press);
   }
 
   .wizard-footer {
@@ -666,7 +664,7 @@
   }
 
   .dot.active {
-    background: var(--blue);
+    background: var(--accent);
   }
 
   .footer-actions {
@@ -683,25 +681,23 @@
   .next-btn,
   .finish-btn {
     padding: calc(var(--padding) / 2) calc(var(--padding) * 1.5);
-    font-size: 13px;
+    font-size: var(--text-base);
     font-weight: 500;
-    background: var(--secondary);
-    color: var(--secondary);
+    background: var(--cta);
+    color: var(--on-cta);
     box-shadow: none;
   }
 
   @media (hover: hover) {
     .next-btn:hover,
     .finish-btn:hover {
-      opacity: 0.9;
-      background: var(--secondary);
+      background: var(--cta-hover);
     }
   }
 
   .next-btn:active,
   .finish-btn:active {
-    opacity: 0.85;
-    background: var(--secondary);
+    background: var(--cta-press);
   }
 
   .next-btn:focus-visible,
@@ -784,7 +780,7 @@
 
   .step-rpc-note {
     margin-top: calc(var(--padding) / 2);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     opacity: 0.8;
   }
 

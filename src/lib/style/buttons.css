@@ -10,11 +10,11 @@
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
-  height: 36px;
-  padding: 0 var(--space-4);
+  height: 28px;
+  padding: 0 var(--space-3);
   font-family: inherit;
-  font-size: var(--text-md);
-  font-weight: 600;
+  font-size: var(--text-base);
+  font-weight: 500;
   line-height: 1;
   border: 1px solid transparent;
   border-radius: var(--radius-sm);
@@ -32,8 +32,8 @@
 }
 
 .btn:focus-visible {
-  outline: none;
-  box-shadow: var(--focus-ring);
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-ring-offset);
 }
 
 .btn:disabled {
@@ -43,34 +43,49 @@
 }
 
 .btn-sm {
-  height: 28px;
+  height: 24px;
   font-size: var(--text-sm);
-  padding: 0 var(--space-3);
+  padding: 0 var(--space-2);
 }
 
 .btn-lg {
-  height: 44px;
+  height: 36px;
   font-size: var(--text-md);
   font-weight: 600;
-  padding: 0 var(--space-5);
+  padding: 0 var(--space-4);
+  border-radius: var(--radius-md);
 }
 
 /* primary — one per surface; the action the user came for */
 .btn-primary {
-  background: var(--accent);
-  color: var(--on-accent);
-  box-shadow: var(--elev-1);
+  background: var(--cta);
+  color: var(--on-cta);
 }
 
 @media (hover: hover) {
   .btn-primary:hover:not(:disabled) {
-    background: var(--accent-hi);
-    box-shadow: var(--elev-glow);
+    background: var(--cta-hover);
   }
 }
 
 .btn-primary:active:not(:disabled) {
-  background: var(--accent-lo);
+  background: var(--cta-press);
+}
+
+.btn.loading {
+  pointer-events: none;
+  opacity: 0.75;
+}
+
+.btn.loading .spinner {
+  width: 12px;
+  height: 12px;
+  border-width: 1.5px;
+}
+
+.btn-primary .spinner {
+  border-color: color-mix(in srgb, var(--on-cta) 35%, transparent);
+  border-top-color: var(--on-cta);
 }
 
 /* secondary — second-most-important action */

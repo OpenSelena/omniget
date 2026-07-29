@@ -605,7 +605,7 @@
   }
   .card-sub {
     margin: 4px 0 0;
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 400;
     color: #aaa;
     overflow: hidden;

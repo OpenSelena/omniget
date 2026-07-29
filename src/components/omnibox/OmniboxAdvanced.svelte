@@ -252,7 +252,7 @@
     gap: 4px;
   }
   .field-label {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     color: var(--gray);
     font-weight: 500;
   }
@@ -310,7 +310,7 @@
     border: 1px solid var(--button-stroke);
     border-radius: calc(var(--border-radius) - 2px);
     padding: 6px 12px;
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     cursor: pointer;
   }
   .ghost-btn.small {

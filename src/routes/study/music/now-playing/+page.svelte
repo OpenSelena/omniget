@@ -966,7 +966,7 @@
     border-radius: 8px;
     color: rgba(255, 255, 255, 0.85);
     font-family: inherit;
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     cursor: pointer;
     text-align: left;
     transition: background 100ms ease;

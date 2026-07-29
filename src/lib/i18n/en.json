@@ -1169,6 +1169,7 @@
   },
   "about": {
     "tab": {
+      "overview": "Overview",
       "terms": "terms",
       "project": "project",
       "roadmap": "roadmap",
@@ -1184,6 +1185,12 @@
       "copy_failed": "Could not copy to clipboard"
     },
     "debug_disabled_redirect": "Debug page is hidden. Enable it in Settings → Advanced → Diagnostics.",
+    "card_changelog_title": "What's new",
+    "card_changelog_desc": "Release notes for every version.",
+    "card_project_title": "The project",
+    "card_project_desc": "Roadmap, philosophy and how to contribute.",
+    "card_terms_title": "Terms & ethics",
+    "card_terms_desc": "What OmniGet expects from you, and what you can expect back.",
     "description": "your media downloader. open source and free.",
     "terms_title": "terms of use",
     "terms_text": "OmniGet is provided as is and we make no guarantees. the app makes it easier to download content that's publicly available on the internet, but we take zero responsibility for what you download or what you do with it. by using OmniGet, you agree to that.",
@@ -1220,6 +1227,12 @@
   "marketplace": {
     "title": "Marketplace",
     "installed": "Installed",
+    "installed_hint": "Installed plugins show up in the sidebar. Toggle one off to hide it without uninstalling.",
+    "section_in_sidebar": "In the sidebar",
+    "section_hidden": "Hidden",
+    "status_in_sidebar": "In the sidebar",
+    "status_hidden": "Hidden",
+    "show_in_sidebar": "Show in sidebar",
     "browse": "Browse",
     "no_plugins": "No plugins installed",
     "enable": "Enable",

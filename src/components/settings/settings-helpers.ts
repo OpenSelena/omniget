@@ -86,8 +86,8 @@ export async function installDep(name: string): Promise<void> {
 
 export const CORE_THEMES = [
   { id: "system", labelKey: "settings.appearance.theme_system", colors: null as string[] | null },
-  { id: "light", labelKey: null, label: "Light", colors: ["#fafafa", "#1a1a1a", "#E05500"] },
-  { id: "dark", labelKey: null, label: "Dark", colors: ["#0a0a0a", "#e8e8e8", "#FF7D38"] },
+  { id: "light", labelKey: null, label: "Light", colors: ["#F5F5F7", "#1D1D1F", "#007AFF"] },
+  { id: "dark", labelKey: null, label: "Dark", colors: ["#1C1C1E", "#F5F5F7", "#0A84FF"] },
 ];
 
 export const MORE_THEMES = [

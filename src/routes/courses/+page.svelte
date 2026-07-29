@@ -321,7 +321,7 @@
   }
 
   .card-name {
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
     color: var(--secondary);
   }

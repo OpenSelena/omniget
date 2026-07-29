@@ -78,13 +78,13 @@
 
   .omnibox {
     width: 100%;
-    height: 56px;
+    height: 52px;
     padding: 0 var(--space-7) 0 var(--space-4);
     font-size: var(--text-lg);
-    background: var(--surface-mut);
-    border-radius: var(--radius-md);
+    background: var(--input-bg);
+    border-radius: var(--radius-lg);
     color: var(--text);
-    border: 1px solid var(--border);
+    border: 1px solid var(--input-border);
     transition: border-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-base) var(--ease-out);
   }
 
@@ -95,7 +95,7 @@
   .omnibox:focus-visible {
     border-color: var(--accent);
     outline: none;
-    box-shadow: var(--elev-glow);
+    box-shadow: 0 0 0 4px var(--accent-soft);
   }
 
   @media (prefers-reduced-motion: reduce) {

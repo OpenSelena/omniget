@@ -56,19 +56,15 @@
   .toast {
     display: flex;
     align-items: center;
-    gap: var(--space-3);
-    padding: var(--space-4);
-    background: var(--surface-hi);
-    border-radius: var(--radius-md);
-    box-shadow: var(--elev-3);
-    border-left: 3px solid var(--info);
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-4);
+    background: var(--popup-bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--elev-2);
     pointer-events: auto;
     animation: toast-in var(--duration-bounce) var(--ease-spring);
   }
-
-  .toast[data-type="success"] { border-left-color: var(--success); }
-  .toast[data-type="error"]   { border-left-color: var(--danger); }
-  .toast[data-type="info"]    { border-left-color: var(--info); }
 
   .toast.closing {
     animation: toast-out var(--duration-base) var(--ease-out) forwards;

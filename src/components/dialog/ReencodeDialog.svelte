@@ -187,7 +187,7 @@
 
   .reencode-target {
     margin: 0;
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     color: var(--tertiary);
     font-family: var(--font-mono, ui-monospace, monospace);
     background: var(--button);

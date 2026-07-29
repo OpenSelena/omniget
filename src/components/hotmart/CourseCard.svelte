@@ -194,7 +194,7 @@
   }
 
   .card-title {
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
     margin-block: 0;
     display: -webkit-box;
@@ -216,7 +216,7 @@
   }
 
   .card-price {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
   }

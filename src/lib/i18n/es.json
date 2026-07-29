@@ -1169,6 +1169,7 @@
   },
   "about": {
     "tab": {
+      "overview": "Overview",
       "terms": "términos",
       "project": "proyecto",
       "roadmap": "roadmap",
@@ -1184,6 +1185,12 @@
       "copy_failed": "No se pudo copiar al portapapeles"
     },
     "debug_disabled_redirect": "La página de depuración está oculta. Actívala en Configuración → Avanzado → Diagnóstico.",
+    "card_changelog_title": "What's new",
+    "card_changelog_desc": "Release notes for every version.",
+    "card_project_title": "The project",
+    "card_project_desc": "Roadmap, philosophy and how to contribute.",
+    "card_terms_title": "Terms & ethics",
+    "card_terms_desc": "What OmniGet expects from you, and what you can expect back.",
     "description": "tu descargador de medios. open source y gratis.",
     "terms_title": "términos de uso",
     "terms_text": "OmniGet se proporciona tal cual y no garantizamos nada. la app facilita descargar contenido que ya está públicamente disponible en internet, pero no asumimos ninguna responsabilidad por lo que descargas ni por lo que haces con ello. al usar OmniGet aceptas esto.",
@@ -1220,6 +1227,12 @@
   "marketplace": {
     "title": "Marketplace",
     "installed": "Instalados",
+    "installed_hint": "Installed plugins show up in the sidebar. Toggle one off to hide it without uninstalling.",
+    "section_in_sidebar": "In the sidebar",
+    "section_hidden": "Hidden",
+    "status_in_sidebar": "In the sidebar",
+    "status_hidden": "Hidden",
+    "show_in_sidebar": "Show in sidebar",
     "browse": "Explorar",
     "no_plugins": "Sin plugins instalados",
     "enable": "Activar",

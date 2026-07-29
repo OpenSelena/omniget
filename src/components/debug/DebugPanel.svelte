@@ -178,7 +178,7 @@
   }
 
   .debug-title {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--secondary);
     margin-right: 4px;
@@ -260,7 +260,7 @@
     padding: 24px;
     text-align: center;
     color: var(--gray);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
   }
 
   .debug-entry {
@@ -303,7 +303,7 @@
 
   .debug-msg {
     color: var(--secondary);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;

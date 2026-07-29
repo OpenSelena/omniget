@@ -461,17 +461,15 @@
     window.addEventListener("keydown", onKeydown);
     return () => window.removeEventListener("keydown", onKeydown);
   });
+
 </script>
 
 {#if hasDownloads || viewMode !== "active"}
-  <div class="downloads-page">
+  <div class="downloads-page downloads-mac">
     <div class="downloads-header">
-      <div class="downloads-title-row">
-        <h2 class="page-title">{$t('downloads.title')}</h2>
-        {#if dlStats.totalDownloads > 0}
-          <span class="downloads-stats">{$t('downloads.stats_line', { count: String(dlStats.totalDownloads), size: formatBytes(dlStats.totalBytes) })}</span>
-        {/if}
-      </div>
+      {#if dlStats.totalDownloads > 0}
+        <span class="downloads-stats">{$t('downloads.stats_line', { count: String(dlStats.totalDownloads), size: formatBytes(dlStats.totalBytes) })}</span>
+      {/if}
       <div class="bulk-actions">
         {#if viewMode === "active"}
           {#if grouped.active.length > 0}
@@ -703,7 +701,7 @@
     {/if}
   </div>
 {:else}
-  <div class="downloads-empty">
+  <div class="downloads-empty downloads-mac-empty">
     <Mascot emotion="idle" />
     <p class="empty-text">{$t('downloads.empty')} <ContextHint text={$t('hints.downloads_empty')} dismissKey="downloads_empty" /></p>
     <div class="empty-links">
@@ -971,6 +969,14 @@
         <span class="item-detail">{$t('downloads.phase_starting')}</span>
       {:else if item.phase === "connecting"}
         <span class="item-detail">{$t('downloads.phase_connecting')}</span>
+      {:else if item.phase === "waiting_rate_limit"}
+        <span class="item-detail">{$t('downloads.phase_waiting_rate_limit')}</span>
+      {:else if item.phase === "merging"}
+        <span class="item-detail">{$t('downloads.phase_merging')}</span>
+      {:else if item.phase === "extracting_audio"}
+        <span class="item-detail">{$t('downloads.phase_extracting_audio')}</span>
+      {:else if item.phase === "embedding_subtitles"}
+        <span class="item-detail">{$t('downloads.phase_embedding_subtitles')}</span>
       {:else}
         <span class="item-detail">{item.platform.charAt(0).toUpperCase() + item.platform.slice(1)}</span>
         <div class="item-stats">
@@ -1125,7 +1131,7 @@
   }
 
   .empty-text {
-    font-size: 14.5px;
+    font-size: var(--text-base);
   }
 
   .downloads-page {
@@ -1138,21 +1144,12 @@
     width: 100%;
   }
 
-  .downloads-page h2 {
-    margin-block: 0;
-  }
-
   .downloads-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: var(--padding);
-  }
-
-  .downloads-title-row {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
+    flex-wrap: wrap;
   }
 
   .downloads-stats {
@@ -1169,7 +1166,7 @@
   }
 
   .clear-btn {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     padding: calc(var(--padding) / 3) calc(var(--padding) * 0.75);
     background: var(--button-elevated);
@@ -1274,36 +1271,28 @@
 
   .download-item {
     background: var(--surface);
+    border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    box-shadow: var(--elev-1);
-    border-left: 3px solid transparent;
-    padding: var(--space-4);
+    padding: var(--space-3) var(--space-4);
     display: flex;
     flex-direction: column;
-    gap: var(--space-2);
-    transition: transform var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
+    gap: var(--space-1);
+    transition: background var(--duration-fast) var(--ease-out);
   }
 
   @media (hover: hover) {
     .download-item:hover {
-      transform: translateY(-1px);
-      box-shadow: var(--elev-2);
+      background: var(--surface-hi);
     }
   }
 
-  .download-item[data-status="downloading"] { border-left-color: var(--accent); }
-  .download-item[data-status="seeding"]     { border-left-color: var(--success); }
-  .download-item[data-status="complete"]    { border-left-color: var(--success); }
-  .download-item[data-status="error"]       { border-left-color: var(--danger); }
-  .download-item[data-status="paused"]      { border-left-color: var(--warning); }
-  .download-item[data-status="queued"]      { opacity: 0.7; }
+  .download-item[data-status="queued"] .item-name {
+    color: var(--text-muted);
+  }
 
   @media (prefers-reduced-motion: reduce) {
     .download-item {
       transition: none;
-    }
-    .download-item:hover {
-      transform: none;
     }
   }
 
@@ -1338,7 +1327,7 @@
   }
 
   .item-name {
-    font-size: 14.5px;
+    font-size: var(--text-base);
     font-weight: 500;
     color: var(--secondary);
     min-width: 0;
@@ -1396,10 +1385,11 @@
   .item-status {
     font-size: var(--text-xs);
     font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
-    padding: var(--space-1) var(--space-2);
-    border-radius: var(--radius-xs);
+    height: 20px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--space-2);
+    border-radius: var(--radius-full);
     flex-shrink: 0;
   }
 
@@ -1430,7 +1420,7 @@
   }
 
   .item-detail {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
     overflow: hidden;
@@ -1442,7 +1432,7 @@
     display: flex;
     align-items: center;
     gap: calc(var(--padding) / 3);
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
     font-variant-numeric: tabular-nums;
@@ -1453,7 +1443,7 @@
   }
 
   .item-error {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--red);
   }
@@ -1461,9 +1451,14 @@
   .progress-track {
     width: 100%;
     height: 4px;
-    background: var(--surface-hi);
+    background: var(--fill-1);
     border-radius: var(--radius-full);
     overflow: hidden;
+  }
+
+  .download-item[data-status="complete"] .progress-track,
+  .download-item[data-status="complete"] .item-percent {
+    display: none;
   }
 
   .progress-fill {
@@ -1493,7 +1488,7 @@
   }
 
   .item-percent {
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     font-weight: 500;
     color: var(--gray);
     font-variant-numeric: tabular-nums;
@@ -1669,8 +1664,9 @@
     margin-top: calc(var(--padding) / 2);
     display: inline-flex;
     align-items: center;
+    min-height: 24px;
     gap: 5px;
-    font-size: 12.5px;
+    font-size: var(--text-sm);
     color: var(--tertiary);
     background: transparent;
     border: none;
