@@ -462,26 +462,6 @@
     return () => window.removeEventListener("keydown", onKeydown);
   });
 
-  // Relógio de 1s, ligado apenas enquanto algum item espera por rate limit.
-  // Sem isso a contagem regressiva ficaria parada até o próximo evento.
-  let nowTick = $state(Date.now());
-
-  let hasWaitingItem = $derived(
-    [...getDownloads().values()].some(
-      (d) => d.kind === "generic" && d.phase === "waiting_rate_limit" && (d.waitUntil ?? 0) > nowTick,
-    ),
-  );
-
-  $effect(() => {
-    if (!hasWaitingItem) return;
-    const timer = setInterval(() => (nowTick = Date.now()), 1000);
-    return () => clearInterval(timer);
-  });
-
-  function waitRemaining(waitUntil: number | null | undefined): number {
-    if (!waitUntil) return 0;
-    return Math.max(0, Math.ceil((waitUntil - nowTick) / 1000));
-  }
 </script>
 
 {#if hasDownloads || viewMode !== "active"}
@@ -990,13 +970,7 @@
       {:else if item.phase === "connecting"}
         <span class="item-detail">{$t('downloads.phase_connecting')}</span>
       {:else if item.phase === "waiting_rate_limit"}
-        <span class="item-detail">
-          {#if waitRemaining(item.waitUntil) > 0}
-            {$t('downloads.phase_waiting_rate_limit_countdown', { seconds: waitRemaining(item.waitUntil) })}
-          {:else}
-            {$t('downloads.phase_waiting_rate_limit')}
-          {/if}
-        </span>
+        <span class="item-detail">{$t('downloads.phase_waiting_rate_limit')}</span>
       {:else if item.phase === "merging"}
         <span class="item-detail">{$t('downloads.phase_merging')}</span>
       {:else if item.phase === "extracting_audio"}
@@ -1168,10 +1142,6 @@
     max-width: 800px;
     margin: 0 auto;
     width: 100%;
-  }
-
-  .downloads-page h2 {
-    margin-block: 0;
   }
 
   .downloads-header {
