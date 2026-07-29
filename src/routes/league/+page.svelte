@@ -135,6 +135,7 @@
   let analysisLoading = $state(false);
   let liveMetrics = $state<any>(null);
   let cooldowns = $state<any>(null);
+  let liveEvents = $state<any>(null);
 
   const GOALS_KEY = "league-role-goals";
 
@@ -191,6 +192,14 @@
       liveMetrics = await invoke<any>("league_live_metrics");
     } catch {
       liveMetrics = null;
+    }
+  }
+
+  async function loadLiveEvents() {
+    try {
+      liveEvents = await invoke<any>("league_live_events");
+    } catch {
+      liveEvents = null;
     }
   }
 
@@ -276,9 +285,11 @@
     if (phase === "InProgress") {
       loadLiveMetrics();
       loadCooldowns();
+      loadLiveEvents();
     } else if (liveMetrics) {
       liveMetrics = null;
       cooldowns = null;
+      liveEvents = null;
     }
     if (phase === "Lobby" || phase === "Matchmaking") {
       try {
@@ -451,7 +462,7 @@
         <SearchTab {championById} />
       </div>
       <div class="tab-panel" class:active={tab === "live"}>
-        <LiveTab {liveMetrics} {cooldowns} {goalValue} />
+        <LiveTab {liveMetrics} {cooldowns} {liveEvents} {goalValue} />
       </div>
       <div class="tab-panel" class:active={tab === "goals"}>
         <GoalsTab {goalValue} {setGoal} {resetGoals} />
@@ -818,6 +829,82 @@
   .league-page :global(.list-label) {
     font-size: 12.5px;
     color: var(--gray);
+    }
+
+  .league-page :global(.queue-filter) {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+    }
+
+  .league-page :global(.queue-chip) {
+    padding: 3px 10px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 12px;
+    cursor: pointer;
+    }
+
+  .league-page :global(.queue-chip:hover) {
+    background: var(--surface-hover);
+    }
+
+  .league-page :global(.queue-chip.on) {
+    border-color: var(--accent);
+    color: var(--text);
+    }
+
+  .league-page :global(.history-summary) {
+    font-size: 12.5px;
+    color: var(--text-secondary);
+    margin: 0 0 10px;
+    }
+
+  .league-page :global(.objective-row) {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    }
+
+  .league-page :global(.objective-chip) {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 6px;
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    border-radius: var(--border-radius);
+    font-variant-numeric: tabular-nums;
+    font-size: 12.5px;
+    }
+
+  .league-page :global(.event-feed) {
+    list-style: none;
+    margin: 12px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    }
+
+  .league-page :global(.event-item) {
+    display: flex;
+    gap: 8px;
+    font-size: 12.5px;
+    }
+
+  .league-page :global(.event-time) {
+    color: var(--gray);
+    font-variant-numeric: tabular-nums;
+    min-width: 42px;
+    }
+
+  .league-page :global(.event-text) {
+    display: flex;
+    gap: 4px;
+    flex-wrap: wrap;
     }
 
   .league-page :global(.delay-block) {
