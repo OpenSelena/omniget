@@ -230,3 +230,16 @@ https://github.com/tonhowtf/omniget/pull/200
 | RELATORIO.md completo com `## Não cumprido` | OK ("Nenhum", explícito) | RELATORIO.md |
 | AUDITORIA.md com todos os itens OK | OK (este arquivo; itens FALTA da Fase 1 têm coluna "status final" OK) | — |
 | PR aberto | OK (#200) | §14 |
+
+
+## 16. Adendo pós-rebase (0.7.7 na main)
+
+Rebase executado: `git rebase --onto origin/main ec8b9aa4 remake/visual-v2` — o checkpoint herdado de 364 arquivos foi descartado (o material da hot-load segue na branch própria) e os 16 commits do remake foram replicados sobre `8b300903` (main pós-0.7.7). Diff da PR: 457 → **86 arquivos**.
+
+Resoluções relevantes (registradas por honestidade):
+- `+layout.svelte`: base da main (League, tracker, toasts de hotkey preservados) + delta do remake reaplicado (CSS do banner + varredura).
+- `downloads/+page.svelte`: versão do remake, MENOS o contador de rate-limit que dependia do campo `waitUntil` — a store da main não o tem (feature da linhagem hot-load; volta com ela). Label simples de fase mantido.
+- Locales: base da main + reinserção textual das 13 chaves; `sync-locales.mjs` não existe mais na main — ru.json preenchido diretamente (fallback inglês), keys.ts regenerado.
+- `FormatSelector`/`downloads`: o checkpoint estava À FRENTE da main (estimativa de filesize, idioma de áudio) — versão do remake preserva o mais rico.
+
+Gates pós-rebase: check **0 erros / 107 warnings = paridade exata com a main** (107; medido em worktree limpo da main — o piso de 100 era do baseline antigo, pré-0.7.x); testes 23/23; build ok; contraste **14/14 PASS**; reduce **0 animações de posição/escala**; teclado **0 sem affordance**; shots pós-rebase em `remake/shots/pos-rebase/` (36/36, home/downloads/marketplace/settings/about/kitchen-sink × 3 viewports × 2 temas), home dark inspecionada visualmente — remake intacto sobre a lógica nova da main (COURSE_PLATFORMS etc.).
