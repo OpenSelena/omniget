@@ -19,6 +19,12 @@
  */
 
 export type TranslationKeys =
+  | 'about.card_changelog_desc'
+  | 'about.card_changelog_title'
+  | 'about.card_project_desc'
+  | 'about.card_project_title'
+  | 'about.card_terms_desc'
+  | 'about.card_terms_title'
   | 'about.credit'
   | 'about.debug.copied'
   | 'about.debug.copied_short'
@@ -56,6 +62,7 @@ export type TranslationKeys =
   | 'about.star_description'
   | 'about.tab.changelog'
   | 'about.tab.debug'
+  | 'about.tab.overview'
   | 'about.tab.project'
   | 'about.tab.roadmap'
   | 'about.tab.terms'
