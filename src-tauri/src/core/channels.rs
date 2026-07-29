@@ -79,15 +79,34 @@ fn row_to_channel(row: &rusqlite::Row) -> rusqlite::Result<ChannelFollow> {
     let enabled: i64 = row.get(6)?;
     let auto: i64 = row.get(7)?;
     let interval: i64 = row.get(8)?;
+    let id: String = row.get(0)?;
+
+    // `seen_ids` ilegível não pode virar lista vazia em silêncio: o poller
+    // trataria todo vídeo já arquivado como novo e re-baixaria o canal
+    // inteiro. Sem saber o que já foi visto, o download automático fica
+    // desligado nesta leitura até o usuário reabilitar.
+    let (seen_ids, auto_download) = match serde_json::from_str::<Vec<String>>(&seen_json) {
+        Ok(seen) => (seen, auto != 0),
+        Err(e) => {
+            tracing::error!(
+                "[channels] historico de vistos do canal {} esta corrompido ({}). \
+                 Download automatico desligado nesta sessao para nao re-baixar tudo.",
+                id,
+                e
+            );
+            (Vec::new(), false)
+        }
+    };
+
     Ok(ChannelFollow {
-        id: row.get(0)?,
+        id,
         url: row.get(1)?,
         title: row.get(2)?,
         added_at_ms: added as u64,
         last_checked_ms: last.map(|v| v as u64),
-        seen_ids: serde_json::from_str(&seen_json).unwrap_or_default(),
+        seen_ids,
         enabled: enabled != 0,
-        auto_download: auto != 0,
+        auto_download,
         interval_minutes: interval as u32,
     })
 }

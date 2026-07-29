@@ -450,6 +450,11 @@ pub fn run() {
                     .download
                     .live_from_start
             });
+            core::ytdlp::set_insecure_tls_fn(|| {
+                storage::config::load_settings_standalone()
+                    .advanced
+                    .insecure_tls
+            });
             core::ytdlp::set_concurrent_fragments_fn(|| {
                 storage::config::load_settings_standalone()
                     .advanced

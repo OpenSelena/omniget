@@ -84,7 +84,10 @@
   border-bottom: 1px solid var(--border);
   background: var(--bg);
   flex-shrink: 0;
-  -webkit-app-region: drag;
+  /* Arrastar é feito por `data-tauri-drag-region` no markup, não por
+     `-webkit-app-region` — essa propriedade é do Chromium/Electron e o
+     WKWebView do macOS a ignora, o que deixava a janela impossível de
+     arrastar. */
   user-select: none;
 }
 
@@ -100,7 +103,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-  -webkit-app-region: no-drag;
 }
 
 .mac-toolbar {

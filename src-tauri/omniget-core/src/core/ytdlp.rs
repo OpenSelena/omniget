@@ -28,6 +28,7 @@ type EmbedMetadataFn = Box<dyn Fn() -> bool + Send + Sync>;
 type EmbedThumbnailFn = Box<dyn Fn() -> bool + Send + Sync>;
 type SpeedLimitFn = Box<dyn Fn() -> Option<String> + Send + Sync>;
 type LiveFromStartFn = Box<dyn Fn() -> bool + Send + Sync>;
+type InsecureTlsFn = Box<dyn Fn() -> bool + Send + Sync>;
 type ConcurrentFragmentsFn = Box<dyn Fn() -> u32 + Send + Sync>;
 type UserAgentFn = Box<dyn Fn() -> Option<String> + Send + Sync>;
 type SponsorBlockModeFn = Box<dyn Fn() -> String + Send + Sync>;
@@ -52,10 +53,76 @@ static EMBED_METADATA_FN: OnceLock<EmbedMetadataFn> = OnceLock::new();
 static EMBED_THUMBNAIL_FN: OnceLock<EmbedThumbnailFn> = OnceLock::new();
 static SPEED_LIMIT_FN: OnceLock<SpeedLimitFn> = OnceLock::new();
 static LIVE_FROM_START_FN: OnceLock<LiveFromStartFn> = OnceLock::new();
+static INSECURE_TLS_FN: OnceLock<InsecureTlsFn> = OnceLock::new();
 static CONCURRENT_FRAGMENTS_FN: OnceLock<ConcurrentFragmentsFn> = OnceLock::new();
 static USER_AGENT_FN: OnceLock<UserAgentFn> = OnceLock::new();
 static SPONSORBLOCK_MODE_FN: OnceLock<SponsorBlockModeFn> = OnceLock::new();
 static SPONSORBLOCK_CATEGORIES_FN: OnceLock<SponsorBlockCategoriesFn> = OnceLock::new();
+
+/// Protocolos que podem ser delegados ao aria2c. Manifesto fragmentado
+/// (`m3u8*`, `dash_frag_urls`) fica de fora por causa da CVE-2026-50574 — o
+/// yt-dlp removeu esse suporte na 2026.06.09 e recomenda `-N` no lugar.
+pub(crate) const ARIA2C_ALLOWED_PROTOCOLS: &str = "http,ftp";
+
+/// Piso de versão do yt-dlp. 2026.06.09 é a release que corrigiu
+/// CVE-2026-50019 (vazamento de cookie no downloader curl), CVE-2026-50023
+/// (escrita de `.desktop`/`.url`/`.webloc`) e CVE-2026-50574 (execução
+/// arbitrária via manifesto com aria2c).
+pub const MIN_YTDLP_VERSION: (u32, u32, u32) = (2026, 6, 9);
+
+/// yt-dlp versiona como `YYYY.MM.DD` com sufixo opcional (`.N`, `-nightly…`).
+/// Devolve `None` para qualquer coisa que não case com esse formato.
+pub fn parse_ytdlp_version(raw: &str) -> Option<(u32, u32, u32)> {
+    let head = raw.split_whitespace().next()?;
+    let core = head.split(['-', '+']).next()?;
+    let mut parts = core.split('.');
+    let year: u32 = parts.next()?.parse().ok()?;
+    let month: u32 = parts.next()?.parse().ok()?;
+    let day: u32 = parts.next()?.parse().ok()?;
+    if !(1..=12).contains(&month) || !(1..=31).contains(&day) || year < 2000 {
+        return None;
+    }
+    Some((year, month, day))
+}
+
+/// `None` quando a versão não pôde ser lida — nesse caso o chamador não deve
+/// afirmar que está desatualizada.
+pub fn ytdlp_version_is_supported(raw: &str) -> Option<bool> {
+    parse_ytdlp_version(raw).map(|v| v >= MIN_YTDLP_VERSION)
+}
+
+/// Argumentos que delegam o download ao aria2c **apenas** para os protocolos
+/// de `ARIA2C_ALLOWED_PROTOCOLS`. Manifesto fragmentado continua no downloader
+/// nativo (CVE-2026-50574).
+///
+/// O proxy é validado antes de entrar na string de `--downloader-args`: um
+/// espaço ali viraria argumento extra do aria2c.
+pub(crate) fn aria2c_downloader_args(
+    aria2c_path: &str,
+    connections: u32,
+    proxy: Option<&str>,
+) -> Vec<String> {
+    let conns = connections.max(1);
+    let proxy_arg = match proxy.map(str::trim).filter(|p| !p.is_empty()) {
+        Some(p) if !p.contains(char::is_whitespace) => format!(" --all-proxy={}", p),
+        Some(_) => {
+            tracing::warn!("[aria2c] proxy com espaço ignorado no --downloader-args");
+            String::new()
+        }
+        None => String::new(),
+    };
+    vec![
+        "--downloader".to_string(),
+        format!("{}:{}", ARIA2C_ALLOWED_PROTOCOLS, aria2c_path),
+        "--downloader-args".to_string(),
+        format!(
+            "aria2c:-x {conns} -k 1M -j {conns} --min-split-size=1M \
+             --file-allocation=none --optimize-concurrent-downloads=true \
+             --auto-file-renaming=false --summary-interval=1 \
+             --console-log-level=notice{proxy_arg}"
+        ),
+    ]
+}
 
 pub fn set_ext_cookie_path_fn(f: impl Fn() -> PathBuf + Send + Sync + 'static) {
     let _ = EXT_COOKIE_PATH_FN.set(Box::new(f));
@@ -256,6 +323,20 @@ pub fn set_speed_limit_fn(f: impl Fn() -> Option<String> + Send + Sync + 'static
 
 fn speed_limit_value() -> Option<String> {
     SPEED_LIMIT_FN.get().and_then(|f| f())
+}
+
+pub fn set_insecure_tls_fn(f: impl Fn() -> bool + Send + Sync + 'static) {
+    let _ = INSECURE_TLS_FN.set(Box::new(f));
+}
+
+/// Verificar certificado é o default. `Vec` vazio quando ligado, para o
+/// chamador poder simplesmente estender a lista de argumentos.
+pub fn insecure_tls_args() -> Vec<String> {
+    if INSECURE_TLS_FN.get().map(|f| f()).unwrap_or(false) {
+        vec!["--no-check-certificates".to_string()]
+    } else {
+        Vec::new()
+    }
 }
 
 pub fn set_live_from_start_fn(f: impl Fn() -> bool + Send + Sync + 'static) {
@@ -906,30 +987,8 @@ fn ytdlp_release_base(channel: YtdlpChannel) -> &'static str {
     }
 }
 
-/// Finds the expected sha256 (lowercased hex) for `asset` in a yt-dlp
-/// `SHA2-256SUMS` file. Lines are `"<64-hex>  <filename>"`.
-fn parse_sha256sums(text: &str, asset: &str) -> Option<String> {
-    for line in text.lines() {
-        let mut parts = line.split_whitespace();
-        let hash = parts.next()?;
-        let name = parts.next()?;
-        if name == asset && hash.len() == 64 && hash.bytes().all(|b| b.is_ascii_hexdigit()) {
-            return Some(hash.to_lowercase());
-        }
-    }
-    None
-}
+use crate::core::dependencies::integrity;
 
-fn sha256_hex(bytes: &[u8]) -> String {
-    use sha2::{Digest, Sha256};
-    let mut hasher = Sha256::new();
-    hasher.update(bytes);
-    hasher
-        .finalize()
-        .iter()
-        .map(|b| format!("{:02x}", b))
-        .collect()
-}
 
 async fn download_ytdlp_binary() -> anyhow::Result<PathBuf> {
     let target =
@@ -963,29 +1022,13 @@ async fn download_ytdlp_binary() -> anyhow::Result<PathBuf> {
     // Verify against the release's published checksums. Fail closed on a
     // mismatch; fail open only when the sums file itself can't be fetched, so
     // a transient GitHub hiccup doesn't block downloads entirely.
-    match client.get(&sums_url).send().await {
-        Ok(r) if r.status().is_success() => {
-            let sums = r.text().await.unwrap_or_default();
-            match parse_sha256sums(&sums, asset) {
-                Some(expected) => {
-                    let actual = sha256_hex(&bytes);
-                    if actual != expected {
-                        return Err(anyhow!(
-                            "yt-dlp checksum mismatch (expected {}, got {}) — refusing to install",
-                            expected,
-                            actual
-                        ));
-                    }
-                    tracing::info!("[ytdlp] sha256 verified ({:?} channel)", channel);
-                }
-                None => tracing::warn!(
-                    "[ytdlp] {} not listed in SHA2-256SUMS — skipping verification",
-                    asset
-                ),
-            }
-        }
-        _ => tracing::warn!("[ytdlp] could not fetch SHA2-256SUMS — skipping verification"),
-    }
+    // Fail-closed. O yt-dlp publica `SHA2-256SUMS` em toda release; não
+    // conseguir buscá-lo é indistinguível de alguém suprimindo a verificação,
+    // então o binário é descartado em vez de instalado sem conferência.
+    let expected = integrity::expected_from_sums_url(&client, &sums_url, asset)
+        .await
+        .map_err(|e| anyhow!("yt-dlp: verificacao de integridade impossivel — {}", e))?;
+    integrity::verify_sha256(&bytes, &expected, &format!("yt-dlp ({:?})", channel))?;
 
     let temp = target.with_file_name(format!(
         "{}.new",
@@ -1294,7 +1337,6 @@ pub async fn get_video_info(
             "--dump-single-json".to_string(),
             "--no-warnings".to_string(),
             "--no-playlist".to_string(),
-            "--no-check-certificates".to_string(),
             "--encoding".to_string(),
             "utf-8".to_string(),
             "--socket-timeout".to_string(),
@@ -2159,6 +2201,13 @@ pub async fn download_video(
         base_args.push(loc.clone());
     }
 
+    // `-N` e `--concurrent-fragments` são a mesma opção do yt-dlp. Empurrar as
+    // duas fazia a segunda vencer no argparse e anular o freio de 429 abaixo.
+    let requested_fragments = if concurrent_fragments == 0 {
+        concurrent_fragments_value()
+    } else {
+        concurrent_fragments
+    };
     let effective_fragments = if is_youtube_url(url) {
         let rate_limit_count = rate_limit_429_count();
         let max_frags = if rate_limit_count >= 2 {
@@ -2168,12 +2217,12 @@ pub async fn download_video(
         } else {
             8
         };
-        concurrent_fragments.min(max_frags)
+        requested_fragments.min(max_frags)
     } else {
-        concurrent_fragments
+        requested_fragments
     };
     base_args.push("-N".to_string());
-    base_args.push(effective_fragments.to_string());
+    base_args.push(effective_fragments.max(1).to_string());
 
     if is_youtube_url(url) {
         base_args.push("--extractor-args".to_string());
@@ -2201,8 +2250,8 @@ pub async fn download_video(
     let effective_ua = ext_user_agent_for_url(url)
         .or_else(user_agent_setting)
         .unwrap_or_else(|| CHROME_UA.to_string());
+    base_args.extend(insecure_tls_args());
     base_args.extend([
-        "--no-check-certificate".to_string(),
         "--no-warnings".to_string(),
         "--no-mtime".to_string(),
         "--user-agent".to_string(),
@@ -2271,12 +2320,6 @@ pub async fn download_video(
     if let Some(rate) = speed_limit_value() {
         base_args.push("--limit-rate".to_string());
         base_args.push(rate);
-    }
-
-    let frag_count = concurrent_fragments_value();
-    if frag_count > 1 {
-        base_args.push("--concurrent-fragments".to_string());
-        base_args.push(frag_count.to_string());
     }
 
     if live_from_start_enabled() {
@@ -2392,14 +2435,15 @@ pub async fn download_video(
                 } else {
                     effective_fragments.clamp(8, 16)
                 };
-                args.push("--downloader".to_string());
-                args.push(a2_path.to_string_lossy().to_string());
-                args.push("--downloader-args".to_string());
-                let aria2c_proxy = match crate::core::http_client::proxy_url() {
-                    Some(url) => format!(" --all-proxy={}", url),
-                    None => String::new(),
-                };
-                args.push(format!("aria2c:-x {} -k 1M -j {} --min-split-size=1M --file-allocation=none --optimize-concurrent-downloads=true --auto-file-renaming=false --summary-interval=1 --console-log-level=notice{}", conns, conns, aria2c_proxy));
+                // CVE-2026-50574: entregar manifesto (m3u8/dash) ao aria2c
+                // permite escrita arbitrária de arquivo. O yt-dlp 2026.06.09
+                // removeu o suporte; aqui o downloader externo fica restrito a
+                // http/ftp e fragmento vai pelo nativo com `-N`.
+                args.extend(aria2c_downloader_args(
+                    &a2_path.to_string_lossy(),
+                    conns,
+                    crate::core::http_client::proxy_url().as_deref(),
+                ));
             }
         }
 
@@ -3560,22 +3604,22 @@ mod tests {
 e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  yt-dlp.exe\n\
 1111111111111111111111111111111111111111111111111111111111111111  yt-dlp_macos\n";
         assert_eq!(
-            parse_sha256sums(sums, "yt-dlp.exe").as_deref(),
+            integrity::parse_sha256sums(sums, "yt-dlp.exe").as_deref(),
             Some("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
         );
         assert_eq!(
-            parse_sha256sums(sums, "yt-dlp_macos").as_deref(),
+            integrity::parse_sha256sums(sums, "yt-dlp_macos").as_deref(),
             Some("1111111111111111111111111111111111111111111111111111111111111111")
         );
-        assert_eq!(parse_sha256sums(sums, "yt-dlp_missing"), None);
-        assert_eq!(parse_sha256sums("garbage line", "yt-dlp"), None);
+        assert_eq!(integrity::parse_sha256sums(sums, "yt-dlp_missing"), None);
+        assert_eq!(integrity::parse_sha256sums("garbage line", "yt-dlp"), None);
     }
 
     #[test]
     fn sha256_hex_known_vector() {
         // SHA-256 of the empty input.
         assert_eq!(
-            sha256_hex(b""),
+            integrity::sha256_hex(b""),
             "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
         );
     }
@@ -3929,5 +3973,56 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  yt-dlp.exe\n\
         assert_eq!(formats.len(), 1);
         assert!(formats[0].has_video);
         assert!(!formats[0].has_audio);
+    }
+
+    // --- Regressao de seguranca: CVE-2026-50574 (aria2c + manifesto) ---
+
+    #[test]
+    fn aria2c_nunca_recebe_manifesto_fragmentado() {
+        let args = aria2c_downloader_args("/opt/bin/aria2c", 8, None);
+        let downloader = &args[1];
+        assert!(downloader.starts_with("http,ftp:"), "{downloader}");
+        for proto in ["m3u8", "m3u8_native", "m3u8_frag_urls", "dash_frag_urls"] {
+            assert!(!downloader.contains(proto), "protocolo {proto} nao pode ir ao aria2c");
+        }
+        assert_eq!(downloader, "http,ftp:/opt/bin/aria2c");
+        // A chave de --downloader-args e o NOME do downloader, nao o protocolo.
+        assert!(args[3].starts_with("aria2c:"), "{}", args[3]);
+    }
+
+    #[test]
+    fn aria2c_downloader_args_rejeita_proxy_com_espaco() {
+        let limpo = aria2c_downloader_args("/bin/aria2c", 2, Some("http://127.0.0.1:8080"));
+        assert!(limpo[3].ends_with("--all-proxy=http://127.0.0.1:8080"), "{}", limpo[3]);
+        let sujo = aria2c_downloader_args("/bin/aria2c", 2, Some("http://h:1 --seed-ratio=0"));
+        assert!(!sujo[3].contains("--all-proxy"), "{}", sujo[3]);
+        assert!(!sujo[3].contains("--seed-ratio"));
+    }
+
+    #[test]
+    fn aria2c_nunca_zera_conexoes() {
+        let args = aria2c_downloader_args("/bin/aria2c", 0, None);
+        assert!(args[3].contains("-x 1") && args[3].contains("-j 1"), "{}", args[3]);
+    }
+
+    // --- Piso de versao do yt-dlp ---
+
+    #[test]
+    fn parse_ytdlp_version_le_os_formatos_reais() {
+        assert_eq!(parse_ytdlp_version("2026.06.09"), Some((2026, 6, 9)));
+        assert_eq!(parse_ytdlp_version("2025.12.31.232815"), Some((2025, 12, 31)));
+        assert_eq!(parse_ytdlp_version("2026.06.10.232815-nightly"), Some((2026, 6, 10)));
+        for lixo in ["", "unknown", "1.2", "2026.13.01", "2026.06.99"] {
+            assert_eq!(parse_ytdlp_version(lixo), None, "aceitou {lixo:?}");
+        }
+    }
+
+    #[test]
+    fn piso_de_versao_cobre_as_cves_de_2026_06_09() {
+        assert_eq!(ytdlp_version_is_supported("2026.06.09"), Some(true));
+        assert_eq!(ytdlp_version_is_supported("2026.07.04"), Some(true));
+        assert_eq!(ytdlp_version_is_supported("2026.06.08"), Some(false));
+        // Versao ilegivel nao pode ser reportada como desatualizada.
+        assert_eq!(ytdlp_version_is_supported("sei la"), None);
     }
 }

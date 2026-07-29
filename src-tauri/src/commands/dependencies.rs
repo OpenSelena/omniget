@@ -9,6 +9,9 @@ pub struct DependencyStatus {
     pub name: String,
     pub installed: bool,
     pub version: Option<String>,
+    /// `true` só quando a versão foi lida **e** é anterior ao piso conhecido.
+    /// Versão ilegível não vira "desatualizado" — seria um alarme falso.
+    pub outdated: bool,
 }
 
 #[derive(Debug, Clone, Serialize)]
@@ -32,21 +35,30 @@ pub async fn check_dependencies() -> Result<Vec<DependencyStatus>, String> {
         None
     };
 
+    let ytdlp_outdated = ytdlp_version
+        .as_deref()
+        .and_then(crate::core::ytdlp::ytdlp_version_is_supported)
+        .map(|supported| !supported)
+        .unwrap_or(false);
+
     Ok(vec![
         DependencyStatus {
             name: "yt-dlp".into(),
             installed: ytdlp_version.is_some(),
             version: ytdlp_version,
+            outdated: ytdlp_outdated,
         },
         DependencyStatus {
             name: "FFmpeg".into(),
             installed: ffmpeg_version.is_some(),
             version: ffmpeg_version,
+            outdated: false,
         },
         DependencyStatus {
             name: "PDFium".into(),
             installed: pdfium_installed,
             version: pdfium_version,
+            outdated: false,
         },
     ])
 }

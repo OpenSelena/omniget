@@ -63,6 +63,7 @@ export type DependencyStatus = {
   name: string;
   installed: boolean;
   version: string | null;
+  outdated: boolean;
 };
 
 export async function loadDeps(): Promise<DependencyStatus[]> {

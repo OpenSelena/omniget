@@ -25,6 +25,7 @@
     name: string;
     installed: boolean;
     version: string | null;
+    outdated: boolean;
   };
 
   let settings = $derived(getSettings());

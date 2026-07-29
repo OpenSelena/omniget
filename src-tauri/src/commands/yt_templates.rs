@@ -25,13 +25,9 @@ fn templates_path() -> PathBuf {
 }
 
 fn load() -> YtTemplateStore {
-    let path = templates_path();
-    if !path.exists() {
-        return YtTemplateStore::default();
-    }
-    fs::read_to_string(&path)
-        .ok()
-        .and_then(|s| serde_json::from_str(&s).ok())
+    // `load()` é seguido de `save()` nos comandos de escrita, então devolver
+    // default em cima de um arquivo corrompido apagaria os templates.
+    crate::core::state_file::load_or_quarantine(&templates_path(), "templates do yt-dlp")
         .unwrap_or_default()
 }
 

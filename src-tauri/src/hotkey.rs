@@ -85,18 +85,37 @@ fn matches_binding(pressed: &Shortcut, binding: &str) -> bool {
         .unwrap_or(false)
 }
 
+/// Resultado de um acionamento do atalho global, sempre reportado à interface.
+///
+/// Antes, cada caminho de falha fazia `return` mudo: quem apertava o atalho com
+/// o clipboard errado via o app não fazer absolutamente nada e concluía que o
+/// atalho estava quebrado (issue #198). O evento de sucesso existia mas ninguém
+/// escutava, então nem o caminho feliz dava sinal.
+fn emit_hotkey_result(app: &tauri::AppHandle, outcome: &str, url: Option<&str>) {
+    let _ = app.emit(
+        "hotkey-download-result",
+        serde_json::json!({ "outcome": outcome, "url": url }),
+    );
+}
+
 fn handle_download_clipboard(app: &tauri::AppHandle) {
     let text = match app.clipboard().read_text() {
         Ok(t) => t,
-        Err(_) => return,
+        Err(e) => {
+            tracing::warn!("[hotkey] nao foi possivel ler o clipboard: {}", e);
+            emit_hotkey_result(app, "clipboard_error", None);
+            return;
+        }
     };
 
     let text = text.trim().to_string();
     if text.is_empty() || (!text.starts_with("http://") && !text.starts_with("https://")) {
+        emit_hotkey_result(app, "not_a_url", None);
         return;
     }
 
     if url::Url::parse(&text).is_err() {
+        emit_hotkey_result(app, "not_a_url", None);
         return;
     }
 
@@ -107,11 +126,16 @@ fn handle_download_clipboard(app: &tauri::AppHandle) {
 }
 
 async fn enqueue_from_clipboard(app: &tauri::AppHandle, url: String) {
-    if matches!(
-        crate::external_url::queue_url_with_defaults(app, url.clone(), true, None).await,
-        Ok(crate::external_url::QueueUrlOutcome::Queued)
-    ) {
-        let _ = app.emit("hotkey-download-queued", serde_json::json!({ "url": url }));
+    use crate::external_url::QueueUrlOutcome;
+    match crate::external_url::queue_url_with_defaults(app, url.clone(), true, None).await {
+        Ok(QueueUrlOutcome::Queued) => emit_hotkey_result(app, "queued", Some(&url)),
+        Ok(QueueUrlOutcome::AlreadyQueued) => {
+            emit_hotkey_result(app, "already_queued", Some(&url))
+        }
+        Err(e) => {
+            tracing::warn!("[hotkey] enfileiramento recusado: {}", e);
+            emit_hotkey_result(app, "unsupported", Some(&url));
+        }
     }
 }
 

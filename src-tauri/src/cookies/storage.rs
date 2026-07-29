@@ -106,12 +106,10 @@ fn safe_slug_segment(slug: &str) -> String {
 }
 
 pub fn load_registry() -> CookieRegistry {
-    let path = meta_path();
-    let content = match fs::read_to_string(&path) {
-        Ok(c) => c,
-        Err(_) => return CookieRegistry::default(),
-    };
-    serde_json::from_str(&content).unwrap_or_default()
+    // Registro ilegível vai para quarentena antes de virar default: sem isso o
+    // `save_registry` seguinte apagaria todas as contas de cookie do usuário.
+    crate::core::state_file::load_or_quarantine(&meta_path(), "registro de cookies")
+        .unwrap_or_default()
 }
 
 pub fn save_registry(registry: &CookieRegistry) -> anyhow::Result<()> {

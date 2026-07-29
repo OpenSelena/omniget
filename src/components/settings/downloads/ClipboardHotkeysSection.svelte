@@ -46,9 +46,19 @@
     return map[key] ?? null;
   }
 
+  // O WebKit do macOS não dá foco a um `<button>` ao clicar, então o keydown
+  // nunca chegava e o gravador ficava preso em "Pressione as teclas…".
+  function startRecording(e: MouseEvent) {
+    (e.currentTarget as HTMLButtonElement | null)?.focus();
+  }
+
   function handleHotkeyKeyDown(e: KeyboardEvent) {
     e.preventDefault();
     e.stopPropagation();
+    if (e.key === "Escape") {
+      hotkeyRecording = false;
+      return;
+    }
     if (["Control", "Shift", "Alt", "Meta"].includes(e.key)) return;
     const keyName = mapKeyName(e.key);
     if (!keyName) return;
@@ -77,6 +87,10 @@
   function handleMusicHotkeyKeyDown(e: KeyboardEvent) {
     e.preventDefault();
     e.stopPropagation();
+    if (e.key === "Escape") {
+      musicHotkeyRecording = false;
+      return;
+    }
     if (["Control", "Shift", "Alt", "Meta"].includes(e.key)) return;
     const keyName = mapKeyName(e.key);
     if (!keyName) return;
@@ -141,7 +155,7 @@
           {#if hotkeyMode === 'type'}
             <input type="text" class="input-hotkey" value={hotkeyInput} oninput={handleHotkeyInput} spellcheck="false" />
           {:else}
-            <button class="input-hotkey hotkey-record-btn" class:recording={hotkeyRecording} onclick={() => { hotkeyRecording = true; }} onkeydown={hotkeyRecording ? handleHotkeyKeyDown : undefined} onblur={() => { hotkeyRecording = false; }}>
+            <button class="input-hotkey hotkey-record-btn" class:recording={hotkeyRecording} onclick={(e) => { hotkeyRecording = true; startRecording(e); }} onkeydown={hotkeyRecording ? handleHotkeyKeyDown : undefined} onblur={() => { hotkeyRecording = false; }}>
               {hotkeyRecording ? $t('settings.download.hotkey_press') : (hotkeyInput || $t('settings.download.hotkey_press'))}
             </button>
           {/if}
@@ -176,7 +190,7 @@
           {#if musicHotkeyMode === 'type'}
             <input type="text" class="input-hotkey" value={musicHotkeyInput} oninput={handleMusicHotkeyInput} spellcheck="false" />
           {:else}
-            <button class="input-hotkey hotkey-record-btn" class:recording={musicHotkeyRecording} onclick={() => { musicHotkeyRecording = true; }} onkeydown={musicHotkeyRecording ? handleMusicHotkeyKeyDown : undefined} onblur={() => { musicHotkeyRecording = false; }}>
+            <button class="input-hotkey hotkey-record-btn" class:recording={musicHotkeyRecording} onclick={(e) => { musicHotkeyRecording = true; startRecording(e); }} onkeydown={musicHotkeyRecording ? handleMusicHotkeyKeyDown : undefined} onblur={() => { musicHotkeyRecording = false; }}>
               {musicHotkeyRecording ? $t('settings.download.hotkey_press') : (musicHotkeyInput || $t('settings.download.hotkey_press'))}
             </button>
           {/if}

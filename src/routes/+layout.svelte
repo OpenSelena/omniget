@@ -222,6 +222,20 @@
 
     reloadPluginNav();
     listen("plugins-changed", () => { reloadPluginNav(); });
+    listen<{ outcome: string; url: string | null }>("hotkey-download-result", (event) => {
+      const outcome = event.payload.outcome;
+      if (outcome === "queued") {
+        showToast("success", $t("toast.hotkey_queued"));
+      } else if (outcome === "already_queued") {
+        showToast("info", $t("toast.hotkey_already_queued"));
+      } else if (outcome === "not_a_url") {
+        showToast("info", $t("toast.hotkey_not_a_url"));
+      } else if (outcome === "unsupported") {
+        showToast("error", $t("toast.hotkey_unsupported"));
+      } else {
+        showToast("error", $t("toast.hotkey_clipboard_error"));
+      }
+    });
     listen<Omit<ExternalUrlEvent, "id">>("external-url", (event) => {
       handleExternalUrlEvent(event.payload);
     }).then((fn) => {

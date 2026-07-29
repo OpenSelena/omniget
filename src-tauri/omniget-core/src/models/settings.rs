@@ -301,6 +301,10 @@ pub struct AdvancedSettings {
     pub twitter_manual_cookie: String,
     #[serde(default)]
     pub user_agent: String,
+    /// Desliga a verificação de certificado TLS do yt-dlp. Default `false`:
+    /// só existe para rede corporativa com TLS interceptado.
+    #[serde(default)]
+    pub insecure_tls: bool,
 }
 
 fn default_concurrent_fragments() -> u32 {
@@ -585,6 +589,7 @@ impl Default for AppSettings {
                 cookies_from_browser: String::new(),
                 twitter_manual_cookie: String::new(),
                 user_agent: String::new(),
+                insecure_tls: false,
             },
             telegram: TelegramSettings::default(),
             proxy: ProxySettings::default(),
@@ -599,5 +604,54 @@ impl Default for AppSettings {
             bridge: BridgeSettings::default(),
             league: LeagueSettings::default(),
         }
+    }
+}
+
+#[cfg(test)]
+mod backcompat_tests {
+    use super::*;
+
+    #[test]
+    fn settings_da_v0_7_6_carregam_com_tls_verificado() {
+        // settings.json de uma instalacao 0.7.6, antes de `insecure_tls`
+        // existir. O campo ausente precisa virar `false` (certificado
+        // verificado) sem derrubar a desserializacao nem tocar em nenhuma
+        // outra preferencia de `advanced`. Essa e a categoria de bug que ja
+        // zerou as preferencias de usuarios neste projeto.
+        let json = serde_json::json!({
+            "max_concurrent_segments": 20,
+            "max_retries": 3,
+            "max_concurrent_downloads": 4,
+            "concurrent_fragments": 8,
+            "prevent_sleep": false,
+            "cookies_from_browser": "",
+            "twitter_manual_cookie": "",
+            "user_agent": "Mozilla/5.0 teste"
+        });
+        let parsed: AdvancedSettings =
+            serde_json::from_value(json).expect("settings antigo precisa desserializar");
+
+        assert!(
+            !parsed.insecure_tls,
+            "campo ausente precisa virar verificacao de certificado LIGADA"
+        );
+        assert_eq!(parsed.max_concurrent_downloads, 4);
+        assert_eq!(parsed.concurrent_fragments, 8);
+        assert!(!parsed.prevent_sleep);
+        assert_eq!(parsed.user_agent, "Mozilla/5.0 teste");
+    }
+
+    #[test]
+    fn insecure_tls_ligado_sobrevive_ao_round_trip() {
+        let json = serde_json::json!({
+            "max_concurrent_segments": 20,
+            "max_retries": 3,
+            "insecure_tls": true
+        });
+        let parsed: AdvancedSettings = serde_json::from_value(json).expect("desserializa");
+        assert!(parsed.insecure_tls);
+        let round = serde_json::to_value(&parsed).expect("serializa");
+        let back: AdvancedSettings = serde_json::from_value(round).expect("volta");
+        assert!(back.insecure_tls);
     }
 }

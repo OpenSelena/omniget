@@ -31,16 +31,18 @@ pub async fn search_videos(
         _ => format!("ytsearch{}:{}", n, query),
     };
 
+    let mut args = vec![
+        "--flat-playlist".to_string(),
+        "--dump-json".to_string(),
+        "--no-warnings".to_string(),
+        "--socket-timeout".to_string(),
+        "15".to_string(),
+    ];
+    args.extend(omniget_core::core::ytdlp::insecure_tls_args());
+    args.push(search_query);
+
     let output = crate::core::process::command(&ytdlp_path)
-        .args([
-            "--flat-playlist",
-            "--dump-json",
-            "--no-warnings",
-            "--no-check-certificates",
-            "--socket-timeout",
-            "15",
-            &search_query,
-        ])
+        .args(&args)
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped())
         .output()

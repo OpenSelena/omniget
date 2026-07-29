@@ -29,5 +29,6 @@ pub mod queue;
 pub mod queue_history;
 pub mod recovery;
 pub mod rpc;
+pub mod state_file;
 pub mod trackers;
 pub mod url_parser;

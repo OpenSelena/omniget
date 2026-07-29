@@ -47,10 +47,14 @@ impl<R: Runtime + 'static> PluginHost for PluginHostImpl<R> {
             .join(plugin_id)
             .join("data")
             .join("settings.json");
-        std::fs::read_to_string(&settings_path)
-            .ok()
-            .and_then(|s| serde_json::from_str(&s).ok())
-            .unwrap_or(serde_json::Value::Object(Default::default()))
+        // Mesmo par lê-default-e-reescreve do registro de cookies: sem a
+        // quarentena, um settings.json de plugin corrompido é apagado pelo
+        // primeiro `save_settings`.
+        crate::core::state_file::load_or_quarantine(
+            &settings_path,
+            &format!("settings do plugin {}", plugin_id),
+        )
+        .unwrap_or(serde_json::Value::Object(Default::default()))
     }
 
     fn save_settings(&self, plugin_id: &str, settings: serde_json::Value) -> anyhow::Result<()> {
