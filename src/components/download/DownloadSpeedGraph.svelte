@@ -75,7 +75,7 @@
 
 <div
   class="speed-graph"
-  style="width: {width}px; height: {height}px"
+  style:width="{width}px" style:height="{height}px"
   title="Now: {formatSpeed(currentBps)} • Peak: {formatSpeed(peakBps)}"
   aria-hidden="true"
 >

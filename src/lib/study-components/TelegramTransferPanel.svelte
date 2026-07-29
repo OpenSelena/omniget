@@ -76,7 +76,7 @@
                     <span class="transfer-meta">{fmtSize(t.sizeBytes)} · {Math.round(t.percent)}%</span>
                   </div>
                   <div class="progress-outer">
-                    <div class="progress-inner" style="width: {Math.max(2, Math.min(100, t.percent))}%"></div>
+                    <div class="progress-inner" style:width="{Math.max(2, Math.min(100, t.percent))}%"></div>
                   </div>
                 </li>
               {/each}

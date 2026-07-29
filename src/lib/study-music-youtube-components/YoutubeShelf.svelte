@@ -16,7 +16,7 @@
   {#if title}
     <h3 class="title">{title}</h3>
   {/if}
-  <div class="grid" style="--min-card: {minCard}px">
+  <div class="grid" style:--min-card="{minCard}px">
     {#each items as item, idx (idx)}
       <YoutubeItem item={item} {onPlay} {onPlaylistOpen} />
     {/each}

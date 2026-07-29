@@ -39,7 +39,7 @@
         class="font-pick"
         class:selected={typography.font_family === opt.key}
         onclick={() => (typography = { ...typography, font_family: opt.key })}
-        style="font-family: {opt.key === 'serif' ? "'Charter', Georgia, serif" : opt.key === 'mono' ? "'IBM Plex Mono', monospace" : opt.key === 'sans' ? 'system-ui, sans-serif' : "'DM Sans', sans-serif"};"
+        style:font-family="{opt.key === 'serif' ?"'Charter', Georgia, serif" : opt.key === 'mono' ? "'IBM Plex Mono', monospace" : opt.key === 'sans' ? 'system-ui, sans-serif' : "'DM Sans', sans-serif"};"
         title={opt.label}
       >
         Aa

@@ -176,6 +176,12 @@ Things people search for, and OmniGet does:
 - **Download only part of a video** by setting a start and end time.
 - **Download subtitles** in any language, embed them, or generate them with Whisper when none exist.
 - **Skip sponsors** with SponsorBlock, and auto embed metadata and thumbnails.
+- **Telegram Direct Uploader & Leech Bot**: Upload media directly to Telegram via User Session or Bot Token, supporting numeric Chat IDs, `@usernames`, custom thumbnails, custom filename & extension editing, **Send As** Video/Document/Audio modes, and 2GB (Free) / 4GB (Premium) auto-chunking.
+- **Dynamic YouTube Quality Picker**: View and select real available resolutions (`4K 2160p`, `2K 1440p`, `1080p`, `720p`, `Audio only`) extracted straight from yt-dlp metadata.
+- **Explicit Merging Phase & Smooth ETA**: Know exactly when audio and video are merging (`[Merger]`, `[ffmpeg]`) with live ETA estimations (`ETA ~3m 20s`).
+- **Header Bandwidth Limiter**: Throttle download speed on the fly directly from the Downloads header bar.
+- **Interactive Clipboard Detection Toast**: Auto-detect video URLs on clipboard with a single-click toast banner.
+- **System Dependency Detection**: Detect and use system-installed `yt-dlp`, `FFmpeg`, and `PDFium` binaries with source indicators (`PATH`, `Managed`, `Flatpak`).
 - **Follow a channel** and auto download new uploads, with a tray notification.
 - **Download Bilibili at maximum quality**, sign in once and unlock 4K, HDR, Hi-Res lossless audio and Dolby Atmos.
 
@@ -397,6 +403,12 @@ The desktop app never needs this. It exists for cron jobs, dotfiles, and scripts
 Found a bug or have a feature idea? [Open an issue](https://github.com/tonhowtf/omniget/issues). Pull requests are welcome, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 OmniGet is translated on [Weblate](https://hosted.weblate.org/engage/omniget/). Pick a language, translate in your browser, and Weblate opens a pull request automatically.
+
+### Contributors
+
+Thanks to all contributors who have participated in this project!
+
+[![Contributors](https://contrib.rocks/image?repo=tonhowtf/omniget)](https://github.com/tonhowtf/omniget/graphs/contributors)
 
 ### Developing plugins
 

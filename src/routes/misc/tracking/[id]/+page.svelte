@@ -311,7 +311,7 @@
     <header class="hero">
       <div
         class="carrier-icon-lg"
-        style="--carrier-color: {icon.color}"
+        style:--carrier-color="{icon.color}"
         title={carrierLabel}
         aria-hidden="true"
       >
@@ -331,7 +331,7 @@
       {#if pkg.canonical_status}
         <div
           class="status-icon-lg"
-          style="--status-color: {status.color}"
+          style:--status-color="{status.color}"
           title={statusLabel}
           aria-label={statusLabel}
         >
@@ -353,7 +353,7 @@
       <div class="hero-text">
         <h1>{hasAlias ? title : maskCode(pkg.code)}</h1>
         <p class="hero-meta">
-          <span class="carrier-name" style="color: {icon.color}">{carrierLabel}</span>
+          <span class="carrier-name" style:color="{icon.color}">{carrierLabel}</span>
           {#if hasAlias}
             <span class="dot-sep">·</span>
             <span class="mono small">{maskCode(pkg.code)}</span>
@@ -389,7 +389,7 @@
         <span
           class="status-badge-big"
           class:delivered={pkg.is_delivered}
-          style="--status-color: {status.color}"
+          style:--status-color="{status.color}"
         >
           <span class="status-badge-label">{statusLabel}</span>
           {#if pkg.last_status && pkg.last_status.toLowerCase() !== statusLabel.toLowerCase()}
@@ -512,7 +512,7 @@
             <li class="event" class:first={i === 0} class:repeat={samePrev}>
               <div
                 class="event-icon"
-                style="--status-color: {evIcon.color}"
+                style:--status-color="{evIcon.color}"
                 title={evLabel}
                 aria-label={evLabel}
               >
@@ -536,7 +536,7 @@
                 {/if}
                 <p class="event-meta">
                   {#if ev.status}
-                    <span class="event-status-chip" style="--status-color: {evIcon.color}">{ev.status}</span>
+                    <span class="event-status-chip" style:--status-color="{evIcon.color}">{ev.status}</span>
                   {/if}
                   {#if ev.date}<span>{fmtDate(ev.date)}</span>{/if}
                   {#if ev.time}<span class="dot-sep">·</span><span>{ev.time}</span>{/if}

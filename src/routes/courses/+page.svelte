@@ -201,7 +201,7 @@
         onclick={() => handleCardClick(platform)}
         onkeydown={(e) => handleKeyDown(e, platform)}
       >
-        <div class="card-icon" style="--platform-color: {platform.color}">
+        <div class="card-icon" style:--platform-color="{platform.color}">
           <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
             {@html getIconSvg(platform.icon)}
           </svg>

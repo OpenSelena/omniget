@@ -1080,7 +1080,7 @@
           >
             <div
               class="palette-bar-fill"
-              style="width: {xpState.level_progress_pct}%"
+              style:width="{xpState.level_progress_pct}%"
             ></div>
           </div>
           <span class="palette-hint"

@@ -41,7 +41,7 @@
   let genericBg = $derived(genericGradient(domain || "x"));
 </script>
 
-<div class="logo" style="width: {size}px; height: {size}px;" data-kind={kind}>
+<div class="logo" style:width="{size}px" style:height="{size}px" data-kind={kind}>
   {#if kind === "youtube"}
     <div class="bg yt">
       <svg viewBox="0 0 24 24" width="60%" height="60%" fill="white" aria-hidden="true">
@@ -137,7 +137,7 @@
       </svg>
     </div>
   {:else}
-    <div class="bg generic" style="background: {genericBg};">
+    <div class="bg generic" style:background="{genericBg}">
       <span class="initial">{genericInitial}</span>
     </div>
   {/if}

@@ -25,6 +25,9 @@
     name: string;
     installed: boolean;
     version: string | null;
+    /** "managed" | "system" | "flatpak" | "missing" */
+    source: string;
+    path: string | null;
     outdated: boolean;
   };
 

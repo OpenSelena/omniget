@@ -759,7 +759,7 @@
         <span>{xpState ? `${xpState.xp} XP` : "XP"}</span>
       </div>
       <div class="level-meter" aria-hidden="true">
-        <div style="width: {xpState?.level_progress_pct ?? 0}%"></div>
+        <div style:width="{xpState?.level_progress_pct ?? 0}%"></div>
       </div>
     </div>
   </header>
@@ -874,8 +874,8 @@
       {:else}
         <div class="line-display" aria-label={timerText}>
           <div class="line-track">
-            <div class="line-fill" style="width: {progressPct}%"></div>
-            <div class="line-knob" style="left: {progressPct}%"></div>
+            <div class="line-fill" style:width="{progressPct}%"></div>
+            <div class="line-knob" style:left="{progressPct}%"></div>
           </div>
           <span>{timerText}</span>
         </div>

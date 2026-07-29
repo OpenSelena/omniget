@@ -198,7 +198,7 @@
                     <div class="progress-bar">
                       <div
                         class="progress-fill"
-                        style="width: {Math.min(100, prog.percent).toFixed(1)}%"
+                        style:width="{Math.min(100, prog.percent).toFixed(1)}%"
                       ></div>
                     </div>
                     <div class="progress-label mono">

@@ -566,7 +566,7 @@
               <div
                 class="module-bar-fill"
                 class:full={mPct >= 100}
-                style="width: {mPct}%"
+                style:width="{mPct}%"
               ></div>
             </div>
             <ul>
@@ -624,7 +624,7 @@
               <div
                 class="module-bar-fill"
                 class:full={loosePct >= 100}
-                style="width: {loosePct}%"
+                style:width="{loosePct}%"
               ></div>
             </div>
             <ul>

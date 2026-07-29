@@ -1717,14 +1717,14 @@
       role="toolbar"
       tabindex="-1"
       aria-label="highlight"
-      style="left: {epubPopupPos.x}px; top: {epubPopupPos.y}px;"
+      style:left="{epubPopupPos.x}px" style:top="{epubPopupPos.y}px"
       onmousedown={(e) => e.stopPropagation()}
     >
       {#each COLOR_PALETTE as c (c.key)}
         <button
           type="button"
           class="hl-color"
-          style="background: {c.css};"
+          style:background="{c.css}"
           title={c.key}
           onclick={() => saveEpubHighlight(c.key)}
         ></button>
@@ -1818,7 +1818,7 @@
                 type="button"
                 class="ink-swatch"
                 class:selected={inkColor === c.css && !inkEraser}
-                style="background: {c.css};"
+                style:background="{c.css}"
                 onclick={() => {
                   inkEraser = false;
                   persistInkColor(c.css);
@@ -2045,7 +2045,7 @@
                       class:active={a && a.page === currentPage}
                       onclick={() => a && jumpTo(a.page)}
                     >
-                      <span class="hl-dot" style="background: {colorCss(h.color)};"></span>
+                      <span class="hl-dot" style:background="{colorCss(h.color)}"></span>
                       <span class="outline-title hl-text-clamp">{h.text ?? "—"}</span>
                       <span class="outline-page mono">{a?.page ?? "?"}</span>
                     </button>
@@ -2073,7 +2073,7 @@
                       {#if h.kind === "note"}
                         <span class="hl-dot" style="background: var(--accent);"></span>
                       {:else}
-                        <span class="hl-dot" style="background: {colorCss(h.color)};"></span>
+                        <span class="hl-dot" style:background="{colorCss(h.color)}"></span>
                       {/if}
                       <span class="note-body">
                         {#if h.text}
@@ -2166,7 +2166,7 @@
               <div
                 class="canvas-frame scroll-page"
                 data-page={p}
-                style="aspect-ratio: {pageSize.w > 0 ? `${pageSize.w} / ${pageSize.h}` : '612 / 792'};"
+                style:aspect-ratio="{pageSize.w > 0 ? `${pageSize.w} / ${pageSize.h}` : '612 / 792'}"
               >
                 {#if scrollImgs[p]}
                   <img class="page-img" src={scrollImgs[p]} alt="page {p}" loading="lazy" />
@@ -2190,7 +2190,7 @@
             role="region"
             aria-label="page"
             bind:this={pageFrameEl}
-            style="aspect-ratio: {pageSize.w} / {pageSize.h};"
+            style:aspect-ratio="{pageSize.w} / {pageSize.h}"
             onmouseup={onTextSelectionEnd}
             onpointerdown={onInkDown}
             onpointermove={onInkMove}
@@ -2211,7 +2211,7 @@
                       type="button"
                       class="hl-rect"
                       data-drawer={h.drawer ?? "lighten"}
-                      style="left: {s.left}px; top: {s.top}px; width: {s.width}px; height: {s.height}px; --hl-color: {colorCss(h.color)};"
+                      style:left="{s.left}px" style:top="{s.top}px" style:width="{s.width}px" style:height="{s.height}px" style:--hl-color="{colorCss(h.color)}"
                       onclick={(e) => openHighlightEditor(h, e)}
                       title={h.note ? `nota: ${h.note}` : "editar"}
                     >
@@ -2265,7 +2265,7 @@
                     <span
                       class="char-span"
                       data-tw={s.width}
-                      style="left: {s.left}px; top: {s.top}px; height: {s.height}px; font-size: {Math.max(6, s.height * 0.95)}px;"
+                      style:left="{s.left}px" style:top="{s.top}px" style:height="{s.height}px" style:font-size="{Math.max(6, s.height * 0.95)}px"
                     >{c.c}</span>
                   {/each}
                 </div>
@@ -2278,14 +2278,14 @@
                 role="toolbar"
                 tabindex="-1"
                 aria-label="highlight"
-                style="left: {popupPos.x}px; top: {popupPos.y}px;"
+                style:left="{popupPos.x}px" style:top="{popupPos.y}px"
                 onmousedown={(e) => e.stopPropagation()}
               >
                 {#each COLOR_PALETTE as c (c.key)}
                   <button
                     type="button"
                     class="hl-color"
-                    style="background: {c.css};"
+                    style:background="{c.css}"
                     title={c.key}
                     onclick={() => saveHighlight(c.key)}
                   ></button>
@@ -2300,7 +2300,7 @@
                 role="dialog"
                 tabindex="-1"
                 aria-label="Editar highlight"
-                style="left: {editPopupPos.x}px; top: {editPopupPos.y}px;"
+                style:left="{editPopupPos.x}px" style:top="{editPopupPos.y}px"
                 onmousedown={(e) => e.stopPropagation()}
                 onkeydown={onEditorKey}
               >
@@ -2326,7 +2326,7 @@
                         type="button"
                         class="ep-color"
                         class:active={editingHighlight.color === c.key}
-                        style="background: {c.css};"
+                        style:background="{c.css}"
                         title={c.key}
                         onclick={() => updateHighlightField("color", c.key)}
                       ></button>
@@ -2492,7 +2492,7 @@
 {/if}
 
 {#snippet outlineNode(node: OutlineNode, depth: number)}
-  <li class="outline-item" style="--depth: {depth};">
+  <li class="outline-item" style:--depth="{depth}">
     {#if node.page != null}
       <button type="button" class="outline-link" onclick={() => jumpTo(node.page!)}>
         <span class="outline-title">{node.title}</span>

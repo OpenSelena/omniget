@@ -390,6 +390,12 @@ omniget import-cookies cookies.txt     # Netscape 格式
 
 OmniGet 在 [Weblate](https://hosted.weblate.org/engage/omniget/) 上进行翻译。选择一种语言，在浏览器里翻译，Weblate 会自动开 PR。
 
+### 贡献者
+
+感谢所有为本项目做出贡献的开发者！
+
+[![贡献者](https://contrib.rocks/image?repo=tonhowtf/omniget)](https://github.com/tonhowtf/omniget/graphs/contributors)
+
 ## 致平台方
 
 如果你代表某个被列出的平台并有顾虑，请用公司邮箱发邮件至 **tonhowtf@gmail.com**。该平台会立即从列表中移除。

@@ -356,7 +356,7 @@
               </div>
               {#if file.status === "converting"}
                 <div class="progress-bar">
-                  <div class="progress-fill" style="width: {file.percent}%"></div>
+                  <div class="progress-fill" style:width="{file.percent}%"></div>
                 </div>
               {/if}
             </div>

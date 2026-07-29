@@ -378,7 +378,7 @@
                         class="progress-inner"
                         class:status-error={s.status === "error"}
                         class:status-completed={s.status === "completed"}
-                        style="width: {pct(s)}%"
+                        style:width="{pct(s)}%"
                       ></div>
                     </div>
                     <div class="session-meta">

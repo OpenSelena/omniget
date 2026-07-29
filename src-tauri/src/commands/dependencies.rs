@@ -9,8 +9,12 @@ pub struct DependencyStatus {
     pub name: String,
     pub installed: bool,
     pub version: Option<String>,
-    /// `true` só quando a versão foi lida **e** é anterior ao piso conhecido.
-    /// Versão ilegível não vira "desatualizado" — seria um alarme falso.
+    /// Where the binary was found: "managed" (downloaded by OmniGet),
+    /// "system" (found on the user's PATH), "flatpak", or "missing".
+    pub source: String,
+    /// Resolved absolute path to the binary, if found.
+    pub path: Option<String>,
+    /// `true` when version was read and is below supported floor.
     pub outdated: bool,
 }
 
@@ -23,9 +27,25 @@ pub struct DependencyVariantInfo {
 
 #[tauri::command]
 pub async fn check_dependencies() -> Result<Vec<DependencyStatus>, String> {
+    let (ytdlp_result, ffmpeg_result) = tokio::join!(
+        dependencies::find_tool_with_source("yt-dlp"),
+        dependencies::find_tool_with_source("ffmpeg"),
+    );
+
+    // Extract versions from the already-found paths — no second find required.
     let (ytdlp_version, ffmpeg_version) = tokio::join!(
-        dependencies::check_version("yt-dlp"),
-        dependencies::check_version("ffmpeg"),
+        async {
+            match ytdlp_result.as_ref() {
+                Some((path, _)) => dependencies::check_version_at_path(path, "yt-dlp").await,
+                None => None,
+            }
+        },
+        async {
+            match ffmpeg_result.as_ref() {
+                Some((path, _)) => dependencies::check_version_at_path(path, "ffmpeg").await,
+                None => None,
+            }
+        },
     );
 
     let pdfium_installed = pdfium::is_installed();
@@ -34,6 +54,18 @@ pub async fn check_dependencies() -> Result<Vec<DependencyStatus>, String> {
     } else {
         None
     };
+
+    let ytdlp_source = ytdlp_result
+        .as_ref()
+        .map(|(_, s)| s.to_string())
+        .unwrap_or_else(|| "missing".to_string());
+    let ytdlp_path = ytdlp_result.map(|(p, _)| p.to_string_lossy().to_string());
+
+    let ffmpeg_source = ffmpeg_result
+        .as_ref()
+        .map(|(_, s)| s.to_string())
+        .unwrap_or_else(|| "missing".to_string());
+    let ffmpeg_path = ffmpeg_result.map(|(p, _)| p.to_string_lossy().to_string());
 
     let ytdlp_outdated = ytdlp_version
         .as_deref()
@@ -46,18 +78,30 @@ pub async fn check_dependencies() -> Result<Vec<DependencyStatus>, String> {
             name: "yt-dlp".into(),
             installed: ytdlp_version.is_some(),
             version: ytdlp_version,
+            source: ytdlp_source,
+            path: ytdlp_path,
             outdated: ytdlp_outdated,
         },
         DependencyStatus {
             name: "FFmpeg".into(),
             installed: ffmpeg_version.is_some(),
             version: ffmpeg_version,
+            source: ffmpeg_source,
+            path: ffmpeg_path,
             outdated: false,
         },
         DependencyStatus {
             name: "PDFium".into(),
             installed: pdfium_installed,
             version: pdfium_version,
+            source: if pdfium_installed {
+                "managed".into()
+            } else {
+                "missing".into()
+            },
+            path: pdfium::pdfium_target_dir()
+                .filter(|_| pdfium_installed)
+                .map(|p| p.to_string_lossy().to_string()),
             outdated: false,
         },
     ])

@@ -225,7 +225,7 @@
               <div class="bw-bar-outer">
                 <div
                   class="bw-bar-inner"
-                  style="width: {Math.min(100, bw.percentage)}%"
+                  style:width="{Math.min(100, bw.percentage)}%"
                   class:warn={bw.percentage > 80}
                 ></div>
               </div>

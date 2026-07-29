@@ -325,7 +325,7 @@
   {#each nodes as node (node.deck_id)}
     {@const count = countsByDeck[node.deck_id] ?? 0}
     <li class="node" data-level={node.level}>
-      <div class="row" style="padding-left: {node.level * 16}px">
+      <div class="row" style:padding-left="{node.level * 16}px">
         <div class="row-main">
           {#if editingId === node.deck_id}
             <input

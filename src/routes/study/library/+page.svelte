@@ -1925,7 +1925,7 @@
                 </svg>
               {/if}
               <span class="kind-badge">{$t("study.library.kind_course")}</span>
-              <div class="progress" style="--pct: {c.progress_pct}%"></div>
+              <div class="progress" style:--pct="{c.progress_pct}%"></div>
             </div>
             <div class="meta">
               <div class="title-row">

@@ -612,7 +612,7 @@
           {/if}
           <a class="card-link" href="/misc/tracking/{pkg.id}" aria-label={title}>
             <div class="card-head">
-              <div class="carrier-icon" style="--carrier-color: {icon.color}" title={carrierLabel} aria-hidden="true">
+              <div class="carrier-icon" style:--carrier-color="{icon.color}" title={carrierLabel} aria-hidden="true">
                 <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
                   <path d={icon.svgPath} />
                 </svg>
@@ -628,7 +628,7 @@
               {#if pkg.canonical_status}
                 <span
                   class="status-icon"
-                  style="--status-color: {status.color}"
+                  style:--status-color="{status.color}"
                   title={statusLabel}
                   aria-label={statusLabel}
                 >
@@ -641,7 +641,7 @@
 
             <div class="card-body">
               {#if pkg.canonical_status}
-                <span class="status-badge" style="--status-color: {status.color}">
+                <span class="status-badge" style:--status-color="{status.color}">
                   {statusLabel}
                 </span>
               {:else if pkg.last_status}

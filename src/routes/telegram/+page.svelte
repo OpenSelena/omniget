@@ -1421,7 +1421,7 @@
           <div class="batch-progress-bar-outer">
             <div
               class="batch-progress-bar-inner"
-              style="width: {batchPercent}%"
+              style:width="{batchPercent}%"
             ></div>
           </div>
           <span class="subtext">

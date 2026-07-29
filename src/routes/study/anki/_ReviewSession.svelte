@@ -291,7 +291,7 @@
   {:else}
     <header class="progress-row">
       <div class="progress-track" aria-hidden="true">
-        <div class="progress-fill" style="width: {progressPct}%"></div>
+        <div class="progress-fill" style:width="{progressPct}%"></div>
       </div>
       <span class="progress-text">{answered} / {initialTotal}</span>
     </header>

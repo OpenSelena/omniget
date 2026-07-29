@@ -88,7 +88,7 @@
       <div class="mini-progress-track">
         <div
           class="mini-progress-fill"
-          style="width: {downloadPercent.toFixed(1)}%"
+          style:width="{downloadPercent.toFixed(1)}%"
         ></div>
       </div>
     {:else if downloadStatus === "complete"}

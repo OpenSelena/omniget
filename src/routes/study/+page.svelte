@@ -288,7 +288,7 @@
             type="button"
             onclick={() => goto("/study/progress")}
             title={goalMet ? $t("study.hub.goal_met") : ""}
-            style="--streak-color: {streakColor};"
+            style:--streak-color="{streakColor}"
           >
             <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
               <path d="M13.5 0.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73S7 7.53 7 5.47c0-1.02.25-1.98.58-2.82-.84 1.5-1.58 3.3-1.58 5.19 0 4.42 3.58 8 8 8s8-3.58 8-8c0-5.9-4.5-9.17-8.5-12.17z"></path>
@@ -306,7 +306,7 @@
           <h2 class="hero-title">{hero.course.title}</h2>
           <div class="hero-progress">
             <div class="progress-track">
-              <div class="progress-fill" style="width: {Math.round(hero.course.progress_pct ?? 0)}%"></div>
+              <div class="progress-fill" style:width="{Math.round(hero.course.progress_pct ?? 0)}%"></div>
             </div>
             <span class="mono hero-pct">{Math.round(hero.course.progress_pct ?? 0)}%</span>
           </div>

@@ -202,7 +202,7 @@
               <div
                 class="progress-bar-inner"
                 class:paused-bar={sendState.paused}
-                style="width: {Math.min(sendState.progress, 100)}%"
+                style:width="{Math.min(sendState.progress, 100)}%"
               ></div>
             </div>
             <span class="progress-text">{sendState.progress.toFixed(1)}%</span>

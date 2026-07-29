@@ -506,7 +506,7 @@
                     <div class="progress-bar-mini">
                       <div
                         class="progress-fill-mini"
-                        style="width: {transcribeProgress[clip.queue_id] ?? 0}%"
+                        style:width="{transcribeProgress[clip.queue_id] ?? 0}%"
                       ></div>
                     </div>
                     <span class="progress-pct">{transcribeProgress[clip.queue_id] ?? 0}%</span>

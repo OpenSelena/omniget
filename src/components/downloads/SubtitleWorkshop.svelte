@@ -286,10 +286,10 @@
       {#if peaks.length}
         <div class="wave" aria-hidden="true">
           {#each peaks as p, idx (idx)}
-            <span class="bar" style="height:{Math.max(2, p * 100)}%"></span>
+            <span class="bar" style:height="{Math.max(2, p * 100)}%"></span>
           {/each}
           {#each shots as sec (sec)}
-            <span class="shot" style="left:{durationMs ? (sec * 1000 / durationMs) * 100 : 0}%"></span>
+            <span class="shot" style:left="{durationMs ? (sec * 1000 / durationMs) * 100 : 0}%"></span>
           {/each}
         </div>
       {/if}

@@ -58,7 +58,7 @@
       {#each particles as p (p.id)}
         <span
           class="particle"
-          style="--tx: {p.x}px; --ty: {p.y}px; --rot: {p.rot}deg; --color: {p.color}; --delay: {p.delay}ms;"
+          style:--tx="{p.x}px" style:--ty="{p.y}px" style:--rot="{p.rot}deg" style:--color="{p.color}" style:--delay="{p.delay}ms"
         ></span>
       {/each}
     {/if}

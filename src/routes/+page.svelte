@@ -87,6 +87,21 @@
   let formatFetchGeneration = $state(0);
   let referer = $state("");
 
+  // Derived quality data from real yt-dlp format info.
+  // These update after the user loads formats via FormatSelector.
+  let availableHeights = $derived(
+    formats.length > 0
+      ? [...new Set(
+          formats
+            .filter(f => f.has_video && typeof f.height === "number" && f.height > 0)
+            .map(f => f.height as number)
+        )].sort((a, b) => b - a)
+      : null
+  );
+  let hasAudioOnly = $derived(
+    formats.some(f => f.has_audio && !f.has_video)
+  );
+
   type CookieAccount = {
     slug: string;
     alias: string;
@@ -974,10 +989,7 @@
     {/if}
 
     {#if omniState.kind === "batch"}
-      <div class="batch-options">
-        <DownloadModeSelector bind:downloadMode />
-        <BatchDownload count={omniState.urls.length} onDownload={handleBatchDownload} />
-      </div>
+      <BatchDownload count={omniState.urls.length} onDownload={handleBatchDownload} />
 
     {:else if omniState.kind === "searching"}
       <div class="feedback feedback-enter">
@@ -1098,7 +1110,7 @@
               <summary class="options-toggle">{$t('omnibox.options')}</summary>
               <div class="options-content">
                 <DownloadModeSelector bind:downloadMode onChange={() => { selectedFormatId = null; }} />
-                <QualityPicker bind:selectedQuality selectedFormatId />
+                <QualityPicker bind:selectedQuality selectedFormatId {availableHeights} {hasAudioOnly} />
                 {#if cookieAccounts.length > 1}
                   <CookieAccountPicker accounts={cookieAccounts} bind:selectedSlug={selectedCookieSlug} />
                 {/if}
@@ -1228,7 +1240,7 @@
 
   .study-maintenance-text strong {
     font-weight: 500;
-    font-size: var(--text-sm);
+    font-size: 12.5px;
     color: var(--text);
   }
 
@@ -1268,35 +1280,29 @@
 
   .mode-toggle-row {
     display: inline-flex;
-    background: var(--fill-1);
-    border-radius: var(--radius-md);
-    padding: 2px;
+    background: var(--button);
+    border-radius: var(--border-radius);
+    padding: 3px;
     gap: 2px;
     margin-bottom: 4px;
   }
   .mode-toggle-btn {
-    min-height: 24px;
-    padding: 4px 12px;
-    font-size: var(--text-sm);
+    padding: 5px 14px;
+    font-size: 11.5px;
     font-weight: 500;
-    color: var(--text-muted);
+    color: var(--gray);
     background: transparent;
     border: none;
-    border-radius: calc(var(--radius-md) - 2px);
+    border-radius: calc(var(--border-radius) - 3px);
     cursor: pointer;
-    transition: background var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
   }
   .mode-toggle-btn.active {
-    background: var(--surface-hi);
-    color: var(--text);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    background: var(--cta);
+    color: var(--on-cta);
   }
   .mode-toggle-btn:not(.active):hover {
-    color: var(--text);
-  }
-  .mode-toggle-btn:focus-visible {
-    outline: var(--focus-ring);
-    outline-offset: -1px;
+    color: var(--secondary);
+    background: var(--button-elevated);
   }
 
   .loop-icon {
@@ -1338,12 +1344,6 @@
     }
   }
 
-  .batch-options {
-    display: flex;
-    flex-direction: column;
-    gap: var(--padding);
-  }
-
   .feedback {
     display: flex;
     align-items: center;
@@ -1364,7 +1364,7 @@
   }
 
   .feedback-text {
-    font-size: var(--text-sm);
+    font-size: 12.5px;
     font-weight: 500;
   }
 
@@ -1456,7 +1456,7 @@
   }
 
   .playlist-count {
-    font-size: var(--text-sm);
+    font-size: 12.5px;
     font-weight: 500;
     color: var(--secondary);
   }
@@ -1484,7 +1484,7 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    font-size: var(--text-sm);
+    font-size: 12.5px;
     color: var(--gray);
   }
 
@@ -1541,7 +1541,7 @@
   }
 
   .options-toggle {
-    font-size: var(--text-sm);
+    font-size: 12.5px;
     font-weight: 500;
     color: var(--gray);
     cursor: pointer;
@@ -1580,7 +1580,7 @@
   }
 
   .referer-label {
-    font-size: var(--text-sm);
+    font-size: 12.5px;
     font-weight: 500;
     color: var(--gray);
   }
@@ -1610,7 +1610,7 @@
   }
 
   .timerange-label {
-    font-size: var(--text-sm);
+    font-size: 12.5px;
     font-weight: 500;
     color: var(--gray);
   }
@@ -1722,7 +1722,7 @@
     justify-content: center;
     gap: 6px;
     padding: var(--padding) calc(var(--padding) * 2);
-    font-size: var(--text-base);
+    font-size: 14.5px;
     font-weight: 500;
     background: var(--button);
     border: none;
@@ -1926,15 +1926,5 @@
     .loop-pulse {
       animation: none;
     }
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .feedback-spinner {
-      animation: feedback-soft-pulse calc(var(--duration-bounce) * 3) var(--ease-in-out) infinite;
-    }
-  }
-
-  @keyframes feedback-soft-pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.45; }
   }
 </style>

@@ -34,7 +34,7 @@
       class:selected={theme === opt.id}
       onclick={() => pick(opt.id)}
     >
-      <span class="swatch" style="background: {opt.swatch};"></span>
+      <span class="swatch" style:background="{opt.swatch}"></span>
       <span class="name">{opt.label}</span>
     </button>
   {/each}

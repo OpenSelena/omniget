@@ -266,7 +266,7 @@
         <li>
           <span class="bar-label">{r.bucket}</span>
           <span class="bar-track" aria-hidden="true">
-            <span class="bar-fill" style="width: {pct}%"></span>
+            <span class="bar-fill" style:width="{pct}%"></span>
           </span>
           <span class="bar-count">{fmtNumber(r.count)}</span>
         </li>
@@ -291,7 +291,7 @@
         {@const h = max === 0 ? 0 : (f.count / max) * 100}
         <span
           class="vbar-col"
-          style="--h: {h}%"
+          style:--h="{h}%"
           title="Dia +{f.day}: {f.count} cards"
         >
           <span class="vbar-fill"></span>

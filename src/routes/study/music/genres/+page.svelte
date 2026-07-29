@@ -67,7 +67,7 @@
           <button
             type="button"
             class="card"
-            style="--seed: {genreColor(g.name)};"
+            style:--seed="{genreColor(g.name)}"
             onclick={() => open(g)}
           >
             <span class="title">{g.name}</span>

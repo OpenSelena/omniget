@@ -113,6 +113,11 @@ export type AppSettings = {
     mode?: "auto" | "audio" | "mute" | null;
     quality?: string | null;
   };
+  accessibility?: {
+    reduce_motion?: boolean;
+    reduce_transparency?: boolean;
+    disable_haptics?: boolean;
+  };
   typography?: TypographySettings;
 };
 

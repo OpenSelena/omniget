@@ -214,7 +214,7 @@
             </div>
             <span
               class="preset-sample"
-              style="font-family: {previewFontStack({ value: preset.values.font_display, label: '', family: 'display', bundled: true })};"
+              style:font-family="{previewFontStack({ value: preset.values.font_display, label: '', family: 'display', bundled: true })}"
             >
               Aa Bb 123
             </span>
@@ -248,7 +248,7 @@
         </label>
         <span
           class="font-sample"
-          style="font-family: {previewFontStack({ value: typo.font_display, label: '', family: 'display', bundled: true })};"
+          style:font-family="{previewFontStack({ value: typo.font_display, label: '', family: 'display', bundled: true })}"
         >
           Aa Bb 123
         </span>
@@ -265,7 +265,7 @@
         </label>
         <span
           class="font-sample"
-          style="font-family: {previewFontStack({ value: typo.font_body, label: '', family: 'body', bundled: true })};"
+          style:font-family="{previewFontStack({ value: typo.font_body, label: '', family: 'body', bundled: true })}"
         >
           {$t("settings.typography.body_sample")}
         </span>
@@ -282,7 +282,7 @@
         </label>
         <span
           class="font-sample mono"
-          style="font-family: {previewFontStack({ value: typo.font_mono, label: '', family: 'mono', bundled: true })};"
+          style:font-family="{previewFontStack({ value: typo.font_mono, label: '', family: 'mono', bundled: true })}"
         >
           {`const x = 42;`}
         </span>

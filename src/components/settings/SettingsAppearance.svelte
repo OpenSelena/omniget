@@ -85,9 +85,9 @@
           >
             {#if theme.colors}
               <div class="theme-preview">
-                <div class="preview-bg" style="background: {theme.colors[0]}">
-                  <div class="preview-text" style="color: {theme.colors[1]}">Aa</div>
-                  <div class="preview-accent" style="background: {theme.colors[2]}"></div>
+                <div class="preview-bg" style:background="{theme.colors[0]}">
+                  <div class="preview-text" style:color="{theme.colors[1]}">Aa</div>
+                  <div class="preview-accent" style:background="{theme.colors[2]}"></div>
                 </div>
               </div>
             {:else}
@@ -113,9 +113,9 @@
                 onclick={() => changeTheme(theme.id)}
               >
                 <div class="theme-preview">
-                  <div class="preview-bg" style="background: {theme.colors[0]}">
-                    <div class="preview-text" style="color: {theme.colors[1]}">Aa</div>
-                    <div class="preview-accent" style="background: {theme.colors[2]}"></div>
+                  <div class="preview-bg" style:background="{theme.colors[0]}">
+                    <div class="preview-text" style:color="{theme.colors[1]}">Aa</div>
+                    <div class="preview-accent" style:background="{theme.colors[2]}"></div>
                   </div>
                 </div>
                 <span class="theme-name">{theme.label}</span>

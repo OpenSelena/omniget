@@ -14,13 +14,16 @@
     name: string;
     installed: boolean;
     version: string | null;
+    source?: string;
+    /** Absolute path where the binary was found */
+    path?: string | null;
     outdated?: boolean;
     busy: boolean;
     onInstall: (variant: string | null) => void | Promise<void>;
     onAfterCustomFile?: () => void | Promise<void>;
   };
 
-  let { name, installed, version, outdated = false, busy, onInstall, onAfterCustomFile }: Props =
+  let { name, installed, version, source = "missing", path = null, outdated = false, busy, onInstall, onAfterCustomFile }: Props =
     $props();
 
   let variants = $state<DependencyVariantInfo[]>([]);
@@ -143,15 +146,24 @@
     {/if}
   </td>
   <td class="deps-cell-status">
-    {#if installed && outdated}
-      <span class="deps-status deps-status-outdated" title={$t("settings.dependencies.outdated_hint") as string}>
-        {$t("settings.dependencies.status_outdated")}
-      </span>
-    {:else if installed}
-      <span class="deps-status deps-status-ok">{$t("settings.dependencies.status_installed")}</span>
-    {:else}
-      <span class="deps-status deps-status-missing">{$t("settings.dependencies.status_missing")}</span>
-    {/if}
+    <div class="deps-status-group">
+      {#if installed && outdated}
+        <span class="deps-status deps-status-outdated" title={$t("settings.dependencies.outdated_hint") as string}>
+          {$t("settings.dependencies.status_outdated")}
+        </span>
+      {:else if installed}
+        <span class="deps-status deps-status-ok">{$t("settings.dependencies.status_installed")}</span>
+      {:else}
+        <span class="deps-status deps-status-missing">{$t("settings.dependencies.status_missing")}</span>
+      {/if}
+      {#if source === "system"}
+        <span class="deps-source deps-source-system" title={path ?? ""}>PATH</span>
+      {:else if source === "managed"}
+        <span class="deps-source deps-source-managed">{$t("settings.dependencies.source_managed")}</span>
+      {:else if source === "flatpak"}
+        <span class="deps-source deps-source-flatpak">Flatpak</span>
+      {/if}
+    </div>
   </td>
   <td class="deps-cell-action">
     <div class="deps-actions">
@@ -176,7 +188,7 @@
       {:else}
         <button class="button dep-btn" onclick={handleInstall}>
           {#if installed}
-            {$t("settings.dependencies.update")}
+            {source === "system" ? $t("settings.dependencies.download_managed") : $t("settings.dependencies.update")}
           {:else}
             {$t("settings.dependencies.install")}
           {/if}
@@ -211,7 +223,11 @@
             >
               {$t("settings.dependencies.show_folder")}
             </button>
-            {#if installDir}
+            {#if path}
+              <div class="menu-path" title={path}>
+                <code>{path}</code>
+              </div>
+            {:else if installDir}
               <div class="menu-path" title={installDir}>
                 <code>{installDir}</code>
               </div>
@@ -244,6 +260,12 @@
     font-size: 11px;
     font-weight: 600;
   }
+  .deps-status-group {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    align-items: flex-start;
+  }
   .deps-status-ok {
     background: color-mix(in srgb, var(--success, #16a34a) 18%, transparent);
     color: var(--success, #16a34a);
@@ -255,6 +277,26 @@
   .deps-status-missing {
     background: color-mix(in srgb, var(--text) 8%, transparent);
     color: var(--text-dim, var(--gray));
+  }
+  .deps-source {
+    display: inline-flex;
+    padding: 1px 6px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .deps-source-system {
+    background: color-mix(in srgb, #3b82f6 15%, transparent);
+    color: #3b82f6;
+  }
+  .deps-source-managed {
+    background: color-mix(in srgb, var(--accent) 15%, transparent);
+    color: var(--accent);
+  }
+  .deps-source-flatpak {
+    background: color-mix(in srgb, var(--warning, #f59e0b) 15%, transparent);
+    color: var(--warning, #f59e0b);
   }
   .deps-actions {
     display: flex;

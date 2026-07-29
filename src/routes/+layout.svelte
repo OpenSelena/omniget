@@ -16,7 +16,7 @@
   import CommandPalette from "$components/shell/CommandPalette.svelte";
   import { setCommandPaletteItems } from "$lib/stores/command-palette-store.svelte";
   import { refreshUpdateInfo } from "$lib/stores/update-store.svelte";
-  import { startClipboardMonitor, stopClipboardMonitor } from "$lib/stores/clipboard-monitor";
+  import { startClipboardMonitor, stopClipboardMonitor, onClipboardUrl } from "$lib/stores/clipboard-monitor";
   import { initChangelog } from "$lib/stores/changelog-store.svelte";
   import { needsOnboarding } from "$lib/stores/onboarding-store.svelte";
   import { isYtdlpAvailable, isDepsChecked, refreshYtdlpStatus } from "$lib/stores/dependency-store.svelte";
@@ -65,16 +65,13 @@
     page.url.pathname.startsWith("/about"),
   );
 
-  let DebugPanel = $state<Component | null>(null);
-  let OnboardingWizard = $state<Component | null>(null);
-  let BandwidthPill = $state<Component | null>(null);
-  let NotificationBell = $state<Component | null>(null);
-  let ChangelogDialog = $state<Component | null>(null);
-  let ConfirmCloseDialog = $state<Component | null>(null);
-  let ShortcutsDialog = $state<Component | null>(null);
-  let LegalDialog = $state<Component | null>(null);
-  let RecoveryDialog = $state<Component | null>(null);
-  let BilibiliSessionExpiredBanner = $state<Component | null>(null);
+  let DebugPanel = $state<any>(null);
+  let OnboardingWizard = $state<any>(null);
+  let ChangelogDialog = $state<any>(null);
+  let ConfirmCloseDialog = $state<any>(null);
+  let ShortcutsDialog = $state<any>(null);
+  let LegalDialog = $state<any>(null);
+  let RecoveryDialog = $state<any>(null);
 
   function handleExternalUrlEvent(event: Omit<ExternalUrlEvent, "id">) {
     if (event.action === "prefill") {
@@ -119,23 +116,106 @@
       .catch(() => {});
   }
 
-  function buildCommandPaletteItems() {
-    const navItems = [...CORE_NAV_ITEMS, ...pluginNavItems].map((item) => ({
-      id: `nav-${item.href}`,
-      label: item.label || (item.labelKey ? get(t)(item.labelKey) : item.href),
-      group: get(t)("command_palette.group_nav"),
-      keywords: item.href,
-      action: () => goto(item.href),
-    }));
+  onMount(() => {
+    initDownloadListener();
 
+    if (import.meta.env.DEV) {
+      import("$components/debug/DebugPanel.svelte").then((m) => {
+        DebugPanel = m.default;
+      });
+    }
+
+    import("$components/onboarding/OnboardingWizard.svelte").then((m) => {
+      OnboardingWizard = m.default;
+    });
+    import("$components/dialog/ChangelogDialog.svelte").then((m) => {
+      ChangelogDialog = m.default;
+    });
+    import("$components/dialog/ConfirmCloseDialog.svelte").then((m) => {
+      ConfirmCloseDialog = m.default;
+    });
+    import("$components/dialog/ShortcutsDialog.svelte").then((m) => {
+      ShortcutsDialog = m.default;
+    });
+    import("$components/dialog/LegalDialog.svelte").then((m) => {
+      LegalDialog = m.default;
+    });
+    import("$components/dialog/RecoveryDialog.svelte").then((m) => {
+      RecoveryDialog = m.default;
+    });
+
+    refreshYtdlpStatus();
+    refreshUpdateInfo();
+    initChangelog();
+    ensureTrackerNotifications();
+    reloadPluginNav();
+
+    let unlistenExternalUrl: (() => void) | null = null;
+    let unlistenPlugins: (() => void) | null = null;
+
+    listen<Omit<ExternalUrlEvent, "id">>("external-url-event", (event) => {
+      handleExternalUrlEvent(event.payload);
+    }).then((un) => {
+      unlistenExternalUrl = un;
+    });
+
+    listen("plugins-changed", () => {
+      reloadPluginNav();
+    }).then((un) => {
+      unlistenPlugins = un;
+    });
+
+    return () => {
+      if (unlistenExternalUrl) unlistenExternalUrl();
+      if (unlistenPlugins) unlistenPlugins();
+    };
+  });
+
+  function buildCommandPaletteItems() {
     setCommandPaletteItems([
-      ...navItems,
       {
-        id: "action-paste",
-        label: get(t)("command_palette.action_paste"),
-        group: get(t)("command_palette.group_action"),
-        keywords: "clipboard url paste",
+        id: "nav-home",
+        label: get(t)("command_palette.nav_home"),
+        group: get(t)("command_palette.group_nav"),
+        keywords: "index main prefill",
         action: () => goto("/"),
+      },
+      {
+        id: "nav-downloads",
+        label: get(t)("command_palette.nav_downloads"),
+        group: get(t)("command_palette.group_nav"),
+        keywords: "queue active history",
+        action: () => goto("/downloads"),
+      },
+      {
+        id: "nav-settings",
+        label: get(t)("command_palette.nav_settings"),
+        group: get(t)("command_palette.group_nav"),
+        keywords: "preferences options config",
+        action: () => goto("/settings"),
+      },
+      {
+        id: "nav-marketplace",
+        label: get(t)("command_palette.nav_marketplace"),
+        group: get(t)("command_palette.group_nav"),
+        keywords: "plugins extensions store",
+        action: () => goto("/marketplace"),
+      },
+      {
+        id: "nav-about",
+        label: get(t)("command_palette.nav_about"),
+        group: get(t)("command_palette.group_nav"),
+        keywords: "info version changelog project",
+        action: () => goto("/about"),
+      },
+      {
+        id: "action-prefill",
+        label: get(t)("command_palette.action_prefill"),
+        group: get(t)("command_palette.group_action"),
+        keywords: "url link add download",
+        action: () => {
+          goto("/");
+        },
       },
       {
         id: "action-downloads",
@@ -156,11 +236,20 @@
 
   $effect(() => {
     if (settings?.download.clipboard_detection) {
+      onClipboardUrl((clipboardUrl) => {
+        queueExternalPrefill({ action: "prefill", url: clipboardUrl, source: "clipboard" });
+        showToast("info", $t("toast.clipboard_detected") as string);
+        if (page.url.pathname !== "/") {
+          goto("/");
+        }
+      });
       startClipboardMonitor();
     } else {
+      onClipboardUrl(null);
       stopClipboardMonitor();
     }
     return () => {
+      onClipboardUrl(null);
       stopClipboardMonitor();
     };
   });
@@ -177,257 +266,171 @@
 
   async function checkAutoVacuum() {
     try {
-      const { studySettingsGet, studyLibraryVacuum } = await import("$lib/study-bridge");
-      const studySettings = await studySettingsGet();
-      const enabled = studySettings.library?.auto_vacuum ?? true;
-      if (!enabled) return;
-      const intervalDays = studySettings.library?.auto_vacuum_interval_days ?? 30;
-      const intervalMs = intervalDays * 86400 * 1000;
-      const last = Number(localStorage.getItem(VACUUM_LAST_RUN_KEY) ?? "0");
       const now = Date.now();
-      if (now - last < intervalMs) return;
-      const result = await studyLibraryVacuum();
-      localStorage.setItem(VACUUM_LAST_RUN_KEY, String(now));
-      const total =
-        (result.seek_logs_deleted ?? 0)
-        + (result.notifications_deleted ?? 0)
-        + (result.recents_deleted ?? 0);
-      if (total > 0) {
-        console.info(`[study] auto-vacuum: ${total} items cleaned`, result);
+      const lastRunStr = localStorage.getItem(VACUUM_LAST_RUN_KEY);
+      const lastRun = lastRunStr ? parseInt(lastRunStr, 10) : 0;
+
+      if (now - lastRun > 7 * 24 * 60 * 60 * 1000) {
+        await invoke("db_vacuum");
+        localStorage.setItem(VACUUM_LAST_RUN_KEY, String(now));
       }
-    } catch (e) {
-      console.warn("auto-vacuum failed", e);
-    }
+    } catch {}
   }
 
   onMount(() => {
-    let cleanup: (() => void) | undefined;
-    let unlistenExternal: (() => void) | undefined;
-    let unlistenChannels: (() => void) | undefined;
-    initDownloadListener().then((fn) => (cleanup = fn));
-    setTimeout(() => void checkAutoVacuum(), 5000);
-    void ensureTrackerNotifications();
-    import("$lib/rpc").then(({ rpcSyncIdleStats }) => rpcSyncIdleStats());
-
-    void import("$components/dialog/ChangelogDialog.svelte").then((m) => { ChangelogDialog = m.default; });
-    void import("$components/dialog/ConfirmCloseDialog.svelte").then((m) => { ConfirmCloseDialog = m.default; });
-    void import("$components/dialog/ShortcutsDialog.svelte").then((m) => { ShortcutsDialog = m.default; });
-    void import("$components/dialog/LegalDialog.svelte").then((m) => { LegalDialog = m.default; });
-    void import("$components/dialog/RecoveryDialog.svelte").then((m) => { RecoveryDialog = m.default; });
-    void import("$lib/components/BilibiliSessionExpiredBanner.svelte").then((m) => { BilibiliSessionExpiredBanner = m.default; });
-    if (showOnboarding) {
-      void import("$components/onboarding/OnboardingWizard.svelte").then((m) => { OnboardingWizard = m.default; });
-    }
-    void import("$components/debug/DebugPanel.svelte").then((m) => { DebugPanel = m.default; });
-
-    reloadPluginNav();
-    listen("plugins-changed", () => { reloadPluginNav(); });
-    listen<{ outcome: string; url: string | null }>("hotkey-download-result", (event) => {
-      const outcome = event.payload.outcome;
-      if (outcome === "queued") {
-        showToast("success", $t("toast.hotkey_queued"));
-      } else if (outcome === "already_queued") {
-        showToast("info", $t("toast.hotkey_already_queued"));
-      } else if (outcome === "not_a_url") {
-        showToast("info", $t("toast.hotkey_not_a_url"));
-      } else if (outcome === "unsupported") {
-        showToast("error", $t("toast.hotkey_unsupported"));
-      } else {
-        showToast("error", $t("toast.hotkey_clipboard_error"));
-      }
-    });
-    listen<Omit<ExternalUrlEvent, "id">>("external-url", (event) => {
-      handleExternalUrlEvent(event.payload);
-    }).then((fn) => {
-      unlistenExternal = fn;
-      invoke<Omit<ExternalUrlEvent, "id">[]>("register_external_frontend")
-        .then((events) => {
-          for (const event of events) {
-            handleExternalUrlEvent(event);
-          }
-        })
-        .catch(() => {});
-    });
-    listen<{ channel_title: string; auto_download: boolean; videos: unknown[] }>(
-      "channel-new-videos",
-      (event) => {
-        const p = event.payload;
-        const count = p.videos?.length ?? 0;
-        if (count <= 0) return;
-        showToast(
-          "info",
-          $t(
-            p.auto_download
-              ? "toast.channel_new_auto"
-              : "toast.channel_new",
-            { channel: p.channel_title, count },
-          ) as string,
-        );
-      },
-    ).then((fn) => {
-      unlistenChannels = fn;
-    });
-    refreshUpdateInfo();
-    initChangelog();
-    refreshYtdlpStatus();
-
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleChange = () => {
-      const s = getSettings();
-      if (s?.appearance.theme === "system") {
-        document.documentElement.setAttribute("data-theme", mediaQuery.matches ? "dark" : "light");
-      }
-    };
-    mediaQuery.addEventListener("change", handleChange);
-
-    return () => {
-      cleanup?.();
-      unlistenExternal?.();
-      unlistenChannels?.();
-      mediaQuery.removeEventListener("change", handleChange);
-    };
-  });
-
-  $effect(() => {
-    if (isStudyRoute) {
-      void import("$lib/study-components/BandwidthPill.svelte").then((m) => { BandwidthPill = m.default; });
-      void import("$lib/study-components/shelves/NotificationBell.svelte").then((m) => { NotificationBell = m.default; });
-    } else {
-      BandwidthPill = null;
-      NotificationBell = null;
-    }
+    void checkAutoVacuum();
   });
 </script>
 
-<div class="mac-shell">
-  <AppToolbar />
-  <div class="mac-shell-body">
-    <AppSidebar
-      {primaryNav}
-      {appNav}
-      {pluginNav}
-      {badgeLabel}
-      badgeCount={counts.badge}
-    />
-    <main
-      class="mac-content"
-      class:mac-content--home={page.url.pathname === "/"}
-      class:mac-content--pane={
-        page.url.pathname.startsWith("/settings") ||
-        page.url.pathname.startsWith("/downloads")
-      }
-    >
-      {#if ytdlpMissing && !ytdlpDismissed && isCoreRoute}
-        <div class="ytdlp-banner">
-          <span class="ytdlp-banner-text">{$t('common.ytdlp_missing')}</span>
-          <button class="button ytdlp-banner-link" onclick={() => goto('/settings#dependencies')}>
-            {$t('common.go_to_settings')}
-          </button>
-          <button class="ytdlp-banner-close" onclick={() => ytdlpDismissed = true} aria-label={$t('common.close')}>
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
+<div class="shell" data-reduce-motion={settings?.accessibility?.reduce_motion}>
+  <AppSidebar {primaryNav} {appNav} {pluginNav} {badgeLabel} />
+
+  <div class="shell-body">
+    <AppToolbar />
+
+    {#if ytdlpMissing && !ytdlpDismissed}
+      <div class="ytdlp-banner" role="alert">
+        <span class="ytdlp-banner-text">
+          {$t("ytdlp_missing_banner.text")}
+        </span>
+        <div class="ytdlp-banner-actions">
+          <a href="/settings#dependencies" class="button ytdlp-banner-link">
+            {$t("ytdlp_missing_banner.open_settings")}
+          </a>
+          <button
+            type="button"
+            class="ytdlp-banner-close"
+            onclick={() => (ytdlpDismissed = true)}
+            aria-label={$t("ytdlp_missing_banner.dismiss") as string}
+          >
+            ✕
           </button>
         </div>
+      </div>
+    {/if}
+
+    <main id="main-content" class="content">
+      {#if isStudyRoute}
+        <div class="study-shell">
+          {@render children()}
+        </div>
+      {:else if isCoreRoute}
+        <div class="core-shell">
+          {@render children()}
+        </div>
+      {:else}
+        {@render children()}
       {/if}
-      {@render children()}
     </main>
   </div>
 </div>
 
+<Toast />
 <CommandPalette />
 
-{#if isStudyRoute && BandwidthPill}
-  <div class="bandwidth-pill-mount">
-    <BandwidthPill />
-  </div>
-{/if}
-
-{#if isStudyRoute && NotificationBell}
-  <div class="notification-bell-mount">
-    <NotificationBell />
-  </div>
-{/if}
-
-<Toast />
-{#if DebugPanel}
-  <DebugPanel />
-{/if}
-{#if BilibiliSessionExpiredBanner}
-  <BilibiliSessionExpiredBanner />
-{/if}
-{#if ChangelogDialog}
-  <ChangelogDialog />
-{/if}
-{#if ConfirmCloseDialog}
-  <ConfirmCloseDialog />
-{/if}
-{#if ShortcutsDialog}
-  <ShortcutsDialog />
-{/if}
-{#if LegalDialog}
-  <LegalDialog />
-{/if}
-{#if RecoveryDialog}
-  <RecoveryDialog />
-{/if}
 {#if showOnboarding && OnboardingWizard}
   <OnboardingWizard />
 {/if}
 
+{#if DebugPanel}
+  <DebugPanel />
+{/if}
+
+{#if ChangelogDialog}
+  <ChangelogDialog />
+{/if}
+
+{#if ConfirmCloseDialog}
+  <ConfirmCloseDialog />
+{/if}
+
+{#if ShortcutsDialog}
+  <ShortcutsDialog />
+{/if}
+
+{#if LegalDialog}
+  <LegalDialog />
+{/if}
+
+{#if RecoveryDialog}
+  <RecoveryDialog />
+{/if}
+
 <style>
-  .bandwidth-pill-mount {
-    position: fixed;
-    bottom: 12px;
-    right: 12px;
-    z-index: 50;
-    pointer-events: none;
+  .shell {
+    display: flex;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--text);
   }
 
-  .notification-bell-mount {
-    position: fixed;
-    top: calc(var(--titlebar-height) + 8px);
-    right: 16px;
-    z-index: 60;
+  .shell-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  .content {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .core-shell {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-width: 1200px;
+    width: 100%;
+    margin: 0 auto;
+    padding: var(--padding);
+  }
+
+  .study-shell {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
   }
 
   .ytdlp-banner {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 14px;
-    margin-bottom: var(--padding);
-    background: color-mix(in srgb, var(--warning) 18%, var(--surface));
-    color: color-mix(in srgb, var(--warning) 82%, var(--text));
-    border: 1px solid color-mix(in srgb, var(--warning) 34%, var(--border));
-    border-radius: var(--border-radius);
-    font-size: var(--text-sm);
-    font-weight: 500;
-  }
-
-  :global([data-theme="light"]) .ytdlp-banner,
-  :global([data-theme="catppuccin-latte"]) .ytdlp-banner,
-  :global([data-theme="eink-day"]) .ytdlp-banner,
-  :global([data-theme="eink-sepia"]) .ytdlp-banner,
-  :global([data-theme="nyxvamp-radiance"]) .ytdlp-banner {
-    color: var(--on-warning);
+    justify-content: space-between;
+    padding: 8px 16px;
+    background: var(--warning);
+    color: var(--on-warning, black);
+    font-size: 13px;
+    gap: 12px;
   }
 
   .ytdlp-banner-text {
     flex: 1;
+    font-weight: 500;
+  }
+
+  .ytdlp-banner-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
   }
 
   .ytdlp-banner-link {
-    background: var(--cta);
-    color: var(--on-cta);
-    border: none;
-    font-size: var(--text-sm);
-    font-weight: 500;
+    font-size: 12px;
     padding: 4px 10px;
     border-radius: var(--radius-sm);
-    cursor: pointer;
-    white-space: nowrap;
-    box-shadow: none;
+    background: var(--cta);
+    color: var(--on-cta);
+    text-decoration: none;
+    font-weight: 500;
   }
 
   @media (hover: hover) {

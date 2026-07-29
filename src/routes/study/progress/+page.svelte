@@ -403,7 +403,7 @@
         {#each weeks as week, wi (wi)}
           <div class="col">
             {#each week as c (c.date)}
-              <span class="cell" style="background: {cellColor(c)}" title={cellTitle(c)}></span>
+              <span class="cell" style:background="{cellColor(c)}" title={cellTitle(c)}></span>
             {/each}
           </div>
         {/each}
@@ -592,7 +592,7 @@
             </div>
             <div class="ab-progress">
               <div class="ab-track">
-                <div class="ab-fill" style="width: {Math.round(readStats.active_book.reading_pct * 100)}%"></div>
+                <div class="ab-fill" style:width="{Math.round(readStats.active_book.reading_pct * 100)}%"></div>
               </div>
               <span class="ab-pct">{Math.round(readStats.active_book.reading_pct * 100)}%</span>
             </div>

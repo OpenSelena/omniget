@@ -25,7 +25,7 @@
     aria-label={`Baixando — ${pct}%`}
     title={`Baixando — ${pct}%`}
   >
-    <span class="ring" style="--pct: {pct}">
+    <span class="ring" style:--pct="{pct}">
       <span class="pct">{pct < 1 ? "" : pct}</span>
     </span>
   </button>

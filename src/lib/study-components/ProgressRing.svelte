@@ -31,7 +31,7 @@
   const labelSize = $derived(Math.max(10, Math.round(size * 0.22)));
 </script>
 
-<div class="ring" style="width: {size}px; height: {size}px;">
+<div class="ring" style:width="{size}px" style:height="{size}px">
   <svg width={size} height={size} viewBox="0 0 {size} {size}" aria-hidden="true">
     <circle
       cx={size / 2}
@@ -59,7 +59,7 @@
     <div class="center">{@render center()}</div>
   {:else if label}
     <div class="center">
-      <span class="label" style="font-size: {labelSize}px;">{label}</span>
+      <span class="label" style:font-size="{labelSize}px">{label}</span>
     </div>
   {/if}
 </div>

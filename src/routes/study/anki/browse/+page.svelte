@@ -598,7 +598,7 @@
               onclick={() => bulkSetFlag(n as number)}
               disabled={busy}
             >
-              <span class="flag-swatch" style="background: {color}"></span>
+              <span class="flag-swatch" style:background="{color}"></span>
               <span>{label}</span>
             </button>
           {/each}
@@ -706,7 +706,7 @@
                 />
               </td>
               <td class="flag-col">
-                <span class="flag-dot" style="background: {flagDot(c.flag)}"></span>
+                <span class="flag-dot" style:background="{flagDot(c.flag)}"></span>
               </td>
               <td class="front">{strip(sfld) || `card ${c.id}`}</td>
               <td class="deck">{decksById[c.did] ?? c.did}</td>

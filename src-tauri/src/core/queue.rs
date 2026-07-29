@@ -1428,12 +1428,16 @@ async fn spawn_download_inner(
             last_percent = clamped;
 
             let phase_value = if percent < 0.0 { percent } else { clamped };
-            let phase = match phase_value {
-                p if p < -1.5 => "connecting",
-                p if p < -0.5 => "starting",
-                p if p > 99.5 => "finalizing",
-                p if p > 0.0 => "downloading",
-                _ => "starting",
+            let phase = if let Some(ref custom_phase) = update.phase {
+                custom_phase.as_str()
+            } else {
+                match phase_value {
+                    p if p < -1.5 => "connecting",
+                    p if p < -0.5 => "starting",
+                    p if p > 99.5 => "finalizing",
+                    p if p > 0.0 => "downloading",
+                    _ => "starting",
+                }
             };
 
             let eta_seconds = update

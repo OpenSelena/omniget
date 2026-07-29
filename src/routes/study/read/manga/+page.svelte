@@ -280,7 +280,7 @@
             >
               {s.favorite ? "★" : "☆"}
             </span>
-            <div class="progress" style="--pct: {Math.round(s.progress_pct * 100)}%"></div>
+            <div class="progress" style:--pct="{Math.round(s.progress_pct * 100)}%"></div>
           </div>
           <div class="meta">
             <div class="title">{s.title}</div>

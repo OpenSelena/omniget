@@ -63,7 +63,7 @@
   <div
     bind:this={menuEl}
     class="ctx-menu"
-    style="left: {adjustedPos.left}px; top: {adjustedPos.top}px;"
+    style:left="{adjustedPos.left}px" style:top="{adjustedPos.top}px"
     role="menu"
     tabindex="-1"
   >

@@ -333,7 +333,7 @@
           <div class="card-path mono" title={item.file_path}>{item.file_path}</div>
           {#if item.progress_pct > 0}
             <div class="progress" aria-label="Progress">
-              <div class="progress-fill" style="width: {(item.progress_pct * 100).toFixed(0)}%"></div>
+              <div class="progress-fill" style:width="{(item.progress_pct * 100).toFixed(0)}%"></div>
             </div>
           {/if}
           <div class="card-foot">
@@ -370,7 +370,7 @@
                   <div class="progress-bar-mini">
                     <div
                       class="progress-fill-mini"
-                      style="width: {transcribeProgress[item.id] ?? 0}%"
+                      style:width="{transcribeProgress[item.id] ?? 0}%"
                     ></div>
                   </div>
                   <span class="progress-pct">{transcribeProgress[item.id] ?? 0}%</span>

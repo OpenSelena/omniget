@@ -27,6 +27,7 @@
   import ReencodeDialog from "$components/dialog/ReencodeDialog.svelte";
   import ToolsPanel from "$components/downloads/ToolsPanel.svelte";
   import VideoOpsOverlay from "$components/downloads/VideoOpsOverlay.svelte";
+  import { getSettings, updateSettings } from "$lib/stores/settings-store.svelte";
   import { locale as i18nLocale } from "$lib/i18n";
   import { get } from "svelte/store";
   import timeAgo from "$lib/time-ago";
@@ -300,6 +301,16 @@
   let historyEntries = $state<HistoryEntry[]>([]);
   let historyLoading = $state(false);
 
+  async function openFileFolder(filePath: string) {
+    try {
+      await invoke("reveal_file", { path: filePath });
+    } catch {
+      try {
+        await invoke("open_path_default", { path: filePath });
+      } catch {}
+    }
+  }
+
   async function loadHistory() {
     historyLoading = true;
     try {
@@ -492,6 +503,21 @@
             {$t('downloads.history_clear')}
           </button>
         {/if}
+        <select
+          class="speed-limit-selector"
+          value={getSettings()?.download.speed_limit || "unlimited"}
+          onchange={(e) => {
+            const val = e.currentTarget.value;
+            updateSettings({ download: { speed_limit: val === "unlimited" ? "" : val } });
+          }}
+          title={$t('settings.download.speed_limit') as string}
+        >
+          <option value="unlimited">⚡ Unlimited</option>
+          <option value="1M">1 MB/s</option>
+          <option value="2M">2 MB/s</option>
+          <option value="5M">5 MB/s</option>
+          <option value="10M">10 MB/s</option>
+        </select>
         <button
           class="history-toggle"
           class:on={viewMode === "history"}
@@ -898,6 +924,18 @@
             {/if}
           </button>
         {:else if item.status === "complete"}
+          {#if item.filePath}
+            <button
+              class="action-icon-btn"
+              onclick={() => openFileFolder(item.filePath!)}
+              aria-label={$t('downloads.open_folder')}
+              title={$t('downloads.open_folder')}
+            >
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+              </svg>
+            </button>
+          {/if}
           {#if item.filePath && item.queueKind === "video"}
             <button
               class="action-icon-btn"
@@ -972,7 +1010,7 @@
       {:else if item.phase === "waiting_rate_limit"}
         <span class="item-detail">{$t('downloads.phase_waiting_rate_limit')}</span>
       {:else if item.phase === "merging"}
-        <span class="item-detail">{$t('downloads.phase_merging')}</span>
+        <span class="item-detail phase-merging-badge">{$t('downloads.phase_merging')}</span>
       {:else if item.phase === "extracting_audio"}
         <span class="item-detail">{$t('downloads.phase_extracting_audio')}</span>
       {:else if item.phase === "embedding_subtitles"}
@@ -990,7 +1028,7 @@
             <span>{formatSpeed(item.speed)}</span>
             {#if formatEta(item.etaSeconds)}
               <span class="stats-sep">&middot;</span>
-              <span>ETA {formatEta(item.etaSeconds)}</span>
+              <span class="eta-pill">ETA {formatEta(item.etaSeconds)}</span>
             {/if}
             <DownloadSpeedGraph points={getSpeedHistory(item.id)} />
           {/if}
@@ -1034,7 +1072,7 @@
         <div
           class="progress-fill"
           data-status={item.status}
-          style="width: {Math.max(0, item.percent).toFixed(1)}%"
+          style:width="{Math.max(0, item.percent).toFixed(1)}%"
         ></div>
       </div>
       <span class="item-percent">{Math.max(0, item.percent).toFixed(0)}%</span>
@@ -1107,7 +1145,7 @@
       <div
         class="progress-fill"
         data-status={item.status}
-        style="width: {Math.max(0, item.percent).toFixed(1)}%"
+        style:width="{Math.max(0, item.percent).toFixed(1)}%"
       ></div>
     </div>
 
@@ -1125,7 +1163,8 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-height: calc(100vh - var(--padding) * 4);
+    flex: 1;
+    min-height: 0;
     gap: calc(var(--padding) * 1.5);
     color: var(--gray);
   }
@@ -1142,6 +1181,10 @@
     max-width: 800px;
     margin: 0 auto;
     width: 100%;
+    /* Scroll within the fixed-height pane (parent has overflow:hidden) */
+    overflow-y: auto;
+    flex: 1;
+    min-height: 0;
   }
 
   .downloads-header {
@@ -1440,6 +1483,31 @@
 
   .stats-sep {
     opacity: 0.5;
+  }
+
+  .phase-merging-badge {
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .eta-pill {
+    background: color-mix(in srgb, var(--accent) 15%, transparent);
+    color: var(--accent);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .speed-limit-selector {
+    padding: 4px 8px;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--text);
+    background: var(--button);
+    border: 1px solid var(--content-border);
+    border-radius: calc(var(--border-radius) - 4px);
+    cursor: pointer;
   }
 
   .item-error {

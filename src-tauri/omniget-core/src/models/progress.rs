@@ -5,12 +5,21 @@ pub struct ProgressUpdate {
     pub total_bytes: Option<u64>,
     pub speed_bps: Option<f64>,
     pub eta_seconds: Option<u64>,
+    pub phase: Option<String>,
 }
 
 impl ProgressUpdate {
     pub fn percent(percent: f64) -> Self {
         Self {
             percent,
+            ..Default::default()
+        }
+    }
+
+    pub fn phase(phase: &str, percent: f64) -> Self {
+        Self {
+            percent,
+            phase: Some(phase.to_string()),
             ..Default::default()
         }
     }
@@ -28,6 +37,7 @@ impl ProgressUpdate {
             total_bytes,
             speed_bps,
             eta_seconds,
+            phase: None,
         }
     }
 

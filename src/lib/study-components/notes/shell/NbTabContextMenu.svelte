@@ -53,7 +53,7 @@
 <div
   class="nb-tab-context-menu"
   data-nb-context-menu="true"
-  style="left: {x}px; top: {y}px;"
+  style:left="{x}px" style:top="{y}px"
   role="menu"
 >
   <button class="item" role="menuitem" onclick={close}>

@@ -4,19 +4,21 @@
   import NavIcon from "$components/shell/NavIcon.svelte";
   import type { NavItem } from "$lib/nav-config";
 
+  interface Props {
+    primaryNav?: NavItem[];
+    appNav?: NavItem[];
+    pluginNav?: NavItem[];
+    badgeLabel?: string;
+    badgeCount?: number;
+  }
+
   let {
-    primaryNav,
-    appNav,
-    pluginNav,
-    badgeLabel,
-    badgeCount,
-  }: {
-    primaryNav: NavItem[];
-    appNav: NavItem[];
-    pluginNav: NavItem[];
-    badgeLabel: string;
-    badgeCount: number;
-  } = $props();
+    primaryNav = [],
+    appNav = [],
+    pluginNav = [],
+    badgeLabel = "",
+    badgeCount = 0,
+  }: Props = $props();
 
   let pluginsExpanded = $state(true);
 

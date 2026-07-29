@@ -114,7 +114,12 @@ pub fn bin_name(tool: &str) -> String {
 }
 
 pub async fn find_tool(tool: &str) -> Option<PathBuf> {
-    let _timer_start = std::time::Instant::now();
+    find_tool_with_source(tool).await.map(|(path, _)| path)
+}
+
+/// Like `find_tool` but also returns a source tag: "flatpak", "managed", or "system".
+/// Returns `None` if the tool is not found anywhere.
+pub async fn find_tool_with_source(tool: &str) -> Option<(PathBuf, &'static str)> {
     let name = bin_name(tool);
     let version_flag = version_flag_for(tool);
 
@@ -122,18 +127,12 @@ pub async fn find_tool(tool: &str) -> Option<PathBuf> {
     {
         let flatpak_path = PathBuf::from("/app/bin").join(&name);
         if flatpak_path.exists() {
-            tracing::debug!(
-                "[perf] find_tool({}) took {:?}",
-                tool,
-                _timer_start.elapsed()
-            );
-            return Some(flatpak_path);
+            return Some((flatpak_path, "flatpak"));
         }
     }
 
-    // Check managed bin dir first — managed binaries are known-good.
-    let managed = managed_bin_dir().map(|d| d.join(&name));
-    if let Some(ref managed_path) = managed {
+    // Check managed bin dir
+    if let Some(managed_path) = managed_bin_dir().map(|d| d.join(&name)) {
         if managed_path.exists() {
             let check = {
                 let managed = managed_path.clone();
@@ -151,30 +150,18 @@ pub async fn find_tool(tool: &str) -> Option<PathBuf> {
                 .ok()
                 .flatten()
             };
-
             if check.is_some() {
-                tracing::debug!(
-                    "[perf] find_tool({}) took {:?}",
-                    tool,
-                    _timer_start.elapsed()
-                );
-                return Some(managed_path.clone());
+                return Some((managed_path, "managed"));
             }
-            tracing::warn!(
-                "find_tool({}): binary exists at {} but failed to execute",
-                tool,
-                managed_path.display()
-            );
         }
     }
 
-    // Fall back to system PATH. Resolve to an absolute path so callers
-    // (e.g. find_ffmpeg_location) can derive the parent directory.
+    // System PATH
     let result = {
-        let name = name.clone();
+        let name2 = name.clone();
         let vf = version_flag.to_string();
         tokio::task::spawn_blocking(move || {
-            crate::core::process::std_command(&name)
+            crate::core::process::std_command(&name2)
                 .arg(&vf)
                 .stdout(Stdio::null())
                 .stderr(Stdio::null())
@@ -189,19 +176,9 @@ pub async fn find_tool(tool: &str) -> Option<PathBuf> {
 
     if result.is_some() {
         let abs = resolve_absolute_path(&name);
-        tracing::debug!(
-            "[perf] find_tool({}) took {:?}",
-            tool,
-            _timer_start.elapsed()
-        );
-        return Some(abs);
+        return Some((abs, "system"));
     }
 
-    tracing::debug!(
-        "[perf] find_tool({}) took {:?}",
-        tool,
-        _timer_start.elapsed()
-    );
     None
 }
 
@@ -238,47 +215,43 @@ fn version_flag_for(tool: &str) -> &'static str {
     }
 }
 
-pub async fn check_version(tool: &str) -> Option<String> {
-    let _timer_start = std::time::Instant::now();
-    let path = find_tool(tool).await?;
+/// Read the version string from a tool binary at a known path.
+/// This avoids re-running tool discovery when the path is already known.
+pub async fn check_version_at_path(path: &std::path::Path, tool: &str) -> Option<String> {
     let version_flag = version_flag_for(tool);
-    let output = {
-        let path = path.clone();
-        let vf = version_flag.to_string();
-        tokio::task::spawn_blocking(move || {
-            crate::core::process::std_command(&path)
-                .arg(&vf)
-                .stdout(Stdio::piped())
-                .stderr(Stdio::piped())
-                .output()
-        })
-        .await
-        .ok()?
-        .ok()?
-    };
+    let path = path.to_path_buf();
+    let vf = version_flag.to_string();
+    let output = tokio::task::spawn_blocking(move || {
+        crate::core::process::std_command(&path)
+            .arg(&vf)
+            .stdout(Stdio::piped())
+            .stderr(Stdio::piped())
+            .output()
+    })
+    .await
+    .ok()?
+    .ok()?;
 
     if !output.status.success() {
-        tracing::debug!(
-            "[perf] check_version({}) took {:?}",
-            tool,
-            _timer_start.elapsed()
-        );
         return None;
     }
 
     let stdout = String::from_utf8_lossy(&output.stdout);
     let first_line = stdout.lines().next().unwrap_or("");
 
-    let result = if tool == "ffmpeg" || tool == "ffprobe" {
+    if tool == "ffmpeg" || tool == "ffprobe" {
         first_line.split_whitespace().nth(2).map(|s| s.to_string())
-    } else if tool == "yt-dlp" {
-        Some(first_line.trim().to_string())
     } else if tool == "aria2c" {
         first_line.split_whitespace().nth(2).map(|s| s.to_string())
     } else {
         Some(first_line.trim().to_string())
-    };
+    }
+}
 
+pub async fn check_version(tool: &str) -> Option<String> {
+    let _timer_start = std::time::Instant::now();
+    let path = find_tool(tool).await?;
+    let result = check_version_at_path(&path, tool).await;
     tracing::debug!(
         "[perf] check_version({}) took {:?}",
         tool,
