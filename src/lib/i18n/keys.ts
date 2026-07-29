@@ -391,6 +391,9 @@ export type TranslationKeys =
   | 'hotmart.unavailable'
   | 'hotmart.unknown_error'
 
+  | 'league.accept_delay'
+  | 'league.accept_delay_desc'
+  | 'league.accept_delay_instant'
   | 'league.accept_now'
   | 'league.auto_accept'
   | 'league.auto_accept_desc'
@@ -497,6 +500,8 @@ export type TranslationKeys =
   | 'league.pref_top'
   | 'league.pref_top_mid'
   | 'league.pref_unknown'
+  | 'league.premade_source_history'
+  | 'league.premade_source_party'
   | 'league.premades'
   | 'league.ranked_flex'
   | 'league.ranked_solo'

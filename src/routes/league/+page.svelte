@@ -820,6 +820,30 @@
     color: var(--gray);
     }
 
+  .league-page :global(.delay-block) {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 10px;
+    }
+
+  .league-page :global(.slider-row) {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    }
+
+  .league-page :global(.slider-row input[type="range"]) {
+    flex: 1;
+    accent-color: var(--accent);
+    }
+
+  .league-page :global(.slider-edge) {
+    font-size: 11.5px;
+    color: var(--gray);
+    min-width: 26px;
+    }
+
   .league-page :global(.list-hint) {
     font-size: 11.5px;
     }
@@ -1006,6 +1030,11 @@
     gap: 6px;
     flex-wrap: wrap;
     margin-top: 10px;
+    }
+
+  .league-page :global(.premade-source) {
+    font-size: 0.75rem;
+    color: var(--text-muted);
     }
 
   .league-page :global(.gold-summary) {
