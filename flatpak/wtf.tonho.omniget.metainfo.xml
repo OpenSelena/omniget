@@ -42,6 +42,11 @@
   </branding>
   <content_rating type="oars-1.1" />
   <releases>
+    <release version="0.8.5" date="2026-07-31">
+      <description>
+        <p>The League page now shows loading skeletons instead of pretending to be empty: the match history no longer says "no matches" while it is still fetching, and the profile, match details, win analysis and scouting draw placeholder shapes that respect the reduced-motion preference. Behind it, talking to the League client got cheaper — one shared HTTP client instead of building a new one per request, no extra liveness probe when the push connection already proves the client is alive, and on Windows the expensive process query only runs after a cheap check confirms the client is actually running. The Telegram section speaks all eleven languages again: an earlier change had left a duplicate block in the translation files that silently swallowed sixty-five strings, and the original translations were restored from history rather than replaced with English. Portable mode on macOS now says plainly in settings that the WebView keeps its session data under the user profile and cannot be redirected — being honest about the limitation instead of erasing data to hide it. And the mascot panel's square corners no longer poke past the rounded corners of the home card.</p>
+      </description>
+    </release>
     <release version="0.8.4" date="2026-07-31">
       <description>
         <p>Two fixes. Hotmart's browser login could report success while you were still sitting on the login page: the success check matched the target hostname as a substring of the visited host and path, and DoubleClick's ad tracker embeds the login redirect target inside its path as matrix parameters, unencoded — so a tracking request fired the success signal, the app started a 30-second wait for a session cookie that could not exist yet, and the login ended with zero cookies. The pattern now has to match the real hostname, exactly or as a subdomain, with an optional path prefix. And when Windows refuses to load a plugin, the error now carries the operating system's reason — a missing dependency, a blocked or corrupted file — instead of the bare "LoadLibraryExW failed" that gave nothing to act on.</p>
