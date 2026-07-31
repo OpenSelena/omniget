@@ -42,6 +42,11 @@
   </branding>
   <content_rating type="oars-1.1" />
   <releases>
+    <release version="0.8.4" date="2026-07-31">
+      <description>
+        <p>Two fixes. Hotmart's browser login could report success while you were still sitting on the login page: the success check matched the target hostname as a substring of the visited host and path, and DoubleClick's ad tracker embeds the login redirect target inside its path as matrix parameters, unencoded — so a tracking request fired the success signal, the app started a 30-second wait for a session cookie that could not exist yet, and the login ended with zero cookies. The pattern now has to match the real hostname, exactly or as a subdomain, with an optional path prefix. And when Windows refuses to load a plugin, the error now carries the operating system's reason — a missing dependency, a blocked or corrupted file — instead of the bare "LoadLibraryExW failed" that gave nothing to act on.</p>
+      </description>
+    </release>
     <release version="0.8.3" date="2026-07-30">
       <description>
         <p>Second pass at the freeze that could lock the window while the League page was open. The page mounts all eight panels at once and keeps them mounted so that switching tabs never loses your place, but that also meant every state change made all eight re-evaluate and redraw — and the same thread draws the app navigation, so saturating it froze everything, including the menu. An inactive panel now keeps its instance, state and effects while rendering nothing: auto runes still applies from any tab, spell timers survive, and the drawing cost drops to a single panel. The live tab was also being mounted twice, each copy running its own timers. On the backend, lobby and ready check updates are now coalesced the same way champion select already was — the lobby republishes on every queue estimate tick and the ready check on every countdown tick — client messages are filtered by resource before being parsed instead of after, since the subscription receives events from every plugin the client runs, and settings are cached briefly instead of being read from disk on every event. Looking up the client no longer holds its lock across a network round trip, which had put every League command in a single queue behind one request.</p>
