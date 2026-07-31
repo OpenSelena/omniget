@@ -1047,7 +1047,7 @@
         <p class="qr-instruction">{$t("telegram.qr_instruction")}</p>
       </div>
 
-      <div class="separator">
+      <div class="or-divider">
         <span class="separator-line"></span>
         <span class="separator-text">{$t("telegram.or_separator")}</span>
         <span class="separator-line"></span>
@@ -1732,7 +1732,7 @@
     line-height: 1.6;
   }
 
-  .separator {
+  .or-divider {
     display: flex;
     align-items: center;
     gap: var(--padding);
