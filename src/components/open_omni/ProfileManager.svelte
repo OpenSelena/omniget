@@ -118,8 +118,9 @@
     <div class="error-message">{error}</div>
   {/if}
 
-  <div class="field-card add-profile-card">
+  <div class="add-profile-field">
     <div class="input-with-button">
+      <svg class="field-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
       <input
         type="text"
         bind:value={newUrl}
@@ -172,106 +173,112 @@
 {/if}
 
 <style>
-  /* Centered column, same width budget as DownloadManager so tabs
-     don't visibly jump width when switching. */
+  /* Reads --glass-*, --accent-* custom properties inherited from the
+     page shell (src/routes/open-omni/+page.svelte). */
   .profile-manager {
-    padding: 0;
-    max-width: 460px;
+    max-width: 440px;
     width: 100%;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
   }
 
   .pill-group {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
     gap: 8px;
-    margin-bottom: 20px;
   }
 
   .pill-group button {
-    padding: 7px 16px;
-    border-radius: 16px;
-    border: 1px solid var(--input-border);
-    background: var(--button-elevated);
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-surface-strong);
     color: var(--text);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
   }
 
   .pill-group button:hover:not(.active) {
-    border-color: var(--accent);
+    border-color: var(--accent-line);
   }
 
   .pill-group button.active {
-    background: var(--accent);
-    border-color: var(--accent);
+    background: var(--accent-gradient);
+    border-color: transparent;
     color: var(--on-accent);
     font-weight: 500;
+    box-shadow: 0 3px 12px -4px var(--accent-glow);
   }
 
   .error-message {
     padding: 10px 14px;
-    margin-bottom: 20px;
     background: var(--error);
     color: var(--on-error);
-    border-radius: var(--border-radius);
+    border-radius: var(--glass-radius-sm, 10px);
     font-size: 13px;
     text-align: center;
   }
 
-  .field-card {
-    background: var(--bg);
-    border: 1px solid var(--input-border);
-    border-radius: 10px;
-    padding: 16px 18px;
-  }
-
-  .add-profile-card {
-    margin-bottom: 20px;
-  }
-
   .input-with-button {
     display: flex;
-    gap: 8px;
+    align-items: center;
+    gap: 10px;
+    background: var(--glass-surface-strong);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--glass-radius, 14px);
+    padding: 0 8px 0 14px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .input-with-button:focus-within {
+    border-color: var(--accent-line);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .field-icon {
+    color: var(--text-secondary);
+    flex-shrink: 0;
   }
 
   .input-with-button input {
     flex: 1;
-    padding: 10px 14px;
-    background: var(--input-bg);
-    border: 1px solid var(--input-border);
-    border-radius: 8px;
+    padding: 12px 0;
+    background: transparent;
+    border: none;
     color: var(--text);
     font-size: 14px;
     box-sizing: border-box;
   }
 
-  .input-with-button input:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 1px;
+  .input-with-button input:focus {
+    outline: none;
   }
 
   .add-btn {
-    padding: 6px 16px;
-    border-radius: 16px;
+    padding: 8px 18px;
+    border-radius: 999px;
     border: none;
-    background: var(--accent);
+    background: var(--accent-gradient);
     color: var(--on-accent);
     font-weight: 500;
     font-size: 13px;
     cursor: pointer;
     white-space: nowrap;
+    box-shadow: 0 3px 12px -4px var(--accent-glow);
   }
 
   .add-btn:hover:not(:disabled) {
-    opacity: 0.9;
+    box-shadow: 0 4px 16px -4px var(--accent-glow);
   }
 
   .add-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    box-shadow: none;
   }
 
   .profiles-list {
@@ -288,9 +295,14 @@
     justify-content: space-between;
     align-items: center;
     padding: 10px 14px;
-    background: var(--bg);
-    border: 1px solid var(--input-border);
-    border-radius: 10px;
+    background: var(--glass-surface-strong);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--glass-radius, 14px);
+    transition: border-color 0.15s ease;
+  }
+
+  .profile-item:hover {
+    border-color: var(--accent-line);
   }
 
   .profile-info {
@@ -304,7 +316,7 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: var(--accent);
+    background: var(--accent-gradient);
     color: var(--on-accent);
     display: flex;
     align-items: center;
@@ -312,6 +324,7 @@
     font-weight: 500;
     font-size: 13px;
     flex-shrink: 0;
+    box-shadow: 0 3px 10px -3px var(--accent-glow);
   }
 
   .profile-name {
@@ -335,7 +348,7 @@
 
   .delete-btn {
     padding: 5px 12px;
-    border-radius: 12px;
+    border-radius: 999px;
     border: 1px solid var(--error);
     background: transparent;
     color: var(--error);
@@ -352,7 +365,7 @@
   .loading, .empty {
     text-align: center;
     color: var(--text-secondary);
-    padding: 28px 0;
+    padding: 20px 0;
     font-size: 13px;
     margin: 0;
   }
@@ -360,7 +373,7 @@
   .confirm-overlay {
     position: fixed;
     inset: 0;
-    background: var(--dialog-backdrop, rgba(0, 0, 0, 0.5));
+    background: var(--dialog-backdrop, rgba(0, 0, 0, 0.4));
     display: flex;
     align-items: center;
     justify-content: center;
@@ -368,13 +381,16 @@
   }
 
   .confirm-dialog {
-    background: var(--popup-bg, var(--button-elevated));
-    border: 1px solid var(--content-border);
-    border-radius: var(--border-radius);
-    padding: 22px;
+    background: var(--glass-surface-strong);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--glass-radius-lg, 20px);
+    padding: 24px;
     max-width: 380px;
     width: 90%;
     text-align: center;
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    box-shadow: 0 18px 40px -20px rgba(0, 0, 0, 0.35);
   }
 
   .confirm-title {
@@ -401,16 +417,16 @@
   .confirm-actions button {
     flex: 1;
     padding: 9px 12px;
-    border-radius: 16px;
+    border-radius: 999px;
     font-weight: 500;
     font-size: 13px;
     cursor: pointer;
   }
 
   .confirm-no {
-    background: var(--bg);
+    background: transparent;
     color: var(--text);
-    border: 1px solid var(--input-border);
+    border: 1px solid var(--glass-border);
   }
 
   .confirm-yes {

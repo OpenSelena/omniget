@@ -54,9 +54,10 @@
     </div>
   {/if}
 
-  <div class="field-card">
+  <div class="settings-field">
     <label for="output-dir">Output directory</label>
     <div class="input-with-button">
+      <svg class="field-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
       <input id="output-dir" type="text" bind:value={outputDir} placeholder="E:\OmniGet" />
       <button type="button" class="browse-btn" onclick={browseOutputDir}>
         Browse
@@ -64,9 +65,10 @@
     </div>
   </div>
 
-  <div class="field-card">
+  <div class="settings-field">
     <label for="cookies-file">Cookies file <span class="optional-tag">(optional, needed for Stories and Highlights)</span></label>
     <div class="input-with-button">
+      <svg class="field-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
       <input id="cookies-file" type="text" bind:value={cookiesFile} placeholder="instagram.com_cookies.txt" />
       <button type="button" class="browse-btn" onclick={browseCookiesFile}>
         Browse
@@ -80,18 +82,20 @@
 </div>
 
 <style>
-  /* Centered column, same width budget as the other tabs. */
+  /* Reads --glass-*, --accent-* custom properties inherited from the
+     page shell (src/routes/open-omni/+page.svelte). */
   .settings-manager {
-    padding: 0;
-    max-width: 460px;
+    max-width: 440px;
     width: 100%;
     margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
   }
 
   .status-alert {
     padding: 10px 14px;
-    margin-bottom: 20px;
-    border-radius: var(--border-radius);
+    border-radius: var(--glass-radius-sm, 10px);
     font-size: 13px;
     text-align: center;
   }
@@ -106,82 +110,95 @@
     color: var(--on-error);
   }
 
-  .field-card {
-    background: var(--bg);
-    border: 1px solid var(--input-border);
-    border-radius: 10px;
-    padding: 16px 18px;
-    margin-bottom: 20px;
-  }
-
-  .field-card label {
+  .settings-field label {
     display: block;
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 500;
-    color: var(--text);
+    color: var(--text-secondary);
     margin-bottom: 8px;
-    text-align: center;
   }
 
   .optional-tag {
     font-weight: 400;
-    color: var(--text-secondary);
+    color: var(--text-muted, var(--text-secondary));
   }
 
   .input-with-button {
     display: flex;
-    gap: 8px;
+    align-items: center;
+    gap: 10px;
+    background: var(--glass-surface-strong);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--glass-radius, 14px);
+    padding: 0 8px 0 14px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .input-with-button:focus-within {
+    border-color: var(--accent-line);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .field-icon {
+    color: var(--text-secondary);
+    flex-shrink: 0;
   }
 
   .input-with-button input {
     flex: 1;
-    padding: 10px 14px;
-    background: var(--input-bg);
-    border: 1px solid var(--input-border);
-    border-radius: 8px;
+    padding: 12px 0;
+    background: transparent;
+    border: none;
     color: var(--text);
     font-size: 14px;
     box-sizing: border-box;
   }
 
-  .input-with-button input:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 1px;
+  .input-with-button input:focus {
+    outline: none;
   }
 
   .browse-btn {
-    padding: 6px 16px;
-    border-radius: 16px;
-    border: 1px solid var(--input-border);
-    background: var(--button-elevated);
+    padding: 7px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-surface);
     color: var(--text);
     font-size: 13px;
     cursor: pointer;
     white-space: nowrap;
+    transition: border-color 0.15s ease;
   }
 
   .browse-btn:hover {
-    border-color: var(--accent);
+    border-color: var(--accent-line);
   }
 
   .primary-btn {
     width: 100%;
-    padding: 12px;
+    padding: 13px;
     border: none;
-    border-radius: var(--border-radius);
+    border-radius: var(--glass-radius, 14px);
     font-weight: 500;
     font-size: 14px;
     cursor: pointer;
-    background: var(--accent);
+    background: var(--accent-gradient);
     color: var(--on-accent);
+    box-shadow: 0 6px 20px -6px var(--accent-glow);
+    transition: box-shadow 0.12s ease, transform 0.12s ease;
   }
 
   .primary-btn:hover:not(:disabled) {
-    opacity: 0.9;
+    box-shadow: 0 8px 24px -6px var(--accent-glow);
+  }
+
+  .primary-btn:active:not(:disabled) {
+    transform: scale(0.99);
   }
 
   .primary-btn:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+    box-shadow: none;
   }
 </style>

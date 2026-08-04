@@ -189,6 +189,14 @@
       contentType = 'photos';
     }
   });
+
+  const CONTENT_TYPES: Array<{ key: string; label: string }> = [
+    { key: 'all', label: 'All' },
+    { key: 'photos', label: 'Photos' },
+    { key: 'videos', label: 'Videos' },
+    { key: 'stories', label: 'Stories' },
+    { key: 'highlights', label: 'Highlights' },
+  ];
 </script>
 
 <div class="download-manager">
@@ -205,16 +213,19 @@
     </div>
   {/if}
 
-  <div class="field-card">
+  <div class="url-field">
     <label for="profile-url">Profile URL or handle</label>
-    <input
-      id="profile-url"
-      type="text"
-      bind:value={url}
-      placeholder="https://instagram.com/username"
-      disabled={downloading}
-      oninput={clearSelectedProfile}
-    />
+    <div class="url-input-shell">
+      <svg class="url-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      <input
+        id="profile-url"
+        type="text"
+        bind:value={url}
+        placeholder="https://instagram.com/username"
+        disabled={downloading}
+        oninput={clearSelectedProfile}
+      />
+    </div>
     {#if !url.trim() && savedProfiles.length > 0}
       <div class="chip-list">
         {#each savedProfiles as profile, index}
@@ -243,11 +254,17 @@
   <div class="segment-block">
     <span class="segment-label">Content type</span>
     <div class="pill-group">
-      <button type="button" class:active={contentType === 'all'} onclick={() => contentType = 'all'} disabled={downloading}>All</button>
-      <button type="button" class:active={contentType === 'photos'} onclick={() => contentType = 'photos'} disabled={downloading}>Photos</button>
-      <button type="button" class:active={contentType === 'videos'} onclick={() => contentType = 'videos'} disabled={downloading}>Videos</button>
-      <button type="button" class:active={contentType === 'stories'} onclick={() => contentType = 'stories'} disabled={downloading || !isInstagram} title={isInstagram ? '' : 'Instagram only'}>Stories</button>
-      <button type="button" class:active={contentType === 'highlights'} onclick={() => contentType = 'highlights'} disabled={downloading || !isInstagram} title={isInstagram ? '' : 'Instagram only'}>Highlights</button>
+      {#each CONTENT_TYPES as type}
+        <button
+          type="button"
+          class:active={contentType === type.key}
+          onclick={() => (contentType = type.key)}
+          disabled={downloading || ((type.key === 'stories' || type.key === 'highlights') && !isInstagram)}
+          title={(type.key === 'stories' || type.key === 'highlights') && !isInstagram ? 'Instagram only' : ''}
+        >
+          {type.label}
+        </button>
+      {/each}
     </div>
   </div>
 
@@ -314,30 +331,33 @@
 </div>
 
 <style>
-  /* Centered column instead of left-hugging the container. */
+  /*
+    Reads --glass-*, --accent-* custom properties inherited from the
+    page shell (src/routes/open-omni/+page.svelte). No local card
+    wrappers — the parent glass panel is the only surface; this
+    component only lays out content inside it.
+  */
   .download-manager {
-    padding: 0;
-    max-width: 460px;
+    max-width: 440px;
     width: 100%;
     margin: 0 auto;
     display: flex;
     flex-direction: column;
-    align-items: stretch;
+    gap: 1.5rem;
   }
 
   .deps-check {
     padding: 10px 14px;
-    margin-bottom: 1.25rem;
-    border-radius: var(--border-radius);
+    border-radius: var(--glass-radius-sm, 10px);
     font-size: 13px;
     font-weight: 500;
     text-align: center;
   }
 
   .deps-check.ok {
-    background: var(--button-elevated);
+    background: var(--glass-surface-strong);
     color: var(--text-secondary);
-    border: 1px solid var(--content-border);
+    border: 1px solid var(--glass-border);
   }
 
   .deps-check.error {
@@ -347,8 +367,7 @@
 
   .status-alert {
     padding: 10px 14px;
-    margin-bottom: 1.25rem;
-    border-radius: var(--border-radius);
+    border-radius: var(--glass-radius-sm, 10px);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -377,41 +396,50 @@
     color: inherit;
   }
 
-  .field-card {
-    background: var(--bg);
-    border: 1px solid var(--input-border);
-    border-radius: 10px;
-    padding: 16px 18px;
-    margin-bottom: 20px;
-  }
-
-  .field-card label {
+  .url-field label {
     display: block;
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 500;
-    color: var(--text);
+    color: var(--text-secondary);
     margin-bottom: 8px;
-    text-align: center;
   }
 
-  .field-card input {
-    width: 100%;
-    padding: 10px 14px;
-    background: var(--input-bg);
-    border: 1px solid var(--input-border);
-    border-radius: 8px;
+  .url-input-shell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--glass-surface-strong);
+    border: 1px solid var(--glass-border);
+    border-radius: var(--glass-radius, 14px);
+    padding: 0 14px;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .url-input-shell:focus-within {
+    border-color: var(--accent-line);
+    box-shadow: 0 0 0 3px var(--accent-soft);
+  }
+
+  .url-icon {
+    color: var(--text-secondary);
+    flex-shrink: 0;
+  }
+
+  .url-input-shell input {
+    flex: 1;
+    padding: 12px 0;
+    background: transparent;
+    border: none;
     color: var(--text);
     font-size: 14px;
     box-sizing: border-box;
-    text-align: center;
   }
 
-  .field-card input:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 1px;
+  .url-input-shell input:focus {
+    outline: none;
   }
 
-  .field-card input:disabled {
+  .url-input-shell input:disabled {
     opacity: 0.6;
     cursor: not-allowed;
   }
@@ -420,8 +448,7 @@
     font-size: 12.5px;
     color: var(--text-secondary);
     font-style: italic;
-    margin: 14px 0 0;
-    text-align: center;
+    margin: 12px 0 0;
   }
 
   .inline-link {
@@ -442,33 +469,34 @@
   .chip-list {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
     gap: 8px;
-    margin-top: 14px;
+    margin-top: 12px;
   }
 
   .chip {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 5px 14px;
-    border-radius: 16px;
-    border: 1px solid var(--input-border);
-    background: var(--button-elevated);
+    padding: 6px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-surface-strong);
     color: var(--text);
     font-size: 12.5px;
     cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
   }
 
   .chip:hover:not(:disabled) {
-    border-color: var(--accent);
+    border-color: var(--accent-line);
   }
 
   .chip.selected {
-    background: var(--accent);
-    border-color: var(--accent);
+    background: var(--accent-gradient);
+    border-color: transparent;
     color: var(--on-accent);
     font-weight: 500;
+    box-shadow: 0 3px 12px -4px var(--accent-glow);
   }
 
   .chip:disabled {
@@ -480,99 +508,98 @@
     font-weight: bold;
   }
 
-  .segment-block {
-    margin-bottom: 20px;
-    text-align: center;
-  }
-
   .segment-label {
     display: block;
-    font-size: 13px;
+    font-size: 12.5px;
     font-weight: 500;
-    color: var(--text);
+    color: var(--text-secondary);
     margin-bottom: 10px;
   }
 
   .pill-group {
     display: flex;
     flex-wrap: wrap;
-    justify-content: center;
     gap: 8px;
   }
 
   .pill-group button {
-    padding: 7px 16px;
-    border-radius: 16px;
-    border: 1px solid var(--input-border);
-    background: var(--button-elevated);
+    padding: 8px 16px;
+    border-radius: 999px;
+    border: 1px solid var(--glass-border);
+    background: var(--glass-surface-strong);
     color: var(--text);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
+    transition: border-color 0.15s ease, background 0.15s ease;
   }
 
   .pill-group button:hover:not(:disabled):not(.active) {
-    border-color: var(--accent);
+    border-color: var(--accent-line);
   }
 
   .pill-group button.active {
-    background: var(--accent);
-    border-color: var(--accent);
+    background: var(--accent-gradient);
+    border-color: transparent;
     color: var(--on-accent);
+    box-shadow: 0 3px 12px -4px var(--accent-glow);
   }
 
   .pill-group button:disabled {
-    opacity: 0.45;
+    opacity: 0.4;
     cursor: not-allowed;
   }
 
   .field-warning {
     font-size: 12px;
     color: var(--error);
-    margin: 8px 0 0;
-    text-align: center;
-  }
-
-  .button-group {
-    margin: 20px 0 4px;
+    margin: -0.75rem 0 0;
   }
 
   .primary-btn {
     width: 100%;
-    padding: 12px;
+    padding: 13px;
     border: none;
-    border-radius: var(--border-radius);
+    border-radius: var(--glass-radius, 14px);
     font-weight: 500;
     font-size: 14px;
     cursor: pointer;
-    background: var(--accent);
+    background: var(--accent-gradient);
     color: var(--on-accent);
+    box-shadow: 0 6px 20px -6px var(--accent-glow);
+    transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
   }
 
   .primary-btn:hover:not(:disabled) {
-    opacity: 0.9;
+    box-shadow: 0 8px 24px -6px var(--accent-glow);
+  }
+
+  .primary-btn:active:not(:disabled) {
+    transform: scale(0.99);
   }
 
   .primary-btn:disabled {
-    opacity: 0.5;
+    opacity: 0.45;
     cursor: not-allowed;
+    box-shadow: none;
   }
 
   .stop-btn {
     background: var(--error);
     color: var(--on-error);
+    box-shadow: 0 6px 20px -6px color-mix(in srgb, var(--error) 45%, transparent);
   }
 
   .ring-wrap {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 22px 0 6px;
+    padding-top: 4px;
   }
 
   .om-ring-track {
     fill: none;
-    stroke: var(--button-elevated);
+    stroke: var(--glass-surface-strong);
     stroke-width: 12;
   }
 
@@ -584,6 +611,7 @@
     transform: rotate(-90deg);
     transform-origin: 70px 70px;
     transition: stroke-dashoffset 0.4s ease;
+    filter: drop-shadow(0 0 6px var(--accent-glow));
   }
 
   .om-ring.indeterminate .om-ring-progress {
