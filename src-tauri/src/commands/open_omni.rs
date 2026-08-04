@@ -467,7 +467,11 @@ fn run_single_content_download(
     cmd.arg("--Print")
         .arg("after:FILE_OK:{filename}.{extension}");
     cmd.arg("--sleep-request")
-        .arg(if platform_name == "Instagram" { "6-12" } else { "2" });
+        .arg(if platform_name == "Instagram" {
+            "6-12"
+        } else {
+            "2"
+        });
     cmd.arg("--http-timeout").arg("30");
 
     cmd.arg(url);
