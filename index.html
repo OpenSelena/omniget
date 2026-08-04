@@ -1,0 +1,1659 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OmniGet — Universal Downloader & Media Player for Desktop</title>
+  <meta name="description" content="OmniGet is a free, open-source desktop app for Windows, macOS, and Linux. Download Udemy courses, YouTube videos, music, books, and 1,800+ sites with no command line." />
+  <meta name="author" content="sayfalse, tonhowtf" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="OmniGet — Download Courses, Videos, Music & Books" />
+  <meta property="og:description" content="Free, open-source desktop downloader & player. Supports 1,800+ sites, Udemy, Hotmart, Bilibili 4K, EPUB/PDF reader, and OpenMint social archiver under GPL-3.0." />
+  <meta property="og:image" content="https://raw.githubusercontent.com/copyrightnews/omniget/main/assets/readme/en/home-hero.png" />
+  <meta property="og:url" content="https://github.com/copyrightnews/omniget" />
+
+  <!-- Canonical -->
+  <link rel="canonical" href="https://github.com/copyrightnews/omniget" />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/copyrightnews/omniget/main/static/favicon.png" />
+  <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/copyrightnews/omniget/main/static/favicon.png" />
+
+  <!-- Google Fonts: Inter, Space Grotesk, JetBrains Mono, Fira Code -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Official Real Web Icon Library (Lucide CDN, version-pinned) -->
+  <script src="https://unpkg.com/lucide@0.474.0/dist/umd/lucide.min.js"></script>
+
+  <style>
+    /* ==========================================================================
+       PURE LIGHT THEME DESIGN SYSTEM (HIGH CONTRAST & PREMIUM TYPOGRAPHY)
+       ========================================================================== */
+    :root {
+      --brand-orange: #FF7D38;
+      --brand-orange-hover: #ff9457;
+      --brand-blue: #0284c7;
+      --brand-emerald: #10b981;
+
+      --font-display: 'Space Grotesk', -apple-system, sans-serif;
+      --font-body: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-pill: 9999px;
+
+      --transition-fast: 0.15s ease;
+      --transition-smooth: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+      /* Pure Light Mode Tokens */
+      --bg-page: #f8fafc;
+      --bg-nav: rgba(255, 255, 255, 0.92);
+      --bg-card: #ffffff;
+      --bg-card-hover: #f1f5f9;
+      --bg-code: #0a0f1d;
+
+      --text-head: #0f172a;
+      --text-body: #334155;
+      --text-muted: #475569;
+      --text-dim: #64748b;
+
+      --border-line: #e2e8f0;
+      --border-glow: rgba(255, 125, 56, 0.4);
+      --shadow-ambient: rgba(15, 23, 42, 0.06);
+
+      --faq-bg: #ffffff;
+      --faq-hover: #f8fafc;
+      --faq-ans-bg: #f1f5f9;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      background-color: var(--bg-page);
+      color: var(--text-body);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      /* NOTE: no global text-align here — components below set their own alignment
+         explicitly via .text-center, so nothing needs "!important" overrides. */
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Utility: explicit centering, applied only where actually wanted */
+    .text-center { text-align: center; }
+
+    /* Floating Pill Header Navbar */
+    .header-nav {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      width: calc(100% - 32px);
+      max-width: 1020px;
+      background: var(--bg-nav);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-line);
+      border-radius: var(--radius-pill);
+      padding: 8px 24px;
+      box-shadow: 0 10px 30px var(--shadow-ambient);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--text-head);
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+
+    .nav-brand img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      list-style: none;
+    }
+
+    .nav-link {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      transition: var(--transition-fast);
+      background: none;
+      border: none;
+      font-family: inherit;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--text-head);
+      background: rgba(15, 23, 42, 0.05);
+    }
+
+    .nav-link:focus-visible,
+    .nav-brand:focus-visible,
+    .faq-question:focus-visible,
+    .demo-tab-btn:focus-visible,
+    .om-tab-btn:focus-visible,
+    .om-platform-btn:focus-visible,
+    .mobile-menu-toggle:focus-visible {
+      outline: 2px solid var(--brand-orange);
+      outline-offset: 2px;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Mobile hamburger toggle (hidden on desktop) */
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: 1px solid var(--border-line);
+      border-radius: var(--radius-pill);
+      width: 38px;
+      height: 38px;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-head);
+    }
+
+    /* Mobile dropdown panel for nav links */
+    .mobile-nav-panel {
+      display: none;
+      position: absolute;
+      top: calc(100% + 10px);
+      left: 0;
+      right: 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border-line);
+      border-radius: var(--radius-md);
+      box-shadow: 0 10px 30px var(--shadow-ambient);
+      padding: 8px;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .mobile-nav-panel.open {
+      display: flex;
+    }
+
+    .mobile-nav-panel .nav-link {
+      text-align: left;
+      width: 100%;
+      padding: 10px 14px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 38px;
+      padding: 0 18px;
+      font-family: var(--font-body);
+      font-size: 13.5px;
+      font-weight: 600;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: var(--transition-fast);
+      user-select: none;
+    }
+
+    .btn-primary {
+      background: var(--brand-orange);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(255, 125, 56, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: var(--brand-orange-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: #ffffff;
+      color: var(--text-head);
+      border: 1px solid var(--border-line);
+      box-shadow: 0 2px 6px var(--shadow-ambient);
+    }
+
+    .btn-secondary:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    /* Tab Page Views Switcher */
+    .page-tab-content {
+      display: none;
+    }
+
+    .page-tab-content.active {
+      display: block;
+      animation: pageFadeIn 0.25s ease-out;
+    }
+
+    @keyframes pageFadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Hero Section */
+    .hero-section {
+      padding-top: 130px;
+      padding-bottom: 50px;
+    }
+
+    .hero-pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 125, 56, 0.1);
+      border: 1px solid rgba(255, 125, 56, 0.25);
+      color: var(--brand-orange);
+      padding: 4px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+
+    .hero-headline {
+      font-family: var(--font-display);
+      font-size: 3.2rem;
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      color: var(--text-head);
+      max-width: 820px;
+      margin: 0 auto 20px;
+    }
+
+    .hero-headline span {
+      color: var(--brand-orange);
+    }
+
+    .hero-subhead {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 620px;
+      margin: 0 auto 32px;
+      line-height: 1.6;
+    }
+
+    .hero-cta-group {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .hero-platform-sub {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-bottom: 40px;
+    }
+
+    /* Tabbed Showcase Frame */
+    .demo-tab-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-line);
+      padding: 6px;
+      border-radius: var(--radius-pill);
+      width: fit-content;
+      margin: 0 auto 24px;
+      box-shadow: 0 4px 12px var(--shadow-ambient);
+      flex-wrap: wrap;
+    }
+
+    .demo-tab-btn {
+      padding: 8px 18px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      font-family: inherit;
+    }
+
+    .demo-tab-btn.active {
+      background: var(--brand-orange);
+      color: #ffffff;
+    }
+
+    .demo-showcase-frame {
+      max-width: 960px;
+      margin: 0 auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border-line);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 20px 50px var(--shadow-ambient);
+    }
+
+    .demo-frame-bar {
+      background: #f1f5f9;
+      border-bottom: 1px solid var(--border-line);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .demo-pane {
+      display: none;
+    }
+
+    .demo-pane.active {
+      display: block;
+    }
+
+    .demo-pane img {
+      width: 100%;
+      height: auto;
+      display: block;
+      cursor: pointer;
+    }
+
+    /* Grid Sections */
+    .section-wrap {
+      padding: 60px 0;
+      border-top: 1px solid var(--border-line);
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--text-head);
+      letter-spacing: -0.02em;
+    }
+
+    .section-desc {
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-line);
+      border-radius: var(--radius-md);
+      padding: 26px;
+      box-shadow: 0 4px 16px var(--shadow-ambient);
+      transition: var(--transition-fast);
+      text-align: left;
+    }
+
+    .feature-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--brand-orange);
+      transform: translateY(-2px);
+    }
+
+    /* Distinct Tinted Icon Boxes */
+    .icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+
+    .icon-box i {
+      width: 22px;
+      height: 22px;
+      stroke-width: 2.2;
+    }
+
+    .icon-purple { background: #f3e8ff; border: 1px solid #d8b4fe; color: #7e22ce; }
+    .icon-amber { background: #fef3c7; border: 1px solid #fde047; color: #b45309; }
+    .icon-red { background: #ffe4e6; border: 1px solid #fecdd3; color: #be123c; }
+    .icon-cyan { background: #e0f2fe; border: 1px solid #bae6fd; color: #0369a1; }
+    .icon-emerald { background: #dcfce7; border: 1px solid #86efac; color: #15803d; }
+    .icon-fuchsia { background: #fae8ff; border: 1px solid #f5d0fe; color: #a21caf; }
+
+    .feature-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-head);
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Release Notes Cards */
+    .release-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-line);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      box-shadow: 0 4px 20px var(--shadow-ambient);
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .release-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-line);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .release-badge {
+      background: rgba(255, 125, 56, 0.12);
+      border: 1px solid rgba(255, 125, 56, 0.3);
+      color: var(--brand-orange);
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .release-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .release-item h4 {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-head);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .release-item ul {
+      list-style-type: disc;
+      padding-left: 20px;
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    .release-item li {
+      margin-bottom: 6px;
+    }
+
+    /* Condensed release summary shown on Home (links out to full notes) */
+    .release-summary-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-line);
+      border-radius: var(--radius-lg);
+      padding: 28px 32px;
+      box-shadow: 0 4px 20px var(--shadow-ambient);
+      margin-top: 20px;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .release-summary-card ul {
+      list-style-type: disc;
+      padding-left: 20px;
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-top: 10px;
+    }
+
+    /* OpenMint High-Contrast Crisp Badge */
+    .openmint-badge {
+      font-family: var(--font-body);
+      font-size: 12px;
+      font-weight: 600;
+      background: #e0f2fe;
+      color: #0284c7;
+      border: 1px solid #7dd3fc;
+      padding: 4px 14px;
+      border-radius: var(--radius-pill);
+      display: inline-block;
+      margin-bottom: 14px;
+      letter-spacing: 0.01em;
+    }
+
+    .demo-disclaimer-badge {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      font-weight: 600;
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde047;
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin: 14px auto 0;
+      width: fit-content;
+    }
+
+    /* ==========================================================================
+       OPENMINT LIVE INTERACTIVE HTML DEMO STYLES
+       ========================================================================== */
+    .openmint-live-app {
+      background: #f8fafc;
+      border: 1px solid var(--border-line);
+      border-radius: var(--radius-lg);
+      padding: 36px 40px;
+      max-width: 900px;
+      margin: 0 auto 30px;
+      box-shadow: 0 10px 30px var(--shadow-ambient);
+      text-align: left;
+    }
+
+    .om-app-title {
+      font-family: var(--font-body);
+      font-size: 26px;
+      font-weight: 700;
+      color: #0f172a;
+      line-height: 1.2;
+    }
+
+    .om-app-subtitle {
+      font-size: 13.5px;
+      color: #64748b;
+      margin-top: 4px;
+      margin-bottom: 24px;
+    }
+
+    .om-main-tabs {
+      display: flex;
+      gap: 28px;
+      border-bottom: 1px solid #e2e8f0;
+      margin-bottom: 28px;
+    }
+
+    .om-tab-btn {
+      background: none;
+      border: none;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 600;
+      color: #64748b;
+      padding-bottom: 10px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: var(--transition-fast);
+    }
+
+    .om-tab-btn.active {
+      color: #2563eb;
+      border-bottom-color: #2563eb;
+    }
+
+    .om-field-group {
+      margin-bottom: 20px;
+    }
+
+    .om-label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+      margin-bottom: 8px;
+    }
+
+    .om-input-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .om-input {
+      flex: 1;
+      height: 42px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 0 14px;
+      font-family: var(--font-body);
+      font-size: 13.5px;
+      color: #0f172a;
+      outline: none;
+      transition: var(--transition-fast);
+    }
+
+    .om-input:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    }
+
+    .om-subtext {
+      font-size: 12px;
+      color: #64748b;
+      margin-top: 6px;
+    }
+
+    .om-subtext a {
+      color: #2563eb;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+
+    .om-browse-btn {
+      height: 42px;
+      padding: 0 18px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .om-browse-btn:hover {
+      background: #f1f5f9;
+      border-color: #94a3b8;
+    }
+
+    .om-segmented-group {
+      display: inline-flex;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 3px;
+      gap: 4px;
+    }
+
+    .om-type-btn {
+      padding: 6px 14px;
+      border-radius: 6px;
+      background: transparent;
+      border: none;
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 500;
+      color: #64748b;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .om-type-btn.active {
+      background: #ffffff;
+      color: #0f172a;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      font-weight: 600;
+    }
+
+    .om-action-row {
+      display: flex;
+      gap: 14px;
+      margin-top: 28px;
+    }
+
+    .om-save-btn {
+      flex: 1;
+      height: 44px;
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 600;
+      color: #334155;
+      cursor: pointer;
+      transition: var(--transition-fast);
+    }
+
+    .om-save-btn:hover {
+      background: #f1f5f9;
+    }
+
+    .om-start-btn {
+      flex: 1;
+      height: 44px;
+      background: #60a5fa;
+      border: none;
+      border-radius: 8px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      font-weight: 600;
+      color: #ffffff;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      box-shadow: 0 4px 12px rgba(96, 165, 250, 0.35);
+    }
+
+    .om-start-btn:hover {
+      background: #3b82f6;
+    }
+
+    /* Live Progress Log Box */
+    .om-progress-box {
+      margin-top: 20px;
+      background: #090d16;
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: #38bdf8;
+      display: none;
+    }
+
+    .om-progress-box.active {
+      display: block;
+      animation: pageFadeIn 0.2s ease-out;
+    }
+
+    /* Sub-tabs for Profiles View */
+    .om-platform-tabs {
+      display: flex;
+      gap: 24px;
+      border-bottom: 1px solid #e2e8f0;
+      margin-bottom: 24px;
+    }
+
+    .om-platform-btn {
+      background: none;
+      border: none;
+      font-family: var(--font-body);
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #64748b;
+      padding-bottom: 8px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+
+    .om-platform-btn.active {
+      color: #2563eb;
+      border-bottom-color: #2563eb;
+    }
+
+    .om-profile-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+    }
+
+    /* Downloads Page */
+    .download-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-top: 30px;
+    }
+
+    .dl-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-line);
+      border-radius: var(--radius-md);
+      padding: 30px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-shadow: 0 4px 16px var(--shadow-ambient);
+      text-align: left;
+    }
+
+    .dl-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-head);
+      margin-bottom: 6px;
+    }
+
+    .dl-card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    /* FAQ Accordion */
+    .faq-wrap {
+      max-width: 780px;
+      margin: 30px auto 0;
+    }
+
+    .faq-box {
+      background: var(--faq-bg);
+      border: 1px solid var(--border-line);
+      border-radius: var(--radius-sm);
+      margin-bottom: 12px;
+      overflow: hidden;
+      transition: var(--transition-fast);
+      box-shadow: 0 2px 8px var(--shadow-ambient);
+    }
+
+    .faq-box:hover {
+      background: var(--faq-hover);
+      border-color: var(--brand-orange);
+    }
+
+    .faq-question {
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 18px 22px;
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-head);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+      text-align: left;
+    }
+
+    .faq-icon-chevron {
+      color: var(--brand-orange);
+      transition: transform var(--transition-fast);
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .faq-box.active .faq-icon-chevron {
+      transform: rotate(180deg);
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.25s ease;
+      background: var(--faq-ans-bg);
+    }
+
+    .faq-answer-inner {
+      padding: 0 22px 18px;
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .faq-box.active .faq-answer {
+      max-height: 200px;
+    }
+
+    /* Footer */
+    .footer {
+      border-top: 1px solid var(--border-line);
+      padding: 40px 0;
+      text-align: center;
+      font-size: 13.5px;
+      color: var(--text-dim);
+      margin-top: auto;
+    }
+
+    .author-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .author-row img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+    }
+
+    /* Lightbox Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal-backdrop img {
+      max-width: 90vw;
+      max-height: 85vh;
+      border-radius: var(--radius-md);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+
+    @media (max-width: 768px) {
+      .hero-headline { font-size: 2.2rem; }
+      .nav-links { display: none; }
+      .mobile-menu-toggle { display: inline-flex; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Pill Navbar Header -->
+  <header class="header-nav">
+    <div class="nav-inner">
+      <button class="nav-brand" onclick="switchPageTab('home')" aria-label="OmniGet home">
+        <img src="https://raw.githubusercontent.com/copyrightnews/omniget/main/static/loop.png" alt="OmniGet Logo" />
+        <span>OmniGet</span>
+      </button>
+
+      <ul class="nav-links">
+        <li><button class="nav-link active" id="nav-home" onclick="switchPageTab('home')">Home</button></li>
+        <li><button class="nav-link" id="nav-openmint" onclick="switchPageTab('openmint')">OpenMint</button></li>
+        <li><button class="nav-link" id="nav-downloads" onclick="switchPageTab('downloads')">Downloads</button></li>
+        <li><button class="nav-link" id="nav-releasenotes" onclick="switchPageTab('releasenotes')">Release Notes</button></li>
+        <li><button class="nav-link" id="nav-faq" onclick="switchPageTab('faq')">FAQ</button></li>
+      </ul>
+
+      <div class="nav-actions">
+        <!-- Official GitHub Octocat SVG Icon -->
+        <a href="https://github.com/copyrightnews/omniget" target="_blank" rel="noopener" class="btn btn-secondary">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="display: inline-block; vertical-align: middle; flex-shrink: 0; margin-right: 4px;"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>
+          GitHub
+        </a>
+
+        <!-- Redirects to Downloads Page View -->
+        <button onclick="switchPageTab('downloads')" class="btn btn-primary">
+          Download
+        </button>
+
+        <!-- Mobile hamburger toggle -->
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Open navigation menu" aria-expanded="false" onclick="toggleMobileNav()">
+          <i data-lucide="menu" style="width: 18px; height: 18px;"></i>
+        </button>
+      </div>
+
+      <!-- Mobile dropdown nav -->
+      <div class="mobile-nav-panel" id="mobileNavPanel">
+        <button class="nav-link" onclick="switchPageTab('home'); toggleMobileNav()">Home</button>
+        <button class="nav-link" onclick="switchPageTab('openmint'); toggleMobileNav()">OpenMint</button>
+        <button class="nav-link" onclick="switchPageTab('downloads'); toggleMobileNav()">Downloads</button>
+        <button class="nav-link" onclick="switchPageTab('releasenotes'); toggleMobileNav()">Release Notes</button>
+        <button class="nav-link" onclick="switchPageTab('faq'); toggleMobileNav()">FAQ</button>
+      </div>
+    </div>
+  </header>
+
+  <main style="flex: 1;">
+
+    <!-- ==================== HOME TAB PAGE ==================== -->
+    <div class="page-tab-content active" id="page-home">
+      <!-- HERO SECTION -->
+      <section class="hero-section text-center">
+        <div class="container">
+          <div class="hero-pill-badge">
+            <span>GPL-3.0 Open Source Desktop App</span>
+          </div>
+
+          <h1 class="hero-headline">
+            Download <span>Udemy courses, YouTube, music & books</span> in one app.
+          </h1>
+
+          <p class="hero-subhead">
+            Universal open-source downloader for Windows, macOS, and Linux. No setup, no Python, and all your files stay local on your computer.
+          </p>
+
+          <div class="hero-cta-group">
+            <button onclick="switchPageTab('downloads')" class="btn btn-primary" style="height: 46px; padding: 0 28px; font-size: 15px;">
+              <i data-lucide="download" style="width: 18px; height: 18px;"></i>
+              Download for Windows
+            </button>
+            <a href="https://github.com/copyrightnews/omniget" target="_blank" rel="noopener" class="btn btn-secondary" style="height: 46px; padding: 0 22px;">
+              Source Code
+            </a>
+          </div>
+
+          <p class="hero-platform-sub">Available on Windows, macOS, and Linux • Hotkey <code>Ctrl + Shift + D</code></p>
+
+          <!-- Interactive Demo Segment Switcher -->
+          <div class="demo-tab-bar">
+            <button class="demo-tab-btn active" onclick="switchDemoPane('home', this)">Home Omnibox</button>
+            <button class="demo-tab-btn" onclick="switchDemoPane('courses', this)">Course Player</button>
+            <button class="demo-tab-btn" onclick="switchDemoPane('reader', this)">eBook Reader</button>
+            <button class="demo-tab-btn" onclick="switchDemoPane('music', this)">Music Player</button>
+            <button class="demo-tab-btn" onclick="switchDemoPane('settings', this)">Settings</button>
+          </div>
+
+          <!-- App Showcase Frame -->
+          <div class="demo-showcase-frame">
+            <div class="demo-frame-bar">
+              <div class="dot" style="background: #ff5f56;"></div>
+              <div class="dot" style="background: #ffbd2e;"></div>
+              <div class="dot" style="background: #27c93f;"></div>
+            </div>
+
+            <div class="demo-pane active" id="pane-home">
+              <img src="https://raw.githubusercontent.com/copyrightnews/omniget/main/assets/readme/en/home-hero.png" alt="Home Screen" onclick="viewModal(this.src)" />
+            </div>
+            <div class="demo-pane" id="pane-courses">
+              <img src="https://raw.githubusercontent.com/copyrightnews/omniget/main/assets/screenshot-courses.png" alt="Course Player" onclick="viewModal(this.src)" />
+            </div>
+            <div class="demo-pane" id="pane-reader">
+              <img src="https://raw.githubusercontent.com/copyrightnews/omniget/main/assets/screenshot-reader.png" alt="EPUB Reader" onclick="viewModal(this.src)" />
+            </div>
+            <div class="demo-pane" id="pane-music">
+              <img src="https://raw.githubusercontent.com/copyrightnews/omniget/main/assets/screenshot-music.png" alt="Music Player" onclick="viewModal(this.src)" />
+            </div>
+            <div class="demo-pane" id="pane-settings">
+              <img src="https://raw.githubusercontent.com/copyrightnews/omniget/main/assets/readme/en/settings-drill.png" alt="Settings" onclick="viewModal(this.src)" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CORE CAPABILITIES SECTION -->
+      <section class="section-wrap">
+        <div class="container">
+          <div class="section-header">
+            <h2 class="section-title">Core Capabilities</h2>
+            <p class="section-desc">Designed to unify offline media extraction and study tools into one app.</p>
+          </div>
+
+          <div class="grid-3">
+            <div class="feature-card">
+              <div class="icon-box icon-purple">
+                <i data-lucide="graduation-cap"></i>
+              </div>
+              <h3>Course Downloader & Player</h3>
+              <p>Extract structured courses from Hotmart, Udemy, Kiwify, Gumroad, Teachable, Kajabi, and Skool. Watch offline with timestamped notes and attached PDFs side-by-side.</p>
+            </div>
+
+            <div class="feature-card">
+              <div class="icon-box icon-amber">
+                <i data-lucide="keyboard"></i>
+              </div>
+              <h3>Global Hotkey Grabber</h3>
+              <p>Copy any URL to your clipboard and press <code>Ctrl+Shift+D</code>. OmniGet fetches metadata and downloads the file silently in the background.</p>
+            </div>
+
+            <div class="feature-card">
+              <div class="icon-box icon-red">
+                <i data-lucide="video"></i>
+              </div>
+              <h3>1,800+ Media Extractor</h3>
+              <p>Powered by yt-dlp. Download video or audio from YouTube, TikTok, Instagram, Twitter/X, Reddit, Twitch, Vimeo, and 1,800+ web platforms.</p>
+            </div>
+
+            <div class="feature-card">
+              <div class="icon-box icon-cyan">
+                <i data-lucide="tv"></i>
+              </div>
+              <h3>Deep Bilibili VIP Support</h3>
+              <p>Sign in to unlock official Bilibili premium streams: 4K, HDR, Dolby Vision, Hi-Res Lossless Audio, Danmaku subtitles, and Kodi/Jellyfin NFOs.</p>
+            </div>
+
+            <div class="feature-card">
+              <div class="icon-box icon-emerald">
+                <i data-lucide="book-open"></i>
+              </div>
+              <h3>Built-in Reader Module</h3>
+              <p>Organize and read your EPUB, PDF, CBZ comics, TXT, and HTML collection with cover fetching, paper themes, bookmarks, and highlights.</p>
+            </div>
+
+            <div class="feature-card">
+              <div class="icon-box icon-fuchsia">
+                <i data-lucide="headphones"></i>
+              </div>
+              <h3>Hi-Fi Music Player & Lyrics</h3>
+              <p>Local audio library player with scrolling synced lyrics. Integrates local tracks with Spotify, SoundCloud, YouTube Music, Qobuz, and Last.fm.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CONDENSED RELEASE SUMMARY (full notes live only on the Release Notes tab) -->
+      <section class="section-wrap">
+        <div class="container">
+          <div class="section-header">
+            <h2 class="section-title">Latest Release</h2>
+            <p class="section-desc">Headline changes in the newest build — full changelog on the Release Notes tab.</p>
+          </div>
+
+          <div class="release-summary-card">
+            <div>
+              <span class="release-badge">v0.7.2 Stable</span>
+              <ul>
+                <li>Fixed Rust compiler version mismatch panics on plugin load</li>
+                <li>Fixed yt-dlp progress output suppression (no more 0% hangs)</li>
+                <li>Bilibili Cheese (课堂) episodes now download with official credentials</li>
+              </ul>
+            </div>
+            <button class="btn btn-secondary" onclick="switchPageTab('releasenotes')" style="white-space: nowrap;">
+              View Full Changelog
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ==================== OPENMINT TAB PAGE ==================== -->
+    <div class="page-tab-content" id="page-openmint">
+      <section class="hero-section text-center" style="padding-bottom: 40px;">
+        <div class="container">
+          <div class="section-header">
+            <span class="openmint-badge">OpenMint Module • Built by sayfalse</span>
+            <h2 class="section-title">OpenMint Engine — Live Interactive Demo</h2>
+            <p class="section-desc">Test the live OpenMint user interface directly in your browser. Experience social media extraction, content filters, and profile bookmarking in real-time.</p>
+            <div class="demo-disclaimer-badge">
+              <i data-lucide="info" style="width: 13px; height: 13px;"></i>
+              Simulated demo — no real profile data is fetched here
+            </div>
+          </div>
+
+          <!-- LIVE OPENMINT HTML/CSS APPLICATION UI DEMO -->
+          <div class="openmint-live-app" style="overflow: hidden; padding: 0;">
+            <!-- macOS-Style Window Navigation Bar (decorative only) -->
+            <div class="demo-frame-bar">
+              <div class="dot" style="background: #ff5f56;"></div>
+              <div class="dot" style="background: #ffbd2e;"></div>
+              <div class="dot" style="background: #27c93f;"></div>
+            </div>
+
+            <div style="padding: 32px 36px;">
+              <div class="om-app-title">OpenMint</div>
+              <div class="om-app-subtitle">Social Media Downloader</div>
+
+              <!-- Main Navigation Tabs (Download | Profiles) -->
+              <div class="om-main-tabs">
+                <button class="om-tab-btn active" id="om-tab-download-btn" onclick="switchLiveOmTab('download')">Download</button>
+                <button class="om-tab-btn" id="om-tab-profiles-btn" onclick="switchLiveOmTab('profiles')">Profiles</button>
+              </div>
+
+              <!-- TAB 1: DOWNLOAD PANEL VIEW -->
+              <div id="om-view-download">
+                <!-- Profile URL -->
+                <div class="om-field-group">
+                  <label class="om-label" for="om-url-input">Profile URL</label>
+                  <input type="text" id="om-url-input" class="om-input" placeholder="https://instagram.com/username" />
+                  <div class="om-subtext">No saved profiles — <a onclick="switchLiveOmTab('profiles')">add one</a></div>
+                </div>
+
+                <!-- Output Directory -->
+                <div class="om-field-group">
+                  <label class="om-label" for="om-out-input">Output Directory</label>
+                  <div class="om-input-row">
+                    <input type="text" id="om-out-input" class="om-input" placeholder="C:/Downloads/OpenMint" />
+                    <button class="om-browse-btn" onclick="triggerOmBrowse('Output Directory')">Browse</button>
+                  </div>
+                </div>
+
+                <!-- Content Type -->
+                <div class="om-field-group">
+                  <label class="om-label">Content Type</label>
+                  <div class="om-segmented-group">
+                    <button class="om-type-btn active" onclick="setOmType(this)">All</button>
+                    <button class="om-type-btn" onclick="setOmType(this)">Photos</button>
+                    <button class="om-type-btn" onclick="setOmType(this)">Videos</button>
+                    <button class="om-type-btn" onclick="setOmType(this)">Stories</button>
+                    <button class="om-type-btn" onclick="setOmType(this)">Highlights</button>
+                  </div>
+                </div>
+
+                <!-- Cookies File (optional) -->
+                <div class="om-field-group">
+                  <label class="om-label" for="om-cookie-input">Cookies File (optional)</label>
+                  <div class="om-input-row">
+                    <input type="text" id="om-cookie-input" class="om-input" placeholder="cookies.txt" />
+                    <button class="om-browse-btn" onclick="triggerOmBrowse('Cookies File')">Browse</button>
+                  </div>
+                </div>
+
+                <!-- Bottom Action Row -->
+                <div class="om-action-row">
+                  <button class="om-save-btn" onclick="saveOmSettings()">Save Settings</button>
+                  <button class="om-start-btn" id="om-start-trigger" onclick="runOmLiveDownload()">Start Download</button>
+                </div>
+
+                <!-- Interactive Simulated Live Download Terminal Log Output -->
+                <div class="om-progress-box" id="om-terminal-log">
+                  <div style="color: #ff7d38; font-weight: bold; margin-bottom: 6px;">[OpenMint v0.7.2 Engine] Processing extraction (simulated)...</div>
+                  <div id="om-log-lines" style="color: #94a3b8; line-height: 1.6;"></div>
+                </div>
+              </div>
+
+              <!-- TAB 2: PROFILES VIEW -->
+              <div id="om-view-profiles" style="display: none;">
+                <!-- Platform Sub-tabs -->
+                <div class="om-platform-tabs">
+                  <button class="om-platform-btn active" id="om-p-instagram" onclick="switchOmPlatform('instagram', this)">Instagram</button>
+                  <button class="om-platform-btn" id="om-p-tiktok" onclick="switchOmPlatform('tiktok', this)">TikTok</button>
+                  <button class="om-platform-btn" id="om-p-facebook" onclick="switchOmPlatform('facebook', this)">Facebook</button>
+                  <button class="om-platform-btn" id="om-p-x" onclick="switchOmPlatform('x', this)">X</button>
+                </div>
+
+                <!-- Add Profile Field -->
+                <div class="om-field-group">
+                  <div class="om-input-row">
+                    <input type="text" id="om-profile-input" class="om-input" placeholder="Enter profile URL or username" />
+                    <button class="btn btn-primary" style="height: 42px; border-radius: 8px; padding: 0 20px;" onclick="addOmProfile()">Add Profile</button>
+                  </div>
+                </div>
+
+                <!-- Saved Profiles List -->
+                <div id="om-profiles-list" style="text-align: center; color: #64748b; font-size: 14px; padding: 24px 0;">
+                  No profiles added yet
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+    </div>
+
+    <!-- ==================== DOWNLOADS TAB PAGE ==================== -->
+    <div class="page-tab-content" id="page-downloads">
+      <section class="hero-section text-center" style="padding-bottom: 20px;">
+        <div class="container">
+          <div class="section-header">
+            <h2 class="section-title">Download & Install</h2>
+            <p class="section-desc">Select your desktop operating system to get the official release binary.</p>
+          </div>
+
+          <div class="download-grid">
+            <!-- Windows Card -->
+            <div class="dl-card">
+              <div>
+                <h3>Windows Setup (.exe)</h3>
+                <p>Direct standalone installer for Windows 10 and 11 (64-bit). Always the latest release.</p>
+              </div>
+              <a href="https://github.com/copyrightnews/omniget/releases/latest" class="btn btn-primary" style="width: 100%;">
+                Download for Windows
+              </a>
+            </div>
+
+            <!-- macOS Card -->
+            <div class="dl-card">
+              <div>
+                <h3>macOS Universal (.dmg)</h3>
+                <p>Universal binary for Apple Silicon (M1-M3) and Intel Macs.</p>
+              </div>
+              <a href="https://github.com/copyrightnews/omniget/releases/latest" class="btn btn-primary" style="width: 100%;">
+                Download for macOS
+              </a>
+            </div>
+
+            <!-- Linux Card -->
+            <div class="dl-card">
+              <div>
+                <h3>Linux (Flatpak & Tarball)</h3>
+                <p>Flathub package or direct release tarball for Linux distributions.</p>
+              </div>
+              <a href="https://github.com/copyrightnews/omniget/releases/latest" class="btn btn-secondary" style="width: 100%;">
+                View Linux Releases
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ==================== RELEASE NOTES TAB PAGE (single source of truth) ==================== -->
+    <div class="page-tab-content" id="page-releasenotes">
+      <section class="hero-section text-center" style="padding-bottom: 20px;">
+        <div class="container">
+          <div class="section-header">
+            <h2 class="section-title">Release Notes & Changelog</h2>
+            <p class="section-desc">Detailed release logs and feature changes for OmniGet.</p>
+          </div>
+
+          <div class="release-card">
+            <div class="release-header">
+              <div>
+                <span class="release-badge">v0.7.2 Stable</span>
+                <h3 style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--text-head); margin-top: 6px;">OmniGet 0.7.2 Release Notes</h3>
+              </div>
+              <a href="https://github.com/copyrightnews/omniget/releases/tag/v0.7.2" target="_blank" rel="noopener" class="btn btn-secondary">
+                View Tag on GitHub
+              </a>
+            </div>
+
+            <div class="release-grid">
+              <div class="release-item">
+                <h4><i data-lucide="shield-alert" style="width: 18px; height: 18px; color: var(--brand-orange);"></i> Plugins & Crash Fixes</h4>
+                <ul>
+                  <li>Fixed crash (SIGSEGV) when opening plugin pages</li>
+                  <li>Compiler version pinned across app and plugins</li>
+                  <li>Plugins load instantly at startup before network calls</li>
+                  <li>Incompatible plugins now output a clear "update plugin" alert</li>
+                </ul>
+              </div>
+
+              <div class="release-item">
+                <h4><i data-lucide="download-cloud" style="width: 18px; height: 18px; color: var(--brand-orange);"></i> Downloads Reliability</h4>
+                <ul>
+                  <li>Fixed yt-dlp progress output suppression (no more 0% hangs)</li>
+                  <li>Real output-path capture from yt-dlp to prevent empty-folder output</li>
+                  <li>Direct .m3u8 CDN links and HLS downloads show live segment progress</li>
+                </ul>
+              </div>
+
+              <div class="release-item">
+                <h4><i data-lucide="globe" style="width: 18px; height: 18px; color: var(--brand-orange);"></i> Platform Additions</h4>
+                <ul>
+                  <li>Bilibili Cheese (课堂) episode links download with user credentials</li>
+                  <li>Udemy plugin downloads course resources & supplementary files</li>
+                  <li>Hotmart/Udemy pasting auto-routes to Courses dashboard</li>
+                  <li>Bulk gallery-dl downloads for Subreddits & X/Twitter profiles</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ==================== FAQ TAB PAGE ==================== -->
+    <div class="page-tab-content" id="page-faq">
+      <section class="hero-section text-center" style="padding-bottom: 20px;">
+        <div class="container">
+          <div class="section-header">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <p class="section-desc">Common questions regarding installation, licensing, and usage.</p>
+          </div>
+
+          <div class="faq-wrap">
+            <div class="faq-box">
+              <button class="faq-question" onclick="toggleFaq(this.parentElement)" aria-expanded="false">
+                <span>Is OmniGet free and open source?</span>
+                <i data-lucide="chevron-down" class="faq-icon-chevron" style="width: 16px; height: 16px;"></i>
+              </button>
+              <div class="faq-answer">
+                <div class="faq-answer-inner">
+                  Yes. OmniGet is published under the GPL-3.0 license. It contains no advertisements, no tracking telemetry, and no paid subscriptions.
+                </div>
+              </div>
+            </div>
+
+            <div class="faq-box">
+              <button class="faq-question" onclick="toggleFaq(this.parentElement)" aria-expanded="false">
+                <span>Do I need to install Python or use terminal commands?</span>
+                <i data-lucide="chevron-down" class="faq-icon-chevron" style="width: 16px; height: 16px;"></i>
+              </button>
+              <div class="faq-answer">
+                <div class="faq-answer-inner">
+                  No. OmniGet operates as a self-contained desktop application. Required tools (yt-dlp and FFmpeg) are bundled, verified via SHA256, and update automatically.
+                </div>
+              </div>
+            </div>
+
+            <div class="faq-box">
+              <button class="faq-question" onclick="toggleFaq(this.parentElement)" aria-expanded="false">
+                <span>How does full course downloading work?</span>
+                <i data-lucide="chevron-down" class="faq-icon-chevron" style="width: 16px; height: 16px;"></i>
+              </button>
+              <div class="faq-answer">
+                <div class="faq-answer-inner">
+                  Log into your course account within OmniGet's embedded browser session. The app extracts modules, videos, subtitles, and PDF worksheets for offline study in the built-in course player.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="author-row">
+        <img src="https://raw.githubusercontent.com/copyrightnews/omniget/main/static/loop.png" alt="Mascot" />
+        <span style="color: var(--text-head); font-weight: 600;">OmniGet for the open-source community</span>
+      </div>
+      <p>© OmniGet Project • Maintained & Developed by <a href="https://github.com/copyrightnews/omniget" target="_blank" rel="noopener" style="color: var(--brand-orange); font-weight: 600;">sayfalse</a> • Originally forked from <a href="https://github.com/tonhowtf/omniget" target="_blank" rel="noopener" style="color: var(--text-muted); text-decoration: underline;">tonhowtf/omniget</a> • Released under GPL-3.0 License.</p>
+    </div>
+  </footer>
+
+  <!-- MODAL BACKDROP -->
+  <div class="modal-backdrop" id="modalView" onclick="closeModal(event)">
+    <img id="modalImg" src="" alt="Preview" />
+  </div>
+
+  <script>
+    /* Multi-Tab Page View Controller */
+    function switchPageTab(tabId) {
+      document.querySelectorAll('.page-tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+
+      const targetPage = document.getElementById('page-' + tabId);
+      document.getElementById('nav-' + tabId)?.classList.add('active');
+
+      if (targetPage) targetPage.classList.add('active');
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    /* Mobile nav dropdown toggle */
+    function toggleMobileNav() {
+      const panel = document.getElementById('mobileNavPanel');
+      const toggle = document.getElementById('mobileMenuToggle');
+      const isOpen = panel.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    }
+
+    /* Demo Pane Switcher for Main App Showcase */
+    function switchDemoPane(paneId, btn) {
+      document.querySelectorAll('.demo-pane').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.demo-tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const pane = document.getElementById('pane-' + paneId);
+      if (pane) pane.classList.add('active');
+    }
+
+    /* OpenMint Live Interactive UI Demo Controller (simulated — no real network calls) */
+    function switchLiveOmTab(tab) {
+      document.getElementById('om-tab-download-btn').classList.toggle('active', tab === 'download');
+      document.getElementById('om-tab-profiles-btn').classList.toggle('active', tab === 'profiles');
+
+      document.getElementById('om-view-download').style.display = (tab === 'download') ? 'block' : 'none';
+      document.getElementById('om-view-profiles').style.display = (tab === 'profiles') ? 'block' : 'none';
+    }
+
+    function setOmType(btn) {
+      document.querySelectorAll('.om-type-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function switchOmPlatform(platform, btn) {
+      document.querySelectorAll('.om-platform-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const input = document.getElementById('om-profile-input');
+      input.placeholder = 'Enter ' + platform + ' profile URL or username';
+    }
+
+    function triggerOmBrowse(field) {
+      alert('(Simulated) Selected custom ' + field + ' destination folder.');
+    }
+
+    function saveOmSettings() {
+      alert('(Simulated) OpenMint configuration settings saved.');
+    }
+
+    let omDownloading = false;
+    function runOmLiveDownload() {
+      if (omDownloading) return;
+      omDownloading = true;
+      const logBox = document.getElementById('om-terminal-log');
+      const logLines = document.getElementById('om-log-lines');
+      const btn = document.getElementById('om-start-trigger');
+
+      logBox.classList.add('active');
+      btn.innerText = 'Extracting...';
+      logLines.innerHTML = '<div>&gt; (Simulated) Connecting to target profile...</div>';
+
+      setTimeout(() => {
+        logLines.innerHTML += '<div>&gt; Discovered 184 photos, 42 videos, 8 active stories</div>';
+      }, 600);
+
+      setTimeout(() => {
+        logLines.innerHTML += '<div>&gt; Deduplicating existing local media catalog... [OK]</div>';
+      }, 1200);
+
+      setTimeout(() => {
+        logLines.innerHTML += '<div style="color: #38bdf8; font-weight: 600;">&gt; Downloading batch async (12 threads)... 100% Complete!</div>';
+        btn.innerText = 'Start Download';
+        omDownloading = false;
+      }, 1800);
+    }
+
+    function addOmProfile() {
+      const input = document.getElementById('om-profile-input');
+      const val = input.value.trim() || '@new_creator';
+      const list = document.getElementById('om-profiles-list');
+
+      if (list.innerHTML.includes('No profiles added yet')) {
+        list.innerHTML = '';
+      }
+
+      const item = document.createElement('div');
+      item.className = 'om-profile-item';
+      const nameEl = document.createElement('div');
+      nameEl.innerHTML = `<strong style="color: #0f172a; font-size: 14px;"></strong><div style="font-size: 12px; color: #64748b;">Monitored Account • Synced</div>`;
+      nameEl.querySelector('strong').textContent = val; // textContent avoids HTML injection from user input
+      const fetchBtn = document.createElement('button');
+      fetchBtn.className = 'btn btn-secondary';
+      fetchBtn.style.cssText = 'height: 32px; padding: 0 12px; font-size: 12px;';
+      fetchBtn.textContent = 'Fetch Latest';
+      fetchBtn.onclick = () => quickDownloadProfile(val);
+
+      item.appendChild(nameEl);
+      item.appendChild(fetchBtn);
+      list.prepend(item);
+      input.value = '';
+    }
+
+    function quickDownloadProfile(handle) {
+      switchLiveOmTab('download');
+      document.getElementById('om-url-input').value = 'https://instagram.com/' + handle.replace('@', '');
+      runOmLiveDownload();
+    }
+
+    /* FAQ Toggle */
+    function toggleFaq(box) {
+      const isActive = box.classList.toggle('active');
+      box.querySelector('.faq-question').setAttribute('aria-expanded', isActive ? 'true' : 'false');
+    }
+
+    /* Lightbox Modal */
+    function viewModal(src) {
+      document.getElementById('modalImg').src = src;
+      document.getElementById('modalView').classList.add('active');
+    }
+
+    function closeModal(e) {
+      if (e.target.id === 'modalView' || e.target.classList.contains('modal-backdrop')) {
+        document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('active'));
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+    });
+  </script>
+</body>
+</html>

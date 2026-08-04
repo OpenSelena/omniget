@@ -1,0 +1,77 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "omniget",
+  "version": "0.8.5",
+  "identifier": "com.igect.omniget",
+  "build": {
+    "beforeDevCommand": "pnpm dev",
+    "devUrl": "http://localhost:1420",
+    "beforeBuildCommand": "pnpm build",
+    "frontendDist": "../build"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "create": false,
+        "title": "OmniGet",
+        "width": 1100,
+        "height": 720,
+        "minWidth": 800,
+        "minHeight": 560,
+        "titleBarStyle": "Overlay",
+        "hiddenTitle": true,
+        "backgroundColor": "#1C1C1E"
+      }
+    ],
+    "security": {
+      "csp": null,
+      "assetProtocol": {
+        "enable": true,
+        "scope": {
+          "allow": [
+            "**"
+          ],
+          "deny": [],
+          "requireLiteralLeadingDot": false
+        }
+      }
+    }
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDA2MkE3OUJCODdBQUU5RTUKUldUbDZhcUh1M2txQmxnQnZKOERTdGRXWW0zUHZqRk5GQVhoaXBxeFR4emdXbWNUd1NBSDBmL1MK",
+      "endpoints": [
+        "https://github.com/igect/omniget/releases/latest/download/latest.json"
+      ]
+    },
+    "deep-link": {
+      "desktop": {
+        "schemes": [
+          "omniget"
+        ]
+      }
+    }
+  },
+  "bundle": {
+    "active": true,
+    "publisher": "igect",
+    "targets": "all",
+    "createUpdaterArtifacts": true,
+    "resources": {
+      "../browser-extension/chrome/": "browser-extension/chrome/",
+      "../browser-extension/firefox/": "browser-extension/firefox/"
+    },
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "macOS": {
+      "entitlements": "Entitlements.plist",
+      "minimumSystemVersion": "10.15"
+    }
+  }
+}

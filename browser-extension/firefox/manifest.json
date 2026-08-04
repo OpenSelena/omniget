@@ -1,0 +1,117 @@
+{
+  "manifest_version": 3,
+  "name": "OmniGet",
+  "description": "Detect supported media pages and send them to OmniGet with one click.",
+  "version": "0.4.0",
+  "default_locale": "en",
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "omniget@tonho.wtf",
+      "strict_min_version": "109.0"
+    }
+  },
+  "permissions": [
+    "tabs",
+    "cookies",
+    "webRequest",
+    "storage",
+    "menus",
+    "alarms"
+  ],
+  "host_permissions": [
+    "http://127.0.0.1/*",
+    "http://localhost/*",
+    "*://*.hotmart.com/*",
+    "*://*.youtube.com/*",
+    "*://*.youtube-nocookie.com/*",
+    "*://youtu.be/*",
+    "*://*.googlevideo.com/*",
+    "*://*.ytimg.com/*",
+    "*://*.instagram.com/*",
+    "*://*.ddinstagram.com/*",
+    "*://*.cdninstagram.com/*",
+    "*://*.fbcdn.net/*",
+    "*://*.tiktok.com/*",
+    "*://*.tiktokcdn.com/*",
+    "*://*.tiktokcdn-us.com/*",
+    "*://*.twitter.com/*",
+    "*://*.x.com/*",
+    "*://*.vxtwitter.com/*",
+    "*://*.fixvx.com/*",
+    "*://*.twimg.com/*",
+    "*://*.reddit.com/*",
+    "*://v.redd.it/*",
+    "*://redd.it/*",
+    "*://*.redditmedia.com/*",
+    "*://*.twitch.tv/*",
+    "*://*.jtvnw.net/*",
+    "*://*.ttvnw.net/*",
+    "*://pin.it/*",
+    "*://*.pinterest.com/*",
+    "*://*.pinterest.ca/*",
+    "*://*.pinterest.co.uk/*",
+    "*://*.pinterest.com.au/*",
+    "*://*.pinterest.de/*",
+    "*://*.pinterest.fr/*",
+    "*://*.pinterest.jp/*",
+    "*://*.pinterest.es/*",
+    "*://*.pinterest.it/*",
+    "*://*.pinterest.mx/*",
+    "*://*.pinterest.nz/*",
+    "*://*.pinterest.ph/*",
+    "*://*.pinterest.pt/*",
+    "*://*.pinterest.se/*",
+    "*://*.pinimg.com/*",
+    "*://bsky.app/*",
+    "*://*.bsky.app/*",
+    "*://*.bsky.social/*",
+    "*://t.me/*",
+    "*://*.telegram.me/*",
+    "*://*.telegram.org/*",
+    "*://*.vimeo.com/*",
+    "*://*.vimeocdn.com/*",
+    "*://*.udemy.com/*",
+    "*://*.udemycdn.com/*",
+    "*://*.bilibili.com/*",
+    "*://*.bilivideo.com/*",
+    "*://b23.tv/*",
+    "*://*.soundcloud.com/*",
+    "*://*.sndcdn.com/*"
+  ],
+  "optional_host_permissions": [
+    "*://*/*"
+  ],
+  "background": {
+    "scripts": ["src/background.js"],
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_title": "OmniGet",
+    "default_icon": {
+      "16": "icons/inactive-16.png",
+      "24": "icons/inactive-24.png",
+      "32": "icons/inactive-32.png",
+      "48": "icons/inactive-48.png"
+    }
+  },
+  "icons": {
+    "16": "icons/active-16.png",
+    "24": "icons/active-24.png",
+    "32": "icons/active-32.png",
+    "48": "icons/active-48.png",
+    "128": "icons/active-128.png"
+  },
+  "commands": {
+    "send-to-omniget": {
+      "suggested_key": {
+        "default": "Alt+O"
+      },
+      "description": "Send current page to OmniGet"
+    }
+  },
+  "options_ui": {
+    "page": "pages/options.html",
+    "open_in_tab": true
+  }
+}

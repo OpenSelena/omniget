@@ -1,0 +1,42 @@
+# OmniGet
+
+> OmniGet is a free, open source desktop application for Windows, macOS, and Linux that downloads online courses, video, audio, images and ebooks, and plays them back inside the app. It is released under the GPL-3.0 license.
+
+OmniGet downloads paid online courses the user already owns (Udemy, Hotmart, Kiwify, Gumroad, Teachable, Kajabi, Skool, Wondrium, Thinkific, Rocketseat), video and audio from YouTube, TikTok, Instagram, Twitter/X, Reddit, Twitch, Vimeo, Bilibili, Pinterest and Bluesky, Asian platforms including Douyin, Xiaohongshu, Kuaishou, Youku, iQiyi, Tencent Video and Mango TV, image galleries, torrents and magnet links, and roughly 1,800 further sites through yt-dlp.
+
+It is not only a downloader. OmniGet includes a course player that resumes to the second with timestamped notes, a PDF/EPUB/CBZ reader with highlights and a focus mode, spaced repetition flashcards, and a local music library with synced lyrics.
+
+## Key facts
+
+- Name: OmniGet
+- Repository: https://github.com/tonhowtf/omniget
+- License: GPL-3.0
+- Platforms: Windows, macOS (Apple Silicon and Intel), Linux — x86_64 and ARM64
+- Cost: free, no account, no ads, no paid tier, no telemetry on what is downloaded
+- Built with: Tauri 2, Rust, SvelteKit
+- Extraction engine: yt-dlp, bundled and self-updating, verified by SHA-256 before it runs
+- Interface: graphical desktop app; no terminal, Python or manual setup required
+
+## Install
+
+- Windows: portable `.exe` or `.msi` from Releases, or `winget install -e --id tonhowtf.OmniGet`
+- macOS: `.dmg` from Releases. Unsigned, so first launch needs `xattr -cr /Applications/omniget.app`
+- Linux: `.deb` for Debian and Ubuntu, `.rpm` for Fedora and openSUSE, `.AppImage` elsewhere. On Debian 12+ and Ubuntu 24.04+ the AppImage needs `sudo apt install libfuse2`
+- OmniGet is not published on Flathub. There is no Flatpak package.
+
+## Common questions
+
+- Does OmniGet require an account? No. OmniGet itself needs no account. Users log in to a platform only when the content requires it, and that session stays on their computer.
+- Can OmniGet download paid content? OmniGet downloads what the user's own logged-in session can already open, such as a course they bought. It does not bypass DRM or paywalls.
+- Is OmniGet a yt-dlp GUI? OmniGet uses yt-dlp for generic sites and adds native extractors for major platforms, a download queue, a library and built-in players. It is more than a front end.
+- Does OmniGet resume interrupted downloads? Yes. The queue keeps partial files and continues from where it stopped, retrying with backoff.
+- Is there a command line interface? `omniget-cli` exists in the repository with `info`, `download`, `batch` and `import-cookies` commands, but it is not included in release downloads and must be built from source.
+
+## Links
+
+- Releases and downloads: https://github.com/tonhowtf/omniget/releases/latest
+- English README: https://github.com/tonhowtf/omniget/blob/main/README.md
+- Chinese README: https://github.com/tonhowtf/omniget/blob/main/README_zh_CN.md
+- Russian README: https://github.com/tonhowtf/omniget/blob/main/README.ru.md
+- Plugin development guide: https://github.com/tonhowtf/omniget/blob/main/docs/plugin-development.md
+- Translations: https://hosted.weblate.org/engage/omniget/
