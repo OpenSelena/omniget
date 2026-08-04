@@ -87,6 +87,7 @@
       await deleteProfile(activePlatform, url);
       await loadPlatformProfiles();
     } catch (err) {
+      error = errorMessage(err, 'Failed to delete profile');
       console.error('Failed to delete profile:', err);
     }
   }

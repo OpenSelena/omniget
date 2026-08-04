@@ -1,7 +1,7 @@
 use chrono::Utc;
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::{HashMap, VecDeque};
 use std::fs;
 use std::io::{BufRead, BufReader};
 use std::path::PathBuf;
@@ -46,6 +46,10 @@ pub struct AppSettings {
 
 static RUNNING_DOWNLOADS: Lazy<Mutex<HashMap<String, u32>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
+
+// Settings and profiles share small JSON files. Serialize access so two Tauri
+// commands cannot read-modify-write the same file concurrently.
+static OPEN_OMNI_STORAGE_LOCK: Lazy<Mutex<()>> = Lazy::new(|| Mutex::new(()));
 
 fn omniget_open_omni_dir() -> Result<PathBuf, String> {
     let base =
@@ -182,6 +186,20 @@ fn canonicalize_profile_url(platform: &str, raw_input: &str) -> String {
     }
 }
 
+fn validate_content_type(content_type: &str) -> Result<(), String> {
+    match content_type {
+        "all" | "photos" | "videos" | "stories" | "highlights" => Ok(()),
+        _ => Err("Unsupported content type".to_string()),
+    }
+}
+
+fn validate_profile_platform(platform: &str) -> Result<(), String> {
+    match platform {
+        "instagram" | "tiktok" | "facebook" | "x" => Ok(()),
+        _ => Err("Unsupported profile platform".to_string()),
+    }
+}
+
 #[command]
 pub async fn open_omni_run_gallery_dl_download(
     app: AppHandle,
@@ -213,15 +231,16 @@ fn run_gallery_dl_download_blocking(
     content_type: String,
     download_id: String,
 ) -> Result<DownloadResult, String> {
+    validate_content_type(&content_type)?;
     fs::create_dir_all(&output_dir)
         .map_err(|e| format!("Failed to create output directory: {}", e))?;
 
     let platform_name = detect_platform_name(&url);
-    let is_instagram = platform_name == "Instagram";
-
     if content_type == "all" {
+        // Each stage gets its own final directory. Instagram's profile
+        // extractor supports stories and highlights through `include`.
         let mut sub_types: Vec<&str> = vec!["photos", "videos"];
-        if is_instagram {
+        if platform_name == "Instagram" {
             sub_types.push("stories");
             sub_types.push("highlights");
         }
@@ -348,13 +367,25 @@ fn run_single_content_download(
         ));
     }
 
-    let username = extract_username_generic(url).unwrap_or_default();
-    let subfolder_name = format!(
-        "{}_{}",
-        sanitize_path_component(platform_name),
-        sanitize_path_component(&username)
-    );
-    let final_dest = PathBuf::from(output_dir).join(&subfolder_name);
+    if let Some(cookies) = cookies_file {
+        if !cookies.trim().is_empty() && !PathBuf::from(cookies).is_file() {
+            return Err("The configured cookies file does not exist or is not a file.".to_string());
+        }
+    }
+
+    let username = extract_username_generic(url).unwrap_or_else(|| "unknown_user".to_string());
+    let media_folder = match content_type {
+        "photos" => "photos",
+        "videos" => "videos",
+        "stories" => "stories",
+        "highlights" => "highlights",
+        _ => "all",
+    };
+    let final_dest = PathBuf::from(output_dir)
+        .join("OpenOmni")
+        .join(sanitize_path_component(platform_name))
+        .join(sanitize_path_component(&username))
+        .join(media_folder);
     fs::create_dir_all(&final_dest).map_err(|e| {
         format!(
             "Failed to create output folder {}: {}",
@@ -396,23 +427,24 @@ fn run_single_content_download(
         cmd.process_group(0);
     }
 
-    cmd.arg("-o").arg("directory=[]");
-
     match content_type {
         "photos" => {
+            if platform_name == "Instagram" {
+                cmd.arg("-o").arg("include=posts,reels");
+            }
             cmd.arg("--filter").arg("extension in ('jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'jfif', 'heic', 'avif', 'tiff', 'svg')");
         }
         "videos" => {
+            if platform_name == "Instagram" {
+                cmd.arg("-o").arg("include=posts,reels");
+            }
             cmd.arg("--filter").arg("extension in ('mp4', 'webm', 'mkv', 'mov', 'avi', 'm4v', 'flv', 'wmv', '3gp', 'mpeg', 'mpg', 'ts', 'f4v', 'mts', 'm2ts')");
         }
         "stories" => {
-            let stories_url = format!("https://www.instagram.com/stories/{}/", username);
-            cmd.arg(&stories_url);
+            cmd.arg("-o").arg("include=stories");
         }
         "highlights" => {
-            let highlights_url =
-                format!("https://www.instagram.com/stories/highlights/{}/", username);
-            cmd.arg(&highlights_url);
+            cmd.arg("-o").arg("include=highlights");
         }
         _ => {}
     }
@@ -434,11 +466,11 @@ fn run_single_content_download(
 
     cmd.arg("--Print")
         .arg("after:FILE_OK:{filename}.{extension}");
-    cmd.arg("--sleep-request").arg("2");
+    cmd.arg("--sleep-request")
+        .arg(if platform_name == "Instagram" { "6-12" } else { "2" });
+    cmd.arg("--http-timeout").arg("30");
 
-    if content_type != "stories" && content_type != "highlights" {
-        cmd.arg(url);
-    }
+    cmd.arg(url);
 
     cmd.stdout(Stdio::piped());
     cmd.stderr(Stdio::piped());
@@ -483,17 +515,23 @@ fn run_single_content_download(
         })
     };
 
-    let last_stderr_line = Arc::new(std::sync::Mutex::new(String::new()));
+    let stderr_tail = Arc::new(std::sync::Mutex::new(VecDeque::<String>::new()));
     let stderr_handle = {
         let app = app.clone();
         let download_id = download_id.to_string();
         let files_downloaded = files_downloaded.clone();
-        let last_stderr_line = last_stderr_line.clone();
+        let stderr_tail = stderr_tail.clone();
         let stage_label = media_type_name.to_string();
         thread::spawn(move || {
             let reader = BufReader::new(stderr);
             for line in reader.lines().map_while(Result::ok) {
-                *last_stderr_line.lock().unwrap() = line.clone();
+                if !line.trim().is_empty() {
+                    let mut tail = stderr_tail.lock().unwrap();
+                    if tail.len() == 12 {
+                        tail.pop_front();
+                    }
+                    tail.push_back(line.clone());
+                }
                 let count = files_downloaded.load(Ordering::SeqCst);
                 let _ = app.emit(
                     &format!("download_{}", download_id),
@@ -519,12 +557,12 @@ fn run_single_content_download(
         }
     });
 
-    let _ = stdout_handle.join();
-    let _ = stderr_handle.join();
-
     let status = child
         .wait()
         .map_err(|e| format!("Download process failed: {}", e))?;
+
+    let _ = stdout_handle.join();
+    let _ = stderr_handle.join();
 
     watchdog_completed.store(true, Ordering::SeqCst);
 
@@ -542,9 +580,15 @@ fn run_single_content_download(
             files_count: final_count,
         })
     } else {
-        let last_message = last_stderr_line.lock().unwrap().clone();
-        let error_msg = if !last_message.is_empty() {
-            last_message
+        let stderr_message = stderr_tail
+            .lock()
+            .unwrap()
+            .iter()
+            .cloned()
+            .collect::<Vec<_>>()
+            .join("\n");
+        let error_msg = if !stderr_message.is_empty() {
+            stderr_message
         } else {
             format!(
                 "gallery-dl exited with code {}",
@@ -594,6 +638,9 @@ pub fn open_omni_save_app_settings(
     output_directory: Option<String>,
     cookies_file: Option<String>,
 ) -> Result<String, String> {
+    let _storage_guard = OPEN_OMNI_STORAGE_LOCK
+        .lock()
+        .map_err(|_| "Open Omni storage lock is unavailable")?;
     let settings = AppSettings {
         output_directory,
         cookies_file,
@@ -612,6 +659,9 @@ pub fn open_omni_save_app_settings(
 
 #[command]
 pub fn open_omni_load_app_settings() -> Result<AppSettings, String> {
+    let _storage_guard = OPEN_OMNI_STORAGE_LOCK
+        .lock()
+        .map_err(|_| "Open Omni storage lock is unavailable")?;
     let settings_file = omniget_open_omni_dir()?.join("app_settings.json");
 
     if !settings_file.exists() {
@@ -632,6 +682,10 @@ pub fn open_omni_load_app_settings() -> Result<AppSettings, String> {
 
 #[command]
 pub fn open_omni_load_profiles(platform: String) -> Result<Vec<Profile>, String> {
+    validate_profile_platform(&platform)?;
+    let _storage_guard = OPEN_OMNI_STORAGE_LOCK
+        .lock()
+        .map_err(|_| "Open Omni storage lock is unavailable")?;
     let profiles_file = omniget_open_omni_dir()?.join("profiles.json");
 
     if !profiles_file.exists() {
@@ -659,6 +713,10 @@ pub fn open_omni_load_profiles(platform: String) -> Result<Vec<Profile>, String>
 
 #[command]
 pub fn open_omni_save_profile(platform: String, url: String) -> Result<String, String> {
+    validate_profile_platform(&platform)?;
+    let _storage_guard = OPEN_OMNI_STORAGE_LOCK
+        .lock()
+        .map_err(|_| "Open Omni storage lock is unavailable")?;
     let raw_input = url.trim().to_string();
 
     if raw_input.is_empty() {
@@ -729,6 +787,10 @@ pub fn open_omni_save_profile(platform: String, url: String) -> Result<String, S
 
 #[command]
 pub fn open_omni_delete_profile(platform: String, profile_url: String) -> Result<String, String> {
+    validate_profile_platform(&platform)?;
+    let _storage_guard = OPEN_OMNI_STORAGE_LOCK
+        .lock()
+        .map_err(|_| "Open Omni storage lock is unavailable")?;
     let profiles_file = omniget_open_omni_dir()?.join("profiles.json");
 
     if !profiles_file.exists() {

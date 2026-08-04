@@ -2,6 +2,7 @@
   import { checkPythonDependencies, loadProfiles } from '$lib/api/open_omni';
   import {
     isActive,
+    isCancelling,
     getFilesDownloaded,
     getStage,
     getStageIndex,
@@ -42,6 +43,7 @@
   let selectedProfileIndex = $state(-1);
 
   let downloading = $derived(isActive());
+  let cancelling = $derived(isCancelling());
   let filesDownloaded = $derived(getFilesDownloaded());
   let stage = $derived(getStage());
   let stageIndex = $derived(getStageIndex());
@@ -287,7 +289,9 @@
 
   <div class="button-group">
     {#if downloading}
-      <button class="primary-btn stop-btn" onclick={handleStop}>Stop download</button>
+      <button class="primary-btn stop-btn" onclick={handleStop} disabled={cancelling}>
+        {cancelling ? 'Cancelling…' : 'Stop download'}
+      </button>
     {:else}
       <button
         class="primary-btn"

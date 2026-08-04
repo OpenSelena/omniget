@@ -20,6 +20,7 @@ let statusType = $state<StatusType>("info");
 let lastFilesCount = $state(0);
 let unlisten: (() => void) | null = null;
 let cancelledByUser = false;
+let cancelling = $state(false);
 
 export function isActive(): boolean {
   return active;
@@ -61,6 +62,10 @@ export function getLastFilesCount(): number {
   return lastFilesCount;
 }
 
+export function isCancelling(): boolean {
+  return cancelling;
+}
+
 export function clearStatus() {
   status = "";
   statusType = "info";
@@ -93,6 +98,7 @@ export async function startDownload(
   }
 
   cancelledByUser = false;
+  cancelling = false;
 
   const cleanUrl = url.trim();
   const cleanOutputDir = outputDir.trim();
@@ -150,6 +156,7 @@ export async function startDownload(
     statusType = "error";
   } finally {
     active = false;
+    cancelling = false;
     if (unlisten) {
       unlisten();
       unlisten = null;
@@ -160,24 +167,22 @@ export async function startDownload(
 
 export async function stopDownload() {
   if (!active || !downloadId) return;
+  if (cancelling) return;
 
   cancelledByUser = true;
+  cancelling = true;
 
   try {
     await cancelDownload(downloadId);
-    status = "Download cancelled";
+    // The run function owns cleanup. Keeping this active until it returns
+    // prevents a new download from racing the cancelled task's listener.
+    status = "Cancelling download...";
     statusType = "info";
   } catch (error) {
     console.error('Failed to cancel download:', error);
     status = `Failed to cancel: ${error}`;
     statusType = "error";
-  } finally {
-    active = false;
-    if (unlisten) {
-      unlisten();
-      unlisten = null;
-    }
-    downloadId = null;
+    cancelling = false;
   }
 }
 
