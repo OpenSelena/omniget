@@ -21,7 +21,7 @@ function cleanPathLike(value: string): string {
   if (
     trimmed.length >= 2 &&
     ((trimmed.startsWith('"') && trimmed.endsWith('"')) ||
-     (trimmed.startsWith("'") && trimmed.endsWith("'")))
+      (trimmed.startsWith("'") && trimmed.endsWith("'")))
   ) {
     return trimmed.slice(1, -1).trim();
   }
@@ -49,3 +49,5 @@ export async function saveSettings(newOutputDir: string, newCookiesFile: string)
   outputDir = cleanOutputDir;
   cookiesFile = cleanCookiesFile;
 }
+
+

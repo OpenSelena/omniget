@@ -12,6 +12,7 @@ export interface DownloadResult {
   success: boolean;
   message: string;
   files_count: number;
+  cancelled: boolean;
 }
 
 export interface DownloadProgress {
@@ -86,10 +87,8 @@ export async function deleteProfile(platform: string, profileUrl: string): Promi
   return await invoke<string>('open_omni_delete_profile', { platform, profileUrl });
 }
 
-export async function setupOpenOmniFolders(baseDir: string, cookiesDir: string): Promise<string> {
-  return await invoke<string>('open_omni_setup_folders', { baseDir, cookiesDir });
+export function generateDownloadId(): string {
+  return `dl_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 }
 
-export function generateDownloadId(): string {
-  return `dl_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-}
+

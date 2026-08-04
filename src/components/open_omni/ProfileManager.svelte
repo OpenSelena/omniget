@@ -1,5 +1,6 @@
 <script lang="ts">
   import { loadProfiles, saveProfile, deleteProfile } from '$lib/api/open_omni';
+  import { onMount } from 'svelte';
 
   type Profile = {
     url: string;
@@ -19,8 +20,10 @@
   let newUrl = $state('');
   let loading = $state(false);
   let error = $state('');
+  let confirmDeleteUrl = $state<string | null>(null);
 
   let requestId = 0;
+  let dialogEl: HTMLDivElement | null = $state(null);
 
   async function loadPlatformProfiles() {
     const platform = activePlatform;
@@ -68,8 +71,6 @@
     }
   }
 
-  let confirmDeleteUrl = $state<string | null>(null);
-
   function promptDelete(url: string) {
     confirmDeleteUrl = url;
   }
@@ -93,22 +94,43 @@
   }
 
   function initials(profile: Profile): string {
-    const source = (profile.username || profile.url || '?').replace(/^https?:\/\//, '').replace(/^www\./, '');
+    const source = (profile.username || profile.url || '?')
+      .replace(/^https?:\/\//, '')
+      .replace(/^www\./, '');
     return source.charAt(0).toUpperCase() || '?';
   }
 
+  function onDialogKeydown(e: KeyboardEvent) {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      cancelDelete();
+    }
+  }
+
+  // Focus the dialog when it opens so keyboard users land inside it.
   $effect(() => {
+    if (confirmDeleteUrl && dialogEl) {
+      dialogEl.focus();
+    }
+  });
+
+  // Reload profiles whenever the active platform changes.
+  $effect(() => {
+    // Read activePlatform so the effect tracks it.
+    void activePlatform;
     loadPlatformProfiles();
   });
 </script>
 
 <div class="profile-manager">
-  <div class="pill-group">
+  <div class="pill-group" role="tablist" aria-label="Platform">
     {#each platforms as platform}
       <button
         type="button"
+        role="tab"
+        aria-selected={activePlatform === platform.key}
         class:active={activePlatform === platform.key}
-        onclick={() => activePlatform = platform.key}
+        onclick={() => (activePlatform = platform.key)}
       >
         {platform.label}
       </button>
@@ -116,7 +138,7 @@
   </div>
 
   {#if error}
-    <div class="error-message">{error}</div>
+    <div class="error-message" role="alert">{error}</div>
   {/if}
 
   <div class="add-profile-field">
@@ -127,6 +149,9 @@
         bind:value={newUrl}
         placeholder="Enter profile URL or username"
         onkeydown={(e) => e.key === 'Enter' && addProfile()}
+        autocomplete="off"
+        spellcheck="false"
+        aria-label="Profile URL or username"
       />
       <button type="button" class="add-btn" onclick={addProfile} disabled={!newUrl.trim() || loading}>
         Add
@@ -143,7 +168,7 @@
       {#each profiles as profile}
         <li class="profile-item">
           <div class="profile-info">
-            <div class="avatar">{initials(profile)}</div>
+            <div class="avatar" aria-hidden="true">{initials(profile)}</div>
             <div>
               <p class="profile-name">{profile.username || profile.url}</p>
               {#if profile.username}
@@ -151,7 +176,7 @@
               {/if}
             </div>
           </div>
-          <button class="delete-btn" onclick={() => promptDelete(profile.url)} aria-label="Delete profile">
+          <button class="delete-btn" onclick={() => promptDelete(profile.url)} aria-label="Delete profile {profile.username || profile.url}">
             Delete
           </button>
         </li>
@@ -161,9 +186,24 @@
 </div>
 
 {#if confirmDeleteUrl}
-  <div class="confirm-overlay" role="presentation" onclick={cancelDelete}>
-    <div class="confirm-dialog" role="dialog" aria-modal="true" onclick={(e) => e.stopPropagation()}>
-      <p class="confirm-title">Delete this profile?</p>
+  <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+  <div
+    class="confirm-overlay"
+    role="presentation"
+    onclick={cancelDelete}
+    onkeydown={onDialogKeydown}
+  >
+    <div
+      class="confirm-dialog"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="confirm-title"
+      tabindex="-1"
+      bind:this={dialogEl}
+      onclick={(e) => e.stopPropagation()}
+      onkeydown={onDialogKeydown}
+    >
+      <p class="confirm-title" id="confirm-title">Delete this profile?</p>
       <p class="confirm-url">{confirmDeleteUrl}</p>
       <div class="confirm-actions">
         <button class="confirm-no" onclick={cancelDelete}>Cancel</button>
@@ -392,6 +432,7 @@
     backdrop-filter: blur(24px) saturate(140%);
     -webkit-backdrop-filter: blur(24px) saturate(140%);
     box-shadow: 0 18px 40px -20px rgba(0, 0, 0, 0.35);
+    outline: none;
   }
 
   .confirm-title {
@@ -440,3 +481,5 @@
     opacity: 0.9;
   }
 </style>
+
+

@@ -1016,7 +1016,6 @@ pub fn run() {
             commands::open_omni::open_omni_load_profiles,
             commands::open_omni::open_omni_save_profile,
             commands::open_omni::open_omni_delete_profile,
-            commands::open_omni::open_omni_setup_folders,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

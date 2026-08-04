@@ -4,11 +4,12 @@ use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, VecDeque};
 use std::fs;
 use std::io::{BufRead, BufReader};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
-use std::sync::atomic::{AtomicU32, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
+use std::time::Duration;
 use tauri::{command, AppHandle, Emitter};
 
 #[cfg(target_os = "windows")]
@@ -27,6 +28,7 @@ pub struct DownloadResult {
     pub success: bool,
     pub message: String,
     pub files_count: u32,
+    pub cancelled: bool,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -44,7 +46,12 @@ pub struct AppSettings {
     pub cookies_file: Option<String>,
 }
 
-static RUNNING_DOWNLOADS: Lazy<Mutex<HashMap<String, u32>>> =
+struct RunningDownload {
+    pid: u32,
+    cancelled: Arc<AtomicBool>,
+}
+
+static RUNNING_DOWNLOADS: Lazy<Mutex<HashMap<String, RunningDownload>>> =
     Lazy::new(|| Mutex::new(HashMap::new()));
 
 // Settings and profiles share small JSON files. Serialize access so two Tauri
@@ -61,7 +68,7 @@ fn omniget_open_omni_dir() -> Result<PathBuf, String> {
 
 #[command]
 pub fn open_omni_check_python_dependencies() -> Result<String, String> {
-    let python_found = ["python3", "python"].iter().any(|bin| {
+    let python_bin = ["python3", "python"].iter().find(|bin| {
         let mut cmd = Command::new(bin);
         #[cfg(target_os = "windows")]
         cmd.creation_flags(0x08000000);
@@ -71,10 +78,11 @@ pub fn open_omni_check_python_dependencies() -> Result<String, String> {
             .unwrap_or(false)
     });
 
-    if !python_found {
+    let Some(python) = python_bin else {
         return Err("Python is not installed".to_string());
-    }
+    };
 
+    // Verify gallery-dl is on PATH and responds to --version
     let mut gallery_cmd = Command::new("gallery-dl");
     #[cfg(target_os = "windows")]
     gallery_cmd.creation_flags(0x08000000);
@@ -86,6 +94,24 @@ pub fn open_omni_check_python_dependencies() -> Result<String, String> {
 
     if !gallery_check.status.success() {
         return Err("gallery-dl is not installed".to_string());
+    }
+
+    // Light extractor sanity check – import the Instagram extractor module.
+    // This catches the common case of a broken/partial gallery-dl install
+    // without adding noticeable startup cost.
+    let mut import_cmd = Command::new(python);
+    #[cfg(target_os = "windows")]
+    import_cmd.creation_flags(0x08000000);
+    let import_ok = import_cmd
+        .args(["-c", "import gallery_dl.extractor.instagram; print('ok')"])
+        .output()
+        .map(|o| o.status.success())
+        .unwrap_or(false);
+
+    if !import_ok {
+        return Err(
+            "gallery-dl is installed but required extractors appear missing or broken".to_string(),
+        );
     }
 
     Ok("All dependencies OK".to_string())
@@ -152,8 +178,8 @@ fn extract_username_generic(url: &str) -> Option<String> {
     let candidate = if trimmed.contains("://") {
         let after_scheme = trimmed.split("://").nth(1).unwrap_or(trimmed);
         let mut parts = after_scheme.split('/');
-        parts.next()?;
-        parts.next()?
+        parts.next()?; // host
+        parts.next()? // first path segment
     } else {
         trimmed
     };
@@ -170,20 +196,62 @@ fn extract_username_generic(url: &str) -> Option<String> {
     Some(sanitize_path_component(cleaned))
 }
 
-fn canonicalize_profile_url(platform: &str, raw_input: &str) -> String {
+/// Normalize a profile URL so that functionally identical addresses
+/// (www vs non-www, trailing slash, mobile subdomain, bare username)
+/// collapse to one canonical form. This prevents duplicate profiles.
+fn normalize_profile_url(platform: &str, raw_input: &str) -> String {
     let trimmed = raw_input.trim();
-    if trimmed.contains("://") {
-        return trimmed.to_string();
+
+    // Bare username / handle
+    if !trimmed.contains("://") && !trimmed.contains('.') {
+        let username = trimmed.trim_start_matches('@').to_lowercase();
+        return match platform {
+            "instagram" => format!("https://www.instagram.com/{}/", username),
+            "tiktok" => format!("https://www.tiktok.com/@{}", username),
+            "facebook" => format!("https://www.facebook.com/{}", username),
+            "x" => format!("https://x.com/{}", username),
+            _ => trimmed.to_string(),
+        };
     }
 
-    let username = trimmed.trim_start_matches('@');
-    match platform {
-        "instagram" => format!("https://www.instagram.com/{}/", username),
-        "tiktok" => format!("https://www.tiktok.com/@{}", username),
-        "facebook" => format!("https://www.facebook.com/{}", username),
-        "x" => format!("https://x.com/{}", username),
-        _ => trimmed.to_string(),
+    // Full URL – strip scheme, force https, drop www/m. prefixes where
+    // appropriate, lowercase host, remove trailing slash & query/fragment.
+    let without_scheme = trimmed
+        .trim_start_matches("https://")
+        .trim_start_matches("http://");
+
+    let (host_and_path, _) = without_scheme
+        .split_once(['?', '#'])
+        .unwrap_or((without_scheme, ""));
+
+    let mut parts = host_and_path.splitn(2, '/');
+    let host = parts.next().unwrap_or("").to_lowercase();
+    let path = parts.next().unwrap_or("").trim_matches('/');
+
+    let canonical_host = match platform {
+        "instagram" => "www.instagram.com",
+        "tiktok" => "www.tiktok.com",
+        "facebook" => "www.facebook.com",
+        "x" => "x.com",
+        _ => {
+            // Keep original host (minus www.) for unknown platforms
+            host.trim_start_matches("www.")
+        }
+    };
+
+    let path_part = if path.is_empty() {
+        String::new()
+    } else {
+        format!("/{}/", path.to_lowercase())
+    };
+
+    // TikTok keeps the @ in the path
+    if platform == "tiktok" && !path_part.is_empty() {
+        let user = path.trim_start_matches('@');
+        return format!("https://www.tiktok.com/@{}", user.to_lowercase());
     }
+
+    format!("https://{}{}", canonical_host, path_part)
 }
 
 fn validate_content_type(content_type: &str) -> Result<(), String> {
@@ -198,6 +266,17 @@ fn validate_profile_platform(platform: &str) -> Result<(), String> {
         "instagram" | "tiktok" | "facebook" | "x" => Ok(()),
         _ => Err("Unsupported profile platform".to_string()),
     }
+}
+
+fn is_cancelled(download_id: &str) -> bool {
+    RUNNING_DOWNLOADS
+        .lock()
+        .ok()
+        .and_then(|map| {
+            map.get(download_id)
+                .map(|rd| rd.cancelled.load(Ordering::SeqCst))
+        })
+        .unwrap_or(false)
 }
 
 #[command]
@@ -232,13 +311,25 @@ fn run_gallery_dl_download_blocking(
     download_id: String,
 ) -> Result<DownloadResult, String> {
     validate_content_type(&content_type)?;
+
+    // Pre-flight: output directory must be creatable / writable
     fs::create_dir_all(&output_dir)
         .map_err(|e| format!("Failed to create output directory: {}", e))?;
+    let test_file = PathBuf::from(&output_dir).join(".open_omni_write_test");
+    fs::write(&test_file, b"ok")
+        .map_err(|e| format!("Output directory is not writable: {} ({})", output_dir, e))?;
+    let _ = fs::remove_file(&test_file);
+
+    // Pre-flight: cookies file, if provided, must exist
+    if let Some(ref cookies) = cookies_file {
+        let c = cookies.trim();
+        if !c.is_empty() && !Path::new(c).is_file() {
+            return Err("The configured cookies file does not exist or is not a file.".to_string());
+        }
+    }
 
     let platform_name = detect_platform_name(&url);
     if content_type == "all" {
-        // Each stage gets its own final directory. Instagram's profile
-        // extractor supports stories and highlights through `include`.
         let mut sub_types: Vec<&str> = vec!["photos", "videos"];
         if platform_name == "Instagram" {
             sub_types.push("stories");
@@ -248,8 +339,14 @@ fn run_gallery_dl_download_blocking(
         let stage_total = sub_types.len() as u32;
         let mut total_files = 0u32;
         let mut failures: Vec<String> = Vec::new();
+        let mut was_cancelled = false;
 
         for (idx, sub_type) in sub_types.into_iter().enumerate() {
+            if is_cancelled(&download_id) {
+                was_cancelled = true;
+                break;
+            }
+
             let stage_index = idx as u32 + 1;
             let stage_label = match sub_type {
                 "photos" => "Photos",
@@ -284,12 +381,31 @@ fn run_gallery_dl_download_blocking(
             ) {
                 Ok(result) => {
                     total_files += result.files_count;
+                    if result.cancelled {
+                        was_cancelled = true;
+                        break;
+                    }
                     if !result.success {
                         failures.push(format!("{}: {}", sub_type, result.message));
                     }
                 }
-                Err(e) => failures.push(format!("{}: {}", sub_type, e)),
+                Err(e) => {
+                    if is_cancelled(&download_id) {
+                        was_cancelled = true;
+                        break;
+                    }
+                    failures.push(format!("{}: {}", sub_type, e));
+                }
             }
+        }
+
+        if was_cancelled {
+            return Ok(DownloadResult {
+                success: false,
+                message: "Download cancelled".to_string(),
+                files_count: total_files,
+                cancelled: true,
+            });
         }
 
         if failures.is_empty() {
@@ -300,6 +416,7 @@ fn run_gallery_dl_download_blocking(
                     total_files
                 ),
                 files_count: total_files,
+                cancelled: false,
             })
         } else {
             Ok(DownloadResult {
@@ -310,6 +427,7 @@ fn run_gallery_dl_download_blocking(
                     failures.join(" | ")
                 ),
                 files_count: total_files,
+                cancelled: false,
             })
         }
     } else {
@@ -341,6 +459,15 @@ fn run_single_content_download(
     stage_index: u32,
     stage_total: u32,
 ) -> Result<DownloadResult, String> {
+    if is_cancelled(download_id) {
+        return Ok(DownloadResult {
+            success: false,
+            message: "Download cancelled".to_string(),
+            files_count: 0,
+            cancelled: true,
+        });
+    }
+
     if (content_type == "stories" || content_type == "highlights") && platform_name != "Instagram" {
         let label = if content_type == "stories" {
             "Stories"
@@ -424,6 +551,7 @@ fn run_single_content_download(
     #[cfg(unix)]
     {
         use std::os::unix::process::CommandExt;
+        // Put the child in its own process group so we can kill the whole tree.
         cmd.process_group(0);
     }
 
@@ -432,13 +560,17 @@ fn run_single_content_download(
             if platform_name == "Instagram" {
                 cmd.arg("-o").arg("include=posts,reels");
             }
-            cmd.arg("--filter").arg("extension in ('jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'jfif', 'heic', 'avif', 'tiff', 'svg')");
+            cmd.arg("--filter").arg(
+                "extension in ('jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'jfif', 'heic', 'avif', 'tiff', 'svg')",
+            );
         }
         "videos" => {
             if platform_name == "Instagram" {
                 cmd.arg("-o").arg("include=posts,reels");
             }
-            cmd.arg("--filter").arg("extension in ('mp4', 'webm', 'mkv', 'mov', 'avi', 'm4v', 'flv', 'wmv', '3gp', 'mpeg', 'mpg', 'ts', 'f4v', 'mts', 'm2ts')");
+            cmd.arg("--filter").arg(
+                "extension in ('mp4', 'webm', 'mkv', 'mov', 'avi', 'm4v', 'flv', 'wmv', '3gp', 'mpeg', 'mpg', 'ts', 'f4v', 'mts', 'm2ts')",
+            );
         }
         "stories" => {
             cmd.arg("-o").arg("include=stories");
@@ -483,10 +615,17 @@ fn run_single_content_download(
         .spawn()
         .map_err(|e| format!("Failed to start gallery-dl: {}", e))?;
 
-    RUNNING_DOWNLOADS
-        .lock()
-        .unwrap()
-        .insert(download_id.to_string(), child.id());
+    let cancelled_flag = Arc::new(AtomicBool::new(false));
+    {
+        let mut map = RUNNING_DOWNLOADS.lock().unwrap();
+        map.insert(
+            download_id.to_string(),
+            RunningDownload {
+                pid: child.id(),
+                cancelled: cancelled_flag.clone(),
+            },
+        );
+    }
 
     let stdout = child.stdout.take().ok_or("Failed to capture stdout")?;
     let stderr = child.stderr.take().ok_or("Failed to capture stderr")?;
@@ -498,9 +637,13 @@ fn run_single_content_download(
         let download_id = download_id.to_string();
         let files_downloaded = files_downloaded.clone();
         let stage_label = media_type_name.to_string();
+        let cancelled_flag = cancelled_flag.clone();
         thread::spawn(move || {
             let reader = BufReader::new(stdout);
             for line in reader.lines().map_while(Result::ok) {
+                if cancelled_flag.load(Ordering::SeqCst) {
+                    break;
+                }
                 if let Some(pos) = line.find("FILE_OK:") {
                     let filename = line[pos + "FILE_OK:".len()..].trim();
                     let count = files_downloaded.fetch_add(1, Ordering::SeqCst) + 1;
@@ -519,28 +662,51 @@ fn run_single_content_download(
         })
     };
 
-    let stderr_tail = Arc::new(std::sync::Mutex::new(VecDeque::<String>::new()));
+    // Keep a larger tail of stderr for better error messages (last 40 lines).
+    let stderr_tail = Arc::new(Mutex::new(VecDeque::<String>::with_capacity(40)));
     let stderr_handle = {
         let app = app.clone();
         let download_id = download_id.to_string();
         let files_downloaded = files_downloaded.clone();
         let stderr_tail = stderr_tail.clone();
         let stage_label = media_type_name.to_string();
+        let cancelled_flag = cancelled_flag.clone();
         thread::spawn(move || {
             let reader = BufReader::new(stderr);
             for line in reader.lines().map_while(Result::ok) {
-                if !line.trim().is_empty() {
+                if cancelled_flag.load(Ordering::SeqCst) {
+                    break;
+                }
+                let trimmed = line.trim();
+                if trimmed.is_empty() {
+                    continue;
+                }
+
+                // Always keep the tail for the final error report.
+                {
                     let mut tail = stderr_tail.lock().unwrap();
-                    if tail.len() == 12 {
+                    if tail.len() >= 40 {
                         tail.pop_front();
                     }
                     tail.push_back(line.clone());
                 }
+
+                // Only forward useful / non-noisy lines to the UI.
+                // Skip pure debug / progress spam that gallery-dl emits.
+                let lower = trimmed.to_lowercase();
+                let is_noise = lower.starts_with("[debug]")
+                    || lower.contains("sleeping")
+                    || lower.contains("waiting")
+                    || lower.starts_with("# ");
+                if is_noise {
+                    continue;
+                }
+
                 let count = files_downloaded.load(Ordering::SeqCst);
                 let _ = app.emit(
                     &format!("download_{}", download_id),
                     DownloadProgress {
-                        message: line,
+                        message: trimmed.to_string(),
                         files_downloaded: base_count + count,
                         stage: Some(stage_label.clone()),
                         stage_index: Some(stage_index),
@@ -551,11 +717,19 @@ fn run_single_content_download(
         })
     };
 
-    let watchdog_completed = Arc::new(std::sync::atomic::AtomicBool::new(false));
+    // Watchdog: 45 minutes (generous for large profiles). Can be cancelled early.
+    let watchdog_completed = Arc::new(AtomicBool::new(false));
     let watchdog_done = watchdog_completed.clone();
     let watchdog_pid = child.id();
+    let watchdog_cancelled = cancelled_flag.clone();
     let _watchdog = thread::spawn(move || {
-        thread::sleep(std::time::Duration::from_secs(1800)); // 30 minutes
+        // Check every 5 s so a cancel is noticed quickly.
+        for _ in 0..(45 * 60 / 5) {
+            if watchdog_done.load(Ordering::SeqCst) || watchdog_cancelled.load(Ordering::SeqCst) {
+                return;
+            }
+            thread::sleep(Duration::from_secs(5));
+        }
         if !watchdog_done.load(Ordering::SeqCst) {
             kill_process_tree(watchdog_pid);
         }
@@ -565,14 +739,38 @@ fn run_single_content_download(
         .wait()
         .map_err(|e| format!("Download process failed: {}", e))?;
 
+    // Signal threads to stop and wait for them.
+    cancelled_flag.store(true, Ordering::SeqCst);
     let _ = stdout_handle.join();
     let _ = stderr_handle.join();
 
     watchdog_completed.store(true, Ordering::SeqCst);
 
-    RUNNING_DOWNLOADS.lock().unwrap().remove(download_id);
+    let was_cancelled = RUNNING_DOWNLOADS
+        .lock()
+        .ok()
+        .and_then(|mut map| {
+            map.remove(download_id)
+                .map(|rd| rd.cancelled.load(Ordering::SeqCst))
+        })
+        .unwrap_or(false);
+
+    // Ensure the entry is gone even if the flag was already true.
+    RUNNING_DOWNLOADS
+        .lock()
+        .ok()
+        .map(|mut map| map.remove(download_id));
 
     let final_count = files_downloaded.load(Ordering::SeqCst);
+
+    if was_cancelled {
+        return Ok(DownloadResult {
+            success: false,
+            message: "Download cancelled".to_string(),
+            files_count: final_count,
+            cancelled: true,
+        });
+    }
 
     if status.success() {
         Ok(DownloadResult {
@@ -582,15 +780,13 @@ fn run_single_content_download(
                 final_count
             ),
             files_count: final_count,
+            cancelled: false,
         })
     } else {
         let stderr_message = stderr_tail
             .lock()
-            .unwrap()
-            .iter()
-            .cloned()
-            .collect::<Vec<_>>()
-            .join("\n");
+            .map(|t| t.iter().cloned().collect::<Vec<_>>().join("\n"))
+            .unwrap_or_default();
         let error_msg = if !stderr_message.is_empty() {
             stderr_message
         } else {
@@ -603,6 +799,7 @@ fn run_single_content_download(
             success: false,
             message: error_msg,
             files_count: final_count,
+            cancelled: false,
         })
     }
 }
@@ -617,6 +814,7 @@ fn kill_process_tree(pid: u32) {
     }
     #[cfg(not(target_os = "windows"))]
     {
+        // Negative PID = process group (we set process_group(0) on spawn).
         let _ = Command::new("kill")
             .args(["-9", &format!("-{}", pid)])
             .output();
@@ -625,12 +823,16 @@ fn kill_process_tree(pid: u32) {
 
 #[command]
 pub fn open_omni_cancel_download(download_id: String) -> Result<String, String> {
-    let pid = RUNNING_DOWNLOADS.lock().unwrap().get(&download_id).copied();
+    let mut map = RUNNING_DOWNLOADS
+        .lock()
+        .map_err(|_| "Download state lock is unavailable")?;
 
-    match pid {
-        Some(pid) => {
-            kill_process_tree(pid);
-            RUNNING_DOWNLOADS.lock().unwrap().remove(&download_id);
+    match map.get_mut(&download_id) {
+        Some(rd) => {
+            rd.cancelled.store(true, Ordering::SeqCst);
+            kill_process_tree(rd.pid);
+            // Keep the entry so the waiting task can observe the cancelled flag.
+            // It will remove the entry itself after wait() returns.
             Ok("Download cancelled".to_string())
         }
         None => Err("No running download found for that ID".to_string()),
@@ -727,7 +929,9 @@ pub fn open_omni_save_profile(platform: String, url: String) -> Result<String, S
         return Err("URL or username cannot be empty".to_string());
     }
 
-    let url = canonicalize_profile_url(&platform, &raw_input);
+    // Full normalization so www / non-www / trailing-slash / bare-username
+    // all collapse to one canonical form.
+    let url = normalize_profile_url(&platform, &raw_input);
 
     let config_dir = omniget_open_omni_dir()?;
     let profiles_file = config_dir.join("profiles.json");
@@ -750,6 +954,12 @@ pub fn open_omni_save_profile(platform: String, url: String) -> Result<String, S
             let existing_url = profile.get("url").and_then(|v| v.as_str());
             if existing_url == Some(url.as_str()) {
                 return Err("Profile already exists".to_string());
+            }
+            // Also compare normalized forms of any legacy entries.
+            if let Some(existing) = existing_url {
+                if normalize_profile_url(&platform, existing) == url {
+                    return Err("Profile already exists".to_string());
+                }
             }
             if let Some(new_name) = &username {
                 let existing_name = profile.get("username").and_then(|v| v.as_str());
@@ -775,10 +985,8 @@ pub fn open_omni_save_profile(platform: String, url: String) -> Result<String, S
         .and_then(|v| v.as_array_mut())
     {
         arr.push(new_profile);
-    } else {
-        if let Some(obj) = all_profiles.as_object_mut() {
-            obj.insert(platform.clone(), serde_json::json!([new_profile]));
-        }
+    } else if let Some(obj) = all_profiles.as_object_mut() {
+        obj.insert(platform.clone(), serde_json::json!([new_profile]));
     }
 
     let content = serde_json::to_string_pretty(&all_profiles)
@@ -807,13 +1015,18 @@ pub fn open_omni_delete_profile(platform: String, profile_url: String) -> Result
     let mut all_profiles: serde_json::Value =
         serde_json::from_str(&content).map_err(|e| format!("Failed to parse profiles: {}", e))?;
 
+    let normalized_target = normalize_profile_url(&platform, &profile_url);
+
     let deleted = all_profiles
         .as_object_mut()
         .and_then(|obj| obj.get_mut(&platform))
         .and_then(|v| v.as_array_mut())
         .map(|arr| {
             let len_before = arr.len();
-            arr.retain(|p| p.get("url").and_then(|u| u.as_str()) != Some(&profile_url));
+            arr.retain(|p| {
+                let u = p.get("url").and_then(|u| u.as_str()).unwrap_or("");
+                u != profile_url && normalize_profile_url(&platform, u) != normalized_target
+            });
             len_before != arr.len()
         })
         .unwrap_or(false);
@@ -830,37 +1043,6 @@ pub fn open_omni_delete_profile(platform: String, profile_url: String) -> Result
     Ok("Profile deleted".to_string())
 }
 
-#[command]
-pub fn open_omni_setup_folders(base_dir: String, cookies_dir: String) -> Result<String, String> {
-    let base_path = PathBuf::from(base_dir);
-    let cookies_path = PathBuf::from(cookies_dir);
-
-    fs::create_dir_all(&base_path).map_err(|e| format!("Failed to create base dir: {}", e))?;
-    fs::create_dir_all(&cookies_path)
-        .map_err(|e| format!("Failed to create cookies dir: {}", e))?;
-
-    let platforms = vec!["instagram", "tiktok", "facebook", "x"];
-
-    for platform in &platforms {
-        let platform_dir = base_path.join(platform);
-        fs::create_dir_all(&platform_dir)
-            .map_err(|e| format!("Failed to create platform dir: {}", e))?;
-
-        let profile_file = base_path.join(format!("{}_profiles.txt", platform));
-        if !profile_file.exists() {
-            fs::write(
-                &profile_file,
-                format!("# Add {} profile URLs here\n", platform),
-            )
-            .map_err(|e| format!("Failed to create profile file: {}", e))?;
-        }
-
-        let cookie_file = cookies_path.join(format!("{}.com_cookies.txt", platform));
-        if !cookie_file.exists() {
-            fs::write(&cookie_file, format!("# Add {} cookies here\n", platform))
-                .map_err(|e| format!("Failed to create cookie file: {}", e))?;
-        }
-    }
-
-    Ok("Folder structure created successfully".to_string())
-}
+// NOTE: open_omni_setup_folders was removed. It created a legacy folder
+// layout that the rest of the application never used. Settings now rely
+// exclusively on the free-form output directory + single cookies file.

@@ -72,19 +72,31 @@ export function clearStatus() {
 }
 
 function applyProgress(progressData: DownloadProgress) {
-  lastMessage = progressData.message;
-  if (progressData.files_downloaded > 0) {
+  // Prefer clean "Downloaded: …" messages; keep other non-empty messages
+  // but never let an empty payload wipe the last useful text.
+  if (progressData.message && progressData.message.trim()) {
+    lastMessage = progressData.message.trim();
+  }
+  if (typeof progressData.files_downloaded === "number" && progressData.files_downloaded >= 0) {
     filesDownloaded = progressData.files_downloaded;
   }
   if (progressData.stage) {
     stage = progressData.stage;
   }
-  if (progressData.stage_index) {
+  if (typeof progressData.stage_index === "number") {
     stageIndex = progressData.stage_index;
   }
-  if (progressData.stage_total) {
+  if (typeof progressData.stage_total === "number") {
     stageTotal = progressData.stage_total;
   }
+}
+
+function resetProgressState() {
+  filesDownloaded = 0;
+  stage = null;
+  stageIndex = null;
+  stageTotal = null;
+  lastMessage = "";
 }
 
 export async function startDownload(
@@ -111,18 +123,14 @@ export async function startDownload(
   }
 
   if ((contentType === "stories" || contentType === "highlights") && !cleanCookiesFile) {
-    status = "Stories and Highlights require a cookies file - set one in Settings.";
+    status = "Stories and Highlights require a cookies file — set one in Settings.";
     statusType = "error";
     return;
   }
 
   active = true;
-  filesDownloaded = 0;
-  stage = null;
-  stageIndex = null;
-  stageTotal = null;
-  lastMessage = "";
-  status = "Starting download...";
+  resetProgressState();
+  status = "Starting download…";
   statusType = "info";
 
   const id = generateDownloadId();
@@ -139,26 +147,37 @@ export async function startDownload(
       id,
     );
 
-    if (cancelledByUser) {
+    if (cancelledByUser || result.cancelled) {
       status = "Download cancelled";
       statusType = "info";
+      filesDownloaded = result.files_count;
     } else if (result.success) {
       status = `Downloaded ${result.files_count} files successfully!`;
       statusType = "success";
       filesDownloaded = result.files_count;
       lastFilesCount = result.files_count;
     } else {
-      status = result.message;
+      status = result.message || "Download failed";
       statusType = "error";
+      filesDownloaded = result.files_count;
     }
   } catch (error) {
-    status = `Download failed: ${error}`;
-    statusType = "error";
+    if (cancelledByUser) {
+      status = "Download cancelled";
+      statusType = "info";
+    } else {
+      status = `Download failed: ${error}`;
+      statusType = "error";
+    }
   } finally {
     active = false;
     cancelling = false;
     if (unlisten) {
-      unlisten();
+      try {
+        unlisten();
+      } catch {
+        // ignore – listener may already be gone
+      }
       unlisten = null;
     }
     downloadId = null;
@@ -171,15 +190,15 @@ export async function stopDownload() {
 
   cancelledByUser = true;
   cancelling = true;
+  status = "Cancelling download…";
+  statusType = "info";
 
   try {
     await cancelDownload(downloadId);
-    // The run function owns cleanup. Keeping this active until it returns
-    // prevents a new download from racing the cancelled task's listener.
-    status = "Cancelling download...";
-    statusType = "info";
+    // The run function owns final cleanup. We keep active=true until it
+    // returns so a new download cannot race the cancelled task's listener.
   } catch (error) {
-    console.error('Failed to cancel download:', error);
+    console.error("Failed to cancel download:", error);
     status = `Failed to cancel: ${error}`;
     statusType = "error";
     cancelling = false;
@@ -189,5 +208,11 @@ export async function stopDownload() {
 export async function reattachIfActive() {
   if (!active || !downloadId || unlisten) return;
 
-  unlisten = await listenToDownloadProgress(downloadId, applyProgress);
+  try {
+    unlisten = await listenToDownloadProgress(downloadId, applyProgress);
+  } catch (error) {
+    console.error("Failed to reattach progress listener:", error);
+  }
 }
+
+

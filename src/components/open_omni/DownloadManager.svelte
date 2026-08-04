@@ -29,6 +29,7 @@
   let url = $state('');
   let contentType = $state('all');
   let depsStatus = $state('');
+  let depsChecked = $state(false);
 
   function detectPlatform(u: string): string {
     const low = u.toLowerCase();
@@ -82,6 +83,8 @@
     reattachIfActive();
     await loadSettings();
     await loadSavedProfiles();
+    // Dependency check runs once on mount, not on every reactive tick.
+    await checkDeps();
   });
 
   async function loadSavedProfiles() {
@@ -111,7 +114,7 @@
   async function checkDeps() {
     // Only surface this banner when a dependency is actually missing.
     // When everything is installed, leave depsStatus empty so nothing
-    // is ever shown to the user — no "All dependencies OK" flash.
+    // is ever shown to the user.
     try {
       const result = await checkPythonDependencies();
       if (!result.includes('OK')) {
@@ -121,6 +124,8 @@
       }
     } catch (error) {
       depsStatus = `Missing dependency: ${error}`;
+    } finally {
+      depsChecked = true;
     }
   }
 
@@ -176,18 +181,20 @@
     selectedProfileIndex = -1;
   }
 
-  $effect(() => {
-    checkDeps();
-  });
-
+  // When the user types a URL, clear any chip selection.
   $effect(() => {
     if (url.trim()) {
       selectedProfileIndex = -1;
     }
   });
 
+  // Force content type away from Instagram-only options when the current
+  // target is not Instagram. Guard against unnecessary writes.
   $effect(() => {
-    if ((contentType === 'stories' || contentType === 'highlights') && !isInstagram) {
+    if (
+      (contentType === 'stories' || contentType === 'highlights') &&
+      !isInstagram
+    ) {
       contentType = 'photos';
     }
   });
@@ -202,14 +209,21 @@
 </script>
 
 <div class="download-manager">
-  {#if depsStatus}
-    <div class="deps-check" class:ok={depsStatus.includes('OK')} class:error={!depsStatus.includes('OK')}>
+  {#if depsChecked && depsStatus}
+    <div class="deps-check error" role="alert">
       <span>{depsStatus}</span>
     </div>
   {/if}
 
   {#if status}
-    <div class="status-alert" class:success={statusType === 'success'} class:error={statusType === 'error'}>
+    <div
+      class="status-alert"
+      class:success={statusType === 'success'}
+      class:error={statusType === 'error'}
+      class:info={statusType === 'info'}
+      role="status"
+      aria-live="polite"
+    >
       <span>{status}</span>
       <button class="close-alert" onclick={clearStatus} aria-label="Dismiss">×</button>
     </div>
@@ -226,10 +240,12 @@
         placeholder="https://instagram.com/username"
         disabled={downloading}
         oninput={clearSelectedProfile}
+        autocomplete="off"
+        spellcheck="false"
       />
     </div>
     {#if !url.trim() && savedProfiles.length > 0}
-      <div class="chip-list">
+      <div class="chip-list" role="listbox" aria-label="Saved profiles">
         {#each savedProfiles as profile, index}
           <button
             type="button"
@@ -237,10 +253,15 @@
             class:selected={selectedProfileIndex === index}
             onclick={() => selectProfile(index)}
             disabled={downloading}
+            role="option"
+            aria-selected={selectedProfileIndex === index}
           >
             <span>{profile.username || profile.url}</span>
+            {#if profile._platformLabel}
+              <span class="chip-platform">{profile._platformLabel}</span>
+            {/if}
             {#if selectedProfileIndex === index}
-              <span class="chip-check">✓</span>
+              <span class="chip-check" aria-hidden="true">✓</span>
             {/if}
           </button>
         {/each}
@@ -254,8 +275,8 @@
   </div>
 
   <div class="segment-block">
-    <span class="segment-label">Content type</span>
-    <div class="pill-group">
+    <span class="segment-label" id="content-type-label">Content type</span>
+    <div class="pill-group" role="group" aria-labelledby="content-type-label">
       {#each CONTENT_TYPES as type}
         <button
           type="button"
@@ -263,6 +284,7 @@
           onclick={() => (contentType = type.key)}
           disabled={downloading || ((type.key === 'stories' || type.key === 'highlights') && !isInstagram)}
           title={(type.key === 'stories' || type.key === 'highlights') && !isInstagram ? 'Instagram only' : ''}
+          aria-pressed={contentType === type.key}
         >
           {type.label}
         </button>
@@ -271,20 +293,20 @@
   </div>
 
   {#if missingOutputDir}
-    <p class="field-warning">
+    <p class="field-warning" role="alert">
       Set an output directory in
       <button type="button" class="inline-link" onclick={() => dispatch('switchToSettings')}>Settings</button>
       before downloading.
     </p>
   {/if}
   {#if needsCookiesWarning}
-    <p class="field-warning">
+    <p class="field-warning" role="alert">
       Stories and Highlights need a cookies file — add one in
       <button type="button" class="inline-link" onclick={() => dispatch('switchToSettings')}>Settings</button>.
     </p>
   {/if}
   {#if platformMismatch}
-    <p class="field-warning">Stories and Highlights are only supported for Instagram.</p>
+    <p class="field-warning" role="alert">Stories and Highlights are only supported for Instagram.</p>
   {/if}
 
   <div class="button-group">
@@ -304,8 +326,8 @@
   </div>
 
   {#if downloading}
-    <div class="ring-wrap">
-      <svg class="om-ring" class:indeterminate={ringFraction === null} viewBox="0 0 140 140" width="140" height="140">
+    <div class="ring-wrap" role="status" aria-live="polite" aria-atomic="true">
+      <svg class="om-ring" class:indeterminate={ringFraction === null} viewBox="0 0 140 140" width="140" height="140" aria-hidden="true">
         <circle class="om-ring-track" cx="70" cy="70" r="58" />
         {#if ringFraction === null}
           <circle class="om-ring-progress" cx="70" cy="70" r="58" />
@@ -322,13 +344,13 @@
       </svg>
       <p class="ring-stage">
         {#if stageTotal && stageTotal > 1}
-          Stage {stageIndex ?? 1} of {stageTotal} &middot; {stage ?? ''}
+          Stage {stageIndex ?? 1} of {stageTotal} · {stage ?? ''}
         {:else}
-          Downloading{stage ? ` ${stage}` : ''}&hellip;
+          Downloading{stage ? ` ${stage}` : ''}…
         {/if}
       </p>
       {#if lastMessage}
-        <p class="ring-message">{lastMessage}</p>
+        <p class="ring-message" title={lastMessage}>{lastMessage}</p>
       {/if}
     </div>
   {/if}
@@ -358,12 +380,6 @@
     text-align: center;
   }
 
-  .deps-check.ok {
-    background: var(--glass-surface-strong);
-    color: var(--text-secondary);
-    border: 1px solid var(--glass-border);
-  }
-
   .deps-check.error {
     background: var(--error);
     color: var(--on-error);
@@ -387,6 +403,12 @@
   .status-alert.error {
     background: var(--error);
     color: var(--on-error);
+  }
+
+  .status-alert.info {
+    background: var(--glass-surface-strong);
+    color: var(--text);
+    border: 1px solid var(--glass-border);
   }
 
   .close-alert {
@@ -506,6 +528,15 @@
   .chip:disabled {
     opacity: 0.5;
     cursor: not-allowed;
+  }
+
+  .chip-platform {
+    font-size: 10.5px;
+    opacity: 0.75;
+  }
+
+  .chip.selected .chip-platform {
+    opacity: 0.9;
   }
 
   .chip-check {
@@ -659,3 +690,5 @@
     text-align: center;
   }
 </style>
+
+
