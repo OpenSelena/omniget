@@ -627,117 +627,284 @@
     }
 
     /* ==========================================================================
-       OPENOMNI LIVE INTERACTIVE HTML DEMO STYLES
+       OPEN OMNI LIVE APP PREVIEW (EXACT APP DESIGN MIRROR)
        ========================================================================== */
-    .openomni-live-app {
-      background: #f8fafc;
-      border: 1px solid var(--border-line);
-      border-radius: var(--radius-lg);
-      padding: 36px 40px;
-      max-width: 900px;
-      margin: 0 auto 30px;
-      box-shadow: 0 10px 30px var(--shadow-ambient);
+    .open-omni-shell {
+      --oo-accent: #0071E3;
+      --glass-surface: rgba(255, 255, 255, 0.88);
+      --glass-surface-strong: #ffffff;
+      --glass-border: rgba(103, 103, 108, 0.22);
+      --glass-radius-lg: 20px;
+      --glass-radius: 14px;
+      --glass-radius-sm: 10px;
+      --accent-soft: rgba(0, 113, 227, 0.12);
+      --accent-line: rgba(0, 113, 227, 0.45);
+      --accent-glow: rgba(0, 113, 227, 0.35);
+      --accent-gradient: linear-gradient(135deg, #0077EE, #0055BB);
+      --on-accent: #ffffff;
+
+      position: relative;
+      max-width: 560px;
+      margin: 0 auto 40px;
+      width: 100%;
       text-align: left;
+      isolation: isolate;
     }
 
-    .om-app-title {
-      font-family: var(--font-body);
-      font-size: 26px;
-      font-weight: 700;
-      color: #0f172a;
-      line-height: 1.2;
+    .oo-ambient-wash {
+      position: absolute;
+      inset: -8% -8% auto -8%;
+      height: 280px;
+      background: radial-gradient(ellipse at 50% 0%, var(--accent-soft) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: -1;
     }
 
-    .om-app-subtitle {
-      font-size: 13.5px;
-      color: #64748b;
-      margin-top: 4px;
-      margin-bottom: 24px;
-    }
-
-    .om-main-tabs {
+    .oo-page-header {
+      width: 100%;
+      margin-bottom: 1.25rem;
       display: flex;
-      gap: 28px;
-      border-bottom: 1px solid #e2e8f0;
-      margin-bottom: 28px;
+      align-items: center;
+      gap: 14px;
+      background: var(--glass-surface-strong);
+      border: 1px solid var(--glass-border);
+      border-radius: 28px;
+      padding: 1rem 1.25rem;
+      box-shadow: 0 4px 16px var(--shadow-ambient);
+      box-sizing: border-box;
     }
 
-    .om-tab-btn {
-      background: none;
+    .oo-page-header .oo-mascot {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      object-fit: cover;
+      background: #1a1a1a;
+      border: 2px solid #ffffff;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+    }
+
+    .oo-header-text h1 {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      margin: 0;
+      font-weight: 700;
+      color: var(--text-head);
+      letter-spacing: -0.02em;
+    }
+
+    .oo-header-text p {
+      color: var(--text-muted);
+      margin: 0.2rem 0 0;
+      font-size: 0.82rem;
+    }
+
+    .oo-glass-panel {
+      width: 100%;
+      background: var(--glass-surface);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--glass-radius-lg);
+      padding: 1.35rem 1.25rem;
+      box-sizing: border-box;
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      box-shadow: 0 12px 32px -18px rgba(0, 0, 0, 0.14);
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .oo-tab-switcher {
+      display: inline-flex;
+      gap: 4px;
+      align-self: center;
+      background: var(--glass-surface-strong);
+      border: 1px solid var(--glass-border);
+      border-radius: 999px;
+      padding: 4px;
+    }
+
+    .oo-tab-btn {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
       border: none;
-      font-family: var(--font-body);
-      font-size: 14px;
+      border-radius: 999px;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 13.5px;
       font-weight: 600;
-      color: #64748b;
-      padding-bottom: 10px;
       cursor: pointer;
-      border-bottom: 2px solid transparent;
-      transition: var(--transition-fast);
+      transition: color 0.15s ease, background 0.2s ease;
+      font-family: inherit;
     }
 
-    .om-tab-btn.active {
-      color: #2563eb;
-      border-bottom-color: #2563eb;
+    .oo-tab-btn.active {
+      background: var(--accent-gradient);
+      color: var(--on-accent);
+      box-shadow: 0 4px 14px -4px var(--accent-glow);
     }
 
-    .om-field-group {
-      margin-bottom: 20px;
-    }
-
-    .om-label {
+    .oo-field-label {
       display: block;
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 600;
-      color: #334155;
+      color: var(--text-body);
       margin-bottom: 8px;
     }
 
-    .om-input-row {
+    .oo-input-shell {
       display: flex;
+      align-items: center;
       gap: 10px;
-    }
-
-    .om-input {
-      flex: 1;
-      height: 42px;
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
+      background: var(--glass-surface-strong);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--glass-radius);
       padding: 0 14px;
-      font-family: var(--font-body);
-      font-size: 13.5px;
-      color: #0f172a;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .oo-input-shell:focus-within {
+      border-color: var(--accent-line);
+      box-shadow: 0 0 0 3px var(--accent-soft);
+    }
+
+    .oo-input-shell input {
+      flex: 1;
+      padding: 12px 0;
+      background: transparent;
+      border: none;
+      color: var(--text-head);
+      font-size: 14px;
       outline: none;
-      transition: var(--transition-fast);
+      font-family: inherit;
     }
 
-    .om-input:focus {
-      border-color: #2563eb;
-      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+    .oo-chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
     }
 
-    .om-subtext {
-      font-size: 12px;
-      color: #64748b;
-      margin-top: 6px;
-    }
-
-    .om-subtext a {
-      color: #2563eb;
-      text-decoration: underline;
+    .oo-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--glass-border);
+      background: var(--glass-surface-strong);
+      color: var(--text-head);
+      font-size: 12.5px;
       cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease;
+      font-family: inherit;
     }
 
-    .om-browse-btn {
-      height: 42px;
-      padding: 0 18px;
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      font-family: var(--font-body);
-      font-size: 13px;
+    .oo-chip:hover {
+      border-color: var(--accent-line);
+    }
+
+    .oo-chip.selected {
+      background: var(--accent-gradient);
+      border-color: transparent;
+      color: var(--on-accent);
       font-weight: 600;
-      color: #334155;
+      box-shadow: 0 3px 12px -4px var(--accent-glow);
+    }
+
+    .oo-chip-platform {
+      font-size: 10.5px;
+      opacity: 0.75;
+    }
+
+    .oo-pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .oo-pill-btn {
+      padding: 8px 16px;
+      border-radius: 999px;
+      border: 1px solid var(--glass-border);
+      background: var(--glass-surface-strong);
+      color: var(--text-body);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease;
+      font-family: inherit;
+    }
+
+    .oo-pill-btn.active {
+      background: var(--accent-gradient);
+      border-color: transparent;
+      color: var(--on-accent);
+      box-shadow: 0 3px 12px -4px var(--accent-glow);
+      font-weight: 600;
+    }
+
+    .oo-primary-btn {
+      width: 100%;
+      padding: 13px;
+      border: none;
+      border-radius: var(--glass-radius);
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      background: var(--accent-gradient);
+      color: var(--on-accent);
+      box-shadow: 0 6px 20px -6px var(--accent-glow);
+      transition: transform 0.12s ease, box-shadow 0.12s ease;
+      font-family: inherit;
+    }
+
+    .oo-primary-btn:hover {
+      box-shadow: 0 8px 24px -6px var(--accent-glow);
+    }
+
+    .oo-primary-btn:active {
+      transform: scale(0.99);
+    }
+
+    /* Live Progress Ring Widget (Mirror of DownloadManager.svelte SVG Ring) */
+    .oo-ring-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 14px;
+    }
+
+    .oo-ring-track {
+      fill: none;
+      stroke: rgba(0, 0, 0, 0.08);
+      stroke-width: 10;
+    }
+
+    .oo-ring-progress {
+      fill: none;
+      stroke: var(--oo-accent);
+      stroke-width: 10;
+      stroke-linecap: round;
+      transform: rotate(-90deg);
+      transform-origin: 70px 70px;
+      transition: stroke-dashoffset 0.4s ease;
+    }
+
+    .oo-ring-count {
+      font-size: 20px;
+      font-weight: 700;
+      fill: var(--text-head);
+    }
+
+    .oo-ring-label {
+      font-size: 11px;
+      fill: var(--text-muted);
+    }
       cursor: pointer;
       transition: var(--transition-fast);
     }
@@ -1250,116 +1417,154 @@
       </section>
     </div>
 
-    <!-- ==================== OPENOMNI TAB PAGE ==================== -->
+    <!-- ==================== OPENOMNI TAB PAGE (EXACT APP SHELL MIRROR) ==================== -->
     <div class="page-tab-content" id="page-openomni">
       <section class="hero-section text-center" style="padding-bottom: 40px;">
         <div class="container">
           <div class="section-header">
-            <span class="openomni-badge">OpenOmni Module • Built by sayfalse</span>
-            <h2 class="section-title">OpenOmni Engine — Live Interactive Demo</h2>
-            <p class="section-desc">Test the live OpenOmni user interface directly in your browser. Experience social media extraction, content filters, and profile bookmarking in real-time.</p>
+            <span class="openomni-badge">Open Omni Module • Social Archiver</span>
+            <h2 class="section-title">Open Omni Engine — Live Interactive Demo</h2>
+            <p class="section-desc">Experience the exact Open Omni UI directly in your browser. Download profiles, filter content types, and monitor accounts in real-time.</p>
             <div class="demo-disclaimer-badge">
               <i data-lucide="info" style="width: 13px; height: 13px;"></i>
-              Simulated demo — no real profile data is fetched here
+              Interactive preview — mirrors the desktop app interface
             </div>
           </div>
 
-          <!-- LIVE OPENOMNI HTML/CSS APPLICATION UI DEMO -->
-          <div class="openomni-live-app" style="overflow: hidden; padding: 0;">
-            <!-- macOS-Style Window Navigation Bar (decorative only) -->
-            <div class="demo-frame-bar">
-              <div class="dot" style="background: #ff5f56;"></div>
-              <div class="dot" style="background: #ffbd2e;"></div>
-              <div class="dot" style="background: #27c93f;"></div>
+          <!-- EXACT APP SHELL MIRROR -->
+          <div class="open-omni-shell">
+            <div class="oo-ambient-wash" aria-hidden="true"></div>
+
+            <!-- Page Header with Mascot -->
+            <header class="oo-page-header">
+              <img class="oo-mascot" src="./static/loop.png" alt="Loop Mascot" />
+              <div class="oo-header-text">
+                <h1>Open Omni</h1>
+                <p>Social media profile &amp; batch downloader</p>
+              </div>
+            </header>
+
+            <!-- Main Glass Panel -->
+            <div class="oo-glass-panel">
+              <!-- Tab Switcher -->
+              <nav class="oo-tab-switcher">
+                <button type="button" class="oo-tab-btn active" id="oo-switcher-download" onclick="switchOoPanel('download')">
+                  <i data-lucide="download" style="width: 14px; height: 14px;"></i> Download
+                </button>
+                <button type="button" class="oo-tab-btn" id="oo-switcher-profiles" onclick="switchOoPanel('profiles')">
+                  <i data-lucide="users" style="width: 14px; height: 14px;"></i> Profiles
+                </button>
+                <button type="button" class="oo-tab-btn" id="oo-switcher-settings" onclick="switchOoPanel('settings')">
+                  <i data-lucide="settings" style="width: 14px; height: 14px;"></i> Settings
+                </button>
+              </nav>
+
+              <!-- PANEL 1: DOWNLOAD MANAGER -->
+              <div id="oo-panel-download" style="display: flex; flex-direction: column; gap: 18px;">
+                <!-- Profile URL Field -->
+                <div>
+                  <label class="oo-field-label">Profile URL</label>
+                  <div class="oo-input-shell">
+                    <i data-lucide="link" style="width: 16px; height: 16px; color: var(--text-muted);"></i>
+                    <input type="text" id="oo-url-input" value="https://instagram.com/creative_studio" placeholder="https://instagram.com/username" />
+                  </div>
+                  
+                  <!-- Saved Profiles Chip List -->
+                  <div class="oo-chip-list">
+                    <button class="oo-chip selected" onclick="selectOoChip(this, 'https://instagram.com/creative_studio')">
+                      <span>@creative_studio</span> <span class="oo-chip-platform">Instagram</span>
+                    </button>
+                    <button class="oo-chip" onclick="selectOoChip(this, 'https://tiktok.com/@tech_daily')">
+                      <span>@tech_daily</span> <span class="oo-chip-platform">TikTok</span>
+                    </button>
+                    <button class="oo-chip" onclick="selectOoChip(this, 'https://x.com/design_feed')">
+                      <span>@design_feed</span> <span class="oo-chip-platform">X</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Content Type Segment -->
+                <div>
+                  <label class="oo-field-label">Content Type</label>
+                  <div class="oo-pill-group">
+                    <button class="oo-pill-btn active" onclick="setOoContentType(this)">All</button>
+                    <button class="oo-pill-btn" onclick="setOoContentType(this)">Photos</button>
+                    <button class="oo-pill-btn" onclick="setOoContentType(this)">Videos</button>
+                    <button class="oo-pill-btn" onclick="setOoContentType(this)">Stories</button>
+                    <button class="oo-pill-btn" onclick="setOoContentType(this)">Highlights</button>
+                  </div>
+                </div>
+
+                <!-- Primary Download Button -->
+                <button class="oo-primary-btn" id="oo-download-btn" onclick="runOoLiveDownload()">Start Download</button>
+
+                <!-- Live Circular Progress Ring (Matches DownloadManager.svelte) -->
+                <div class="oo-ring-wrap" id="oo-ring-widget" style="display: none;">
+                  <svg width="140" height="140" viewBox="0 0 140 140">
+                    <circle class="oo-ring-track" cx="70" cy="70" r="58" />
+                    <circle class="oo-ring-progress" id="oo-ring-circle" cx="70" cy="70" r="58" stroke-dasharray="364.42" stroke-dashoffset="364.42" />
+                    <text class="oo-ring-count" x="70" y="66" text-anchor="middle" dominant-baseline="middle" id="oo-ring-count">0 / 42</text>
+                    <text class="oo-ring-label" x="70" y="88" text-anchor="middle" dominant-baseline="middle">Files Downloaded</text>
+                  </svg>
+                  <div style="font-size: 13px; font-weight: 600; color: var(--text-head); margin-top: 10px;" id="oo-ring-stage">Connecting to profile...</div>
+                  <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;" id="oo-ring-message">Fetching metadata & media streams...</div>
+                </div>
+              </div>
+
+              <!-- PANEL 2: PROFILES MANAGER -->
+              <div id="oo-panel-profiles" style="display: none; flex-direction: column; gap: 16px;">
+                <div class="oo-pill-group">
+                  <button class="oo-pill-btn active" onclick="switchOoPlatformTab('Instagram', this)">Instagram</button>
+                  <button class="oo-pill-btn" onclick="switchOoPlatformTab('TikTok', this)">TikTok</button>
+                  <button class="oo-pill-btn" onclick="switchOoPlatformTab('Facebook', this)">Facebook</button>
+                  <button class="oo-pill-btn" onclick="switchOoPlatformTab('X', this)">X</button>
+                </div>
+
+                <div class="oo-input-shell">
+                  <input type="text" id="oo-new-profile-input" placeholder="Enter profile URL or username" />
+                  <button class="btn btn-primary" style="height: 34px; font-size: 12px; padding: 0 14px;" onclick="addOoProfile()">Add</button>
+                </div>
+
+                <div id="oo-profiles-list" style="display: flex; flex-direction: column; gap: 10px;">
+                  <div style="display: flex; align-items: center; justify-content: space-between; background: #ffffff; border: 1px solid var(--glass-border); padding: 10px 14px; border-radius: 12px;">
+                    <div>
+                      <strong style="color: var(--text-head); font-size: 13.5px;">@creative_studio</strong>
+                      <div style="font-size: 11.5px; color: var(--text-muted);">Monitored • 42 posts downloaded</div>
+                    </div>
+                    <button class="btn btn-secondary" style="height: 32px; font-size: 12px; padding: 0 12px;" onclick="quickOoDownload('@creative_studio')">Fetch Latest</button>
+                  </div>
+                  <div style="display: flex; align-items: center; justify-content: space-between; background: #ffffff; border: 1px solid var(--glass-border); padding: 10px 14px; border-radius: 12px;">
+                    <div>
+                      <strong style="color: var(--text-head); font-size: 13.5px;">@tech_daily</strong>
+                      <div style="font-size: 11.5px; color: var(--text-muted);">Monitored • 18 videos downloaded</div>
+                    </div>
+                    <button class="btn btn-secondary" style="height: 32px; font-size: 12px; padding: 0 12px;" onclick="quickOoDownload('@tech_daily')">Fetch Latest</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- PANEL 3: SETTINGS MANAGER -->
+              <div id="oo-panel-settings" style="display: none; flex-direction: column; gap: 16px;">
+                <div>
+                  <label class="oo-field-label">Output Directory</label>
+                  <div class="oo-input-shell">
+                    <input type="text" id="oo-settings-dir" value="C:/Downloads/OpenOmni" />
+                    <button class="btn btn-secondary" style="height: 32px; font-size: 12px;" onclick="alert('Selected Output Directory destination folder.')">Browse</button>
+                  </div>
+                </div>
+
+                <div>
+                  <label class="oo-field-label">Cookies File (optional)</label>
+                  <div class="oo-input-shell">
+                    <input type="text" id="oo-settings-cookies" value="cookies.txt" placeholder="cookies.txt" />
+                    <button class="btn btn-secondary" style="height: 32px; font-size: 12px;" onclick="alert('Selected Cookies File destination.')">Browse</button>
+                  </div>
+                </div>
+
+                <button class="oo-primary-btn" onclick="alert('Open Omni configuration settings saved!')">Save Settings</button>
+              </div>
+
             </div>
-
-            <div style="padding: 32px 36px;">
-              <div class="om-app-title">OpenOmni</div>
-              <div class="om-app-subtitle">Social Media Downloader & Archiver</div>
-
-              <!-- Main Navigation Tabs (Download | Profiles) -->
-              <div class="om-main-tabs">
-                <button class="om-tab-btn active" id="om-tab-download-btn" onclick="switchLiveOmTab('download')">Download</button>
-                <button class="om-tab-btn" id="om-tab-profiles-btn" onclick="switchLiveOmTab('profiles')">Profiles</button>
-              </div>
-
-              <!-- TAB 1: DOWNLOAD PANEL VIEW -->
-              <div id="om-view-download">
-                <!-- Profile URL -->
-                <div class="om-field-group">
-                  <label class="om-label" for="om-url-input">Profile URL</label>
-                  <input type="text" id="om-url-input" class="om-input" placeholder="https://instagram.com/username" />
-                  <div class="om-subtext">No saved profiles — <a onclick="switchLiveOmTab('profiles')">add one</a></div>
-                </div>
-
-                <!-- Output Directory -->
-                <div class="om-field-group">
-                  <label class="om-label" for="om-out-input">Output Directory</label>
-                  <div class="om-input-row">
-                    <input type="text" id="om-out-input" class="om-input" placeholder="C:/Downloads/OpenOmni" />
-                    <button class="om-browse-btn" onclick="triggerOmBrowse('Output Directory')">Browse</button>
-                  </div>
-                </div>
-
-                <!-- Content Type -->
-                <div class="om-field-group">
-                  <label class="om-label">Content Type</label>
-                  <div class="om-segmented-group">
-                    <button class="om-type-btn active" onclick="setOmType(this)">All</button>
-                    <button class="om-type-btn" onclick="setOmType(this)">Photos</button>
-                    <button class="om-type-btn" onclick="setOmType(this)">Videos</button>
-                    <button class="om-type-btn" onclick="setOmType(this)">Stories</button>
-                    <button class="om-type-btn" onclick="setOmType(this)">Highlights</button>
-                  </div>
-                </div>
-
-                <!-- Cookies File (optional) -->
-                <div class="om-field-group">
-                  <label class="om-label" for="om-cookie-input">Cookies File (optional)</label>
-                  <div class="om-input-row">
-                    <input type="text" id="om-cookie-input" class="om-input" placeholder="cookies.txt" />
-                    <button class="om-browse-btn" onclick="triggerOmBrowse('Cookies File')">Browse</button>
-                  </div>
-                </div>
-
-                <!-- Bottom Action Row -->
-                <div class="om-action-row">
-                  <button class="om-save-btn" onclick="saveOmSettings()">Save Settings</button>
-                  <button class="om-start-btn" id="om-start-trigger" onclick="runOmLiveDownload()">Start Download</button>
-                </div>
-
-                <!-- Interactive Simulated Live Download Terminal Log Output -->
-                <div class="om-progress-box" id="om-terminal-log">
-                  <div style="color: #ff7d38; font-weight: bold; margin-bottom: 6px;">[OpenOmni Engine] Processing extraction (simulated)...</div>
-                  <div id="om-log-lines" style="color: #94a3b8; line-height: 1.6;"></div>
-                </div>
-              </div>
-
-              <!-- TAB 2: PROFILES VIEW -->
-              <div id="om-view-profiles" style="display: none;">
-                <!-- Platform Sub-tabs -->
-                <div class="om-platform-tabs">
-                  <button class="om-platform-btn active" id="om-p-instagram" onclick="switchOmPlatform('instagram', this)">Instagram</button>
-                  <button class="om-platform-btn" id="om-p-tiktok" onclick="switchOmPlatform('tiktok', this)">TikTok</button>
-                  <button class="om-platform-btn" id="om-p-facebook" onclick="switchOmPlatform('facebook', this)">Facebook</button>
-                  <button class="om-platform-btn" id="om-p-x" onclick="switchOmPlatform('x', this)">X</button>
-                </div>
-
-                <!-- Add Profile Field -->
-                <div class="om-field-group">
-                  <div class="om-input-row">
-                    <input type="text" id="om-profile-input" class="om-input" placeholder="Enter profile URL or username" />
-                    <button class="btn btn-primary" style="height: 42px; border-radius: 8px; padding: 0 20px;" onclick="addOmProfile()">Add Profile</button>
-                  </div>
-                </div>
-
-                <!-- Saved Profiles List -->
-                <div id="om-profiles-list" style="text-align: center; color: #64748b; font-size: 14px; padding: 24px 0;">
-                  No profiles added yet
-                </div>
-              </div>
-            </div>
-
           </div>
 
         </div>
@@ -1585,92 +1790,96 @@
       if (pane) pane.classList.add('active');
     }
 
-    /* OpenOmni Live Interactive UI Demo Controller (simulated — no real network calls) */
-    function switchLiveOmTab(tab) {
-      document.getElementById('om-tab-download-btn').classList.toggle('active', tab === 'download');
-      document.getElementById('om-tab-profiles-btn').classList.toggle('active', tab === 'profiles');
+    /* Open Omni App Shell Demo Controller (Mirrors Svelte App Components) */
+    function switchOoPanel(panel) {
+      document.getElementById('oo-switcher-download').classList.toggle('active', panel === 'download');
+      document.getElementById('oo-switcher-profiles').classList.toggle('active', panel === 'profiles');
+      document.getElementById('oo-switcher-settings').classList.toggle('active', panel === 'settings');
 
-      document.getElementById('om-view-download').style.display = (tab === 'download') ? 'block' : 'none';
-      document.getElementById('om-view-profiles').style.display = (tab === 'profiles') ? 'block' : 'none';
+      document.getElementById('oo-panel-download').style.display = (panel === 'download') ? 'flex' : 'none';
+      document.getElementById('oo-panel-profiles').style.display = (panel === 'profiles') ? 'flex' : 'none';
+      document.getElementById('oo-panel-settings').style.display = (panel === 'settings') ? 'flex' : 'none';
     }
 
-    function setOmType(btn) {
-      document.querySelectorAll('.om-type-btn').forEach(b => b.classList.remove('active'));
+    function selectOoChip(chipEl, targetUrl) {
+      document.querySelectorAll('.oo-chip').forEach(c => c.classList.remove('selected'));
+      chipEl.classList.add('selected');
+      const input = document.getElementById('oo-url-input');
+      if (input) input.value = targetUrl;
+    }
+
+    function setOoContentType(btn) {
+      document.querySelectorAll('.oo-pill-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
     }
 
-    function switchOmPlatform(platform, btn) {
-      document.querySelectorAll('.om-platform-btn').forEach(b => b.classList.remove('active'));
+    function switchOoPlatformTab(platform, btn) {
+      btn.parentElement.querySelectorAll('.oo-pill-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      const input = document.getElementById('om-profile-input');
-      input.placeholder = 'Enter ' + platform + ' profile URL or username';
+      const input = document.getElementById('oo-new-profile-input');
+      if (input) input.placeholder = 'Enter ' + platform + ' profile URL or username';
     }
 
-    function triggerOmBrowse(field) {
-      alert('(Simulated) Selected custom ' + field + ' destination folder.');
+    let ooIsDownloading = false;
+    function runOoLiveDownload() {
+      if (ooIsDownloading) return;
+      ooIsDownloading = true;
+      const widget = document.getElementById('oo-ring-widget');
+      const countText = document.getElementById('oo-ring-count');
+      const circle = document.getElementById('oo-ring-circle');
+      const stageText = document.getElementById('oo-ring-stage');
+      const msgText = document.getElementById('oo-ring-message');
+      const btn = document.getElementById('oo-download-btn');
+
+      const maxFiles = 42;
+      const ringCircumference = 364.42;
+
+      widget.style.display = 'flex';
+      btn.innerText = 'Extracting Profile Media...';
+
+      let current = 0;
+      const interval = setInterval(() => {
+        current += 3;
+        if (current > maxFiles) current = maxFiles;
+        const fraction = current / maxFiles;
+        const offset = ringCircumference * (1 - fraction);
+        
+        circle.style.strokeDashoffset = offset;
+        countText.textContent = `${current} / ${maxFiles}`;
+        stageText.textContent = current < maxFiles ? `Downloading media... ${current}/${maxFiles}` : 'Download Complete!';
+        msgText.textContent = current < maxFiles ? 'Extracting high-resolution posts & stories' : 'All 42 files saved to C:/Downloads/OpenOmni';
+
+        if (current >= maxFiles) {
+          clearInterval(interval);
+          btn.innerText = 'Start Download';
+          ooIsDownloading = false;
+        }
+      }, 150);
     }
 
-    function saveOmSettings() {
-      alert('(Simulated) OpenOmni configuration settings saved.');
-    }
-
-    let omDownloading = false;
-    function runOmLiveDownload() {
-      if (omDownloading) return;
-      omDownloading = true;
-      const logBox = document.getElementById('om-terminal-log');
-      const logLines = document.getElementById('om-log-lines');
-      const btn = document.getElementById('om-start-trigger');
-
-      logBox.classList.add('active');
-      btn.innerText = 'Extracting...';
-      logLines.innerHTML = '<div>&gt; (Simulated) Connecting to target profile...</div>';
-
-      setTimeout(() => {
-        logLines.innerHTML += '<div>&gt; Discovered 184 photos, 42 videos, 8 active stories</div>';
-      }, 600);
-
-      setTimeout(() => {
-        logLines.innerHTML += '<div>&gt; Deduplicating existing local media catalog... [OK]</div>';
-      }, 1200);
-
-      setTimeout(() => {
-        logLines.innerHTML += '<div style="color: #38bdf8; font-weight: 600;">&gt; Downloading batch async (12 threads)... 100% Complete!</div>';
-        btn.innerText = 'Start Download';
-        omDownloading = false;
-      }, 1800);
-    }
-
-    function addOmProfile() {
-      const input = document.getElementById('om-profile-input');
-      const val = input.value.trim() || '@new_creator';
-      const list = document.getElementById('om-profiles-list');
-
-      if (list.innerHTML.includes('No profiles added yet')) {
-        list.innerHTML = '';
-      }
+    function addOoProfile() {
+      const input = document.getElementById('oo-new-profile-input');
+      const val = input.value.trim() || '@new_account';
+      const list = document.getElementById('oo-profiles-list');
 
       const item = document.createElement('div');
-      item.className = 'om-profile-item';
-      const nameEl = document.createElement('div');
-      nameEl.innerHTML = `<strong style="color: #0f172a; font-size: 14px;"></strong><div style="font-size: 12px; color: #64748b;">Monitored Account • Synced</div>`;
-      nameEl.querySelector('strong').textContent = val;
-      const fetchBtn = document.createElement('button');
-      fetchBtn.className = 'btn btn-secondary';
-      fetchBtn.style.cssText = 'height: 32px; padding: 0 12px; font-size: 12px;';
-      fetchBtn.textContent = 'Fetch Latest';
-      fetchBtn.onclick = () => quickDownloadProfile(val);
-
-      item.appendChild(nameEl);
-      item.appendChild(fetchBtn);
+      item.style.cssText = 'display: flex; align-items: center; justify-content: space-between; background: #ffffff; border: 1px solid var(--glass-border); padding: 10px 14px; border-radius: 12px;';
+      item.innerHTML = `
+        <div>
+          <strong style="color: var(--text-head); font-size: 13.5px;">${val}</strong>
+          <div style="font-size: 11.5px; color: var(--text-muted);">Monitored • Just added</div>
+        </div>
+        <button class="btn btn-secondary" style="height: 32px; font-size: 12px; padding: 0 12px;" onclick="quickOoDownload('${val}')">Fetch Latest</button>
+      `;
       list.prepend(item);
       input.value = '';
     }
 
-    function quickDownloadProfile(handle) {
-      switchLiveOmTab('download');
-      document.getElementById('om-url-input').value = 'https://instagram.com/' + handle.replace('@', '');
-      runOmLiveDownload();
+    function quickOoDownload(handle) {
+      switchOoPanel('download');
+      const input = document.getElementById('oo-url-input');
+      if (input) input.value = 'https://instagram.com/' + handle.replace('@', '');
+      runOoLiveDownload();
     }
 
     /* FAQ Toggle */
