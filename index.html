@@ -10,7 +10,7 @@
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
   <meta property="og:title" content="OmniGet — Download Courses, Videos, Music & Books" />
-  <meta property="og:description" content="Free, open-source desktop downloader & player. Supports 1,800+ sites, Udemy, Hotmart, Bilibili 4K, EPUB/PDF reader, and OpenMint social archiver under GPL-3.0." />
+  <meta property="og:description" content="Free, open-source desktop downloader & player. Supports 1,800+ sites, Udemy, Hotmart, Bilibili 4K, EPUB/PDF reader, Telegram uploader, and OpenOmni social archiver under GPL-3.0." />
   <meta property="og:image" content="./assets/readme/en/home-hero.png" />
   <meta property="og:url" content="https://omniget.nav.bd/" />
 
@@ -595,8 +595,8 @@
       margin-top: 10px;
     }
 
-    /* OpenMint High-Contrast Crisp Badge */
-    .openmint-badge {
+    /* OpenOmni High-Contrast Crisp Badge */
+    .openomni-badge, .openmint-badge {
       font-family: var(--font-body);
       font-size: 12px;
       font-weight: 600;
@@ -627,9 +627,9 @@
     }
 
     /* ==========================================================================
-       OPENMINT LIVE INTERACTIVE HTML DEMO STYLES
+       OPENOMNI LIVE INTERACTIVE HTML DEMO STYLES
        ========================================================================== */
-    .openmint-live-app {
+    .openomni-live-app, .openmint-live-app {
       background: #f8fafc;
       border: 1px solid var(--border-line);
       border-radius: var(--radius-lg);
@@ -1039,7 +1039,7 @@
 
       <ul class="nav-links">
         <li><button class="nav-link active" id="nav-home" onclick="switchPageTab('home')">Home</button></li>
-        <li><button class="nav-link" id="nav-openmint" onclick="switchPageTab('openmint')">OpenMint</button></li>
+        <li><button class="nav-link" id="nav-openomni" onclick="switchPageTab('openomni')">OpenOmni</button></li>
         <li><button class="nav-link" id="nav-downloads" onclick="switchPageTab('downloads')">Downloads</button></li>
         <li><button class="nav-link" id="nav-releasenotes" onclick="switchPageTab('releasenotes')">Release Notes</button></li>
         <li><button class="nav-link" id="nav-faq" onclick="switchPageTab('faq')">FAQ</button></li>
@@ -1047,13 +1047,13 @@
 
       <div class="nav-actions">
         <!-- Official GitHub Octocat SVG Icon -->
-        <a href="https://github.com/copyrightnews/omniget" target="_blank" rel="noopener" class="btn btn-secondary">
+        <a href="https://github.com/igect/omniget" target="_blank" rel="noopener" class="btn btn-secondary">
           <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="display: inline-block; vertical-align: middle; flex-shrink: 0; margin-right: 4px;"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>
           GitHub
         </a>
 
         <!-- Direct OS Download CTA / View Downloads -->
-        <a id="nav-download-btn" href="https://github.com/copyrightnews/omniget/releases/latest" class="btn btn-primary">
+        <a id="nav-download-btn" href="https://github.com/igect/omniget/releases/latest" class="btn btn-primary">
           Download
         </a>
 
@@ -1066,7 +1066,7 @@
       <!-- Mobile dropdown nav -->
       <div class="mobile-nav-panel" id="mobileNavPanel">
         <button class="nav-link" onclick="switchPageTab('home'); toggleMobileNav()">Home</button>
-        <button class="nav-link" onclick="switchPageTab('openmint'); toggleMobileNav()">OpenMint</button>
+        <button class="nav-link" onclick="switchPageTab('openomni'); toggleMobileNav()">OpenOmni</button>
         <button class="nav-link" onclick="switchPageTab('downloads'); toggleMobileNav()">Downloads</button>
         <button class="nav-link" onclick="switchPageTab('releasenotes'); toggleMobileNav()">Release Notes</button>
         <button class="nav-link" onclick="switchPageTab('faq'); toggleMobileNav()">FAQ</button>
@@ -1094,11 +1094,11 @@
           </p>
 
           <div class="hero-cta-group">
-            <a id="hero-primary-download-btn" href="https://github.com/copyrightnews/omniget/releases/latest" class="btn btn-primary" style="height: 46px; padding: 0 28px; font-size: 15px;">
+            <a id="hero-primary-download-btn" href="https://github.com/igect/omniget/releases/latest" class="btn btn-primary" style="height: 46px; padding: 0 28px; font-size: 15px;">
               <i data-lucide="download" style="width: 18px; height: 18px;"></i>
               <span id="hero-download-text">Download for Windows</span>
             </a>
-            <a href="https://github.com/copyrightnews/omniget" target="_blank" rel="noopener" class="btn btn-secondary" style="height: 46px; padding: 0 22px;">
+            <a href="https://github.com/igect/omniget" target="_blank" rel="noopener" class="btn btn-secondary" style="height: 46px; padding: 0 22px;">
               Source Code
             </a>
           </div>
@@ -1155,7 +1155,7 @@
                 <i data-lucide="graduation-cap"></i>
               </div>
               <h3>Course Downloader & Player</h3>
-              <p>Extract structured courses from Hotmart, Udemy, Kiwify, Gumroad, Teachable, Kajabi, and Skool. Watch offline with timestamped notes and attached PDFs side-by-side.</p>
+              <p>Extract structured courses from Hotmart, Udemy, Kiwify, Gumroad, Teachable, Kajabi, Skool, Wondrium, Thinkific, and Rocketseat. Watch offline with timestamped notes and attached PDFs.</p>
             </div>
 
             <div class="feature-card">
@@ -1163,27 +1163,43 @@
                 <i data-lucide="keyboard"></i>
               </div>
               <h3>Global Hotkey Grabber</h3>
-              <p>Copy any URL to your clipboard and press <code>Ctrl+Shift+D</code>. OmniGet fetches metadata and downloads the file silently in the background.</p>
+              <p>Copy any URL to your clipboard and press <code>Ctrl+Shift+D</code> (or <code>Cmd+Shift+D</code> on macOS). OmniGet fetches metadata and downloads silently in the background.</p>
             </div>
 
             <div class="feature-card">
               <div class="icon-box icon-red">
                 <i data-lucide="video"></i>
               </div>
-              <h3>1,800+ Media Extractor</h3>
-              <p>Powered by yt-dlp. Download video or audio from YouTube, TikTok, Instagram, Twitter/X, Reddit, Twitch, Vimeo, and 1,800+ web platforms.</p>
-            </div>
-
-            <div class="feature-card">
-              <div class="icon-box icon-cyan">
-                <i data-lucide="tv"></i>
-              </div>
-              <h3>Deep Bilibili VIP Support</h3>
-              <p>Sign in to unlock official Bilibili premium streams: 4K, HDR, Dolby Vision, Hi-Res Lossless Audio, Danmaku subtitles, and Kodi/Jellyfin NFOs.</p>
+              <h3>1,800+ Media Extractor & Quality Picker</h3>
+              <p>Powered by yt-dlp. Extract video/audio with real resolution selection (4K 2160p, 2K, 1080p, audio-only), SponsorBlock skipping, and auto-generated Whisper subtitles.</p>
             </div>
 
             <div class="feature-card">
               <div class="icon-box icon-emerald">
+                <i data-lucide="share-2"></i>
+              </div>
+              <h3>OpenOmni Social Archiver</h3>
+              <p>Bulk extract posts, reels, stories, and galleries from Instagram, TikTok, Reddit subreddits/profiles, and Twitter/X profiles with integrated gallery-dl engine.</p>
+            </div>
+
+            <div class="feature-card">
+              <div class="icon-box icon-cyan">
+                <i data-lucide="send"></i>
+              </div>
+              <h3>Telegram Direct Uploader & Bot</h3>
+              <p>Upload media directly to Telegram via User Session or Bot Token with custom thumbnails, filename editing, 2GB/4GB auto-chunking, and Video/Doc/Audio modes.</p>
+            </div>
+
+            <div class="feature-card">
+              <div class="icon-box icon-fuchsia">
+                <i data-lucide="tv"></i>
+              </div>
+              <h3>Deep Bilibili VIP 4K Support</h3>
+              <p>Sign in to unlock official Bilibili premium streams: 4K, HDR, Dolby Vision, Hi-Res Lossless Audio, Danmaku subtitles (XML/ASS), and Kodi/Jellyfin NFOs.</p>
+            </div>
+
+            <div class="feature-card">
+              <div class="icon-box icon-purple">
                 <i data-lucide="book-open"></i>
               </div>
               <h3>Built-in Reader Module</h3>
@@ -1191,11 +1207,19 @@
             </div>
 
             <div class="feature-card">
-              <div class="icon-box icon-fuchsia">
+              <div class="icon-box icon-amber">
                 <i data-lucide="headphones"></i>
               </div>
               <h3>Hi-Fi Music Player & Lyrics</h3>
-              <p>Local audio library player with scrolling synced lyrics. Integrates local tracks with Spotify, SoundCloud, YouTube Music, Qobuz, and Last.fm.</p>
+              <p>Local audio library player with scrolling synced lyrics. Integrates local tracks with Spotify, SoundCloud, YouTube Music, Qobuz, Last.fm, and Discord RPC.</p>
+            </div>
+
+            <div class="feature-card">
+              <div class="icon-box icon-emerald">
+                <i data-lucide="hard-drive"></i>
+              </div>
+              <h3>Portable Mode & Zero Setup</h3>
+              <p>Run directly from USB drives with <code>portable.txt</code>. System dependency detector auto-manages yt-dlp, FFmpeg, and PDFium binaries securely.</p>
             </div>
           </div>
         </div>
@@ -1226,22 +1250,22 @@
       </section>
     </div>
 
-    <!-- ==================== OPENMINT TAB PAGE ==================== -->
-    <div class="page-tab-content" id="page-openmint">
+    <!-- ==================== OPENOMNI TAB PAGE ==================== -->
+    <div class="page-tab-content" id="page-openomni">
       <section class="hero-section text-center" style="padding-bottom: 40px;">
         <div class="container">
           <div class="section-header">
-            <span class="openmint-badge">OpenMint Module • Built by sayfalse</span>
-            <h2 class="section-title">OpenMint Engine — Live Interactive Demo</h2>
-            <p class="section-desc">Test the live OpenMint user interface directly in your browser. Experience social media extraction, content filters, and profile bookmarking in real-time.</p>
+            <span class="openomni-badge">OpenOmni Module • Built by sayfalse</span>
+            <h2 class="section-title">OpenOmni Engine — Live Interactive Demo</h2>
+            <p class="section-desc">Test the live OpenOmni user interface directly in your browser. Experience social media extraction, content filters, and profile bookmarking in real-time.</p>
             <div class="demo-disclaimer-badge">
               <i data-lucide="info" style="width: 13px; height: 13px;"></i>
               Simulated demo — no real profile data is fetched here
             </div>
           </div>
 
-          <!-- LIVE OPENMINT HTML/CSS APPLICATION UI DEMO -->
-          <div class="openmint-live-app" style="overflow: hidden; padding: 0;">
+          <!-- LIVE OPENOMNI HTML/CSS APPLICATION UI DEMO -->
+          <div class="openomni-live-app" style="overflow: hidden; padding: 0;">
             <!-- macOS-Style Window Navigation Bar (decorative only) -->
             <div class="demo-frame-bar">
               <div class="dot" style="background: #ff5f56;"></div>
@@ -1250,8 +1274,8 @@
             </div>
 
             <div style="padding: 32px 36px;">
-              <div class="om-app-title">OpenMint</div>
-              <div class="om-app-subtitle">Social Media Downloader</div>
+              <div class="om-app-title">OpenOmni</div>
+              <div class="om-app-subtitle">Social Media Downloader & Archiver</div>
 
               <!-- Main Navigation Tabs (Download | Profiles) -->
               <div class="om-main-tabs">
@@ -1272,7 +1296,7 @@
                 <div class="om-field-group">
                   <label class="om-label" for="om-out-input">Output Directory</label>
                   <div class="om-input-row">
-                    <input type="text" id="om-out-input" class="om-input" placeholder="C:/Downloads/OpenMint" />
+                    <input type="text" id="om-out-input" class="om-input" placeholder="C:/Downloads/OpenOmni" />
                     <button class="om-browse-btn" onclick="triggerOmBrowse('Output Directory')">Browse</button>
                   </div>
                 </div>
@@ -1306,7 +1330,7 @@
 
                 <!-- Interactive Simulated Live Download Terminal Log Output -->
                 <div class="om-progress-box" id="om-terminal-log">
-                  <div style="color: #ff7d38; font-weight: bold; margin-bottom: 6px;">[OpenMint v0.7.2 Engine] Processing extraction (simulated)...</div>
+                  <div style="color: #ff7d38; font-weight: bold; margin-bottom: 6px;">[OpenOmni Engine] Processing extraction (simulated)...</div>
                   <div id="om-log-lines" style="color: #94a3b8; line-height: 1.6;"></div>
                 </div>
               </div>
@@ -1407,7 +1431,7 @@
                 <span class="release-badge">v0.7.2 Stable</span>
                 <h3 style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--text-head); margin-top: 6px;">OmniGet Release Notes</h3>
               </div>
-              <a id="release-tag-link" href="https://github.com/copyrightnews/omniget/releases/latest" target="_blank" rel="noopener" class="btn btn-secondary">
+              <a id="release-tag-link" href="https://github.com/igect/omniget/releases/latest" target="_blank" rel="noopener" class="btn btn-secondary">
                 View Release on GitHub
               </a>
             </div>
@@ -1506,7 +1530,7 @@
         <img src="./static/loop.png" alt="Mascot" />
         <span style="color: var(--text-head); font-weight: 600;">OmniGet for the open-source community</span>
       </div>
-      <p>© OmniGet Project • Maintained & Developed by <a href="https://github.com/copyrightnews/omniget" target="_blank" rel="noopener" style="color: var(--brand-orange); font-weight: 600;">sayfalse</a> • Originally forked from <a href="https://github.com/tonhowtf/omniget" target="_blank" rel="noopener" style="color: var(--text-muted); text-decoration: underline;">tonhowtf/omniget</a> • Released under GPL-3.0 License.</p>
+      <p>© OmniGet Project • Maintained & Developed by <a href="https://github.com/igect/omniget" target="_blank" rel="noopener" style="color: var(--brand-orange); font-weight: 600;">sayfalse</a> • Originally forked from <a href="https://github.com/tonhowtf/omniget" target="_blank" rel="noopener" style="color: var(--text-muted); text-decoration: underline;">tonhowtf/omniget</a> • Released under GPL-3.0 License.</p>
     </div>
   </footer>
 
@@ -1536,7 +1560,7 @@
 
     function handleHashChange() {
       const hash = window.location.hash.replace('#', '').trim();
-      const validTabs = ['home', 'openmint', 'downloads', 'releasenotes', 'faq'];
+      const validTabs = ['home', 'openomni', 'downloads', 'releasenotes', 'faq'];
       if (hash && validTabs.includes(hash)) {
         switchPageTab(hash, false);
       }
@@ -1670,7 +1694,7 @@
     /* ==========================================================================
        GITHUB RELEASES API AUTO-FETCHER & DIRECT DOWNLOAD LINK INJECTOR
        ========================================================================== */
-    const GITHUB_REPO = "copyrightnews/omniget";
+    const GITHUB_REPO = "igect/omniget";
     const API_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
 
     function formatBytes(bytes) {
