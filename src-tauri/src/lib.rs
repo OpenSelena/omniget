@@ -330,7 +330,7 @@ pub fn run() {
                 // Nao e so Windows. No Linux o wry usa este caminho para
                 // `base_data_directory`, `base_cache_directory` e os cookies do
                 // WebKitGTK; sem ele o modo portatil deixa
-                // `XDG_DATA_HOME/wtf.tonho.omniget` no perfil do usuario — a
+                // `XDG_DATA_HOME/com.igect.omniget` no perfil do usuario — a
                 // mesma #209, fora do Windows. Foi o smoke test do B55 que
                 // pegou isso, na primeira vez que rodou.
                 //

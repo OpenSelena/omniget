@@ -42,9 +42,9 @@ pub trait PluginHost: Send + Sync {
     ///
     /// # Platform layout
     ///
-    /// - Windows: `%LOCALAPPDATA%\wtf.tonho.omniget\external-cache\{plugin_id}\{namespace}\`
-    /// - Linux: `$XDG_CACHE_HOME/wtf.tonho.omniget/external-cache/{plugin_id}/{namespace}/` (falls back to `~/.cache/...`)
-    /// - macOS: `~/Library/Caches/wtf.tonho.omniget/external-cache/{plugin_id}/{namespace}/`
+    /// - Windows: `%LOCALAPPDATA%\com.igect.omniget\external-cache\{plugin_id}\{namespace}\`
+    /// - Linux: `$XDG_CACHE_HOME/com.igect.omniget/external-cache/{plugin_id}/{namespace}/` (falls back to `~/.cache/...`)
+    /// - macOS: `~/Library/Caches/com.igect.omniget/external-cache/{plugin_id}/{namespace}/`
     ///
     /// These are the OS-canonical cache locations (non-roaming on Windows,
     /// `$XDG_CACHE_HOME` on Linux, `Caches/` on macOS). They are deliberately

@@ -1,4 +1,4 @@
-app-id: wtf.tonho.omniget
+app-id: com.igect.omniget
 runtime: org.gnome.Platform
 runtime-version: '48'
 sdk: org.gnome.Sdk
@@ -137,9 +137,9 @@ modules:
       - npx vite build
       - cargo --offline build --release --manifest-path src-tauri/Cargo.toml
       - install -Dm755 src-tauri/target/release/omniget /app/bin/omniget
-      - install -Dm644 flatpak/wtf.tonho.omniget.desktop /app/share/applications/wtf.tonho.omniget.desktop
-      - install -Dm644 flatpak/wtf.tonho.omniget.metainfo.xml /app/share/metainfo/wtf.tonho.omniget.metainfo.xml
-      - install -Dm644 flatpak/wtf.tonho.omniget.png /app/share/icons/hicolor/128x128/apps/wtf.tonho.omniget.png
+      - install -Dm644 flatpak/com.igect.omniget.desktop /app/share/applications/com.igect.omniget.desktop
+      - install -Dm644 flatpak/com.igect.omniget.metainfo.xml /app/share/metainfo/com.igect.omniget.metainfo.xml
+      - install -Dm644 flatpak/com.igect.omniget.png /app/share/icons/hicolor/128x128/apps/com.igect.omniget.png
     sources:
       - type: dir
         path: ..

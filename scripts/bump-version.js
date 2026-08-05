@@ -172,7 +172,7 @@ function hasBinary(name) {
   }
 }
 
-const metainfoAbs = path.join(root, "flatpak", "wtf.tonho.omniget.metainfo.xml");
+const metainfoAbs = path.join(root, "flatpak", "com.igect.omniget.metainfo.xml");
 if (hasBinary("appstreamcli")) {
   try {
     execSync(`appstreamcli validate "${metainfoAbs}"`, { stdio: "inherit" });

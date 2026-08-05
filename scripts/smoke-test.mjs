@@ -120,10 +120,10 @@ if (code !== 0) {
 
 if (portable) {
   const vazouParaOPerfil = [
-    join(fakeProfile, "Local", "wtf.tonho.omniget"),
-    join(fakeProfile, "Roaming", "wtf.tonho.omniget"),
-    join(fakeProfile, "share", "wtf.tonho.omniget"),
-    join(fakeProfile, "Library", "Application Support", "wtf.tonho.omniget"),
+    join(fakeProfile, "Local", "com.igect.omniget"),
+    join(fakeProfile, "Roaming", "com.igect.omniget"),
+    join(fakeProfile, "share", "com.igect.omniget"),
+    join(fakeProfile, "Library", "Application Support", "com.igect.omniget"),
   ].filter((p) => existsSync(p));
 
   if (vazouParaOPerfil.length > 0) {

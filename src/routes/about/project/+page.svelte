@@ -3,7 +3,7 @@
   import { t } from "$lib/i18n";
 
   const GITHUB_URL = "https://github.com/igect";
-  const APP_VERSION = "0.8.9";
+  const APP_VERSION = "0.8.10";
 
   async function openGitHub() {
     await open(GITHUB_URL);

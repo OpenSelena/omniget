@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>wtf.tonho.omniget</id>
+  <id>com.igect.omniget</id>
   <name>Omniget</name>
   <summary>Download media from multiple platforms</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
-  <developer id="wtf.tonho">
-    <name>Tonho</name>
+  <developer id="com.igect">
+    <name>Igect</name>
   </developer>
   <description>
     <p>
@@ -26,7 +26,7 @@
   <url type="homepage">https://github.com/tonhowtf/omniget</url>
   <url type="bugtracker">https://github.com/tonhowtf/omniget/issues</url>
   <url type="vcs-browser">https://github.com/tonhowtf/omniget</url>
-  <launchable type="desktop-id">wtf.tonho.omniget.desktop</launchable>
+  <launchable type="desktop-id">com.igect.omniget.desktop</launchable>
   <provides>
     <binary>omniget</binary>
   </provides>

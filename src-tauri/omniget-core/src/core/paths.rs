@@ -4,26 +4,28 @@ pub fn app_data_dir() -> Option<std::path::PathBuf> {
     }
 
     let base = dirs::data_dir()?;
-    let new_path = base.join("wtf.tonho.omniget");
-    let old_path = base.join("omniget");
+    let new_path = base.join("com.igect.omniget");
+    let legacy_paths = [base.join("wtf.tonho.omniget"), base.join("omniget")];
 
-    if old_path.exists() {
-        let _ = std::fs::create_dir_all(&new_path);
+    for legacy_path in &legacy_paths {
+        if legacy_path.exists() {
+            let _ = std::fs::create_dir_all(&new_path);
 
-        for dir_name in &["bin", "plugins"] {
-            let src = old_path.join(dir_name);
-            let dst = new_path.join(dir_name);
-            if src.exists() && !dst.exists() {
-                let _ = copy_dir_recursive(&src, &dst);
+            for dir_name in &["bin", "plugins"] {
+                let src = legacy_path.join(dir_name);
+                let dst = new_path.join(dir_name);
+                if src.exists() && !dst.exists() {
+                    let _ = copy_dir_recursive(&src, &dst);
+                }
             }
-        }
 
-        if let Ok(entries) = std::fs::read_dir(&old_path) {
-            for entry in entries.flatten() {
-                if entry.file_type().map(|t| t.is_file()).unwrap_or(false) {
-                    let dest = new_path.join(entry.file_name());
-                    if !dest.exists() {
-                        let _ = std::fs::copy(entry.path(), &dest);
+            if let Ok(entries) = std::fs::read_dir(legacy_path) {
+                for entry in entries.flatten() {
+                    if entry.file_type().map(|t| t.is_file()).unwrap_or(false) {
+                        let dest = new_path.join(entry.file_name());
+                        if !dest.exists() {
+                            let _ = std::fs::copy(entry.path(), &dest);
+                        }
                     }
                 }
             }
