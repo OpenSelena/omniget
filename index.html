@@ -596,7 +596,7 @@
     }
 
     /* OpenOmni High-Contrast Crisp Badge */
-    .openomni-badge, .openmint-badge {
+    .openomni-badge {
       font-family: var(--font-body);
       font-size: 12px;
       font-weight: 600;
@@ -629,7 +629,7 @@
     /* ==========================================================================
        OPENOMNI LIVE INTERACTIVE HTML DEMO STYLES
        ========================================================================== */
-    .openomni-live-app, .openmint-live-app {
+    .openomni-live-app {
       background: #f8fafc;
       border: 1px solid var(--border-line);
       border-radius: var(--radius-lg);
@@ -1585,7 +1585,7 @@
       if (pane) pane.classList.add('active');
     }
 
-    /* OpenMint Live Interactive UI Demo Controller (simulated — no real network calls) */
+    /* OpenOmni Live Interactive UI Demo Controller (simulated — no real network calls) */
     function switchLiveOmTab(tab) {
       document.getElementById('om-tab-download-btn').classList.toggle('active', tab === 'download');
       document.getElementById('om-tab-profiles-btn').classList.toggle('active', tab === 'profiles');
@@ -1611,7 +1611,7 @@
     }
 
     function saveOmSettings() {
-      alert('(Simulated) OpenMint configuration settings saved.');
+      alert('(Simulated) OpenOmni configuration settings saved.');
     }
 
     let omDownloading = false;
