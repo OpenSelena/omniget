@@ -11,16 +11,16 @@
   <meta property="og:type" content="website" />
   <meta property="og:title" content="OmniGet — Download Courses, Videos, Music & Books" />
   <meta property="og:description" content="Free, open-source desktop downloader & player. Supports 1,800+ sites, Udemy, Hotmart, Bilibili 4K, EPUB/PDF reader, and OpenMint social archiver under GPL-3.0." />
-  <meta property="og:image" content="https://raw.githubusercontent.com/copyrightnews/omniget/main/assets/readme/en/home-hero.png" />
-  <meta property="og:url" content="https://github.com/copyrightnews/omniget" />
+  <meta property="og:image" content="./assets/readme/en/home-hero.png" />
+  <meta property="og:url" content="https://omniget.nav.bd/" />
 
   <!-- Canonical -->
-  <link rel="canonical" href="https://github.com/copyrightnews/omniget" />
+  <link rel="canonical" href="https://omniget.nav.bd/" />
   <meta name="robots" content="index, follow" />
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/copyrightnews/omniget/main/static/favicon.png" />
-  <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/copyrightnews/omniget/main/static/favicon.png" />
+  <link rel="icon" type="image/png" href="./static/favicon.png" />
+  <link rel="apple-touch-icon" href="./static/favicon.png" />
 
   <!-- Google Fonts: Inter, Space Grotesk, JetBrains Mono, Fira Code -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1033,7 +1033,7 @@
   <header class="header-nav">
     <div class="nav-inner">
       <button class="nav-brand" onclick="switchPageTab('home')" aria-label="OmniGet home">
-        <img src="https://raw.githubusercontent.com/copyrightnews/omniget/main/static/loop.png" alt="OmniGet Logo" />
+        <img src="./static/loop.png" alt="OmniGet Logo" />
         <span>OmniGet</span>
       </button>
 
@@ -1052,10 +1052,10 @@
           GitHub
         </a>
 
-        <!-- Redirects to Downloads Page View -->
-        <button onclick="switchPageTab('downloads')" class="btn btn-primary">
+        <!-- Direct OS Download CTA / View Downloads -->
+        <a id="nav-download-btn" href="https://github.com/copyrightnews/omniget/releases/latest" class="btn btn-primary">
           Download
-        </button>
+        </a>
 
         <!-- Mobile hamburger toggle -->
         <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Open navigation menu" aria-expanded="false" onclick="toggleMobileNav()">
@@ -1094,16 +1094,16 @@
           </p>
 
           <div class="hero-cta-group">
-            <button onclick="switchPageTab('downloads')" class="btn btn-primary" style="height: 46px; padding: 0 28px; font-size: 15px;">
+            <a id="hero-primary-download-btn" href="https://github.com/copyrightnews/omniget/releases/latest" class="btn btn-primary" style="height: 46px; padding: 0 28px; font-size: 15px;">
               <i data-lucide="download" style="width: 18px; height: 18px;"></i>
-              Download for Windows
-            </button>
+              <span id="hero-download-text">Download for Windows</span>
+            </a>
             <a href="https://github.com/copyrightnews/omniget" target="_blank" rel="noopener" class="btn btn-secondary" style="height: 46px; padding: 0 22px;">
               Source Code
             </a>
           </div>
 
-          <p class="hero-platform-sub">Available on Windows, macOS, and Linux • Hotkey <code>Ctrl + Shift + D</code></p>
+          <p class="hero-platform-sub">Available on Windows, macOS, and Linux • <a onclick="switchPageTab('downloads')" style="color: var(--brand-orange); text-decoration: underline; cursor: pointer;">Browse all download formats</a></p>
 
           <!-- Interactive Demo Segment Switcher -->
           <div class="demo-tab-bar">
@@ -1123,19 +1123,19 @@
             </div>
 
             <div class="demo-pane active" id="pane-home">
-              <img src="https://raw.githubusercontent.com/copyrightnews/omniget/main/assets/readme/en/home-hero.png" alt="Home Screen" onclick="viewModal(this.src)" />
+              <img src="./assets/readme/en/home-hero.png" alt="Home Screen" onclick="viewModal(this.src)" />
             </div>
             <div class="demo-pane" id="pane-courses">
-              <img src="https://raw.githubusercontent.com/copyrightnews/omniget/main/assets/screenshot-courses.png" alt="Course Player" onclick="viewModal(this.src)" />
+              <img src="./assets/screenshot-courses.png" alt="Course Player" onclick="viewModal(this.src)" />
             </div>
             <div class="demo-pane" id="pane-reader">
-              <img src="https://raw.githubusercontent.com/copyrightnews/omniget/main/assets/screenshot-reader.png" alt="EPUB Reader" onclick="viewModal(this.src)" />
+              <img src="./assets/screenshot-reader.png" alt="EPUB Reader" onclick="viewModal(this.src)" />
             </div>
             <div class="demo-pane" id="pane-music">
-              <img src="https://raw.githubusercontent.com/copyrightnews/omniget/main/assets/screenshot-music.png" alt="Music Player" onclick="viewModal(this.src)" />
+              <img src="./assets/screenshot-music.png" alt="Music Player" onclick="viewModal(this.src)" />
             </div>
             <div class="demo-pane" id="pane-settings">
-              <img src="https://raw.githubusercontent.com/copyrightnews/omniget/main/assets/readme/en/settings-drill.png" alt="Settings" onclick="viewModal(this.src)" />
+              <img src="./assets/readme/en/settings-drill.png" alt="Settings" onclick="viewModal(this.src)" />
             </div>
           </div>
         </div>
@@ -1355,11 +1355,12 @@
             <!-- Windows Card -->
             <div class="dl-card">
               <div>
-                <h3>Windows Setup (.exe)</h3>
-                <p>Direct standalone installer for Windows 10 and 11 (64-bit). Always the latest release.</p>
+                <h3>Windows Setup (.exe / .msi)</h3>
+                <p>Direct standalone installer for Windows 10 and 11 (64-bit).</p>
+                <div id="dl-win-sub" style="font-size: 12px; color: var(--text-dim); margin-bottom: 14px; font-family: var(--font-mono);">Fetching latest asset...</div>
               </div>
-              <a href="https://github.com/copyrightnews/omniget/releases/latest" class="btn btn-primary" style="width: 100%;">
-                Download for Windows
+              <a id="dl-win-btn" href="https://github.com/copyrightnews/omniget/releases/latest" class="btn btn-primary" style="width: 100%;">
+                <i data-lucide="download" style="width: 16px; height: 16px;"></i> Download for Windows
               </a>
             </div>
 
@@ -1368,9 +1369,10 @@
               <div>
                 <h3>macOS Universal (.dmg)</h3>
                 <p>Universal binary for Apple Silicon (M1-M3) and Intel Macs.</p>
+                <div id="dl-mac-sub" style="font-size: 12px; color: var(--text-dim); margin-bottom: 14px; font-family: var(--font-mono);">Fetching latest asset...</div>
               </div>
-              <a href="https://github.com/copyrightnews/omniget/releases/latest" class="btn btn-primary" style="width: 100%;">
-                Download for macOS
+              <a id="dl-mac-btn" href="https://github.com/copyrightnews/omniget/releases/latest" class="btn btn-primary" style="width: 100%;">
+                <i data-lucide="download" style="width: 16px; height: 16px;"></i> Download for macOS
               </a>
             </div>
 
@@ -1379,9 +1381,10 @@
               <div>
                 <h3>Linux (Flatpak & Tarball)</h3>
                 <p>Flathub package or direct release tarball for Linux distributions.</p>
+                <div id="dl-linux-sub" style="font-size: 12px; color: var(--text-dim); margin-bottom: 14px; font-family: var(--font-mono);">Fetching latest asset...</div>
               </div>
-              <a href="https://github.com/copyrightnews/omniget/releases/latest" class="btn btn-secondary" style="width: 100%;">
-                View Linux Releases
+              <a id="dl-linux-btn" href="https://github.com/copyrightnews/omniget/releases/latest" class="btn btn-secondary" style="width: 100%;">
+                <i data-lucide="download" style="width: 16px; height: 16px;"></i> View Linux Releases
               </a>
             </div>
           </div>
@@ -1402,10 +1405,10 @@
             <div class="release-header">
               <div>
                 <span class="release-badge">v0.7.2 Stable</span>
-                <h3 style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--text-head); margin-top: 6px;">OmniGet 0.7.2 Release Notes</h3>
+                <h3 style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--text-head); margin-top: 6px;">OmniGet Release Notes</h3>
               </div>
-              <a href="https://github.com/copyrightnews/omniget/releases/tag/v0.7.2" target="_blank" rel="noopener" class="btn btn-secondary">
-                View Tag on GitHub
+              <a id="release-tag-link" href="https://github.com/copyrightnews/omniget/releases/latest" target="_blank" rel="noopener" class="btn btn-secondary">
+                View Release on GitHub
               </a>
             </div>
 
@@ -1500,7 +1503,7 @@
   <footer class="footer">
     <div class="container">
       <div class="author-row">
-        <img src="https://raw.githubusercontent.com/copyrightnews/omniget/main/static/loop.png" alt="Mascot" />
+        <img src="./static/loop.png" alt="Mascot" />
         <span style="color: var(--text-head); font-weight: 600;">OmniGet for the open-source community</span>
       </div>
       <p>© OmniGet Project • Maintained & Developed by <a href="https://github.com/copyrightnews/omniget" target="_blank" rel="noopener" style="color: var(--brand-orange); font-weight: 600;">sayfalse</a> • Originally forked from <a href="https://github.com/tonhowtf/omniget" target="_blank" rel="noopener" style="color: var(--text-muted); text-decoration: underline;">tonhowtf/omniget</a> • Released under GPL-3.0 License.</p>
@@ -1513,18 +1516,33 @@
   </div>
 
   <script>
-    /* Multi-Tab Page View Controller */
-    function switchPageTab(tabId) {
+    /* Multi-Tab Page View Controller with Hash Routing */
+    function switchPageTab(tabId, updateHash = true) {
       document.querySelectorAll('.page-tab-content').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
 
       const targetPage = document.getElementById('page-' + tabId);
-      document.getElementById('nav-' + tabId)?.classList.add('active');
+      const navLink = document.getElementById('nav-' + tabId);
 
       if (targetPage) targetPage.classList.add('active');
+      if (navLink) navLink.classList.add('active');
+
+      if (updateHash && history.pushState) {
+        history.pushState(null, null, '#' + tabId);
+      }
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+
+    function handleHashChange() {
+      const hash = window.location.hash.replace('#', '').trim();
+      const validTabs = ['home', 'openmint', 'downloads', 'releasenotes', 'faq'];
+      if (hash && validTabs.includes(hash)) {
+        switchPageTab(hash, false);
+      }
+    }
+
+    window.addEventListener('hashchange', handleHashChange);
 
     /* Mobile nav dropdown toggle */
     function toggleMobileNav() {
@@ -1612,7 +1630,7 @@
       item.className = 'om-profile-item';
       const nameEl = document.createElement('div');
       nameEl.innerHTML = `<strong style="color: #0f172a; font-size: 14px;"></strong><div style="font-size: 12px; color: #64748b;">Monitored Account • Synced</div>`;
-      nameEl.querySelector('strong').textContent = val; // textContent avoids HTML injection from user input
+      nameEl.querySelector('strong').textContent = val;
       const fetchBtn = document.createElement('button');
       fetchBtn.className = 'btn btn-secondary';
       fetchBtn.style.cssText = 'height: 32px; padding: 0 12px; font-size: 12px;';
@@ -1649,10 +1667,126 @@
       }
     }
 
+    /* ==========================================================================
+       GITHUB RELEASES API AUTO-FETCHER & DIRECT DOWNLOAD LINK INJECTOR
+       ========================================================================== */
+    const GITHUB_REPO = "copyrightnews/omniget";
+    const API_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
+
+    function formatBytes(bytes) {
+      if (!bytes || isNaN(bytes)) return '';
+      const mb = bytes / (1024 * 1024);
+      return ` (${mb.toFixed(1)} MB)`;
+    }
+
+    function detectOS() {
+      const ua = navigator.userAgent || '';
+      const platform = navigator.platform || '';
+      if (/Win/i.test(platform) || /Windows/i.test(ua)) return 'win';
+      if (/Mac/i.test(platform) || /Macintosh/i.test(ua)) return 'mac';
+      if (/Linux/i.test(platform) || /X11/i.test(ua)) return 'linux';
+      return 'win';
+    }
+
+    async function fetchLatestRelease() {
+      const os = detectOS();
+      const heroText = document.getElementById('hero-download-text');
+      const heroBtn = document.getElementById('hero-primary-download-btn');
+      const navBtn = document.getElementById('nav-download-btn');
+
+      if (heroText) {
+        if (os === 'mac') heroText.textContent = 'Download for macOS';
+        else if (os === 'linux') heroText.textContent = 'Download for Linux';
+        else heroText.textContent = 'Download for Windows';
+      }
+
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) throw new Error(`GitHub API HTTP ${response.status}`);
+        const data = await response.json();
+
+        const versionTag = data.tag_name || 'Latest';
+        const assets = data.assets || [];
+
+        // Update release badges on page
+        document.querySelectorAll('.release-badge').forEach(el => {
+          el.textContent = `${versionTag} Stable`;
+        });
+
+        // Find platform specific assets
+        const winAsset = assets.find(a => a.name.endsWith('.exe') || a.name.endsWith('.msi'));
+        const macAsset = assets.find(a => a.name.endsWith('.dmg'));
+        const linuxAsset = assets.find(a => a.name.endsWith('.AppImage') || a.name.endsWith('.deb') || a.name.endsWith('.tar.gz'));
+
+        // Inject Windows Download
+        const winBtn = document.getElementById('dl-win-btn');
+        const winSub = document.getElementById('dl-win-sub');
+        if (winBtn && winAsset) {
+          winBtn.href = winAsset.browser_download_url;
+          if (winSub) winSub.textContent = `${winAsset.name}${formatBytes(winAsset.size)}`;
+        } else if (winSub) {
+          winSub.textContent = 'Latest release installer available on GitHub';
+        }
+
+        // Inject macOS Download
+        const macBtn = document.getElementById('dl-mac-btn');
+        const macSub = document.getElementById('dl-mac-sub');
+        if (macBtn && macAsset) {
+          macBtn.href = macAsset.browser_download_url;
+          if (macSub) macSub.textContent = `${macAsset.name}${formatBytes(macAsset.size)}`;
+        } else if (macSub) {
+          macSub.textContent = 'Universal DMG binary available on GitHub';
+        }
+
+        // Inject Linux Download
+        const linuxBtn = document.getElementById('dl-linux-btn');
+        const linuxSub = document.getElementById('dl-linux-sub');
+        if (linuxBtn && linuxAsset) {
+          linuxBtn.href = linuxAsset.browser_download_url;
+          if (linuxSub) linuxSub.textContent = `${linuxAsset.name}${formatBytes(linuxAsset.size)}`;
+        } else if (linuxSub) {
+          linuxSub.textContent = 'Flatpak & Linux packages available on GitHub';
+        }
+
+        // Target primary CTA to user's OS
+        let targetAsset = winAsset;
+        if (os === 'mac' && macAsset) targetAsset = macAsset;
+        if (os === 'linux' && linuxAsset) targetAsset = linuxAsset;
+
+        if (targetAsset) {
+          if (heroBtn) heroBtn.href = targetAsset.browser_download_url;
+          if (navBtn) navBtn.href = targetAsset.browser_download_url;
+        } else {
+          const fallbackUrl = data.html_url || `https://github.com/${GITHUB_REPO}/releases/latest`;
+          if (heroBtn) heroBtn.href = fallbackUrl;
+          if (navBtn) navBtn.href = fallbackUrl;
+        }
+
+        // Update Release Notes tag link
+        const releaseTagLink = document.getElementById('release-tag-link');
+        if (releaseTagLink && data.html_url) {
+          releaseTagLink.href = data.html_url;
+          releaseTagLink.textContent = `View ${versionTag} on GitHub`;
+        }
+
+      } catch (err) {
+        console.warn('GitHub API fetch fallback:', err);
+        const fallbackUrl = `https://github.com/${GITHUB_REPO}/releases/latest`;
+        ['dl-win-btn', 'dl-mac-btn', 'dl-linux-btn', 'hero-primary-download-btn', 'nav-download-btn', 'release-tag-link'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el && (el.getAttribute('href') === '#' || el.getAttribute('href') === fallbackUrl)) {
+            el.href = fallbackUrl;
+          }
+        });
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
       if (window.lucide) {
         lucide.createIcons();
       }
+      handleHashChange();
+      fetchLatestRelease();
     });
   </script>
 </body>
