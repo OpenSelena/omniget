@@ -13,9 +13,19 @@
 <div class="open-omni-page">
   <div class="ambient-wash" aria-hidden="true"></div>
 
+  <!-- White surface header with mascot (chosen UI) -->
   <header class="page-header">
-    <h1>Open Omni</h1>
-    <p class="subtitle">Social media profile &amp; batch downloader</p>
+    <img
+      class="mascot"
+      src="/open-omni-mascot.png"
+      alt=""
+      width="64"
+      height="64"
+    />
+    <div class="header-text">
+      <h1>Open Omni</h1>
+      <p class="subtitle">Social media profile &amp; batch downloader</p>
+    </div>
   </header>
 
   <div class="glass-panel">
@@ -66,32 +76,32 @@
 
 <style>
   /*
-    Glass/Fluent shell.
-    --glass-* and --accent-* custom properties are defined here on the
-    page root and inherit into every child component's scoped styles
-    (CSS custom properties cross Svelte's style scoping boundary), so
-    DownloadManager / ProfileManager / SettingsManager can all read
-    them without redefining the palette.
+    Open Omni shell — uses app theme tokens:
+      --accent, --cta, --primary, --secondary, --tertiary, --button,
+      --bg / --text / --text-secondary / --content-border (legacy aliases)
+    Glass tokens inherit into child components.
   */
   .open-omni-page {
-    --glass-surface: color-mix(in srgb, var(--bg) 58%, transparent);
-    --glass-surface-strong: color-mix(in srgb, var(--bg) 82%, transparent);
-    --glass-border: color-mix(in srgb, var(--content-border) 55%, transparent);
+    --oo-accent: var(--cta, var(--accent, #0071E3));
+    --glass-surface: color-mix(in srgb, var(--button, var(--bg, #fff)) 92%, transparent);
+    --glass-surface-strong: var(--button, var(--bg, #fff));
+    --glass-border: color-mix(in srgb, var(--content-border, var(--tertiary, #67676C)) 40%, transparent);
     --glass-radius-lg: 20px;
     --glass-radius: 14px;
     --glass-radius-sm: 10px;
-    --accent-soft: color-mix(in srgb, var(--accent) 12%, transparent);
-    --accent-line: color-mix(in srgb, var(--accent) 45%, transparent);
-    --accent-glow: color-mix(in srgb, var(--accent) 38%, transparent);
+    --accent-soft: color-mix(in srgb, var(--oo-accent) 14%, transparent);
+    --accent-line: color-mix(in srgb, var(--oo-accent) 50%, transparent);
+    --accent-glow: color-mix(in srgb, var(--oo-accent) 40%, transparent);
     --accent-gradient: linear-gradient(
       135deg,
-      color-mix(in srgb, var(--accent) 88%, white 14%),
-      color-mix(in srgb, var(--accent) 92%, black 6%)
+      color-mix(in srgb, var(--oo-accent) 92%, white 8%),
+      color-mix(in srgb, var(--oo-accent) 88%, black 12%)
     );
+    --on-accent: #ffffff;
 
     position: relative;
-    padding: 2.5rem var(--padding) 3.5rem;
-    max-width: 720px;
+    padding: 2rem var(--padding, 1.25rem) 3rem;
+    max-width: 560px;
     margin: 0 auto;
     width: 100%;
     box-sizing: border-box;
@@ -103,8 +113,8 @@
 
   .ambient-wash {
     position: absolute;
-    inset: -10% -10% auto -10%;
-    height: 340px;
+    inset: -8% -8% auto -8%;
+    height: 280px;
     background: radial-gradient(
       ellipse at 50% 0%,
       var(--accent-soft) 0%,
@@ -114,23 +124,49 @@
     z-index: -1;
   }
 
+  /* White / surface header with mascot */
   .page-header {
-    margin-bottom: 2rem;
-    text-align: center;
+    width: 100%;
+    margin-bottom: 1.25rem;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--button, #ffffff);
+    border: 1px solid var(--glass-border);
+    border-radius: 28px;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+    box-sizing: border-box;
+  }
+
+  .page-header .mascot {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center top;
+    background: #1a1a1a;
+    border: 2.5px solid var(--button, #ffffff);
+    flex-shrink: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+  }
+
+  .header-text {
+    min-width: 0;
   }
 
   .page-header h1 {
-    font-size: 25px;
+    font-size: 1.35rem;
     margin: 0;
-    font-weight: 500;
-    color: var(--text);
-    letter-spacing: -0.01em;
+    font-weight: 600;
+    color: var(--text, var(--secondary, #1d1d1f));
+    letter-spacing: -0.02em;
   }
 
   .subtitle {
-    color: var(--text-secondary);
-    margin: 6px 0 0;
-    font-size: 14px;
+    color: var(--text-secondary, var(--tertiary, #67676c));
+    margin: 0.2rem 0 0;
+    font-size: 0.8125rem;
   }
 
   .glass-panel {
@@ -138,13 +174,13 @@
     background: var(--glass-surface);
     border: 1px solid var(--glass-border);
     border-radius: var(--glass-radius-lg);
-    padding: 1.5rem;
+    padding: 1.35rem 1.25rem;
     box-sizing: border-box;
     backdrop-filter: blur(20px) saturate(140%);
     -webkit-backdrop-filter: blur(20px) saturate(140%);
     box-shadow:
-      0 1px 0 0 rgba(255, 255, 255, 0.08) inset,
-      0 18px 40px -20px rgba(0, 0, 0, 0.28);
+      0 1px 0 0 rgba(255, 255, 255, 0.06) inset,
+      0 12px 32px -18px rgba(0, 0, 0, 0.18);
     display: flex;
     flex-direction: column;
     gap: 1.25rem;
@@ -164,11 +200,11 @@
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 8px 18px;
+    padding: 8px 16px;
     border: none;
     border-radius: 999px;
     background: transparent;
-    color: var(--text-secondary);
+    color: var(--text-secondary, var(--tertiary, #67676c));
     font-size: 13.5px;
     font-weight: 500;
     cursor: pointer;
@@ -176,7 +212,7 @@
   }
 
   .tab-switcher button:hover:not(.active) {
-    color: var(--text);
+    color: var(--text, var(--secondary, #1d1d1f));
   }
 
   .tab-switcher button.active {
@@ -190,4 +226,3 @@
     justify-content: center;
   }
 </style>
-

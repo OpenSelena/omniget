@@ -67,10 +67,9 @@
   {/if}
 
   <div class="settings-field">
-    <label for="output-dir">Output directory</label>
     <div class="input-with-button">
       <svg class="field-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
-      <input id="output-dir" type="text" bind:value={outputDir} placeholder="E:\OmniGet" autocomplete="off" spellcheck="false" />
+      <input id="output-dir" aria-label="Output directory" type="text" bind:value={outputDir} placeholder="E:\OmniGet" autocomplete="off" spellcheck="false" />
       <button type="button" class="browse-btn" onclick={browseOutputDir}>
         Browse
       </button>
@@ -78,10 +77,9 @@
   </div>
 
   <div class="settings-field">
-    <label for="cookies-file">Cookies file <span class="optional-tag">(optional, needed for Stories and Highlights)</span></label>
     <div class="input-with-button">
       <svg class="field-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-      <input id="cookies-file" type="text" bind:value={cookiesFile} placeholder="instagram.com_cookies.txt" autocomplete="off" spellcheck="false" />
+      <input id="cookies-file" aria-label="Cookies file (optional, needed for Stories and Highlights)" type="text" bind:value={cookiesFile} placeholder="instagram.com_cookies.txt" autocomplete="off" spellcheck="false" />
       <button type="button" class="browse-btn" onclick={browseCookiesFile}>
         Browse
       </button>
@@ -214,5 +212,3 @@
     box-shadow: none;
   }
 </style>
-
-

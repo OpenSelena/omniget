@@ -49,5 +49,3 @@ export async function saveSettings(newOutputDir: string, newCookiesFile: string)
   outputDir = cleanOutputDir;
   cookiesFile = cleanCookiesFile;
 }
-
-

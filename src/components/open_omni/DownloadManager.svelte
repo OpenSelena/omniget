@@ -230,11 +230,10 @@
   {/if}
 
   <div class="url-field">
-    <label for="profile-url">Profile URL or handle</label>
     <div class="url-input-shell">
       <svg class="url-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
       <input
-        id="profile-url"
+        id="profile-url" aria-label="Profile URL or handle"
         type="text"
         bind:value={url}
         placeholder="https://instagram.com/username"
@@ -275,8 +274,7 @@
   </div>
 
   <div class="segment-block">
-    <span class="segment-label" id="content-type-label">Content type</span>
-    <div class="pill-group" role="group" aria-labelledby="content-type-label">
+    <div class="pill-group" role="group" aria-label="Content type">
       {#each CONTENT_TYPES as type}
         <button
           type="button"
@@ -690,5 +688,3 @@
     text-align: center;
   }
 </style>
-
-

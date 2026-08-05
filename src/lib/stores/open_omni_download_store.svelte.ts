@@ -214,5 +214,3 @@ export async function reattachIfActive() {
     console.error("Failed to reattach progress listener:", error);
   }
 }
-
-
