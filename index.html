@@ -1402,11 +1402,11 @@
 
           <div class="release-summary-card">
             <div>
-              <span class="release-badge">v0.7.2 Stable</span>
-              <ul>
-                <li>Fixed Rust compiler version mismatch panics on plugin load</li>
-                <li>Fixed yt-dlp progress output suppression (no more 0% hangs)</li>
-                <li>Bilibili Cheese (课堂) episodes now download with official credentials</li>
+              <span class="release-badge">v0.8.9 Stable</span>
+              <ul id="release-summary-list">
+                <li>Added Open Omni social media archiver & profile batch downloader</li>
+                <li>Added Telegram Direct Uploader & Leech Bot with 2GB/4GB auto-chunking</li>
+                <li>Dynamic YouTube & extractor quality picker with real available resolutions</li>
               </ul>
             </div>
             <button class="btn btn-secondary" onclick="switchPageTab('releasenotes')" style="white-space: nowrap;">
@@ -1633,41 +1633,42 @@
           <div class="release-card">
             <div class="release-header">
               <div>
-                <span class="release-badge">v0.7.2 Stable</span>
-                <h3 style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--text-head); margin-top: 6px;">OmniGet Release Notes</h3>
+                <span class="release-badge">v0.8.9 Stable</span>
+                <h3 id="release-card-title" style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--text-head); margin-top: 6px;">OmniGet v0.8.9 Release Notes</h3>
               </div>
-              <a id="release-tag-link" href="https://github.com/igect/omniget/releases/latest" target="_blank" rel="noopener" class="btn btn-secondary">
-                View Release on GitHub
+              <a id="release-tag-link" href="https://github.com/igect/omniget/releases/tag/v0.8.9" target="_blank" rel="noopener" class="btn btn-secondary">
+                View Tag on GitHub
               </a>
             </div>
 
-            <div class="release-grid">
+            <div class="release-grid" id="release-full-grid">
               <div class="release-item">
-                <h4><i data-lucide="shield-alert" style="width: 18px; height: 18px; color: var(--brand-orange);"></i> Plugins & Crash Fixes</h4>
+                <h4><i data-lucide="share-2" style="width: 18px; height: 18px; color: var(--brand-orange);"></i> Open Omni & Archiving</h4>
                 <ul>
-                  <li>Fixed crash (SIGSEGV) when opening plugin pages</li>
-                  <li>Compiler version pinned across app and plugins</li>
-                  <li>Plugins load instantly at startup before network calls</li>
-                  <li>Incompatible plugins now output a clear "update plugin" alert</li>
+                  <li>Full profile extraction for Instagram, TikTok, Reddit, and X/Twitter</li>
+                  <li>Monitored profile manager with instant sync & automated fetch</li>
+                  <li>Integrated gallery-dl engine with cookie authentication support</li>
+                  <li>Content type filtering: Photos, Videos, Stories, and Highlights</li>
                 </ul>
               </div>
 
               <div class="release-item">
-                <h4><i data-lucide="download-cloud" style="width: 18px; height: 18px; color: var(--brand-orange);"></i> Downloads Reliability</h4>
+                <h4><i data-lucide="send" style="width: 18px; height: 18px; color: var(--brand-orange);"></i> Telegram Direct Uploader</h4>
                 <ul>
-                  <li>Fixed yt-dlp progress output suppression (no more 0% hangs)</li>
-                  <li>Real output-path capture from yt-dlp to prevent empty-folder output</li>
-                  <li>Direct .m3u8 CDN links and HLS downloads show live segment progress</li>
+                  <li>Upload media directly to Telegram via User Session or Bot Token</li>
+                  <li>Automatic 2GB (Free) / 4GB (Premium) chunking for large files</li>
+                  <li>Send As Video, Document, or Audio modes with custom thumbnails</li>
+                  <li>Custom filename and extension editing before uploading</li>
                 </ul>
               </div>
 
               <div class="release-item">
-                <h4><i data-lucide="globe" style="width: 18px; height: 18px; color: var(--brand-orange);"></i> Platform Additions</h4>
+                <h4><i data-lucide="sliders" style="width: 18px; height: 18px; color: var(--brand-orange);"></i> Quality & Performance</h4>
                 <ul>
-                  <li>Bilibili Cheese (课堂) episode links download with user credentials</li>
-                  <li>Udemy plugin downloads course resources & supplementary files</li>
-                  <li>Hotmart/Udemy pasting auto-routes to Courses dashboard</li>
-                  <li>Bulk gallery-dl downloads for Subreddits & X/Twitter profiles</li>
+                  <li>Dynamic quality selector for 4K 2160p, 2K 1440p, 1080p, 720p, and audio-only</li>
+                  <li>Explicit merging phase display (<code>[Merger]</code> / <code>[ffmpeg]</code>) with live ETA</li>
+                  <li>Header download speed limiter controls on the fly</li>
+                  <li>System dependency auto-detection for yt-dlp, FFmpeg, and PDFium</li>
                 </ul>
               </div>
             </div>
@@ -1945,6 +1946,11 @@
         document.querySelectorAll('.release-badge').forEach(el => {
           el.textContent = `${versionTag} Stable`;
         });
+
+        const releaseCardTitle = document.getElementById('release-card-title');
+        if (releaseCardTitle && data.name) {
+          releaseCardTitle.textContent = `${data.name} Release Notes`;
+        }
 
         // Find platform specific assets
         const winAsset = assets.find(a => a.name.endsWith('.exe') || a.name.endsWith('.msi'));
