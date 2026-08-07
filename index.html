@@ -1220,7 +1220,7 @@
         </a>
 
         <!-- Direct OS Download CTA / View Downloads -->
-        <a id="nav-download-btn" href="https://github.com/igect/omniget/releases/latest/download/omniget_0.8.9_x64-setup.exe" class="btn btn-primary">
+        <a id="nav-download-btn" href="https://github.com/igect/omniget/releases/latest/download/omniget_0.8.10_x64-setup.exe" class="btn btn-primary">
           Download
         </a>
 
@@ -1261,7 +1261,7 @@
           </p>
 
           <div class="hero-cta-group">
-            <a id="hero-primary-download-btn" href="https://github.com/igect/omniget/releases/latest/download/omniget_0.8.9_x64-setup.exe" class="btn btn-primary" style="height: 46px; padding: 0 28px; font-size: 15px;">
+            <a id="hero-primary-download-btn" href="https://github.com/igect/omniget/releases/latest/download/omniget_0.8.10_x64-setup.exe" class="btn btn-primary" style="height: 46px; padding: 0 28px; font-size: 15px;">
               <i data-lucide="download" style="width: 18px; height: 18px;"></i>
               <span id="hero-download-text">Download for Windows</span>
             </a>
@@ -1402,11 +1402,11 @@
 
           <div class="release-summary-card">
             <div>
-              <span class="release-badge">v0.8.9 Stable</span>
+              <span class="release-badge">v0.8.10 Stable</span>
               <ul id="release-summary-list">
-                <li>Added Open Omni social media archiver & profile batch downloader</li>
-                <li>Added Telegram Direct Uploader & Leech Bot with 2GB/4GB auto-chunking</li>
-                <li>Dynamic YouTube & extractor quality picker with real available resolutions</li>
+                <li>Migrated local app data directory identifier to <code>com.igect.omniget</code></li>
+                <li>Redesigned Open Omni web preview matching exact Svelte 5 app UI styling</li>
+                <li>Updated GitHub CI release workflows &amp; standardized owner references to <code>igect</code></li>
               </ul>
             </div>
             <button class="btn btn-secondary" onclick="switchPageTab('releasenotes')" style="white-space: nowrap;">
@@ -1586,9 +1586,9 @@
               <div>
                 <h3>Windows Setup (.exe / .msi)</h3>
                 <p>Direct standalone installer for Windows 10 and 11 (64-bit).</p>
-                <div id="dl-win-sub" style="font-size: 12px; color: var(--text-dim); margin-bottom: 14px; font-family: var(--font-mono);">omniget_0.8.9_x64-setup.exe</div>
+                <div id="dl-win-sub" style="font-size: 12px; color: var(--text-dim); margin-bottom: 14px; font-family: var(--font-mono);">omniget_0.8.10_x64-setup.exe</div>
               </div>
-              <a id="dl-win-btn" href="https://github.com/igect/omniget/releases/latest/download/omniget_0.8.9_x64-setup.exe" class="btn btn-primary" style="width: 100%;">
+              <a id="dl-win-btn" href="https://github.com/igect/omniget/releases/latest/download/omniget_0.8.10_x64-setup.exe" class="btn btn-primary" style="width: 100%;">
                 <i data-lucide="download" style="width: 16px; height: 16px;"></i> Download for Windows
               </a>
             </div>
@@ -1598,9 +1598,9 @@
               <div>
                 <h3>macOS Universal (.dmg)</h3>
                 <p>Universal binary for Apple Silicon (M1-M3) and Intel Macs.</p>
-                <div id="dl-mac-sub" style="font-size: 12px; color: var(--text-dim); margin-bottom: 14px; font-family: var(--font-mono);">omniget_0.8.9_x64.dmg</div>
+                <div id="dl-mac-sub" style="font-size: 12px; color: var(--text-dim); margin-bottom: 14px; font-family: var(--font-mono);">omniget_0.8.10_x64.dmg</div>
               </div>
-              <a id="dl-mac-btn" href="https://github.com/igect/omniget/releases/latest/download/omniget_0.8.9_x64.dmg" class="btn btn-primary" style="width: 100%;">
+              <a id="dl-mac-btn" href="https://github.com/igect/omniget/releases/latest/download/omniget_0.8.10_x64.dmg" class="btn btn-primary" style="width: 100%;">
                 <i data-lucide="download" style="width: 16px; height: 16px;"></i> Download for macOS
               </a>
             </div>
@@ -1610,9 +1610,9 @@
               <div>
                 <h3>Linux (Flatpak & Tarball)</h3>
                 <p>Flathub package or direct release tarball for Linux distributions.</p>
-                <div id="dl-linux-sub" style="font-size: 12px; color: var(--text-dim); margin-bottom: 14px; font-family: var(--font-mono);">omniget_0.8.9_amd64.AppImage</div>
+                <div id="dl-linux-sub" style="font-size: 12px; color: var(--text-dim); margin-bottom: 14px; font-family: var(--font-mono);">omniget_0.8.10_amd64.AppImage</div>
               </div>
-              <a id="dl-linux-btn" href="https://github.com/igect/omniget/releases/latest/download/omniget_0.8.9_amd64.AppImage" class="btn btn-secondary" style="width: 100%;">
+              <a id="dl-linux-btn" href="https://github.com/igect/omniget/releases/latest/download/omniget_0.8.10_amd64.AppImage" class="btn btn-secondary" style="width: 100%;">
                 <i data-lucide="download" style="width: 16px; height: 16px;"></i> View Linux Releases
               </a>
             </div>
@@ -1633,42 +1633,39 @@
           <div class="release-card">
             <div class="release-header">
               <div>
-                <span class="release-badge">v0.8.9 Stable</span>
-                <h3 id="release-card-title" style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--text-head); margin-top: 6px;">OmniGet v0.8.9 Release Notes</h3>
+                <span class="release-badge">v0.8.10 Stable</span>
+                <h3 id="release-card-title" style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--text-head); margin-top: 6px;">OmniGet v0.8.10 Release Notes</h3>
               </div>
-              <a id="release-tag-link" href="https://github.com/igect/omniget/releases/tag/v0.8.9" target="_blank" rel="noopener" class="btn btn-secondary">
+              <a id="release-tag-link" href="https://github.com/igect/omniget/releases/tag/v0.8.10" target="_blank" rel="noopener" class="btn btn-secondary">
                 View Tag on GitHub
               </a>
             </div>
 
             <div class="release-grid" id="release-full-grid">
               <div class="release-item">
-                <h4><i data-lucide="share-2" style="width: 18px; height: 18px; color: var(--brand-orange);"></i> Open Omni & Archiving</h4>
+                <h4><i data-lucide="hard-drive" style="width: 18px; height: 18px; color: var(--brand-orange);"></i> App Storage &amp; Identifier</h4>
                 <ul>
-                  <li>Full profile extraction for Instagram, TikTok, Reddit, and X/Twitter</li>
-                  <li>Monitored profile manager with instant sync & automated fetch</li>
-                  <li>Integrated gallery-dl engine with cookie authentication support</li>
-                  <li>Content type filtering: Photos, Videos, Stories, and Highlights</li>
+                  <li>Migrated local app data directory identifier to <code>com.igect.omniget</code></li>
+                  <li>Improved cross-platform app data directory path resolution and migration safeguards</li>
+                  <li>Cleaned up legacy configuration file references across backend storage modules</li>
                 </ul>
               </div>
 
               <div class="release-item">
-                <h4><i data-lucide="send" style="width: 18px; height: 18px; color: var(--brand-orange);"></i> Telegram Direct Uploader</h4>
+                <h4><i data-lucide="share-2" style="width: 18px; height: 18px; color: var(--brand-orange);"></i> Open Omni &amp; Svelte 5 UI</h4>
                 <ul>
-                  <li>Upload media directly to Telegram via User Session or Bot Token</li>
-                  <li>Automatic 2GB (Free) / 4GB (Premium) chunking for large files</li>
-                  <li>Send As Video, Document, or Audio modes with custom thumbnails</li>
-                  <li>Custom filename and extension editing before uploading</li>
+                  <li>Redesigned Open Omni web preview interface to match exact Svelte 5 desktop app UI styling</li>
+                  <li>Updated Open Omni UI components with interactive loop mascot status animations</li>
+                  <li>Enhanced download cancellation, stderr tail processing, and UI state synchronization</li>
                 </ul>
               </div>
 
               <div class="release-item">
-                <h4><i data-lucide="sliders" style="width: 18px; height: 18px; color: var(--brand-orange);"></i> Quality & Performance</h4>
+                <h4><i data-lucide="git-branch" style="width: 18px; height: 18px; color: var(--brand-orange);"></i> CI Workflows &amp; Repository Alignment</h4>
                 <ul>
-                  <li>Dynamic quality selector for 4K 2160p, 2K 1440p, 1080p, 720p, and audio-only</li>
-                  <li>Explicit merging phase display (<code>[Merger]</code> / <code>[ffmpeg]</code>) with live ETA</li>
-                  <li>Header download speed limiter controls on the fly</li>
-                  <li>System dependency auto-detection for yt-dlp, FFmpeg, and PDFium</li>
+                  <li>Updated GitHub release workflow repository owner references to <code>igect</code></li>
+                  <li>Standardized project links, metadata, author attributions, and footer credits</li>
+                  <li>Added dynamic GitHub Releases asset fetcher with automatic OS binary link injection</li>
                 </ul>
               </div>
             </div>
@@ -1756,6 +1753,10 @@
 
       if (targetPage) targetPage.classList.add('active');
       if (navLink) navLink.classList.add('active');
+
+      if (window.lucide) {
+        lucide.createIcons();
+      }
 
       if (updateHash && history.pushState) {
         history.pushState(null, null, '#' + tabId);
