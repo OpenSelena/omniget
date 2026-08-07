@@ -1073,6 +1073,34 @@
       margin-bottom: 24px;
     }
 
+    .dl-os-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .dl-os-icon.icon-win {
+      background: rgba(2, 132, 199, 0.1);
+      border: 1px solid rgba(2, 132, 199, 0.25);
+      color: #0284c7;
+    }
+
+    .dl-os-icon.icon-mac {
+      background: rgba(15, 23, 42, 0.08);
+      border: 1px solid rgba(15, 23, 42, 0.2);
+      color: #0f172a;
+    }
+
+    .dl-os-icon.icon-linux {
+      background: rgba(234, 179, 8, 0.12);
+      border: 1px solid rgba(234, 179, 8, 0.3);
+      color: #ca8a04;
+    }
+
     /* FAQ Accordion */
     .faq-wrap {
       max-width: 780px;
@@ -1584,33 +1612,42 @@
             <!-- Windows Card -->
             <div class="dl-card">
               <div>
-                <h3>Windows Setup (.exe / .msi)</h3>
+                <div class="dl-os-icon icon-win">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.95-9.6L24 0v11.4H10.95M0 12.6h9.75v9.451L0 20.699M10.95 12.6H24V24l-13.05-1.8"/></svg>
+                </div>
+                <h3>Windows Setup</h3>
                 <p>Direct standalone installer for Windows 10 and 11 (64-bit).</p>
               </div>
               <a id="dl-win-btn" href="https://github.com/igect/omniget/releases/latest/download/omniget_0.8.10_x64-setup.exe" class="btn btn-primary" style="width: 100%;">
-                <i data-lucide="download" style="width: 16px; height: 16px;"></i> Download for Windows
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px;"><path d="M0 3.449L9.75 2.1v9.451H0m10.95-9.6L24 0v11.4H10.95M0 12.6h9.75v9.451L0 20.699M10.95 12.6H24V24l-13.05-1.8"/></svg> Download for Windows
               </a>
             </div>
 
             <!-- macOS Card -->
             <div class="dl-card">
               <div>
-                <h3>macOS Universal (.dmg)</h3>
+                <div class="dl-os-icon icon-mac">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.32c.67-.82 1.12-1.96.99-3.1-.97.04-2.14.65-2.84 1.47-.63.73-1.18 1.89-1.03 3.01 1.08.08 2.21-.56 2.88-1.38z"/></svg>
+                </div>
+                <h3>macOS Universal</h3>
                 <p>Universal binary for Apple Silicon (M1-M3) and Intel Macs.</p>
               </div>
               <a id="dl-mac-btn" href="https://github.com/igect/omniget/releases/latest/download/omniget_0.8.10_x64.dmg" class="btn btn-primary" style="width: 100%;">
-                <i data-lucide="download" style="width: 16px; height: 16px;"></i> Download for macOS
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px;"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.32c.67-.82 1.12-1.96.99-3.1-.97.04-2.14.65-2.84 1.47-.63.73-1.18 1.89-1.03 3.01 1.08.08 2.21-.56 2.88-1.38z"/></svg> Download for macOS
               </a>
             </div>
 
             <!-- Linux Card -->
             <div class="dl-card">
               <div>
-                <h3>Linux (Flatpak & Tarball)</h3>
+                <div class="dl-os-icon icon-linux">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M12.002 0c-3.178 0-5.753 2.766-5.753 6.177 0 1.57.545 3.003 1.447 4.108C5.553 11.597 2.5 14.542 2.5 18.232c0 2.753 1.83 5.074 4.543 5.617C8.17 24.07 9.878 24 11.455 24c.182 0 .364 0 .546 0 1.577 0 3.286.07 4.412-.151 2.713-.543 4.543-2.864 4.543-5.617 0-3.69-3.053-6.635-5.196-7.947.902-1.105 1.447-2.538 1.447-4.108C17.755 2.766 15.18 0 12.002 0zm-2.096 4.382c.484 0 .878.394.878.878 0 .484-.394.878-.878.878a.878.878 0 01-.878-.878c0-.484.394-.878.878-.878zm4.192 0c.484 0 .878.394.878.878 0 .484-.394.878-.878.878a.878.878 0 01-.878-.878c0-.484.394-.878.878-.878zM12 7.777c1.396 0 2.56.574 2.822 1.341H9.178C9.44 8.351 10.604 7.777 12 7.777z"/></svg>
+                </div>
+                <h3>Linux</h3>
                 <p>Flathub package or direct release tarball for Linux distributions.</p>
               </div>
               <a id="dl-linux-btn" href="https://github.com/igect/omniget/releases/latest/download/omniget_0.8.10_amd64.AppImage" class="btn btn-secondary" style="width: 100%;">
-                <i data-lucide="download" style="width: 16px; height: 16px;"></i> View Linux Releases
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px;"><path d="M12.002 0c-3.178 0-5.753 2.766-5.753 6.177 0 1.57.545 3.003 1.447 4.108C5.553 11.597 2.5 14.542 2.5 18.232c0 2.753 1.83 5.074 4.543 5.617C8.17 24.07 9.878 24 11.455 24c.182 0 .364 0 .546 0 1.577 0 3.286.07 4.412-.151 2.713-.543 4.543-2.864 4.543-5.617 0-3.69-3.053-6.635-5.196-7.947.902-1.105 1.447-2.538 1.447-4.108C17.755 2.766 15.18 0 12.002 0zm-2.096 4.382c.484 0 .878.394.878.878 0 .484-.394.878-.878.878a.878.878 0 01-.878-.878c0-.484.394-.878.878-.878zm4.192 0c.484 0 .878.394.878.878 0 .484-.394.878-.878.878a.878.878 0 01-.878-.878c0-.484.394-.878.878-.878zM12 7.777c1.396 0 2.56.574 2.822 1.341H9.178C9.44 8.351 10.604 7.777 12 7.777z"/></svg> View Linux Releases
               </a>
             </div>
           </div>
