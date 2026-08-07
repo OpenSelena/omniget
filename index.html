@@ -1586,7 +1586,6 @@
               <div>
                 <h3>Windows Setup (.exe / .msi)</h3>
                 <p>Direct standalone installer for Windows 10 and 11 (64-bit).</p>
-                <div id="dl-win-sub" style="font-size: 12px; color: var(--text-dim); margin-bottom: 14px; font-family: var(--font-mono);">omniget_0.8.10_x64-setup.exe</div>
               </div>
               <a id="dl-win-btn" href="https://github.com/igect/omniget/releases/latest/download/omniget_0.8.10_x64-setup.exe" class="btn btn-primary" style="width: 100%;">
                 <i data-lucide="download" style="width: 16px; height: 16px;"></i> Download for Windows
@@ -1598,7 +1597,6 @@
               <div>
                 <h3>macOS Universal (.dmg)</h3>
                 <p>Universal binary for Apple Silicon (M1-M3) and Intel Macs.</p>
-                <div id="dl-mac-sub" style="font-size: 12px; color: var(--text-dim); margin-bottom: 14px; font-family: var(--font-mono);">omniget_0.8.10_x64.dmg</div>
               </div>
               <a id="dl-mac-btn" href="https://github.com/igect/omniget/releases/latest/download/omniget_0.8.10_x64.dmg" class="btn btn-primary" style="width: 100%;">
                 <i data-lucide="download" style="width: 16px; height: 16px;"></i> Download for macOS
@@ -1610,7 +1608,6 @@
               <div>
                 <h3>Linux (Flatpak & Tarball)</h3>
                 <p>Flathub package or direct release tarball for Linux distributions.</p>
-                <div id="dl-linux-sub" style="font-size: 12px; color: var(--text-dim); margin-bottom: 14px; font-family: var(--font-mono);">omniget_0.8.10_amd64.AppImage</div>
               </div>
               <a id="dl-linux-btn" href="https://github.com/igect/omniget/releases/latest/download/omniget_0.8.10_amd64.AppImage" class="btn btn-secondary" style="width: 100%;">
                 <i data-lucide="download" style="width: 16px; height: 16px;"></i> View Linux Releases
@@ -1960,32 +1957,20 @@
 
         // Inject Windows Download
         const winBtn = document.getElementById('dl-win-btn');
-        const winSub = document.getElementById('dl-win-sub');
         if (winBtn && winAsset) {
           winBtn.href = winAsset.browser_download_url;
-          if (winSub) winSub.textContent = `${winAsset.name}${formatBytes(winAsset.size)}`;
-        } else if (winSub) {
-          winSub.textContent = 'Latest release installer available on GitHub';
         }
 
         // Inject macOS Download
         const macBtn = document.getElementById('dl-mac-btn');
-        const macSub = document.getElementById('dl-mac-sub');
         if (macBtn && macAsset) {
           macBtn.href = macAsset.browser_download_url;
-          if (macSub) macSub.textContent = `${macAsset.name}${formatBytes(macAsset.size)}`;
-        } else if (macSub) {
-          macSub.textContent = 'Universal DMG binary available on GitHub';
         }
 
         // Inject Linux Download
         const linuxBtn = document.getElementById('dl-linux-btn');
-        const linuxSub = document.getElementById('dl-linux-sub');
         if (linuxBtn && linuxAsset) {
           linuxBtn.href = linuxAsset.browser_download_url;
-          if (linuxSub) linuxSub.textContent = `${linuxAsset.name}${formatBytes(linuxAsset.size)}`;
-        } else if (linuxSub) {
-          linuxSub.textContent = 'Flatpak & Linux packages available on GitHub';
         }
 
         // Target primary CTA to user's OS
