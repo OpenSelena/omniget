@@ -1,5 +1,4 @@
 use chrono::Utc;
-use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, VecDeque};
 use std::fs;
@@ -7,7 +6,7 @@ use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, LazyLock, Mutex};
 use std::thread;
 use std::time::Duration;
 use tauri::{command, AppHandle, Emitter};
@@ -51,12 +50,12 @@ struct RunningDownload {
     cancelled: Arc<AtomicBool>,
 }
 
-static RUNNING_DOWNLOADS: Lazy<Mutex<HashMap<String, RunningDownload>>> =
-    Lazy::new(|| Mutex::new(HashMap::new()));
+static RUNNING_DOWNLOADS: LazyLock<Mutex<HashMap<String, RunningDownload>>> =
+    LazyLock::new(|| Mutex::new(HashMap::new()));
 
 // Settings and profiles share small JSON files. Serialize access so two Tauri
 // commands cannot read-modify-write the same file concurrently.
-static OPEN_OMNI_STORAGE_LOCK: Lazy<Mutex<()>> = Lazy::new(|| Mutex::new(()));
+static OPEN_OMNI_STORAGE_LOCK: LazyLock<Mutex<()>> = LazyLock::new(|| Mutex::new(()));
 
 fn omniget_open_omni_dir() -> Result<PathBuf, String> {
     let base =

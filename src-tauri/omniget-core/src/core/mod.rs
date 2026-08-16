@@ -21,7 +21,6 @@ pub mod log_hook;
 pub mod media_processor;
 pub mod paths;
 pub mod pdfium;
-pub mod pokemon_names;
 pub mod pot_provider;
 pub mod process;
 pub mod redirect;

@@ -1,9 +1,8 @@
 use std::collections::HashMap;
-use std::sync::Mutex;
+use std::sync::{LazyLock, Mutex};
 
 use discord_rich_presence::activity::{Activity, Assets, Button, Timestamps};
 use discord_rich_presence::{DiscordIpc, DiscordIpcClient};
-use once_cell::sync::Lazy;
 use serde_json::{json, Value};
 
 pub use omniget_core::models::settings::RpcSettings;
@@ -49,7 +48,7 @@ struct RpcState {
     last_displayed_source: Option<String>,
 }
 
-static RPC: Lazy<Mutex<RpcState>> = Lazy::new(|| {
+static RPC: LazyLock<Mutex<RpcState>> = LazyLock::new(|| {
     Mutex::new(RpcState {
         client: None,
         connected: false,

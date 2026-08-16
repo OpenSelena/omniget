@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.8.11] - 2026-08-17
+
+### Refactored & Optimized
+- **Platform Architecture Cleanup**: Removed orphaned and unreferenced legacy platform extractor files from `src-tauri/src/platforms/`, consolidating all platform downloader logic solely within `omniget-core::platforms`.
+- **Rust Standard Library Modernization**: Migrated all `once_cell::sync::OnceCell` and `Lazy` occurrences to Rust standard library's `std::sync::OnceLock` and `std::sync::LazyLock`, dropping the external `once_cell` crate dependency across the workspace.
+- **Dependency Trimming**: Removed unused `open` crate dependency from Cargo configurations in favor of Tauri's native opener plugin.
+- **Fallback Title Generation**: Streamlined generic video title generation in the download queue, removing redundant name tables in favor of lightweight timestamp-based fallbacks.
+- **Universal Relative Time Formatting**: Refactored `timeAgo` to leverage native browser `Intl.RelativeTimeFormat`, ensuring accurate locale-aware time formatting without hardcoded dictionaries.
+- **Bundle Hygiene**: Removed dev-only audit routes from the production application bundle.
+
+---
+
 ## [0.8.10] - 2026-08-06
 
 ### Fixed & Refactored

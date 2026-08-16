@@ -4260,7 +4260,7 @@ dependencies = [
 
 [[package]]
 name = "omniget"
-version = "0.8.10"
+version = "0.8.11"
 dependencies = [
  "aes",
  "anyhow",
@@ -4286,8 +4286,6 @@ dependencies = [
  "native-tls",
  "omniget-core",
  "omniget-plugin-sdk",
- "once_cell",
- "open",
  "qrcode",
  "rand 0.10.2",
  "regex",
@@ -4367,8 +4365,6 @@ dependencies = [
  "m3u8-rs",
  "md-5",
  "murmur3",
- "once_cell",
- "open",
  "qrcode",
  "rand 0.10.2",
  "regex",

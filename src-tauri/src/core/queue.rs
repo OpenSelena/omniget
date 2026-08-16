@@ -1222,8 +1222,11 @@ async fn spawn_download_inner(
 
     let mut info = info;
     if is_generic_title(&info.title) {
-        let pokemon = omniget_core::core::pokemon_names::random_pokemon_name();
-        info.title = format!("video_{}", pokemon);
+        let ts = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs();
+        info.title = format!("video_{ts}");
     }
 
     let state = {

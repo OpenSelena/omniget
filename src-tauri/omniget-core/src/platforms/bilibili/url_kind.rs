@@ -1,4 +1,4 @@
-use once_cell::sync::Lazy;
+use std::sync::LazyLock;
 use regex::Regex;
 
 use super::api::{ApiClient, BilibiliError, Result};
@@ -69,29 +69,29 @@ impl UrlKind {
     }
 }
 
-static RE_VIDEO_BV: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"bilibili\.com/video/(BV[a-zA-Z0-9]+|av\d+)").unwrap());
-static RE_BARE_BV: Lazy<Regex> = Lazy::new(|| Regex::new(r"(BV[a-zA-Z0-9]{8,})").unwrap());
-static RE_BARE_AV: Lazy<Regex> = Lazy::new(|| Regex::new(r"\bav(\d+)\b").unwrap());
-static RE_BANGUMI: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"bilibili\.com/bangumi/(?:play|media)/(ss\d+|ep\d+|md\d+)").unwrap());
-static RE_BARE_BANGUMI: Lazy<Regex> = Lazy::new(|| Regex::new(r"\b(ss\d+|ep\d+|md\d+)\b").unwrap());
-static RE_CHEESE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"bilibili\.com/cheese/play/(ss\d+|ep\d+)").unwrap());
-static RE_LIST_LISTS: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"space\.bilibili\.com/(\d+)/lists(?:/(\d+))?").unwrap());
-static RE_FAVLIST_SPACE: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"space\.bilibili\.com/\d+/favlist").unwrap());
-static RE_FAVLIST_LIST: Lazy<Regex> = Lazy::new(|| {
+static RE_VIDEO_BV: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"bilibili\.com/video/(BV[a-zA-Z0-9]+|av\d+)").unwrap());
+static RE_BARE_BV: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(BV[a-zA-Z0-9]{8,})").unwrap());
+static RE_BARE_AV: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\bav(\d+)\b").unwrap());
+static RE_BANGUMI: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"bilibili\.com/bangumi/(?:play|media)/(ss\d+|ep\d+|md\d+)").unwrap());
+static RE_BARE_BANGUMI: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\b(ss\d+|ep\d+|md\d+)\b").unwrap());
+static RE_CHEESE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"bilibili\.com/cheese/play/(ss\d+|ep\d+)").unwrap());
+static RE_LIST_LISTS: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"space\.bilibili\.com/(\d+)/lists(?:/(\d+))?").unwrap());
+static RE_FAVLIST_SPACE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"space\.bilibili\.com/\d+/favlist").unwrap());
+static RE_FAVLIST_LIST: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"bilibili\.com/(?:medialist/detail/)?ml(\d+)|bilibili\.com/list/ml(\d+)").unwrap()
 });
-static RE_SPACE: Lazy<Regex> = Lazy::new(|| Regex::new(r"space\.bilibili\.com/(\d+)").unwrap());
-static RE_MEDIALIST_PLAY: Lazy<Regex> =
-    Lazy::new(|| Regex::new(r"bilibili\.com/medialist/play/(\d+)").unwrap());
-static RE_POPULAR: Lazy<Regex> = Lazy::new(|| Regex::new(r"bilibili\.com/v/popular").unwrap());
-static RE_FESTIVAL: Lazy<Regex> = Lazy::new(|| Regex::new(r"bilibili\.com/festival").unwrap());
-static RE_B23: Lazy<Regex> = Lazy::new(|| Regex::new(r"(b23\.tv|bili2233\.cn)").unwrap());
-static RE_LIST_OLD: Lazy<Regex> = Lazy::new(|| Regex::new(r"bilibili\.com/list/(\d+)").unwrap());
+static RE_SPACE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"space\.bilibili\.com/(\d+)").unwrap());
+static RE_MEDIALIST_PLAY: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"bilibili\.com/medialist/play/(\d+)").unwrap());
+static RE_POPULAR: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"bilibili\.com/v/popular").unwrap());
+static RE_FESTIVAL: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"bilibili\.com/festival").unwrap());
+static RE_B23: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(b23\.tv|bili2233\.cn)").unwrap());
+static RE_LIST_OLD: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"bilibili\.com/list/(\d+)").unwrap());
 
 pub fn detect(url: &str) -> Result<UrlKind> {
     detect_internal(url, None)
@@ -329,8 +329,8 @@ pub fn parse_video_id(input: &str) -> (Option<String>, Option<u64>) {
 }
 
 pub fn extract_festival_bvid(html: &str) -> Option<String> {
-    static RE_STATE: Lazy<Regex> =
-        Lazy::new(|| Regex::new(r"window\.__INITIAL_STATE__\s*=\s*(\{.*?\});").unwrap());
+    static RE_STATE: LazyLock<Regex> =
+        LazyLock::new(|| Regex::new(r"window\.__INITIAL_STATE__\s*=\s*(\{.*?\});").unwrap());
     let cap = RE_STATE.captures(html)?;
     let json_str = cap.get(1)?.as_str();
     let v: serde_json::Value = serde_json::from_str(json_str).ok()?;
