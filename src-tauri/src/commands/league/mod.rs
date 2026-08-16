@@ -90,7 +90,8 @@ async fn lcu_reachable(client: &LcuClient) -> bool {
 
 /// The client's own web server is easy to swamp: a scouting pass touches ten
 /// players at once, so requests are queued instead of fired all together.
-static LCU_GATE: LazyLock<tokio::sync::Semaphore> = LazyLock::new(|| tokio::sync::Semaphore::new(4));
+static LCU_GATE: LazyLock<tokio::sync::Semaphore> =
+    LazyLock::new(|| tokio::sync::Semaphore::new(4));
 
 async fn lcu_send(
     client: &LcuClient,
@@ -174,8 +175,9 @@ enum CacheKind {
 const PATCH_STATIC_TTL: std::time::Duration = std::time::Duration::from_secs(15 * 60);
 const IMMUTABLE_CAP: usize = 400;
 
-static PATCH_CACHE: LazyLock<Mutex<std::collections::HashMap<String, (std::time::Instant, Value)>>> =
-    LazyLock::new(|| Mutex::new(std::collections::HashMap::new()));
+static PATCH_CACHE: LazyLock<
+    Mutex<std::collections::HashMap<String, (std::time::Instant, Value)>>,
+> = LazyLock::new(|| Mutex::new(std::collections::HashMap::new()));
 static IMMUTABLE_CACHE: LazyLock<
     Mutex<(
         std::collections::VecDeque<String>,
@@ -3043,8 +3045,9 @@ fn estimated_ranks(level: i64) -> [i64; 4] {
     ranks
 }
 
-static HASTE_TABLE: LazyLock<Mutex<Option<(std::time::Instant, std::collections::HashMap<i64, i64>)>>> =
-    LazyLock::new(|| Mutex::new(None));
+static HASTE_TABLE: LazyLock<
+    Mutex<Option<(std::time::Instant, std::collections::HashMap<i64, i64>)>>,
+> = LazyLock::new(|| Mutex::new(None));
 const HASTE_TABLE_TTL: std::time::Duration = std::time::Duration::from_secs(6 * 60 * 60);
 
 /// Ability-haste per item, from the English game-data mirror. The client

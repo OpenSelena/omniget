@@ -1,5 +1,5 @@
-use std::sync::OnceLock;
 use serde::Serialize;
+use std::sync::OnceLock;
 
 pub type Emitter = Box<dyn Fn(&str, serde_json::Value) + Send + Sync + 'static>;
 
