@@ -71,7 +71,7 @@ export async function fetchChangelog(): Promise<string> {
 
   try {
     const res = await fetch(
-      `https://api.github.com/repos/tonhowtf/omniget/releases/tags/v${currentVersion}`,
+      `https://api.github.com/repos/igect/omniget/releases/tags/v${currentVersion}`,
       { headers: { Accept: "application/vnd.github.v3+json" } }
     );
     if (res.ok) {
@@ -85,7 +85,7 @@ export async function fetchChangelog(): Promise<string> {
 
   try {
     const res = await fetch(
-      "https://api.github.com/repos/tonhowtf/omniget/releases/latest",
+      "https://api.github.com/repos/igect/omniget/releases/latest",
       { headers: { Accept: "application/vnd.github.v3+json" } }
     );
     if (res.ok) {
