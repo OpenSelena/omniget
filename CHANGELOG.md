@@ -9,13 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.8.12] - 2026-08-23
 
-### Added & Synchronized
-- **Upstream Sync**: Synchronized full upstream code base and bug fixes from `tonhowtf/omniget` (including macOS auth cookies, updater signatures, command palette improvements, dependency row optimizations, and League UI enhancements).
-- **Open Omni Social Downloader**: Integrated Open Omni download manager, profiles manager, and settings manager with desktop backend Rust IPC commands (`src-tauri/src/commands/open_omni.rs`).
-- **Loop Mascot System**: Restored full interactive mascot animations responding across download lifecycles and Open Omni views.
-- **Branding & Package Identity**: Standardized package identifier to `com.igect.omniget`, Flatpak manifests, and CI/CD release pipelines targeting `igect/omniget`.
-- **Rust Standard Library Modernization**: Maintained stdlib `std::sync::OnceLock` and `std::sync::LazyLock` synchronization without external `once_cell` dependencies, and pruned legacy platform directory duplicates.
-- **Landing Page & Branding Assets**: Maintained direct OS downloads, `omniget.nav.bd` web landing page, and vector brand assets.
+### Added
+- **Open Omni Social Media Downloader**: Full multi-platform downloader interface (`/open-omni`) integrating `gallery-dl` and `yt-dlp` backend engines with active process cancellation and live progress streaming.
+- **Open Omni Profile & Settings Management**: Persistent JSON presets for user configurations, domain-specific extractors, authentication cookie injection, and concurrency controls.
+- **Loop Mascot Animation Controller**: Reactive mascot state controller responding in real-time to active download phases (Idle, Amazed, Downloading, Queue, Paused, and Error).
+- **Built-in Offline Release Notes**: Local bundled release notes fallback ensuring the Changelog page always displays rich update details even when offline or rate-limited.
+
+### Upstream Synchronization
+- **macOS Authenticated Downloads**: Integrated direct WKWebView cookie store extraction (`objc2-web-kit`) to resolve HttpOnly auth sessions.
+- **Updater & Signing Upgrades**: Synchronized minisign public keys and enabled building from source without mandatory updater signatures.
+- **Performance & Reliability**: Resolved dependency-row process storms during CLI binary version queries, improved command palette action search, and added UI skeletons for League client tools.
+- **Platform Parser Improvements**: Enhanced Instagram Reels video extraction and Bilibili collection parsing.
+
+### Packaging & Infrastructure
+- **Identity Standard**: Standardized bundle identifier to `com.igect.omniget` across Tauri config, Flatpak manifests, and CI/CD pipelines.
+- **Automatic Storage Migration**: Non-destructive automatic migration copying existing configurations, credentials, and plugins from legacy data directories (`wtf.tonho.omniget`, `omniget`) to `com.igect.omniget`.
+- **Rust Standard Library Modernization**: Upgraded synchronization primitives to standard library `std::sync::OnceLock` and `std::sync::LazyLock`, removing the external `once_cell` crate dependency.
 
 ---
 
