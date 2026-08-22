@@ -4,7 +4,7 @@ resolver = "2"
 
 [package]
 name = "omniget"
-version = "0.8.11"
+version = "0.8.12"
 description = "A Tauri App"
 authors = ["igect"]
 edition = "2021"
@@ -76,6 +76,15 @@ fs4 = "1"
 [target.'cfg(windows)'.dependencies]
 webview2-com = "0.38"
 windows = { version = "0.61", features = ["Win32_System_Com", "Win32_UI_WindowsAndMessaging"] }
+
+# Reading WKWebView's cookie store directly — document.cookie cannot see
+# HttpOnly cookies, which is the whole point of the auth webview (#287).
+# Versions track what wry already resolves, so this adds no new build cost.
+[target.'cfg(target_os = "macos")'.dependencies]
+objc2 = "0.6"
+objc2-foundation = { version = "0.3", features = ["NSHTTPCookie", "NSArray", "NSString"] }
+objc2-web-kit = { version = "0.3", features = ["WKWebView", "WKWebViewConfiguration", "WKWebsiteDataStore", "WKHTTPCookieStore"] }
+block2 = "0.6"
 
 [target.'cfg(any(target_os = "macos", windows, target_os = "linux"))'.dependencies]
 tauri-plugin-process = "2.3.1"

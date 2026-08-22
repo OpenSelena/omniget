@@ -87,7 +87,6 @@
     color: var(--text-muted);
     border-radius: var(--radius-sm);
     text-decoration: none;
-    text-transform: capitalize;
     transition: color var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out);
   }
 

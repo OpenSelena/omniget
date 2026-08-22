@@ -4260,13 +4260,14 @@ dependencies = [
 
 [[package]]
 name = "omniget"
-version = "0.8.11"
+version = "0.8.12"
 dependencies = [
  "aes",
  "anyhow",
  "async-trait",
  "axum",
  "base64 0.22.1",
+ "block2",
  "cbc",
  "chrono",
  "constant_time_eq",
@@ -4284,6 +4285,9 @@ dependencies = [
  "md-5",
  "murmur3",
  "native-tls",
+ "objc2",
+ "objc2-foundation",
+ "objc2-web-kit",
  "omniget-core",
  "omniget-plugin-sdk",
  "qrcode",

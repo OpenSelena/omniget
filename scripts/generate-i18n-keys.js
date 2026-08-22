@@ -99,11 +99,7 @@ export type TranslationKeys =\n`;
       const extra = [...localeKeys].filter((k) => !enKeySet.has(k));
       if (missing.length > 0 || extra.length > 0) {
         hadMismatch = true;
-        let details = `[${file}] missing: ${missing.length}`;
-        if (missing.length > 0) details += ` [${missing.join(", ")}]`;
-        details += `, extra: ${extra.length}`;
-        if (extra.length > 0) details += ` [${extra.join(", ")}]`;
-        console.warn(details);
+        console.warn(`[${file}] missing: ${missing.length}, extra: ${extra.length}`);
       }
     } catch (err) {
       hadMismatch = true;

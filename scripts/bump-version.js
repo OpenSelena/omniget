@@ -152,14 +152,6 @@ if (fs.existsSync(aboutProjectPath)) {
   );
 }
 
-const changelogPath = path.join(root, "CHANGELOG.md");
-if (fs.existsSync(changelogPath)) {
-  const content = fs.readFileSync(changelogPath, "utf8");
-  if (!content.includes(`[${version}]`)) {
-    console.warn(`\x1b[33m[Warning] CHANGELOG.md does not contain an entry for [${version}]. Please update CHANGELOG.md before committing.\x1b[0m`);
-  }
-}
-
 if (changed.length === 0) {
   console.error("No files changed — aborting.");
   process.exit(1);
@@ -180,7 +172,7 @@ function hasBinary(name) {
   }
 }
 
-const metainfoAbs = path.join(root, "flatpak", "com.igect.omniget.metainfo.xml");
+const metainfoAbs = path.join(root, "flatpak", "wtf.tonho.omniget.metainfo.xml");
 if (hasBinary("appstreamcli")) {
   try {
     execSync(`appstreamcli validate "${metainfoAbs}"`, { stdio: "inherit" });
