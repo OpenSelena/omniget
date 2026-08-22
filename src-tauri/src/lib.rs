@@ -395,15 +395,6 @@ pub fn run() {
             commands::host_queue::register_event_listeners(app.handle());
             {
                 let handle = app.handle().clone();
-                platforms::bilibili::notify::set_emitter(Box::new(
-                    move |event: &str, payload: serde_json::Value| {
-                        use tauri::Emitter;
-                        let _ = handle.emit(event, payload);
-                    },
-                ));
-            }
-            {
-                let handle = app.handle().clone();
                 omniget_core::platforms::bilibili::notify::set_emitter(Box::new(
                     move |event: &str, payload: serde_json::Value| {
                         use tauri::Emitter;
