@@ -29,10 +29,10 @@ epub-reader, spaced-repetition
 </p>
 
 <p align="center">
-  <a href="https://github.com/tonhowtf/omniget/releases/latest"><img src="https://img.shields.io/github/v/release/tonhowtf/omniget?style=for-the-badge&label=release" alt="Latest Release" /></a>
+  <a href="https://github.com/igect/omniget/releases/latest"><img src="https://img.shields.io/github/v/release/igect/omniget?style=for-the-badge&label=release" alt="Latest Release" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-green?style=for-the-badge" alt="License GPL-3.0" /></a>
-  <a href="https://github.com/tonhowtf/omniget/stargazers"><img src="https://img.shields.io/github/stars/tonhowtf/omniget?style=for-the-badge" alt="GitHub stars" /></a>
-  <a href="https://github.com/tonhowtf/omniget/releases"><img src="https://img.shields.io/github/downloads/tonhowtf/omniget/total?style=for-the-badge&label=downloads" alt="Total downloads" /></a>
+  <a href="https://github.com/igect/omniget/stargazers"><img src="https://img.shields.io/github/stars/igect/omniget?style=for-the-badge" alt="GitHub stars" /></a>
+  <a href="https://github.com/igect/omniget/releases"><img src="https://img.shields.io/github/downloads/igect/omniget/total?style=for-the-badge&label=downloads" alt="Total downloads" /></a>
   <a href="https://hosted.weblate.org/engage/omniget/"><img src="https://hosted.weblate.org/widget/omniget/frontend-json/svg-badge.svg" alt="Translation status" /></a>
 </p>
 
@@ -64,15 +64,15 @@ Pick your system, download the latest release, and open it. There is no installe
   <tr>
     <td><strong>Windows</strong></td>
     <td>
-      <a href="https://github.com/tonhowtf/omniget/releases/latest"><img alt="Download OmniGet for Windows" src="https://img.shields.io/badge/Windows-Portable_EXE-0078D6?style=for-the-badge&logo=windows&logoColor=white" height="38"></a>
+      <a href="https://github.com/igect/omniget/releases/latest"><img alt="Download OmniGet for Windows" src="https://img.shields.io/badge/Windows-Portable_EXE-0078D6?style=for-the-badge&logo=windows&logoColor=white" height="38"></a>
       <br/>
-      <sub>Download the <code>.exe</code> from Releases and double click it. It is portable, so it runs from anywhere. There is also an <code>.msi</code> installer, and <code>winget install -e --id tonhowtf.OmniGet</code> if you prefer the command line.</sub>
+      <sub>Download the <code>.exe</code> from Releases and double click it. It is portable, so it runs from anywhere. There is also an <code>.msi</code> installer, and <code>winget install -e --id igect.OmniGet</code> if you prefer the command line.</sub>
     </td>
   </tr>
   <tr>
     <td><strong>macOS</strong></td>
     <td>
-      <a href="https://github.com/tonhowtf/omniget/releases/latest"><img alt="Download OmniGet for macOS" src="https://img.shields.io/badge/macOS-DMG-000000?style=for-the-badge&logo=apple&logoColor=white" height="38"></a>
+      <a href="https://github.com/igect/omniget/releases/latest"><img alt="Download OmniGet for macOS" src="https://img.shields.io/badge/macOS-DMG-000000?style=for-the-badge&logo=apple&logoColor=white" height="38"></a>
       <br/>
       <sub>Open the <code>.dmg</code> and drag OmniGet into your Applications folder. Read the first launch note below.</sub>
     </td>
@@ -80,7 +80,7 @@ Pick your system, download the latest release, and open it. There is no installe
   <tr>
     <td><strong>Linux</strong></td>
     <td>
-      <a href="https://github.com/tonhowtf/omniget/releases/latest"><img alt="Download OmniGet for Linux as deb, rpm or AppImage" src="https://img.shields.io/badge/Linux-deb_·_rpm_·_AppImage-FFAA33?style=for-the-badge&logo=linux&logoColor=white" height="38"></a>
+      <a href="https://github.com/igect/omniget/releases/latest"><img alt="Download OmniGet for Linux as deb, rpm or AppImage" src="https://img.shields.io/badge/Linux-deb_·_rpm_·_AppImage-FFAA33?style=for-the-badge&logo=linux&logoColor=white" height="38"></a>
       <br/>
       <sub>Debian and Ubuntu: download the <code>.deb</code>. Fedora and openSUSE: the <code>.rpm</code>. Everything else: the <code>.AppImage</code>. x86_64 and ARM64 builds are both published.</sub>
     </td>
@@ -358,7 +358,7 @@ Yes, with a Bilibili account signed in. OmniGet talks to the official Bilibili A
 For developers. If you just want to use OmniGet, [grab a release](#download-and-install).
 
 ```bash
-git clone https://github.com/tonhowtf/omniget.git
+git clone https://github.com/igect/omniget.git
 cd omniget
 pnpm install
 pnpm tauri dev
@@ -385,7 +385,7 @@ Releases sign their updater artifacts with a private key only the maintainers ho
 
 ### Command line interface
 
-The repository also contains `omniget-cli`, a small Rust binary that makes OmniGet scriptable. It ships with every release — grab `omniget-cli-<version>-<target>` from the [latest release](https://github.com/tonhowtf/omniget/releases/latest) for Windows, macOS (Intel and Apple Silicon) or Linux. To build it from this repository instead:
+The repository also contains `omniget-cli`, a small Rust binary that makes OmniGet scriptable. It ships with every release — grab `omniget-cli-<version>-<target>` from the [latest release](https://github.com/igect/omniget/releases/latest) for Windows, macOS (Intel and Apple Silicon) or Linux. To build it from this repository instead:
 
 ```bash
 cargo build --release -p omniget-cli
@@ -407,7 +407,7 @@ The desktop app never needs this. It exists for cron jobs, dotfiles, and scripts
 
 **Community.** Questions, help and release chatter happen on [Discord](https://discord.gg/jgdxyPy7Vn).
 
-Found a bug or have a feature idea? [Open an issue](https://github.com/tonhowtf/omniget/issues). Pull requests are welcome, see [CONTRIBUTING.md](CONTRIBUTING.md).
+Found a bug or have a feature idea? [Open an issue](https://github.com/igect/omniget/issues). Pull requests are welcome, see [CONTRIBUTING.md](CONTRIBUTING.md).
 
 OmniGet is translated on [Weblate](https://hosted.weblate.org/engage/omniget/). Pick a language, translate in your browser, and Weblate opens a pull request automatically.
 
@@ -415,11 +415,11 @@ OmniGet is translated on [Weblate](https://hosted.weblate.org/engage/omniget/). 
 
 Thanks to all contributors who have participated in this project!
 
-[![Contributors](https://contrib.rocks/image?repo=tonhowtf/omniget)](https://github.com/tonhowtf/omniget/graphs/contributors)
+[![Contributors](https://contrib.rocks/image?repo=igect/omniget)](https://github.com/igect/omniget/graphs/contributors)
 
 ### Developing plugins
 
-OmniGet's Courses, Telegram, and Convert features are all plugins — Rust dynamic libraries built on [`omniget-plugin-sdk`](src-tauri/omniget-plugin-sdk) — and third-party plugins are welcome. The [Plugin Development Guide](docs/plugin-development.md) covers the architecture, a quick start from the [plugin template](https://github.com/tonhowtf/omniget-plugin-template), the manifest and host API, honest notes on ABI stability, and how to get listed in the [plugin registry](https://github.com/tonhowtf/omniget-plugins).
+OmniGet's Courses, Telegram, and Convert features are all plugins — Rust dynamic libraries built on [`omniget-plugin-sdk`](src-tauri/omniget-plugin-sdk) — and third-party plugins are welcome. The [Plugin Development Guide](docs/plugin-development.md) covers the architecture, a quick start from the [plugin template](https://github.com/igect/omniget-plugin-template), the manifest and host API, honest notes on ABI stability, and how to get listed in the [plugin registry](https://github.com/igect/omniget-plugins).
 
 ## Notice to platform owners
 

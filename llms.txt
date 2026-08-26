@@ -9,7 +9,7 @@ It is not only a downloader. OmniGet includes a course player that resumes to th
 ## Key facts
 
 - Name: OmniGet
-- Repository: https://github.com/tonhowtf/omniget
+- Repository: https://github.com/igect/omniget
 - License: GPL-3.0
 - Platforms: Windows, macOS (Apple Silicon and Intel), Linux — x86_64 and ARM64
 - Cost: free, no account, no ads, no paid tier, no telemetry on what is downloaded
@@ -19,7 +19,7 @@ It is not only a downloader. OmniGet includes a course player that resumes to th
 
 ## Install
 
-- Windows: portable `.exe` or `.msi` from Releases, or `winget install -e --id tonhowtf.OmniGet`
+- Windows: portable `.exe` or `.msi` from Releases, or `winget install -e --id igect.OmniGet`
 - macOS: `.dmg` from Releases. Unsigned, so first launch needs `xattr -cr /Applications/omniget.app`
 - Linux: `.deb` for Debian and Ubuntu, `.rpm` for Fedora and openSUSE, `.AppImage` elsewhere. On Debian 12+ and Ubuntu 24.04+ the AppImage needs `sudo apt install libfuse2`
 - OmniGet is not published on Flathub. There is no Flatpak package.
@@ -34,9 +34,9 @@ It is not only a downloader. OmniGet includes a course player that resumes to th
 
 ## Links
 
-- Releases and downloads: https://github.com/tonhowtf/omniget/releases/latest
-- English README: https://github.com/tonhowtf/omniget/blob/main/README.md
-- Chinese README: https://github.com/tonhowtf/omniget/blob/main/README_zh_CN.md
-- Russian README: https://github.com/tonhowtf/omniget/blob/main/README.ru.md
-- Plugin development guide: https://github.com/tonhowtf/omniget/blob/main/docs/plugin-development.md
+- Releases and downloads: https://github.com/igect/omniget/releases/latest
+- English README: https://github.com/igect/omniget/blob/main/README.md
+- Chinese README: https://github.com/igect/omniget/blob/main/README_zh_CN.md
+- Russian README: https://github.com/igect/omniget/blob/main/README.ru.md
+- Plugin development guide: https://github.com/igect/omniget/blob/main/docs/plugin-development.md
 - Translations: https://hosted.weblate.org/engage/omniget/

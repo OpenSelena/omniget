@@ -23,9 +23,9 @@
       <li>Queue management with concurrent downloads</li>
     </ul>
   </description>
-  <url type="homepage">https://github.com/tonhowtf/omniget</url>
-  <url type="bugtracker">https://github.com/tonhowtf/omniget/issues</url>
-  <url type="vcs-browser">https://github.com/tonhowtf/omniget</url>
+  <url type="homepage">https://github.com/igect/omniget</url>
+  <url type="bugtracker">https://github.com/igect/omniget/issues</url>
+  <url type="vcs-browser">https://github.com/igect/omniget</url>
   <launchable type="desktop-id">com.igect.omniget.desktop</launchable>
   <provides>
     <binary>omniget</binary>
@@ -33,7 +33,7 @@
   <screenshots>
     <screenshot type="default">
       <caption>Main download interface</caption>
-      <image>https://raw.githubusercontent.com/tonhowtf/omniget/main/flatpak/screenshots/main.png</image>
+      <image>https://raw.githubusercontent.com/igect/omniget/main/flatpak/screenshots/main.png</image>
     </screenshot>
   </screenshots>
   <branding>

@@ -76,7 +76,7 @@ Mirror domains are also recognized: `youtu.be`, `youtube-nocookie.com`, `ddinsta
 
 ### 1. Install the desktop app
 
-Install OmniGet from [github.com/tonhowtf/omniget/releases](https://github.com/tonhowtf/omniget/releases/latest) and **launch it once**. On first launch it generates a per-installation pairing token and starts the local bridge on `127.0.0.1:47720` (or the next free port up to `47729`).
+Install OmniGet from [github.com/igect/omniget/releases](https://github.com/igect/omniget/releases/latest) and **launch it once**. On first launch it generates a per-installation pairing token and starts the local bridge on `127.0.0.1:47720` (or the next free port up to `47729`).
 
 ### 2. Install the extension
 
