@@ -10,21 +10,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.8.12] - 2026-08-23
 
 ### Added
-- **Open Omni Social Media Downloader**: Full multi-platform downloader interface (`/open-omni`) integrating `gallery-dl` and `yt-dlp` backend engines with active process cancellation and live progress streaming.
-- **Open Omni Profile & Settings Management**: Persistent JSON presets for user configurations, domain-specific extractors, authentication cookie injection, and concurrency controls.
-- **Loop Mascot Animation Controller**: Reactive mascot state controller responding in real-time to active download phases (Idle, Amazed, Downloading, Queue, Paused, and Error).
-- **Built-in Offline Release Notes**: Local bundled release notes fallback ensuring the Changelog page always displays rich update details even when offline or rate-limited.
+- **Open Omni Social Media Downloader (`/open-omni`)**: Dedicated multi-platform downloader interface combining `gallery-dl` and `yt-dlp` backend runners with live progress reporting and instant process cancellation.
+- **Open Omni Presets & Concurrency Control**: Persistent JSON presets for domain extractors, authentication cookie injection, and concurrency throttling.
+- **Loop Mascot Reactive Controller**: Reactive mascot state controller responding in real-time to active download states (Idle, Amazed, Downloading, Queue, Paused, Error).
+- **Offline Release Notes Fallback**: Bundled local changelog fallback in `changelog-store.svelte.ts` ensuring update details load when offline or GitHub API rate-limited.
 
-### Upstream Synchronization
-- **macOS Authenticated Downloads**: Integrated direct WKWebView cookie store extraction (`objc2-web-kit`) to resolve HttpOnly auth sessions.
-- **Updater & Signing Upgrades**: Synchronized minisign public keys and enabled building from source without mandatory updater signatures.
-- **Performance & Reliability**: Resolved dependency-row process storms during CLI binary version queries, improved command palette action search, and added UI skeletons for League client tools.
-- **Platform Parser Improvements**: Enhanced Instagram Reels video extraction and Bilibili collection parsing.
+### Platform & Engine Improvements
+- **macOS WebKit Cookie Store Extraction**: Integrated native `objc2-web-kit` cookie extraction from WKWebView to resolve HttpOnly session cookies for authenticated downloads.
+- **Instagram & Bilibili Parsers**: Improved Instagram Reels video stream detection and Bilibili collection parsing in `omniget-core`.
+- **Rust Standard Library Modernization**: Migrated global synchronization primitives to `std::sync::OnceLock` and `std::sync::LazyLock`, eliminating the external `once_cell` crate.
+- **Dependency Hygiene**: Dropped redundant `open` crate dependency in favor of Tauri's native opener plugin.
 
 ### Packaging & Infrastructure
-- **Identity Standard**: Standardized bundle identifier to `com.igect.omniget` across Tauri config, Flatpak manifests, and CI/CD pipelines.
-- **Automatic Storage Migration**: Non-destructive automatic migration copying existing configurations, credentials, and plugins from legacy data directories (`wtf.tonho.omniget`, `omniget`) to `com.igect.omniget`.
-- **Rust Standard Library Modernization**: Upgraded synchronization primitives to standard library `std::sync::OnceLock` and `std::sync::LazyLock`, removing the external `once_cell` crate dependency.
+- **App Storage Migration**: Non-destructive automatic migration moving legacy configuration and plugin folders (`wtf.tonho.omniget`, `omniget`) to `com.igect.omniget`.
+- **Identifier Standard**: Standardized bundle identifier to `com.igect.omniget` across Tauri configuration, Flatpak manifests, and CI/CD pipelines.
+- **Repository Alignment**: Standardized all project URLs, documentation links, and CI workflow targets to `igect/omniget`.
+- **Source Builds**: Enabled building locally without requiring private updater signing keys (`createUpdaterArtifacts: false`).
 
 ---
 
