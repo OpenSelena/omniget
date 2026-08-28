@@ -13,6 +13,28 @@ use std::time::Duration;
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 
+/// A password nobody can guess from the repository.
+///
+/// These tests register real accounts on whatever instance `OMNIDISC_TEST_URL`
+/// points at, and a constant in a public repo is a working credential for every
+/// account they ever left behind. One random value per process keeps the run
+/// self-consistent without publishing a key.
+fn test_password() -> &'static str {
+    static PASSWORD: std::sync::OnceLock<String> = std::sync::OnceLock::new();
+    PASSWORD.get_or_init(|| {
+        let nanos = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_nanos())
+            .unwrap_or(0);
+        format!(
+            "od-{}-{:x}-{:x}",
+            std::process::id(),
+            nanos,
+            nanos.rotate_left(29)
+        )
+    })
+}
+
 enum Ev {
     Dispatch(String, Value),
     Status(Status, Option<String>),
@@ -73,7 +95,7 @@ async fn register_gateway_ready_send_receive() {
 
     let alice_name = unique("alice");
     let bob_name = unique("bob");
-    let password = "correct horse battery";
+    let password = test_password();
 
     let alice = auth::register(&base, &alice_name, password, Some("Alice"), None)
         .await

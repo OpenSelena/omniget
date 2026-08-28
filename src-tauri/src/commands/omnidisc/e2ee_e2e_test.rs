@@ -22,6 +22,28 @@ use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 use std::path::PathBuf;
 
+/// A password nobody can guess from the repository.
+///
+/// These tests register real accounts on whatever instance `OMNIDISC_TEST_URL`
+/// points at, and a constant in a public repo is a working credential for every
+/// account they ever left behind. One random value per process keeps the run
+/// self-consistent without publishing a key.
+fn test_password() -> &'static str {
+    static PASSWORD: std::sync::OnceLock<String> = std::sync::OnceLock::new();
+    PASSWORD.get_or_init(|| {
+        let nanos = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_nanos())
+            .unwrap_or(0);
+        format!(
+            "od-{}-{:x}-{:x}",
+            std::process::id(),
+            nanos,
+            nanos.rotate_left(29)
+        )
+    })
+}
+
 struct Side {
     name: String,
     dir: PathBuf,
@@ -68,7 +90,7 @@ async fn register_side(base: &str, name_prefix: &str) -> Side {
     let dir = workspace(name_prefix);
     std::env::set_var(store::SESSION_DIR_ENV, &dir);
     let username = unique(name_prefix);
-    let user = auth::register(base, &username, "correct horse battery", None, None)
+    let user = auth::register(base, &username, test_password(), None, None)
         .await
         .expect("register");
     let token = store::load_token(base).expect("store").expect("token");

@@ -22,6 +22,7 @@ use hmac::{Hmac, Mac};
 use sha2::{Digest, Sha256};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
+use std::sync::{Mutex, OnceLock};
 
 pub const SERVICE: &str = "wtf.tonho.omniget.omnidisc";
 const SESSIONS_FILE: &str = "sessions.bin";
@@ -34,6 +35,55 @@ type Dec = cbc::Decryptor<aes::Aes256>;
 type HmacSha256 = Hmac<Sha256>;
 
 pub const SESSION_DIR_ENV: &str = "OMNIGET_OMNIDISC_SESSION_DIR";
+const KEYRING_ENV: &str = "OMNIGET_OMNIDISC_KEYRING";
+
+/// Whether to put secrets in the OS keyring at all.
+///
+/// A development build cannot hold a keychain grant: `tauri dev` produces an
+/// unsigned binary that is rebuilt on every change, and macOS binds "Always
+/// Allow" to the binary's identity, so the grant is void the next time you press
+/// run. The prompt then returns on every launch and every read, no matter how
+/// many times it is answered. Debug builds therefore use the encrypted file
+/// store, and only release builds — signed, and stable across launches — use the
+/// keyring. `OMNIGET_OMNIDISC_KEYRING=1` forces it on to exercise that path.
+fn use_keyring() -> bool {
+    match std::env::var(KEYRING_ENV) {
+        Ok(v) => matches!(v.trim(), "1" | "true" | "yes"),
+        Err(_) => !cfg!(debug_assertions),
+    }
+}
+
+/// Read-through cache so one launch asks the OS once per secret instead of once
+/// per call. Every gateway reconnect and every authenticated request would
+/// otherwise reach for the token again.
+fn cache() -> &'static Mutex<HashMap<String, Option<String>>> {
+    static CACHE: OnceLock<Mutex<HashMap<String, Option<String>>>> = OnceLock::new();
+    CACHE.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+/// The key carries the store the value came from, not just the account. The
+/// integration tests give each side its own `OMNIGET_OMNIDISC_SESSION_DIR` and
+/// switch between them in one process, so an account-only key would hand one
+/// side the other's device key.
+fn cache_key(account: &str) -> String {
+    match forced_dir() {
+        Some(dir) => format!("{}|{}", dir.display(), account),
+        None => format!("<default>|{account}"),
+    }
+}
+
+fn cache_put(account: &str, value: Option<String>) {
+    if let Ok(mut c) = cache().lock() {
+        c.insert(cache_key(account), value);
+    }
+}
+
+fn cache_get(account: &str) -> Option<Option<String>> {
+    cache()
+        .lock()
+        .ok()
+        .and_then(|c| c.get(&cache_key(account)).cloned())
+}
 
 fn forced_dir() -> Option<PathBuf> {
     std::env::var(SESSION_DIR_ENV)
@@ -63,6 +113,7 @@ pub fn secret_account(url: &str, kind: &str) -> String {
 }
 
 pub fn save_secret(account: &str, value: &str) -> Result<(), String> {
+    cache_put(account, Some(value.to_string()));
     if let Some(dir) = forced_dir() {
         return FileStore::new(dir).set(account, value);
     }
@@ -75,22 +126,31 @@ pub fn save_secret(account: &str, value: &str) -> Result<(), String> {
 }
 
 pub fn load_secret(account: &str) -> Result<Option<String>, String> {
+    if let Some(hit) = cache_get(account) {
+        return Ok(hit);
+    }
     if let Some(dir) = forced_dir() {
-        return FileStore::new(dir).get(account);
+        let found = FileStore::new(dir).get(account)?;
+        cache_put(account, found.clone());
+        return Ok(found);
     }
     match keyring_get(account) {
         Some(Ok(found)) => {
             if found.is_some() {
+                cache_put(account, found.clone());
                 return Ok(found);
             }
         }
         Some(Err(e)) => tracing::warn!("[omnidisc] keyring read failed, using file store: {}", e),
         None => {}
     }
-    FileStore::default_dir()?.get(account)
+    let found = FileStore::default_dir()?.get(account)?;
+    cache_put(account, found.clone());
+    Ok(found)
 }
 
 pub fn delete_secret(account: &str) -> Result<(), String> {
+    cache_put(account, None);
     if let Some(dir) = forced_dir() {
         return FileStore::new(dir).remove(account);
     }
@@ -119,11 +179,17 @@ fn keyring_entry(url: &str) -> Result<keyring::Entry, String> {
 
 #[cfg(any(target_os = "macos", windows))]
 fn keyring_set(url: &str, token: &str) -> Option<Result<(), String>> {
+    if !use_keyring() {
+        return None;
+    }
     Some(keyring_entry(url).and_then(|e| e.set_password(token).map_err(|e| e.to_string())))
 }
 
 #[cfg(any(target_os = "macos", windows))]
 fn keyring_get(url: &str) -> Option<Result<Option<String>, String>> {
+    if !use_keyring() {
+        return None;
+    }
     Some(keyring_entry(url).and_then(|e| match e.get_password() {
         Ok(t) => Ok(Some(t)),
         Err(keyring::Error::NoEntry) => Ok(None),
@@ -133,6 +199,9 @@ fn keyring_get(url: &str) -> Option<Result<Option<String>, String>> {
 
 #[cfg(any(target_os = "macos", windows))]
 fn keyring_delete(url: &str) -> Option<Result<(), String>> {
+    if !use_keyring() {
+        return None;
+    }
     Some(
         keyring_entry(url).and_then(|e| match e.delete_credential() {
             Ok(()) | Err(keyring::Error::NoEntry) => Ok(()),

@@ -16,6 +16,28 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 use tokio_tungstenite::tungstenite::Message;
 
+/// A password nobody can guess from the repository.
+///
+/// These tests register real accounts on whatever instance `OMNIDISC_TEST_URL`
+/// points at, and a constant in a public repo is a working credential for every
+/// account they ever left behind. One random value per process keeps the run
+/// self-consistent without publishing a key.
+fn test_password() -> &'static str {
+    static PASSWORD: std::sync::OnceLock<String> = std::sync::OnceLock::new();
+    PASSWORD.get_or_init(|| {
+        let nanos = std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_nanos())
+            .unwrap_or(0);
+        format!(
+            "od-{}-{:x}-{:x}",
+            std::process::id(),
+            nanos,
+            nanos.rotate_left(29)
+        )
+    })
+}
+
 fn unique(prefix: &str) -> String {
     let nanos = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -32,7 +54,7 @@ fn unique(prefix: &str) -> String {
 async fn register(http: &reqwest::Client, base: &str, name: &str) -> (String, String) {
     let res: Value = http
         .post(format!("{base}/api/auth/register"))
-        .json(&json!({ "username": name, "password": "correct horse battery" }))
+        .json(&json!({ "username": name, "password": test_password() }))
         .send()
         .await
         .expect("register request")
