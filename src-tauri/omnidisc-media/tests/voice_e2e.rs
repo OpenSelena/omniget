@@ -7,7 +7,9 @@
 //! `OMNIDISC_TEST_URL=https://72-62-136-3.sslip.io cargo test -p omnidisc-media --test voice_e2e -- --ignored --nocapture`.
 
 use futures_util::{SinkExt, StreamExt};
-use omnidisc_media::{AudioPrefs, ConnectOptions, LiveKitBackend, MediaEngine, RoomKey, VoiceState};
+use omnidisc_media::{
+    AudioPrefs, ConnectOptions, LiveKitBackend, MediaEngine, RoomKey, VoiceState,
+};
 use omnidisc_proto::gateway::VoiceServerUpdate;
 use serde_json::{json, Value};
 use std::sync::Arc;
@@ -19,7 +21,12 @@ fn unique(prefix: &str) -> String {
         .duration_since(std::time::UNIX_EPOCH)
         .map(|d| d.subsec_nanos())
         .unwrap_or(0);
-    format!("{}{}{}", prefix, std::process::id() % 10_000, nanos % 100_000)
+    format!(
+        "{}{}{}",
+        prefix,
+        std::process::id() % 10_000,
+        nanos % 100_000
+    )
 }
 
 async fn register(http: &reqwest::Client, base: &str, name: &str) -> (String, String) {
@@ -38,24 +45,33 @@ async fn register(http: &reqwest::Client, base: &str, name: &str) -> (String, St
 }
 
 struct Gateway {
-    ws: tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>,
+    ws: tokio_tungstenite::WebSocketStream<
+        tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>,
+    >,
 }
 
 impl Gateway {
     async fn connect(base: &str, token: &str) -> Self {
         let ws_url = format!("{}/gateway", base.replacen("http", "ws", 1));
-        let (mut ws, _) = tokio_tungstenite::connect_async(&ws_url).await.expect("gateway ws");
+        let (mut ws, _) = tokio_tungstenite::connect_async(&ws_url)
+            .await
+            .expect("gateway ws");
         let hello = ws.next().await.expect("hello").expect("hello frame");
         assert!(matches!(hello, Message::Text(_)));
         let identify = json!({ "op": 2, "d": { "token": token, "protocol_version": omnidisc_proto::PROTOCOL_VERSION, "compress": "none", "properties": { "os": "test", "client": "omnidisc-media-test", "version": "0" } } });
-        ws.send(Message::Text(identify.to_string().into())).await.expect("identify");
+        ws.send(Message::Text(identify.to_string().into()))
+            .await
+            .expect("identify");
         let mut g = Self { ws };
         g.wait_dispatch("READY").await;
         g
     }
 
     async fn send(&mut self, frame: Value) {
-        self.ws.send(Message::Text(frame.to_string().into())).await.expect("send frame");
+        self.ws
+            .send(Message::Text(frame.to_string().into()))
+            .await
+            .expect("send frame");
     }
 
     async fn wait_dispatch(&mut self, name: &str) -> Value {
@@ -68,7 +84,9 @@ impl Gateway {
                 .expect("gateway closed")
                 .expect("gateway frame");
             let Message::Text(text) = msg else { continue };
-            let Ok(v) = serde_json::from_str::<Value>(&text) else { continue };
+            let Ok(v) = serde_json::from_str::<Value>(&text) else {
+                continue;
+            };
             if v["op"] == 0 && v["t"] == name {
                 return v["d"].clone();
             }
@@ -99,7 +117,10 @@ struct Room {
 }
 
 async fn two_in_a_voice_channel(base: &str, label: &str) -> Room {
-    let http = reqwest::Client::builder().timeout(Duration::from_secs(15)).build().expect("http");
+    let http = reqwest::Client::builder()
+        .timeout(Duration::from_secs(15))
+        .build()
+        .expect("http");
     let (token_a, _id_a) = register(&http, base, &unique(&format!("{label}a"))).await;
     let (token_b, _id_b) = register(&http, base, &unique(&format!("{label}b"))).await;
 
@@ -143,14 +164,20 @@ async fn two_in_a_voice_channel(base: &str, label: &str) -> Room {
         .send()
         .await
         .expect("join invite");
-    assert!(joined.status().is_success(), "invite join failed: {}", joined.status());
+    assert!(
+        joined.status().is_success(),
+        "invite join failed: {}",
+        joined.status()
+    );
 
     let mut gw_a = Gateway::connect(base, &token_a).await;
     let mut gw_b = Gateway::connect(base, &token_b).await;
     gw_a.send(json!({ "op": 4, "d": { "guild_id": guild_id, "channel_id": channel_id, "self_mute": false, "self_deaf": false } })).await;
-    let vsu_a: VoiceServerUpdate = serde_json::from_value(gw_a.wait_dispatch("VOICE_SERVER_UPDATE").await).expect("vsu a");
+    let vsu_a: VoiceServerUpdate =
+        serde_json::from_value(gw_a.wait_dispatch("VOICE_SERVER_UPDATE").await).expect("vsu a");
     gw_b.send(json!({ "op": 4, "d": { "guild_id": guild_id, "channel_id": channel_id, "self_mute": false, "self_deaf": false } })).await;
-    let vsu_b: VoiceServerUpdate = serde_json::from_value(gw_b.wait_dispatch("VOICE_SERVER_UPDATE").await).expect("vsu b");
+    let vsu_b: VoiceServerUpdate =
+        serde_json::from_value(gw_b.wait_dispatch("VOICE_SERVER_UPDATE").await).expect("vsu b");
     assert_eq!(vsu_a.room, vsu_b.room);
     eprintln!(
         "[e2e/{label}] room {} endpoint {} ice_servers={}",
@@ -158,7 +185,14 @@ async fn two_in_a_voice_channel(base: &str, label: &str) -> Room {
         vsu_a.endpoint,
         vsu_a.ice_servers.len()
     );
-    Room { guild_id, channel_id, gw_a, gw_b, vsu_a, vsu_b }
+    Room {
+        guild_id,
+        channel_id,
+        gw_a,
+        gw_b,
+        vsu_a,
+        vsu_b,
+    }
 }
 
 /// A publishes a tone, B must hear it. `room_key` present means both sides run
@@ -170,22 +204,54 @@ async fn tone_reaches_the_other_side(base: &str, label: &str, room_key: Option<R
     let backend_b = Arc::new(LiveKitBackend::new().expect("backend b"));
     let engine_a = Arc::new(MediaEngine::new(backend_a.clone()));
     let engine_b = Arc::new(MediaEngine::new(backend_b.clone()));
-    let pump_a = { let e = engine_a.clone(); tokio::spawn(async move { e.pump().await }) };
-    let pump_b = { let e = engine_b.clone(); tokio::spawn(async move { e.pump().await }) };
+    let pump_a = {
+        let e = engine_a.clone();
+        tokio::spawn(async move { e.pump().await })
+    };
+    let pump_b = {
+        let e = engine_b.clone();
+        tokio::spawn(async move { e.pump().await })
+    };
     let mut notes_b = engine_b.subscribe();
 
-    let prefs = AudioPrefs { noise_suppression: false, ..Default::default() };
-    let options = ConnectOptions { room_key, relay_only: false };
-    let outcome_a = engine_a.join(&room.vsu_a, &prefs, &options).await.expect("A joins");
-    eprintln!("[e2e/{label}] A connected (mic_error={:?}, output_error={:?})", outcome_a.mic_error, outcome_a.output_error);
+    let prefs = AudioPrefs {
+        noise_suppression: false,
+        ..Default::default()
+    };
+    let options = ConnectOptions {
+        room_key,
+        relay_only: false,
+    };
+    let outcome_a = engine_a
+        .join(&room.vsu_a, &prefs, &options)
+        .await
+        .expect("A joins");
+    eprintln!(
+        "[e2e/{label}] A connected (mic_error={:?}, output_error={:?})",
+        outcome_a.mic_error, outcome_a.output_error
+    );
     assert_eq!(engine_a.state().await, VoiceState::Connected);
     backend_a.set_test_tone(Some(440.0));
-    let outcome_b = engine_b.join(&room.vsu_b, &prefs, &options).await.expect("B joins");
-    eprintln!("[e2e/{label}] B connected (mic_error={:?}, output_error={:?})", outcome_b.mic_error, outcome_b.output_error);
+    let outcome_b = engine_b
+        .join(&room.vsu_b, &prefs, &options)
+        .await
+        .expect("B joins");
+    eprintln!(
+        "[e2e/{label}] B connected (mic_error={:?}, output_error={:?})",
+        outcome_b.mic_error, outcome_b.output_error
+    );
     backend_b.set_test_tone(Some(440.0));
 
-    assert_eq!(engine_a.e2ee_epoch(), room_key.map(|k| k.epoch), "A's key ring state");
-    assert_eq!(engine_b.e2ee_epoch(), room_key.map(|k| k.epoch), "B's key ring state");
+    assert_eq!(
+        engine_a.e2ee_epoch(),
+        room_key.map(|k| k.epoch),
+        "A's key ring state"
+    );
+    assert_eq!(
+        engine_b.e2ee_epoch(),
+        room_key.map(|k| k.epoch),
+        "B's key ring state"
+    );
 
     let start = Instant::now();
     let deadline = start + Duration::from_secs(20);
@@ -203,26 +269,37 @@ async fn tone_reaches_the_other_side(base: &str, label: &str, room_key: Option<R
         start.elapsed(),
         tone * 100.0
     );
-    assert!(frames >= 50, "B received only {frames} non-silent audio frames within 20 s");
+    assert!(
+        frames >= 50,
+        "B received only {frames} non-silent audio frames within 20 s"
+    );
     // Frame count alone would also pass on the comfort noise Opus invents for
     // frames it could not decrypt; the tone is what proves A's audio arrived.
-    assert!(tone > 0.5, "only {:.0}% of B's received energy was A's 440 Hz tone", tone * 100.0);
+    assert!(
+        tone > 0.5,
+        "only {:.0}% of B's received energy was A's 440 Hz tone",
+        tone * 100.0
+    );
 
     let mut saw_speaking = false;
     let mut saw_participant = false;
     while let Ok(Ok(n)) = tokio::time::timeout(Duration::from_millis(50), notes_b.recv()).await {
         match n {
-            omnidisc_media::EngineNotification::Speaking { speaking: true, .. } => saw_speaking = true,
+            omnidisc_media::EngineNotification::Speaking { speaking: true, .. } => {
+                saw_speaking = true
+            }
             omnidisc_media::EngineNotification::ParticipantJoined { .. } => saw_participant = true,
             _ => {}
         }
     }
-    eprintln!("[e2e/{label}] B events: speaking={saw_speaking} participant_joined={saw_participant}");
+    eprintln!(
+        "[e2e/{label}] B events: speaking={saw_speaking} participant_joined={saw_participant}"
+    );
 
-    if room_key.is_some() {
+    if let Some(key) = room_key {
         // A commit on the group bumps the epoch; the ring index has to follow it
         // without dropping the call.
-        let next = RoomKey::new(room_key.expect("key").epoch + 1, [0x5A; 32]);
+        let next = RoomKey::new(key.epoch + 1, [0x5A; 32]);
         engine_a.set_room_key(next).await.expect("A rotates");
         engine_b.set_room_key(next).await.expect("B rotates");
         assert_eq!(engine_a.e2ee_epoch(), Some(next.epoch));
@@ -230,22 +307,35 @@ async fn tone_reaches_the_other_side(base: &str, label: &str, room_key: Option<R
         tokio::time::sleep(Duration::from_secs(3)).await;
         let after = backend_b.remote_nonsilent_frames();
         eprintln!("[e2e/{label}] frames across the epoch bump: {before} -> {after}");
-        assert!(after > before, "audio stopped after the key rotated ({before} -> {after})");
+        assert!(
+            after > before,
+            "audio stopped after the key rotated ({before} -> {after})"
+        );
     }
 
     let _ = engine_b.stats().await.expect("stats b (first sample)");
     tokio::time::sleep(Duration::from_secs(5)).await;
     let stats_b = engine_b.stats().await.expect("stats b");
     eprintln!("[e2e/{label}] B stats: {:?}", stats_b);
-    eprintln!("[e2e/{label}] process cpu (ps lifetime avg) = {}%", cpu_percent());
-    assert!(stats_b.bitrate_in_kbps > 0.0, "B reports no inbound bitrate");
+    eprintln!(
+        "[e2e/{label}] process cpu (ps lifetime avg) = {}%",
+        cpu_percent()
+    );
+    assert!(
+        stats_b.bitrate_in_kbps > 0.0,
+        "B reports no inbound bitrate"
+    );
 
     engine_a.leave().await.expect("A leaves");
     engine_b.leave().await.expect("B leaves");
     assert_eq!(engine_b.state().await, VoiceState::Idle);
     let guild_id = room.guild_id.clone();
-    room.gw_a.send(json!({ "op": 4, "d": { "guild_id": guild_id, "channel_id": null } })).await;
-    room.gw_b.send(json!({ "op": 4, "d": { "guild_id": guild_id, "channel_id": null } })).await;
+    room.gw_a
+        .send(json!({ "op": 4, "d": { "guild_id": guild_id, "channel_id": null } }))
+        .await;
+    room.gw_b
+        .send(json!({ "op": 4, "d": { "guild_id": guild_id, "channel_id": null } }))
+        .await;
     let _ = room.channel_id;
     pump_a.abort();
     pump_b.abort();
@@ -288,17 +378,40 @@ async fn voice_with_the_wrong_key_hears_nothing() {
     let backend_b = Arc::new(LiveKitBackend::new().expect("backend b"));
     let engine_a = Arc::new(MediaEngine::new(backend_a.clone()));
     let engine_b = Arc::new(MediaEngine::new(backend_b.clone()));
-    let pump_a = { let e = engine_a.clone(); tokio::spawn(async move { e.pump().await }) };
-    let pump_b = { let e = engine_b.clone(); tokio::spawn(async move { e.pump().await }) };
+    let pump_a = {
+        let e = engine_a.clone();
+        tokio::spawn(async move { e.pump().await })
+    };
+    let pump_b = {
+        let e = engine_b.clone();
+        tokio::spawn(async move { e.pump().await })
+    };
 
-    let prefs = AudioPrefs { noise_suppression: false, ..Default::default() };
+    let prefs = AudioPrefs {
+        noise_suppression: false,
+        ..Default::default()
+    };
     engine_a
-        .join(&room.vsu_a, &prefs, &ConnectOptions { room_key: Some(RoomKey::new(1, [0x11; 32])), relay_only: false })
+        .join(
+            &room.vsu_a,
+            &prefs,
+            &ConnectOptions {
+                room_key: Some(RoomKey::new(1, [0x11; 32])),
+                relay_only: false,
+            },
+        )
         .await
         .expect("A joins");
     backend_a.set_test_tone(Some(440.0));
     engine_b
-        .join(&room.vsu_b, &prefs, &ConnectOptions { room_key: Some(RoomKey::new(1, [0x22; 32])), relay_only: false })
+        .join(
+            &room.vsu_b,
+            &prefs,
+            &ConnectOptions {
+                room_key: Some(RoomKey::new(1, [0x22; 32])),
+                relay_only: false,
+            },
+        )
         .await
         .expect("B joins");
 
@@ -311,14 +424,25 @@ async fn voice_with_the_wrong_key_hears_nothing() {
     );
     // A handful of non-silent frames is Opus concealment noise for packets the
     // cryptor rejected, not audio: what must be absent is the tone itself.
-    assert!(tone < 0.1, "B recovered A's tone with the wrong key ({:.0}% of the energy at 440 Hz)", tone * 100.0);
-    assert!(frames < 200, "B decoded {frames} frames it should not have been able to decrypt");
+    assert!(
+        tone < 0.1,
+        "B recovered A's tone with the wrong key ({:.0}% of the energy at 440 Hz)",
+        tone * 100.0
+    );
+    assert!(
+        frames < 200,
+        "B decoded {frames} frames it should not have been able to decrypt"
+    );
 
     engine_a.leave().await.expect("A leaves");
     engine_b.leave().await.expect("B leaves");
     let guild_id = room.guild_id.clone();
-    room.gw_a.send(json!({ "op": 4, "d": { "guild_id": guild_id, "channel_id": null } })).await;
-    room.gw_b.send(json!({ "op": 4, "d": { "guild_id": guild_id, "channel_id": null } })).await;
+    room.gw_a
+        .send(json!({ "op": 4, "d": { "guild_id": guild_id, "channel_id": null } }))
+        .await;
+    room.gw_b
+        .send(json!({ "op": 4, "d": { "guild_id": guild_id, "channel_id": null } }))
+        .await;
     pump_a.abort();
     pump_b.abort();
 }

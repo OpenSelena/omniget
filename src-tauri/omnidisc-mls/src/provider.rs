@@ -13,11 +13,17 @@ pub struct Provider {
 
 impl Provider {
     pub fn fresh() -> Self {
-        Self { crypto: RustCrypto::default(), storage: MemoryStorage::default() }
+        Self {
+            crypto: RustCrypto::default(),
+            storage: MemoryStorage::default(),
+        }
     }
 
     pub fn from_blob(blob: &[u8]) -> Result<Self> {
-        Ok(Self { crypto: RustCrypto::default(), storage: storage_from_blob(blob)? })
+        Ok(Self {
+            crypto: RustCrypto::default(),
+            storage: storage_from_blob(blob)?,
+        })
     }
 
     pub fn to_blob(&self) -> Vec<u8> {
@@ -89,7 +95,9 @@ fn storage_from_blob(mut blob: &[u8]) -> Result<MemoryStorage> {
         let v = take(&mut blob, vl)?;
         map.insert(k, v);
     }
-    Ok(MemoryStorage { values: std::sync::RwLock::new(map) })
+    Ok(MemoryStorage {
+        values: std::sync::RwLock::new(map),
+    })
 }
 
 #[cfg(test)]
@@ -107,7 +115,10 @@ mod tests {
         let blob = provider.to_blob();
         let restored = Provider::from_blob(&blob).expect("restore");
         let values = restored.storage.values.read().expect("lock");
-        assert_eq!(values.get(b"a".as_slice()).map(Vec::as_slice), Some(b"one".as_slice()));
+        assert_eq!(
+            values.get(b"a".as_slice()).map(Vec::as_slice),
+            Some(b"one".as_slice())
+        );
         assert_eq!(values.len(), 2);
         assert!(Provider::from_blob(&blob[..blob.len() - 1]).is_err());
     }

@@ -156,7 +156,10 @@ mod tests {
     fn bucket_matches_timestamp_division() {
         let g = SnowflakeGenerator::new(0);
         let id = g.next();
-        assert_eq!(id.bucket(), Snowflake::bucket_for_timestamp_ms(id.timestamp_ms()));
+        assert_eq!(
+            id.bucket(),
+            Snowflake::bucket_for_timestamp_ms(id.timestamp_ms())
+        );
         assert!(Snowflake::lower_bound_for_bucket(id.bucket()) <= id);
         assert!(Snowflake::lower_bound_for_bucket(id.bucket() + 1) > id);
     }

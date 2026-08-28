@@ -41,7 +41,10 @@ pub struct WgpuViewer {
     rendered: Arc<std::sync::atomic::AtomicU64>,
 }
 
-fn build_pipeline(device: &wgpu::Device, format: wgpu::TextureFormat) -> (wgpu::RenderPipeline, wgpu::BindGroupLayout) {
+fn build_pipeline(
+    device: &wgpu::Device,
+    format: wgpu::TextureFormat,
+) -> (wgpu::RenderPipeline, wgpu::BindGroupLayout) {
     let shader = device.create_shader_module(wgpu::ShaderModuleDescriptor {
         label: Some("omnidisc-viewer"),
         source: wgpu::ShaderSource::Wgsl(include_str!("shader.wgsl").into()),
@@ -62,7 +65,11 @@ fn build_pipeline(device: &wgpu::Device, format: wgpu::TextureFormat) -> (wgpu::
             wgpu::BindGroupLayoutEntry {
                 binding: 0,
                 visibility: wgpu::ShaderStages::FRAGMENT,
-                ty: wgpu::BindingType::Buffer { ty: wgpu::BufferBindingType::Uniform, has_dynamic_offset: false, min_binding_size: None },
+                ty: wgpu::BindingType::Buffer {
+                    ty: wgpu::BufferBindingType::Uniform,
+                    has_dynamic_offset: false,
+                    min_binding_size: None,
+                },
                 count: None,
             },
             wgpu::BindGroupLayoutEntry {
@@ -84,7 +91,12 @@ fn build_pipeline(device: &wgpu::Device, format: wgpu::TextureFormat) -> (wgpu::
     let pipeline = device.create_render_pipeline(&wgpu::RenderPipelineDescriptor {
         label: Some("omnidisc-viewer"),
         layout: Some(&layout),
-        vertex: wgpu::VertexState { module: &shader, entry_point: Some("vs_main"), compilation_options: Default::default(), buffers: &[] },
+        vertex: wgpu::VertexState {
+            module: &shader,
+            entry_point: Some("vs_main"),
+            compilation_options: Default::default(),
+            buffers: &[],
+        },
         primitive: wgpu::PrimitiveState::default(),
         depth_stencil: None,
         multisample: wgpu::MultisampleState::default(),
@@ -92,7 +104,11 @@ fn build_pipeline(device: &wgpu::Device, format: wgpu::TextureFormat) -> (wgpu::
             module: &shader,
             entry_point: Some("fs_main"),
             compilation_options: Default::default(),
-            targets: &[Some(wgpu::ColorTargetState { format, blend: Some(wgpu::BlendState::REPLACE), write_mask: wgpu::ColorWrites::ALL })],
+            targets: &[Some(wgpu::ColorTargetState {
+                format,
+                blend: Some(wgpu::BlendState::REPLACE),
+                write_mask: wgpu::ColorWrites::ALL,
+            })],
         }),
         multiview_mask: None,
         cache: None,
@@ -101,7 +117,12 @@ fn build_pipeline(device: &wgpu::Device, format: wgpu::TextureFormat) -> (wgpu::
 }
 
 impl WgpuViewer {
-    pub fn from_surface(instance: wgpu::Instance, surface: wgpu::Surface<'static>, width: u32, height: u32) -> Result<Arc<Self>, StreamError> {
+    pub fn from_surface(
+        instance: wgpu::Instance,
+        surface: wgpu::Surface<'static>,
+        width: u32,
+        height: u32,
+    ) -> Result<Arc<Self>, StreamError> {
         let adapter = pollster::block_on(instance.request_adapter(&wgpu::RequestAdapterOptions {
             power_preference: wgpu::PowerPreference::HighPerformance,
             compatible_surface: Some(&surface),
@@ -109,10 +130,18 @@ impl WgpuViewer {
             apply_limit_buckets: false,
         }))
         .map_err(|e| StreamError::Viewer(format!("no gpu adapter: {e}")))?;
-        let (device, queue) = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor { label: Some("omnidisc-viewer"), ..Default::default() }))
-            .map_err(|e| StreamError::Viewer(format!("no gpu device: {e}")))?;
+        let (device, queue) = pollster::block_on(adapter.request_device(&wgpu::DeviceDescriptor {
+            label: Some("omnidisc-viewer"),
+            ..Default::default()
+        }))
+        .map_err(|e| StreamError::Viewer(format!("no gpu device: {e}")))?;
         let caps = surface.get_capabilities(&adapter);
-        let format = caps.formats.iter().copied().find(|f| !f.is_srgb()).unwrap_or(caps.formats[0]);
+        let format = caps
+            .formats
+            .iter()
+            .copied()
+            .find(|f| !f.is_srgb())
+            .unwrap_or(caps.formats[0]);
         let config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format,
@@ -194,7 +223,11 @@ impl WgpuViewer {
         let make = |tw: u32, th: u32| {
             gpu.device.create_texture(&wgpu::TextureDescriptor {
                 label: Some("omnidisc-plane"),
-                size: wgpu::Extent3d { width: tw.max(1), height: th.max(1), depth_or_array_layers: 1 },
+                size: wgpu::Extent3d {
+                    width: tw.max(1),
+                    height: th.max(1),
+                    depth_or_array_layers: 1,
+                },
                 mip_level_count: 1,
                 sample_count: 1,
                 dimension: wgpu::TextureDimension::D2,
@@ -218,8 +251,8 @@ impl WgpuViewer {
             Ok(g) => g,
             Err(_) => return false,
         };
-        let surf_w = (viewport.surface_width.max(1)) as u32;
-        let surf_h = (viewport.surface_height.max(1)) as u32;
+        let surf_w = viewport.surface_width.max(1);
+        let surf_h = viewport.surface_height.max(1);
         if gpu.config.width != surf_w || gpu.config.height != surf_h {
             gpu.config.width = surf_w;
             gpu.config.height = surf_h;
@@ -232,14 +265,28 @@ impl WgpuViewer {
             if let Some(p) = slot.take() {
                 Self::ensure_textures(&mut gpu, p.width, p.height);
                 if let Some(tex) = &gpu.textures {
-                    let write = |q: &wgpu::Queue, t: &wgpu::Texture, data: &[u8], w: u32, h: u32| {
-                        q.write_texture(
-                            wgpu::TexelCopyTextureInfo { texture: t, mip_level: 0, origin: wgpu::Origin3d::ZERO, aspect: wgpu::TextureAspect::All },
-                            data,
-                            wgpu::TexelCopyBufferLayout { offset: 0, bytes_per_row: Some(w), rows_per_image: Some(h) },
-                            wgpu::Extent3d { width: w, height: h, depth_or_array_layers: 1 },
-                        );
-                    };
+                    let write =
+                        |q: &wgpu::Queue, t: &wgpu::Texture, data: &[u8], w: u32, h: u32| {
+                            q.write_texture(
+                                wgpu::TexelCopyTextureInfo {
+                                    texture: t,
+                                    mip_level: 0,
+                                    origin: wgpu::Origin3d::ZERO,
+                                    aspect: wgpu::TextureAspect::All,
+                                },
+                                data,
+                                wgpu::TexelCopyBufferLayout {
+                                    offset: 0,
+                                    bytes_per_row: Some(w),
+                                    rows_per_image: Some(h),
+                                },
+                                wgpu::Extent3d {
+                                    width: w,
+                                    height: h,
+                                    depth_or_array_layers: 1,
+                                },
+                            );
+                        };
                     write(&gpu.queue, &tex[0], &p.y, p.width, p.height);
                     write(&gpu.queue, &tex[1], &p.u, p.width / 2, p.height / 2);
                     write(&gpu.queue, &tex[2], &p.v, p.width / 2, p.height / 2);
@@ -263,14 +310,19 @@ impl WgpuViewer {
         let rh = viewport.height as f32 * viewport.scale as f32;
         let src_aspect = vw as f32 / vh.max(1) as f32;
         let dst_aspect = rw / rh.max(1.0);
-        let (fw, fh) = if src_aspect > dst_aspect { (rw, rw / src_aspect) } else { (rh * src_aspect, rh) };
+        let (fw, fh) = if src_aspect > dst_aspect {
+            (rw, rw / src_aspect)
+        } else {
+            (rh * src_aspect, rh)
+        };
         let fx = rx + (rw - fw) / 2.0;
         let fy = ry + (rh - fh) / 2.0;
         let vid = [fx, fy, fx + fw, fy + fh];
 
         let bg = viewport.background;
         let mut ub = [0u8; 80];
-        let write_f = |ub: &mut [u8], off: usize, v: f32| ub[off..off + 4].copy_from_slice(&v.to_ne_bytes());
+        let write_f =
+            |ub: &mut [u8], off: usize, v: f32| ub[off..off + 4].copy_from_slice(&v.to_ne_bytes());
         write_f(&mut ub, 0, gpu.config.width as f32);
         write_f(&mut ub, 4, gpu.config.height as f32);
         write_f(&mut ub, 16, rx);
@@ -289,20 +341,39 @@ impl WgpuViewer {
         gpu.queue.write_buffer(&gpu.uniform, 0, &ub);
 
         let tex = gpu.textures.as_ref().unwrap();
-        let views: Vec<wgpu::TextureView> = tex.iter().map(|t| t.create_view(&Default::default())).collect();
+        let views: Vec<wgpu::TextureView> = tex
+            .iter()
+            .map(|t| t.create_view(&Default::default()))
+            .collect();
         let bind = gpu.device.create_bind_group(&wgpu::BindGroupDescriptor {
             label: Some("omnidisc-viewer"),
             layout: &gpu.bgl,
             entries: &[
-                wgpu::BindGroupEntry { binding: 0, resource: gpu.uniform.as_entire_binding() },
-                wgpu::BindGroupEntry { binding: 1, resource: wgpu::BindingResource::Sampler(&gpu.sampler) },
-                wgpu::BindGroupEntry { binding: 2, resource: wgpu::BindingResource::TextureView(&views[0]) },
-                wgpu::BindGroupEntry { binding: 3, resource: wgpu::BindingResource::TextureView(&views[1]) },
-                wgpu::BindGroupEntry { binding: 4, resource: wgpu::BindingResource::TextureView(&views[2]) },
+                wgpu::BindGroupEntry {
+                    binding: 0,
+                    resource: gpu.uniform.as_entire_binding(),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 1,
+                    resource: wgpu::BindingResource::Sampler(&gpu.sampler),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 2,
+                    resource: wgpu::BindingResource::TextureView(&views[0]),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 3,
+                    resource: wgpu::BindingResource::TextureView(&views[1]),
+                },
+                wgpu::BindGroupEntry {
+                    binding: 4,
+                    resource: wgpu::BindingResource::TextureView(&views[2]),
+                },
             ],
         });
         let surface_tex = match gpu.surface.get_current_texture() {
-            wgpu::CurrentSurfaceTexture::Success(t) | wgpu::CurrentSurfaceTexture::Suboptimal(t) => t,
+            wgpu::CurrentSurfaceTexture::Success(t)
+            | wgpu::CurrentSurfaceTexture::Suboptimal(t) => t,
             wgpu::CurrentSurfaceTexture::Outdated | wgpu::CurrentSurfaceTexture::Lost => {
                 let (device, config) = (&gpu.device, gpu.config.clone());
                 gpu.surface.configure(device, &config);
@@ -311,7 +382,11 @@ impl WgpuViewer {
             _ => return false,
         };
         let view = surface_tex.texture.create_view(&Default::default());
-        let mut enc = gpu.device.create_command_encoder(&wgpu::CommandEncoderDescriptor { label: Some("omnidisc-viewer") });
+        let mut enc = gpu
+            .device
+            .create_command_encoder(&wgpu::CommandEncoderDescriptor {
+                label: Some("omnidisc-viewer"),
+            });
         {
             let mut rp = enc.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("omnidisc-viewer"),
@@ -319,7 +394,10 @@ impl WgpuViewer {
                     view: &view,
                     resolve_target: None,
                     depth_slice: None,
-                    ops: wgpu::Operations { load: wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT), store: wgpu::StoreOp::Store },
+                    ops: wgpu::Operations {
+                        load: wgpu::LoadOp::Clear(wgpu::Color::TRANSPARENT),
+                        store: wgpu::StoreOp::Store,
+                    },
                 })],
                 depth_stencil_attachment: None,
                 timestamp_writes: None,

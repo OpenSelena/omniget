@@ -7,7 +7,11 @@ use std::sync::Arc;
 pub struct VideoEncoder;
 
 impl VideoEncoder {
-    pub fn new(_cfg: EncoderConfig, _source: NativeVideoSource, _counters: Arc<EncoderCounters>) -> Result<Self, StreamError> {
+    pub fn new(
+        _cfg: EncoderConfig,
+        _source: NativeVideoSource,
+        _counters: Arc<EncoderCounters>,
+    ) -> Result<Self, StreamError> {
         Err(StreamError::Unsupported)
     }
 

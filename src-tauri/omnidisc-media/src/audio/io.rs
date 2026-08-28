@@ -83,9 +83,15 @@ pub fn classify_loss(still_listed: bool, probe: &AudioIoError) -> DeviceLoss {
 pub type FaultSink = Arc<dyn Fn(StreamFault, String) + Send + Sync>;
 
 enum IoCmd {
-    StartInput { device: Option<String>, reply: mpsc::Sender<Result<(), AudioIoError>> },
+    StartInput {
+        device: Option<String>,
+        reply: mpsc::Sender<Result<(), AudioIoError>>,
+    },
     StopInput,
-    StartOutput { device: Option<String>, reply: mpsc::Sender<Result<(), AudioIoError>> },
+    StartOutput {
+        device: Option<String>,
+        reply: mpsc::Sender<Result<(), AudioIoError>>,
+    },
     StopOutput,
     Shutdown,
 }
@@ -96,16 +102,26 @@ pub struct AudioIo {
 }
 
 impl AudioIo {
-    pub fn spawn(feeder: Arc<Feeder>, mixer: Arc<Mixer>, faults: FaultSink) -> Result<Self, String> {
+    pub fn spawn(
+        feeder: Arc<Feeder>,
+        mixer: Arc<Mixer>,
+        faults: FaultSink,
+    ) -> Result<Self, String> {
         let (tx, rx) = mpsc::channel();
         let thread = std::thread::Builder::new()
             .name("omnidisc-audio-io".into())
             .spawn(move || run(rx, feeder, mixer, faults))
             .map_err(|e| format!("could not start the audio thread: {e}"))?;
-        Ok(Self { tx, thread: Some(thread) })
+        Ok(Self {
+            tx,
+            thread: Some(thread),
+        })
     }
 
-    fn ask(&self, make: impl FnOnce(mpsc::Sender<Result<(), AudioIoError>>) -> IoCmd) -> Result<(), AudioIoError> {
+    fn ask(
+        &self,
+        make: impl FnOnce(mpsc::Sender<Result<(), AudioIoError>>) -> IoCmd,
+    ) -> Result<(), AudioIoError> {
         let (reply_tx, reply_rx) = mpsc::channel();
         self.tx
             .send(make(reply_tx))
@@ -175,13 +191,18 @@ fn run(rx: mpsc::Receiver<IoCmd>, feeder: Arc<Feeder>, mixer: Arc<Mixer>, faults
     drop(output);
 }
 
-fn build_input(device_id: Option<&str>, feeder: &Feeder, faults: FaultSink) -> Result<cpal::Stream, AudioIoError> {
+fn build_input(
+    device_id: Option<&str>,
+    feeder: &Feeder,
+    faults: FaultSink,
+) -> Result<cpal::Stream, AudioIoError> {
     let device = devices::find(DeviceKind::Input, device_id).ok_or(AudioIoError::NoDevice)?;
     let supported = device.default_input_config().map_err(classify)?;
     let config: StreamConfig = supported.config();
     let channels = config.channels.max(1) as usize;
     let sample_rate = config.sample_rate;
-    let (producer, consumer) = rtrb::RingBuffer::<f32>::new(sample_rate as usize * INPUT_RING_SECONDS);
+    let (producer, consumer) =
+        rtrb::RingBuffer::<f32>::new(sample_rate as usize * INPUT_RING_SECONDS);
     let err_cb = move |e: cpal::Error| {
         faults(StreamFault::Input, e.to_string());
     };
@@ -214,7 +235,10 @@ fn build_input(device_id: Option<&str>, feeder: &Feeder, faults: FaultSink) -> R
     }
     .map_err(classify)?;
     stream.play().map_err(classify)?;
-    feeder.send(FeederMsg::Input { consumer, sample_rate });
+    feeder.send(FeederMsg::Input {
+        consumer,
+        sample_rate,
+    });
     Ok(stream)
 }
 
@@ -240,7 +264,11 @@ fn input_callback<T: Copy + Send + 'static>(
     }
 }
 
-fn build_output(device_id: Option<&str>, mixer: Arc<Mixer>, faults: FaultSink) -> Result<cpal::Stream, AudioIoError> {
+fn build_output(
+    device_id: Option<&str>,
+    mixer: Arc<Mixer>,
+    faults: FaultSink,
+) -> Result<cpal::Stream, AudioIoError> {
     let device = devices::find(DeviceKind::Output, device_id).ok_or(AudioIoError::NoDevice)?;
     let supported = device.default_output_config().map_err(classify)?;
     let config: StreamConfig = supported.config();
@@ -264,13 +292,17 @@ fn build_output(device_id: Option<&str>, mixer: Arc<Mixer>, faults: FaultSink) -
         ),
         SampleFormat::I32 => device.build_output_stream(
             config,
-            output_callback::<i32>(mixer, sample_rate, channels, |s| (s * 2_147_483_647.0) as i32),
+            output_callback::<i32>(mixer, sample_rate, channels, |s| {
+                (s * 2_147_483_647.0) as i32
+            }),
             err_cb,
             None,
         ),
         SampleFormat::U16 => device.build_output_stream(
             config,
-            output_callback::<u16>(mixer, sample_rate, channels, |s| ((s + 1.0) * 32_767.5) as u16),
+            output_callback::<u16>(mixer, sample_rate, channels, |s| {
+                ((s + 1.0) * 32_767.5) as u16
+            }),
             err_cb,
             None,
         ),
@@ -319,13 +351,25 @@ mod tests {
 
     #[test]
     fn a_device_the_os_no_longer_lists_counts_as_unplugged() {
-        assert_eq!(classify_loss(false, &AudioIoError::Other("gone".into())), DeviceLoss::Unplugged);
-        assert_eq!(classify_loss(true, &AudioIoError::NoDevice), DeviceLoss::Unplugged);
+        assert_eq!(
+            classify_loss(false, &AudioIoError::Other("gone".into())),
+            DeviceLoss::Unplugged
+        );
+        assert_eq!(
+            classify_loss(true, &AudioIoError::NoDevice),
+            DeviceLoss::Unplugged
+        );
     }
 
     #[test]
     fn a_listed_device_that_will_not_open_is_a_plain_failure() {
-        assert_eq!(classify_loss(true, &AudioIoError::Other("boom".into())), DeviceLoss::Failed);
-        assert_eq!(classify_loss(true, &AudioIoError::DeviceBusy), DeviceLoss::Busy);
+        assert_eq!(
+            classify_loss(true, &AudioIoError::Other("boom".into())),
+            DeviceLoss::Failed
+        );
+        assert_eq!(
+            classify_loss(true, &AudioIoError::DeviceBusy),
+            DeviceLoss::Busy
+        );
     }
 }

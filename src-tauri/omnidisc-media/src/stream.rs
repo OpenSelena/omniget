@@ -116,7 +116,14 @@ pub fn resolve_geometry(native_w: u32, native_h: u32, requested_height: Option<u
     ((target_w.max(2)) & !1, (target_h.max(2)) & !1)
 }
 
-pub fn resolve_bitrate(policy: &StreamingPolicy, width: u32, height: u32, fps: u16, requested_height: Option<u16>, custom_kbps: Option<u32>) -> u32 {
+pub fn resolve_bitrate(
+    policy: &StreamingPolicy,
+    width: u32,
+    height: u32,
+    fps: u16,
+    requested_height: Option<u16>,
+    custom_kbps: Option<u32>,
+) -> u32 {
     if let Some(custom) = custom_kbps {
         return policy.clamp_custom(custom);
     }
@@ -257,8 +264,17 @@ mod tests {
     #[test]
     fn bitrate_uses_matrix_for_presets_and_native_otherwise() {
         let p = StreamingPolicy::default();
-        assert_eq!(resolve_bitrate(&p, 1920, 1080, 60, Some(1080), None), p.kbps_for(1080, 60));
-        assert_eq!(resolve_bitrate(&p, 3440, 1440, 60, None, None), p.native_kbps(3440, 1440, 60));
-        assert_eq!(resolve_bitrate(&p, 1920, 1080, 60, Some(1080), Some(7_777)), p.clamp_custom(7_777));
+        assert_eq!(
+            resolve_bitrate(&p, 1920, 1080, 60, Some(1080), None),
+            p.kbps_for(1080, 60)
+        );
+        assert_eq!(
+            resolve_bitrate(&p, 3440, 1440, 60, None, None),
+            p.native_kbps(3440, 1440, 60)
+        );
+        assert_eq!(
+            resolve_bitrate(&p, 1920, 1080, 60, Some(1080), Some(7_777)),
+            p.clamp_custom(7_777)
+        );
     }
 }

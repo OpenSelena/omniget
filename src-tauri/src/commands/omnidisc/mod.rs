@@ -42,7 +42,9 @@ pub struct ConnectResult {
 /// Loopback traffic never leaves the machine, so `http://localhost` is not the
 /// thing this flag is warning about.
 pub fn is_insecure_instance_url(base: &str) -> bool {
-    let Ok(parsed) = url::Url::parse(base) else { return true };
+    let Ok(parsed) = url::Url::parse(base) else {
+        return true;
+    };
     if parsed.scheme() != "http" {
         return false;
     }
@@ -118,14 +120,25 @@ pub async fn omnidisc_connect(url: String, invite: Option<String>) -> Result<Val
             Err(_) => (false, body),
         };
 
-    let invite = invite.map(|i| i.trim().to_string()).filter(|i| !i.is_empty());
+    let invite = invite
+        .map(|i| i.trim().to_string())
+        .filter(|i| !i.is_empty());
 
     let insecure = is_insecure_instance_url(&base);
     if insecure {
-        tracing::warn!("[omnidisc] {} is plain http; the session token travels in the clear", base);
+        tracing::warn!(
+            "[omnidisc] {} is plain http; the session token travels in the clear",
+            base
+        );
     }
-    serde_json::to_value(ConnectResult { url: base, recognized, insecure, instance, invite })
-        .map_err(|e| format!("OmniDisc: could not serialize response: {}", e))
+    serde_json::to_value(ConnectResult {
+        url: base,
+        recognized,
+        insecure,
+        instance,
+        invite,
+    })
+    .map_err(|e| format!("OmniDisc: could not serialize response: {}", e))
 }
 
 #[cfg(test)]
@@ -134,7 +147,10 @@ mod tests {
 
     #[test]
     fn accepts_plain_host_and_adds_https() {
-        assert_eq!(normalize_instance_url("chat.example.org").unwrap(), "https://chat.example.org");
+        assert_eq!(
+            normalize_instance_url("chat.example.org").unwrap(),
+            "https://chat.example.org"
+        );
     }
 
     #[test]

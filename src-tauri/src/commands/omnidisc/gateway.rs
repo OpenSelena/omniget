@@ -54,13 +54,16 @@ impl GatewaySink for TauriSink {
     fn dispatch(&self, url: &str, t: &str, d: Value) {
         super::voice::on_dispatch(&self.0, url, t, &d);
         super::mls::on_dispatch(&self.0, url, t, &d);
-        let _ = self.0.emit(EVENT_DISPATCH, json!({ "url": url, "t": t, "d": d }));
+        let _ = self
+            .0
+            .emit(EVENT_DISPATCH, json!({ "url": url, "t": t, "d": d }));
     }
 
     fn status(&self, url: &str, status: Status, error: Option<&str>) {
-        let _ = self
-            .0
-            .emit(EVENT_STATUS, json!({ "url": url, "status": status.as_str(), "error": error }));
+        let _ = self.0.emit(
+            EVENT_STATUS,
+            json!({ "url": url, "status": status.as_str(), "error": error }),
+        );
     }
 }
 
@@ -105,7 +108,11 @@ impl Shared {
             .lock()
             .map(|s| s.clone())
             .unwrap_or((Status::Disconnected, None));
-        StatusSnapshot { url: self.url.clone(), status, error }
+        StatusSnapshot {
+            url: self.url.clone(),
+            status,
+            error,
+        }
     }
 
     fn is_finished(&self) -> bool {
@@ -232,7 +239,9 @@ async fn run_with_shared(
             }
         }
     }
-    shared.finished.store(true, std::sync::atomic::Ordering::Release);
+    shared
+        .finished
+        .store(true, std::sync::atomic::Ordering::Release);
 }
 
 async fn connect_once(
@@ -268,9 +277,19 @@ async fn connect_once(
                 .and_then(|d| d.get("heartbeat_interval"))
                 .and_then(Value::as_u64)
                 .unwrap_or(HEARTBEAT_INTERVAL_MS),
-            _ => return Outcome::Retry { resume: true, error: Some(ERR_PROTOCOL.to_string()) },
+            _ => {
+                return Outcome::Retry {
+                    resume: true,
+                    error: Some(ERR_PROTOCOL.to_string()),
+                }
+            }
         },
-        _ => return Outcome::Retry { resume: true, error: Some(ERR_UNREACHABLE.to_string()) },
+        _ => {
+            return Outcome::Retry {
+                resume: true,
+                error: Some(ERR_UNREACHABLE.to_string()),
+            }
+        }
     };
 
     let first = match &state.session_id {
@@ -281,7 +300,10 @@ async fn connect_once(
         _ => frame_text(Opcode::Identify, identify_payload(token)),
     };
     if tx.send(Message::Text(first.into())).await.is_err() {
-        return Outcome::Retry { resume: true, error: Some(ERR_UNREACHABLE.to_string()) };
+        return Outcome::Retry {
+            resume: true,
+            error: Some(ERR_UNREACHABLE.to_string()),
+        };
     }
 
     let mut heartbeat = tokio::time::interval(Duration::from_millis(heartbeat_ms.max(1000)));
@@ -375,11 +397,18 @@ fn close_outcome(code: u16) -> Outcome {
     match code {
         4004 => Outcome::Stop(ERR_UNAUTHORIZED.to_string()),
         4012 => Outcome::Stop(ERR_PROTOCOL.to_string()),
-        4001 | 4002 | 4003 | 4005 | 4007 | 4009 => {
-            Outcome::Retry { resume: false, error: Some(format!("gateway closed {}", code)) }
-        }
-        4000 => Outcome::Retry { resume: false, error: None },
-        _ => Outcome::Retry { resume: true, error: None },
+        4001 | 4002 | 4003 | 4005 | 4007 | 4009 => Outcome::Retry {
+            resume: false,
+            error: Some(format!("gateway closed {}", code)),
+        },
+        4000 => Outcome::Retry {
+            resume: false,
+            error: None,
+        },
+        _ => Outcome::Retry {
+            resume: true,
+            error: None,
+        },
     }
 }
 
@@ -393,7 +422,10 @@ pub async fn start(
     if let Some(existing) = map.get(&base) {
         if !existing.shared.is_finished() {
             let snap = existing.shared.snapshot();
-            existing.shared.sink.status(&base, snap.status, snap.error.as_deref());
+            existing
+                .shared
+                .sink
+                .status(&base, snap.status, snap.error.as_deref());
             return snap;
         }
         map.remove(&base);
@@ -406,16 +438,26 @@ pub async fn start(
         status: std::sync::Mutex::new((Status::Connecting, None)),
         finished: std::sync::atomic::AtomicBool::new(false),
     });
-    let handle = GatewayHandle { cancel: cancel.clone(), outbound: tx, shared: shared.clone() };
+    let handle = GatewayHandle {
+        cancel: cancel.clone(),
+        outbound: tx,
+        shared: shared.clone(),
+    };
     map.insert(base.clone(), handle);
     let task_shared = shared.clone();
     let task_base = base.clone();
     tauri::async_runtime::spawn(async move {
         let fut = run_with_shared(task_base.clone(), token, rx, cancel, task_shared.clone());
-        if std::panic::AssertUnwindSafe(fut).catch_unwind().await.is_err() {
+        if std::panic::AssertUnwindSafe(fut)
+            .catch_unwind()
+            .await
+            .is_err()
+        {
             tracing::error!("[omnidisc] gateway task for {} panicked", task_base);
             task_shared.set_status(Status::Disconnected, Some(ERR_PROTOCOL));
-            task_shared.finished.store(true, std::sync::atomic::Ordering::Release);
+            task_shared
+                .finished
+                .store(true, std::sync::atomic::Ordering::Release);
         }
     });
     shared.snapshot()
@@ -455,7 +497,13 @@ pub async fn omnidisc_gateway_connect(
 ) -> Result<StatusSnapshot, String> {
     let base = normalize_instance_url(&url)?;
     let token = store::load_token(&base)?.ok_or_else(|| ERR_NO_SESSION.to_string())?;
-    Ok(start(&state.omnidisc_gateways, base, token, Arc::new(TauriSink(app))).await)
+    Ok(start(
+        &state.omnidisc_gateways,
+        base,
+        token,
+        Arc::new(TauriSink(app)),
+    )
+    .await)
 }
 
 #[tauri::command]
@@ -490,7 +538,11 @@ pub async fn omnidisc_gateway_status(
         .get(&base)
         .filter(|h| !h.shared.is_finished())
         .map(|h| h.shared.snapshot())
-        .unwrap_or(StatusSnapshot { url: base, status: Status::Disconnected, error: None }))
+        .unwrap_or(StatusSnapshot {
+            url: base,
+            status: Status::Disconnected,
+            error: None,
+        }))
 }
 
 #[tauri::command]
@@ -519,8 +571,14 @@ mod tests {
 
     #[test]
     fn ws_url_swaps_scheme_and_appends_gateway() {
-        assert_eq!(ws_url("https://chat.example.org"), "wss://chat.example.org/gateway");
-        assert_eq!(ws_url("http://localhost:8080"), "ws://localhost:8080/gateway");
+        assert_eq!(
+            ws_url("https://chat.example.org"),
+            "wss://chat.example.org/gateway"
+        );
+        assert_eq!(
+            ws_url("http://localhost:8080"),
+            "ws://localhost:8080/gateway"
+        );
     }
 
     #[test]
@@ -533,8 +591,14 @@ mod tests {
     #[test]
     fn close_codes_decide_resume() {
         assert!(matches!(close_outcome(4004), Outcome::Stop(e) if e == ERR_UNAUTHORIZED));
-        assert!(matches!(close_outcome(4009), Outcome::Retry { resume: false, .. }));
-        assert!(matches!(close_outcome(1006), Outcome::Retry { resume: true, .. }));
+        assert!(matches!(
+            close_outcome(4009),
+            Outcome::Retry { resume: false, .. }
+        ));
+        assert!(matches!(
+            close_outcome(1006),
+            Outcome::Retry { resume: true, .. }
+        ));
     }
 
     #[test]

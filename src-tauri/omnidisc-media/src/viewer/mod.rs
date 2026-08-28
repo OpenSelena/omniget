@@ -13,13 +13,24 @@ use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 
+/// # Safety
+///
+/// `ns_view` must be a non-null pointer to a live `NSView` that stays alive for
+/// as long as the returned [`WgpuViewer`], and must be called from the main
+/// thread — it reads and mutates the view's AppKit layer tree.
 #[cfg(target_os = "macos")]
-pub unsafe fn create_appkit_surface(ns_view: *mut std::ffi::c_void, width: u32, height: u32) -> Result<Arc<WgpuViewer>, StreamError> {
+pub unsafe fn create_appkit_surface(
+    ns_view: *mut std::ffi::c_void,
+    width: u32,
+    height: u32,
+) -> Result<Arc<WgpuViewer>, StreamError> {
     use objc2::runtime::NSObjectProtocol;
     use objc2::ClassType;
     use objc2_app_kit::NSView;
     use objc2_quartz_core::CAMetalLayer;
-    use raw_window_handle::{AppKitDisplayHandle, AppKitWindowHandle, RawDisplayHandle, RawWindowHandle};
+    use raw_window_handle::{
+        AppKitDisplayHandle, AppKitWindowHandle, RawDisplayHandle, RawWindowHandle,
+    };
 
     if ns_view.is_null() {
         return Err(StreamError::Viewer("null ns_view".into()));
@@ -27,7 +38,10 @@ pub unsafe fn create_appkit_surface(ns_view: *mut std::ffi::c_void, width: u32, 
     let mut desc = wgpu::InstanceDescriptor::new_without_display_handle();
     desc.backends = wgpu::Backends::PRIMARY;
     let instance = wgpu::Instance::new(desc);
-    let handle = AppKitWindowHandle::new(std::ptr::NonNull::new(ns_view).ok_or_else(|| StreamError::Viewer("null ns_view".into()))?);
+    let handle = AppKitWindowHandle::new(
+        std::ptr::NonNull::new(ns_view)
+            .ok_or_else(|| StreamError::Viewer("null ns_view".into()))?,
+    );
     let surface = instance
         .create_surface_unsafe(wgpu::SurfaceTargetUnsafe::RawHandle {
             raw_display_handle: Some(RawDisplayHandle::AppKit(AppKitDisplayHandle::new())),
@@ -93,9 +107,18 @@ pub struct Viewer {
 }
 
 impl Viewer {
-    pub fn new(renderer: Arc<WgpuViewer>, track: RemoteVideoTrack, user_id: String, rt: tokio::runtime::Handle) -> Self {
+    pub fn new(
+        renderer: Arc<WgpuViewer>,
+        track: RemoteVideoTrack,
+        user_id: String,
+        rt: tokio::runtime::Handle,
+    ) -> Self {
         let stop = Arc::new(AtomicBool::new(false));
-        let decode_stats = Arc::new(DecodeStats { received: AtomicU64::new(0), width: AtomicU64::new(0), height: AtomicU64::new(0) });
+        let decode_stats = Arc::new(DecodeStats {
+            received: AtomicU64::new(0),
+            width: AtomicU64::new(0),
+            height: AtomicU64::new(0),
+        });
         let slot = renderer.frame_slot();
         let stats2 = decode_stats.clone();
         let stop_dec = stop.clone();
@@ -136,7 +159,16 @@ impl Viewer {
             })
             .expect("spawn viewer render thread");
 
-        Self { renderer, track, user_id, stop, decode_stats, started: Instant::now(), render_thread: Some(render_thread), decode_task: Some(decode_task) }
+        Self {
+            renderer,
+            track,
+            user_id,
+            stop,
+            decode_stats,
+            started: Instant::now(),
+            render_thread: Some(render_thread),
+            decode_task: Some(decode_task),
+        }
     }
 
     pub fn set_viewport(&self, viewport: Option<Viewport>) {
@@ -152,8 +184,10 @@ impl Viewer {
             user_id: self.user_id.clone(),
             width: self.decode_stats.width.load(Ordering::Relaxed) as u32,
             height: self.decode_stats.height.load(Ordering::Relaxed) as u32,
-            fps_received: self.decode_stats.received.load(Ordering::Relaxed) as f64 / self.started.elapsed().as_secs_f64().max(1.0),
-            fps_rendered: self.renderer.rendered_frames() as f64 / self.started.elapsed().as_secs_f64().max(1.0),
+            fps_received: self.decode_stats.received.load(Ordering::Relaxed) as f64
+                / self.started.elapsed().as_secs_f64().max(1.0),
+            fps_rendered: self.renderer.rendered_frames() as f64
+                / self.started.elapsed().as_secs_f64().max(1.0),
             ..Default::default()
         };
         if let Ok(rtc) = self.track.get_stats().await {

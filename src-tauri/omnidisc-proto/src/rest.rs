@@ -260,9 +260,17 @@ pub struct KickRequest {
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct UpdateMemberRequest {
-    #[serde(default, skip_serializing_if = "Option::is_none", deserialize_with = "double_option::deserialize")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "double_option::deserialize"
+    )]
     pub nick: Option<Option<String>>,
-    #[serde(default, skip_serializing_if = "Option::is_none", deserialize_with = "double_option::deserialize")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "double_option::deserialize"
+    )]
     pub muted_until: Option<Option<String>>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub reason: Option<String>,
@@ -272,11 +280,23 @@ pub struct UpdateMemberRequest {
 pub struct UpdateGuildRequest {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub name: Option<String>,
-    #[serde(default, skip_serializing_if = "Option::is_none", deserialize_with = "double_option::deserialize")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "double_option::deserialize"
+    )]
     pub description: Option<Option<String>>,
-    #[serde(default, skip_serializing_if = "Option::is_none", deserialize_with = "double_option::deserialize")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "double_option::deserialize"
+    )]
     pub afk_channel_id: Option<Option<Snowflake>>,
-    #[serde(default, skip_serializing_if = "Option::is_none", deserialize_with = "double_option::deserialize")]
+    #[serde(
+        default,
+        skip_serializing_if = "Option::is_none",
+        deserialize_with = "double_option::deserialize"
+    )]
     pub system_channel_id: Option<Option<Snowflake>>,
 }
 
@@ -501,7 +521,8 @@ mod tests {
         let r: MlsCommitRequest = serde_json::from_str(r#"{"epoch":1,"commit":"AA=="}"#).unwrap();
         assert!(r.welcome.is_none());
         assert!(r.added_devices.is_empty());
-        let c: KeyPackageUpload = serde_json::from_str(r#"{"ciphersuite":1,"blob":"AA=="}"#).unwrap();
+        let c: KeyPackageUpload =
+            serde_json::from_str(r#"{"ciphersuite":1,"blob":"AA=="}"#).unwrap();
         assert!(!c.last_resort);
     }
 
@@ -513,12 +534,16 @@ mod tests {
         assert_eq!(cleared.muted_until, Some(None));
         let set: UpdateMemberRequest =
             serde_json::from_str(r#"{"muted_until":"2030-01-01T00:00:00Z"}"#).unwrap();
-        assert_eq!(set.muted_until.as_ref().and_then(|m| m.as_deref()), Some("2030-01-01T00:00:00Z"));
+        assert_eq!(
+            set.muted_until.as_ref().and_then(|m| m.as_deref()),
+            Some("2030-01-01T00:00:00Z")
+        );
     }
 
     #[test]
     fn search_query_parses_in_keyword() {
-        let q: SearchQuery = serde_json::from_str(r#"{"q":"hello","in":"42","has":"link"}"#).unwrap();
+        let q: SearchQuery =
+            serde_json::from_str(r#"{"q":"hello","in":"42","has":"link"}"#).unwrap();
         assert_eq!(q.r#in, Some(Snowflake(42)));
         assert_eq!(q.has, Some(SearchHas::Link));
     }

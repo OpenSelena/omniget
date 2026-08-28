@@ -1,8 +1,8 @@
 use super::gateway::{self, ERR_NOT_CONNECTED};
 use super::normalize_instance_url;
 use omnidisc_media::{
-    AudioDevices, AudioPrefs, ConnectOptions, DeviceKind, LiveKitBackend, MediaEngine, NullBackend, RoomKey,
-    VoiceState, VoiceStats,
+    AudioDevices, AudioPrefs, ConnectOptions, DeviceKind, LiveKitBackend, MediaEngine, NullBackend,
+    RoomKey, VoiceState, VoiceStats,
 };
 use omnidisc_proto::gateway::{Opcode, VoiceServerUpdate};
 use serde::Serialize;
@@ -163,7 +163,9 @@ impl VoiceManager {
 }
 
 pub fn on_dispatch(app: &tauri::AppHandle, url: &str, t: &str, d: &Value) {
-    let Some(state) = app.try_state::<crate::AppState>() else { return };
+    let Some(state) = app.try_state::<crate::AppState>() else {
+        return;
+    };
     match t {
         "READY" | "RESUMED" => {
             let manager = state.omnidisc_voice.clone();
@@ -171,34 +173,57 @@ pub fn on_dispatch(app: &tauri::AppHandle, url: &str, t: &str, d: &Value) {
             let url = url.to_string();
             tauri::async_runtime::spawn(async move {
                 let session = manager.session.lock().await.clone();
-                let Some(s) = session.filter(|s| s.url == url) else { return };
+                let Some(s) = session.filter(|s| s.url == url) else {
+                    return;
+                };
                 if manager.engine.state().await != VoiceState::Connected {
                     return;
                 }
                 tokio::time::sleep(Duration::from_millis(200)).await;
                 let flags = manager.flags();
-                if let Err(e) = send_voice_state(&gateways, &s.url, s.guild_id.as_deref(), Some(&s.channel_id), flags).await {
-                    tracing::debug!("[omnidisc] voice state not re-announced after resume: {}", e);
+                if let Err(e) = send_voice_state(
+                    &gateways,
+                    &s.url,
+                    s.guild_id.as_deref(),
+                    Some(&s.channel_id),
+                    flags,
+                )
+                .await
+                {
+                    tracing::debug!(
+                        "[omnidisc] voice state not re-announced after resume: {}",
+                        e
+                    );
                 }
             });
         }
         "VOICE_SERVER_UPDATE" => match serde_json::from_value::<VoiceServerUpdate>(d.clone()) {
             Ok(update) => state.omnidisc_voice.resolve_server_update(url, update),
-            Err(e) => tracing::warn!("[omnidisc] malformed VOICE_SERVER_UPDATE from {}: {}", url, e),
+            Err(e) => tracing::warn!(
+                "[omnidisc] malformed VOICE_SERVER_UPDATE from {}: {}",
+                url,
+                e
+            ),
         },
-        "GATEWAY_ERROR" => {
-            if d.get("code").and_then(Value::as_str) == Some("voice") {
-                let reason = d.get("message").and_then(Value::as_str).unwrap_or("").to_string();
-                tracing::warn!("[omnidisc] voice request rejected by {}: {}", url, reason);
-                state.omnidisc_voice.reject_pending(url, ERR_VOICE_DENIED.to_string());
-            }
+        "GATEWAY_ERROR" if d.get("code").and_then(Value::as_str) == Some("voice") => {
+            let reason = d
+                .get("message")
+                .and_then(Value::as_str)
+                .unwrap_or("")
+                .to_string();
+            tracing::warn!("[omnidisc] voice request rejected by {}: {}", url, reason);
+            state
+                .omnidisc_voice
+                .reject_pending(url, ERR_VOICE_DENIED.to_string());
         }
         _ => {}
     }
 }
 
 pub fn start(app: &tauri::AppHandle) {
-    let Some(state) = app.try_state::<crate::AppState>() else { return };
+    let Some(state) = app.try_state::<crate::AppState>() else {
+        return;
+    };
     let manager = state.omnidisc_voice.clone();
     if manager.started.swap(true, Ordering::AcqRel) {
         return;
@@ -229,7 +254,9 @@ pub fn start(app: &tauri::AppHandle) {
 }
 
 pub fn ptt_from_hotkey(app: &tauri::AppHandle, pressed: bool) {
-    let Some(state) = app.try_state::<crate::AppState>() else { return };
+    let Some(state) = app.try_state::<crate::AppState>() else {
+        return;
+    };
     let manager = state.omnidisc_voice.clone();
     tauri::async_runtime::spawn(async move {
         if let Err(e) = manager.engine.set_ptt(true, pressed).await {
@@ -295,7 +322,8 @@ async fn leave_current(manager: &VoiceManager, gateways: &gateway::Gateways) {
     }
     if let Some(s) = previous {
         let flags = manager.flags();
-        if let Err(e) = send_voice_state(gateways, &s.url, s.guild_id.as_deref(), None, flags).await {
+        if let Err(e) = send_voice_state(gateways, &s.url, s.guild_id.as_deref(), None, flags).await
+        {
             tracing::debug!("[omnidisc] voice leave not sent to {}: {}", s.url, e);
         }
     }
@@ -311,7 +339,9 @@ pub async fn omnidisc_voice_join(
     recipient_ids: Option<Vec<String>>,
 ) -> Result<JoinResult, String> {
     let base = normalize_instance_url(&url)?;
-    let guild_id = guild_id.map(|g| g.trim().to_string()).filter(|g| !g.is_empty());
+    let guild_id = guild_id
+        .map(|g| g.trim().to_string())
+        .filter(|g| !g.is_empty());
     let manager = state.omnidisc_voice.clone();
     if !gateway::is_ready(&state.omnidisc_gateways, &base).await {
         return Err(ERR_NOT_CONNECTED.to_string());
@@ -320,8 +350,16 @@ pub async fn omnidisc_voice_join(
     {
         let current = manager.session.lock().await.clone();
         if let Some(s) = current {
-            if s.url == base && s.channel_id == channel_id && manager.engine.state().await == VoiceState::Connected {
-                return Ok(JoinResult { state: VoiceState::Connected, session: s, mic_error: None, output_error: None });
+            if s.url == base
+                && s.channel_id == channel_id
+                && manager.engine.state().await == VoiceState::Connected
+            {
+                return Ok(JoinResult {
+                    state: VoiceState::Connected,
+                    session: s,
+                    mic_error: None,
+                    output_error: None,
+                });
             }
             leave_current(&manager, &state.omnidisc_gateways).await;
         }
@@ -329,11 +367,21 @@ pub async fn omnidisc_voice_join(
 
     let (tx, rx) = oneshot::channel();
     if let Ok(mut p) = manager.pending.lock() {
-        *p = Some(PendingJoin { url: base.clone(), channel_id: channel_id.clone(), tx });
+        *p = Some(PendingJoin {
+            url: base.clone(),
+            channel_id: channel_id.clone(),
+            tx,
+        });
     }
     let flags = manager.flags();
-    if let Err(e) =
-        send_voice_state(&state.omnidisc_gateways, &base, guild_id.as_deref(), Some(&channel_id), flags).await
+    if let Err(e) = send_voice_state(
+        &state.omnidisc_gateways,
+        &base,
+        guild_id.as_deref(),
+        Some(&channel_id),
+        flags,
+    )
+    .await
     {
         let _ = manager.take_pending_if(&base, None);
         return Err(e);
@@ -341,7 +389,11 @@ pub async fn omnidisc_voice_join(
     // The gateway was ready before we sent, so silence on a DM means the server
     // predates DM calls and dropped op 4 without a guild — say that instead of
     // a bare timeout.
-    let timeout_code = if guild_id.is_some() { ERR_VOICE_TIMEOUT } else { ERR_VOICE_DM_UNSUPPORTED };
+    let timeout_code = if guild_id.is_some() {
+        ERR_VOICE_TIMEOUT
+    } else {
+        ERR_VOICE_DM_UNSUPPORTED
+    };
     let update = match tokio::time::timeout(SERVER_UPDATE_TIMEOUT, rx).await {
         Ok(Ok(Ok(update))) => update,
         Ok(Ok(Err(reason))) => return Err(reason),
@@ -368,7 +420,10 @@ pub async fn omnidisc_voice_join(
     };
     *manager.session.lock().await = Some(session.clone());
     let (prefs, relay_only) = prefs_from_settings(&app);
-    let options = ConnectOptions { room_key, relay_only };
+    let options = ConnectOptions {
+        room_key,
+        relay_only,
+    };
     match manager.engine.join(&update, &prefs, &options).await {
         Ok(outcome) => {
             let _ = manager.engine.set_muted(flags.muted).await;
@@ -382,7 +437,14 @@ pub async fn omnidisc_voice_join(
         }
         Err(e) => {
             *manager.session.lock().await = None;
-            let _ = send_voice_state(&state.omnidisc_gateways, &base, guild_id.as_deref(), None, flags).await;
+            let _ = send_voice_state(
+                &state.omnidisc_gateways,
+                &base,
+                guild_id.as_deref(),
+                None,
+                flags,
+            )
+            .await;
             Err(e.code().to_string())
         }
     }
@@ -399,8 +461,15 @@ pub async fn channel_in_call_on(app: &tauri::AppHandle, base: &str) -> Option<St
 
 /// Push a freshly exported epoch key into the running call.
 pub async fn push_room_key(app: &tauri::AppHandle, epoch: u64, key: [u8; 32]) {
-    let Some(state) = app.try_state::<crate::AppState>() else { return };
-    if let Err(e) = state.omnidisc_voice.engine.set_room_key(RoomKey::new(epoch, key)).await {
+    let Some(state) = app.try_state::<crate::AppState>() else {
+        return;
+    };
+    if let Err(e) = state
+        .omnidisc_voice
+        .engine
+        .set_room_key(RoomKey::new(epoch, key))
+        .await
+    {
         tracing::warn!("[omnidisc] the voice key could not be rotated: {}", e);
     }
 }
@@ -415,29 +484,51 @@ async fn push_flags(manager: &VoiceManager, gateways: &gateway::Gateways) {
     let flags = manager.flags();
     let session = manager.session.lock().await.clone();
     if let Some(s) = session {
-        if let Err(e) = send_voice_state(gateways, &s.url, s.guild_id.as_deref(), Some(&s.channel_id), flags).await {
+        if let Err(e) = send_voice_state(
+            gateways,
+            &s.url,
+            s.guild_id.as_deref(),
+            Some(&s.channel_id),
+            flags,
+        )
+        .await
+        {
             tracing::debug!("[omnidisc] voice flags not sent: {}", e);
         }
     }
 }
 
 #[tauri::command]
-pub async fn omnidisc_voice_set_mute(state: tauri::State<'_, crate::AppState>, muted: bool) -> Result<VoiceStatus, String> {
+pub async fn omnidisc_voice_set_mute(
+    state: tauri::State<'_, crate::AppState>,
+    muted: bool,
+) -> Result<VoiceStatus, String> {
     let manager = state.omnidisc_voice.clone();
     let mut flags = manager.flags();
     flags.muted = muted;
     if !muted && flags.deafened {
         flags.deafened = false;
-        manager.engine.set_deafened(false).await.map_err(|e| e.code().to_string())?;
+        manager
+            .engine
+            .set_deafened(false)
+            .await
+            .map_err(|e| e.code().to_string())?;
     }
     manager.set_flags(flags);
-    manager.engine.set_muted(muted).await.map_err(|e| e.code().to_string())?;
+    manager
+        .engine
+        .set_muted(muted)
+        .await
+        .map_err(|e| e.code().to_string())?;
     push_flags(&manager, &state.omnidisc_gateways).await;
     status_of(&manager).await
 }
 
 #[tauri::command]
-pub async fn omnidisc_voice_set_deaf(state: tauri::State<'_, crate::AppState>, deafened: bool) -> Result<VoiceStatus, String> {
+pub async fn omnidisc_voice_set_deaf(
+    state: tauri::State<'_, crate::AppState>,
+    deafened: bool,
+) -> Result<VoiceStatus, String> {
     let manager = state.omnidisc_voice.clone();
     let mut flags = manager.flags();
     if deafened && !flags.deafened {
@@ -448,8 +539,16 @@ pub async fn omnidisc_voice_set_deaf(state: tauri::State<'_, crate::AppState>, d
     }
     flags.deafened = deafened;
     manager.set_flags(flags);
-    manager.engine.set_deafened(deafened).await.map_err(|e| e.code().to_string())?;
-    manager.engine.set_muted(flags.muted).await.map_err(|e| e.code().to_string())?;
+    manager
+        .engine
+        .set_deafened(deafened)
+        .await
+        .map_err(|e| e.code().to_string())?;
+    manager
+        .engine
+        .set_muted(flags.muted)
+        .await
+        .map_err(|e| e.code().to_string())?;
     push_flags(&manager, &state.omnidisc_gateways).await;
     status_of(&manager).await
 }
@@ -472,7 +571,9 @@ pub async fn omnidisc_voice_set_volume(
 }
 
 #[tauri::command]
-pub async fn omnidisc_voice_devices(state: tauri::State<'_, crate::AppState>) -> Result<AudioDevices, String> {
+pub async fn omnidisc_voice_devices(
+    state: tauri::State<'_, crate::AppState>,
+) -> Result<AudioDevices, String> {
     let engine = state.omnidisc_voice.engine.clone();
     tokio::task::spawn_blocking(move || engine.devices())
         .await
@@ -485,12 +586,24 @@ pub async fn omnidisc_voice_set_device(
     kind: DeviceKind,
     id: Option<String>,
 ) -> Result<(), String> {
-    state.omnidisc_voice.engine.set_device(kind, id).await.map_err(|e| e.code().to_string())
+    state
+        .omnidisc_voice
+        .engine
+        .set_device(kind, id)
+        .await
+        .map_err(|e| e.code().to_string())
 }
 
 #[tauri::command]
-pub async fn omnidisc_voice_stats(state: tauri::State<'_, crate::AppState>) -> Result<VoiceStats, String> {
-    state.omnidisc_voice.engine.stats().await.map_err(|e| e.code().to_string())
+pub async fn omnidisc_voice_stats(
+    state: tauri::State<'_, crate::AppState>,
+) -> Result<VoiceStats, String> {
+    state
+        .omnidisc_voice
+        .engine
+        .stats()
+        .await
+        .map_err(|e| e.code().to_string())
 }
 
 #[tauri::command]
@@ -499,8 +612,18 @@ pub async fn omnidisc_voice_ptt(
     state: tauri::State<'_, crate::AppState>,
     pressed: bool,
 ) -> Result<(), String> {
-    let enabled = !crate::storage::config::load_settings(&app).omnidisc.voice.ptt_key.trim().is_empty();
-    state.omnidisc_voice.engine.set_ptt(enabled, pressed).await.map_err(|e| e.code().to_string())
+    let enabled = !crate::storage::config::load_settings(&app)
+        .omnidisc
+        .voice
+        .ptt_key
+        .trim()
+        .is_empty();
+    state
+        .omnidisc_voice
+        .engine
+        .set_ptt(enabled, pressed)
+        .await
+        .map_err(|e| e.code().to_string())
 }
 
 #[tauri::command]
@@ -508,7 +631,12 @@ pub async fn omnidisc_voice_set_noise_suppression(
     state: tauri::State<'_, crate::AppState>,
     enabled: bool,
 ) -> Result<(), String> {
-    state.omnidisc_voice.engine.set_noise_suppression(enabled).await.map_err(|e| e.code().to_string())
+    state
+        .omnidisc_voice
+        .engine
+        .set_noise_suppression(enabled)
+        .await
+        .map_err(|e| e.code().to_string())
 }
 
 #[tauri::command]
@@ -525,8 +653,16 @@ pub async fn omnidisc_voice_set_ducking(
 }
 
 #[tauri::command]
-pub async fn omnidisc_voice_mic_test(state: tauri::State<'_, crate::AppState>, enabled: bool) -> Result<(), String> {
-    state.omnidisc_voice.engine.set_mic_monitor(enabled).await.map_err(|e| e.code().to_string())
+pub async fn omnidisc_voice_mic_test(
+    state: tauri::State<'_, crate::AppState>,
+    enabled: bool,
+) -> Result<(), String> {
+    state
+        .omnidisc_voice
+        .engine
+        .set_mic_monitor(enabled)
+        .await
+        .map_err(|e| e.code().to_string())
 }
 
 async fn status_of(manager: &VoiceManager) -> Result<VoiceStatus, String> {
@@ -541,7 +677,9 @@ async fn status_of(manager: &VoiceManager) -> Result<VoiceStatus, String> {
 }
 
 #[tauri::command]
-pub async fn omnidisc_voice_status(state: tauri::State<'_, crate::AppState>) -> Result<VoiceStatus, String> {
+pub async fn omnidisc_voice_status(
+    state: tauri::State<'_, crate::AppState>,
+) -> Result<VoiceStatus, String> {
     status_of(&state.omnidisc_voice).await
 }
 
@@ -591,12 +729,20 @@ mod tests {
             device: DeviceRef::new(c.user_id(), c.device_id(), c.public_key().to_vec()),
             key_package: c.key_packages(1, false).expect("kp").remove(0),
         };
-        let alice_ref = DeviceRef::new(alice.user_id(), alice.device_id(), alice.public_key().to_vec());
+        let alice_ref = DeviceRef::new(
+            alice.user_id(),
+            alice.device_id(),
+            alice.public_key().to_vec(),
+        );
         let bob_kp = claim(&mut bob);
         let welcome = alice.add_members(GROUP, &[bob_kp]).expect("add");
         alice.merge_pending(GROUP).expect("merge");
-        bob.join_welcome(&welcome.welcome.clone().expect("welcome"), GROUP, &[alice_ref])
-            .expect("join");
+        bob.join_welcome(
+            &welcome.welcome.clone().expect("welcome"),
+            GROUP,
+            &[alice_ref],
+        )
+        .expect("join");
 
         let epoch = alice.epoch(GROUP).expect("epoch");
         assert_eq!(epoch, bob.epoch(GROUP).expect("epoch"));
@@ -608,12 +754,16 @@ mod tests {
         let rot_a = KeyRotation::new();
         let rot_b = KeyRotation::new();
         rot_a.arm(ring_a.clone(), RoomKey::new(epoch, key_a));
-        rot_b.arm(ring_b.clone(), RoomKey::new(epoch, bob.voice_key(GROUP, ROOM).expect("key")));
+        rot_b.arm(
+            ring_b.clone(),
+            RoomKey::new(epoch, bob.voice_key(GROUP, ROOM).expect("key")),
+        );
 
         let carol_kp = claim(&mut carol);
         let commit = alice.add_members(GROUP, &[carol_kp]).expect("add carol");
         alice.merge_pending(GROUP).expect("merge");
-        bob.process(GROUP, &commit.commit).expect("bob processes the commit");
+        bob.process(GROUP, &commit.commit)
+            .expect("bob processes the commit");
 
         let next = alice.epoch(GROUP).expect("epoch");
         assert_eq!(next, epoch + 1);
@@ -636,7 +786,11 @@ mod tests {
     async fn server_update_resolves_only_the_matching_pending_join() {
         let manager = VoiceManager::new();
         let (tx, rx) = oneshot::channel();
-        *manager.pending.lock().unwrap() = Some(PendingJoin { url: "https://a".into(), channel_id: "7".into(), tx });
+        *manager.pending.lock().unwrap() = Some(PendingJoin {
+            url: "https://a".into(),
+            channel_id: "7".into(),
+            tx,
+        });
         manager.resolve_server_update("https://b", update(7));
         assert!(manager.pending.lock().unwrap().is_some());
         manager.resolve_server_update("https://a", update(8));
@@ -650,7 +804,11 @@ mod tests {
     async fn gateway_voice_error_rejects_pending_join() {
         let manager = VoiceManager::new();
         let (tx, rx) = oneshot::channel();
-        *manager.pending.lock().unwrap() = Some(PendingJoin { url: "https://a".into(), channel_id: "7".into(), tx });
+        *manager.pending.lock().unwrap() = Some(PendingJoin {
+            url: "https://a".into(),
+            channel_id: "7".into(),
+            tx,
+        });
         manager.reject_pending("https://a", ERR_VOICE_DENIED.into());
         assert_eq!(rx.await.unwrap().unwrap_err(), ERR_VOICE_DENIED);
     }

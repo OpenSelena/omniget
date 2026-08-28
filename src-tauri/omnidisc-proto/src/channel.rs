@@ -23,7 +23,10 @@ impl ChannelType {
     }
 
     pub fn is_guild(self) -> bool {
-        matches!(self, Self::GuildText | Self::GuildVoice | Self::GuildCategory | Self::GuildLink)
+        matches!(
+            self,
+            Self::GuildText | Self::GuildVoice | Self::GuildCategory | Self::GuildLink
+        )
     }
 
     pub fn is_voice(self) -> bool {

@@ -133,10 +133,12 @@ fn keyring_get(url: &str) -> Option<Result<Option<String>, String>> {
 
 #[cfg(any(target_os = "macos", windows))]
 fn keyring_delete(url: &str) -> Option<Result<(), String>> {
-    Some(keyring_entry(url).and_then(|e| match e.delete_credential() {
-        Ok(()) | Err(keyring::Error::NoEntry) => Ok(()),
-        Err(err) => Err(err.to_string()),
-    }))
+    Some(
+        keyring_entry(url).and_then(|e| match e.delete_credential() {
+            Ok(()) | Err(keyring::Error::NoEntry) => Ok(()),
+            Err(err) => Err(err.to_string()),
+        }),
+    )
 }
 
 #[cfg(not(any(target_os = "macos", windows)))]
@@ -264,7 +266,7 @@ pub fn write_private(path: &Path, bytes: &[u8]) -> Result<(), String> {
             Err(e) => return Err(io(e)),
         };
         file.write_all(bytes).map_err(io)?;
-        return Ok(());
+        Ok(())
     }
     #[cfg(not(unix))]
     {
@@ -350,13 +352,24 @@ mod tests {
         assert_eq!(store.get("https://a.example").unwrap(), None);
         store.set("https://a.example", "od1.secret-a").unwrap();
         store.set("https://b.example", "od1.secret-b").unwrap();
-        assert_eq!(store.get("https://a.example").unwrap().as_deref(), Some("od1.secret-a"));
-        assert_eq!(store.get("https://b.example").unwrap().as_deref(), Some("od1.secret-b"));
+        assert_eq!(
+            store.get("https://a.example").unwrap().as_deref(),
+            Some("od1.secret-a")
+        );
+        assert_eq!(
+            store.get("https://b.example").unwrap().as_deref(),
+            Some("od1.secret-b")
+        );
         store.remove("https://a.example").unwrap();
         assert_eq!(store.get("https://a.example").unwrap(), None);
-        assert_eq!(store.get("https://b.example").unwrap().as_deref(), Some("od1.secret-b"));
+        assert_eq!(
+            store.get("https://b.example").unwrap().as_deref(),
+            Some("od1.secret-b")
+        );
         let raw = std::fs::read(dir.join(SESSIONS_FILE)).unwrap();
-        assert!(!raw.windows(b"od1.secret-b".len()).any(|w| w == b"od1.secret-b"));
+        assert!(!raw
+            .windows(b"od1.secret-b".len())
+            .any(|w| w == b"od1.secret-b"));
         let _ = std::fs::remove_dir_all(&dir);
     }
 
@@ -385,11 +398,13 @@ mod tests {
         std::fs::set_permissions(&dir, std::fs::Permissions::from_mode(0o755)).unwrap();
         let path = dir.join("key.bin");
         write_private(&path, b"first").unwrap();
-        let mode = |p: &std::path::Path| {
-            std::fs::metadata(p).unwrap().permissions().mode() & 0o777
-        };
+        let mode = |p: &std::path::Path| std::fs::metadata(p).unwrap().permissions().mode() & 0o777;
         assert_eq!(mode(&path), 0o600);
-        assert_eq!(mode(&dir), 0o700, "the folder around it has to be private too");
+        assert_eq!(
+            mode(&dir),
+            0o700,
+            "the folder around it has to be private too"
+        );
 
         // An overwrite keeps the mode, and a file an older build left open is
         // tightened before it is written again.

@@ -144,8 +144,14 @@ pub struct ReactionCount {
 #[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Emoji {
-    Unicode { name: String },
-    Custom { id: Snowflake, name: String, animated: bool },
+    Unicode {
+        name: String,
+    },
+    Custom {
+        id: Snowflake,
+        name: String,
+        animated: bool,
+    },
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

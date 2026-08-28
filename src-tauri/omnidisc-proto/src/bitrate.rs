@@ -89,7 +89,11 @@ impl Default for StreamingPolicy {
 impl StreamingPolicy {
     pub fn kbps_for(&self, height: u16, fps: u16) -> u32 {
         let key = format!("{height}p{fps}");
-        let raw = self.overrides.get(&key).copied().unwrap_or_else(|| default_kbps(height, fps));
+        let raw = self
+            .overrides
+            .get(&key)
+            .copied()
+            .unwrap_or_else(|| default_kbps(height, fps));
         raw.clamp(self.min_kbps, self.max_kbps)
     }
 
@@ -102,11 +106,19 @@ impl StreamingPolicy {
     }
 
     pub fn allowed_resolutions(&self) -> Vec<u16> {
-        RESOLUTIONS.iter().copied().filter(|h| *h <= self.max_height).collect()
+        RESOLUTIONS
+            .iter()
+            .copied()
+            .filter(|h| *h <= self.max_height)
+            .collect()
     }
 
     pub fn allowed_framerates(&self) -> Vec<u16> {
-        FRAMERATES.iter().copied().filter(|f| *f <= self.max_fps).collect()
+        FRAMERATES
+            .iter()
+            .copied()
+            .filter(|f| *f <= self.max_fps)
+            .collect()
     }
 
     pub fn codec_for(&self, height: u16, fps: u16) -> Codec {
@@ -155,7 +167,10 @@ mod tests {
 
     #[test]
     fn policy_clamps_and_overrides() {
-        let mut p = StreamingPolicy { max_kbps: 8_000, ..Default::default() };
+        let mut p = StreamingPolicy {
+            max_kbps: 8_000,
+            ..Default::default()
+        };
         assert_eq!(p.kbps_for(2160, 120), 8_000);
         p.overrides.insert("720p30".into(), 1_000);
         assert_eq!(p.kbps_for(720, 30), 1_000);
@@ -170,13 +185,19 @@ mod tests {
         assert_eq!(p.codec_for(2160, 120), Codec::H265);
         assert_eq!(p.codec_for(2160, 60), Codec::H264);
         assert_eq!(p.codec_for(1440, 120), Codec::H264);
-        let off = StreamingPolicy { allow_h265: false, ..Default::default() };
+        let off = StreamingPolicy {
+            allow_h265: false,
+            ..Default::default()
+        };
         assert_eq!(off.codec_for(2160, 120), Codec::H264);
     }
 
     #[test]
     fn native_handles_ultrawide() {
-        let p = StreamingPolicy { max_kbps: 50_000, ..Default::default() };
+        let p = StreamingPolicy {
+            max_kbps: 50_000,
+            ..Default::default()
+        };
         let uw = p.native_kbps(3440, 1440, 60);
         let std = p.kbps_for(1440, 60);
         assert!(uw > std);

@@ -44,20 +44,31 @@ impl VoiceStateMachine {
                 self.retries = 0;
                 S::Connected
             }
-            (S::Connecting, E::Disconnected { recoverable: true }) | (S::Connected, E::Disconnected { recoverable: true }) => {
+            (S::Connecting, E::Disconnected { recoverable: true })
+            | (S::Connected, E::Disconnected { recoverable: true }) => {
                 self.retries += 1;
-                if self.retries > Self::MAX_RETRIES { S::Failed } else { S::Reconnecting }
+                if self.retries > Self::MAX_RETRIES {
+                    S::Failed
+                } else {
+                    S::Reconnecting
+                }
             }
-            (S::Connecting, E::Disconnected { recoverable: false }) | (S::Connected, E::Disconnected { recoverable: false }) => S::Failed,
+            (S::Connecting, E::Disconnected { recoverable: false })
+            | (S::Connected, E::Disconnected { recoverable: false }) => S::Failed,
             (S::Reconnecting, E::Reconnected) | (S::Reconnecting, E::Connected) => {
                 self.retries = 0;
                 S::Connected
             }
             (S::Reconnecting, E::Disconnected { recoverable: true }) => {
                 self.retries += 1;
-                if self.retries > Self::MAX_RETRIES { S::Failed } else { S::Reconnecting }
+                if self.retries > Self::MAX_RETRIES {
+                    S::Failed
+                } else {
+                    S::Reconnecting
+                }
             }
-            (S::Reconnecting, E::Disconnected { recoverable: false }) | (S::Reconnecting, E::GiveUp) => S::Failed,
+            (S::Reconnecting, E::Disconnected { recoverable: false })
+            | (S::Reconnecting, E::GiveUp) => S::Failed,
             (_, E::Leave) => {
                 self.retries = 0;
                 S::Idle
@@ -87,9 +98,15 @@ mod tests {
         m.apply(&VoiceEvent::Join);
         m.apply(&VoiceEvent::Connected);
         for _ in 0..VoiceStateMachine::MAX_RETRIES {
-            assert_eq!(m.apply(&VoiceEvent::Disconnected { recoverable: true }), VoiceState::Reconnecting);
+            assert_eq!(
+                m.apply(&VoiceEvent::Disconnected { recoverable: true }),
+                VoiceState::Reconnecting
+            );
         }
-        assert_eq!(m.apply(&VoiceEvent::Disconnected { recoverable: true }), VoiceState::Failed);
+        assert_eq!(
+            m.apply(&VoiceEvent::Disconnected { recoverable: true }),
+            VoiceState::Failed
+        );
         assert_eq!(m.apply(&VoiceEvent::Join), VoiceState::Connecting);
     }
 

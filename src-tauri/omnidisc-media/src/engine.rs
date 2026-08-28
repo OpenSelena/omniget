@@ -66,18 +66,34 @@ pub enum EngineNotification {
         #[serde(skip_serializing_if = "Option::is_none")]
         reason: Option<String>,
     },
-    Speaking { user_id: String, speaking: bool },
-    ParticipantJoined { user_id: String },
-    ParticipantLeft { user_id: String },
-    Quality { user_id: String, quality: Quality },
-    Level { rms_db: f32, peak: f32 },
+    Speaking {
+        user_id: String,
+        speaking: bool,
+    },
+    ParticipantJoined {
+        user_id: String,
+    },
+    ParticipantLeft {
+        user_id: String,
+    },
+    Quality {
+        user_id: String,
+        quality: Quality,
+    },
+    Level {
+        rms_db: f32,
+        peak: f32,
+    },
     Device {
         kind: DeviceKind,
         status: DeviceStatus,
         #[serde(skip_serializing_if = "Option::is_none")]
         cause: Option<DeviceLoss>,
     },
-    Error { code: String, message: String },
+    Error {
+        code: String,
+        message: String,
+    },
 }
 
 #[derive(Debug)]
@@ -227,8 +243,15 @@ impl MediaEngine {
                 Ok(outcome)
             }
             Err(e) => {
-                self.transition(&VoiceEvent::Disconnected { recoverable: false }, Some(e.code())).await;
-                let _ = self.notify.send(EngineNotification::Error { code: e.code().into(), message: e.to_string() });
+                self.transition(
+                    &VoiceEvent::Disconnected { recoverable: false },
+                    Some(e.code()),
+                )
+                .await;
+                let _ = self.notify.send(EngineNotification::Error {
+                    code: e.code().into(),
+                    message: e.to_string(),
+                });
                 let _ = guard(self.backend.disconnect()).await;
                 Err(e)
             }
@@ -295,7 +318,10 @@ impl MediaEngine {
 
     async fn transition(&self, ev: &VoiceEvent, reason: Option<&str>) -> VoiceState {
         let s = self.machine.lock().await.apply(ev);
-        let _ = self.notify.send(EngineNotification::State { state: s, reason: reason.map(str::to_string) });
+        let _ = self.notify.send(EngineNotification::State {
+            state: s,
+            reason: reason.map(str::to_string),
+        });
         s
     }
 }
@@ -311,7 +337,9 @@ impl MediaBackend for NullBackend {
         _: &AudioPrefs,
         _: &ConnectOptions,
     ) -> Result<ConnectOutcome, MediaError> {
-        Err(MediaError::Unavailable("no media backend compiled in".into()))
+        Err(MediaError::Unavailable(
+            "no media backend compiled in".into(),
+        ))
     }
     async fn disconnect(&self) -> Result<(), MediaError> {
         Ok(())
@@ -434,17 +462,37 @@ mod tests {
     async fn null_backend_join_fails_into_failed_state() {
         let engine = MediaEngine::new(Arc::new(NullBackend));
         let mut rx = engine.subscribe();
-        assert!(engine.join(&target(), &AudioPrefs::default(), &ConnectOptions::default()).await.is_err());
+        assert!(engine
+            .join(
+                &target(),
+                &AudioPrefs::default(),
+                &ConnectOptions::default()
+            )
+            .await
+            .is_err());
         assert_eq!(engine.state().await, VoiceState::Failed);
         let first = rx.recv().await.unwrap();
-        assert_eq!(first, EngineNotification::State { state: VoiceState::Connecting, reason: None });
+        assert_eq!(
+            first,
+            EngineNotification::State {
+                state: VoiceState::Connecting,
+                reason: None
+            }
+        );
         assert_eq!(engine.leave().await.unwrap(), VoiceState::Idle);
     }
 
     #[tokio::test]
     async fn panic_in_backend_is_contained() {
         let engine = MediaEngine::new(Arc::new(PanickyBackend));
-        let err = engine.join(&target(), &AudioPrefs::default(), &ConnectOptions::default()).await.unwrap_err();
+        let err = engine
+            .join(
+                &target(),
+                &AudioPrefs::default(),
+                &ConnectOptions::default(),
+            )
+            .await
+            .unwrap_err();
         assert!(matches!(err, MediaError::Panicked));
         assert_eq!(engine.state().await, VoiceState::Failed);
     }

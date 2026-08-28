@@ -98,7 +98,11 @@ pub fn encrypt_file(
         buf.truncate(filled);
         hasher.update(&buf);
         cipher
-            .encrypt_in_place(&chunk_nonce(&secret.nonce, index), &chunk_aad(file_id, index, total), &mut buf)
+            .encrypt_in_place(
+                &chunk_nonce(&secret.nonce, index),
+                &chunk_aad(file_id, index, total),
+                &mut buf,
+            )
             .map_err(|_| MlsError::File(format!("chunk {index}: could not be encrypted")))?;
         writer.write_all(&buf)?;
         index += 1;
@@ -134,7 +138,11 @@ pub fn decrypt_file(
             .read_exact(&mut buf)
             .map_err(|_| MlsError::File(format!("chunk {index}: the file ends too early")))?;
         cipher
-            .decrypt_in_place(&chunk_nonce(&secret.nonce, index), &chunk_aad(file_id, index, total), &mut buf)
+            .decrypt_in_place(
+                &chunk_nonce(&secret.nonce, index),
+                &chunk_aad(file_id, index, total),
+                &mut buf,
+            )
             .map_err(|_| MlsError::File(format!("chunk {index}: authentication failed")))?;
         hasher.update(&buf);
         writer.write_all(&buf)?;
@@ -174,12 +182,17 @@ mod tests {
         let plain = temp("plain.bin");
         let enc = temp("enc.bin");
         let out = temp("out.bin");
-        let data: Vec<u8> = (0..(CHUNK_SIZE * 2 + 4096)).map(|i| (i % 251) as u8).collect();
+        let data: Vec<u8> = (0..(CHUNK_SIZE * 2 + 4096))
+            .map(|i| (i % 251) as u8)
+            .collect();
         write(&plain, &data);
         let secret = new_file_secret();
         let (size, sha) = encrypt_file(&plain, &enc, &secret, "file-1").expect("encrypt");
         assert_eq!(size, data.len() as u64);
-        assert_eq!(std::fs::metadata(&enc).expect("meta").len(), encrypted_size(size));
+        assert_eq!(
+            std::fs::metadata(&enc).expect("meta").len(),
+            encrypted_size(size)
+        );
         let back = decrypt_file(&enc, &out, &secret, "file-1", size).expect("decrypt");
         assert_eq!(back, sha);
         assert_eq!(std::fs::read(&out).expect("read"), data);
@@ -194,7 +207,10 @@ mod tests {
         let secret = new_file_secret();
         let (size, _) = encrypt_file(&plain, &enc, &secret, "file-e").expect("encrypt");
         assert_eq!(size, 0);
-        assert_eq!(std::fs::metadata(&enc).expect("meta").len(), TAG_SIZE as u64);
+        assert_eq!(
+            std::fs::metadata(&enc).expect("meta").len(),
+            TAG_SIZE as u64
+        );
         decrypt_file(&enc, &out, &secret, "file-e", 0).expect("decrypt");
         assert!(std::fs::read(&out).expect("read").is_empty());
     }
@@ -239,6 +255,9 @@ mod tests {
         assert_eq!(chunk_count(1), 1);
         assert_eq!(chunk_count(CHUNK_SIZE as u64), 1);
         assert_eq!(chunk_count(CHUNK_SIZE as u64 + 1), 2);
-        assert_eq!(encrypted_size(CHUNK_SIZE as u64 + 1), CHUNK_SIZE as u64 + 1 + 32);
+        assert_eq!(
+            encrypted_size(CHUNK_SIZE as u64 + 1),
+            CHUNK_SIZE as u64 + 1 + 32
+        );
     }
 }

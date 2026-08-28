@@ -1,7 +1,7 @@
 use super::voice::EVENT_VOICE;
 use omnidisc_media::{
-    start_stream, ActiveStream, AudioMode, LiveKitBackend, PublishStats, SourceId, StreamError, StreamMode, StreamRequest,
-    StreamSources, StreamStats, Viewer, Viewport, WatchStats,
+    start_stream, ActiveStream, AudioMode, LiveKitBackend, PublishStats, SourceId, StreamError,
+    StreamMode, StreamRequest, StreamSources, StreamStats, Viewer, Viewport, WatchStats,
 };
 use omnidisc_proto::bitrate::StreamingPolicy;
 use serde::Deserialize;
@@ -18,7 +18,10 @@ pub struct StreamManager {
 
 impl Default for StreamManager {
     fn default() -> Self {
-        Self { active: Mutex::new(None), viewers: Mutex::new(HashMap::new()) }
+        Self {
+            active: Mutex::new(None),
+            viewers: Mutex::new(HashMap::new()),
+        }
     }
 }
 
@@ -27,19 +30,33 @@ fn err(e: StreamError) -> String {
 }
 
 fn backend(state: &crate::AppState) -> Result<Arc<LiveKitBackend>, String> {
-    state.omnidisc_voice.livekit_backend().ok_or_else(|| "ERR_VOICE_UNAVAILABLE".to_string())
+    state
+        .omnidisc_voice
+        .livekit_backend()
+        .ok_or_else(|| "ERR_VOICE_UNAVAILABLE".to_string())
 }
 
-fn emit_voice(app: &tauri::AppHandle, url: Option<String>, event: &str, mut payload: serde_json::Value) {
+fn emit_voice(
+    app: &tauri::AppHandle,
+    url: Option<String>,
+    event: &str,
+    mut payload: serde_json::Value,
+) {
     if let serde_json::Value::Object(map) = &mut payload {
         map.insert("type".into(), json!(event));
-        map.insert("url".into(), url.map(serde_json::Value::String).unwrap_or(serde_json::Value::Null));
+        map.insert(
+            "url".into(),
+            url.map(serde_json::Value::String)
+                .unwrap_or(serde_json::Value::Null),
+        );
     }
     let _ = app.emit(EVENT_VOICE, payload);
 }
 
 #[tauri::command]
-pub async fn omnidisc_stream_sources(state: tauri::State<'_, crate::AppState>) -> Result<StreamSources, String> {
+pub async fn omnidisc_stream_sources(
+    state: tauri::State<'_, crate::AppState>,
+) -> Result<StreamSources, String> {
     let _ = state;
     tokio::task::spawn_blocking(|| omnidisc_media::capture::list_sources(true).map_err(err))
         .await
@@ -100,12 +117,25 @@ pub async fn omnidisc_stream_start(
         *active = Some(stream);
     }
     state.omnidisc_voice.set_streaming(true);
-    state.omnidisc_voice.announce_stream(&state.omnidisc_gateways).await;
+    state
+        .omnidisc_voice
+        .announce_stream(&state.omnidisc_gateways)
+        .await;
     let url = state.omnidisc_voice.session_info().await.map(|s| s.url);
     schedule_overdrive(app.clone());
     let stats = current_publish_stats(&state).await.unwrap_or_default();
-    emit_voice(&app, url.clone(), "stream_started", serde_json::to_value(&resolved).unwrap_or_default());
-    emit_voice(&app, url, "stream_audio_mode", json!({ "audio": audio_mode }));
+    emit_voice(
+        &app,
+        url.clone(),
+        "stream_started",
+        serde_json::to_value(&resolved).unwrap_or_default(),
+    );
+    emit_voice(
+        &app,
+        url,
+        "stream_audio_mode",
+        json!({ "audio": audio_mode }),
+    );
     Ok(stats)
 }
 
@@ -129,7 +159,10 @@ async fn current_publish_stats(state: &crate::AppState) -> Option<PublishStats> 
 }
 
 #[tauri::command]
-pub async fn omnidisc_stream_stop(app: tauri::AppHandle, state: tauri::State<'_, crate::AppState>) -> Result<(), String> {
+pub async fn omnidisc_stream_stop(
+    app: tauri::AppHandle,
+    state: tauri::State<'_, crate::AppState>,
+) -> Result<(), String> {
     let stream = state.omnidisc_stream.active.lock().await.take();
     if let Some(stream) = stream {
         if let Some(b) = state.omnidisc_voice.livekit_backend() {
@@ -139,25 +172,37 @@ pub async fn omnidisc_stream_stop(app: tauri::AppHandle, state: tauri::State<'_,
         }
     }
     state.omnidisc_voice.set_streaming(false);
-    state.omnidisc_voice.announce_stream(&state.omnidisc_gateways).await;
+    state
+        .omnidisc_voice
+        .announce_stream(&state.omnidisc_gateways)
+        .await;
     let url = state.omnidisc_voice.session_info().await.map(|s| s.url);
     emit_voice(&app, url, "stream_stopped", json!({}));
     Ok(())
 }
 
 #[tauri::command]
-pub async fn omnidisc_stream_stats(state: tauri::State<'_, crate::AppState>) -> Result<StreamStats, String> {
+pub async fn omnidisc_stream_stats(
+    state: tauri::State<'_, crate::AppState>,
+) -> Result<StreamStats, String> {
     let publishing = current_publish_stats(&state).await;
     let mut watching: Vec<WatchStats> = Vec::new();
     let viewers = state.omnidisc_stream.viewers.lock().await;
     for v in viewers.values() {
         watching.push(v.stats().await);
     }
-    Ok(StreamStats { publishing, watching })
+    Ok(StreamStats {
+        publishing,
+        watching,
+    })
 }
 
 #[tauri::command]
-pub async fn omnidisc_stream_set_volume(state: tauri::State<'_, crate::AppState>, user_id: String, gain: f32) -> Result<(), String> {
+pub async fn omnidisc_stream_set_volume(
+    state: tauri::State<'_, crate::AppState>,
+    user_id: String,
+    gain: f32,
+) -> Result<(), String> {
     if !gain.is_finite() {
         return Err("ERR_BAD_REQUEST".into());
     }
@@ -182,7 +227,10 @@ pub struct ViewportArgs {
 }
 
 #[tauri::command]
-pub async fn omnidisc_stream_set_viewport(state: tauri::State<'_, crate::AppState>, args: ViewportArgs) -> Result<(), String> {
+pub async fn omnidisc_stream_set_viewport(
+    state: tauri::State<'_, crate::AppState>,
+    args: ViewportArgs,
+) -> Result<(), String> {
     let viewers = state.omnidisc_stream.viewers.lock().await;
     if let Some(v) = viewers.get(&args.user_id) {
         v.set_viewport(Some(Viewport {
@@ -200,12 +248,24 @@ pub async fn omnidisc_stream_set_viewport(state: tauri::State<'_, crate::AppStat
 }
 
 #[tauri::command]
-pub async fn omnidisc_stream_watch(app: tauri::AppHandle, state: tauri::State<'_, crate::AppState>, user_id: String) -> Result<(), String> {
+pub async fn omnidisc_stream_watch(
+    app: tauri::AppHandle,
+    state: tauri::State<'_, crate::AppState>,
+    user_id: String,
+) -> Result<(), String> {
     let backend = backend(&state)?;
-    if state.omnidisc_stream.viewers.lock().await.contains_key(&user_id) {
+    if state
+        .omnidisc_stream
+        .viewers
+        .lock()
+        .await
+        .contains_key(&user_id)
+    {
         return Ok(());
     }
-    let publication = backend.video_publication_for(&user_id).ok_or_else(|| StreamError::NoSuchStream.code().to_string())?;
+    let publication = backend
+        .video_publication_for(&user_id)
+        .ok_or_else(|| StreamError::NoSuchStream.code().to_string())?;
     publication.set_subscribed(true);
 
     let track = {
@@ -217,44 +277,73 @@ pub async fn omnidisc_stream_watch(app: tauri::AppHandle, state: tauri::State<'_
             }
             tokio::time::sleep(std::time::Duration::from_millis(100)).await;
         }
-        found.ok_or_else(|| StreamError::Viewer("stream did not arrive".into()).code().to_string())?
+        found.ok_or_else(|| {
+            StreamError::Viewer("stream did not arrive".into())
+                .code()
+                .to_string()
+        })?
     };
 
     let label = format!("omnidisc-stream-{}", sanitize(&user_id));
     let win_label = label.clone();
     let uid = user_id.clone();
-    let build = WebviewWindowBuilder::new(&app, &win_label, WebviewUrl::App(format!("/omnidisc/stream?user={user_id}").into()))
-        .title("OmniDisc — Stream")
-        .inner_size(1280.0, 760.0)
-        .min_inner_size(480.0, 320.0)
-        .transparent(true);
-    let window = build.build().map_err(|e| format!("OmniDisc: could not open the stream window: {e}"))?;
+    let build = WebviewWindowBuilder::new(
+        &app,
+        &win_label,
+        WebviewUrl::App(format!("/omnidisc/stream?user={user_id}").into()),
+    )
+    .title("OmniDisc — Stream")
+    .inner_size(1280.0, 760.0)
+    .min_inner_size(480.0, 320.0)
+    .transparent(true);
+    let window = build
+        .build()
+        .map_err(|e| format!("OmniDisc: could not open the stream window: {e}"))?;
 
     let renderer = create_surface_on_main(&app, &window).await?;
-    let rt = backend.runtime_handle().ok_or_else(|| "ERR_VOICE_UNAVAILABLE".to_string())?;
+    let rt = backend
+        .runtime_handle()
+        .ok_or_else(|| "ERR_VOICE_UNAVAILABLE".to_string())?;
     let viewer = Viewer::new(renderer, track, uid, rt);
-    state.omnidisc_stream.viewers.lock().await.insert(user_id, viewer);
+    state
+        .omnidisc_stream
+        .viewers
+        .lock()
+        .await
+        .insert(user_id, viewer);
     Ok(())
 }
 
 fn sanitize(s: &str) -> String {
-    s.chars().map(|c| if c.is_ascii_alphanumeric() { c } else { '-' }).collect()
+    s.chars()
+        .map(|c| if c.is_ascii_alphanumeric() { c } else { '-' })
+        .collect()
 }
 
-async fn create_surface_on_main(app: &tauri::AppHandle, window: &tauri::WebviewWindow) -> Result<Arc<omnidisc_media::viewer::WgpuViewer>, String> {
-    let size = window.inner_size().map_err(|e| format!("OmniDisc: window size: {e}"))?;
+async fn create_surface_on_main(
+    app: &tauri::AppHandle,
+    window: &tauri::WebviewWindow,
+) -> Result<Arc<omnidisc_media::viewer::WgpuViewer>, String> {
+    let size = window
+        .inner_size()
+        .map_err(|e| format!("OmniDisc: window size: {e}"))?;
     #[cfg(target_os = "macos")]
     {
-        let ns_view = window.ns_view().map_err(|e| format!("OmniDisc: ns_view: {e}"))? as *mut std::ffi::c_void;
+        let ns_view = window
+            .ns_view()
+            .map_err(|e| format!("OmniDisc: ns_view: {e}"))?;
         let ptr = ns_view as usize;
         let (w, h) = (size.width, size.height);
         let (tx, rx) = tokio::sync::oneshot::channel();
         app.run_on_main_thread(move || {
-            let result = unsafe { omnidisc_media::viewer::create_appkit_surface(ptr as *mut std::ffi::c_void, w, h) };
+            let result = unsafe {
+                omnidisc_media::viewer::create_appkit_surface(ptr as *mut std::ffi::c_void, w, h)
+            };
             let _ = tx.send(result.map_err(err));
         })
         .map_err(|e| format!("OmniDisc: main thread dispatch: {e}"))?;
-        rx.await.map_err(|_| "OmniDisc: surface creation dropped".to_string())?
+        rx.await
+            .map_err(|_| "OmniDisc: surface creation dropped".to_string())?
     }
     #[cfg(not(target_os = "macos"))]
     {
@@ -264,7 +353,11 @@ async fn create_surface_on_main(app: &tauri::AppHandle, window: &tauri::WebviewW
 }
 
 #[tauri::command]
-pub async fn omnidisc_stream_unwatch(app: tauri::AppHandle, state: tauri::State<'_, crate::AppState>, user_id: String) -> Result<(), String> {
+pub async fn omnidisc_stream_unwatch(
+    app: tauri::AppHandle,
+    state: tauri::State<'_, crate::AppState>,
+    user_id: String,
+) -> Result<(), String> {
     let removed = state.omnidisc_stream.viewers.lock().await.remove(&user_id);
     if removed.is_some() {
         if let Some(b) = state.omnidisc_voice.livekit_backend() {

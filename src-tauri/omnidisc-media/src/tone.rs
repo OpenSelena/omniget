@@ -42,7 +42,8 @@ impl ToneMeter {
             self.q2 = std::mem::replace(&mut self.q1, q0);
             self.filled += 1;
             if self.filled == BLOCK {
-                let magnitude = self.q1 * self.q1 + self.q2 * self.q2 - self.coeff * self.q1 * self.q2;
+                let magnitude =
+                    self.q1 * self.q1 + self.q2 * self.q2 - self.coeff * self.q1 * self.q2;
                 self.tone_energy += magnitude / (BLOCK as f64 / 2.0);
                 self.q1 = 0.0;
                 self.q2 = 0.0;

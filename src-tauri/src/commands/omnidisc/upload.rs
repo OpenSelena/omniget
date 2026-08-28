@@ -162,7 +162,11 @@ fn guess_mime(path: &Path) -> Option<String> {
 }
 
 fn meta_pair(key: &str, value: &str) -> String {
-    format!("{} {}", key, base64::engine::general_purpose::STANDARD.encode(value))
+    format!(
+        "{} {}",
+        key,
+        base64::engine::general_purpose::STANDARD.encode(value)
+    )
 }
 
 pub async fn instance_limits(base: &str) -> Result<InstanceInfo, String> {
@@ -178,8 +182,8 @@ struct Tus {
 
 impl Tus {
     fn new(base: &str) -> Result<Self, String> {
-        let token = store::load_token(base)?
-            .ok_or_else(|| super::api::ERR_NO_SESSION.to_string())?;
+        let token =
+            store::load_token(base)?.ok_or_else(|| super::api::ERR_NO_SESSION.to_string())?;
         Ok(Self {
             http: http_client(Duration::from_secs(120))?,
             base: base.to_string(),
@@ -285,11 +289,10 @@ impl Tus {
             .unwrap_or(offset + 1);
         if status == reqwest::StatusCode::OK {
             let text = response.text().await.unwrap_or_default();
-            let attachment = serde_json::from_str::<Attachment>(&text)
-                .map_err(|e| {
-                    tracing::warn!("[omnidisc] upload finished with an unreadable body: {}", e);
-                    ERR_SERVER.to_string()
-                })?;
+            let attachment = serde_json::from_str::<Attachment>(&text).map_err(|e| {
+                tracing::warn!("[omnidisc] upload finished with an unreadable body: {}", e);
+                ERR_SERVER.to_string()
+            })?;
             return Ok((next, Some(attachment)));
         }
         Ok((next, None))
@@ -359,7 +362,11 @@ async fn run_job(
             emit(&sink, done);
         }
         Err(err) => {
-            let state = if cancel.is_cancelled() { "cancelled" } else { "failed" };
+            let state = if cancel.is_cancelled() {
+                "cancelled"
+            } else {
+                "failed"
+            };
             let mut failed = progress_of(&job, 0, 0, state);
             failed.error = Some(err);
             emit(&sink, failed);
@@ -576,7 +583,11 @@ pub async fn omnidisc_stage_file(name: String, bytes: Vec<u8>) -> Result<String,
     std::fs::create_dir_all(&dir)
         .map_err(|e| format!("OmniDisc: could not create the upload workspace: {}", e))?;
     let safe = sanitize_filename::sanitize(&name);
-    let safe = if safe.trim().is_empty() { "pasted".to_string() } else { safe };
+    let safe = if safe.trim().is_empty() {
+        "pasted".to_string()
+    } else {
+        safe
+    };
     let path = dir.join(format!("{}-{}", uuid::Uuid::new_v4(), safe));
     std::fs::write(&path, bytes)
         .map_err(|e| format!("OmniDisc: could not stage the file: {}", e))?;
@@ -682,8 +693,15 @@ pub async fn omnidisc_download_attachment(
     if ciphertext.is_some() && manifest.is_none() {
         return Err(super::mls::ERR_NO_GROUP_YET.to_string());
     }
-    let downloaded =
-        fetch_attachment(&base, attachment_url, manifest, &attachment_id, &filename, None).await?;
+    let downloaded = fetch_attachment(
+        &base,
+        attachment_url,
+        manifest,
+        &attachment_id,
+        &filename,
+        None,
+    )
+    .await?;
     let _ = crate::commands::downloads::reveal_file(downloaded.path.clone()).await;
     Ok(downloaded)
 }
@@ -772,9 +790,16 @@ pub async fn fetch_attachment(
     into: Option<PathBuf>,
 ) -> Result<DownloadedAttachment, String> {
     let name = sanitize_filename::sanitize(
-        manifest.as_ref().map(|m| m.name.as_str()).unwrap_or(filename),
+        manifest
+            .as_ref()
+            .map(|m| m.name.as_str())
+            .unwrap_or(filename),
     );
-    let name = if name.trim().is_empty() { "download".to_string() } else { name };
+    let name = if name.trim().is_empty() {
+        "download".to_string()
+    } else {
+        name
+    };
     let target_dir = match into {
         Some(dir) => dir,
         None => dirs::download_dir()
@@ -818,13 +843,7 @@ pub async fn fetch_attachment(
             let tmp_for_task = tmp.clone();
             let target_for_task = target.clone();
             let got = tokio::task::spawn_blocking(move || {
-                omnidisc_mls::decrypt_file(
-                    &tmp_for_task,
-                    &target_for_task,
-                    &secret,
-                    &file_id,
-                    size,
-                )
+                omnidisc_mls::decrypt_file(&tmp_for_task, &target_for_task, &secret, &file_id, size)
             })
             .await
             .map_err(|e| format!("{}:{}", ERR_UPLOAD, e))?;
@@ -863,7 +882,10 @@ fn decode_secret(manifest: &FileManifest) -> Result<FileSecret, String> {
         .ok()
         .filter(|b| b.len() == 16)
         .ok_or_else(|| "ERR_ATTACHMENT_CORRUPT".to_string())?;
-    let mut secret = FileSecret { key: [0u8; 32], nonce: [0u8; 16] };
+    let mut secret = FileSecret {
+        key: [0u8; 32],
+        nonce: [0u8; 16],
+    };
     secret.key.copy_from_slice(&key);
     secret.nonce.copy_from_slice(&nonce);
     Ok(secret)
@@ -878,7 +900,9 @@ fn unique_path(dir: &Path, name: &str) -> PathBuf {
         .file_stem()
         .map(|s| s.to_string_lossy().to_string())
         .unwrap_or_else(|| name.to_string());
-    let ext = Path::new(name).extension().map(|e| e.to_string_lossy().to_string());
+    let ext = Path::new(name)
+        .extension()
+        .map(|e| e.to_string_lossy().to_string());
     for n in 2..1000 {
         let candidate = match &ext {
             Some(ext) => dir.join(format!("{stem} ({n}).{ext}")),
@@ -894,7 +918,9 @@ fn unique_path(dir: &Path, name: &str) -> PathBuf {
 /// A staged (pasted or dropped) source belongs to us, so it goes away with the
 /// upload. A file the user picked from disk is theirs and is left alone.
 fn drop_staged(source: &Path) {
-    let Ok(staged) = tmp_dir().map(|d| d.join("staged")) else { return };
+    let Ok(staged) = tmp_dir().map(|d| d.join("staged")) else {
+        return;
+    };
     if source.starts_with(&staged) {
         let _ = std::fs::remove_file(source);
     }
@@ -947,8 +973,14 @@ mod tests {
         assert!(ok("https://chat.example.org/api/uploads/42"));
         assert!(ok("https://media.example.org/attachments/42/cat.png?sig=x"));
         assert!(!ok("https://evil.example.net/attachments/42/cat.png"));
-        assert!(!ok("http://chat.example.org/api/uploads/42"), "scheme is part of the origin");
-        assert!(!ok("https://chat.example.org:8443/api/uploads/42"), "port is part of the origin");
+        assert!(
+            !ok("http://chat.example.org/api/uploads/42"),
+            "scheme is part of the origin"
+        );
+        assert!(
+            !ok("https://chat.example.org:8443/api/uploads/42"),
+            "port is part of the origin"
+        );
         assert!(!ok("http://127.0.0.1:9200/_search"));
         assert!(!ok("file:///etc/passwd"));
     }
@@ -974,15 +1006,26 @@ mod tests {
         assert_eq!(pair, "filename Y2F0LnBuZw==");
         let (key, value) = pair.split_once(' ').expect("pair");
         assert_eq!(key, "filename");
-        let decoded = base64::engine::general_purpose::STANDARD.decode(value).expect("b64");
+        let decoded = base64::engine::general_purpose::STANDARD
+            .decode(value)
+            .expect("b64");
         assert_eq!(decoded, b"cat.png");
     }
 
     #[test]
     fn mime_guesses_cover_what_the_ui_renders_inline() {
-        assert_eq!(guess_mime(Path::new("a/b/cat.PNG")).as_deref(), Some("image/png"));
-        assert_eq!(guess_mime(Path::new("clip.mp4")).as_deref(), Some("video/mp4"));
-        assert_eq!(guess_mime(Path::new("song.flac")).as_deref(), Some("audio/flac"));
+        assert_eq!(
+            guess_mime(Path::new("a/b/cat.PNG")).as_deref(),
+            Some("image/png")
+        );
+        assert_eq!(
+            guess_mime(Path::new("clip.mp4")).as_deref(),
+            Some("video/mp4")
+        );
+        assert_eq!(
+            guess_mime(Path::new("song.flac")).as_deref(),
+            Some("audio/flac")
+        );
         assert_eq!(guess_mime(Path::new("archive.7z")), None);
         assert_eq!(guess_mime(Path::new("noext")), None);
     }
@@ -1013,9 +1056,15 @@ mod tests {
             nonce: engine.encode([2u8; 16]),
         };
         assert!(decode_secret(&good).is_ok());
-        let short = FileManifest { key: engine.encode([1u8; 16]), ..good.clone() };
+        let short = FileManifest {
+            key: engine.encode([1u8; 16]),
+            ..good.clone()
+        };
         assert!(decode_secret(&short).is_err());
-        let bad = FileManifest { nonce: "!!!".into(), ..good };
+        let bad = FileManifest {
+            nonce: "!!!".into(),
+            ..good
+        };
         assert!(decode_secret(&bad).is_err());
     }
 }

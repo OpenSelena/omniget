@@ -31,7 +31,13 @@ pub fn encrypt_state(key: &[u8; 32], plaintext: &[u8]) -> Result<Vec<u8>> {
     rand::rng().fill_bytes(&mut nonce);
     let cipher = XChaCha20Poly1305::new(Key::from_slice(key));
     let ciphertext = cipher
-        .encrypt(XNonce::from_slice(&nonce), Payload { msg: plaintext, aad: &aad })
+        .encrypt(
+            XNonce::from_slice(&nonce),
+            Payload {
+                msg: plaintext,
+                aad: &aad,
+            },
+        )
         .map_err(|_| MlsError::State("could not encrypt the MLS state".into()))?;
     let mut out = aad;
     out.extend_from_slice(&nonce);
@@ -58,7 +64,10 @@ pub fn decrypt_state(key: &[u8; 32], blob: &[u8]) -> Result<Vec<u8>> {
     cipher
         .decrypt(
             XNonce::from_slice(nonce),
-            Payload { msg: &blob[head + NONCE_LEN..], aad: &blob[..head] },
+            Payload {
+                msg: &blob[head + NONCE_LEN..],
+                aad: &blob[..head],
+            },
         )
         .map_err(|_| MlsError::State("the stored MLS state failed its integrity check".into()))
 }

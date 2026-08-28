@@ -13,10 +13,10 @@
 //! exactly the bug this test is meant to catch.
 
 use super::api::Api;
-use base64::Engine;
 use super::e2e_lock::SessionDirGuard;
 use super::mls::{Decrypted, E2eePayload, MlsManager};
 use super::{auth, device, mls, store, upload};
+use base64::Engine;
 use reqwest::Method;
 use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
@@ -49,7 +49,12 @@ fn unique(prefix: &str) -> String {
         .duration_since(std::time::UNIX_EPOCH)
         .map(|d| d.as_nanos())
         .unwrap_or(0);
-    format!("{}{}{}", prefix, std::process::id() % 10_000, nanos % 1_000_000)
+    format!(
+        "{}{}{}",
+        prefix,
+        std::process::id() % 10_000,
+        nanos % 1_000_000
+    )
 }
 
 fn workspace(tag: &str) -> PathBuf {
@@ -106,7 +111,10 @@ async fn drain(side: &Side) -> Vec<Decrypted> {
 
 fn sha256_of(path: &std::path::Path) -> String {
     let bytes = std::fs::read(path).expect("read");
-    Sha256::digest(&bytes).iter().map(|b| format!("{b:02x}")).collect()
+    Sha256::digest(&bytes)
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect()
 }
 
 #[tokio::test]
@@ -116,7 +124,9 @@ async fn two_devices_exchange_an_encrypted_message_and_an_encrypted_file() {
         eprintln!("OMNIDISC_TEST_URL not set; skipping");
         return;
     };
-    let _ = tracing_subscriber::fmt().with_max_level(tracing::Level::WARN).try_init();
+    let _ = tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::WARN)
+        .try_init();
     let base = super::normalize_instance_url(&url).expect("valid url");
     let _session_dir = SessionDirGuard::acquire();
 
@@ -181,7 +191,7 @@ async fn two_devices_exchange_an_encrypted_message_and_an_encrypted_file() {
             &api,
             &mut session,
             &dm_id,
-            &[bob.user_id.clone()],
+            std::slice::from_ref(&bob.user_id),
             E2eePayload {
                 v: 1,
                 content: plaintext.to_string(),
@@ -202,7 +212,10 @@ async fn two_devices_exchange_an_encrypted_message_and_an_encrypted_file() {
         .to_string();
     assert!(!ciphertext.contains("hello from the other side"));
     let raw = serde_json::to_string(&sent).expect("json");
-    assert!(!raw.contains("hello from the other side"), "plaintext leaked into the message: {raw}");
+    assert!(
+        !raw.contains("hello from the other side"),
+        "plaintext leaked into the message: {raw}"
+    );
 
     let fetched: Vec<Value> = bob
         .api()
@@ -254,7 +267,9 @@ async fn two_devices_exchange_an_encrypted_message_and_an_encrypted_file() {
         seen_progress.lock().map(|v| v.len() > 1).unwrap_or(false),
         "the upload reported no progress"
     );
-    let manifest = ready.manifest().expect("an encrypted upload has a manifest");
+    let manifest = ready
+        .manifest()
+        .expect("an encrypted upload has a manifest");
 
     let sent_file = {
         let api = alice.api();
@@ -264,7 +279,7 @@ async fn two_devices_exchange_an_encrypted_message_and_an_encrypted_file() {
             &api,
             &mut session,
             &dm_id,
-            &[bob.user_id.clone()],
+            std::slice::from_ref(&bob.user_id),
             E2eePayload {
                 v: 1,
                 content: String::new(),
@@ -276,20 +291,29 @@ async fn two_devices_exchange_an_encrypted_message_and_an_encrypted_file() {
         .await
         .expect("send file message")
     };
-    let file_ciphertext = sent_file["e2ee"]["ciphertext"].as_str().expect("ciphertext");
+    let file_ciphertext = sent_file["e2ee"]["ciphertext"]
+        .as_str()
+        .expect("ciphertext");
 
     let received = drain(&bob).await;
     let with_file = received
         .iter()
         .find(|d| d.ciphertext == file_ciphertext)
         .expect("bob decrypted the file message");
-    let got = with_file.payload.files.first().expect("the manifest survived");
+    let got = with_file
+        .payload
+        .files
+        .first()
+        .expect("the manifest survived");
     assert_eq!(got.name, "five-mib.bin");
     assert_eq!(got.size, data.len() as u64);
     assert_eq!(got.sha256, source_sha);
     assert_eq!(got.attachment_id, manifest.attachment_id);
     assert_eq!(got.file_id, manifest.file_id);
-    assert_ne!(got.file_id, got.attachment_id, "the AAD id must not be the server's id");
+    assert_ne!(
+        got.file_id, got.attachment_id,
+        "the AAD id must not be the server's id"
+    );
 
     // The blob the server holds is ciphertext, not the file.
     let http = super::api::http_client(std::time::Duration::from_secs(120)).expect("http");
@@ -301,8 +325,16 @@ async fn two_devices_exchange_an_encrypted_message_and_an_encrypted_file() {
         .bytes()
         .await
         .expect("blob bytes");
-    assert_ne!(downloaded_raw.len(), data.len(), "the stored blob is not padded ciphertext");
-    assert_ne!(&downloaded_raw[..64], &data[..64], "the server stored the file in the clear");
+    assert_ne!(
+        downloaded_raw.len(),
+        data.len(),
+        "the stored blob is not padded ciphertext"
+    );
+    assert_ne!(
+        &downloaded_raw[..64],
+        &data[..64],
+        "the server stored the file in the clear"
+    );
 
     bob.activate();
     let into = workspace("bob-downloads");
@@ -322,9 +354,16 @@ async fn two_devices_exchange_an_encrypted_message_and_an_encrypted_file() {
     let mut wrong = got.clone();
     wrong.sha256 = "0".repeat(64);
     assert!(
-        upload::fetch_attachment(&base, None, Some(wrong), &got.attachment_id, &got.name, Some(into))
-            .await
-            .is_err(),
+        upload::fetch_attachment(
+            &base,
+            None,
+            Some(wrong),
+            &got.attachment_id,
+            &got.name,
+            Some(into)
+        )
+        .await
+        .is_err(),
         "a mismatched hash was accepted"
     );
 

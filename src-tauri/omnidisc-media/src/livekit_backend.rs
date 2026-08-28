@@ -7,8 +7,8 @@ use crate::audio::{
 };
 use crate::e2ee::{KeyRing, KeyRotation, RoomKey};
 use crate::engine::{
-    AudioPrefs, BackendEvent, ConnectOptions, ConnectOutcome, DeviceStatus, EngineNotification, MediaBackend,
-    MediaError, Quality, VoiceStats,
+    AudioPrefs, BackendEvent, ConnectOptions, ConnectOutcome, DeviceStatus, EngineNotification,
+    MediaBackend, MediaError, Quality, VoiceStats,
 };
 use crate::state::VoiceEvent;
 use crate::tone::ToneMeter;
@@ -16,12 +16,14 @@ use async_trait::async_trait;
 use futures::StreamExt;
 use livekit::e2ee::key_provider::{KeyProvider, KeyProviderOptions};
 use livekit::e2ee::{E2eeOptions, EncryptionType};
+use livekit::options::TrackPublishOptions;
 use livekit::prelude::*;
-use livekit::webrtc::audio_source::{native::NativeAudioSource, AudioSourceOptions, RtcAudioSource};
+use livekit::webrtc::audio_source::{
+    native::NativeAudioSource, AudioSourceOptions, RtcAudioSource,
+};
 use livekit::webrtc::audio_stream::native::NativeAudioStream;
 use livekit::webrtc::peer_connection_factory::{IceServer, IceTransportsType};
 use livekit::webrtc::stats::RtcStats;
-use livekit::options::TrackPublishOptions;
 use livekit::{DisconnectReason, RoomEvent, RoomOptions};
 use omnidisc_proto::gateway::VoiceServerUpdate;
 use std::collections::{HashMap, HashSet};
@@ -106,7 +108,11 @@ impl Shared {
     }
 
     fn volume_for(&self, user_id: &str) -> f32 {
-        self.volumes.lock().ok().and_then(|v| v.get(user_id).copied()).unwrap_or(1.0)
+        self.volumes
+            .lock()
+            .ok()
+            .and_then(|v| v.get(user_id).copied())
+            .unwrap_or(1.0)
     }
 
     fn input_device(&self) -> Option<String> {
@@ -213,12 +219,19 @@ fn recover(shared: &Arc<Shared>, kind: DeviceKind) {
                     DeviceKind::Input => shared.input_running.store(true, Ordering::Release),
                     DeviceKind::Output => shared.output_running.store(true, Ordering::Release),
                 }
-                shared.emit(EngineNotification::Device { kind, status: DeviceStatus::Recovered, cause: None });
+                shared.emit(EngineNotification::Device {
+                    kind,
+                    status: DeviceStatus::Recovered,
+                    cause: None,
+                });
                 return;
             }
             Err(e) => e,
         };
-        let still_listed = wanted.as_deref().map(|id| devices::exists(kind, id)).unwrap_or(true);
+        let still_listed = wanted
+            .as_deref()
+            .map(|id| devices::exists(kind, id))
+            .unwrap_or(true);
         let cause = classify_loss(still_listed, &error);
         if cause == DeviceLoss::PermissionRevoked {
             give_up(shared, kind, cause);
@@ -271,8 +284,16 @@ fn give_up(shared: &Arc<Shared>, kind: DeviceKind, cause: DeviceLoss) {
             DeviceStatus::Silent
         }
     };
-    tracing::warn!("[omnidisc-media] giving up on the {:?} device: {:?}", kind, cause);
-    shared.emit(EngineNotification::Device { kind, status, cause: Some(cause) });
+    tracing::warn!(
+        "[omnidisc-media] giving up on the {:?} device: {:?}",
+        kind,
+        cause
+    );
+    shared.emit(EngineNotification::Device {
+        kind,
+        status,
+        cause: Some(cause),
+    });
 }
 
 impl LiveKitBackend {
@@ -286,43 +307,72 @@ impl LiveKitBackend {
         let flags = Arc::new(CaptureFlags::default());
         let mixer = Arc::new(Mixer::default());
         let events: StdMutex<Option<mpsc::UnboundedSender<BackendEvent>>> = StdMutex::new(None);
-        let shared_slot: Arc<StdMutex<Option<std::sync::Weak<Shared>>>> = Arc::new(StdMutex::new(None));
+        let shared_slot: Arc<StdMutex<Option<std::sync::Weak<Shared>>>> =
+            Arc::new(StdMutex::new(None));
         let capture_slot = shared_slot.clone();
         let capture_sink: crate::audio::capture::CaptureSink = Arc::new(move |ev| {
-            let Some(shared) = capture_slot.lock().ok().and_then(|s| s.as_ref().and_then(|w| w.upgrade())) else {
+            let Some(shared) = capture_slot
+                .lock()
+                .ok()
+                .and_then(|s| s.as_ref().and_then(|w| w.upgrade()))
+            else {
                 return;
             };
             match ev {
-                CaptureEvent::Level { rms_db, peak } => shared.emit(EngineNotification::Level { rms_db, peak }),
+                CaptureEvent::Level { rms_db, peak } => {
+                    shared.emit(EngineNotification::Level { rms_db, peak })
+                }
                 CaptureEvent::Speaking(speaking) => {
                     shared.mixer.set_ducking(speaking);
                     if let Some(id) = shared.local_identity() {
-                        shared.emit(EngineNotification::Speaking { user_id: id, speaking });
+                        shared.emit(EngineNotification::Speaking {
+                            user_id: id,
+                            speaking,
+                        });
                     }
                 }
                 CaptureEvent::Underrun => tracing::debug!("[omnidisc-media] microphone underrun"),
             }
         });
-        let feeder = Arc::new(Feeder::spawn(flags.clone(), capture_sink).map_err(MediaError::Device)?);
+        let feeder =
+            Arc::new(Feeder::spawn(flags.clone(), capture_sink).map_err(MediaError::Device)?);
         let fault_slot = shared_slot.clone();
         let fault_sink: crate::audio::io::FaultSink = Arc::new(move |fault, message| {
-            let Some(shared) = fault_slot.lock().ok().and_then(|s| s.as_ref().and_then(|w| w.upgrade())) else {
+            let Some(shared) = fault_slot
+                .lock()
+                .ok()
+                .and_then(|s| s.as_ref().and_then(|w| w.upgrade()))
+            else {
                 return;
             };
-            tracing::warn!("[omnidisc-media] audio stream fault {:?}: {}", fault, message);
+            tracing::warn!(
+                "[omnidisc-media] audio stream fault {:?}: {}",
+                fault,
+                message
+            );
             let kind = match fault {
                 StreamFault::Input => {
                     shared.input_running.store(false, Ordering::Release);
-                    shared.emit(EngineNotification::Error { code: "ERR_VOICE_MIC_LOST".into(), message });
+                    shared.emit(EngineNotification::Error {
+                        code: "ERR_VOICE_MIC_LOST".into(),
+                        message,
+                    });
                     DeviceKind::Input
                 }
                 StreamFault::Output => {
                     shared.output_running.store(false, Ordering::Release);
-                    shared.emit(EngineNotification::Error { code: "ERR_VOICE_OUTPUT_LOST".into(), message });
+                    shared.emit(EngineNotification::Error {
+                        code: "ERR_VOICE_OUTPUT_LOST".into(),
+                        message,
+                    });
                     DeviceKind::Output
                 }
             };
-            shared.emit(EngineNotification::Device { kind, status: DeviceStatus::Lost, cause: None });
+            shared.emit(EngineNotification::Device {
+                kind,
+                status: DeviceStatus::Lost,
+                cause: None,
+            });
             // The cpal error callback runs on the device thread: re-opening a
             // device from here would deadlock the very thread that has to answer.
             if shared.recovering(kind).swap(true, Ordering::AcqRel) {
@@ -340,7 +390,8 @@ impl LiveKitBackend {
                 shared.recovering(kind).store(false, Ordering::Release);
             }
         });
-        let io = AudioIo::spawn(feeder.clone(), mixer.clone(), fault_sink).map_err(MediaError::Device)?;
+        let io = AudioIo::spawn(feeder.clone(), mixer.clone(), fault_sink)
+            .map_err(MediaError::Device)?;
         let shared = Arc::new(Shared {
             events,
             flags,
@@ -368,7 +419,10 @@ impl LiveKitBackend {
         if let Ok(mut slot) = shared_slot.lock() {
             *slot = Some(Arc::downgrade(&shared));
         }
-        Ok(Self { rt: Some(rt), shared })
+        Ok(Self {
+            rt: Some(rt),
+            shared,
+        })
     }
 
     pub fn remote_nonsilent_frames(&self) -> u64 {
@@ -379,7 +433,11 @@ impl LiveKitBackend {
     /// Amplitude alone cannot distinguish delivered audio from the comfort noise
     /// Opus invents when frames fail to decrypt, so the e2e tests assert on this.
     pub fn remote_tone_ratio(&self) -> f64 {
-        self.shared.remote_tone.lock().map(|m| m.ratio()).unwrap_or(0.0)
+        self.shared
+            .remote_tone
+            .lock()
+            .map(|m| m.ratio())
+            .unwrap_or(0.0)
     }
 
     pub fn set_test_tone(&self, hz: Option<f32>) {
@@ -391,7 +449,12 @@ impl LiveKitBackend {
     }
 
     pub async fn current_room(&self) -> Option<Arc<Room>> {
-        self.shared.session.lock().await.as_ref().map(|s| s.room.clone())
+        self.shared
+            .session
+            .lock()
+            .await
+            .as_ref()
+            .map(|s| s.room.clone())
     }
 
     pub async fn is_connected(&self) -> bool {
@@ -407,22 +470,36 @@ impl LiveKitBackend {
     }
 
     pub fn remote_video_for(&self, user_id: &str) -> Option<RemoteVideo> {
-        self.shared.remote_video.lock().ok().and_then(|m| m.get(user_id).cloned())
+        self.shared
+            .remote_video
+            .lock()
+            .ok()
+            .and_then(|m| m.get(user_id).cloned())
     }
 
     pub fn video_publication_for(&self, user_id: &str) -> Option<RemoteTrackPublication> {
-        self.shared.video_publications.lock().ok().and_then(|m| m.get(user_id).cloned())
+        self.shared
+            .video_publications
+            .lock()
+            .ok()
+            .and_then(|m| m.get(user_id).cloned())
     }
 
     pub fn streaming_user_ids(&self) -> Vec<String> {
-        self.shared.video_publications.lock().map(|m| m.keys().cloned().collect()).unwrap_or_default()
+        self.shared
+            .video_publications
+            .lock()
+            .map(|m| m.keys().cloned().collect())
+            .unwrap_or_default()
     }
 
     async fn on_runtime<T: Send + 'static>(
         &self,
         fut: impl std::future::Future<Output = Result<T, MediaError>> + Send + 'static,
     ) -> Result<T, MediaError> {
-        let Some(rt) = self.rt.as_ref() else { return Err(MediaError::Unavailable("media runtime stopped".into())) };
+        let Some(rt) = self.rt.as_ref() else {
+            return Err(MediaError::Unavailable("media runtime stopped".into()));
+        };
         match rt.spawn(fut).await {
             Ok(r) => r,
             Err(e) if e.is_panic() => Err(MediaError::Panicked),
@@ -459,14 +536,21 @@ fn spawn_remote_audio(
     }
     tokio::spawn(async move {
         let (mut producer, consumer) = rtrb::RingBuffer::<f32>::new(REMOTE_RING_SAMPLES);
-        shared.mixer.add_source(key.clone(), gain_key.clone(), consumer, shared.volume_for(&gain_key));
+        shared.mixer.add_source(
+            key.clone(),
+            gain_key.clone(),
+            consumer,
+            shared.volume_for(&gain_key),
+        );
         let mut stream = NativeAudioStream::new(track.rtc_track(), MIX_RATE as i32, 1);
         let mut scratch: Vec<f32> = Vec::with_capacity(FRAME_SAMPLES * 4);
         while let Some(frame) = stream.next().await {
             scratch.clear();
             scratch.extend(frame.data.iter().map(|s| *s as f32 / 32_768.0));
             if scratch.iter().any(|s| s.abs() > 0.01) {
-                shared.remote_nonsilent_frames.fetch_add(1, Ordering::Relaxed);
+                shared
+                    .remote_nonsilent_frames
+                    .fetch_add(1, Ordering::Relaxed);
             }
             if let Ok(mut meter) = shared.remote_tone.lock() {
                 meter.push(&scratch);
@@ -491,16 +575,24 @@ async fn run_room_events(
     while let Some(ev) = events.recv().await {
         match ev {
             RoomEvent::ParticipantConnected(p) => {
-                shared.emit(EngineNotification::ParticipantJoined { user_id: p.identity().0 });
+                shared.emit(EngineNotification::ParticipantJoined {
+                    user_id: p.identity().0,
+                });
             }
             RoomEvent::ParticipantDisconnected(p) => {
                 let id = p.identity().0;
                 if speakers.remove(&id) {
-                    shared.emit(EngineNotification::Speaking { user_id: id.clone(), speaking: false });
+                    shared.emit(EngineNotification::Speaking {
+                        user_id: id.clone(),
+                        speaking: false,
+                    });
                 }
                 shared.emit(EngineNotification::ParticipantLeft { user_id: id });
             }
-            RoomEvent::TrackPublished { publication, participant } => {
+            RoomEvent::TrackPublished {
+                publication,
+                participant,
+            } => {
                 if publication.kind() == TrackKind::Video {
                     if let Ok(mut m) = shared.video_publications.lock() {
                         m.insert(participant.identity().0, publication.clone());
@@ -509,7 +601,10 @@ async fn run_room_events(
                     subscribe_audio(&publication);
                 }
             }
-            RoomEvent::TrackUnpublished { publication, participant } => {
+            RoomEvent::TrackUnpublished {
+                publication,
+                participant,
+            } => {
                 if publication.kind() == TrackKind::Video {
                     if let Ok(mut m) = shared.video_publications.lock() {
                         m.remove(&participant.identity().0);
@@ -519,7 +614,11 @@ async fn run_room_events(
                     }
                 }
             }
-            RoomEvent::TrackSubscribed { track, participant, publication } => match track {
+            RoomEvent::TrackSubscribed {
+                track,
+                participant,
+                publication,
+            } => match track {
                 RemoteTrack::Audio(audio) => {
                     let sid = audio.sid().to_string();
                     let user = participant.identity().0;
@@ -528,7 +627,13 @@ async fn run_room_events(
                     } else {
                         user
                     };
-                    let handle = spawn_remote_audio(shared.clone(), remote_audio.clone(), audio, participant.identity().0, gain_key);
+                    let handle = spawn_remote_audio(
+                        shared.clone(),
+                        remote_audio.clone(),
+                        audio,
+                        participant.identity().0,
+                        gain_key,
+                    );
                     if let Some(old) = feeders.insert(sid, handle) {
                         old.abort();
                     }
@@ -537,12 +642,18 @@ async fn run_room_events(
                     if let Ok(mut m) = shared.remote_video.lock() {
                         m.insert(
                             participant.identity().0.clone(),
-                            RemoteVideo { user_id: participant.identity().0, sid: video.sid().to_string(), track: video },
+                            RemoteVideo {
+                                user_id: participant.identity().0,
+                                sid: video.sid().to_string(),
+                                track: video,
+                            },
                         );
                     }
                 }
             },
-            RoomEvent::TrackUnsubscribed { track, participant, .. } => match track {
+            RoomEvent::TrackUnsubscribed {
+                track, participant, ..
+            } => match track {
                 RemoteTrack::Audio(audio) => {
                     let sid = audio.sid().to_string();
                     if let Some(h) = feeders.remove(&sid) {
@@ -566,17 +677,31 @@ async fn run_room_events(
                     .filter(|id| *id != local_identity)
                     .collect();
                 for id in speakers.difference(&next) {
-                    shared.emit(EngineNotification::Speaking { user_id: id.clone(), speaking: false });
+                    shared.emit(EngineNotification::Speaking {
+                        user_id: id.clone(),
+                        speaking: false,
+                    });
                 }
                 for id in next.difference(&speakers) {
-                    shared.emit(EngineNotification::Speaking { user_id: id.clone(), speaking: true });
+                    shared.emit(EngineNotification::Speaking {
+                        user_id: id.clone(),
+                        speaking: true,
+                    });
                 }
                 speakers = next;
             }
-            RoomEvent::ConnectionQualityChanged { quality, participant } => {
-                shared.emit(EngineNotification::Quality { user_id: participant.identity().0, quality: quality_of(quality) });
+            RoomEvent::ConnectionQualityChanged {
+                quality,
+                participant,
+            } => {
+                shared.emit(EngineNotification::Quality {
+                    user_id: participant.identity().0,
+                    quality: quality_of(quality),
+                });
             }
-            RoomEvent::Reconnecting => shared.transport(VoiceEvent::Disconnected { recoverable: true }),
+            RoomEvent::Reconnecting => {
+                shared.transport(VoiceEvent::Disconnected { recoverable: true })
+            }
             RoomEvent::Reconnected => shared.transport(VoiceEvent::Reconnected),
             RoomEvent::Disconnected { reason } => {
                 if reason != DisconnectReason::ClientInitiated {
@@ -654,8 +779,14 @@ impl MediaBackend for LiveKitBackend {
             if let Ok(mut d) = shared.output_device.lock() {
                 *d = prefs.output_device.clone();
             }
-            shared.flags.denoise.store(prefs.noise_suppression && cfg!(feature = "rnnoise"), Ordering::Relaxed);
-            shared.flags.ptt_enabled.store(prefs.ptt_enabled, Ordering::Relaxed);
+            shared.flags.denoise.store(
+                prefs.noise_suppression && cfg!(feature = "rnnoise"),
+                Ordering::Relaxed,
+            );
+            shared
+                .flags
+                .ptt_enabled
+                .store(prefs.ptt_enabled, Ordering::Relaxed);
             if let Some(db) = prefs.vad_threshold_db {
                 shared.flags.set_vad_threshold_db(db);
             }
@@ -686,20 +817,31 @@ impl MediaBackend for LiveKitBackend {
             // index is the epoch, which is what lets a member who has not merged
             // the newest commit yet still decode the previous epoch's frames.
             if let Some(room_key) = connect_options.room_key {
-                let provider =
-                    KeyProvider::with_shared_key(KeyProviderOptions::default(), room_key.key.to_vec());
+                let provider = KeyProvider::with_shared_key(
+                    KeyProviderOptions::default(),
+                    room_key.key.to_vec(),
+                );
                 options.encryption = Some(E2eeOptions {
                     encryption_type: EncryptionType::Gcm,
                     key_provider: provider.clone(),
                 });
-                shared.rotation.arm(Arc::new(LiveKitRing(provider)), room_key);
-                tracing::info!("[omnidisc-media] room {} is end-to-end encrypted", target.room);
+                shared
+                    .rotation
+                    .arm(Arc::new(LiveKitRing(provider)), room_key);
+                tracing::info!(
+                    "[omnidisc-media] room {} is end-to-end encrypted",
+                    target.room
+                );
             }
             let connect = Room::connect(&target.endpoint, &target.token, options);
             let (room, events) = match tokio::time::timeout(CONNECT_TIMEOUT, connect).await {
                 Ok(Ok(r)) => r,
                 Ok(Err(e)) => {
-                    tracing::warn!("[omnidisc-media] livekit connect to {} failed: {}", target.endpoint, e);
+                    tracing::warn!(
+                        "[omnidisc-media] livekit connect to {} failed: {}",
+                        target.endpoint,
+                        e
+                    );
                     return Err(MediaError::Connection(e.to_string()));
                 }
                 Err(_) => return Err(MediaError::Connection("timed out".into())),
@@ -720,11 +862,18 @@ impl MediaBackend for LiveKitBackend {
                 1,
                 0,
             );
-            let audio_track = LocalAudioTrack::create_audio_track("microphone", RtcAudioSource::Native(source.clone()));
+            let audio_track = LocalAudioTrack::create_audio_track(
+                "microphone",
+                RtcAudioSource::Native(source.clone()),
+            );
             room.local_participant()
                 .publish_track(
                     LocalTrack::Audio(audio_track.clone()),
-                    TrackPublishOptions { source: TrackSource::Microphone, dtx: true, ..Default::default() },
+                    TrackPublishOptions {
+                        source: TrackSource::Microphone,
+                        dtx: true,
+                        ..Default::default()
+                    },
                 )
                 .await
                 .map_err(|e| MediaError::Connection(format!("publish microphone: {e}")))?;
@@ -733,9 +882,12 @@ impl MediaBackend for LiveKitBackend {
                 audio_track.mute();
             }
 
-            let remote_audio: Arc<StdMutex<HashMap<String, RemoteAudioTrack>>> = Arc::new(StdMutex::new(HashMap::new()));
+            let remote_audio: Arc<StdMutex<HashMap<String, RemoteAudioTrack>>> =
+                Arc::new(StdMutex::new(HashMap::new()));
             for (_, participant) in room.remote_participants() {
-                shared.emit(EngineNotification::ParticipantJoined { user_id: participant.identity().0 });
+                shared.emit(EngineNotification::ParticipantJoined {
+                    user_id: participant.identity().0,
+                });
                 for (_, publication) in participant.track_publications() {
                     if publication.kind() == TrackKind::Video {
                         if let Ok(mut m) = shared.video_publications.lock() {
@@ -746,7 +898,12 @@ impl MediaBackend for LiveKitBackend {
                     }
                 }
             }
-            let events_task = tokio::spawn(run_room_events(shared.clone(), remote_audio.clone(), local_identity.clone(), events));
+            let events_task = tokio::spawn(run_room_events(
+                shared.clone(),
+                remote_audio.clone(),
+                local_identity.clone(),
+                events,
+            ));
 
             let mut outcome = ConnectOutcome::default();
             if let Err(e) = shared.ensure_output() {
@@ -824,7 +981,9 @@ impl MediaBackend for LiveKitBackend {
                     }
                     if shared.input_running.load(Ordering::Acquire) {
                         shared.input_running.store(false, Ordering::Release);
-                        shared.ensure_input().map_err(|e| MediaError::Device(map_io_error(&e, DeviceKind::Input)))?;
+                        shared
+                            .ensure_input()
+                            .map_err(|e| MediaError::Device(map_io_error(&e, DeviceKind::Input)))?;
                     }
                 }
                 DeviceKind::Output => {
@@ -833,7 +992,9 @@ impl MediaBackend for LiveKitBackend {
                     }
                     if shared.output_running.load(Ordering::Acquire) {
                         shared.output_running.store(false, Ordering::Release);
-                        shared.ensure_output().map_err(|e| MediaError::Device(map_io_error(&e, DeviceKind::Output)))?;
+                        shared.ensure_output().map_err(|e| {
+                            MediaError::Device(map_io_error(&e, DeviceKind::Output))
+                        })?;
                     }
                 }
             }
@@ -843,7 +1004,10 @@ impl MediaBackend for LiveKitBackend {
     }
 
     async fn set_noise_suppression(&self, on: bool) -> Result<(), MediaError> {
-        self.shared.flags.denoise.store(on && cfg!(feature = "rnnoise"), Ordering::Relaxed);
+        self.shared
+            .flags
+            .denoise
+            .store(on && cfg!(feature = "rnnoise"), Ordering::Relaxed);
         Ok(())
     }
 
@@ -856,7 +1020,9 @@ impl MediaBackend for LiveKitBackend {
             return Ok(());
         }
         let shared = self.shared.clone();
-        let Some(rt) = self.rt.as_ref() else { return Ok(()) };
+        let Some(rt) = self.rt.as_ref() else {
+            return Ok(());
+        };
         rt.spawn(async move {
             tokio::time::sleep(PTT_RELEASE_DELAY).await;
             if shared.ptt_generation.load(Ordering::Acquire) == generation {
@@ -872,7 +1038,9 @@ impl MediaBackend for LiveKitBackend {
             shared.monitor.store(on, Ordering::Release);
             shared.flags.monitor.store(on, Ordering::Relaxed);
             if on {
-                shared.ensure_input().map_err(|e| MediaError::Device(map_io_error(&e, DeviceKind::Input)))?;
+                shared
+                    .ensure_input()
+                    .map_err(|e| MediaError::Device(map_io_error(&e, DeviceKind::Input)))?;
             } else {
                 shared.stop_input_if_idle();
             }
@@ -902,12 +1070,24 @@ impl MediaBackend for LiveKitBackend {
         self.on_runtime(async move {
             let (track, remotes, participants) = {
                 let guard = shared.session.lock().await;
-                let Some(s) = guard.as_ref() else { return Err(MediaError::NotConnected) };
-                let remotes: Vec<RemoteAudioTrack> =
-                    s.remote_audio.lock().map(|m| m.values().cloned().collect()).unwrap_or_default();
-                (s.audio_track.clone(), remotes, s.room.remote_participants().len())
+                let Some(s) = guard.as_ref() else {
+                    return Err(MediaError::NotConnected);
+                };
+                let remotes: Vec<RemoteAudioTrack> = s
+                    .remote_audio
+                    .lock()
+                    .map(|m| m.values().cloned().collect())
+                    .unwrap_or_default();
+                (
+                    s.audio_track.clone(),
+                    remotes,
+                    s.room.remote_participants().len(),
+                )
             };
-            let mut out = VoiceStats { participants, ..Default::default() };
+            let mut out = VoiceStats {
+                participants,
+                ..Default::default()
+            };
             let mut bytes_out = 0u64;
             let mut bytes_in = 0u64;
             if let Ok(stats) = track.get_stats().await {
@@ -921,10 +1101,12 @@ impl MediaBackend for LiveKitBackend {
                             out.packet_loss = Some(r.remote_inbound.fraction_lost.clamp(0.0, 1.0));
                             out.jitter_ms = Some(r.received.jitter * 1000.0);
                         }
-                        RtcStats::CandidatePair(p) if p.candidate_pair.nominated => {
-                            if out.rtt_ms.is_none() && p.candidate_pair.current_round_trip_time > 0.0 {
-                                out.rtt_ms = Some(p.candidate_pair.current_round_trip_time * 1000.0);
-                            }
+                        RtcStats::CandidatePair(p)
+                            if p.candidate_pair.nominated
+                                && out.rtt_ms.is_none()
+                                && p.candidate_pair.current_round_trip_time > 0.0 =>
+                        {
+                            out.rtt_ms = Some(p.candidate_pair.current_round_trip_time * 1000.0);
                         }
                         _ => {}
                     }
@@ -944,15 +1126,19 @@ impl MediaBackend for LiveKitBackend {
                 }
             }
             if out.packet_loss.is_none() && received > 0 {
-                out.packet_loss = Some((lost.max(0) as f64 / (received as f64 + lost.max(0) as f64)).clamp(0.0, 1.0));
+                out.packet_loss = Some(
+                    (lost.max(0) as f64 / (received as f64 + lost.max(0) as f64)).clamp(0.0, 1.0),
+                );
             }
             let now = Instant::now();
             if let Ok(mut last) = shared.last_stats.lock() {
                 if let Some((t, o, i)) = *last {
                     let dt = now.duration_since(t).as_secs_f64();
                     if dt > 0.2 {
-                        out.bitrate_out_kbps = (bytes_out.saturating_sub(o) as f64 * 8.0 / 1000.0) / dt;
-                        out.bitrate_in_kbps = (bytes_in.saturating_sub(i) as f64 * 8.0 / 1000.0) / dt;
+                        out.bitrate_out_kbps =
+                            (bytes_out.saturating_sub(o) as f64 * 8.0 / 1000.0) / dt;
+                        out.bitrate_in_kbps =
+                            (bytes_in.saturating_sub(i) as f64 * 8.0 / 1000.0) / dt;
                     }
                 }
                 *last = Some((now, bytes_out, bytes_in));

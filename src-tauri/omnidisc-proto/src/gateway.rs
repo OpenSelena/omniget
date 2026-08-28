@@ -60,7 +60,12 @@ pub struct Frame {
 
 impl Frame {
     pub fn new(op: Opcode, d: impl Serialize) -> Self {
-        Self { op, s: None, t: None, d: serde_json::to_value(d).ok() }
+        Self {
+            op,
+            s: None,
+            t: None,
+            d: serde_json::to_value(d).ok(),
+        }
     }
 
     pub fn dispatch(seq: u64, event: &DispatchEvent) -> Self {
@@ -68,7 +73,12 @@ impl Frame {
             serde_json::Value::Object(mut m) => m.remove("d"),
             other => Some(other),
         });
-        Self { op: Opcode::Dispatch, s: Some(seq), t: Some(event.name().to_string()), d }
+        Self {
+            op: Opcode::Dispatch,
+            s: Some(seq),
+            t: Some(event.name().to_string()),
+            d,
+        }
     }
 
     pub fn event(&self) -> Option<DispatchEvent> {
@@ -264,20 +274,46 @@ pub struct MemberListUpdate {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "op", rename_all = "snake_case")]
 pub enum MemberListOp {
-    Sync { range: (u32, u32), items: Vec<MemberListItem> },
-    Insert { index: u32, item: MemberListItem },
-    Update { index: u32, item: MemberListItem },
-    Delete { index: u32 },
-    Invalidate { range: (u32, u32) },
+    Sync {
+        range: (u32, u32),
+        items: Vec<MemberListItem>,
+    },
+    Insert {
+        index: u32,
+        item: MemberListItem,
+    },
+    Update {
+        index: u32,
+        item: MemberListItem,
+    },
+    Delete {
+        index: u32,
+    },
+    Invalidate {
+        range: (u32, u32),
+    },
 }
 
+// Wire type shared with omnidisc-server: boxing a variant would keep the JSON
+// identical but break every construction site in that repo.
+#[allow(clippy::large_enum_variant)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum MemberListItem {
-    Group { id: String, count: u32 },
-    Member { member: Member, user: User, presence: Option<PresenceUpdate> },
+    Group {
+        id: String,
+        count: u32,
+    },
+    Member {
+        member: Member,
+        user: User,
+        presence: Option<PresenceUpdate>,
+    },
 }
 
+// Wire type shared with omnidisc-server: boxing a variant would keep the JSON
+// identical but break every construction site in that repo.
+#[allow(clippy::large_enum_variant)]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "t", content = "d")]
 #[serde(rename_all = "SCREAMING_SNAKE_CASE")]
@@ -286,38 +322,76 @@ pub enum DispatchEvent {
     Resumed,
     GuildCreate(Guild),
     GuildUpdate(Guild),
-    GuildDelete { id: Snowflake },
+    GuildDelete {
+        id: Snowflake,
+    },
     GuildMemberAdd(Member),
     GuildMemberUpdate(Member),
-    GuildMemberRemove { guild_id: Snowflake, user_id: Snowflake },
+    GuildMemberRemove {
+        guild_id: Snowflake,
+        user_id: Snowflake,
+    },
     GuildMemberListUpdate(MemberListUpdate),
     GuildRoleCreate(Role),
     GuildRoleUpdate(Role),
-    GuildRoleDelete { guild_id: Snowflake, id: Snowflake },
+    GuildRoleDelete {
+        guild_id: Snowflake,
+        id: Snowflake,
+    },
     ChannelCreate(Channel),
     ChannelUpdate(Channel),
-    ChannelDelete { id: Snowflake },
-    ChannelPinsUpdate { channel_id: Snowflake },
+    ChannelDelete {
+        id: Snowflake,
+    },
+    ChannelPinsUpdate {
+        channel_id: Snowflake,
+    },
     MessageCreate(Message),
     MessageUpdate(Message),
-    MessageDelete { id: Snowflake, channel_id: Snowflake },
-    MessageDeleteBulk { ids: Vec<Snowflake>, channel_id: Snowflake },
-    MessageReactionAdd { channel_id: Snowflake, message_id: Snowflake, user_id: Snowflake, emoji: crate::message::Emoji },
-    MessageReactionRemove { channel_id: Snowflake, message_id: Snowflake, user_id: Snowflake, emoji: crate::message::Emoji },
+    MessageDelete {
+        id: Snowflake,
+        channel_id: Snowflake,
+    },
+    MessageDeleteBulk {
+        ids: Vec<Snowflake>,
+        channel_id: Snowflake,
+    },
+    MessageReactionAdd {
+        channel_id: Snowflake,
+        message_id: Snowflake,
+        user_id: Snowflake,
+        emoji: crate::message::Emoji,
+    },
+    MessageReactionRemove {
+        channel_id: Snowflake,
+        message_id: Snowflake,
+        user_id: Snowflake,
+        emoji: crate::message::Emoji,
+    },
     MessageAck(ReadState),
     TypingStart(TypingStart),
     PresenceUpdate(PresenceUpdate),
     PresenceUpdateBulk(Vec<PresenceUpdate>),
     UserUpdate(User),
     RelationshipAdd(Relationship),
-    RelationshipRemove { user_id: Snowflake },
+    RelationshipRemove {
+        user_id: Snowflake,
+    },
     VoiceStateUpdate(VoiceState),
     VoiceServerUpdate(VoiceServerUpdate),
-    CallRing { channel_id: Snowflake, from_user_id: Snowflake },
+    CallRing {
+        channel_id: Snowflake,
+        from_user_id: Snowflake,
+    },
     MlsEnvelope(MlsEnvelope),
-    DeviceRevoked { user_id: Snowflake, device_id: String },
+    DeviceRevoked {
+        user_id: Snowflake,
+        device_id: String,
+    },
     InviteCreate(crate::channel::Invite),
-    InviteDelete { code: String },
+    InviteDelete {
+        code: String,
+    },
     SessionsReplace(Vec<SessionInfo>),
 }
 
@@ -383,8 +457,15 @@ mod tests {
         let f = Frame::dispatch(3, &ev);
         assert_eq!(f.t.as_deref(), Some("CHANNEL_DELETE"));
         assert_eq!(f.s, Some(3));
-        assert_eq!(f.d.as_ref().and_then(|d| d.get("id")).and_then(|v| v.as_str()), Some("42"));
-        assert!(matches!(f.event(), Some(DispatchEvent::ChannelDelete { id }) if id == Snowflake(42)));
+        assert_eq!(
+            f.d.as_ref()
+                .and_then(|d| d.get("id"))
+                .and_then(|v| v.as_str()),
+            Some("42")
+        );
+        assert!(
+            matches!(f.event(), Some(DispatchEvent::ChannelDelete { id }) if id == Snowflake(42))
+        );
     }
 
     #[test]
@@ -400,11 +481,25 @@ mod tests {
         };
         let f = Frame::dispatch(9, &DispatchEvent::MlsEnvelope(env.clone()));
         assert_eq!(f.t.as_deref(), Some("MLS_ENVELOPE"));
-        assert_eq!(f.d.as_ref().and_then(|d| d.get("kind")).and_then(|v| v.as_str()), Some("commit"));
+        assert_eq!(
+            f.d.as_ref()
+                .and_then(|d| d.get("kind"))
+                .and_then(|v| v.as_str()),
+            Some("commit")
+        );
         assert!(matches!(f.event(), Some(DispatchEvent::MlsEnvelope(e)) if e == env));
-        let f = Frame::dispatch(10, &DispatchEvent::DeviceRevoked { user_id: Snowflake(1), device_id: "dev-a".into() });
+        let f = Frame::dispatch(
+            10,
+            &DispatchEvent::DeviceRevoked {
+                user_id: Snowflake(1),
+                device_id: "dev-a".into(),
+            },
+        );
         assert_eq!(f.t.as_deref(), Some("DEVICE_REVOKED"));
-        assert_eq!(MlsEnvelopeKind::parse("welcome"), Some(MlsEnvelopeKind::Welcome));
+        assert_eq!(
+            MlsEnvelopeKind::parse("welcome"),
+            Some(MlsEnvelopeKind::Welcome)
+        );
         assert_eq!(MlsEnvelopeKind::Application.as_str(), "application");
     }
 

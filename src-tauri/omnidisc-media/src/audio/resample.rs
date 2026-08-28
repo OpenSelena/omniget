@@ -6,8 +6,16 @@ pub struct LinearResampler {
 
 impl LinearResampler {
     pub fn new(from_rate: u32, to_rate: u32) -> Self {
-        let step = if to_rate == 0 { 1.0 } else { from_rate as f64 / to_rate as f64 };
-        Self { step, pos: 0.0, pending: Vec::with_capacity(16_384) }
+        let step = if to_rate == 0 {
+            1.0
+        } else {
+            from_rate as f64 / to_rate as f64
+        };
+        Self {
+            step,
+            pos: 0.0,
+            pending: Vec::with_capacity(16_384),
+        }
     }
 
     pub fn is_identity(&self) -> bool {

@@ -33,7 +33,9 @@ impl RoomKey {
 
 impl std::fmt::Debug for RoomKey {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("RoomKey").field("epoch", &self.epoch).finish_non_exhaustive()
+        f.debug_struct("RoomKey")
+            .field("epoch", &self.epoch)
+            .finish_non_exhaustive()
     }
 }
 
@@ -146,9 +148,15 @@ mod tests {
         let rotation = KeyRotation::new();
         rotation.arm(recorder.clone(), RoomKey::new(15, key(1)));
         assert!(rotation.apply(RoomKey::new(16, key(2))));
-        assert!(!rotation.apply(RoomKey::new(16, key(2))), "the same epoch must not rewrite the ring");
+        assert!(
+            !rotation.apply(RoomKey::new(16, key(2))),
+            "the same epoch must not rewrite the ring"
+        );
         assert!(rotation.apply(RoomKey::new(17, key(3))));
-        assert_eq!(recorder.calls(), vec![(15, key(1)), (0, key(2)), (1, key(3))]);
+        assert_eq!(
+            recorder.calls(),
+            vec![(15, key(1)), (0, key(2)), (1, key(3))]
+        );
     }
 
     #[test]
@@ -173,6 +181,9 @@ mod tests {
     fn the_debug_output_never_carries_key_material() {
         let printed = format!("{:?}", RoomKey::new(7, key(0xAB)));
         assert!(printed.contains('7'));
-        assert!(!printed.contains("171") && !printed.to_lowercase().contains("ab"), "{printed}");
+        assert!(
+            !printed.contains("171") && !printed.to_lowercase().contains("ab"),
+            "{printed}"
+        );
     }
 }

@@ -33,15 +33,27 @@ fn describe(device: &cpal::Device, default_id: Option<&str>) -> Option<AudioDevi
 
 pub fn enumerate() -> AudioDevices {
     let host = cpal::default_host();
-    let default_in = host.default_input_device().and_then(|d| d.id().ok()).map(|i| i.to_string());
-    let default_out = host.default_output_device().and_then(|d| d.id().ok()).map(|i| i.to_string());
+    let default_in = host
+        .default_input_device()
+        .and_then(|d| d.id().ok())
+        .map(|i| i.to_string());
+    let default_out = host
+        .default_output_device()
+        .and_then(|d| d.id().ok())
+        .map(|i| i.to_string());
     let inputs = host
         .input_devices()
-        .map(|it| it.filter_map(|d| describe(&d, default_in.as_deref())).collect())
+        .map(|it| {
+            it.filter_map(|d| describe(&d, default_in.as_deref()))
+                .collect()
+        })
         .unwrap_or_default();
     let outputs = host
         .output_devices()
-        .map(|it| it.filter_map(|d| describe(&d, default_out.as_deref())).collect())
+        .map(|it| {
+            it.filter_map(|d| describe(&d, default_out.as_deref()))
+                .collect()
+        })
         .unwrap_or_default();
     AudioDevices { inputs, outputs }
 }
@@ -55,7 +67,11 @@ pub fn exists(kind: DeviceKind, id: &str) -> bool {
         DeviceKind::Output => host.output_devices().ok().map(|it| it.collect::<Vec<_>>()),
     };
     listed
-        .map(|devices| devices.iter().any(|d| d.id().map(|i| i.to_string() == id).unwrap_or(false)))
+        .map(|devices| {
+            devices
+                .iter()
+                .any(|d| d.id().map(|i| i.to_string() == id).unwrap_or(false))
+        })
         .unwrap_or(false)
 }
 

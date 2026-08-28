@@ -53,12 +53,16 @@ impl CaptureFlags {
 
     pub fn transmitting(&self) -> bool {
         !self.muted.load(Ordering::Relaxed)
-            && (!self.ptt_enabled.load(Ordering::Relaxed) || self.ptt_pressed.load(Ordering::Relaxed))
+            && (!self.ptt_enabled.load(Ordering::Relaxed)
+                || self.ptt_pressed.load(Ordering::Relaxed))
     }
 }
 
 pub enum FeederMsg {
-    Input { consumer: rtrb::Consumer<f32>, sample_rate: u32 },
+    Input {
+        consumer: rtrb::Consumer<f32>,
+        sample_rate: u32,
+    },
     NoInput,
     Source(Option<NativeAudioSource>),
     TestTone(Option<f32>),
@@ -79,7 +83,10 @@ impl Feeder {
             .name("omnidisc-mic".into())
             .spawn(move || run(rx, flags, sink))
             .map_err(|e| format!("could not start the microphone thread: {e}"))?;
-        Ok(Self { tx, thread: Some(thread) })
+        Ok(Self {
+            tx,
+            thread: Some(thread),
+        })
     }
 
     pub fn send(&self, msg: FeederMsg) {
@@ -146,7 +153,9 @@ impl Pipeline {
                 break;
             }
             let n = avail.min(self.scratch.len());
-            let Ok(chunk) = self.consumer.read_chunk(n) else { break };
+            let Ok(chunk) = self.consumer.read_chunk(n) else {
+                break;
+            };
             let (a, b) = chunk.as_slices();
             self.scratch[..a.len()].copy_from_slice(a);
             self.scratch[a.len()..a.len() + b.len()].copy_from_slice(b);
@@ -160,7 +169,12 @@ impl Pipeline {
         self.resampler.drop_excess(max_backlog);
     }
 
-    fn step(&mut self, flags: &CaptureFlags, source: Option<&NativeAudioSource>, sink: &CaptureSink) {
+    fn step(
+        &mut self,
+        flags: &CaptureFlags,
+        source: Option<&NativeAudioSource>,
+        sink: &CaptureSink,
+    ) {
         self.pull();
         let mut got = self.resampler.produce(&mut self.frame);
         if let Some((hz, phase)) = self.tone.as_mut() {
@@ -186,7 +200,8 @@ impl Pipeline {
             for (d, s) in self.denoise_in.iter_mut().zip(self.frame.iter()) {
                 *d = s * 32_768.0;
             }
-            self.denoiser.process_frame(&mut self.denoise_out, &self.denoise_in);
+            self.denoiser
+                .process_frame(&mut self.denoise_out, &self.denoise_in);
             for (f, d) in self.frame.iter_mut().zip(self.denoise_out.iter()) {
                 *f = (d / 32_768.0).clamp(-1.0, 1.0);
             }
@@ -194,7 +209,11 @@ impl Pipeline {
 
         let transmitting = flags.transmitting();
         let (rms, peak) = level(&self.frame);
-        let rms_db = if rms > 0.0 { 20.0 * rms.log10() } else { -100.0 };
+        let rms_db = if rms > 0.0 {
+            20.0 * rms.log10()
+        } else {
+            -100.0
+        };
 
         let loud = got && transmitting && rms_db > flags.vad_threshold_db();
         if loud {
@@ -209,7 +228,7 @@ impl Pipeline {
         }
 
         self.tick = self.tick.wrapping_add(1);
-        if flags.monitor.load(Ordering::Relaxed) && self.tick % LEVEL_EVERY_TICKS == 0 {
+        if flags.monitor.load(Ordering::Relaxed) && self.tick.is_multiple_of(LEVEL_EVERY_TICKS) {
             sink(CaptureEvent::Level { rms_db, peak });
         }
 
@@ -260,7 +279,10 @@ fn run(rx: mpsc::Receiver<FeederMsg>, flags: Arc<CaptureFlags>, sink: CaptureSin
         };
         match msg {
             Some(FeederMsg::Stop) => return,
-            Some(FeederMsg::Input { consumer, sample_rate }) => {
+            Some(FeederMsg::Input {
+                consumer,
+                sample_rate,
+            }) => {
                 pipeline = Some(Pipeline::new(consumer, sample_rate));
                 next = Instant::now();
                 continue;
@@ -335,7 +357,10 @@ mod tests {
         });
         let feeder = Feeder::spawn(flags.clone(), sink).expect("feeder");
         let (mut prod, cons) = rtrb::RingBuffer::<f32>::new(48_000);
-        feeder.send(FeederMsg::Input { consumer: cons, sample_rate: 48_000 });
+        feeder.send(FeederMsg::Input {
+            consumer: cons,
+            sample_rate: 48_000,
+        });
         let mut phase = 0.0f32;
         for _ in 0..40 {
             let mut buf = [0.0f32; 480];
@@ -359,7 +384,8 @@ mod tests {
         let deadline = Instant::now() + Duration::from_secs(2);
         let mut quiet = false;
         while Instant::now() < deadline {
-            if let Ok(CaptureEvent::Speaking(false)) = erx.recv_timeout(Duration::from_millis(100)) {
+            if let Ok(CaptureEvent::Speaking(false)) = erx.recv_timeout(Duration::from_millis(100))
+            {
                 quiet = true;
                 break;
             }

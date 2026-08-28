@@ -30,7 +30,11 @@ impl GatewaySink for ChanSink {
     }
 }
 
-async fn wait_for<F: FnMut(&Ev) -> bool>(rx: &mut mpsc::UnboundedReceiver<Ev>, mut pred: F, what: &str) -> Ev {
+async fn wait_for<F: FnMut(&Ev) -> bool>(
+    rx: &mut mpsc::UnboundedReceiver<Ev>,
+    mut pred: F,
+    what: &str,
+) -> Ev {
     let deadline = tokio::time::Instant::now() + Duration::from_secs(15);
     loop {
         let remaining = deadline.saturating_duration_since(tokio::time::Instant::now());
@@ -49,7 +53,12 @@ fn unique(prefix: &str) -> String {
         .duration_since(std::time::UNIX_EPOCH)
         .map(|d| d.subsec_nanos())
         .unwrap_or(0);
-    format!("{}{}{}", prefix, std::process::id() % 10_000, nanos % 100_000)
+    format!(
+        "{}{}{}",
+        prefix,
+        std::process::id() % 10_000,
+        nanos % 100_000
+    )
 }
 
 #[tokio::test]
@@ -70,19 +79,28 @@ async fn register_gateway_ready_send_receive() {
         .await
         .expect("register alice");
     assert_eq!(alice["username"], alice_name);
-    let alice_token = store::load_token(&base).expect("store").expect("alice token stored");
+    let alice_token = store::load_token(&base)
+        .expect("store")
+        .expect("alice token stored");
 
     let bob = auth::register(&base, &bob_name, password, None, None)
         .await
         .expect("register bob");
-    let bob_token = store::load_token(&base).expect("store").expect("bob token stored");
+    let bob_token = store::load_token(&base)
+        .expect("store")
+        .expect("bob token stored");
     assert_ne!(alice_token, bob_token);
 
     let alice_api = Api::with_token(base.clone(), alice_token.clone()).expect("api");
     let bob_api = Api::with_token(base.clone(), bob_token.clone()).expect("api");
 
     let guild: Value = alice_api
-        .send(Method::POST, "/api/guilds", &[], Some(json!({ "name": "E2E" })))
+        .send(
+            Method::POST,
+            "/api/guilds",
+            &[],
+            Some(json!({ "name": "E2E" })),
+        )
         .await
         .expect("create guild");
     let guild_id = guild["id"].as_str().expect("guild id").to_string();
@@ -97,18 +115,33 @@ async fn register_gateway_ready_send_receive() {
         .to_string();
 
     let invite: Value = alice_api
-        .send(Method::POST, "/api/invites", &[], Some(json!({ "guild_id": guild_id })))
+        .send(
+            Method::POST,
+            "/api/invites",
+            &[],
+            Some(json!({ "guild_id": guild_id })),
+        )
         .await
         .expect("create invite");
     let code = invite["code"].as_str().expect("code").to_string();
     let joined: Value = bob_api
-        .send(Method::POST, &format!("/api/invites/{code}"), &[], Some(json!({})))
+        .send(
+            Method::POST,
+            &format!("/api/invites/{code}"),
+            &[],
+            Some(json!({})),
+        )
         .await
         .expect("join invite");
     assert_eq!(joined["id"], guild_id);
 
     let fetched: Value = bob_api
-        .send(Method::GET, &format!("/api/users/{}", alice["id"].as_str().expect("id")), &[], None)
+        .send(
+            Method::GET,
+            &format!("/api/users/{}", alice["id"].as_str().expect("id")),
+            &[],
+            None,
+        )
         .await
         .expect("get user");
     assert_eq!(fetched["display_name"], "Alice");
@@ -123,11 +156,23 @@ async fn register_gateway_ready_send_receive() {
         a_cancel.clone(),
         Arc::new(ChanSink(a_tx)),
     ));
-    let ready = wait_for(&mut a_rx, |e| matches!(e, Ev::Dispatch(t, _) if t == "READY"), "alice READY").await;
-    let Ev::Dispatch(_, ready_d) = ready else { unreachable!() };
+    let ready = wait_for(
+        &mut a_rx,
+        |e| matches!(e, Ev::Dispatch(t, _) if t == "READY"),
+        "alice READY",
+    )
+    .await;
+    let Ev::Dispatch(_, ready_d) = ready else {
+        unreachable!()
+    };
     assert_eq!(ready_d["user"]["username"], alice_name);
     assert_eq!(ready_d["guilds"][0]["id"], guild_id);
-    let ready_status = wait_for(&mut a_rx, |e| matches!(e, Ev::Status(Status::Ready, _)), "alice ready status").await;
+    let ready_status = wait_for(
+        &mut a_rx,
+        |e| matches!(e, Ev::Status(Status::Ready, _)),
+        "alice ready status",
+    )
+    .await;
     assert!(matches!(ready_status, Ev::Status(_, None)));
 
     let (b_tx, mut b_rx) = mpsc::unbounded_channel();
@@ -140,14 +185,31 @@ async fn register_gateway_ready_send_receive() {
         b_cancel.clone(),
         Arc::new(ChanSink(b_tx)),
     ));
-    wait_for(&mut b_rx, |e| matches!(e, Ev::Dispatch(t, _) if t == "READY"), "bob READY").await;
-    wait_for(&mut b_rx, |e| matches!(e, Ev::Status(Status::Ready, _)), "bob ready status").await;
+    wait_for(
+        &mut b_rx,
+        |e| matches!(e, Ev::Dispatch(t, _) if t == "READY"),
+        "bob READY",
+    )
+    .await;
+    wait_for(
+        &mut b_rx,
+        |e| matches!(e, Ev::Status(Status::Ready, _)),
+        "bob ready status",
+    )
+    .await;
 
     b_out_tx
         .send(json!({ "op": 20, "d": { "channel_id": general } }).to_string())
         .expect("typing frame");
-    let typing = wait_for(&mut a_rx, |e| matches!(e, Ev::Dispatch(t, _) if t == "TYPING_START"), "typing").await;
-    let Ev::Dispatch(_, typing_d) = typing else { unreachable!() };
+    let typing = wait_for(
+        &mut a_rx,
+        |e| matches!(e, Ev::Dispatch(t, _) if t == "TYPING_START"),
+        "typing",
+    )
+    .await;
+    let Ev::Dispatch(_, typing_d) = typing else {
+        unreachable!()
+    };
     assert_eq!(typing_d["user_id"], bob["id"]);
 
     let sent: Value = bob_api
@@ -165,15 +227,25 @@ async fn register_gateway_ready_send_receive() {
         "alice MESSAGE_CREATE",
     )
     .await;
-    let Ev::Dispatch(_, msg) = received else { unreachable!() };
+    let Ev::Dispatch(_, msg) = received else {
+        unreachable!()
+    };
     assert_eq!(msg["id"], sent["id"]);
     assert_eq!(msg["author_id"], bob["id"]);
 
     let history: Value = alice_api
-        .send(Method::GET, &format!("/api/channels/{general}/messages"), &[("limit", "10".into())], None)
+        .send(
+            Method::GET,
+            &format!("/api/channels/{general}/messages"),
+            &[("limit", "10".into())],
+            None,
+        )
         .await
         .expect("history");
-    assert!(history.as_array().map(|a| a.iter().any(|m| m["id"] == sent["id"])).unwrap_or(false));
+    assert!(history
+        .as_array()
+        .map(|a| a.iter().any(|m| m["id"] == sent["id"]))
+        .unwrap_or(false));
 
     let bob_id = bob["id"].as_str().expect("bob id").to_string();
     let alice_id = alice["id"].as_str().expect("alice id").to_string();
@@ -192,11 +264,17 @@ async fn register_gateway_ready_send_receive() {
         "alice RELATIONSHIP_ADD",
     )
     .await;
-    let Ev::Dispatch(_, rel) = requested else { unreachable!() };
+    let Ev::Dispatch(_, rel) = requested else {
+        unreachable!()
+    };
     assert_eq!(rel["kind"], "incoming_request");
 
     alice_api
-        .send_empty(Method::PUT, &format!("/api/users/@me/relationships/{bob_id}"), None)
+        .send_empty(
+            Method::PUT,
+            &format!("/api/users/@me/relationships/{bob_id}"),
+            None,
+        )
         .await
         .expect("accept friend");
     wait_for(
@@ -212,7 +290,9 @@ async fn register_gateway_ready_send_receive() {
         .expect("relationships");
     assert!(relationships
         .as_array()
-        .map(|a| a.iter().any(|r| r["user_id"] == bob_id.as_str() && r["kind"] == "friend"))
+        .map(|a| a
+            .iter()
+            .any(|r| r["user_id"] == bob_id.as_str() && r["kind"] == "friend"))
         .unwrap_or(false));
 
     let dm: Value = alice_api
@@ -270,7 +350,11 @@ async fn register_gateway_ready_send_receive() {
 
     let message_id = sent["id"].as_str().expect("message id").to_string();
     alice_api
-        .send_empty(Method::PUT, &format!("/api/channels/{general}/pins/{message_id}"), None)
+        .send_empty(
+            Method::PUT,
+            &format!("/api/channels/{general}/pins/{message_id}"),
+            None,
+        )
         .await
         .expect("pin message");
     wait_for(
@@ -280,7 +364,12 @@ async fn register_gateway_ready_send_receive() {
     )
     .await;
     let pins: Value = alice_api
-        .send(Method::GET, &format!("/api/channels/{general}/pins"), &[], None)
+        .send(
+            Method::GET,
+            &format!("/api/channels/{general}/pins"),
+            &[],
+            None,
+        )
         .await
         .expect("list pins");
     assert!(pins
@@ -314,7 +403,9 @@ async fn register_gateway_ready_send_receive() {
         .expect("audit log");
     assert!(audit
         .as_array()
-        .map(|a| a.iter().any(|e| e["action"] == "member.kick" && e["actor_id"] == alice_id.as_str()))
+        .map(|a| a
+            .iter()
+            .any(|e| e["action"] == "member.kick" && e["actor_id"] == alice_id.as_str()))
         .unwrap_or(false));
 
     let sessions: Value = alice_api
@@ -330,7 +421,12 @@ async fn register_gateway_ready_send_receive() {
     b_cancel.cancel();
     let _ = tokio::time::timeout(Duration::from_secs(5), a_task).await;
     let _ = tokio::time::timeout(Duration::from_secs(5), b_task).await;
-    wait_for(&mut a_rx, |e| matches!(e, Ev::Status(Status::Disconnected, _)), "alice disconnected").await;
+    wait_for(
+        &mut a_rx,
+        |e| matches!(e, Ev::Status(Status::Disconnected, _)),
+        "alice disconnected",
+    )
+    .await;
 
     auth::logout(&base).await.expect("logout");
     assert!(store::load_token(&base).expect("store").is_none());

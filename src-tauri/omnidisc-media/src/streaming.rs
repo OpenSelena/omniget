@@ -2,12 +2,15 @@ use crate::capture::{self, AudioSink, CaptureOptions, CapturedFrame, VideoSink, 
 use crate::encode::{EncoderConfig, EncoderCounters, VideoEncoder};
 use crate::livekit_backend::LiveKitBackend;
 use crate::stream::{
-    resolve_bitrate, AudioMode, PublishStats, ResolvedStream, StreamCodec, StreamError, StreamMode, StreamRequest,
+    resolve_bitrate, AudioMode, PublishStats, ResolvedStream, StreamCodec, StreamError, StreamMode,
+    StreamRequest,
 };
 use livekit::options::{TrackPublishOptions, VideoCodec, VideoEncoderBackend, VideoEncoding};
 use livekit::prelude::*;
 use livekit::webrtc::audio_frame::AudioFrame;
-use livekit::webrtc::audio_source::{native::NativeAudioSource, AudioSourceOptions, RtcAudioSource};
+use livekit::webrtc::audio_source::{
+    native::NativeAudioSource, AudioSourceOptions, RtcAudioSource,
+};
 use livekit::webrtc::stats::RtcStats;
 use livekit::webrtc::video_frame::{I420Buffer, VideoFrame, VideoRotation};
 use livekit::webrtc::video_source::{native::NativeVideoSource, RtcVideoSource, VideoResolution};
@@ -86,7 +89,9 @@ impl EncodeLoop {
                         counters.rate_requests.fetch_add(1, Ordering::Relaxed);
                         if rc.target_bitrate_bps > 0 {
                             let target = rc.target_bitrate_bps.max(floor).min(configured_bps);
-                            let changed = (last_applied as f64 - target as f64).abs() / last_applied.max(1) as f64 > 0.05;
+                            let changed = (last_applied as f64 - target as f64).abs()
+                                / last_applied.max(1) as f64
+                                > 0.05;
                             if changed {
                                 encoder.set_bitrate(target);
                                 last_applied = target;
@@ -115,9 +120,13 @@ impl EncodeLoop {
                 }
             })
             .expect("spawn encode loop");
-        Self { stop, thread: Some(thread), latest, fps_captured }
+        Self {
+            stop,
+            thread: Some(thread),
+            latest,
+            fps_captured,
+        }
     }
-
 }
 
 impl Drop for EncodeLoop {
@@ -157,16 +166,28 @@ impl ActiveStream {
         if let Some(c) = self.capture.take() {
             c.stop();
         }
-        let _ = room.local_participant().unpublish_track(&self.video_pub.sid()).await;
+        let _ = room
+            .local_participant()
+            .unpublish_track(&self.video_pub.sid())
+            .await;
         if let Some(a) = self.audio.take() {
-            let _ = room.local_participant().unpublish_track(&a.publication.sid()).await;
+            let _ = room
+                .local_participant()
+                .unpublish_track(&a.publication.sid())
+                .await;
             a.capture.stop();
         }
     }
 }
 
-pub async fn start_stream(backend: Arc<LiveKitBackend>, req: StreamRequest) -> Result<ActiveStream, StreamError> {
-    let room = backend.current_room().await.ok_or(StreamError::NotConnected)?;
+pub async fn start_stream(
+    backend: Arc<LiveKitBackend>,
+    req: StreamRequest,
+) -> Result<ActiveStream, StreamError> {
+    let room = backend
+        .current_room()
+        .await
+        .ok_or(StreamError::NotConnected)?;
 
     let cap_sink_slot: Arc<StdMutex<Option<VideoSink>>> = Arc::new(StdMutex::new(None));
     let slot = cap_sink_slot.clone();
@@ -175,17 +196,40 @@ pub async fn start_stream(backend: Arc<LiveKitBackend>, req: StreamRequest) -> R
             s(tick);
         }
     });
-    let opts = CaptureOptions { source: req.source.clone(), fps: req.fps, height: req.height, cursor: req.cursor };
+    let opts = CaptureOptions {
+        source: req.source.clone(),
+        fps: req.fps,
+        height: req.height,
+        cursor: req.cursor,
+    };
     let (video_capture, geometry) = capture::start_video(&opts, vsink)?;
     let (width, height) = (geometry.width, geometry.height);
 
     let codec = codec_from_policy(&req.policy, height, req.fps);
-    let bitrate = resolve_bitrate(&req.policy, width, height, req.fps, req.height, req.bitrate_kbps);
+    let bitrate = resolve_bitrate(
+        &req.policy,
+        width,
+        height,
+        req.fps,
+        req.height,
+        req.bitrate_kbps,
+    );
     let configured_bps = bitrate as u64 * 1000;
-    let resolved = ResolvedStream { width, height, fps: req.fps, bitrate_kbps: bitrate, codec, mode: req.mode, audio: req.audio };
+    let resolved = ResolvedStream {
+        width,
+        height,
+        fps: req.fps,
+        bitrate_kbps: bitrate,
+        codec,
+        mode: req.mode,
+        audio: req.audio,
+    };
 
     let source = NativeVideoSource::new_encoded(VideoResolution { width, height });
-    let track = LocalVideoTrack::create_video_track("omnidisc-screen", RtcVideoSource::Native(source.clone()));
+    let track = LocalVideoTrack::create_video_track(
+        "omnidisc-screen",
+        RtcVideoSource::Native(source.clone()),
+    );
     let degradation = Some(match req.mode {
         StreamMode::Text => livekit::options::DegradationPreference::MaintainResolution,
         StreamMode::Game => livekit::options::DegradationPreference::Balanced,
@@ -199,7 +243,10 @@ pub async fn start_stream(backend: Arc<LiveKitBackend>, req: StreamRequest) -> R
                 video_codec: to_video_codec(codec),
                 simulcast: false,
                 video_encoder: VideoEncoderBackend::PreEncoded,
-                video_encoding: Some(VideoEncoding { max_bitrate: configured_bps, max_framerate: req.fps as f64 }),
+                video_encoding: Some(VideoEncoding {
+                    max_bitrate: configured_bps,
+                    max_framerate: req.fps as f64,
+                }),
                 degradation_preference: degradation,
                 ..Default::default()
             },
@@ -223,9 +270,22 @@ pub async fn start_stream(backend: Arc<LiveKitBackend>, req: StreamRequest) -> R
     tokio::time::sleep(Duration::from_millis(PRIMER_INTERVAL_MS * 2)).await;
 
     let counters = Arc::new(EncoderCounters::default());
-    let cfg = EncoderConfig { width, height, fps: req.fps, codec, bitrate_kbps: bitrate, mode: req.mode };
+    let cfg = EncoderConfig {
+        width,
+        height,
+        fps: req.fps,
+        codec,
+        bitrate_kbps: bitrate,
+        mode: req.mode,
+    };
     let encoder = Arc::new(VideoEncoder::new(cfg, source.clone(), counters.clone())?);
-    let encode_loop = EncodeLoop::spawn(encoder.clone(), source.clone(), counters.clone(), req.fps, configured_bps);
+    let encode_loop = EncodeLoop::spawn(
+        encoder.clone(),
+        source.clone(),
+        counters.clone(),
+        req.fps,
+        configured_bps,
+    );
     if let Ok(mut g) = cap_sink_slot.lock() {
         *g = Some(encode_loop.video_sink());
     }
@@ -253,7 +313,11 @@ async fn start_screenshare_audio(room: &Arc<Room>, mode: AudioMode) -> Option<Au
         return None;
     }
     let source = NativeAudioSource::new(
-        AudioSourceOptions { echo_cancellation: false, noise_suppression: false, auto_gain_control: false },
+        AudioSourceOptions {
+            echo_cancellation: false,
+            noise_suppression: false,
+            auto_gain_control: false,
+        },
         capture::AUDIO_SAMPLE_RATE,
         capture::AUDIO_CHANNELS,
         0,
@@ -266,7 +330,11 @@ async fn start_screenshare_audio(room: &Arc<Room>, mode: AudioMode) -> Option<Au
             if chunk.len() < per_frame {
                 break;
             }
-            let mut frame = AudioFrame::new(capture::AUDIO_SAMPLE_RATE, capture::AUDIO_CHANNELS, (chunk.len() / capture::AUDIO_CHANNELS as usize) as u32);
+            let mut frame = AudioFrame::new(
+                capture::AUDIO_SAMPLE_RATE,
+                capture::AUDIO_CHANNELS,
+                (chunk.len() / capture::AUDIO_CHANNELS as usize) as u32,
+            );
             {
                 let data = frame.data.to_mut();
                 for (i, s) in chunk.iter().enumerate() {
@@ -286,13 +354,26 @@ async fn start_screenshare_audio(room: &Arc<Room>, mode: AudioMode) -> Option<Au
     if obtained == AudioMode::None {
         return None;
     }
-    let track = LocalAudioTrack::create_audio_track("omnidisc-screen-audio", RtcAudioSource::Native(source));
+    let track = LocalAudioTrack::create_audio_track(
+        "omnidisc-screen-audio",
+        RtcAudioSource::Native(source),
+    );
     match room
         .local_participant()
-        .publish_track(LocalTrack::Audio(track.clone()), TrackPublishOptions { source: TrackSource::ScreenshareAudio, ..Default::default() })
+        .publish_track(
+            LocalTrack::Audio(track.clone()),
+            TrackPublishOptions {
+                source: TrackSource::ScreenshareAudio,
+                ..Default::default()
+            },
+        )
         .await
     {
-        Ok(pub_) => Some(AudioPublish { capture: capture_handle, _track: track, publication: pub_ }),
+        Ok(pub_) => Some(AudioPublish {
+            capture: capture_handle,
+            _track: track,
+            publication: pub_,
+        }),
         Err(e) => {
             tracing::warn!("[omnidisc-media] publish screenshare audio: {e}");
             capture_handle.stop();
@@ -343,7 +424,8 @@ impl ActiveStream {
         stats.keyframe_requests = self.counters.keyframe_requests.load(Ordering::Relaxed);
         stats.frames_dropped = self.counters.dropped.load(Ordering::Relaxed);
         if let Some(el) = self.encode_loop.as_ref() {
-            stats.fps_captured = el.fps_captured.load(Ordering::Relaxed) as f64 / self.started.elapsed().as_secs_f64().max(1.0);
+            stats.fps_captured = el.fps_captured.load(Ordering::Relaxed) as f64
+                / self.started.elapsed().as_secs_f64().max(1.0);
         }
         if let Ok(rtc) = self.video_track.get_stats().await {
             apply_outbound(&mut stats, &rtc);

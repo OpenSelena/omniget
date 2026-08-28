@@ -75,7 +75,11 @@ fn new_device_id() -> String {
 
 pub fn hostname() -> Option<String> {
     for key in ["HOSTNAME", "COMPUTERNAME", "HOST"] {
-        if let Some(h) = std::env::var(key).ok().map(|h| h.trim().to_string()).filter(|h| !h.is_empty()) {
+        if let Some(h) = std::env::var(key)
+            .ok()
+            .map(|h| h.trim().to_string())
+            .filter(|h| !h.is_empty())
+        {
             return Some(h);
         }
     }
@@ -246,7 +250,11 @@ mod tests {
     fn device_ids_fit_the_server_rules() {
         let id = new_device_id();
         assert!(id.len() >= 8 && id.len() <= 64, "{id}");
-        assert!(id.chars().all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_'), "{id}");
+        assert!(
+            id.chars()
+                .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '_'),
+            "{id}"
+        );
         assert_ne!(id, new_device_id());
     }
 

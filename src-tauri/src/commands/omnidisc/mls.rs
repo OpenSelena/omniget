@@ -122,7 +122,9 @@ pub struct MlsManager {
 
 impl Default for MlsManager {
     fn default() -> Self {
-        Self { sessions: Mutex::new(HashMap::new()) }
+        Self {
+            sessions: Mutex::new(HashMap::new()),
+        }
     }
 }
 
@@ -161,7 +163,11 @@ pub async fn voice_key_for(
         let recipients = establish?;
         let api = Api::authed(base).ok()?;
         if let Err(e) = ensure_group(&api, &mut session, channel_id, recipients).await {
-            tracing::warn!("[omnidisc] no MLS group for the call in {}: {}", channel_id, e);
+            tracing::warn!(
+                "[omnidisc] no MLS group for the call in {}: {}",
+                channel_id,
+                e
+            );
             return None;
         }
     }
@@ -188,7 +194,10 @@ pub struct Session {
 
 fn state_path(base: &str) -> Result<PathBuf, String> {
     let digest = Sha256::digest(base.as_bytes());
-    let name = digest[..8].iter().map(|b| format!("{b:02x}")).collect::<String>();
+    let name = digest[..8]
+        .iter()
+        .map(|b| format!("{b:02x}"))
+        .collect::<String>();
     Ok(store::base_dir()?.join("mls").join(format!("{name}.state")))
 }
 
@@ -254,9 +263,9 @@ impl Session {
         let user_id = current_user_id(base).await?;
         let path = state_path(base)?;
         let client = match std::fs::read(&path) {
-            Ok(blob) => match omnidisc_mls::decrypt_state(&state_key, &blob)
-                .and_then(|plain| MlsClient::restore(&user_id, &identity.device_id, &identity.seed, &plain))
-            {
+            Ok(blob) => match omnidisc_mls::decrypt_state(&state_key, &blob).and_then(|plain| {
+                MlsClient::restore(&user_id, &identity.device_id, &identity.seed, &plain)
+            }) {
                 Ok(client) => client,
                 Err(err) => {
                     // A state we cannot read is a state we cannot use. Starting
@@ -296,13 +305,19 @@ impl Session {
     }
 
     fn load_history(&mut self) {
-        let Ok(path) = history_path(&self.base) else { return };
-        let Ok(blob) = std::fs::read(&path) else { return };
+        let Ok(path) = history_path(&self.base) else {
+            return;
+        };
+        let Ok(blob) = std::fs::read(&path) else {
+            return;
+        };
         let Ok(plain) = omnidisc_mls::decrypt_state(&self.state_key, &blob) else {
             tracing::warn!("[omnidisc] the decrypted-message cache is unreadable; dropping it");
             return;
         };
-        let Ok(entries) = serde_json::from_slice::<Vec<(String, String)>>(&plain) else { return };
+        let Ok(entries) = serde_json::from_slice::<Vec<(String, String)>>(&plain) else {
+            return;
+        };
         for (hash, payload) in entries {
             self.history_order.push(hash.clone());
             self.history.insert(hash, payload);
@@ -310,16 +325,25 @@ impl Session {
     }
 
     fn save_history(&self) {
-        let Ok(path) = history_path(&self.base) else { return };
+        let Ok(path) = history_path(&self.base) else {
+            return;
+        };
         let entries: Vec<(&String, &String)> = self
             .history_order
             .iter()
             .filter_map(|h| self.history.get_key_value(h))
             .collect();
-        let Ok(plain) = serde_json::to_vec(&entries) else { return };
-        let Ok(blob) = omnidisc_mls::encrypt_state(&self.state_key, &plain) else { return };
+        let Ok(plain) = serde_json::to_vec(&entries) else {
+            return;
+        };
+        let Ok(blob) = omnidisc_mls::encrypt_state(&self.state_key, &plain) else {
+            return;
+        };
         if let Err(e) = write_atomic(&path, &blob) {
-            tracing::warn!("[omnidisc] could not persist the decrypted-message cache: {}", e);
+            tracing::warn!(
+                "[omnidisc] could not persist the decrypted-message cache: {}",
+                e
+            );
         }
     }
 
@@ -327,7 +351,9 @@ impl Session {
     /// happens days later needs the file key, and this file is encrypted at rest
     /// with the same keyring-held key as the group state.
     pub fn remember(&mut self, ciphertext_b64: &str, payload: &E2eePayload) {
-        let Ok(encoded) = serde_json::to_string(payload) else { return };
+        let Ok(encoded) = serde_json::to_string(payload) else {
+            return;
+        };
         let hash = hash_ciphertext(ciphertext_b64);
         if self.history.insert(hash.clone(), encoded).is_none() {
             self.history_order.push(hash);
@@ -379,7 +405,11 @@ fn voice_key_of(client: &MlsClient, channel_id: &str) -> Option<(u64, [u8; 32])>
     match client.voice_key(&group_id, channel_id.as_bytes()) {
         Ok(key) => Some((epoch, key)),
         Err(e) => {
-            tracing::warn!("[omnidisc] could not derive the voice key for {}: {}", group_id, e);
+            tracing::warn!(
+                "[omnidisc] could not derive the voice key for {}: {}",
+                group_id,
+                e
+            );
             None
         }
     }
@@ -431,7 +461,11 @@ pub async fn top_up_key_packages(api: &Api, session: &mut Session) -> Result<(),
         return Ok(());
     }
     session.save()?;
-    let last_resort_index = if count.last_resort { usize::MAX } else { blobs.len() - 1 };
+    let last_resort_index = if count.last_resort {
+        usize::MAX
+    } else {
+        blobs.len() - 1
+    };
     let packages: Vec<Value> = blobs
         .iter()
         .enumerate()
@@ -465,7 +499,12 @@ pub async fn top_up_key_packages(api: &Api, session: &mut Session) -> Result<(),
 async fn device_roster(api: &Api, user_id: &str) -> Result<Vec<DeviceRef>, String> {
     let user_id = super::api::path_id(user_id)?;
     let devices: Vec<Device> = api
-        .send(Method::GET, &format!("/api/users/{}/devices", user_id), &[], None)
+        .send(
+            Method::GET,
+            &format!("/api/users/{}/devices", user_id),
+            &[],
+            None,
+        )
         .await?;
     Ok(devices
         .into_iter()
@@ -517,7 +556,10 @@ async fn claim_devices(api: &Api, user_ids: &[String]) -> Result<Vec<ClaimedDevi
                 );
                 return Err(ERR_E2EE_UNTRUSTED.to_string());
             };
-            claimed.push(ClaimedDevice { device, key_package: blob });
+            claimed.push(ClaimedDevice {
+                device,
+                key_package: blob,
+            });
         }
     }
     Ok(claimed)
@@ -570,9 +612,15 @@ async fn commit_with_retry(
                 session.save()?;
                 drain_inbox(api, session, None).await?;
                 if !removed.is_empty() {
-                    output = session.client.remove_devices(group_id, removed).map_err(e2ee)?;
+                    output = session
+                        .client
+                        .remove_devices(group_id, removed)
+                        .map_err(e2ee)?;
                 } else if !key_packages.is_empty() {
-                    output = session.client.add_members(group_id, key_packages).map_err(e2ee_mls)?;
+                    output = session
+                        .client
+                        .add_members(group_id, key_packages)
+                        .map_err(e2ee_mls)?;
                 } else {
                     return Err(format!("{}:epoch_conflict", ERR_BAD_REQUEST));
                 }
@@ -647,7 +695,10 @@ pub async fn ensure_group(
         return Ok(group_id);
     }
     let devices: Vec<String> = claimed.iter().map(|c| c.device.device_id.clone()).collect();
-    let output = session.client.add_members(&group_id, &claimed).map_err(e2ee_mls)?;
+    let output = session
+        .client
+        .add_members(&group_id, &claimed)
+        .map_err(e2ee_mls)?;
     commit_with_retry(api, session, &group_id, output, &devices, &[], &claimed).await?;
     Ok(group_id)
 }
@@ -673,7 +724,10 @@ pub async fn sync_members(
         return Ok(false);
     }
     let devices: Vec<String> = claimed.iter().map(|c| c.device.device_id.clone()).collect();
-    let output = session.client.add_members(group_id, &claimed).map_err(e2ee_mls)?;
+    let output = session
+        .client
+        .add_members(group_id, &claimed)
+        .map_err(e2ee_mls)?;
     commit_with_retry(api, session, group_id, output, &devices, &[], &claimed).await?;
     Ok(true)
 }
@@ -689,20 +743,33 @@ pub async fn remove_device_everywhere(
     let groups = session.client.group_ids();
     let removed = vec![device_id.to_string()];
     for group_id in groups {
-        if !session.client.member_device_ids(&group_id).iter().any(|d| d == device_id) {
+        if !session
+            .client
+            .member_device_ids(&group_id)
+            .iter()
+            .any(|d| d == device_id)
+        {
             continue;
         }
         let output = match session.client.remove_devices(&group_id, &removed) {
             Ok(o) => o,
             Err(e) => {
-                tracing::warn!("[omnidisc] could not stage a removal in {}: {}", group_id, e);
+                tracing::warn!(
+                    "[omnidisc] could not stage a removal in {}: {}",
+                    group_id,
+                    e
+                );
                 continue;
             }
         };
-        if let Err(e) =
-            commit_with_retry(api, session, &group_id, output, &[], &removed, &[]).await
+        if let Err(e) = commit_with_retry(api, session, &group_id, output, &[], &removed, &[]).await
         {
-            tracing::warn!("[omnidisc] could not remove {} from {}: {}", device_id, group_id, e);
+            tracing::warn!(
+                "[omnidisc] could not remove {} from {}: {}",
+                device_id,
+                group_id,
+                e
+            );
         }
     }
     Ok(())
@@ -739,7 +806,9 @@ pub async fn drain_inbox(
         if let Some(after) = &session.last_envelope_id {
             query.push(("after", after.clone()));
         }
-        let page: MlsInboxResponse = api.send(Method::GET, "/api/mls/inbox", &query, None).await?;
+        let page: MlsInboxResponse = api
+            .send(Method::GET, "/api/mls/inbox", &query, None)
+            .await?;
         if page.envelopes.is_empty() {
             return Ok(());
         }
@@ -811,8 +880,12 @@ async fn welcome_senders(
         return Err(format!("{} is not an encrypted channel", channel_id));
     }
     let me = session.client.user_id().to_string();
-    let recipients: Vec<String> = channel.recipient_ids.iter().map(|r| r.to_string()).collect();
-    if !recipients.iter().any(|r| *r == me) {
+    let recipients: Vec<String> = channel
+        .recipient_ids
+        .iter()
+        .map(|r| r.to_string())
+        .collect();
+    if !recipients.contains(&me) {
         return Err(format!("this account is not a recipient of {}", channel_id));
     }
     let mut allowed = Vec::new();
@@ -860,7 +933,11 @@ async fn sender_is_known(
             ok
         }
         Err(e) => {
-            tracing::warn!("[omnidisc] could not fetch the devices of {}: {}", user_id, e);
+            tracing::warn!(
+                "[omnidisc] could not fetch the devices of {}: {}",
+                user_id,
+                e
+            );
             false
         }
     }
@@ -901,7 +978,12 @@ async fn apply_envelope(
                 .process(&envelope.group_id, &blob)
                 .map_err(|e| e.to_string())?
             {
-                Incoming::Application { user_id, device_id, signature_key, plaintext } => {
+                Incoming::Application {
+                    user_id,
+                    device_id,
+                    signature_key,
+                    plaintext,
+                } => {
                     let payload: E2eePayload = serde_json::from_slice(&plaintext)
                         .map_err(|e| format!("the plaintext was not an OmniDisc payload: {e}"))?;
                     session.remember(&envelope.payload, &payload);
@@ -934,7 +1016,10 @@ async fn apply_envelope(
                             "[omnidisc] this device was removed from {}",
                             envelope.group_id
                         );
-                        session.client.drop_group(&envelope.group_id).map_err(|e| e.to_string())?;
+                        session
+                            .client
+                            .drop_group(&envelope.group_id)
+                            .map_err(|e| e.to_string())?;
                     }
                     Ok(None)
                 }
@@ -958,7 +1043,10 @@ pub async fn send_encrypted(
     let group_id = ensure_group(api, session, channel_id, recipient_user_ids).await?;
     let _ = sync_members(api, session, &group_id, recipient_user_ids).await;
     let plaintext = serde_json::to_vec(&payload).map_err(e2ee)?;
-    let (ciphertext, epoch) = session.client.encrypt(&group_id, &plaintext).map_err(e2ee)?;
+    let (ciphertext, epoch) = session
+        .client
+        .encrypt(&group_id, &plaintext)
+        .map_err(e2ee)?;
     // The ratchet already moved; if the process died here the message would be
     // undecryptable for us, so the state goes to disk before the request.
     session.save()?;
@@ -1046,7 +1134,9 @@ pub fn on_dispatch(app: &tauri::AppHandle, url: &str, t: &str, d: &Value) {
         "MLS_ENVELOPE" => (false, None),
         "DEVICE_REVOKED" => (
             false,
-            d.get("device_id").and_then(Value::as_str).map(str::to_string),
+            d.get("device_id")
+                .and_then(Value::as_str)
+                .map(str::to_string),
         ),
         _ => return,
     };
@@ -1174,8 +1264,13 @@ mod tests {
         let id = group_id_for("1234567890123456789");
         assert_eq!(id, "od-1234567890123456789");
         assert!(id.len() >= 8 && id.len() <= 128);
-        assert!(id.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.')));
-        assert_eq!(channel_of_group(&id).as_deref(), Some("1234567890123456789"));
+        assert!(id
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.')));
+        assert_eq!(
+            channel_of_group(&id).as_deref(),
+            Some("1234567890123456789")
+        );
         assert_eq!(channel_of_group("nope"), None);
     }
 
@@ -1243,19 +1338,27 @@ mod tests {
         };
         let out = alice.add_members(&group, &[bob_kp]).expect("add");
         alice.merge_pending(&group).expect("merge");
-        let alice_ref =
-            DeviceRef::new(alice.user_id(), alice.device_id(), alice.public_key().to_vec());
+        let alice_ref = DeviceRef::new(
+            alice.user_id(),
+            alice.device_id(),
+            alice.public_key().to_vec(),
+        );
         bob.join_welcome(&out.welcome.clone().expect("welcome"), &group, &[alice_ref])
             .expect("join");
 
         let (epoch_a, key_a) = voice_key_of(&alice, channel).expect("alice key");
         let (epoch_b, key_b) = voice_key_of(&bob, channel).expect("bob key");
         assert_eq!(epoch_a, epoch_b);
-        assert_eq!(key_a, key_b, "both sides must derive the same key from the channel alone");
+        assert_eq!(
+            key_a, key_b,
+            "both sides must derive the same key from the channel alone"
+        );
         assert!(voice_key_of(&alice, "9999999999999999999").is_none());
         assert_ne!(
             key_a,
-            alice.voice_key(&group, b"livekit-room-the-server-picked").expect("raw"),
+            alice
+                .voice_key(&group, b"livekit-room-the-server-picked")
+                .expect("raw"),
             "the channel id is what the exporter is bound to"
         );
     }

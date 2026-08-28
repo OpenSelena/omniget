@@ -43,11 +43,22 @@ impl Default for Mixer {
 }
 
 impl Mixer {
-    pub fn add_source(&self, key: String, user_id: String, consumer: rtrb::Consumer<f32>, gain: f32) {
+    pub fn add_source(
+        &self,
+        key: String,
+        user_id: String,
+        consumer: rtrb::Consumer<f32>,
+        gain: f32,
+    ) {
         if let Ok(mut s) = self.sources.lock() {
             s.retain(|x| x.key != key);
             if s.len() < MAX_SOURCES {
-                s.push(MixSource { key, user_id, consumer, gain: gain.clamp(0.0, 2.0) });
+                s.push(MixSource {
+                    key,
+                    user_id,
+                    consumer,
+                    gain: gain.clamp(0.0, 2.0),
+                });
             }
         }
     }
@@ -73,7 +84,8 @@ impl Mixer {
     }
 
     pub fn set_master(&self, gain: f32) {
-        self.master.store(gain.clamp(0.0, 2.0).to_bits(), Ordering::Relaxed);
+        self.master
+            .store(gain.clamp(0.0, 2.0).to_bits(), Ordering::Relaxed);
     }
 
     pub fn master(&self) -> f32 {
@@ -134,7 +146,9 @@ impl Mixer {
             if avail == 0 {
                 continue;
             }
-            let Ok(chunk) = src.consumer.read_chunk(avail) else { continue };
+            let Ok(chunk) = src.consumer.read_chunk(avail) else {
+                continue;
+            };
             let (a, b) = chunk.as_slices();
             scratch[..a.len()].copy_from_slice(a);
             scratch[a.len()..a.len() + b.len()].copy_from_slice(b);
@@ -276,21 +290,32 @@ mod tests {
 
         let _ = p1.push_partial_slice(&vec![0.5; 4800]);
         mixer.mix_into(&mut out, &mut scratch);
-        assert!((out[4799] - 0.5).abs() < 1e-6, "no ducking while nobody speaks");
+        assert!(
+            (out[4799] - 0.5).abs() < 1e-6,
+            "no ducking while nobody speaks"
+        );
 
         mixer.set_ducking(true);
         for _ in 0..2 {
             let _ = p1.push_partial_slice(&vec![0.5; 4800]);
             mixer.mix_into(&mut out, &mut scratch);
         }
-        assert!((out[4799] - 0.2).abs() < 1e-3, "ducked sample was {}", out[4799]);
+        assert!(
+            (out[4799] - 0.2).abs() < 1e-3,
+            "ducked sample was {}",
+            out[4799]
+        );
 
         mixer.set_ducking(false);
         for _ in 0..2 {
             let _ = p1.push_partial_slice(&vec![0.5; 4800]);
             mixer.mix_into(&mut out, &mut scratch);
         }
-        assert!((out[4799] - 0.5).abs() < 1e-3, "restored sample was {}", out[4799]);
+        assert!(
+            (out[4799] - 0.5).abs() < 1e-3,
+            "restored sample was {}",
+            out[4799]
+        );
     }
 
     #[test]

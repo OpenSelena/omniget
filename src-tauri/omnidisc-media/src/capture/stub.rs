@@ -39,11 +39,17 @@ impl CaptureApi for Platform {
         Err(StreamError::Unsupported)
     }
 
-    fn start_video(_opts: &CaptureOptions, _sink: VideoSink) -> Result<(VideoCapture, CaptureGeometry), StreamError> {
+    fn start_video(
+        _opts: &CaptureOptions,
+        _sink: VideoSink,
+    ) -> Result<(VideoCapture, CaptureGeometry), StreamError> {
         Err(StreamError::Unsupported)
     }
 
-    fn start_audio(mode: AudioMode, _sink: AudioSink) -> Result<(AudioCapture, AudioMode), StreamError> {
+    fn start_audio(
+        mode: AudioMode,
+        _sink: AudioSink,
+    ) -> Result<(AudioCapture, AudioMode), StreamError> {
         if mode == AudioMode::None {
             Ok((AudioCapture, AudioMode::None))
         } else {

@@ -50,7 +50,11 @@ pub struct DeviceRef {
 
 impl DeviceRef {
     pub fn new(user_id: impl Into<String>, device_id: impl Into<String>, key: Vec<u8>) -> Self {
-        Self { user_id: user_id.into(), device_id: device_id.into(), signature_key: key }
+        Self {
+            user_id: user_id.into(),
+            device_id: device_id.into(),
+            signature_key: key,
+        }
     }
 
     fn matches(&self, user_id: &str, device_id: &str, key: &[u8]) -> bool {
@@ -84,7 +88,10 @@ pub enum Incoming {
         signature_key: Vec<u8>,
         plaintext: Vec<u8>,
     },
-    Commit { epoch: u64, removed_me: bool },
+    Commit {
+        epoch: u64,
+        removed_me: bool,
+    },
     Proposal,
 }
 
@@ -150,7 +157,8 @@ impl MlsClient {
                 signing.to_bytes().to_vec(),
                 public_key.to_vec(),
             );
-            pair.store(provider.storage()).map_err(mls("store signer"))?;
+            pair.store(provider.storage())
+                .map_err(mls("store signer"))?;
             pair
         };
         let credential = CredentialWithKey {
@@ -160,13 +168,12 @@ impl MlsClient {
         let mut groups = HashMap::new();
         for id in group_ids {
             let gid = GroupId::from_slice(id.as_bytes());
-            match MlsGroup::load(provider.storage(), &gid).map_err(mls("load group"))? {
-                Some(group) => {
-                    groups.insert(id.clone(), group);
-                }
-                // A group listed in the snapshot but missing from storage means a
-                // partial write; dropping it is safer than refusing to start.
-                None => {}
+            // A group listed in the snapshot but missing from storage means a
+            // partial write; dropping it is safer than refusing to start.
+            if let Some(group) =
+                MlsGroup::load(provider.storage(), &gid).map_err(mls("load group"))?
+            {
+                groups.insert(id.clone(), group);
             }
         }
         Ok(Self {
@@ -239,12 +246,22 @@ impl MlsClient {
 
     fn build_key_package(&mut self, last_resort: bool) -> Result<Vec<u8>> {
         let builder = KeyPackage::builder();
-        let builder = if last_resort { builder.mark_as_last_resort() } else { builder };
+        let builder = if last_resort {
+            builder.mark_as_last_resort()
+        } else {
+            builder
+        };
         let bundle = builder
-            .build(CIPHERSUITE, &self.provider, &self.signer, self.credential.clone())
+            .build(
+                CIPHERSUITE,
+                &self.provider,
+                &self.signer,
+                self.credential.clone(),
+            )
             .map_err(mls("key package"))?;
         let out: MlsMessageOut = bundle.into();
-        out.tls_serialize_detached().map_err(mls("serialise key package"))
+        out.tls_serialize_detached()
+            .map_err(mls("serialise key package"))
     }
 
     pub fn create_group(&mut self, group_id: &str) -> Result<()> {
@@ -301,12 +318,21 @@ impl MlsClient {
     /// call [`MlsClient::merge_pending`] only after the server accepted it, and
     /// [`MlsClient::clear_pending`] on a 409 — merging a commit the server
     /// rejected would fork the group for this device.
-    pub fn add_members(&mut self, group_id: &str, devices: &[ClaimedDevice]) -> Result<CommitOutput> {
+    pub fn add_members(
+        &mut self,
+        group_id: &str,
+        devices: &[ClaimedDevice],
+    ) -> Result<CommitOutput> {
         let parsed = devices
             .iter()
             .map(|d| self.parse_key_package(&d.key_package, &d.device))
             .collect::<Result<Vec<_>>>()?;
-        let Self { groups, provider, signer, .. } = self;
+        let Self {
+            groups,
+            provider,
+            signer,
+            ..
+        } = self;
         let group = groups
             .get_mut(group_id)
             .ok_or_else(|| MlsError::UnknownGroup(group_id.to_string()))?;
@@ -314,13 +340,23 @@ impl MlsClient {
             .add_members(provider, signer, &parsed)
             .map_err(mls("add_members"))?;
         Ok(CommitOutput {
-            commit: commit.tls_serialize_detached().map_err(mls("serialise commit"))?,
-            welcome: Some(welcome.tls_serialize_detached().map_err(mls("serialise welcome"))?),
+            commit: commit
+                .tls_serialize_detached()
+                .map_err(mls("serialise commit"))?,
+            welcome: Some(
+                welcome
+                    .tls_serialize_detached()
+                    .map_err(mls("serialise welcome"))?,
+            ),
             epoch: group.epoch().as_u64() + 1,
         })
     }
 
-    pub fn remove_devices(&mut self, group_id: &str, device_ids: &[String]) -> Result<CommitOutput> {
+    pub fn remove_devices(
+        &mut self,
+        group_id: &str,
+        device_ids: &[String],
+    ) -> Result<CommitOutput> {
         let leaves: Vec<LeafNodeIndex> = {
             let group = self
                 .groups
@@ -330,15 +366,22 @@ impl MlsClient {
                 .members()
                 .filter(|m| {
                     let (_, device) = identity_parts(&m.credential);
-                    device_ids.iter().any(|d| *d == device)
+                    device_ids.contains(&device)
                 })
                 .map(|m| m.index)
                 .collect()
         };
         if leaves.is_empty() {
-            return Err(MlsError::Malformed("none of those devices are in the group".into()));
+            return Err(MlsError::Malformed(
+                "none of those devices are in the group".into(),
+            ));
         }
-        let Self { groups, provider, signer, .. } = self;
+        let Self {
+            groups,
+            provider,
+            signer,
+            ..
+        } = self;
         let group = groups
             .get_mut(group_id)
             .ok_or_else(|| MlsError::UnknownGroup(group_id.to_string()))?;
@@ -346,7 +389,9 @@ impl MlsClient {
             .remove_members(provider, signer, &leaves)
             .map_err(mls("remove_members"))?;
         Ok(CommitOutput {
-            commit: commit.tls_serialize_detached().map_err(mls("serialise commit"))?,
+            commit: commit
+                .tls_serialize_detached()
+                .map_err(mls("serialise commit"))?,
             welcome: welcome
                 .map(|w| w.tls_serialize_detached().map_err(mls("serialise welcome")))
                 .transpose()?,
@@ -355,16 +400,22 @@ impl MlsClient {
     }
 
     pub fn merge_pending(&mut self, group_id: &str) -> Result<u64> {
-        let Self { groups, provider, .. } = self;
+        let Self {
+            groups, provider, ..
+        } = self;
         let group = groups
             .get_mut(group_id)
             .ok_or_else(|| MlsError::UnknownGroup(group_id.to_string()))?;
-        group.merge_pending_commit(provider).map_err(mls("merge_pending_commit"))?;
+        group
+            .merge_pending_commit(provider)
+            .map_err(mls("merge_pending_commit"))?;
         Ok(group.epoch().as_u64())
     }
 
     pub fn clear_pending(&mut self, group_id: &str) -> Result<()> {
-        let Self { groups, provider, .. } = self;
+        let Self {
+            groups, provider, ..
+        } = self;
         let group = groups
             .get_mut(group_id)
             .ok_or_else(|| MlsError::UnknownGroup(group_id.to_string()))?;
@@ -404,8 +455,7 @@ impl MlsClient {
             None,
         )
         .map_err(mls("staged welcome"))?;
-        let id =
-            String::from_utf8_lossy(staged.group_context().group_id().as_slice()).into_owned();
+        let id = String::from_utf8_lossy(staged.group_context().group_id().as_slice()).into_owned();
         if id != expected_group_id {
             return Err(MlsError::Untrusted(format!(
                 "a Welcome announced as {expected_group_id} is really for {id}"
@@ -425,13 +475,20 @@ impl MlsClient {
                 "{sender_user}:{sender_device} is not a known device of anyone in {id}"
             )));
         }
-        let group = staged.into_group(&self.provider).map_err(mls("into_group"))?;
+        let group = staged
+            .into_group(&self.provider)
+            .map_err(mls("into_group"))?;
         self.groups.insert(id.clone(), group);
         Ok(id)
     }
 
     pub fn encrypt(&mut self, group_id: &str, plaintext: &[u8]) -> Result<(Vec<u8>, u64)> {
-        let Self { groups, provider, signer, .. } = self;
+        let Self {
+            groups,
+            provider,
+            signer,
+            ..
+        } = self;
         let group = groups
             .get_mut(group_id)
             .ok_or_else(|| MlsError::UnknownGroup(group_id.to_string()))?;
@@ -439,7 +496,8 @@ impl MlsClient {
             .create_message(provider, signer, plaintext)
             .map_err(mls("create_message"))?;
         Ok((
-            out.tls_serialize_detached().map_err(mls("serialise message"))?,
+            out.tls_serialize_detached()
+                .map_err(mls("serialise message"))?,
             group.epoch().as_u64(),
         ))
     }
@@ -450,7 +508,9 @@ impl MlsClient {
         let protocol = msg
             .try_into_protocol_message()
             .map_err(|e| MlsError::Malformed(format!("not a protocol message: {e:?}")))?;
-        let Self { groups, provider, .. } = self;
+        let Self {
+            groups, provider, ..
+        } = self;
         let group = groups
             .get_mut(group_id)
             .ok_or_else(|| MlsError::UnknownGroup(group_id.to_string()))?;
@@ -481,7 +541,10 @@ impl MlsClient {
                 group
                     .merge_staged_commit(provider, *staged)
                     .map_err(mls("merge_staged_commit"))?;
-                Ok(Incoming::Commit { epoch: group.epoch().as_u64(), removed_me })
+                Ok(Incoming::Commit {
+                    epoch: group.epoch().as_u64(),
+                    removed_me,
+                })
             }
             ProcessedMessageContent::ProposalMessage(p) => {
                 group
@@ -503,7 +566,9 @@ impl MlsClient {
     }
 
     pub fn members(&self, group_id: &str) -> Vec<MemberInfo> {
-        let Some(group) = self.groups.get(group_id) else { return vec![] };
+        let Some(group) = self.groups.get(group_id) else {
+            return vec![];
+        };
         group
             .members()
             .map(|m| {
@@ -520,7 +585,10 @@ impl MlsClient {
     }
 
     pub fn member_device_ids(&self, group_id: &str) -> Vec<String> {
-        self.members(group_id).into_iter().map(|m| m.device_id).collect()
+        self.members(group_id)
+            .into_iter()
+            .map(|m| m.device_id)
+            .collect()
     }
 
     /// Room key for LiveKit's shared-key E2EE mode. Same on every member, new on
@@ -600,7 +668,9 @@ mod tests {
         let welcome = out.welcome.clone().expect("welcome");
         let allowed = [device_ref(owner)];
         for joiner in joiners.iter_mut() {
-            let id = joiner.join_welcome(&welcome, GROUP, &allowed).expect("join");
+            let id = joiner
+                .join_welcome(&welcome, GROUP, &allowed)
+                .expect("join");
             assert_eq!(id, GROUP);
         }
         out
@@ -621,9 +691,17 @@ mod tests {
 
         let (ct, epoch) = alice.encrypt(GROUP, b"hello bob").expect("encrypt");
         assert_eq!(epoch, 1);
-        assert!(!ct.windows(9).any(|w| w == b"hello bob"), "ciphertext leaked the plaintext");
+        assert!(
+            !ct.windows(9).any(|w| w == b"hello bob"),
+            "ciphertext leaked the plaintext"
+        );
         match bob.process(GROUP, &ct).expect("decrypt") {
-            Incoming::Application { user_id, device_id, plaintext, .. } => {
+            Incoming::Application {
+                user_id,
+                device_id,
+                plaintext,
+                ..
+            } => {
                 assert_eq!(user_id, "1001");
                 assert_eq!(device_id, "desktop-a");
                 assert_eq!(plaintext, b"hello bob");
@@ -638,10 +716,17 @@ mod tests {
         alice.merge_pending(GROUP).expect("merge");
         assert!(matches!(
             bob.process(GROUP, &commit.commit).expect("bob commit"),
-            Incoming::Commit { epoch: 2, removed_me: false }
+            Incoming::Commit {
+                epoch: 2,
+                removed_me: false
+            }
         ));
         carol
-            .join_welcome(&commit.welcome.clone().expect("welcome"), GROUP, &[device_ref(&alice)])
+            .join_welcome(
+                &commit.welcome.clone().expect("welcome"),
+                GROUP,
+                &[device_ref(&alice)],
+            )
             .expect("carol join");
         assert_eq!(carol.epoch(GROUP), Some(2));
         assert_eq!(alice.members(GROUP).len(), 3);
@@ -663,15 +748,23 @@ mod tests {
         alice.create_group(GROUP).expect("create");
         add_all(&mut alice, &mut [&mut bob, &mut carol]);
 
-        let out = alice.remove_devices(GROUP, &["tablet-cc".to_string()]).expect("remove");
+        let out = alice
+            .remove_devices(GROUP, &["tablet-cc".to_string()])
+            .expect("remove");
         alice.merge_pending(GROUP).expect("merge");
         assert!(matches!(
             bob.process(GROUP, &out.commit).expect("bob"),
-            Incoming::Commit { removed_me: false, .. }
+            Incoming::Commit {
+                removed_me: false,
+                ..
+            }
         ));
         assert!(matches!(
             carol.process(GROUP, &out.commit).expect("carol"),
-            Incoming::Commit { removed_me: true, .. }
+            Incoming::Commit {
+                removed_me: true,
+                ..
+            }
         ));
 
         let (ct, _) = alice.encrypt(GROUP, b"after the removal").expect("encrypt");
@@ -679,7 +772,10 @@ mod tests {
             bob.process(GROUP, &ct).expect("bob decrypt"),
             Incoming::Application { .. }
         ));
-        assert!(carol.process(GROUP, &ct).is_err(), "a removed device decrypted a new message");
+        assert!(
+            carol.process(GROUP, &ct).is_err(),
+            "a removed device decrypted a new message"
+        );
         carol.drop_group(GROUP).expect("drop");
         assert!(!carol.has_group(GROUP));
     }
@@ -698,7 +794,10 @@ mod tests {
         alice.add_members(GROUP, &[carol_kp]).expect("stage");
         alice.clear_pending(GROUP).expect("clear");
         let bob_commit = bob.remove_devices(GROUP, &["desktop-a".to_string()]);
-        assert!(bob_commit.is_ok(), "bob can still commit after alice cleared hers");
+        assert!(
+            bob_commit.is_ok(),
+            "bob can still commit after alice cleared hers"
+        );
     }
 
     #[test]
@@ -716,7 +815,11 @@ mod tests {
         alice.merge_pending(GROUP).expect("merge");
         bob.process(GROUP, &commit.commit).expect("bob");
         carol
-            .join_welcome(&commit.welcome.clone().expect("welcome"), GROUP, &[device_ref(&alice)])
+            .join_welcome(
+                &commit.welcome.clone().expect("welcome"),
+                GROUP,
+                &[device_ref(&alice)],
+            )
             .expect("join");
         let k2 = alice.voice_key(GROUP, ROOM).expect("key");
         assert_ne!(k1, k2, "the voice key must rotate on a membership change");
@@ -739,7 +842,9 @@ mod tests {
         assert_eq!(restored.epoch(GROUP), alice.epoch(GROUP));
         assert_eq!(restored.fingerprint(), alice.fingerprint());
 
-        let (ct, _) = restored.encrypt(GROUP, b"after the restart").expect("encrypt");
+        let (ct, _) = restored
+            .encrypt(GROUP, b"after the restart")
+            .expect("encrypt");
         match bob.process(GROUP, &ct).expect("decrypt") {
             Incoming::Application { plaintext, .. } => assert_eq!(plaintext, b"after the restart"),
             other => panic!("expected an application message, got {other:?}"),
@@ -775,7 +880,11 @@ mod tests {
             .join_welcome(&welcome, GROUP, &[device_ref(&attacker)])
             .expect_err("the second welcome must be refused");
         assert!(matches!(err, MlsError::GroupExists(_)), "{err:?}");
-        assert_eq!(bob.epoch(GROUP), Some(before), "the group was re-keyed anyway");
+        assert_eq!(
+            bob.epoch(GROUP),
+            Some(before),
+            "the group was re-keyed anyway"
+        );
 
         let (ct, _) = alice.encrypt(GROUP, b"still ours").expect("encrypt");
         match bob.process(GROUP, &ct).expect("decrypt") {
@@ -789,7 +898,7 @@ mod tests {
     /// attacker is not a recipient of that channel.
     #[test]
     fn a_welcome_from_someone_outside_the_channel_is_refused() {
-        let mut alice = client("1001", "desktop-a", 61);
+        let alice = client("1001", "desktop-a", 61);
         let mut attacker = client("6006", "evil-0001", 62);
         let mut bob = client("2002", "phone-bbb", 63);
         attacker.create_group(GROUP).expect("create");
@@ -854,7 +963,11 @@ mod tests {
         // And the honest one still goes through.
         let honest = claim(&mut bob);
         alice.add_members(GROUP, &[honest]).expect("add");
-        assert_eq!(alice.members(GROUP).len(), 1, "a refused commit must not be staged");
+        assert_eq!(
+            alice.members(GROUP).len(),
+            1,
+            "a refused commit must not be staged"
+        );
     }
 
     /// C2: attribution. The identity string in a leaf is whatever its owner
@@ -868,7 +981,12 @@ mod tests {
 
         let (ct, _) = alice.encrypt(GROUP, b"from alice").expect("encrypt");
         match bob.process(GROUP, &ct).expect("decrypt") {
-            Incoming::Application { user_id, device_id, signature_key, .. } => {
+            Incoming::Application {
+                user_id,
+                device_id,
+                signature_key,
+                ..
+            } => {
                 assert_eq!(user_id, "1001");
                 assert_eq!(device_id, "desktop-a");
                 assert_eq!(signature_key, alice.public_key().to_vec());

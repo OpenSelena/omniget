@@ -22,7 +22,9 @@ pub fn path_id(id: &str) -> Result<&str, String> {
         && id.len() <= 128
         && id != "."
         && id != ".."
-        && id.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.'));
+        && id
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.'));
     if ok {
         Ok(id)
     } else {
@@ -61,17 +63,29 @@ pub struct Api {
 impl Api {
     pub fn public(url: &str) -> Result<Self, String> {
         let base = normalize_instance_url(url)?;
-        Ok(Self { base, token: None, http: http_client(Duration::from_secs(15))? })
+        Ok(Self {
+            base,
+            token: None,
+            http: http_client(Duration::from_secs(15))?,
+        })
     }
 
     pub fn authed(url: &str) -> Result<Self, String> {
         let base = normalize_instance_url(url)?;
         let token = store::load_token(&base)?.ok_or_else(|| ERR_NO_SESSION.to_string())?;
-        Ok(Self { base, token: Some(token), http: http_client(Duration::from_secs(15))? })
+        Ok(Self {
+            base,
+            token: Some(token),
+            http: http_client(Duration::from_secs(15))?,
+        })
     }
 
     pub fn with_token(base: String, token: String) -> Result<Self, String> {
-        Ok(Self { base, token: Some(token), http: http_client(Duration::from_secs(15))? })
+        Ok(Self {
+            base,
+            token: Some(token),
+            http: http_client(Duration::from_secs(15))?,
+        })
     }
 
     pub async fn send<T: DeserializeOwned>(
@@ -83,7 +97,12 @@ impl Api {
     ) -> Result<T, String> {
         let text = self.raw(method, path, query, body).await?;
         serde_json::from_str(&text).map_err(|e| {
-            tracing::warn!("[omnidisc] {}{} returned unexpected JSON: {}", self.base, path, e);
+            tracing::warn!(
+                "[omnidisc] {}{} returned unexpected JSON: {}",
+                self.base,
+                path,
+                e
+            );
             ERR_SERVER.to_string()
         })
     }
@@ -131,7 +150,13 @@ impl Api {
         let code = serde_json::from_str::<omnidisc_proto::rest::ApiError>(&text)
             .map(|e| e.code)
             .unwrap_or_default();
-        tracing::warn!("[omnidisc] {} {} -> {} {}", method, url, status.as_u16(), code);
+        tracing::warn!(
+            "[omnidisc] {} {} -> {} {}",
+            method,
+            url,
+            status.as_u16(),
+            code
+        );
         Err(map_error(status, &code))
     }
 }
@@ -182,14 +207,22 @@ pub async fn omnidisc_list_messages(
     if let Some(l) = limit {
         query.push(("limit", l.clamp(1, 100).to_string()));
     }
-    api.send(Method::GET, &format!("/api/channels/{}/messages", channel_id), &query, None)
-        .await
+    api.send(
+        Method::GET,
+        &format!("/api/channels/{}/messages", channel_id),
+        &query,
+        None,
+    )
+    .await
 }
 
 /// One entry point for both surfaces. `encrypted` comes from the channel kind:
 /// DMs and group DMs go through MLS, guild channels go through the plain REST
 /// route the server can read. Uploads are referenced by their local id so the
 /// file keys never cross the bridge.
+// The argument list is the IPC contract the frontend calls by name; folding it
+// into a struct would change the payload shape for no gain here.
+#[allow(clippy::too_many_arguments)]
 #[tauri::command]
 pub async fn omnidisc_send_message(
     state: tauri::State<'_, crate::AppState>,
@@ -236,7 +269,12 @@ pub async fn omnidisc_send_message(
         body["attachment_ids"] = json!(attachment_ids);
     }
     let sent = api
-        .send(Method::POST, &format!("/api/channels/{}/messages", channel_id), &[], Some(body))
+        .send(
+            Method::POST,
+            &format!("/api/channels/{}/messages", channel_id),
+            &[],
+            Some(body),
+        )
         .await?;
     state.omnidisc_uploads.release(&upload_ids).await;
     Ok(sent)
@@ -291,8 +329,12 @@ pub async fn omnidisc_add_reaction(
     emoji: String,
 ) -> Result<(), String> {
     let api = Api::authed(&url)?;
-    api.send_empty(Method::PUT, &reaction_path(&channel_id, &message_id, &emoji), None)
-        .await
+    api.send_empty(
+        Method::PUT,
+        &reaction_path(&channel_id, &message_id, &emoji),
+        None,
+    )
+    .await
 }
 
 #[tauri::command]
@@ -303,12 +345,20 @@ pub async fn omnidisc_remove_reaction(
     emoji: String,
 ) -> Result<(), String> {
     let api = Api::authed(&url)?;
-    api.send_empty(Method::DELETE, &reaction_path(&channel_id, &message_id, &emoji), None)
-        .await
+    api.send_empty(
+        Method::DELETE,
+        &reaction_path(&channel_id, &message_id, &emoji),
+        None,
+    )
+    .await
 }
 
 #[tauri::command]
-pub async fn omnidisc_ack(url: String, channel_id: String, message_id: String) -> Result<Value, String> {
+pub async fn omnidisc_ack(
+    url: String,
+    channel_id: String,
+    message_id: String,
+) -> Result<Value, String> {
     let api = Api::authed(&url)?;
     api.send(
         Method::POST,
@@ -321,14 +371,24 @@ pub async fn omnidisc_ack(url: String, channel_id: String, message_id: String) -
 
 pub async fn typing_rest(url: &str, channel_id: &str) -> Result<(), String> {
     let api = Api::authed(url)?;
-    api.send_empty(Method::POST, &format!("/api/channels/{}/typing", channel_id), None)
-        .await
+    api.send_empty(
+        Method::POST,
+        &format!("/api/channels/{}/typing", channel_id),
+        None,
+    )
+    .await
 }
 
 #[tauri::command]
 pub async fn omnidisc_create_guild(url: String, name: String) -> Result<Value, String> {
     let api = Api::authed(&url)?;
-    api.send(Method::POST, "/api/guilds", &[], Some(json!({ "name": name }))).await
+    api.send(
+        Method::POST,
+        "/api/guilds",
+        &[],
+        Some(json!({ "name": name })),
+    )
+    .await
 }
 
 #[tauri::command]
@@ -367,7 +427,8 @@ pub async fn omnidisc_create_invite(
     if let Some(uses) = max_uses.filter(|u| *u > 0) {
         body["max_uses"] = json!(uses);
     }
-    api.send(Method::POST, "/api/invites", &[], Some(body)).await
+    api.send(Method::POST, "/api/invites", &[], Some(body))
+        .await
 }
 
 #[tauri::command]
@@ -390,7 +451,12 @@ pub fn extract_invite_code(raw: &str) -> String {
     let trimmed = raw.trim().trim_end_matches('/');
     match trimmed.rsplit_once("/invite/") {
         Some((_, code)) => code.trim().to_string(),
-        None => trimmed.rsplit('/').next().unwrap_or(trimmed).trim().to_string(),
+        None => trimmed
+            .rsplit('/')
+            .next()
+            .unwrap_or(trimmed)
+            .trim()
+            .to_string(),
     }
 }
 
@@ -409,19 +475,22 @@ pub async fn omnidisc_create_dm(url: String, recipient_ids: Vec<String>) -> Resu
 #[tauri::command]
 pub async fn omnidisc_update_me(url: String, patch: Value) -> Result<Value, String> {
     let api = Api::authed(&url)?;
-    api.send(Method::PATCH, "/api/users/@me", &[], Some(patch)).await
+    api.send(Method::PATCH, "/api/users/@me", &[], Some(patch))
+        .await
 }
 
 #[tauri::command]
 pub async fn omnidisc_get_user(url: String, user_id: String) -> Result<Value, String> {
     let api = Api::authed(&url)?;
-    api.send(Method::GET, &format!("/api/users/{}", user_id), &[], None).await
+    api.send(Method::GET, &format!("/api/users/{}", user_id), &[], None)
+        .await
 }
 
 #[tauri::command]
 pub async fn omnidisc_get_guild(url: String, guild_id: String) -> Result<Value, String> {
     let api = Api::authed(&url)?;
-    api.send(Method::GET, &format!("/api/guilds/{}", guild_id), &[], None).await
+    api.send(Method::GET, &format!("/api/guilds/{}", guild_id), &[], None)
+        .await
 }
 
 #[tauri::command]
@@ -430,6 +499,9 @@ pub async fn omnidisc_get_me(url: String) -> Result<Value, String> {
     api.send(Method::GET, "/api/users/@me", &[], None).await
 }
 
+// The argument list is the IPC contract the frontend calls by name; folding it
+// into a struct would change the payload shape for no gain here.
+#[allow(clippy::too_many_arguments)]
 #[tauri::command]
 pub async fn omnidisc_search(
     url: String,
@@ -472,7 +544,13 @@ pub async fn omnidisc_search(
 #[tauri::command]
 pub async fn omnidisc_list_pins(url: String, channel_id: String) -> Result<Value, String> {
     let api = Api::authed(&url)?;
-    api.send(Method::GET, &format!("/api/channels/{}/pins", channel_id), &[], None).await
+    api.send(
+        Method::GET,
+        &format!("/api/channels/{}/pins", channel_id),
+        &[],
+        None,
+    )
+    .await
 }
 
 #[tauri::command]
@@ -484,14 +562,19 @@ pub async fn omnidisc_pin_message(
 ) -> Result<(), String> {
     let api = Api::authed(&url)?;
     let method = if pinned { Method::PUT } else { Method::DELETE };
-    api.send_empty(method, &format!("/api/channels/{}/pins/{}", channel_id, message_id), None)
-        .await
+    api.send_empty(
+        method,
+        &format!("/api/channels/{}/pins/{}", channel_id, message_id),
+        None,
+    )
+    .await
 }
 
 #[tauri::command]
 pub async fn omnidisc_list_relationships(url: String) -> Result<Value, String> {
     let api = Api::authed(&url)?;
-    api.send(Method::GET, "/api/users/@me/relationships", &[], None).await
+    api.send(Method::GET, "/api/users/@me/relationships", &[], None)
+        .await
 }
 
 #[tauri::command]
@@ -511,34 +594,48 @@ pub async fn omnidisc_add_relationship(
     if body.get("username").is_none() && body.get("user_id").is_none() {
         return Err(format!("{}:invalid_field", ERR_BAD_REQUEST));
     }
-    api.send_empty(Method::POST, "/api/users/@me/relationships", Some(body)).await
+    api.send_empty(Method::POST, "/api/users/@me/relationships", Some(body))
+        .await
 }
 
 #[tauri::command]
 pub async fn omnidisc_accept_relationship(url: String, user_id: String) -> Result<(), String> {
     let api = Api::authed(&url)?;
-    api.send_empty(Method::PUT, &format!("/api/users/@me/relationships/{}", user_id), None)
-        .await
+    api.send_empty(
+        Method::PUT,
+        &format!("/api/users/@me/relationships/{}", user_id),
+        None,
+    )
+    .await
 }
 
 #[tauri::command]
 pub async fn omnidisc_remove_relationship(url: String, user_id: String) -> Result<(), String> {
     let api = Api::authed(&url)?;
-    api.send_empty(Method::DELETE, &format!("/api/users/@me/relationships/{}", user_id), None)
-        .await
+    api.send_empty(
+        Method::DELETE,
+        &format!("/api/users/@me/relationships/{}", user_id),
+        None,
+    )
+    .await
 }
 
 #[tauri::command]
 pub async fn omnidisc_block_user(url: String, user_id: String) -> Result<(), String> {
     let api = Api::authed(&url)?;
-    api.send_empty(Method::PUT, &format!("/api/users/@me/relationships/{}/block", user_id), None)
-        .await
+    api.send_empty(
+        Method::PUT,
+        &format!("/api/users/@me/relationships/{}/block", user_id),
+        None,
+    )
+    .await
 }
 
 #[tauri::command]
 pub async fn omnidisc_list_notes(url: String) -> Result<Value, String> {
     let api = Api::authed(&url)?;
-    api.send(Method::GET, "/api/users/@me/notes", &[], None).await
+    api.send(Method::GET, "/api/users/@me/notes", &[], None)
+        .await
 }
 
 #[tauri::command]
@@ -553,22 +650,37 @@ pub async fn omnidisc_put_note(url: String, user_id: String, note: String) -> Re
 }
 
 #[tauri::command]
-pub async fn omnidisc_update_guild(url: String, guild_id: String, patch: Value) -> Result<Value, String> {
+pub async fn omnidisc_update_guild(
+    url: String,
+    guild_id: String,
+    patch: Value,
+) -> Result<Value, String> {
     let api = Api::authed(&url)?;
-    api.send(Method::PATCH, &format!("/api/guilds/{}", guild_id), &[], Some(patch)).await
+    api.send(
+        Method::PATCH,
+        &format!("/api/guilds/{}", guild_id),
+        &[],
+        Some(patch),
+    )
+    .await
 }
 
 #[tauri::command]
 pub async fn omnidisc_delete_guild(url: String, guild_id: String) -> Result<(), String> {
     let api = Api::authed(&url)?;
-    api.send_empty(Method::DELETE, &format!("/api/guilds/{}", guild_id), None).await
+    api.send_empty(Method::DELETE, &format!("/api/guilds/{}", guild_id), None)
+        .await
 }
 
 #[tauri::command]
 pub async fn omnidisc_leave_guild(url: String, guild_id: String) -> Result<(), String> {
     let api = Api::authed(&url)?;
-    api.send_empty(Method::DELETE, &format!("/api/users/@me/guilds/{}", guild_id), None)
-        .await
+    api.send_empty(
+        Method::DELETE,
+        &format!("/api/users/@me/guilds/{}", guild_id),
+        None,
+    )
+    .await
 }
 
 #[tauri::command]
@@ -607,7 +719,13 @@ pub async fn omnidisc_create_role(
     if let Some(c) = color {
         body["color"] = json!(c);
     }
-    api.send(Method::POST, &format!("/api/guilds/{}/roles", guild_id), &[], Some(body)).await
+    api.send(
+        Method::POST,
+        &format!("/api/guilds/{}/roles", guild_id),
+        &[],
+        Some(body),
+    )
+    .await
 }
 
 #[tauri::command]
@@ -634,8 +752,12 @@ pub async fn omnidisc_delete_role(
     role_id: String,
 ) -> Result<(), String> {
     let api = Api::authed(&url)?;
-    api.send_empty(Method::DELETE, &format!("/api/guilds/{}/roles/{}", guild_id, role_id), None)
-        .await
+    api.send_empty(
+        Method::DELETE,
+        &format!("/api/guilds/{}/roles/{}", guild_id, role_id),
+        None,
+    )
+    .await
 }
 
 #[tauri::command]
@@ -650,7 +772,10 @@ pub async fn omnidisc_set_member_role(
     let method = if granted { Method::PUT } else { Method::DELETE };
     api.send_empty(
         method,
-        &format!("/api/guilds/{}/members/{}/roles/{}", guild_id, user_id, role_id),
+        &format!(
+            "/api/guilds/{}/members/{}/roles/{}",
+            guild_id, user_id, role_id
+        ),
         None,
     )
     .await
@@ -721,14 +846,24 @@ pub async fn omnidisc_unban_member(
     user_id: String,
 ) -> Result<(), String> {
     let api = Api::authed(&url)?;
-    api.send_empty(Method::DELETE, &format!("/api/guilds/{}/bans/{}", guild_id, user_id), None)
-        .await
+    api.send_empty(
+        Method::DELETE,
+        &format!("/api/guilds/{}/bans/{}", guild_id, user_id),
+        None,
+    )
+    .await
 }
 
 #[tauri::command]
 pub async fn omnidisc_list_bans(url: String, guild_id: String) -> Result<Value, String> {
     let api = Api::authed(&url)?;
-    api.send(Method::GET, &format!("/api/guilds/{}/bans", guild_id), &[], None).await
+    api.send(
+        Method::GET,
+        &format!("/api/guilds/{}/bans", guild_id),
+        &[],
+        None,
+    )
+    .await
 }
 
 #[tauri::command]
@@ -752,7 +887,13 @@ pub async fn omnidisc_audit_log(
         q.push(("before", v));
     }
     q.push(("limit", limit.unwrap_or(50).clamp(1, 100).to_string()));
-    api.send(Method::GET, &format!("/api/guilds/{}/audit-log", guild_id), &q, None).await
+    api.send(
+        Method::GET,
+        &format!("/api/guilds/{}/audit-log", guild_id),
+        &q,
+        None,
+    )
+    .await
 }
 
 #[tauri::command]
@@ -762,13 +903,24 @@ pub async fn omnidisc_update_channel(
     patch: Value,
 ) -> Result<Value, String> {
     let api = Api::authed(&url)?;
-    api.send(Method::PATCH, &format!("/api/channels/{}", channel_id), &[], Some(patch)).await
+    api.send(
+        Method::PATCH,
+        &format!("/api/channels/{}", channel_id),
+        &[],
+        Some(patch),
+    )
+    .await
 }
 
 #[tauri::command]
 pub async fn omnidisc_delete_channel(url: String, channel_id: String) -> Result<(), String> {
     let api = Api::authed(&url)?;
-    api.send_empty(Method::DELETE, &format!("/api/channels/{}", channel_id), None).await
+    api.send_empty(
+        Method::DELETE,
+        &format!("/api/channels/{}", channel_id),
+        None,
+    )
+    .await
 }
 
 #[tauri::command]
@@ -813,14 +965,19 @@ pub async fn omnidisc_list_sessions(url: String) -> Result<Value, String> {
 #[tauri::command]
 pub async fn omnidisc_revoke_session(url: String, session_id: String) -> Result<(), String> {
     let api = Api::authed(&url)?;
-    api.send_empty(Method::DELETE, &format!("/api/auth/sessions/{}", session_id), None)
-        .await
+    api.send_empty(
+        Method::DELETE,
+        &format!("/api/auth/sessions/{}", session_id),
+        None,
+    )
+    .await
 }
 
 #[tauri::command]
 pub async fn omnidisc_revoke_other_sessions(url: String) -> Result<(), String> {
     let api = Api::authed(&url)?;
-    api.send_empty(Method::DELETE, "/api/auth/sessions", None).await
+    api.send_empty(Method::DELETE, "/api/auth/sessions", None)
+        .await
 }
 
 #[cfg(test)]
@@ -829,14 +986,35 @@ mod tests {
 
     #[test]
     fn maps_statuses_to_stable_codes() {
-        assert_eq!(map_error(StatusCode::UNAUTHORIZED, "unauthorized"), "ERR_UNAUTHORIZED");
-        assert_eq!(map_error(StatusCode::FORBIDDEN, "registration_closed"), "ERR_FORBIDDEN:registration_closed");
+        assert_eq!(
+            map_error(StatusCode::UNAUTHORIZED, "unauthorized"),
+            "ERR_UNAUTHORIZED"
+        );
+        assert_eq!(
+            map_error(StatusCode::FORBIDDEN, "registration_closed"),
+            "ERR_FORBIDDEN:registration_closed"
+        );
         assert_eq!(map_error(StatusCode::FORBIDDEN, ""), "ERR_FORBIDDEN");
-        assert_eq!(map_error(StatusCode::NOT_FOUND, "not_found"), "ERR_NOT_FOUND");
-        assert_eq!(map_error(StatusCode::TOO_MANY_REQUESTS, "rate_limited"), "ERR_RATE_LIMITED");
-        assert_eq!(map_error(StatusCode::BAD_REQUEST, "invalid_credentials"), "ERR_BAD_REQUEST:invalid_credentials");
-        assert_eq!(map_error(StatusCode::CONFLICT, "username_taken"), "ERR_BAD_REQUEST:username_taken");
-        assert_eq!(map_error(StatusCode::INTERNAL_SERVER_ERROR, "internal"), "ERR_SERVER");
+        assert_eq!(
+            map_error(StatusCode::NOT_FOUND, "not_found"),
+            "ERR_NOT_FOUND"
+        );
+        assert_eq!(
+            map_error(StatusCode::TOO_MANY_REQUESTS, "rate_limited"),
+            "ERR_RATE_LIMITED"
+        );
+        assert_eq!(
+            map_error(StatusCode::BAD_REQUEST, "invalid_credentials"),
+            "ERR_BAD_REQUEST:invalid_credentials"
+        );
+        assert_eq!(
+            map_error(StatusCode::CONFLICT, "username_taken"),
+            "ERR_BAD_REQUEST:username_taken"
+        );
+        assert_eq!(
+            map_error(StatusCode::INTERNAL_SERVER_ERROR, "internal"),
+            "ERR_SERVER"
+        );
         assert_eq!(map_error(StatusCode::BAD_GATEWAY, ""), "ERR_SERVER");
     }
 
@@ -845,7 +1023,7 @@ mod tests {
     #[test]
     fn ids_are_plain_identifiers_or_nothing() {
         assert_eq!(path_id("1234567890123456789"), Ok("1234567890123456789"));
-        assert_eq!(path_id("od-3f2a1b4c-1111-2222-3333-444455556666").is_ok(), true);
+        assert!(path_id("od-3f2a1b4c-1111-2222-3333-444455556666").is_ok());
         assert!(path_id("../../admin/instance").is_err());
         assert!(path_id("..").is_err());
         assert!(path_id("7/messages").is_err());
@@ -859,7 +1037,9 @@ mod tests {
     #[test]
     fn assembled_paths_stay_inside_the_api() {
         assert!(safe_path("/api/users/@me/devices"));
-        assert!(safe_path("/api/channels/17/messages/42/reactions/%F0%9F%91%8D/@me"));
+        assert!(safe_path(
+            "/api/channels/17/messages/42/reactions/%F0%9F%91%8D/@me"
+        ));
         assert!(!safe_path("/api/channels/../../admin"));
         assert!(!safe_path("/api/channels//messages"));
         assert!(!safe_path("api/instance"));
@@ -870,8 +1050,14 @@ mod tests {
     #[test]
     fn invite_code_is_extracted_from_links() {
         assert_eq!(extract_invite_code("abc123"), "abc123");
-        assert_eq!(extract_invite_code("https://chat.example.org/invite/abc123"), "abc123");
-        assert_eq!(extract_invite_code("https://chat.example.org/invite/abc123/"), "abc123");
+        assert_eq!(
+            extract_invite_code("https://chat.example.org/invite/abc123"),
+            "abc123"
+        );
+        assert_eq!(
+            extract_invite_code("https://chat.example.org/invite/abc123/"),
+            "abc123"
+        );
         assert_eq!(extract_invite_code("  abc123 "), "abc123");
     }
 }

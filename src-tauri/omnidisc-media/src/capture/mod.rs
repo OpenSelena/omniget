@@ -46,18 +46,30 @@ pub fn unix_micros() -> i64 {
 
 pub trait CaptureApi {
     fn list_sources(thumbnails: bool) -> Result<StreamSources, StreamError>;
-    fn start_video(opts: &CaptureOptions, sink: VideoSink) -> Result<(VideoCapture, CaptureGeometry), StreamError>;
-    fn start_audio(mode: AudioMode, sink: AudioSink) -> Result<(AudioCapture, AudioMode), StreamError>;
+    fn start_video(
+        opts: &CaptureOptions,
+        sink: VideoSink,
+    ) -> Result<(VideoCapture, CaptureGeometry), StreamError>;
+    fn start_audio(
+        mode: AudioMode,
+        sink: AudioSink,
+    ) -> Result<(AudioCapture, AudioMode), StreamError>;
 }
 
 pub fn list_sources(thumbnails: bool) -> Result<StreamSources, StreamError> {
     Platform::list_sources(thumbnails)
 }
 
-pub fn start_video(opts: &CaptureOptions, sink: VideoSink) -> Result<(VideoCapture, CaptureGeometry), StreamError> {
+pub fn start_video(
+    opts: &CaptureOptions,
+    sink: VideoSink,
+) -> Result<(VideoCapture, CaptureGeometry), StreamError> {
     Platform::start_video(opts, sink)
 }
 
-pub fn start_audio(mode: AudioMode, sink: AudioSink) -> Result<(AudioCapture, AudioMode), StreamError> {
+pub fn start_audio(
+    mode: AudioMode,
+    sink: AudioSink,
+) -> Result<(AudioCapture, AudioMode), StreamError> {
     Platform::start_audio(mode, sink)
 }

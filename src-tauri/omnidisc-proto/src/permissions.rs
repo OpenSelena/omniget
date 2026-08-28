@@ -154,7 +154,9 @@ impl Serialize for Permissions {
 impl<'de> Deserialize<'de> for Permissions {
     fn deserialize<D: serde::Deserializer<'de>>(d: D) -> Result<Self, D::Error> {
         let s = String::deserialize(d)?;
-        s.parse::<u64>().map(Permissions).map_err(serde::de::Error::custom)
+        s.parse::<u64>()
+            .map(Permissions)
+            .map_err(serde::de::Error::custom)
     }
 }
 
@@ -198,8 +200,18 @@ pub fn resolve(inputs: &PermissionInputs<'_>) -> Permissions {
         return Permissions(u64::MAX);
     }
     let mut p = base;
-    p = apply_tier(p, inputs.category_everyone, inputs.category_roles, inputs.category_member);
-    p = apply_tier(p, inputs.channel_everyone, inputs.channel_roles, inputs.channel_member);
+    p = apply_tier(
+        p,
+        inputs.category_everyone,
+        inputs.category_roles,
+        inputs.category_member,
+    );
+    p = apply_tier(
+        p,
+        inputs.channel_everyone,
+        inputs.channel_roles,
+        inputs.channel_member,
+    );
     p
 }
 
@@ -246,7 +258,10 @@ mod tests {
     #[test]
     fn non_member_gets_nothing_even_with_channel_allow() {
         let mut i = base(Membership::NotMember, &[]);
-        i.channel_everyone = Some(Overwrite { allow: Permissions::VIEW_CHANNEL, deny: Permissions::NONE });
+        i.channel_everyone = Some(Overwrite {
+            allow: Permissions::VIEW_CHANNEL,
+            deny: Permissions::NONE,
+        });
         assert_eq!(resolve(&i), Permissions::NONE);
     }
 
@@ -258,16 +273,28 @@ mod tests {
     #[test]
     fn channel_member_overwrite_beats_role_deny() {
         let mut i = base(Membership::Member, &[]);
-        i.channel_roles = &[Overwrite { allow: Permissions::NONE, deny: Permissions::SEND_MESSAGES }];
-        i.channel_member = Some(Overwrite { allow: Permissions::SEND_MESSAGES, deny: Permissions::NONE });
+        i.channel_roles = &[Overwrite {
+            allow: Permissions::NONE,
+            deny: Permissions::SEND_MESSAGES,
+        }];
+        i.channel_member = Some(Overwrite {
+            allow: Permissions::SEND_MESSAGES,
+            deny: Permissions::NONE,
+        });
         assert!(resolve(&i).contains(Permissions::SEND_MESSAGES));
     }
 
     #[test]
     fn channel_tier_overrides_category_tier() {
         let mut i = base(Membership::Member, &[]);
-        i.category_everyone = Some(Overwrite { allow: Permissions::NONE, deny: Permissions::VIEW_CHANNEL });
-        i.channel_everyone = Some(Overwrite { allow: Permissions::VIEW_CHANNEL, deny: Permissions::NONE });
+        i.category_everyone = Some(Overwrite {
+            allow: Permissions::NONE,
+            deny: Permissions::VIEW_CHANNEL,
+        });
+        i.channel_everyone = Some(Overwrite {
+            allow: Permissions::VIEW_CHANNEL,
+            deny: Permissions::NONE,
+        });
         assert!(resolve(&i).contains(Permissions::VIEW_CHANNEL));
     }
 
@@ -275,7 +302,10 @@ mod tests {
     fn admin_role_ignores_overwrites() {
         let roles = [Permissions::ADMINISTRATOR];
         let mut i = base(Membership::Member, &roles);
-        i.channel_everyone = Some(Overwrite { allow: Permissions::NONE, deny: Permissions::VIEW_CHANNEL });
+        i.channel_everyone = Some(Overwrite {
+            allow: Permissions::NONE,
+            deny: Permissions::VIEW_CHANNEL,
+        });
         assert!(resolve(&i).contains(Permissions::VIEW_CHANNEL));
     }
 
