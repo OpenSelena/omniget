@@ -382,8 +382,7 @@ async fn tone_reaches_the_other_side(base: &str, label: &str, room_key: Option<R
 }
 
 fn test_url() -> Option<String> {
-    let picked = real_test_url();
-    return picked.filter(|b| allow_target(b));
+    real_test_url().filter(|b| allow_target(b))
 }
 
 #[allow(dead_code)]
