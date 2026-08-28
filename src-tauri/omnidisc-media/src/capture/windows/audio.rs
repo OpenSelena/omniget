@@ -142,9 +142,13 @@ fn activate(pid: u32, include_tree: bool) -> Result<IAudioClient, StreamError> {
             },
         },
     };
-    let mut prop = PROPVARIANT::default();
-    // SAFETY: VT_BLOB borrows `params` for the duration of the call only;
-    // `ActivateAudioInterfaceAsync` copies the blob before returning.
+    // Never let this variant be dropped: PROPVARIANT's Drop runs
+    // PropVariantClear, which for VT_BLOB hands pBlobData to the COM allocator —
+    // and this blob points at the stack local above. Freeing that corrupts the
+    // heap, which is precisely how this failed the first time. The variant only
+    // borrows `params` for the duration of the call, so there is nothing to
+    // release either way.
+    let mut prop = std::mem::ManuallyDrop::new(PROPVARIANT::default());
     unsafe {
         let inner: &mut PROPVARIANT_0_0 = &mut prop.Anonymous.Anonymous;
         inner.vt = VT_BLOB;
