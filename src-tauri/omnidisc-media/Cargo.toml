@@ -75,3 +75,10 @@ windows = { version = "0.61", features = [
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
 tokio-tungstenite = { version = "0.30", features = ["native-tls"] }
 futures-util = "0.3"
+
+# Plain main instead of libtest: a heap corruption kills the process and libtest
+# discards the buffered output of the test that died, so CI would only show an
+# exit code. See the file header.
+[[test]]
+name = "windows_capture"
+harness = false
