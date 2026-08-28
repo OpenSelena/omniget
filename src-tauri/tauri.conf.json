@@ -72,6 +72,13 @@
     "macOS": {
       "entitlements": "Entitlements.plist",
       "minimumSystemVersion": "10.15"
+    },
+    "linux": {
+      "deb": {
+        "depends": [
+          "libasound2"
+        ]
+      }
     }
   }
 }

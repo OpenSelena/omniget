@@ -2,7 +2,9 @@ mod wgpu_surface;
 
 pub use wgpu_surface::{FrameSlot, Planes, WgpuViewer};
 
-use crate::stream::{StreamError, Viewport, WatchStats};
+#[cfg(target_os = "macos")]
+use crate::stream::StreamError;
+use crate::stream::{Viewport, WatchStats};
 use futures::StreamExt;
 use livekit::track::RemoteVideoTrack;
 use livekit::webrtc::stats::RtcStats;
