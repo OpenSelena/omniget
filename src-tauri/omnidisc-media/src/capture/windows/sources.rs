@@ -27,6 +27,14 @@ const THUMB_WIDTH: u32 = 320;
 /// calls that can fault on a window the compositor is tearing down, and the
 /// only way to see which source did it — here or on a user's machine — is to
 /// have the step on the wire before the call.
+/// Same gate as [`trace_step!`], callable from the sibling modules.
+pub fn trace(msg: &str) {
+    if std::env::var_os("OMNIDISC_CAPTURE_TRACE").is_some() {
+        println!("[capture-trace] {msg}");
+        std::io::Write::flush(&mut std::io::stdout()).ok();
+    }
+}
+
 macro_rules! trace_step {
     ($($arg:tt)*) => {
         if std::env::var_os("OMNIDISC_CAPTURE_TRACE").is_some() {
@@ -427,7 +435,10 @@ pub fn window_from_id(id: u32) -> Option<HWND> {
 }
 
 pub fn display_sources(thumbnails: bool) -> Vec<StreamSource> {
-    monitors()
+    trace_step!("display_sources thumbnails={thumbnails}");
+    let found = monitors();
+    trace_step!("monitors enumerated: {}", found.len());
+    found
         .iter()
         .enumerate()
         .map(|(i, m)| {
@@ -454,8 +465,11 @@ pub fn display_sources(thumbnails: bool) -> Vec<StreamSource> {
 }
 
 pub fn window_sources(thumbnails: bool) -> Vec<StreamSource> {
+    trace_step!("window_sources thumbnails={thumbnails}");
     let mut out = Vec::new();
-    for (i, w) in windows_list().into_iter().enumerate() {
+    let listed = windows_list();
+    trace_step!("windows enumerated: {}", listed.len());
+    for (i, w) in listed.into_iter().enumerate() {
         let title = if w.title.trim().is_empty() {
             w.app.clone().unwrap_or_default()
         } else {

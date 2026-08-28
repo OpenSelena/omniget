@@ -171,15 +171,20 @@ pub struct Platform;
 impl CaptureApi for Platform {
     fn list_sources(thumbnails: bool) -> Result<StreamSources, StreamError> {
         let _com = audio::ComGuard::mta();
+        sources::trace("com guard ready");
         wgc_available()?;
+        sources::trace("wgc available");
         let displays = sources::display_sources(thumbnails);
+        sources::trace("displays done");
         if displays.is_empty() {
             return Err(StreamError::Capture(
                 "no displays were reported by Windows".into(),
             ));
         }
         let windows = sources::window_sources(thumbnails);
+        sources::trace("windows done");
         let loopback = audio::process_loopback_supported();
+        sources::trace("loopback probe done");
         let apps = if loopback {
             audio::audio_apps()
         } else {
