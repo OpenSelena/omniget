@@ -170,7 +170,7 @@ pub struct Platform;
 
 impl CaptureApi for Platform {
     fn list_sources(thumbnails: bool) -> Result<StreamSources, StreamError> {
-        let _com = audio::ComGuard::mta();
+        audio::ensure_mta();
         sources::trace("com guard ready");
         wgc_available()?;
         sources::trace("wgc available");
@@ -209,7 +209,7 @@ impl CaptureApi for Platform {
         // `GraphicsCaptureSession::IsSupported` is a WinRT static call, so the
         // caller's thread needs an apartment even though the session itself
         // runs on our own.
-        let _com = audio::ComGuard::mta();
+        audio::ensure_mta();
         wgc_available()?;
         let gpu = gpu()?;
         let target = match opts.source {

@@ -17,7 +17,6 @@ use windows::Win32::Foundation::HWND;
 use windows::Win32::Graphics::Direct3D11::{ID3D11Texture2D, D3D11_BOX};
 use windows::Win32::Graphics::Dxgi::IDXGIDevice;
 use windows::Win32::Graphics::Gdi::HMONITOR;
-use windows::Win32::System::Com::{CoInitializeEx, CoUninitialize, COINIT_MULTITHREADED};
 use windows::Win32::System::WinRT::Direct3D11::{
     CreateDirect3D11DeviceFromDXGIDevice, IDirect3DDxgiInterfaceAccess,
 };
@@ -258,7 +257,7 @@ pub fn start(
     let thread = std::thread::Builder::new()
         .name("omnidisc-wgc".into())
         .spawn(move || {
-            let com = unsafe { CoInitializeEx(None, COINIT_MULTITHREADED) };
+            super::audio::ensure_mta();
             let last_frame_us = Arc::new(AtomicU64::new(0));
             let started = capture_item(&target).and_then(|item| {
                 let size: SizeInt32 = item.Size().map_err(|e| cap_err("item size", e))?;
@@ -283,9 +282,6 @@ pub fn start(
                 }
                 Err(e) => {
                     let _ = tx.send(Err(e));
-                    if com.is_ok() {
-                        unsafe { CoUninitialize() };
-                    }
                     return;
                 }
             };
@@ -299,9 +295,6 @@ pub fn start(
             }
             let _ = session.session.Close();
             let _ = session.pool.Close();
-            if com.is_ok() {
-                unsafe { CoUninitialize() };
-            }
         })
         .map_err(|e| StreamError::Capture(format!("wgc thread: {e}")))?;
     match rx.recv() {

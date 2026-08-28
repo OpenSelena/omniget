@@ -18,9 +18,7 @@ use windows::Win32::Media::Audio::{
     WAVEFORMATEX,
 };
 use windows::Win32::System::Com::StructuredStorage::{PROPVARIANT, PROPVARIANT_0_0};
-use windows::Win32::System::Com::{
-    CoCreateInstance, CoInitializeEx, CoUninitialize, BLOB, CLSCTX_ALL, COINIT_MULTITHREADED,
-};
+use windows::Win32::System::Com::{CoCreateInstance, CoIncrementMTAUsage, BLOB, CLSCTX_ALL};
 use windows::Win32::System::Threading::{CreateEventW, SetEvent, WaitForSingleObject};
 use windows::Win32::System::Variant::VT_BLOB;
 
@@ -332,14 +330,11 @@ pub fn start_process_loopback(
     let thread = std::thread::Builder::new()
         .name("omnidisc-wasapi".into())
         .spawn(move || {
-            let com = unsafe { CoInitializeEx(None, COINIT_MULTITHREADED) };
+            ensure_mta();
             let ready = match Event::new() {
                 Ok(e) => e,
                 Err(e) => {
                     let _ = tx.send(Err(e));
-                    if com.is_ok() {
-                        unsafe { CoUninitialize() };
-                    }
                     return;
                 }
             };
@@ -353,9 +348,6 @@ pub fn start_process_loopback(
                 Err(e) => {
                     let _ = tx.send(Err(e));
                 }
-            }
-            if com.is_ok() {
-                unsafe { CoUninitialize() };
             }
         })
         .map_err(|e| StreamError::Capture(format!("wasapi thread: {e}")))?;
@@ -441,19 +433,21 @@ pub fn audio_apps() -> Vec<AudioApp> {
 
 /// COM apartment guard for the enumeration helpers, which may run on a tokio
 /// blocking thread whose apartment we do not control.
-pub struct ComGuard(bool);
-
-impl ComGuard {
-    pub fn mta() -> Self {
-        let hr = unsafe { CoInitializeEx(None, COINIT_MULTITHREADED) };
-        Self(hr.is_ok())
-    }
-}
-
-impl Drop for ComGuard {
-    fn drop(&mut self) {
-        if self.0 {
-            unsafe { CoUninitialize() };
+/// Guarantees the process has a multithreaded apartment, once, for good.
+///
+/// The obvious shape — initialise COM on entry, uninitialise on the way out —
+/// crashes. `CoUninitialize` tears the apartment down, but the activation
+/// factories the windows crate caches for WinRT types survive it, so the next
+/// `GraphicsCaptureSession::IsSupported` dereferences freed memory: opening the
+/// share picker a second time was enough to fault. `CoIncrementMTAUsage` is the
+/// API for this exact need — it keeps an implicit MTA alive for every thread
+/// that never initialises one itself, and the cookie is deliberately never
+/// released.
+pub fn ensure_mta() {
+    static MTA: std::sync::OnceLock<()> = std::sync::OnceLock::new();
+    MTA.get_or_init(|| {
+        if let Err(e) = unsafe { CoIncrementMTAUsage() } {
+            tracing::warn!("[omnidisc-media] could not hold an MTA open: {e}");
         }
-    }
+    });
 }
