@@ -25,6 +25,43 @@
   let isFriends = $derived(page.url.pathname.startsWith("/omnidisc/friends"));
 
   let menuOpen = $state(false);
+  let menuAnchor = $state<HTMLButtonElement | null>(null);
+  let menuEl = $state<HTMLDivElement | null>(null);
+  let menuPos = $state({ left: 0, bottom: 0 });
+
+  // The rail scrolls, so it clips anything that leaves its 64px width. An
+  // absolutely positioned menu was being cut away entirely: the button looked
+  // dead because the menu it opened was never visible. Fixed positioning,
+  // measured from the button, escapes every clipping ancestor.
+  function toggleMenu() {
+    if (menuOpen) {
+      menuOpen = false;
+      return;
+    }
+    const rect = menuAnchor?.getBoundingClientRect();
+    if (rect) {
+      menuPos = { left: rect.right + 8, bottom: Math.max(8, window.innerHeight - rect.bottom) };
+    }
+    menuOpen = true;
+  }
+
+  // A menu that only closes by pressing its own button reads as stuck.
+  $effect(() => {
+    if (!menuOpen) return;
+    const dismiss = (e: MouseEvent) => {
+      const target = e.target as Node | null;
+      if (menuAnchor && target && menuAnchor.contains(target)) return;
+      if (menuEl && target && menuEl.contains(target)) return;
+      menuOpen = false;
+    };
+    const reposition = () => (menuOpen = false);
+    window.addEventListener("pointerdown", dismiss, true);
+    window.addEventListener("resize", reposition);
+    return () => {
+      window.removeEventListener("pointerdown", dismiss, true);
+      window.removeEventListener("resize", reposition);
+    };
+  });
   let dialog = $state<"create" | "join" | null>(null);
   let dialogBusy = $state(false);
   let dialogError = $state<string | null>(null);
@@ -206,7 +243,8 @@
       title={$t("omnidisc.rail.menu")}
       aria-haspopup="menu"
       aria-expanded={menuOpen}
-      onclick={() => (menuOpen = !menuOpen)}
+      bind:this={menuAnchor}
+      onclick={toggleMenu}
     >
       <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
         <path d="M12 5v14M5 12h14" />
@@ -214,7 +252,14 @@
     </button>
     {#if menuOpen}
       <!-- svelte-ignore a11y_no_static_element_interactions -->
-      <div class="menu" role="menu" tabindex="-1" onkeydown={onMenuKeydown}>
+      <div
+        class="menu"
+        role="menu"
+        tabindex="-1"
+        onkeydown={onMenuKeydown}
+        bind:this={menuEl}
+        style="left: {menuPos.left}px; bottom: {menuPos.bottom}px;"
+      >
         <button type="button" role="menuitem" onclick={() => openDialog("create")} disabled={!canCreate}>{$t("omnidisc.rail.create_server")}</button>
         <button type="button" role="menuitem" onclick={() => openDialog("join")} disabled={!canCreate}>{$t("omnidisc.rail.join_invite")}</button>
         <button type="button" role="menuitem" onclick={addInstance}>{$t("omnidisc.rail.add_instance")}</button>
@@ -417,9 +462,7 @@
   }
 
   .menu {
-    position: absolute;
-    left: 52px;
-    bottom: 0;
+    position: fixed;
     z-index: 30;
     display: flex;
     flex-direction: column;

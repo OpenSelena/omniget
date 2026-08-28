@@ -3,6 +3,7 @@
   import { t } from "$lib/i18n";
   import { translateBackendError } from "$lib/error-translate";
   import type { OmnidiscMessage } from "$lib/omnidisc/types";
+  import { placeMenu, portal } from "$lib/omnidisc/popover";
   import EmojiPicker from "./EmojiPicker.svelte";
   import MessageAttachments from "./MessageAttachments.svelte";
 
@@ -65,6 +66,13 @@
   let editValue = $state("");
   let editArea = $state<HTMLTextAreaElement | null>(null);
   let root = $state<HTMLElement | null>(null);
+  let actionsEl = $state<HTMLElement | null>(null);
+  let menuEl = $state<HTMLElement | null>(null);
+  let pickerEl = $state<HTMLElement | null>(null);
+  let menuBtn = $state<HTMLButtonElement | null>(null);
+  let pickerBtn = $state<HTMLButtonElement | null>(null);
+  let overlayPos = $state({ left: 0, top: 0 });
+  let placed = $state(false);
 
   $effect(() => {
     if (!editing) return;
@@ -90,19 +98,72 @@
     return new Date(ts).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" });
   }
 
-  function closeOverlays() {
+  function overlayNode(): HTMLElement | null {
+    return menuEl ?? pickerEl;
+  }
+
+  function closeOverlays(restoreFocus = false) {
+    const trigger = menuOpen ? menuBtn : pickerOpen ? pickerBtn : null;
     menuOpen = false;
     pickerOpen = false;
+    placed = false;
+    if (restoreFocus) trigger?.focus();
   }
 
-  function onWindowPointerDown(e: PointerEvent) {
-    if (!menuOpen && !pickerOpen) return;
-    if (root && e.target instanceof Node && root.contains(e.target)) return;
-    closeOverlays();
+  function place() {
+    const node = overlayNode();
+    const anchor = actionsEl?.getBoundingClientRect();
+    if (!node || !anchor) return;
+    const box = node.getBoundingClientRect();
+    overlayPos = placeMenu(
+      anchor,
+      { width: box.width, height: box.height },
+      { width: window.innerWidth, height: window.innerHeight },
+    );
+    placed = true;
   }
+
+  async function toggleOverlay(which: "menu" | "picker") {
+    const wasOpen = which === "menu" ? menuOpen : pickerOpen;
+    closeOverlays();
+    if (wasOpen) return;
+    if (which === "menu") menuOpen = true;
+    else pickerOpen = true;
+    await tick();
+    place();
+    if (which !== "menu") return;
+    await tick();
+    menuEl?.querySelector<HTMLButtonElement>("[role='menuitem']")?.focus();
+  }
+
+  // The menu lives on the body, so nothing inside the message can be trusted to
+  // contain the click any more, and a scroll would leave it hanging in place.
+  $effect(() => {
+    if (!menuOpen && !pickerOpen) return;
+    const inside = (target: EventTarget | null): boolean =>
+      target instanceof Node && (overlayNode()?.contains(target) ?? false);
+    const dismiss = (e: PointerEvent) => {
+      if (inside(e.target)) return;
+      if (root && e.target instanceof Node && root.contains(e.target)) return;
+      closeOverlays();
+    };
+    const scrolled = (e: Event) => {
+      if (inside(e.target)) return;
+      closeOverlays();
+    };
+    const resized = () => closeOverlays();
+    window.addEventListener("pointerdown", dismiss, true);
+    window.addEventListener("scroll", scrolled, true);
+    window.addEventListener("resize", resized);
+    return () => {
+      window.removeEventListener("pointerdown", dismiss, true);
+      window.removeEventListener("scroll", scrolled, true);
+      window.removeEventListener("resize", resized);
+    };
+  });
 
   function react(emoji: string) {
-    closeOverlays();
+    closeOverlays(true);
     onReact?.(message, emoji);
   }
 
@@ -136,8 +197,6 @@
   let sent = $derived(message.delivery === "sent" || message.delivery === undefined);
   let showActions = $derived(sent && (canReact || canEdit || canDelete || canPin || !!onReply));
 </script>
-
-<svelte:window onpointerdown={onWindowPointerDown} />
 
 {#if daySeparator}
   <div class="day-separator" role="separator" aria-label={dayLabel(message.createdAt)}>
@@ -289,12 +348,13 @@
   {/if}
 
   {#if showActions && !editing}
-    <div class="actions" class:open={menuOpen || pickerOpen}>
+    <div class="actions" class:open={menuOpen || pickerOpen} bind:this={actionsEl}>
       {#if canReact}
         <button
           type="button"
           class="action"
-          onclick={() => { pickerOpen = !pickerOpen; menuOpen = false; }}
+          bind:this={pickerBtn}
+          onclick={() => void toggleOverlay("picker")}
           aria-expanded={pickerOpen}
           title={$t("omnidisc.messages.react")}
           aria-label={$t("omnidisc.messages.react")}
@@ -315,7 +375,8 @@
       <button
         type="button"
         class="action"
-        onclick={() => { menuOpen = !menuOpen; pickerOpen = false; }}
+        bind:this={menuBtn}
+        onclick={() => void toggleOverlay("menu")}
         aria-expanded={menuOpen}
         title={$t("omnidisc.messages.more")}
         aria-label={$t("omnidisc.messages.more")}
@@ -325,29 +386,45 @@
     </div>
 
     {#if pickerOpen}
-      <div class="overlay picker-anchor">
-        <EmojiPicker onPick={react} onClose={() => (pickerOpen = false)} />
+      <div
+        class="overlay picker-anchor"
+        class:placed
+        use:portal
+        bind:this={pickerEl}
+        style="left: {overlayPos.left}px; top: {overlayPos.top}px;"
+      >
+        <EmojiPicker onPick={react} onClose={() => closeOverlays(true)} />
       </div>
     {/if}
 
     {#if menuOpen}
-      <div class="overlay menu" role="menu" aria-label={$t("omnidisc.messages.more")}>
+      <div
+        class="overlay menu"
+        class:placed
+        role="menu"
+        tabindex="-1"
+        aria-label={$t("omnidisc.messages.more")}
+        use:portal
+        bind:this={menuEl}
+        style="left: {overlayPos.left}px; top: {overlayPos.top}px;"
+        onkeydown={(e) => { if (e.key === "Escape") closeOverlays(true); }}
+      >
         {#if canPin}
-          <button type="button" class="menu-item" role="menuitem" onclick={() => { closeOverlays(); onTogglePin?.(message); }}>
+          <button type="button" class="menu-item" role="menuitem" onclick={() => { closeOverlays(true); onTogglePin?.(message); }}>
             {message.pinned ? $t("omnidisc.messages.unpin") : $t("omnidisc.messages.pin")}
           </button>
         {/if}
-        <button type="button" class="menu-item" role="menuitem" onclick={() => { closeOverlays(); onMarkUnread?.(message); }}>
+        <button type="button" class="menu-item" role="menuitem" onclick={() => { closeOverlays(true); onMarkUnread?.(message); }}>
           {$t("omnidisc.messages.mark_unread")}
         </button>
-        <button type="button" class="menu-item" role="menuitem" onclick={() => { closeOverlays(); onCopyLink?.(message); }}>
+        <button type="button" class="menu-item" role="menuitem" onclick={() => { closeOverlays(true); onCopyLink?.(message); }}>
           {$t("omnidisc.messages.copy_link")}
         </button>
-        <button type="button" class="menu-item" role="menuitem" onclick={() => { closeOverlays(); onCopyId?.(message); }}>
+        <button type="button" class="menu-item" role="menuitem" onclick={() => { closeOverlays(true); onCopyId?.(message); }}>
           {$t("omnidisc.messages.copy_id")}
         </button>
         {#if canDelete}
-          <button type="button" class="menu-item danger" role="menuitem" onclick={() => { closeOverlays(); onDelete?.(message); }}>
+          <button type="button" class="menu-item danger" role="menuitem" onclick={() => { closeOverlays(true); onDelete?.(message); }}>
             {$t("omnidisc.messages.delete")}
           </button>
         {/if}
@@ -749,10 +826,12 @@
   }
 
   .overlay {
-    position: absolute;
-    top: 16px;
-    right: var(--space-4);
+    position: fixed;
     z-index: 30;
+  }
+
+  .overlay:not(.placed) {
+    visibility: hidden;
   }
 
   .menu {

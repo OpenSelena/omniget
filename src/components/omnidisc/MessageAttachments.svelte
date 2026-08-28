@@ -2,11 +2,14 @@
   import { t } from "$lib/i18n";
   import { translateBackendError } from "$lib/error-translate";
   import { downloadAttachment } from "$lib/stores/omnidisc-store.svelte";
+  import { portal } from "$lib/omnidisc/popover";
   import type { OmnidiscAttachment, OmnidiscMessage } from "$lib/omnidisc/types";
 
   let { message }: { message: OmnidiscMessage } = $props();
 
   let lightbox = $state<OmnidiscAttachment | null>(null);
+  let lightboxEl = $state<HTMLElement | null>(null);
+  let lightboxTrigger: HTMLElement | null = null;
   let busyId = $state<string | null>(null);
   let savedPath = $state<string | null>(null);
   let error = $state<string | null>(null);
@@ -50,10 +53,25 @@
     }
   }
 
+  function openLightbox(attachment: OmnidiscAttachment, trigger: HTMLElement) {
+    lightboxTrigger = trigger;
+    lightbox = attachment;
+  }
+
+  function closeLightbox() {
+    lightbox = null;
+    lightboxTrigger?.focus();
+    lightboxTrigger = null;
+  }
+
+  $effect(() => {
+    if (lightbox) lightboxEl?.focus();
+  });
+
   function onKeydown(e: KeyboardEvent) {
     if (e.key === "Escape" && lightbox) {
       e.preventDefault();
-      lightbox = null;
+      closeLightbox();
     }
   }
 </script>
@@ -72,7 +90,7 @@
             style:aspect-ratio={attachment.width && attachment.height
               ? `${attachment.width} / ${attachment.height}`
               : undefined}
-            onclick={() => (lightbox = attachment)}
+            onclick={(e) => openLightbox(attachment, e.currentTarget)}
             aria-label={$t("omnidisc.attachments.open_image", { name: attachment.filename })}
           >
             <img
@@ -130,12 +148,14 @@
     aria-modal="true"
     aria-label={lightbox.filename}
     tabindex="-1"
+    use:portal
+    bind:this={lightboxEl}
   >
     <img src={lightbox.url} alt={lightbox.filename} />
     <button
       type="button"
       class="close"
-      onclick={() => (lightbox = null)}
+      onclick={closeLightbox}
       aria-label={$t("omnidisc.attachments.close_image")}
     >×</button>
   </div>
