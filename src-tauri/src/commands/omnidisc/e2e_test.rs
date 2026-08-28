@@ -13,6 +13,24 @@ use std::time::Duration;
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 
+/// Refuses to run against anything but a throwaway instance unless told
+/// otherwise. These tests create real accounts, and pointing them at a live
+/// server litters it — which is exactly what happened to the production
+/// instance before this guard existed.
+fn allow_target(base: &str) -> bool {
+    if std::env::var_os("OMNIDISC_TEST_ALLOW_REMOTE").is_some() {
+        return true;
+    }
+    let local = base.contains("localhost") || base.contains("127.0.0.1") || base.contains("[::1]");
+    if !local {
+        eprintln!(
+            "refusing to run against {base}: it is not a local instance. Set \
+             OMNIDISC_TEST_ALLOW_REMOTE=1 if that is really what you want."
+        );
+    }
+    local
+}
+
 /// A password nobody can guess from the repository.
 ///
 /// These tests register real accounts on whatever instance `OMNIDISC_TEST_URL`
@@ -91,6 +109,9 @@ async fn register_gateway_ready_send_receive() {
         return;
     };
     let base = super::normalize_instance_url(&url).expect("valid url");
+    if !allow_target(&base) {
+        return;
+    }
     let _session_dir = super::e2e_lock::SessionDirGuard::acquire();
 
     let alice_name = unique("alice");

@@ -22,6 +22,24 @@ use serde_json::{json, Value};
 use sha2::{Digest, Sha256};
 use std::path::PathBuf;
 
+/// Refuses to run against anything but a throwaway instance unless told
+/// otherwise. These tests create real accounts, and pointing them at a live
+/// server litters it — which is exactly what happened to the production
+/// instance before this guard existed.
+fn allow_target(base: &str) -> bool {
+    if std::env::var_os("OMNIDISC_TEST_ALLOW_REMOTE").is_some() {
+        return true;
+    }
+    let local = base.contains("localhost") || base.contains("127.0.0.1") || base.contains("[::1]");
+    if !local {
+        eprintln!(
+            "refusing to run against {base}: it is not a local instance. Set \
+             OMNIDISC_TEST_ALLOW_REMOTE=1 if that is really what you want."
+        );
+    }
+    local
+}
+
 /// A password nobody can guess from the repository.
 ///
 /// These tests register real accounts on whatever instance `OMNIDISC_TEST_URL`
@@ -150,6 +168,9 @@ async fn two_devices_exchange_an_encrypted_message_and_an_encrypted_file() {
         .with_max_level(tracing::Level::WARN)
         .try_init();
     let base = super::normalize_instance_url(&url).expect("valid url");
+    if !allow_target(&base) {
+        return;
+    }
     let _session_dir = SessionDirGuard::acquire();
 
     let alice = register_side(&base, "alicee").await;

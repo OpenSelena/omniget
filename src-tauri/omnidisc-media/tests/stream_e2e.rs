@@ -16,6 +16,24 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 use tokio_tungstenite::tungstenite::Message;
 
+/// Refuses to run against anything but a throwaway instance unless told
+/// otherwise. These tests create real accounts, and pointing them at a live
+/// server litters it — which is exactly what happened to the production
+/// instance before this guard existed.
+fn allow_target(base: &str) -> bool {
+    if std::env::var_os("OMNIDISC_TEST_ALLOW_REMOTE").is_some() {
+        return true;
+    }
+    let local = base.contains("localhost") || base.contains("127.0.0.1") || base.contains("[::1]");
+    if !local {
+        eprintln!(
+            "refusing to run against {base}: it is not a local instance. Set \
+             OMNIDISC_TEST_ALLOW_REMOTE=1 if that is really what you want."
+        );
+    }
+    local
+}
+
 /// A password nobody can guess from the repository.
 ///
 /// These tests register real accounts on whatever instance `OMNIDISC_TEST_URL`
@@ -155,6 +173,9 @@ async fn stream_publish_and_watch() {
         return;
     };
     let base = url.trim().trim_end_matches('/').to_string();
+    if !allow_target(&base) {
+        return;
+    }
     let http = reqwest::Client::builder()
         .timeout(Duration::from_secs(15))
         .build()

@@ -16,6 +16,24 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 use tokio_tungstenite::tungstenite::Message;
 
+/// Refuses to run against anything but a throwaway instance unless told
+/// otherwise. These tests create real accounts, and pointing them at a live
+/// server litters it — which is exactly what happened to the production
+/// instance before this guard existed.
+fn allow_target(base: &str) -> bool {
+    if std::env::var_os("OMNIDISC_TEST_ALLOW_REMOTE").is_some() {
+        return true;
+    }
+    let local = base.contains("localhost") || base.contains("127.0.0.1") || base.contains("[::1]");
+    if !local {
+        eprintln!(
+            "refusing to run against {base}: it is not a local instance. Set \
+             OMNIDISC_TEST_ALLOW_REMOTE=1 if that is really what you want."
+        );
+    }
+    local
+}
+
 /// A password nobody can guess from the repository.
 ///
 /// These tests register real accounts on whatever instance `OMNIDISC_TEST_URL`
@@ -364,6 +382,12 @@ async fn tone_reaches_the_other_side(base: &str, label: &str, room_key: Option<R
 }
 
 fn test_url() -> Option<String> {
+    let picked = real_test_url();
+    return picked.filter(|b| allow_target(b));
+}
+
+#[allow(dead_code)]
+fn real_test_url() -> Option<String> {
     match std::env::var("OMNIDISC_TEST_URL") {
         Ok(url) => Some(url.trim().trim_end_matches('/').to_string()),
         Err(_) => {
