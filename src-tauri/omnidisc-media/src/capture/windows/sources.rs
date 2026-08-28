@@ -22,6 +22,20 @@ use windows::Win32::UI::WindowsAndMessaging::{
 };
 
 const THUMB_WIDTH: u32 = 320;
+
+/// Opt-in tracing for the thumbnail path. Enumeration runs inside GDI and DWM
+/// calls that can fault on a window the compositor is tearing down, and the
+/// only way to see which source did it — here or on a user's machine — is to
+/// have the step on the wire before the call.
+macro_rules! trace_step {
+    ($($arg:tt)*) => {
+        if std::env::var_os("OMNIDISC_CAPTURE_TRACE").is_some() {
+            println!("[capture-trace] {}", format!($($arg)*));
+            std::io::Write::flush(&mut std::io::stdout()).ok();
+        }
+    };
+}
+
 const PW_RENDERFULLCONTENT: PRINT_WINDOW_FLAGS = PRINT_WINDOW_FLAGS(2);
 const MIN_WINDOW_EDGE: i32 = 64;
 
@@ -311,6 +325,7 @@ fn thumb_size(width: u32, height: u32) -> (i32, i32) {
 pub fn monitor_thumbnail(m: &Monitor) -> Option<String> {
     let w = m.rect.right - m.rect.left;
     let h = m.rect.bottom - m.rect.top;
+    trace_step!("monitor_thumbnail {}x{}", w, h);
     if w <= 0 || h <= 0 {
         return None;
     }
@@ -339,6 +354,7 @@ pub fn monitor_thumbnail(m: &Monitor) -> Option<String> {
             .ok()
             .ok()?;
         }
+        trace_step!("blt ok, encoding");
         dib.to_jpeg_data_url()
     })();
     unsafe { ReleaseDC(None, screen) };
@@ -346,6 +362,13 @@ pub fn monitor_thumbnail(m: &Monitor) -> Option<String> {
 }
 
 pub fn window_thumbnail(win: &Window) -> Option<String> {
+    trace_step!(
+        "window_thumbnail hwnd={:?} {}x{} title={:.40}",
+        win.handle.0,
+        win.width,
+        win.height,
+        win.title
+    );
     let screen = unsafe { GetDC(None) };
     if screen.is_invalid() {
         return None;
@@ -353,7 +376,9 @@ pub fn window_thumbnail(win: &Window) -> Option<String> {
     let (tw, th) = thumb_size(win.width, win.height);
     let out = (|| {
         let full = Dib::new(screen, win.width as i32, win.height as i32)?;
+        trace_step!("full dib ok, printing window");
         let printed = unsafe { PrintWindow(win.handle, full.dc, PW_RENDERFULLCONTENT) }.as_bool();
+        trace_step!("printed={printed}");
         if !printed {
             return None;
         }
@@ -376,6 +401,7 @@ pub fn window_thumbnail(win: &Window) -> Option<String> {
             .ok()
             .ok()?;
         }
+        trace_step!("blt ok, encoding");
         thumb.to_jpeg_data_url()
     })();
     unsafe { ReleaseDC(None, screen) };

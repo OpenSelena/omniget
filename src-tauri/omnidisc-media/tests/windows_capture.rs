@@ -35,6 +35,8 @@ fn main() {
         }};
     }
 
+    std::env::set_var("OMNIDISC_CAPTURE_TRACE", "1");
+
     step!("enumerating without thumbnails");
     let sources = capture::list_sources(false).expect("list_sources must answer on Windows");
     step!(
