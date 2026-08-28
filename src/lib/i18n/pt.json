@@ -738,6 +738,7 @@
       "lang_en": "English",
       "lang_ru": "Русский",
       "lang_zh": "中文",
+      "lang_zh_tw": "Chinês (tradicional)",
       "lang_ja": "日本語",
       "lang_it": "Italiano",
       "lang_fr": "Français",
@@ -4949,5 +4950,10 @@
       "leave": "Leave the call",
       "joining": "Connecting…"
     }
+  },
+  "ytdlp_missing_banner": {
+    "text": "O yt-dlp não está instalado, então os downloads não começam. Instale em Configurações.",
+    "open_settings": "Abrir Configurações",
+    "dismiss": "Dispensar"
   }
 }

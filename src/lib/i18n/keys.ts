@@ -1881,6 +1881,7 @@ export type TranslationKeys =
   | 'settings.appearance.lang_pt'
   | 'settings.appearance.lang_ru'
   | 'settings.appearance.lang_zh'
+  | 'settings.appearance.lang_zh_tw'
   | 'settings.appearance.language'
   | 'settings.appearance.more_themes'
   | 'settings.appearance.reduce_motion'
@@ -4679,5 +4680,9 @@ export type TranslationKeys =
   | 'udemy.upload_file'
   | 'udemy.waiting_code'
   | 'udemy.waiting_code_title'
+
+  | 'ytdlp_missing_banner.dismiss'
+  | 'ytdlp_missing_banner.open_settings'
+  | 'ytdlp_missing_banner.text'
   // Allows dynamic/computed keys while preserving autocomplete for known keys
   | (string & {});

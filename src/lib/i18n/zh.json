@@ -738,6 +738,7 @@
       "lang_en": "English",
       "lang_ru": "Русский",
       "lang_zh": "中文",
+      "lang_zh_tw": "Chinese (Traditional)",
       "lang_ja": "日本語",
       "lang_it": "Italiano",
       "lang_fr": "Français",
@@ -4949,5 +4950,10 @@
       "leave": "Leave the call",
       "joining": "Connecting…"
     }
+  },
+  "ytdlp_missing_banner": {
+    "text": "yt-dlp is missing, so downloads cannot start. Install it from Settings.",
+    "open_settings": "Open Settings",
+    "dismiss": "Dismiss"
   }
 }
