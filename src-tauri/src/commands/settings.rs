@@ -16,6 +16,7 @@ pub fn update_settings(app: tauri::AppHandle, partial: String) -> Result<AppSett
     let old_clip_hotkey_binding = current.download.clip_hotkey_binding.clone();
     let old_music_hotkey_enabled = current.download.music_hotkey_enabled;
     let old_music_hotkey_binding = current.download.music_hotkey_binding.clone();
+    let old_ptt_key = current.omnidisc.voice.ptt_key.clone();
     let old_start_with_system = current.start_with_system;
     let old_rpc = current.rpc.clone();
 
@@ -38,6 +39,7 @@ pub fn update_settings(app: tauri::AppHandle, partial: String) -> Result<AppSett
         || old_clip_hotkey_binding != current.download.clip_hotkey_binding
         || old_music_hotkey_enabled != current.download.music_hotkey_enabled
         || old_music_hotkey_binding != current.download.music_hotkey_binding
+        || old_ptt_key != current.omnidisc.voice.ptt_key
     {
         hotkey::reregister(&app);
     }

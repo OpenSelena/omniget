@@ -259,3 +259,6 @@ vite.config.ts.timestamp-*
 .vite/
 .varredura/
 remake/shots/
+
+# Sessao autonoma (scratch)
+/.sessao/

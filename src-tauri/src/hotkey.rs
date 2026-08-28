@@ -23,6 +23,20 @@ pub fn register_from_settings(app: &tauri::AppHandle) {
     if settings.download.music_hotkey_enabled {
         register_one(app, &settings.download.music_hotkey_binding, "music");
     }
+    let ptt = settings.omnidisc.voice.ptt_key.trim();
+    if settings.omnidisc.enabled && !ptt.is_empty() {
+        register_one(app, ptt, "omnidisc-ptt");
+    }
+}
+
+pub fn handle_ptt(app: &tauri::AppHandle, shortcut: &Shortcut, pressed: bool) -> bool {
+    let settings = config::load_settings(app);
+    let ptt = settings.omnidisc.voice.ptt_key.trim();
+    if ptt.is_empty() || !matches_binding(shortcut, ptt) {
+        return false;
+    }
+    crate::commands::omnidisc::voice::ptt_from_hotkey(app, pressed);
+    true
 }
 
 fn register_one(app: &tauri::AppHandle, binding: &str, label: &str) {

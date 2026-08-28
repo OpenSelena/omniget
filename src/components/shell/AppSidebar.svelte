@@ -10,6 +10,7 @@
     pluginNav?: NavItem[];
     badgeLabel?: string;
     badgeCount?: number;
+    chatBadgeCount?: number;
   }
 
   let {
@@ -18,7 +19,10 @@
     pluginNav = [],
     badgeLabel = "",
     badgeCount = 0,
+    chatBadgeCount = 0,
   }: Props = $props();
+
+  let chatBadgeLabel = $derived(chatBadgeCount > 99 ? "99+" : String(chatBadgeCount));
 
   let pluginsExpanded = $state(true);
 
@@ -42,6 +46,8 @@
         <span class="mac-nav-label">{title}</span>
         {#if item.badge === "downloads" && badgeCount > 0}
           <span class="mac-nav-badge">{badgeLabel}</span>
+        {:else if item.badge === "omnidisc" && chatBadgeCount > 0}
+          <span class="mac-nav-badge">{chatBadgeLabel}</span>
         {/if}
       </a>
     {/each}

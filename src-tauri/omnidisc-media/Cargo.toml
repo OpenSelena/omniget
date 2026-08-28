@@ -1,0 +1,45 @@
+[package]
+name = "omnidisc-media"
+version = "0.1.0"
+edition = "2021"
+description = "OmniDisc client media engine: capture, audio I/O, SFU connection, E2EE (all native, never in the webview)"
+license = "GPL-3.0"
+
+[features]
+default = ["rnnoise"]
+rnnoise = ["dep:nnnoiseless"]
+
+[dependencies]
+omnidisc-proto = { path = "../omnidisc-proto" }
+tokio = { version = "1", features = ["rt-multi-thread", "sync", "time", "macros"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "1"
+tracing = "0.1"
+async-trait = "0.1"
+futures = "0.3"
+livekit = { version = "0.8.3", features = ["native-tls"] }
+cpal = "0.18"
+rtrb = "0.4"
+nnnoiseless = { version = "0.5", optional = true, default-features = false }
+wgpu = "30"
+pollster = "0.4"
+raw-window-handle = "0.6"
+image = { version = "0.25", default-features = false, features = ["jpeg"] }
+base64 = "0.22"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+screencapturekit = { version = "8.0.1", features = ["macos_14_0"] }
+objc2 = "0.6"
+objc2-foundation = { version = "0.3", features = ["NSArray", "NSString", "NSGeometry", "NSThread", "NSKeyValueCoding", "NSObject", "NSValue"] }
+objc2-app-kit = { version = "0.3", features = ["NSView", "NSWindow", "NSResponder", "NSColor", "NSGraphics"] }
+objc2-quartz-core = { version = "0.3", features = ["CALayer", "CAMetalLayer"] }
+objc2-core-foundation = { version = "0.3.2", features = ["CFDictionary", "CFNumber", "CFString", "CFArray", "CFData", "CFBase"] }
+objc2-core-video = { version = "0.3.2", features = ["CVPixelBuffer", "CVImageBuffer", "CVBuffer", "CVReturn", "CVBase", "CVPixelBufferPool", "CVPixelFormatDescription"] }
+objc2-core-media = { version = "0.3.2", features = ["CMSampleBuffer", "CMFormatDescription", "CMTime", "CMBase", "CMBlockBuffer", "CMAttachment", "CMSync"] }
+objc2-video-toolbox = { version = "0.3.2", features = ["VTCompressionSession", "VTCompressionProperties", "VTSession", "VTErrors", "VTBase", "VTVideoEncoderList", "VTUtilities"] }
+
+[dev-dependencies]
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls"] }
+tokio-tungstenite = { version = "0.30", features = ["native-tls"] }
+futures-util = "0.3"

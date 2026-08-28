@@ -90,6 +90,10 @@ export type AppSettings = {
     app_id: string;
     large_image_key: string;
   };
+  omnidisc?: {
+    enabled?: boolean;
+    voice?: OmnidiscVoiceSettings;
+  };
   league?: {
     enabled?: boolean;
     auto_accept?: boolean;
@@ -125,6 +129,16 @@ export type AppSettings = {
     disable_haptics?: boolean;
   };
   typography?: TypographySettings;
+};
+
+export type OmnidiscVoiceSettings = {
+  ptt_key?: string;
+  noise_suppression?: boolean;
+  input_device?: string | null;
+  output_device?: string | null;
+  vad_threshold_db?: number;
+  ducking_percent?: number;
+  relay_only?: boolean;
 };
 
 export type TypographySettings = {

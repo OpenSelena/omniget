@@ -1,5 +1,5 @@
 [workspace]
-members = [".", "omniget-core", "omniget-plugin-sdk", "omniget-cli"]
+members = [".", "omniget-core", "omniget-plugin-sdk", "omniget-cli", "omnidisc-proto", "omnidisc-media", "omnidisc-mls"]
 resolver = "2"
 
 [package]
@@ -17,7 +17,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = ["protocol-asset", "tray-icon"] }
+tauri = { version = "2", features = ["protocol-asset", "tray-icon", "macos-private-api"] }
 tauri-plugin-shell = "2"
 tauri-plugin-store = "2"
 tauri-plugin-dialog = "2"
@@ -65,6 +65,9 @@ qrcode = { version = "0.14", default-features = false, features = ["svg"] }
 open = "5"
 omniget-core = { path = "omniget-core", features = ["desktop"] }
 omniget-plugin-sdk = { path = "omniget-plugin-sdk" }
+omnidisc-proto = { path = "omnidisc-proto" }
+omnidisc-media = { path = "omnidisc-media" }
+omnidisc-mls = { path = "omnidisc-mls" }
 libloading = "0.8"
 which = "7"
 librqbit = "8.1.1"
@@ -76,6 +79,7 @@ native-tls = "0.2.18"
 fs4 = "1"
 
 [target.'cfg(windows)'.dependencies]
+keyring = { version = "3", features = ["windows-native"] }
 webview2-com = "0.38"
 windows = { version = "0.61", features = ["Win32_System_Com", "Win32_UI_WindowsAndMessaging"] }
 
@@ -83,6 +87,7 @@ windows = { version = "0.61", features = ["Win32_System_Com", "Win32_UI_WindowsA
 # HttpOnly cookies, which is the whole point of the auth webview (#287).
 # Versions track what wry already resolves, so this adds no new build cost.
 [target.'cfg(target_os = "macos")'.dependencies]
+keyring = { version = "3", features = ["apple-native"] }
 objc2 = "0.6"
 objc2-foundation = { version = "0.3", features = ["NSHTTPCookie", "NSArray", "NSString"] }
 objc2-web-kit = { version = "0.3", features = ["WKWebView", "WKWebViewConfiguration", "WKWebsiteDataStore", "WKHTTPCookieStore"] }

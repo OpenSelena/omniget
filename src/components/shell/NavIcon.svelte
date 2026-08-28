@@ -23,6 +23,9 @@
   {:else if icon === "downloads"}
     <path d="M12 3v12m0 0l-4-4m4 4l4-4" />
     <path d="M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2" />
+  {:else if icon === "chat"}
+    <path d="M21 12a8 8 0 0 1-8 8H7l-4 3V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8z" />
+    <path d="M8 12h.01M12 12h.01M16 12h.01" />
   {:else if icon === "marketplace"}
     <path d="M3 21h18" />
     <path d="M3 7v1a3 3 0 0 0 6 0V7" />

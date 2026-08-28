@@ -1,0 +1,23 @@
+[package]
+name = "omnidisc-mls"
+version = "0.1.0"
+edition = "2021"
+description = "OmniDisc client MLS engine (RFC 9420 via openmls): device identity, groups, message and file encryption"
+license = "GPL-3.0"
+
+[dependencies]
+openmls = "0.8.1"
+openmls_rust_crypto = "0.5.1"
+openmls_basic_credential = "0.5.0"
+openmls_traits = "0.5.0"
+openmls_memory_storage = "0.5.0"
+tls_codec = "0.4"
+chacha20poly1305 = "0.10"
+hkdf = "0.12"
+sha2 = "0.10"
+ed25519-dalek = "2"
+rand = "0.10.0"
+data-encoding = "2"
+thiserror = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"

@@ -36,7 +36,8 @@
           "requireLiteralLeadingDot": false
         }
       }
-    }
+    },
+    "macOSPrivateApi": true
   },
   "plugins": {
     "updater": {
