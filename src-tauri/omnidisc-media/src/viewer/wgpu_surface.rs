@@ -136,21 +136,35 @@ impl WgpuViewer {
         }))
         .map_err(|e| StreamError::Viewer(format!("no gpu device: {e}")))?;
         let caps = surface.get_capabilities(&adapter);
+        // An adapter that cannot present to this window answers with empty
+        // lists instead of an error; indexing them would abort the app.
+        let first_format = *caps.formats.first().ok_or_else(|| {
+            StreamError::Viewer("this GPU cannot draw into the stream window".into())
+        })?;
         let format = caps
             .formats
             .iter()
             .copied()
             .find(|f| !f.is_srgb())
-            .unwrap_or(caps.formats[0]);
+            .unwrap_or(first_format);
         let config = wgpu::SurfaceConfiguration {
             usage: wgpu::TextureUsages::RENDER_ATTACHMENT,
             format,
             color_space: wgpu::SurfaceColorSpace::Auto,
             width: width.max(1),
             height: height.max(1),
-            present_mode: wgpu::PresentMode::Fifo,
+            present_mode: caps
+                .present_modes
+                .iter()
+                .copied()
+                .find(|m| *m == wgpu::PresentMode::Fifo)
+                .unwrap_or(wgpu::PresentMode::AutoVsync),
             desired_maximum_frame_latency: 2,
-            alpha_mode: caps.alpha_modes[0],
+            alpha_mode: caps
+                .alpha_modes
+                .first()
+                .copied()
+                .unwrap_or(wgpu::CompositeAlphaMode::Auto),
             view_formats: vec![],
         };
         surface.configure(&device, &config);

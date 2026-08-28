@@ -904,6 +904,8 @@ pub fn run() {
             commands::omnidisc::voice::omnidisc_voice_set_noise_suppression,
             commands::omnidisc::voice::omnidisc_voice_mic_test,
             commands::omnidisc::voice::omnidisc_voice_set_ducking,
+            commands::omnidisc::voice::omnidisc_voice_ptt_status,
+            commands::omnidisc::stream::omnidisc_media_capabilities,
             commands::omnidisc::stream::omnidisc_stream_sources,
             commands::omnidisc::stream::omnidisc_stream_start,
             commands::omnidisc::stream::omnidisc_stream_stop,

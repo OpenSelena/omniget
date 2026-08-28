@@ -4,12 +4,17 @@ use std::sync::Arc;
 #[cfg(target_os = "macos")]
 mod macos;
 #[cfg(target_os = "macos")]
-pub use macos::*;
+pub use self::macos::*;
 
-#[cfg(not(target_os = "macos"))]
+#[cfg(windows)]
+mod windows;
+#[cfg(windows)]
+pub use self::windows::*;
+
+#[cfg(not(any(target_os = "macos", windows)))]
 mod stub;
-#[cfg(not(target_os = "macos"))]
-pub use stub::*;
+#[cfg(not(any(target_os = "macos", windows)))]
+pub use self::stub::*;
 
 #[derive(Debug, Clone)]
 pub struct CaptureOptions {

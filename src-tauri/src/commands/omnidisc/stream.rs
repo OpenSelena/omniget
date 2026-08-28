@@ -53,6 +53,35 @@ fn emit_voice(
     let _ = app.emit(EVENT_VOICE, payload);
 }
 
+/// What this build can actually do with media, so the interface never has to
+/// guess from the platform name.
+#[derive(Debug, Clone, Copy, serde::Serialize)]
+pub struct MediaCapabilities {
+    /// A voice backend was created at startup. False means calls are dead
+    /// weight in the UI and the entry points should say so.
+    pub voice: bool,
+    /// Screen capture exists for this platform. Whether the user has granted
+    /// the permission is a separate answer, and it belongs to the share dialog.
+    pub screen_share: bool,
+    /// Someone else's stream can be rendered into a window.
+    pub stream_viewer: bool,
+}
+
+#[tauri::command]
+pub async fn omnidisc_media_capabilities(
+    state: tauri::State<'_, crate::AppState>,
+) -> Result<MediaCapabilities, String> {
+    // Deliberately not probed by calling into the capture layer: on macOS the
+    // first enumeration is what raises the screen-recording prompt, and asking
+    // for that permission before the user has asked to share anything is the
+    // kind of thing that gets an app denied for good.
+    Ok(MediaCapabilities {
+        voice: state.omnidisc_voice.livekit_backend().is_some(),
+        screen_share: cfg!(any(target_os = "macos", target_os = "windows")),
+        stream_viewer: cfg!(any(target_os = "macos", target_os = "windows")),
+    })
+}
+
 #[tauri::command]
 pub async fn omnidisc_stream_sources(
     state: tauri::State<'_, crate::AppState>,
@@ -300,7 +329,16 @@ pub async fn omnidisc_stream_watch(
         .build()
         .map_err(|e| format!("OmniDisc: could not open the stream window: {e}"))?;
 
-    let renderer = create_surface_on_main(&app, &window).await?;
+    let renderer = match create_surface_on_main(&app, &window).await {
+        Ok(r) => r,
+        Err(e) => {
+            // A window that cannot draw anything is worse than no window: it
+            // looks like the stream is loading forever.
+            let _ = window.close();
+            publication.set_subscribed(false);
+            return Err(e);
+        }
+    };
     let rt = backend
         .runtime_handle()
         .ok_or_else(|| "ERR_VOICE_UNAVAILABLE".to_string())?;
@@ -345,10 +383,42 @@ async fn create_surface_on_main(
         rx.await
             .map_err(|_| "OmniDisc: surface creation dropped".to_string())?
     }
-    #[cfg(not(target_os = "macos"))]
+    #[cfg(target_os = "windows")]
+    {
+        let hwnd = window.hwnd().map_err(|e| format!("OmniDisc: hwnd: {e}"))?.0 as isize;
+        let hinstance = window_hinstance(hwnd);
+        let (w, h) = (size.width, size.height);
+        let (tx, rx) = tokio::sync::oneshot::channel();
+        app.run_on_main_thread(move || {
+            let result =
+                unsafe { omnidisc_media::viewer::create_win32_surface(hwnd, hinstance, w, h) };
+            let _ = tx.send(result.map_err(err));
+        })
+        .map_err(|e| format!("OmniDisc: main thread dispatch: {e}"))?;
+        rx.await
+            .map_err(|_| "OmniDisc: surface creation dropped".to_string())?
+    }
+    #[cfg(not(any(target_os = "macos", target_os = "windows")))]
     {
         let _ = (app, window, size);
         Err(StreamError::Unsupported.code().to_string())
+    }
+}
+
+/// The module handle Vulkan asks for. DX12 ignores it, so a zero here only
+/// costs the Vulkan backend, never the whole viewer.
+#[cfg(target_os = "windows")]
+fn window_hinstance(hwnd: isize) -> isize {
+    #[cfg(target_pointer_width = "64")]
+    {
+        use windows::Win32::Foundation::HWND;
+        use windows::Win32::UI::WindowsAndMessaging::{GetWindowLongPtrW, GWLP_HINSTANCE};
+        unsafe { GetWindowLongPtrW(HWND(hwnd as *mut std::ffi::c_void), GWLP_HINSTANCE) }
+    }
+    #[cfg(not(target_pointer_width = "64"))]
+    {
+        let _ = hwnd;
+        0
     }
 }
 

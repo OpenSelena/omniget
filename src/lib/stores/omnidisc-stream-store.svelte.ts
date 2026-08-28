@@ -90,6 +90,24 @@ export interface StartArgs {
   policy?: StreamingPolicy;
 }
 
+export interface MediaCapabilities {
+  voice: boolean;
+  screen_share: boolean;
+  stream_viewer: boolean;
+}
+
+/**
+ * What the interface assumes until the backend answers — which it does on
+ * mount, before anyone can click. Assuming "yes" keeps the buttons from
+ * blinking into existence on the platforms where they do work; when the answer
+ * is "no" they end up disabled with the reason attached, never silently gone.
+ */
+const ASSUMED_CAPABILITIES: MediaCapabilities = {
+  voice: true,
+  screen_share: true,
+  stream_viewer: true,
+};
+
 const RESOLUTIONS = [540, 720, 1080, 1440, 2160];
 const FRAMERATES = [15, 30, 60, 90, 120, 144];
 
@@ -99,6 +117,7 @@ let stats = $state<StreamStats | null>(null);
 let busy = $state(false);
 let lastError = $state<string | null>(null);
 let streamers = $state<Record<string, boolean>>({});
+let capabilities = $state<MediaCapabilities>(ASSUMED_CAPABILITIES);
 
 let unlisten: UnlistenFn | null = null;
 let initialized = false;
@@ -133,6 +152,18 @@ export function getStreamError(): string | null {
 
 export function clearStreamError() {
   lastError = null;
+}
+
+export function getMediaCapabilities(): MediaCapabilities {
+  return capabilities;
+}
+
+export async function refreshMediaCapabilities(): Promise<void> {
+  try {
+    capabilities = await invoke<MediaCapabilities>("omnidisc_media_capabilities");
+  } catch (e) {
+    console.warn("[omnidisc] media capabilities unavailable", errorText(e));
+  }
 }
 
 export function isStreamer(userId: string): boolean {
@@ -278,6 +309,7 @@ interface StreamEventPayload {
 export async function initStream(): Promise<void> {
   if (initialized) return;
   initialized = true;
+  void refreshMediaCapabilities();
   try {
     unlisten = await listen<StreamEventPayload>("omnidisc://voice", (event) => {
       const p = event.payload;

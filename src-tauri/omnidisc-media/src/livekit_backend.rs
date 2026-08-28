@@ -198,12 +198,50 @@ fn map_io_error(e: &AudioIoError, kind: DeviceKind) -> String {
 /// system default, and only then give up — a USB mic that was yanked and put
 /// back must not need a rejoin, and a permission the user revoked must not look
 /// like a broken app.
-fn recover(shared: &Arc<Shared>, kind: DeviceKind) {
+fn recover(shared: &Arc<Shared>, kind: DeviceKind, message: String) {
     const BACKOFF_MS: [u64; 3] = [250, 1_000, 3_000];
     let wanted = match kind {
         DeviceKind::Input => shared.input_device(),
         DeviceKind::Output => shared.output_device(),
     };
+    // Long enough for the failing callback to unwind before its stream is
+    // dropped, short enough that nobody sees it.
+    std::thread::sleep(Duration::from_millis(50));
+    if !shared.still_wanted(kind) {
+        return;
+    }
+    // One silent attempt before saying anything. Windows invalidates the stream
+    // handle whenever the default endpoint changes — switching headphones in
+    // the tray is a routine action, and it must not flash "microphone lost" at
+    // someone who is mid-sentence.
+    let reopened = match kind {
+        DeviceKind::Input => shared.io.start_input(wanted.clone()),
+        DeviceKind::Output => shared.io.start_output(wanted.clone()),
+    };
+    if reopened.is_ok() {
+        match kind {
+            DeviceKind::Input => shared.input_running.store(true, Ordering::Release),
+            DeviceKind::Output => shared.output_running.store(true, Ordering::Release),
+        }
+        tracing::debug!(
+            "[omnidisc-media] the {:?} device came back immediately after: {}",
+            kind,
+            message
+        );
+        return;
+    }
+    shared.emit(EngineNotification::Error {
+        code: match kind {
+            DeviceKind::Input => "ERR_VOICE_MIC_LOST".into(),
+            DeviceKind::Output => "ERR_VOICE_OUTPUT_LOST".into(),
+        },
+        message,
+    });
+    shared.emit(EngineNotification::Device {
+        kind,
+        status: DeviceStatus::Lost,
+        cause: None,
+    });
     for (attempt, wait) in BACKOFF_MS.iter().enumerate() {
         std::thread::sleep(Duration::from_millis(*wait));
         if !shared.still_wanted(kind) {
@@ -337,7 +375,7 @@ impl LiveKitBackend {
         let feeder =
             Arc::new(Feeder::spawn(flags.clone(), capture_sink).map_err(MediaError::Device)?);
         let fault_slot = shared_slot.clone();
-        let fault_sink: crate::audio::io::FaultSink = Arc::new(move |fault, message| {
+        let fault_sink: crate::audio::io::FaultSink = Arc::new(move |fault, error| {
             let Some(shared) = fault_slot
                 .lock()
                 .ok()
@@ -345,6 +383,11 @@ impl LiveKitBackend {
             else {
                 return;
             };
+            if !error.fatal() {
+                tracing::debug!("[omnidisc-media] audio glitch on {:?}: {}", fault, error);
+                return;
+            }
+            let message = error.to_string();
             tracing::warn!(
                 "[omnidisc-media] audio stream fault {:?}: {}",
                 fault,
@@ -353,26 +396,13 @@ impl LiveKitBackend {
             let kind = match fault {
                 StreamFault::Input => {
                     shared.input_running.store(false, Ordering::Release);
-                    shared.emit(EngineNotification::Error {
-                        code: "ERR_VOICE_MIC_LOST".into(),
-                        message,
-                    });
                     DeviceKind::Input
                 }
                 StreamFault::Output => {
                     shared.output_running.store(false, Ordering::Release);
-                    shared.emit(EngineNotification::Error {
-                        code: "ERR_VOICE_OUTPUT_LOST".into(),
-                        message,
-                    });
                     DeviceKind::Output
                 }
             };
-            shared.emit(EngineNotification::Device {
-                kind,
-                status: DeviceStatus::Lost,
-                cause: None,
-            });
             // The cpal error callback runs on the device thread: re-opening a
             // device from here would deadlock the very thread that has to answer.
             if shared.recovering(kind).swap(true, Ordering::AcqRel) {
@@ -382,7 +412,7 @@ impl LiveKitBackend {
             if std::thread::Builder::new()
                 .name("omnidisc-audio-recovery".into())
                 .spawn(move || {
-                    recover(&worker, kind);
+                    recover(&worker, kind, message);
                     worker.recovering(kind).store(false, Ordering::Release);
                 })
                 .is_err()

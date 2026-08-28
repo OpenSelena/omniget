@@ -5949,6 +5949,8 @@ dependencies = [
  "tokio-tungstenite 0.30.0",
  "tracing",
  "wgpu",
+ "windows 0.61.3",
+ "windows-core 0.61.2",
 ]
 
 [[package]]

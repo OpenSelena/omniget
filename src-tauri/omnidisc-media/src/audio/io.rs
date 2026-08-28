@@ -15,6 +15,12 @@ pub enum AudioIoError {
     PermissionDenied,
     DeviceBusy,
     Unsupported(String),
+    /// The stream handle died but the device is still there — WASAPI answers
+    /// this when the default endpoint changes under a running stream.
+    Invalidated(String),
+    /// A glitch that did not stop anything: an over/underrun, or a route the
+    /// backend already followed on its own.
+    Transient(String),
     Other(String),
 }
 
@@ -25,8 +31,17 @@ impl AudioIoError {
             Self::PermissionDenied => "permission_denied",
             Self::DeviceBusy => "device_busy",
             Self::Unsupported(_) => "unsupported",
+            Self::Invalidated(_) => "invalidated",
+            Self::Transient(_) => "transient",
             Self::Other(_) => "other",
         }
+    }
+
+    /// Did the stream actually stop? Tearing a call down and re-opening the
+    /// device because one buffer arrived late is worse than the late buffer,
+    /// and on WASAPI late buffers are routine under load.
+    pub fn fatal(&self) -> bool {
+        !matches!(self, Self::Transient(_))
     }
 }
 
@@ -37,9 +52,34 @@ impl std::fmt::Display for AudioIoError {
             Self::PermissionDenied => write!(f, "audio permission denied"),
             Self::DeviceBusy => write!(f, "audio device busy"),
             Self::Unsupported(s) => write!(f, "unsupported audio config: {s}"),
+            Self::Invalidated(s) => write!(f, "audio stream invalidated: {s}"),
+            Self::Transient(s) => write!(f, "audio glitch: {s}"),
             Self::Other(s) => write!(f, "{s}"),
         }
     }
+}
+
+/// Access-denied as it reaches us through `std::io::Error`'s message: the
+/// Windows HRESULT `E_ACCESSDENIED` and the plain Win32 `ERROR_ACCESS_DENIED`.
+/// Matching the number and not the sentence is what keeps this working on a
+/// non-English Windows.
+#[cfg_attr(not(windows), allow(dead_code))]
+fn is_access_denied(message: &str) -> bool {
+    message.contains("(os error -2147024891)") || message.contains("(os error 5)")
+}
+
+/// WASAPI answers a microphone blocked in the Windows privacy settings with a
+/// bare `E_ACCESSDENIED`, which cpal cannot map and reports as a backend error.
+/// Left unclassified it becomes "the mic failed" instead of "grant the
+/// permission", which is the one message that would let the user fix it.
+#[cfg(windows)]
+fn platform_permission_denied(e: &cpal::Error) -> bool {
+    e.message().map(is_access_denied).unwrap_or(false)
+}
+
+#[cfg(not(windows))]
+fn platform_permission_denied(_: &cpal::Error) -> bool {
+    false
 }
 
 fn classify(e: cpal::Error) -> AudioIoError {
@@ -48,6 +88,11 @@ fn classify(e: cpal::Error) -> AudioIoError {
         cpal::ErrorKind::DeviceNotAvailable => AudioIoError::NoDevice,
         cpal::ErrorKind::DeviceBusy => AudioIoError::DeviceBusy,
         cpal::ErrorKind::UnsupportedConfig => AudioIoError::Unsupported(e.to_string()),
+        cpal::ErrorKind::StreamInvalidated => AudioIoError::Invalidated(e.to_string()),
+        cpal::ErrorKind::Xrun
+        | cpal::ErrorKind::DeviceChanged
+        | cpal::ErrorKind::RealtimeDenied => AudioIoError::Transient(e.to_string()),
+        _ if platform_permission_denied(&e) => AudioIoError::PermissionDenied,
         _ => AudioIoError::Other(e.to_string()),
     }
 }
@@ -80,7 +125,7 @@ pub fn classify_loss(still_listed: bool, probe: &AudioIoError) -> DeviceLoss {
     }
 }
 
-pub type FaultSink = Arc<dyn Fn(StreamFault, String) + Send + Sync>;
+pub type FaultSink = Arc<dyn Fn(StreamFault, AudioIoError) + Send + Sync>;
 
 enum IoCmd {
     StartInput {
@@ -204,7 +249,7 @@ fn build_input(
     let (producer, consumer) =
         rtrb::RingBuffer::<f32>::new(sample_rate as usize * INPUT_RING_SECONDS);
     let err_cb = move |e: cpal::Error| {
-        faults(StreamFault::Input, e.to_string());
+        faults(StreamFault::Input, classify(e));
     };
     let stream = match supported.sample_format() {
         SampleFormat::F32 => device.build_input_stream(
@@ -247,20 +292,27 @@ fn input_callback<T: Copy + Send + 'static>(
     channels: usize,
     convert: impl Fn(T) -> f32 + Send + 'static,
 ) -> impl FnMut(&[T], &cpal::InputCallbackInfo) + Send + 'static {
-    let mut mono: Vec<f32> = Vec::with_capacity(8192);
+    // WASAPI does not hand over the same number of frames every callback, so a
+    // fixed scratch buffer has to loop instead of dropping whatever did not
+    // fit — a dropped tail is a click in the middle of a sentence.
+    const CHUNK_FRAMES: usize = 2048;
+    let mut mono: Vec<f32> = vec![0.0; CHUNK_FRAMES];
     move |data: &[T], _| {
-        mono.clear();
         let inv = 1.0 / channels as f32;
-        for frame in data.chunks(channels) {
-            let mut acc = 0.0f32;
-            for s in frame {
-                acc += convert(*s);
+        for block in data.chunks(CHUNK_FRAMES * channels) {
+            let frames = block.len() / channels;
+            for (o, frame) in mono[..frames]
+                .iter_mut()
+                .zip(block.chunks_exact(channels.max(1)))
+            {
+                let mut acc = 0.0f32;
+                for s in frame {
+                    acc += convert(*s);
+                }
+                *o = acc * inv;
             }
-            if mono.len() < mono.capacity() {
-                mono.push(acc * inv);
-            }
+            let _ = producer.push_partial_slice(&mono[..frames]);
         }
-        let _ = producer.push_partial_slice(&mono);
     }
 }
 
@@ -275,7 +327,7 @@ fn build_output(
     let channels = config.channels.max(1);
     let sample_rate = config.sample_rate;
     let err_cb = move |e: cpal::Error| {
-        faults(StreamFault::Output, e.to_string());
+        faults(StreamFault::Output, classify(e));
     };
     let stream = match supported.sample_format() {
         SampleFormat::F32 => device.build_output_stream(
@@ -322,13 +374,15 @@ fn output_callback<T: Copy + Send + 'static>(
     let mut renderer = OutputRenderer::new(sample_rate, channels);
     let mut scratch: Vec<f32> = vec![0.0; 16_384];
     move |data: &mut [T], _| {
-        let n = data.len().min(scratch.len());
+        // Growing once beats filling the tail with silence forever on a device
+        // whose period is larger than the guess made here.
+        if scratch.len() < data.len() {
+            scratch.resize(data.len(), 0.0);
+        }
+        let n = data.len();
         renderer.render(&mixer, &mut scratch[..n]);
         for (d, s) in data.iter_mut().zip(scratch[..n].iter()) {
             *d = convert(*s);
-        }
-        for d in data.iter_mut().skip(n) {
-            *d = convert(0.0);
         }
     }
 }
@@ -358,6 +412,46 @@ mod tests {
         assert_eq!(
             classify_loss(true, &AudioIoError::NoDevice),
             DeviceLoss::Unplugged
+        );
+    }
+
+    #[test]
+    fn a_glitch_does_not_end_the_stream_but_everything_else_does() {
+        assert!(!AudioIoError::Transient("xrun".into()).fatal());
+        assert!(AudioIoError::Invalidated("default changed".into()).fatal());
+        assert!(AudioIoError::NoDevice.fatal());
+        assert!(AudioIoError::PermissionDenied.fatal());
+        assert!(AudioIoError::Other("boom".into()).fatal());
+    }
+
+    #[test]
+    fn windows_access_denied_is_recognised_by_its_number() {
+        assert!(is_access_denied("Access is denied. (os error -2147024891)"));
+        assert!(is_access_denied("Acesso negado. (os error 5)"));
+        assert!(!is_access_denied(
+            "The device is not available. (os error -2147023728)"
+        ));
+        assert!(!is_access_denied("no error code here"));
+    }
+
+    #[test]
+    fn cpal_kinds_map_to_the_right_severity() {
+        use cpal::{Error, ErrorKind};
+        assert_eq!(
+            classify(Error::new(ErrorKind::Xrun)),
+            AudioIoError::Transient(Error::new(ErrorKind::Xrun).to_string())
+        );
+        assert_eq!(
+            classify(Error::new(ErrorKind::DeviceChanged)),
+            AudioIoError::Transient(Error::new(ErrorKind::DeviceChanged).to_string())
+        );
+        assert_eq!(
+            classify(Error::new(ErrorKind::StreamInvalidated)),
+            AudioIoError::Invalidated(Error::new(ErrorKind::StreamInvalidated).to_string())
+        );
+        assert_eq!(
+            classify(Error::new(ErrorKind::DeviceNotAvailable)),
+            AudioIoError::NoDevice
         );
     }
 

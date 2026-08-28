@@ -2,7 +2,7 @@
   import { goto } from "$app/navigation";
   import { t } from "$lib/i18n";
   import { translateBackendError } from "$lib/error-translate";
-  import { isMac, modKey } from "$lib/platform";
+  import { formatBinding } from "$lib/platform";
   import { getSettings } from "$lib/stores/settings-store.svelte";
   import { getChannel, getGuild } from "$lib/stores/omnidisc-store.svelte";
   import {
@@ -22,7 +22,12 @@
     leaveVoice,
     retryVoice,
   } from "$lib/stores/omnidisc-voice-store.svelte";
-  import { isPublishing, stopStream, isStreamBusy } from "$lib/stores/omnidisc-stream-store.svelte";
+  import {
+    isPublishing,
+    stopStream,
+    isStreamBusy,
+    getMediaCapabilities,
+  } from "$lib/stores/omnidisc-stream-store.svelte";
   import ShareScreenDialog from "$components/omnidisc/ShareScreenDialog.svelte";
 
   let shareOpen = $state(false);
@@ -44,14 +49,8 @@
   let outputError = $derived(getOutputError());
   let ping = $derived(stats?.rtt_ms != null ? Math.round(stats.rtt_ms) : null);
   let pttKey = $derived(getSettings()?.omnidisc?.voice?.ptt_key ?? "");
-  let pttLabel = $derived(
-    pttKey
-      ? pttKey
-          .split("+")
-          .map((part) => (part === "CmdOrCtrl" ? modKey() : part))
-          .join(isMac() ? "" : "+")
-      : "",
-  );
+  let pttLabel = $derived(formatBinding(pttKey));
+  let canShare = $derived(getMediaCapabilities().screen_share);
 
   let stateLabel = $derived.by(() => {
     switch (connState) {
@@ -167,12 +166,21 @@
             {$t("omnidisc.stream.stop_sharing")}
           </button>
         {:else}
-          <button type="button" class="share" onclick={() => (shareOpen = true)} disabled={connState !== "connected"}>
+          <button
+            type="button"
+            class="share"
+            onclick={() => (shareOpen = true)}
+            disabled={connState !== "connected" || !canShare}
+            title={canShare ? undefined : $t("omnidisc.error.stream_unsupported")}
+          >
             <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="13" rx="2" /><path d="M12 8v5M9.5 10.5 12 8l2.5 2.5" /></svg>
             {$t("omnidisc.stream.share_screen")}
           </button>
         {/if}
       </div>
+      {#if !publishing && !canShare}
+        <p class="note quiet">{$t("omnidisc.error.stream_unsupported")}</p>
+      {/if}
 
       <div class="actions">
         <button
@@ -441,6 +449,11 @@
     color: var(--text);
     padding: var(--space-2);
     border-radius: var(--radius-sm);
+  }
+
+  .note.quiet {
+    color: var(--text-muted);
+    padding: 0 var(--space-2);
   }
 
   .note.warn {

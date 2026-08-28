@@ -117,6 +117,7 @@ let muted = $state(false);
 let deafened = $state(false);
 let busy = $state(false);
 let backendAvailable = $state(true);
+let pttRegistered = $state<boolean | null>(null);
 let speaking = $state<Record<string, boolean>>({});
 let quality = $state<VoiceQuality>("unknown");
 let stats = $state<VoiceStatsWire | null>(null);
@@ -660,10 +661,33 @@ export async function setNoiseSuppression(enabled: boolean): Promise<void> {
 
 export async function setPttKey(key: string): Promise<void> {
   await updateSettings({ omnidisc: { voice: { ptt_key: key } } });
+  await refreshPttStatus();
   try {
     await invoke("omnidisc_voice_ptt", { pressed: false });
   } catch {
     return;
+  }
+}
+
+/**
+ * `null` while unknown or while no key is set; `false` when the OS refused to
+ * hand the combination over — Windows gives it to whoever asked first, macOS
+ * wants Accessibility permission. Both used to fail silently, so the key just
+ * did nothing.
+ */
+export function isPttRegistered(): boolean | null {
+  return pttRegistered;
+}
+
+export async function refreshPttStatus(): Promise<void> {
+  try {
+    const status = await invoke<{ binding: string; registered: boolean }>(
+      "omnidisc_voice_ptt_status",
+    );
+    pttRegistered = status.binding ? status.registered : null;
+  } catch (e) {
+    pttRegistered = null;
+    console.warn("[omnidisc] push-to-talk status unavailable", errorText(e));
   }
 }
 

@@ -1,5 +1,5 @@
 use crate::capture::{self, AudioSink, CaptureOptions, CapturedFrame, VideoSink, VideoTick};
-use crate::encode::{EncoderConfig, EncoderCounters, VideoEncoder};
+use crate::encode::{self, EncoderConfig, EncoderCounters, PublishPath, VideoEncoder};
 use crate::livekit_backend::LiveKitBackend;
 use crate::stream::{
     resolve_bitrate, AudioMode, PublishStats, ResolvedStream, StreamCodec, StreamError, StreamMode,
@@ -142,6 +142,7 @@ struct AudioPublish {
     capture: capture::AudioCapture,
     _track: LocalAudioTrack,
     publication: LocalTrackPublication,
+    mode: AudioMode,
 }
 
 pub struct ActiveStream {
@@ -205,7 +206,7 @@ pub async fn start_stream(
     let (video_capture, geometry) = capture::start_video(&opts, vsink)?;
     let (width, height) = (geometry.width, geometry.height);
 
-    let codec = codec_from_policy(&req.policy, height, req.fps);
+    let codec = encode::clamp_codec(codec_from_policy(&req.policy, height, req.fps));
     let bitrate = resolve_bitrate(
         &req.policy,
         width,
@@ -215,6 +216,15 @@ pub async fn start_stream(
         req.bitrate_kbps,
     );
     let configured_bps = bitrate as u64 * 1000;
+    let cfg = EncoderConfig {
+        width,
+        height,
+        fps: req.fps,
+        codec,
+        bitrate_kbps: bitrate,
+        mode: req.mode,
+    };
+    let path = encode::publish_path(&cfg);
     let resolved = ResolvedStream {
         width,
         height,
@@ -225,7 +235,11 @@ pub async fn start_stream(
         audio: req.audio,
     };
 
-    let source = NativeVideoSource::new_encoded(VideoResolution { width, height });
+    let resolution = VideoResolution { width, height };
+    let source = match path {
+        PublishPath::PreEncoded => NativeVideoSource::new_encoded(resolution),
+        PublishPath::Raw => NativeVideoSource::new(resolution, true),
+    };
     let track = LocalVideoTrack::create_video_track(
         "omnidisc-screen",
         RtcVideoSource::Native(source.clone()),
@@ -242,7 +256,10 @@ pub async fn start_stream(
                 source: TrackSource::Screenshare,
                 video_codec: to_video_codec(codec),
                 simulcast: false,
-                video_encoder: VideoEncoderBackend::PreEncoded,
+                video_encoder: match path {
+                    PublishPath::PreEncoded => VideoEncoderBackend::PreEncoded,
+                    PublishPath::Raw => VideoEncoderBackend::Auto,
+                },
                 video_encoding: Some(VideoEncoding {
                     max_bitrate: configured_bps,
                     max_framerate: req.fps as f64,
@@ -257,27 +274,21 @@ pub async fn start_stream(
 
     // S-07 §5.1: prime the sender with raw frames so the pass-through selector
     // switches before the first encoded frame (otherwise it segfaults on macOS).
-    for _ in 0..PRIMER_FRAMES {
-        let black = VideoFrame {
-            rotation: VideoRotation::VideoRotation0,
-            timestamp_us: 0,
-            frame_metadata: None,
-            buffer: I420Buffer::new_black(width, height),
-        };
-        source.capture_frame(&black);
-        tokio::time::sleep(Duration::from_millis(PRIMER_INTERVAL_MS)).await;
+    if path == PublishPath::PreEncoded {
+        for _ in 0..PRIMER_FRAMES {
+            let black = VideoFrame {
+                rotation: VideoRotation::VideoRotation0,
+                timestamp_us: 0,
+                frame_metadata: None,
+                buffer: I420Buffer::new_black(width, height),
+            };
+            source.capture_frame(&black);
+            tokio::time::sleep(Duration::from_millis(PRIMER_INTERVAL_MS)).await;
+        }
+        tokio::time::sleep(Duration::from_millis(PRIMER_INTERVAL_MS * 2)).await;
     }
-    tokio::time::sleep(Duration::from_millis(PRIMER_INTERVAL_MS * 2)).await;
 
     let counters = Arc::new(EncoderCounters::default());
-    let cfg = EncoderConfig {
-        width,
-        height,
-        fps: req.fps,
-        codec,
-        bitrate_kbps: bitrate,
-        mode: req.mode,
-    };
     let encoder = Arc::new(VideoEncoder::new(cfg, source.clone(), counters.clone())?);
     let encode_loop = EncodeLoop::spawn(
         encoder.clone(),
@@ -291,6 +302,10 @@ pub async fn start_stream(
     }
 
     let audio = start_screenshare_audio(&room, req.audio).await;
+    // Report the mode actually obtained, not the one asked for: the capture
+    // side degrades per-app -> system-except-us -> none on its own.
+    let mut resolved = resolved;
+    resolved.audio = audio.as_ref().map(|a| a.mode).unwrap_or(AudioMode::None);
 
     Ok(ActiveStream {
         resolved,
@@ -373,6 +388,7 @@ async fn start_screenshare_audio(room: &Arc<Room>, mode: AudioMode) -> Option<Au
             capture: capture_handle,
             _track: track,
             publication: pub_,
+            mode: obtained,
         }),
         Err(e) => {
             tracing::warn!("[omnidisc-media] publish screenshare audio: {e}");
@@ -446,7 +462,12 @@ fn apply_outbound(stats: &mut PublishStats, rtc: &[RtcStats]) {
             RtcStats::OutboundRtp(o) if o.stream.kind == "video" => {
                 stats.fps_sent = o.outbound.frames_per_second;
                 stats.target_kbps = o.outbound.target_bitrate / 1000.0;
-                stats.encoder = o.outbound.encoder_implementation.clone();
+                // On the pass-through the SDK only knows "passthrough"; the
+                // encoder that actually ran is ours, so keep our name.
+                let reported = &o.outbound.encoder_implementation;
+                if !reported.is_empty() && !reported.to_lowercase().contains("passthrough") {
+                    stats.encoder = reported.clone();
+                }
                 stats.quality_limitation = format!("{:?}", o.outbound.quality_limitation_reason);
                 if let Some(m) = mimes.get(&o.stream.codec_id) {
                     if m.contains("265") || m.to_lowercase().contains("hevc") {

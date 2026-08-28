@@ -2,7 +2,7 @@
   import { onDestroy, onMount } from "svelte";
   import { t } from "$lib/i18n";
   import { translateBackendError } from "$lib/error-translate";
-  import { isMac, modKey } from "$lib/platform";
+  import { formatBinding, isMac } from "$lib/platform";
   import { getSettings } from "$lib/stores/settings-store.svelte";
   import {
     getDevices,
@@ -18,6 +18,8 @@
     isMicTesting,
     getMicLevel,
     micLevelStale,
+    isPttRegistered,
+    refreshPttStatus,
   } from "$lib/stores/omnidisc-voice-store.svelte";
 
   let settings = $derived(getSettings());
@@ -39,17 +41,10 @@
 
   let levelPercent = $derived(Math.round(Math.min(1, Math.max(0, (level.rmsDb + 60) / 60)) * 100));
   let pttLabel = $derived(formatBinding(voice.ptt_key ?? ""));
+  let pttRefused = $derived(!!voice.ptt_key && isPttRegistered() === false);
   let vadValue = $derived(vadDraft ?? voice.vad_threshold_db ?? -45);
   let duckValue = $derived(duckDraft ?? voice.ducking_percent ?? 0);
   let relayOnly = $derived(voice.relay_only === true);
-
-  function formatBinding(binding: string): string {
-    if (!binding) return "";
-    return binding
-      .split("+")
-      .map((part) => (part === "CmdOrCtrl" ? modKey() : part === "Meta" || part === "Super" ? (isMac() ? "⌘" : "Win") : part))
-      .join(isMac() ? "" : "+");
-  }
 
   function mapKeyName(key: string): string | null {
     if (key.length === 1 && /[a-zA-Z]/.test(key)) return key.toUpperCase();
@@ -122,6 +117,7 @@
 
   onMount(() => {
     void refreshDevices();
+    void refreshPttStatus();
     clock = setInterval(() => (now = Date.now()), 1000);
   });
 
@@ -213,8 +209,11 @@
       <div class="setting-col">
         <span class="setting-label">{$t("omnidisc.voice.ptt_key")}</span>
         <span class="setting-path">{$t("omnidisc.voice.ptt_key_desc")}</span>
-        {#if isMac() && voice.ptt_key}
-          <span class="setting-path">{$t("omnidisc.voice.ptt_permission_hint")}</span>
+        {#if pttRefused}
+          <span class="setting-path refused" role="status">
+            {$t("omnidisc.voice.ptt_refused")}
+            {isMac() ? $t("omnidisc.voice.ptt_permission_hint") : $t("omnidisc.voice.ptt_conflict_hint")}
+          </span>
         {/if}
       </div>
       <div class="row-actions">
@@ -295,6 +294,16 @@
     flex-direction: column;
     align-items: flex-end;
     gap: var(--space-2);
+  }
+
+  .setting-path.refused {
+    color: var(--warning);
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    line-height: 1.45;
+    max-width: 52ch;
+    margin-top: var(--space-1);
   }
 
   .button.active {

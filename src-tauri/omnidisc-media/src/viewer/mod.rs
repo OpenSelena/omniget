@@ -2,7 +2,7 @@ mod wgpu_surface;
 
 pub use wgpu_surface::{FrameSlot, Planes, WgpuViewer};
 
-#[cfg(target_os = "macos")]
+#[cfg(any(target_os = "macos", target_os = "windows"))]
 use crate::stream::StreamError;
 use crate::stream::{Viewport, WatchStats};
 use futures::StreamExt;
@@ -59,6 +59,47 @@ pub unsafe fn create_appkit_surface(
             }
         }
     }
+    WgpuViewer::from_surface(instance, surface, width, height)
+}
+
+/// Build the viewer surface from a Win32 window.
+///
+/// There is no layer ordering to fix here: WebView2 lives in its own child
+/// `HWND` that DWM composes above the parent's swap chain, so the overlay is on
+/// top by construction — unlike AppKit, where both are sibling `CALayer`s.
+///
+/// # Safety
+///
+/// `hwnd` must be a live window handle that stays alive for as long as the
+/// returned [`WgpuViewer`], and this must be called from the thread that owns
+/// that window — `raw-window-handle` requires it, and the swap chain is bound
+/// to the window's message loop.
+#[cfg(target_os = "windows")]
+pub unsafe fn create_win32_surface(
+    hwnd: isize,
+    hinstance: isize,
+    width: u32,
+    height: u32,
+) -> Result<Arc<WgpuViewer>, StreamError> {
+    use raw_window_handle::{
+        RawDisplayHandle, RawWindowHandle, Win32WindowHandle, WindowsDisplayHandle,
+    };
+    use std::num::NonZeroIsize;
+
+    let hwnd = NonZeroIsize::new(hwnd).ok_or_else(|| StreamError::Viewer("null hwnd".into()))?;
+    let mut desc = wgpu::InstanceDescriptor::new_without_display_handle();
+    desc.backends = wgpu::Backends::PRIMARY;
+    let instance = wgpu::Instance::new(desc);
+    let mut handle = Win32WindowHandle::new(hwnd);
+    // Vulkan's `VkWin32SurfaceCreateInfoKHR` wants the module handle; DX12 does
+    // not. Passing it keeps both backends usable instead of betting on DX12.
+    handle.hinstance = NonZeroIsize::new(hinstance);
+    let surface = instance
+        .create_surface_unsafe(wgpu::SurfaceTargetUnsafe::RawHandle {
+            raw_display_handle: Some(RawDisplayHandle::Windows(WindowsDisplayHandle::new())),
+            raw_window_handle: RawWindowHandle::Win32(handle),
+        })
+        .map_err(|e| StreamError::Viewer(format!("create_surface: {e}")))?;
     WgpuViewer::from_surface(instance, surface, width, height)
 }
 

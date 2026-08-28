@@ -4,12 +4,25 @@ use std::sync::atomic::{AtomicU64, Ordering};
 #[cfg(target_os = "macos")]
 mod videotoolbox;
 #[cfg(target_os = "macos")]
-pub use videotoolbox::VideoEncoder;
+pub use self::videotoolbox::{clamp_codec, publish_path, VideoEncoder};
 
-#[cfg(not(target_os = "macos"))]
+#[cfg(windows)]
+mod windows;
+#[cfg(windows)]
+pub use self::windows::{clamp_codec, publish_path, VideoEncoder};
+
+#[cfg(not(any(target_os = "macos", windows)))]
 mod stub;
-#[cfg(not(target_os = "macos"))]
-pub use stub::VideoEncoder;
+#[cfg(not(any(target_os = "macos", windows)))]
+pub use self::stub::{clamp_codec, publish_path, VideoEncoder};
+
+/// How a platform hands frames to LiveKit: through our own encoder and the
+/// `PreEncoded` pass-through, or as raw frames for libwebrtc to encode.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum PublishPath {
+    PreEncoded,
+    Raw,
+}
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct EncoderConfig {

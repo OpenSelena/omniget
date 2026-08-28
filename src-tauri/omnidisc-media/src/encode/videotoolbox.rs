@@ -1,4 +1,4 @@
-use super::{EncoderConfig, EncoderCounters};
+use super::{EncoderConfig, EncoderCounters, PublishPath};
 use crate::capture::CapturedFrame;
 use crate::stream::{StreamCodec, StreamError, StreamMode};
 use livekit::webrtc::video_frame::{EncodedFrameType, EncodedVideoCodec, EncodedVideoFrame};
@@ -35,6 +35,14 @@ use std::sync::{Arc, Mutex};
 use std::time::Instant;
 
 const KEYFRAME_INTERVAL: i32 = 240;
+
+pub fn clamp_codec(codec: StreamCodec) -> StreamCodec {
+    codec
+}
+
+pub fn publish_path(_cfg: &EncoderConfig) -> PublishPath {
+    PublishPath::PreEncoded
+}
 
 struct FrameCtx {
     submit: Instant,
@@ -485,7 +493,7 @@ impl VideoEncoder {
         self.hw
     }
 
-    pub fn name(&self) -> &'static str {
+    pub fn name(&self) -> &str {
         "VideoToolbox"
     }
 

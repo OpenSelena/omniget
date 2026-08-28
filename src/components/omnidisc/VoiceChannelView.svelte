@@ -21,6 +21,7 @@
     isStreamBusy,
     refreshStreamStats,
     getStreamStats,
+    getMediaCapabilities,
   } from "$lib/stores/omnidisc-stream-store.svelte";
   import type { OmnidiscChannel } from "$lib/omnidisc/types";
 
@@ -41,6 +42,7 @@
   let confirmSwitch = $state(false);
   let publishing = $derived(isPublishing());
   let streamBusy = $derived(isStreamBusy());
+  let canWatch = $derived(getMediaCapabilities().stream_viewer);
   let inspectorOpen = $state(false);
   let volumes = $state<Record<string, number>>({});
 
@@ -118,9 +120,18 @@
           <span class="name">{name}{#if m.userId === me} <span class="you">({$t("omnidisc.voice.you")})</span>{/if}</span>
           {#if live && m.userId !== me}
             <div class="watch">
-              <button type="button" class="btn small" onclick={() => void toggleWatch(m.userId)} disabled={streamBusy}>
+              <button
+                type="button"
+                class="btn small"
+                onclick={() => void toggleWatch(m.userId)}
+                disabled={streamBusy || !canWatch}
+                title={canWatch ? undefined : $t("omnidisc.stream.watch_unsupported")}
+              >
                 {watching ? $t("omnidisc.stream.stop_watching") : $t("omnidisc.stream.watch")}
               </button>
+              {#if !canWatch}
+                <span class="watch-note">{$t("omnidisc.stream.watch_unsupported")}</span>
+              {/if}
               {#if watching}
                 {#if ws && ws.width > 0}
                   <span class="res-badge">{ws.width}×{ws.height} · {Math.round(ws.fps_received)}fps{#if ws.codec} · {ws.codec.replace("video/", "").toUpperCase()}{/if}</span>
@@ -277,6 +288,13 @@
     padding: 4px var(--space-3);
     font-size: var(--text-xs);
     border-radius: var(--radius-sm);
+  }
+
+  .watch-note {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.4;
   }
 
   .res-badge {

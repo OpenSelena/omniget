@@ -34,3 +34,26 @@ export function modKey(): string {
 export function shortcut(...keys: string[]): string {
   return isMac() ? `${modKey()}${keys.join("")}` : [modKey(), ...keys].join("+");
 }
+
+/**
+ * Rótulo de um atalho gravado no formato do Tauri (`CmdOrCtrl+Shift+K`).
+ *
+ * Vive aqui e não em cada componente porque duas cópias divergiram: uma
+ * traduzia `Meta` para `Win` fora do macOS e a outra deixava `Meta` cru, então
+ * o mesmo atalho aparecia com nomes diferentes em duas telas do mesmo app.
+ */
+export function formatBinding(binding: string): string {
+  if (!binding) return "";
+  const mac = isMac();
+  return binding
+    .split("+")
+    .map((part) => {
+      if (part === "CmdOrCtrl") return modKey();
+      if (part === "Meta" || part === "Super" || part === "Command") return mac ? "⌘" : "Win";
+      if (part === "Alt") return mac ? "⌥" : "Alt";
+      if (part === "Shift") return mac ? "⇧" : "Shift";
+      if (part === "Control" || part === "Ctrl") return mac ? "⌃" : "Ctrl";
+      return part;
+    })
+    .join(mac ? "" : "+");
+}

@@ -174,6 +174,27 @@ impl Mixer {
     }
 }
 
+/// Put one mono sample on a device frame.
+///
+/// Copying it into every channel is fine on the stereo endpoints macOS almost
+/// always has, and wrong on the 5.1/7.1 endpoints Windows hands out for HDMI
+/// and receivers: it would put speech in the centre, the surrounds and the
+/// subwoofer at once, and make the call louder than everything else. Front
+/// left/right is where a mono source belongs; the rest stays quiet.
+fn place(frame: &mut [f32], sample: f32) {
+    match frame.len() {
+        0 => {}
+        1 => frame[0] = sample,
+        _ => {
+            frame[0] = sample;
+            frame[1] = sample;
+            for c in frame[2..].iter_mut() {
+                *c = 0.0;
+            }
+        }
+    }
+}
+
 pub struct OutputRenderer {
     step: f64,
     pos: f64,
@@ -206,7 +227,7 @@ impl OutputRenderer {
             mixer.mix_into(mix, scratch);
             for (i, frame) in data.chunks_mut(self.channels).enumerate() {
                 let s = if i < n { mix[i] } else { 0.0 };
-                frame.fill(s);
+                place(frame, s);
             }
             return;
         }
@@ -227,7 +248,7 @@ impl OutputRenderer {
             let frac = (p - idx as f64) as f32;
             let a = self.buf48.get(idx).copied().unwrap_or(0.0);
             let b = self.buf48.get(idx + 1).copied().unwrap_or(a);
-            frame.fill(a + (b - a) * frac);
+            place(frame, a + (b - a) * frac);
             p += self.step;
         }
         let consumed = (p.floor() as usize).min(self.buf48.len());
@@ -329,6 +350,35 @@ mod tests {
         let mut scratch = vec![0.0; 480];
         mixer.mix_into(&mut out, &mut scratch);
         assert!((out[479] - 0.5).abs() < 1e-6);
+    }
+
+    #[test]
+    fn surround_endpoints_get_the_voice_on_the_front_pair_only() {
+        let mixer = Mixer::default();
+        let (mut p1, c1) = rtrb::RingBuffer::<f32>::new(48_000);
+        mixer.add_source("t1".into(), "u1".into(), c1, 1.0);
+        let _ = p1.push_partial_slice(&vec![0.5; 4800]);
+        let mut r = OutputRenderer::new(MIX_RATE, 6);
+        let mut data = vec![9.0; 480 * 6];
+        r.render(&mixer, &mut data);
+        assert!((data[0] - 0.5).abs() < 1e-6, "front left");
+        assert!((data[1] - 0.5).abs() < 1e-6, "front right");
+        for (i, s) in data[2..6].iter().enumerate() {
+            assert_eq!(*s, 0.0, "channel {} must stay quiet", i + 2);
+        }
+    }
+
+    #[test]
+    fn a_mono_endpoint_still_hears_the_call() {
+        let mixer = Mixer::default();
+        let (mut p1, c1) = rtrb::RingBuffer::<f32>::new(48_000);
+        mixer.add_source("t1".into(), "u1".into(), c1, 1.0);
+        let _ = p1.push_partial_slice(&vec![0.5; 4800]);
+        let mut r = OutputRenderer::new(MIX_RATE, 1);
+        let mut data = vec![0.0; 480];
+        r.render(&mixer, &mut data);
+        assert!((data[0] - 0.5).abs() < 1e-6);
+        assert!((data[479] - 0.5).abs() < 1e-6);
     }
 
     #[test]

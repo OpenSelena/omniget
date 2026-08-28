@@ -228,6 +228,7 @@ pub fn start(app: &tauri::AppHandle) {
     if manager.started.swap(true, Ordering::AcqRel) {
         return;
     }
+    super::ducking::opt_out_of_system_ducking();
     let pump_engine = manager.engine.clone();
     tauri::async_runtime::spawn(async move { pump_engine.pump().await });
     let app = app.clone();
@@ -624,6 +625,43 @@ pub async fn omnidisc_voice_ptt(
         .set_ptt(enabled, pressed)
         .await
         .map_err(|e| e.code().to_string())
+}
+
+/// Whether the OS actually handed us the push-to-talk key.
+///
+/// It can refuse: Windows gives a combination to the first process that asks
+/// and answers everyone else with `ERROR_HOTKEY_ALREADY_REGISTERED`, and macOS
+/// needs Accessibility permission. Both used to fail into a log line, so the
+/// key simply did nothing and the app looked broken.
+#[derive(Debug, Clone, Serialize)]
+pub struct PttStatus {
+    pub binding: String,
+    pub registered: bool,
+}
+
+#[tauri::command]
+pub async fn omnidisc_voice_ptt_status(app: tauri::AppHandle) -> Result<PttStatus, String> {
+    use tauri_plugin_global_shortcut::GlobalShortcutExt;
+    let binding = crate::storage::config::load_settings(&app)
+        .omnidisc
+        .voice
+        .ptt_key
+        .trim()
+        .to_string();
+    if binding.is_empty() {
+        return Ok(PttStatus {
+            binding,
+            registered: false,
+        });
+    }
+    let registered = binding
+        .parse::<tauri_plugin_global_shortcut::Shortcut>()
+        .map(|s| app.global_shortcut().is_registered(s))
+        .unwrap_or(false);
+    Ok(PttStatus {
+        binding,
+        registered,
+    })
 }
 
 #[tauri::command]
