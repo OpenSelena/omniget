@@ -26,7 +26,10 @@ fn enumeration_answers_and_reports_what_the_build_supports() {
     );
     for d in &sources.displays {
         assert!(matches!(d.id, SourceId::Display { .. }));
-        assert!(!d.name.trim().is_empty(), "a display needs a label the user can read");
+        assert!(
+            !d.title.trim().is_empty(),
+            "a display needs a label the user can read"
+        );
     }
     for w in &sources.windows {
         assert!(matches!(w.id, SourceId::Window { .. }));
@@ -58,7 +61,12 @@ fn thumbnails_do_not_break_enumeration() {
 #[test]
 fn capturing_a_display_delivers_ticks_or_a_typed_error() {
     let sources = capture::list_sources(false).expect("list_sources");
-    let display = sources.displays.first().expect("at least one display").id;
+    let display = sources
+        .displays
+        .first()
+        .expect("at least one display")
+        .id
+        .clone();
     let frames = Arc::new(AtomicU32::new(0));
     let ticks = Arc::new(AtomicU32::new(0));
     let (f, t) = (frames.clone(), ticks.clone());
@@ -88,7 +96,10 @@ fn capturing_a_display_delivers_ticks_or_a_typed_error() {
         }
     };
     let (capture_handle, geometry) = started;
-    assert!(geometry.width > 0 && geometry.height > 0, "geometry must be real");
+    assert!(
+        geometry.width > 0 && geometry.height > 0,
+        "geometry must be real"
+    );
     assert!(geometry.fps > 0);
 
     let deadline = Instant::now() + Duration::from_secs(3);
