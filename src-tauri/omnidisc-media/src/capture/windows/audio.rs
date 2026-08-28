@@ -167,7 +167,7 @@ fn activate(pid: u32, include_tree: bool) -> Result<IAudioClient, StreamError> {
         ActivateAudioInterfaceAsync(
             VIRTUAL_AUDIO_DEVICE_PROCESS_LOOPBACK,
             &IAudioClient::IID,
-            Some(&prop),
+            Some(&*prop as *const PROPVARIANT),
             &handler,
         )
     }
