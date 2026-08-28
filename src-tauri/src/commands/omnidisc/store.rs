@@ -35,6 +35,7 @@ type Dec = cbc::Decryptor<aes::Aes256>;
 type HmacSha256 = Hmac<Sha256>;
 
 pub const SESSION_DIR_ENV: &str = "OMNIGET_OMNIDISC_SESSION_DIR";
+#[cfg(any(target_os = "macos", windows))]
 const KEYRING_ENV: &str = "OMNIGET_OMNIDISC_KEYRING";
 
 /// Whether to put secrets in the OS keyring at all.
@@ -46,6 +47,7 @@ const KEYRING_ENV: &str = "OMNIGET_OMNIDISC_KEYRING";
 /// many times it is answered. Debug builds therefore use the encrypted file
 /// store, and only release builds — signed, and stable across launches — use the
 /// keyring. `OMNIGET_OMNIDISC_KEYRING=1` forces it on to exercise that path.
+#[cfg(any(target_os = "macos", windows))]
 fn use_keyring() -> bool {
     match std::env::var(KEYRING_ENV) {
         Ok(v) => matches!(v.trim(), "1" | "true" | "yes"),
