@@ -4517,7 +4517,8 @@
       "loss": "Perda",
       "encode": "Codificação",
       "no_active": "Nenhuma transmissão em andamento.",
-      "preview_alt": "Prévia ao vivo da sua tela compartilhada"
+      "preview_alt": "Prévia ao vivo da sua tela compartilhada",
+      "portal_picker": "Seu sistema vai perguntar qual tela ou janela compartilhar depois que você tocar em Compartilhar."
     },
     "emoji": {
       "title": "Emoji",

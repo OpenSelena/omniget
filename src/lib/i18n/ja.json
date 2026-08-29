@@ -4517,7 +4517,8 @@
       "loss": "Loss",
       "encode": "Encode",
       "no_active": "No stream running yet.",
-      "preview_alt": "Live preview of your shared screen"
+      "preview_alt": "Live preview of your shared screen",
+      "portal_picker": "Your desktop will ask which screen or window to share after you press Share."
     },
     "emoji": {
       "title": "Emoji",

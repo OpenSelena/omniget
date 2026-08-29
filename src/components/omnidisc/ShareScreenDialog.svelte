@@ -23,6 +23,13 @@
   let { onClose }: { onClose: () => void } = $props();
 
   let sources = $state<StreamSources | null>(null);
+  /// The Linux backend answers with a single placeholder because the portal
+  /// shows its own picker after "share" is pressed.
+  let portalPicker = $derived(
+    sources?.displays.length === 1 &&
+      sources.windows.length === 0 &&
+      sources.displays[0].title === "__omnidisc_portal_picker__",
+  );
   let loading = $state(true);
   let loadError = $state<string | null>(null);
   let selected = $state<SourceId | null>(null);
@@ -126,6 +133,14 @@
             <button type="button" class="btn" onclick={() => void load()}>{$t("omnidisc.voice.retry")}</button>
           {/if}
         </div>
+      {:else if sources && portalPicker}
+        <!-- On Wayland an unprivileged app cannot enumerate windows: the
+             desktop's own dialog is the picker. Saying so beats drawing a grid
+             we cannot fill. -->
+        <section>
+          <h3>{$t("omnidisc.stream.pick_source")}</h3>
+          <p class="muted">{$t("omnidisc.stream.portal_picker")}</p>
+        </section>
       {:else if sources}
         <section>
           <h3>{$t("omnidisc.stream.pick_source")}</h3>

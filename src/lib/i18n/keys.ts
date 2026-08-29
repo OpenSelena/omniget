@@ -1570,6 +1570,7 @@ export type TranslationKeys =
   | 'omnidisc.stream.mode_text'
   | 'omnidisc.stream.no_active'
   | 'omnidisc.stream.pick_source'
+  | 'omnidisc.stream.portal_picker'
   | 'omnidisc.stream.preview_alt'
   | 'omnidisc.stream.quality'
   | 'omnidisc.stream.receiving'
