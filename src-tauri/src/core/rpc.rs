@@ -1,10 +1,9 @@
 use std::collections::HashMap;
-use std::sync::Mutex;
+use std::sync::{LazyLock, Mutex};
 
 use discord_rich_presence::activity::{Activity, Assets, Button, Timestamps};
 use discord_rich_presence::{DiscordIpc, DiscordIpcClient};
 use serde_json::{json, Value};
-use std::sync::LazyLock;
 
 pub use omniget_core::models::settings::RpcSettings;
 

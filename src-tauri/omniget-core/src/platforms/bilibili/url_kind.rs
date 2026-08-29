@@ -73,9 +73,11 @@ static RE_VIDEO_BV: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"bilibili\.com/video/(BV[a-zA-Z0-9]+|av\d+)").unwrap());
 static RE_BARE_BV: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(BV[a-zA-Z0-9]{8,})").unwrap());
 static RE_BARE_AV: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\bav(\d+)\b").unwrap());
-static RE_BANGUMI: LazyLock<Regex> =
-    LazyLock::new(|| Regex::new(r"bilibili\.com/bangumi/(?:play|media)/(ss\d+|ep\d+|md\d+)").unwrap());
-static RE_BARE_BANGUMI: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"\b(ss\d+|ep\d+|md\d+)\b").unwrap());
+static RE_BANGUMI: LazyLock<Regex> = LazyLock::new(|| {
+    Regex::new(r"bilibili\.com/bangumi/(?:play|media)/(ss\d+|ep\d+|md\d+)").unwrap()
+});
+static RE_BARE_BANGUMI: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"\b(ss\d+|ep\d+|md\d+)\b").unwrap());
 static RE_CHEESE: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"bilibili\.com/cheese/play/(ss\d+|ep\d+)").unwrap());
 static RE_LIST_LISTS: LazyLock<Regex> =
