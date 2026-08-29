@@ -17,8 +17,12 @@ jobs:
             args: '--target aarch64-apple-darwin'
           - platform: 'macos-latest'
             args: '--target x86_64-apple-darwin'
+          # Ubuntu 22.04 keeps the x86_64 build on glibc 2.35, which is what
+          # lets the AppImage run on older distros. Its PipeWire headers
+          # (0.3.48) are too old for the screen-capture backend to compile, so
+          # that one feature is left out and the client says so at runtime.
           - platform: 'ubuntu-22.04'
-            args: ''
+            args: '--no-default-features --features rnnoise'
           - platform: 'ubuntu-24.04-arm'
             args: ''
           - platform: 'windows-latest'

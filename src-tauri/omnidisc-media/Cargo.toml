@@ -6,8 +6,14 @@ description = "OmniDisc client media engine: capture, audio I/O, SFU connection,
 license = "GPL-3.0"
 
 [features]
-default = ["rnnoise"]
+default = ["rnnoise", "linux-capture"]
 rnnoise = ["dep:nnnoiseless"]
+# Screen capture on Linux needs PipeWire headers newer than Ubuntu 22.04 ships
+# (its 0.3.48 `spa_video_info_raw` has no `flags` field, so `libspa` itself will
+# not compile). Turning this off builds a client with working voice and an
+# honest "screen sharing is not available in this build" — which the interface
+# already knows how to say, because it asks the backend rather than the OS.
+linux-capture = ["dep:ashpd", "dep:pipewire", "dep:libspa", "dep:yuv"]
 
 [dependencies]
 omnidisc-proto = { path = "../omnidisc-proto" }
@@ -41,10 +47,10 @@ objc2-core-media = { version = "0.3.2", features = ["CMSampleBuffer", "CMFormatD
 objc2-video-toolbox = { version = "0.3.2", features = ["VTCompressionSession", "VTCompressionProperties", "VTSession", "VTErrors", "VTBase", "VTVideoEncoderList", "VTUtilities"] }
 
 [target.'cfg(target_os = "linux")'.dependencies]
-ashpd = { version = "0.13", default-features = false, features = ["tokio", "screencast"] }
-pipewire = "0.10"
-libspa = "0.10"
-yuv = "0.8"
+ashpd = { version = "0.13", default-features = false, features = ["tokio", "screencast"], optional = true }
+pipewire = { version = "0.10", optional = true }
+libspa = { version = "0.10", optional = true }
+yuv = { version = "0.8", optional = true }
 
 [target.'cfg(windows)'.dependencies]
 windows-core = "0.61"

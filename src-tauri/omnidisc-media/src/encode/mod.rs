@@ -11,14 +11,22 @@ mod windows;
 #[cfg(windows)]
 pub use self::windows::{clamp_codec, publish_path, VideoEncoder};
 
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", feature = "linux-capture"))]
 mod linux;
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", feature = "linux-capture"))]
 pub use self::linux::{clamp_codec, preferred_backend, publish_path, VideoEncoder};
 
-#[cfg(not(any(target_os = "macos", windows, target_os = "linux")))]
+#[cfg(not(any(
+    target_os = "macos",
+    windows,
+    all(target_os = "linux", feature = "linux-capture")
+)))]
 mod stub;
-#[cfg(not(any(target_os = "macos", windows, target_os = "linux")))]
+#[cfg(not(any(
+    target_os = "macos",
+    windows,
+    all(target_os = "linux", feature = "linux-capture")
+)))]
 pub use self::stub::{clamp_codec, publish_path, VideoEncoder};
 
 /// How a platform hands frames to LiveKit: through our own encoder and the

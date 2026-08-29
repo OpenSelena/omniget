@@ -80,11 +80,7 @@ pub async fn omnidisc_media_capabilities(
     // kind of thing that gets an app denied for good.
     Ok(MediaCapabilities {
         voice: state.omnidisc_voice.livekit_backend().is_some(),
-        screen_share: cfg!(any(
-            target_os = "macos",
-            target_os = "windows",
-            target_os = "linux"
-        )),
+        screen_share: omnidisc_media::capture::SCREEN_CAPTURE_SUPPORTED,
         stream_viewer: cfg!(any(target_os = "macos", target_os = "windows")),
     })
 }

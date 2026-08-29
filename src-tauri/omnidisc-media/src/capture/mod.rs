@@ -11,15 +11,32 @@ mod windows;
 #[cfg(windows)]
 pub use self::windows::*;
 
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", feature = "linux-capture"))]
 mod linux;
-#[cfg(target_os = "linux")]
+#[cfg(all(target_os = "linux", feature = "linux-capture"))]
 pub use self::linux::*;
 
-#[cfg(not(any(target_os = "macos", windows, target_os = "linux")))]
+#[cfg(not(any(
+    target_os = "macos",
+    windows,
+    all(target_os = "linux", feature = "linux-capture")
+)))]
 mod stub;
-#[cfg(not(any(target_os = "macos", windows, target_os = "linux")))]
+#[cfg(not(any(
+    target_os = "macos",
+    windows,
+    all(target_os = "linux", feature = "linux-capture")
+)))]
 pub use self::stub::*;
+
+/// Whether this build can capture a screen at all. The interface asks the
+/// backend rather than the operating system, so a client compiled without the
+/// Linux capture backend says so instead of offering a button that fails.
+pub const SCREEN_CAPTURE_SUPPORTED: bool = cfg!(any(
+    target_os = "macos",
+    windows,
+    all(target_os = "linux", feature = "linux-capture")
+));
 
 #[derive(Debug, Clone)]
 pub struct CaptureOptions {

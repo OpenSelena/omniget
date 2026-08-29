@@ -23,6 +23,11 @@ For full release notes, assets, and signatures of each version, see
   the default sink monitor. Hardware encoding uses VAAPI or NVENC when
   `VideoEncoderBackend::list_available()` reports them, and the inspector
   reports the backend actually selected rather than the one hoped for.
+  It is a build feature (`linux-capture`, on by default) because `libspa` will
+  not compile against PipeWire as old as Ubuntu 22.04 ships; the x86_64 release
+  stays on that base to keep its glibc floor, so that artifact is voice-only and
+  `MediaCapabilities` reports the loss instead of offering a button that fails.
+  The arm64 build has both.
 - **Local preview of your own screen share**, emitted as a periodic JPEG from
   the active capture filter and rendered on the sharer's tile.
 - **Temporary file storage**: attachments are deleted from the server

@@ -261,9 +261,9 @@ pub async fn start_stream(
                     // On Linux the SDK's own VAAPI/NVENC backends replace the
                     // encoder we write by hand elsewhere, so ask for one by
                     // name instead of leaving the choice to `Auto`.
-                    #[cfg(target_os = "linux")]
+                    #[cfg(all(target_os = "linux", feature = "linux-capture"))]
                     PublishPath::Raw => encode::preferred_backend(),
-                    #[cfg(not(target_os = "linux"))]
+                    #[cfg(not(all(target_os = "linux", feature = "linux-capture")))]
                     PublishPath::Raw => VideoEncoderBackend::Auto,
                 },
                 video_encoding: Some(VideoEncoding {

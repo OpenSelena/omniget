@@ -16,6 +16,13 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
+[features]
+default = ["linux-capture"]
+# Off for the x86_64 Linux release, whose runner has PipeWire headers older than
+# the capture backend can compile against. Everything else in the client is
+# unaffected, and `MediaCapabilities` reports the loss rather than hiding it.
+linux-capture = ["omnidisc-media/linux-capture"]
+
 [dependencies]
 tauri = { version = "2", features = ["protocol-asset", "tray-icon", "macos-private-api"] }
 tauri-plugin-shell = "2"
@@ -66,7 +73,7 @@ open = "5"
 omniget-core = { path = "omniget-core", features = ["desktop"] }
 omniget-plugin-sdk = { path = "omniget-plugin-sdk" }
 omnidisc-proto = { path = "omnidisc-proto" }
-omnidisc-media = { path = "omnidisc-media" }
+omnidisc-media = { path = "omnidisc-media", default-features = false, features = ["rnnoise"] }
 omnidisc-mls = { path = "omnidisc-mls" }
 libloading = "0.8"
 which = "7"
