@@ -91,13 +91,17 @@ static RE_FAVLIST_SPACE: LazyLock<Regex> =
 static RE_FAVLIST_LIST: LazyLock<Regex> = LazyLock::new(|| {
     Regex::new(r"bilibili\.com/(?:medialist/detail/)?ml(\d+)|bilibili\.com/list/ml(\d+)").unwrap()
 });
-static RE_SPACE: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"space\.bilibili\.com/(\d+)").unwrap());
+static RE_SPACE: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"space\.bilibili\.com/(\d+)").unwrap());
 static RE_MEDIALIST_PLAY: LazyLock<Regex> =
     LazyLock::new(|| Regex::new(r"bilibili\.com/medialist/play/(\d+)").unwrap());
-static RE_POPULAR: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"bilibili\.com/v/popular").unwrap());
-static RE_FESTIVAL: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"bilibili\.com/festival").unwrap());
+static RE_POPULAR: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"bilibili\.com/v/popular").unwrap());
+static RE_FESTIVAL: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"bilibili\.com/festival").unwrap());
 static RE_B23: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"(b23\.tv|bili2233\.cn)").unwrap());
-static RE_LIST_OLD: LazyLock<Regex> = LazyLock::new(|| Regex::new(r"bilibili\.com/list/(\d+)").unwrap());
+static RE_LIST_OLD: LazyLock<Regex> =
+    LazyLock::new(|| Regex::new(r"bilibili\.com/list/(\d+)").unwrap());
 
 pub fn detect(url: &str) -> Result<UrlKind> {
     detect_internal(url, None)
