@@ -1429,11 +1429,11 @@
 
           <div class="release-summary-card">
             <div>
-              <span class="release-badge">v0.8.13 Stable</span>
+              <span class="release-badge">v0.8.14 Stable</span>
               <ul id="release-summary-list">
-                <li>Integrated OmniDisc encrypted messaging, voice channels, and screen sharing</li>
-                <li>Added Open Omni unified social downloader with gallery-dl / yt-dlp backends</li>
-                <li>Standardized core platform architecture and migrated to stdlib synchronization locks</li>
+                <li>Open Omni macOS System Settings layout with sidebar navigation and theme-adaptive icons</li>
+                <li>OmniDisc encrypted messaging, low-latency voice channels, and 60fps screen sharing</li>
+                <li>Standardized core architecture with stdlib synchronization locks &amp; updated metadata</li>
               </ul>
             </div>
             <button class="btn btn-secondary" onclick="switchPageTab('releasenotes')" style="white-space: nowrap;">
@@ -1612,7 +1612,7 @@
                 <h3>Windows Setup</h3>
                 <p>Direct standalone installer for Windows 10 and 11 (64-bit).</p>
               </div>
-              <a id="dl-win-btn" href="https://github.com/igect/omniget/releases/latest/download/omniget_0.8.13_x64-setup.exe" class="btn btn-primary" style="width: 100%;">
+              <a id="dl-win-btn" href="https://github.com/igect/omniget/releases/latest/download/omniget_0.8.14_x64-setup.exe" class="btn btn-primary" style="width: 100%;">
                 <img src="./static/logo-windows.svg" alt="" style="width: 16px; height: 16px; margin-right: 6px; filter: brightness(0) invert(1);" /> Download for Windows
               </a>
             </div>
@@ -1626,7 +1626,7 @@
                 <h3>macOS Universal</h3>
                 <p>Universal binary for Apple Silicon (M1-M3) and Intel Macs.</p>
               </div>
-              <a id="dl-mac-btn" href="https://github.com/igect/omniget/releases/latest/download/omniget_0.8.13_x64.dmg" class="btn btn-primary" style="width: 100%;">
+              <a id="dl-mac-btn" href="https://github.com/igect/omniget/releases/latest/download/omniget_0.8.14_x64.dmg" class="btn btn-primary" style="width: 100%;">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px;"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.32c.67-.82 1.12-1.96.99-3.1-.97.04-2.14.65-2.84 1.47-.63.73-1.18 1.89-1.03 3.01 1.08.08 2.21-.56 2.88-1.38z"/></svg> Download for Mac
               </a>
             </div>
@@ -1640,7 +1640,7 @@
                 <h3>Linux</h3>
                 <p>Flathub package or direct release tarball for Linux distributions.</p>
               </div>
-              <a id="dl-linux-btn" href="https://github.com/igect/omniget/releases/latest/download/omniget_0.8.13_amd64.AppImage" class="btn btn-secondary" style="width: 100%;">
+              <a id="dl-linux-btn" href="https://github.com/igect/omniget/releases/latest/download/omniget_0.8.14_amd64.AppImage" class="btn btn-secondary" style="width: 100%;">
                 <i data-lucide="terminal" style="width: 16px; height: 16px; margin-right: 4px;"></i> View Linux Releases
               </a>
             </div>
@@ -1661,39 +1661,39 @@
           <div class="release-card">
             <div class="release-header">
               <div>
-                <span class="release-badge">v0.8.13 Stable</span>
-                <h3 id="release-card-title" style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--text-head); margin-top: 6px;">OmniGet v0.8.13 Release Notes</h3>
+                <span class="release-badge">v0.8.14 Stable</span>
+                <h3 id="release-card-title" style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--text-head); margin-top: 6px;">OmniGet v0.8.14 Release Notes</h3>
               </div>
-              <a id="release-tag-link" href="https://github.com/igect/omniget/releases/tag/v0.8.13" target="_blank" rel="noopener" class="btn btn-secondary">
+              <a id="release-tag-link" href="https://github.com/igect/omniget/releases/tag/v0.8.14" target="_blank" rel="noopener" class="btn btn-secondary">
                 View Tag on GitHub
               </a>
             </div>
 
             <div class="release-grid" id="release-full-grid">
               <div class="release-item">
+                <h4><i data-lucide="layout" style="width: 18px; height: 18px; color: var(--brand-orange);"></i> Open Omni System Settings UI</h4>
+                <ul>
+                  <li>macOS System Settings-style sidebar navigation (Download, Profiles, Settings)</li>
+                  <li>Theme-adaptive navigation icons with automatic contrast filtering</li>
+                  <li>Centered download and configuration action controls</li>
+                </ul>
+              </div>
+
+              <div class="release-item">
                 <h4><i data-lucide="message-square" style="width: 18px; height: 18px; color: var(--brand-orange);"></i> OmniDisc Subsystem</h4>
                 <ul>
-                  <li>End-to-end encrypted messaging, direct messaging, and group channels</li>
-                  <li>Real-time voice channels, screen sharing, and audio capture</li>
-                  <li>Guild roles, permissions, bans, invites, and session management</li>
+                  <li>End-to-end encrypted messaging with Messaging Layer Security (MLS)</li>
+                  <li>Real-time voice channels with noise suppression &amp; 60fps screen sharing</li>
+                  <li>Guild hierarchy, member roles, permissions, and session management</li>
                 </ul>
               </div>
 
               <div class="release-item">
-                <h4><i data-lucide="share-2" style="width: 18px; height: 18px; color: var(--brand-orange);"></i> Open Omni Social Downloader</h4>
+                <h4><i data-lucide="cpu" style="width: 18px; height: 18px; color: var(--brand-orange);"></i> Platform &amp; Metadata Alignment</h4>
                 <ul>
-                  <li>Dedicated multi-platform downloader interface with gallery-dl and yt-dlp backends</li>
-                  <li>Persistent profile presets, cookie injection, and concurrency throttling</li>
-                  <li>Live download status, cancellation handling, and tail log reporting</li>
-                </ul>
-              </div>
-
-              <div class="release-item">
-                <h4><i data-lucide="cpu" style="width: 18px; height: 18px; color: var(--brand-orange);"></i> Core Platform &amp; Architecture</h4>
-                <ul>
-                  <li>Removed 14,000+ lines of duplicate legacy platform extractors in favor of <code>omniget_core</code></li>
-                  <li>Migrated all synchronization locks to standard library <code>OnceLock</code> and <code>LazyLock</code></li>
-                  <li>Standardized identifier to <code>com.igect.omniget</code> with automatic path migration</li>
+                  <li>Updated Flatpak AppStream metainfo with v0.8.14 and v0.8.13 releases</li>
+                  <li>Migrated synchronization locks to Rust stdlib <code>OnceLock</code> and <code>LazyLock</code></li>
+                  <li>Cleaned up legacy platform extractors into unified <code>omniget_core</code></li>
                 </ul>
               </div>
             </div>
