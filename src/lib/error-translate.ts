@@ -149,6 +149,8 @@ export function translateBackendError(
   const key = BACKEND_ERROR_MAP[stripped];
   if (key) return t(key);
 
+  if (stripped.startsWith("ERR_PLUGIN_OUTDATED")) return t("errors.plugin_outdated");
+
   if (stripped.startsWith("ERR_")) {
     const prefix = stripped.split(":")[0];
     const prefixKey = OMNIDISC_PREFIX_MAP[prefix];

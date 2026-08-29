@@ -743,7 +743,8 @@
       "lang_it": "Italiano",
       "lang_fr": "Français",
       "lang_es": "Español",
-      "lang_el": "Ελληνικά"
+      "lang_el": "Ελληνικά",
+      "lang_fa": "فارسی"
     },
     "download": {
       "default_output_dir": "既定のフォルダ",
@@ -1755,7 +1756,8 @@
     "extractor_broken": "The site extractor is broken. Update yt-dlp in Settings → Dependencies, then retry.",
     "drm_protected": "ダウンロードしたストリームはDRMで保護されているため結合できません。このコンテンツはサポートされていません。",
     "output_missing": "ダウンロードは完了しましたが、フォルダにファイルが見つからないか空です。ディスク容量とウイルス対策ソフトの設定を確認して、もう一度お試しください。",
-    "course_platform_url": "コースプラットフォームはURLからダウンロードできません。コースページを開いてください（コースプラグインとログイン済みアカウントが必要です）。"
+    "course_platform_url": "コースプラットフォームはURLからダウンロードできません。コースページを開いてください（コースプラグインとログイン済みアカウントが必要です）。",
+    "plugin_outdated": "This plugin is outdated and doesn't support this action. Update it in the Marketplace, then restart OmniGet."
   },
   "debug": {
     "title": "アクティビティログ",

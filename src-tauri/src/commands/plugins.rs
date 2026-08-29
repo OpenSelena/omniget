@@ -228,7 +228,27 @@ pub async fn plugin_command(
     args: serde_json::Value,
 ) -> Result<serde_json::Value, String> {
     let manager = state.read().await;
-    manager.handle_command(&plugin_id, &command, args).await
+    manager
+        .handle_command(&plugin_id, &command, args)
+        .await
+        .map_err(|e| {
+            // Issue #193: a loaded but outdated plugin DLL answers "Unknown
+            // command"/"Command X not found" when the (newer) frontend calls a
+            // command it predates. Raw, that reads like an app bug; rewrite it
+            // into an actionable update hint. ERR_PLUGIN_OUTDATED is matched by
+            // error-translate.ts on the frontend.
+            let lower = e.to_lowercase();
+            let unknown_command = lower.contains("unknown command")
+                || (lower.contains("command") && lower.contains("not found"));
+            if unknown_command && !lower.contains("not loaded") {
+                format!(
+                    "ERR_PLUGIN_OUTDATED: The installed '{}' plugin is outdated and doesn't support '{}'. Update it in the Marketplace, then restart OmniGet. ({})",
+                    plugin_id, command, e
+                )
+            } else {
+                e
+            }
+        })
 }
 
 const REGISTRY_URLS: &[&str] = &[

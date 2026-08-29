@@ -54,6 +54,20 @@ fn setup_environment() {
     if std::env::var("WEBKIT_DISABLE_DMABUF_RENDERER").is_err() {
         std::env::set_var("WEBKIT_DISABLE_DMABUF_RENDERER", "1");
     }
+
+    // Issue #199. AppImages bundle their own libwayland, which conflicts with
+    // the system EGL on some Wayland setups (Fedora/KDE, Intel+Mesa) and kills
+    // the WebKit process with EGL_BAD_PARAMETER before any window appears
+    // (tauri-apps/tauri#11988). Running through XWayland sidesteps the bundled
+    // library entirely. Only applies inside an AppImage on a Wayland session,
+    // and never overrides an explicit user choice.
+    #[cfg(target_os = "linux")]
+    if std::env::var_os("APPIMAGE").is_some()
+        && std::env::var_os("GDK_BACKEND").is_none()
+        && std::env::var("XDG_SESSION_TYPE").as_deref() == Ok("wayland")
+    {
+        std::env::set_var("GDK_BACKEND", "x11");
+    }
 }
 
 /// Usa um WebView2 Fixed Version Runtime descompactado ao lado do executavel.

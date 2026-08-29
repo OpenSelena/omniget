@@ -159,6 +159,7 @@
               <option value="fr">Français</option>
               <option value="es">Español</option>
               <option value="el">Ελληνικά</option>
+              <option value="fa">فارسی</option>
             </select>
           </div>
           <div class="theme-row">

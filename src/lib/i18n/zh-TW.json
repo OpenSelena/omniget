@@ -743,7 +743,8 @@
       "lang_it": "Italiano",
       "lang_fr": "Français",
       "lang_es": "Español",
-      "lang_el": "Ελληνικά"
+      "lang_el": "Ελληνικά",
+      "lang_fa": "فارسی"
     },
     "download": {
       "default_output_dir": "預設資料夾",
@@ -1755,7 +1756,8 @@
     "extractor_broken": "The site extractor is broken. Update yt-dlp in Settings → Dependencies, then retry.",
     "drm_protected": "下載的串流受 DRM 保護，無法合併。不支援此內容。",
     "output_missing": "下載已完成，但資料夾中沒有出現檔案（或檔案為空）。請檢查磁碟空間與防毒軟體設定後重試。",
-    "course_platform_url": "課程平台無法透過 URL 下載。請開啟課程頁面（需要課程外掛並登入帳號）。"
+    "course_platform_url": "課程平台無法透過 URL 下載。請開啟課程頁面（需要課程外掛並登入帳號）。",
+    "plugin_outdated": "This plugin is outdated and doesn't support this action. Update it in the Marketplace, then restart OmniGet."
   },
   "debug": {
     "title": "活動記錄",

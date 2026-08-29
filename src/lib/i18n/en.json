@@ -743,7 +743,8 @@
       "lang_it": "Italiano",
       "lang_fr": "Français",
       "lang_es": "Español",
-      "lang_el": "Ελληνικά"
+      "lang_el": "Ελληνικά",
+      "lang_fa": "فارسی"
     },
     "download": {
       "default_output_dir": "Default folder",
@@ -1755,7 +1756,8 @@
     "extractor_broken": "The site extractor is broken. Update yt-dlp in Settings → Dependencies, then retry.",
     "drm_protected": "The streams are DRM-protected and cannot be merged. This content is not supported.",
     "output_missing": "Download finished, but no file appeared in the folder (or it's empty). Check disk space and antivirus exclusions, then try again.",
-    "course_platform_url": "Course platforms can't be downloaded from a URL. Open the Courses page (requires the Courses plugin and a logged-in account)."
+    "course_platform_url": "Course platforms can't be downloaded from a URL. Open the Courses page (requires the Courses plugin and a logged-in account).",
+    "plugin_outdated": "This plugin is outdated and doesn't support this action. Update it in the Marketplace, then restart OmniGet."
   },
   "debug": {
     "title": "Activity Log",

@@ -55,9 +55,20 @@ const config = {
       key: "",
       loader: async () => (await import("./es.json")).default,
     },
+    {
+      locale: "fa",
+      key: "",
+      loader: async () => (await import("./fa.json")).default,
+    },
   ],
 };
 
 export const defaultLocale = "en";
+
+export const RTL_LOCALES = ["fa", "ar", "he"];
+
+export function isRtlLocale(l: string | null | undefined): boolean {
+  return !!l && RTL_LOCALES.includes(l);
+}
 
 export const { t, locale, locales, loading, loadTranslations } = new i18n<Payload>(config);

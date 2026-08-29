@@ -263,7 +263,63 @@ fn signal_download_process(download_id: u64, signal: &str) -> bool {
         .unwrap_or(false)
 }
 
-#[cfg(not(unix))]
+// Issue #307: pausing on Windows always reported "failed to pause" because
+// this arm was a stub returning false. Windows has no SIGSTOP; the equivalent
+// is NtSuspendProcess/NtResumeProcess from ntdll (what Process Explorer uses).
+// They are undocumented but ABI-stable since XP; resolved via GetProcAddress
+// so nothing breaks at link time if they ever disappear.
+#[cfg(windows)]
+fn signal_download_process(download_id: u64, signal: &str) -> bool {
+    use std::ffi::c_void;
+    use std::os::raw::{c_char, c_int};
+
+    type Handle = *mut c_void;
+
+    #[link(name = "kernel32")]
+    extern "system" {
+        fn OpenProcess(desired_access: u32, inherit_handle: c_int, process_id: u32) -> Handle;
+        fn CloseHandle(handle: Handle) -> c_int;
+        fn GetModuleHandleA(module_name: *const c_char) -> Handle;
+        fn GetProcAddress(module: Handle, proc_name: *const c_char) -> *mut c_void;
+    }
+
+    const PROCESS_SUSPEND_RESUME: u32 = 0x0800;
+
+    let pid = active_process_pids()
+        .lock()
+        .ok()
+        .and_then(|pids| pids.get(&download_id).copied());
+    let Some(pid) = pid else {
+        return false;
+    };
+
+    let suspend = signal == "-STOP";
+    unsafe {
+        let ntdll = GetModuleHandleA(c"ntdll.dll".as_ptr());
+        if ntdll.is_null() {
+            return false;
+        }
+        let proc_name = if suspend {
+            c"NtSuspendProcess"
+        } else {
+            c"NtResumeProcess"
+        };
+        let addr = GetProcAddress(ntdll, proc_name.as_ptr());
+        if addr.is_null() {
+            return false;
+        }
+        let func: extern "system" fn(Handle) -> i32 = std::mem::transmute(addr);
+        let handle = OpenProcess(PROCESS_SUSPEND_RESUME, 0, pid);
+        if handle.is_null() {
+            return false;
+        }
+        let status = func(handle);
+        CloseHandle(handle);
+        status >= 0
+    }
+}
+
+#[cfg(not(any(unix, windows)))]
 fn signal_download_process(_download_id: u64, _signal: &str) -> bool {
     false
 }

@@ -29,7 +29,7 @@
   import { isYtdlpAvailable, isDepsChecked, refreshYtdlpStatus } from "$lib/stores/dependency-store.svelte";
   import { showToast } from "$lib/stores/toast-store.svelte";
   import { ensureTrackerNotifications } from "$lib/tracker-notifications.svelte";
-  import { t, locale } from "$lib/i18n";
+  import { t, locale, isRtlLocale } from "$lib/i18n";
   import { get } from "svelte/store";
   import { CORE_NAV_ITEMS, type NavItem } from "$lib/nav-config";
   import {
@@ -279,7 +279,8 @@
     // do macOS) e colocava os próprios botões exatamente onde o Windows desenha
     // o botão de fechar.
     document.documentElement.setAttribute("data-platform", isMac() ? "macos" : "other");
-    void $locale;
+    document.documentElement.setAttribute("dir", isRtlLocale($locale) ? "rtl" : "ltr");
+    document.documentElement.setAttribute("lang", $locale || "en");
     buildCommandPaletteItems();
   });
 

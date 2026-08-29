@@ -1,5 +1,5 @@
 use std::collections::{BTreeMap, HashMap};
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
@@ -361,7 +361,7 @@ impl HlsDownloader {
 
         writer_result?;
 
-        std::fs::rename(&part_path, &output)?;
+        finalize_container(&part_path, &output).await?;
 
         let file_size = std::fs::metadata(&output)?.len();
 
@@ -509,6 +509,67 @@ fn resolve_url(base: &str, relative: &str) -> String {
         Some(q) if !relative.contains('?') => format!("{}{}", resolved, q),
         _ => resolved,
     }
+}
+
+/// Concatenated MPEG-TS segments are not a valid MP4 container, so strict
+/// players (QuickTime, Jellyfin) reject the file even though the streams
+/// inside are compatible. When the caller asked for an MP4-family output,
+/// remux the transport stream with ffmpeg (-c copy regenerating PTS) into a
+/// real MP4. Falls back to a plain rename when ffmpeg is unavailable so the
+/// download still completes.
+async fn finalize_container(part_path: &Path, output: &Path) -> anyhow::Result<()> {
+    let wants_mp4 = matches!(
+        output
+            .extension()
+            .and_then(|e| e.to_str())
+            .map(|e| e.to_ascii_lowercase())
+            .as_deref(),
+        Some("mp4" | "m4v" | "m4a" | "mov")
+    );
+
+    if wants_mp4 && crate::core::media_processor::check_ffmpeg() {
+        let part_str = part_path.to_string_lossy();
+        let out_str = output.to_string_lossy();
+        let status = crate::core::process::command("ffmpeg")
+            .args([
+                "-y",
+                "-fflags",
+                "+genpts",
+                "-i",
+                part_str.as_ref(),
+                "-c",
+                "copy",
+                "-movflags",
+                "+faststart",
+                out_str.as_ref(),
+            ])
+            .stdout(std::process::Stdio::null())
+            .stderr(std::process::Stdio::null())
+            .status()
+            .await;
+
+        match status {
+            Ok(s) if s.success() => {
+                let _ = std::fs::remove_file(part_path);
+                return Ok(());
+            }
+            Ok(s) => {
+                tracing::warn!(
+                    "HLS remux to MP4 failed with status {}, keeping raw transport stream",
+                    s
+                );
+                let _ = std::fs::remove_file(output);
+            }
+            Err(e) => {
+                tracing::warn!("HLS remux to MP4 failed to spawn ffmpeg: {}", e);
+            }
+        }
+    } else if wants_mp4 {
+        tracing::warn!("ffmpeg not found; HLS output will remain MPEG-TS despite .mp4 extension");
+    }
+
+    std::fs::rename(part_path, output)?;
+    Ok(())
 }
 
 async fn write_segments_ordered(

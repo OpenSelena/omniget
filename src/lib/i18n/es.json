@@ -743,7 +743,8 @@
       "lang_it": "Italiano",
       "lang_fr": "Français",
       "lang_es": "Español",
-      "lang_el": "Ελληνικά"
+      "lang_el": "Ελληνικά",
+      "lang_fa": "فارسی"
     },
     "download": {
       "default_output_dir": "Carpeta por defecto",
@@ -1755,7 +1756,8 @@
     "extractor_broken": "El extractor del sitio está roto. Actualiza yt-dlp en Configuración → Dependencias y reintenta.",
     "drm_protected": "Los streams descargados están protegidos por DRM y no se pueden combinar. Este contenido no es compatible.",
     "output_missing": "La descarga terminó, pero no apareció ningún archivo en la carpeta (o está vacío). Revisa el espacio en disco y el antivirus, y reintenta.",
-    "course_platform_url": "Las plataformas de cursos no se pueden descargar desde una URL. Abre la página Cursos (requiere el plugin de Cursos y una cuenta con sesión iniciada)."
+    "course_platform_url": "Las plataformas de cursos no se pueden descargar desde una URL. Abre la página Cursos (requiere el plugin de Cursos y una cuenta con sesión iniciada).",
+    "plugin_outdated": "This plugin is outdated and doesn't support this action. Update it in the Marketplace, then restart OmniGet."
   },
   "debug": {
     "title": "Registro de actividad",
