@@ -3,226 +3,173 @@
   import ProfileManager from '$components/open_omni/ProfileManager.svelte';
   import SettingsManager from '$components/open_omni/SettingsManager.svelte';
 
-  let activeTab = $state('download');
+  type TabKey = 'download' | 'profiles' | 'settings';
+
+  let activeTab = $state<TabKey>('download');
+
+  const NAV_ITEMS: { key: TabKey; label: string; icon: string }[] = [
+    { key: 'download', label: 'Download', icon: '/icons/open-omni-download.png' },
+    { key: 'profiles', label: 'Profiles', icon: '/icons/open-omni-profiles.png' },
+    { key: 'settings', label: 'Settings', icon: '/icons/open-omni-settings.png' }
+  ];
+
+  function switchTab(tab: TabKey) {
+    activeTab = tab;
+  }
 </script>
 
 <svelte:head>
   <title>Open Omni - Social Media Downloader</title>
 </svelte:head>
 
-<div class="open-omni-page">
-  <div class="ambient-wash" aria-hidden="true"></div>
-
-  <!-- White surface header with mascot (chosen UI) -->
-  <header class="page-header">
-    <img
-      class="mascot"
-      src="/open-omni-mascot.png"
-      alt=""
-      width="64"
-      height="64"
-    />
-    <div class="header-text">
-      <h1>Open Omni</h1>
-      <p class="subtitle">Social media profile &amp; batch downloader</p>
-    </div>
-  </header>
-
-  <div class="glass-panel">
-    <nav class="tab-switcher" aria-label="Open Omni sections">
-      <button
-        type="button"
-        class:active={activeTab === 'download'}
-        onclick={() => (activeTab = 'download')}
-        aria-current={activeTab === 'download' ? 'page' : undefined}
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="m7 10 5 5 5-5"/><path d="M5 21h14"/></svg>
-        Download
-      </button>
-      <button
-        type="button"
-        class:active={activeTab === 'profiles'}
-        onclick={() => (activeTab = 'profiles')}
-        aria-current={activeTab === 'profiles' ? 'page' : undefined}
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-        Profiles
-      </button>
-      <button
-        type="button"
-        class:active={activeTab === 'settings'}
-        onclick={() => (activeTab = 'settings')}
-        aria-current={activeTab === 'settings' ? 'page' : undefined}
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        Settings
-      </button>
+<div class="oo-shell">
+  <aside class="oo-sidebar" aria-label="Open Omni sections">
+    <nav class="oo-nav">
+      {#each NAV_ITEMS as item (item.key)}
+        <button
+          type="button"
+          class="oo-nav-item"
+          class:active={activeTab === item.key}
+          aria-current={activeTab === item.key ? 'page' : undefined}
+          onclick={() => switchTab(item.key)}
+        >
+          <img src={item.icon} alt="" width="24" height="24" />
+          <span>{item.label}</span>
+        </button>
+      {/each}
     </nav>
+  </aside>
 
-    <div class="content">
-      {#if activeTab === 'download'}
-        <DownloadManager
-          on:switchToProfiles={() => (activeTab = 'profiles')}
-          on:switchToSettings={() => (activeTab = 'settings')}
-        />
-      {:else if activeTab === 'profiles'}
-        <ProfileManager />
-      {:else}
-        <SettingsManager />
-      {/if}
-    </div>
+  <div class="oo-content">
+    <h1 class="oo-title">{NAV_ITEMS.find((i) => i.key === activeTab)?.label}</h1>
+
+    {#if activeTab === 'download'}
+      <DownloadManager
+        on:switchToProfiles={() => switchTab('profiles')}
+        on:switchToSettings={() => switchTab('settings')}
+      />
+    {:else if activeTab === 'profiles'}
+      <ProfileManager />
+    {:else}
+      <SettingsManager />
+    {/if}
   </div>
 </div>
 
 <style>
   /*
-    Open Omni shell — uses app theme tokens:
-      --accent, --cta, --primary, --secondary, --tertiary, --button,
-      --bg / --text / --text-secondary / --content-border (legacy aliases)
-    Glass tokens inherit into child components.
+    Open Omni shell — macOS System Settings layout.
+    Reads app theme tokens: --accent, --cta, --bg, --button, --secondary,
+    --tertiary, --content-border. Falls back to sane defaults if a token
+    is not defined by the surrounding app shell.
   */
-  .open-omni-page {
-    --oo-accent: var(--cta, var(--accent, #0071E3));
-    --glass-surface: color-mix(in srgb, var(--button, var(--bg, #fff)) 92%, transparent);
-    --glass-surface-strong: var(--button, var(--bg, #fff));
-    --glass-border: color-mix(in srgb, var(--content-border, var(--tertiary, #67676C)) 40%, transparent);
-    --glass-radius-lg: 20px;
-    --glass-radius: 14px;
-    --glass-radius-sm: 10px;
-    --accent-soft: color-mix(in srgb, var(--oo-accent) 14%, transparent);
-    --accent-line: color-mix(in srgb, var(--oo-accent) 50%, transparent);
-    --accent-glow: color-mix(in srgb, var(--oo-accent) 40%, transparent);
-    --accent-gradient: linear-gradient(
-      135deg,
-      color-mix(in srgb, var(--oo-accent) 92%, white 8%),
-      color-mix(in srgb, var(--oo-accent) 88%, black 12%)
-    );
-    --on-accent: #ffffff;
+  .oo-shell {
+    --oo-accent: var(--cta, var(--accent, #0071e3));
+    --oo-border: color-mix(in srgb, var(--content-border, var(--tertiary, #67676c)) 22%, transparent);
+    --oo-sidebar-bg: color-mix(in srgb, var(--button, var(--bg, #fff)) 88%, var(--tertiary, #67676c) 10%);
+    --oo-content-bg: var(--bg, #ececef);
+    --oo-group-bg: var(--button, #ffffff);
+    --oo-text: var(--text, var(--secondary, #1d1d1f));
+    --oo-text-secondary: var(--text-secondary, var(--tertiary, #67676c));
+    --oo-radius-lg: 12px;
+    --oo-radius: 9px;
+    --oo-radius-sm: 6px;
 
-    position: relative;
-    padding: 2rem var(--padding, 1.25rem) 3rem;
-    max-width: 560px;
+    max-width: 680px;
     margin: 0 auto;
-    width: 100%;
-    box-sizing: border-box;
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    isolation: isolate;
+    min-height: 480px;
+    background: var(--oo-content-bg);
+    border: 1px solid var(--oo-border);
+    border-radius: var(--oo-radius-lg);
+    overflow: hidden;
+    box-shadow: 0 18px 44px -24px rgba(0, 0, 0, 0.28);
   }
 
-  .ambient-wash {
-    position: absolute;
-    inset: -8% -8% auto -8%;
-    height: 280px;
-    background: radial-gradient(
-      ellipse at 50% 0%,
-      var(--accent-soft) 0%,
-      transparent 70%
-    );
-    pointer-events: none;
-    z-index: -1;
-  }
-
-  /* White / surface header with mascot */
-  .page-header {
-    width: 100%;
-    margin-bottom: 1.25rem;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    background: var(--button, #ffffff);
-    border: 1px solid var(--glass-border);
-    border-radius: 28px;
-    padding: 1rem 1.25rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
-    box-sizing: border-box;
-  }
-
-  .page-header .mascot {
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    object-fit: cover;
-    object-position: center top;
-    background: #1a1a1a;
-    border: 2.5px solid var(--button, #ffffff);
+  .oo-sidebar {
+    width: 196px;
     flex-shrink: 0;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-  }
-
-  .header-text {
-    min-width: 0;
-  }
-
-  .page-header h1 {
-    font-size: 1.35rem;
-    margin: 0;
-    font-weight: 600;
-    color: var(--text, var(--secondary, #1d1d1f));
-    letter-spacing: -0.02em;
-  }
-
-  .subtitle {
-    color: var(--text-secondary, var(--tertiary, #67676c));
-    margin: 0.2rem 0 0;
-    font-size: 0.8125rem;
-  }
-
-  .glass-panel {
-    width: 100%;
-    background: var(--glass-surface);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--glass-radius-lg);
-    padding: 1.35rem 1.25rem;
+    background: var(--oo-sidebar-bg);
+    border-right: 1px solid var(--oo-border);
+    padding: 12px 8px;
     box-sizing: border-box;
-    backdrop-filter: blur(20px) saturate(140%);
-    -webkit-backdrop-filter: blur(20px) saturate(140%);
-    box-shadow:
-      0 1px 0 0 rgba(255, 255, 255, 0.06) inset,
-      0 12px 32px -18px rgba(0, 0, 0, 0.18);
+  }
+
+  .oo-nav {
     display: flex;
     flex-direction: column;
-    gap: 1.25rem;
+    gap: 2px;
   }
 
-  .tab-switcher {
-    display: inline-flex;
-    gap: 4px;
-    align-self: center;
-    background: var(--glass-surface-strong);
-    border: 1px solid var(--glass-border);
-    border-radius: 999px;
-    padding: 4px;
-  }
-
-  .tab-switcher button {
+  .oo-nav-item {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 8px 16px;
-    border: none;
-    border-radius: 999px;
-    background: transparent;
-    color: var(--text-secondary, var(--tertiary, #67676c));
-    font-size: 13.5px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: color 0.15s ease, background 0.2s ease;
+    gap: 9px;
+    padding: 6px 8px;
+    border-radius: var(--oo-radius-sm);
+    font-size: 13px;
+    color: var(--oo-text);
+    text-align: left;
+    transition: background 0.12s ease, color 0.12s ease;
   }
 
-  .tab-switcher button:hover:not(.active) {
-    color: var(--text, var(--secondary, #1d1d1f));
+  .oo-nav-item img {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    flex-shrink: 0;
+    filter: brightness(0) invert(1);
   }
 
-  .tab-switcher button.active {
-    background: var(--accent-gradient);
-    color: var(--on-accent);
-    box-shadow: 0 4px 14px -4px var(--accent-glow);
+  :global([data-theme="light"]) .oo-nav-item:not(.active) img,
+  :global([data-theme="catppuccin-latte"]) .oo-nav-item:not(.active) img,
+  :global([data-theme="eink-day"]) .oo-nav-item:not(.active) img,
+  :global([data-theme="eink-sepia"]) .oo-nav-item:not(.active) img,
+  :global([data-theme="nyxvamp-radiance"]) .oo-nav-item:not(.active) img {
+    filter: brightness(0);
   }
 
-  .content {
-    display: flex;
-    justify-content: center;
+  .oo-nav-item:not(.active):hover {
+    background: color-mix(in srgb, var(--oo-text) 6%, transparent);
+  }
+
+  .oo-nav-item.active {
+    background: var(--oo-accent);
+    color: #ffffff;
+  }
+
+  .oo-content {
+    flex: 1;
+    min-width: 0;
+    padding: 22px 24px 26px;
+    overflow-y: auto;
+    box-sizing: border-box;
+  }
+
+  .oo-title {
+    font-size: 19px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--oo-text);
+    margin: 0 0 16px;
+  }
+
+  @media (max-width: 520px) {
+    .oo-shell {
+      flex-direction: column;
+      min-height: 0;
+    }
+    .oo-sidebar {
+      width: 100%;
+      border-right: 0;
+      border-bottom: 1px solid var(--oo-border);
+    }
+    .oo-nav {
+      flex-direction: row;
+      overflow-x: auto;
+    }
+    .oo-nav-item {
+      flex-shrink: 0;
+    }
   }
 </style>

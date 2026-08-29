@@ -42,6 +42,16 @@
   </branding>
   <content_rating type="oars-1.1" />
   <releases>
+    <release version="0.8.14" date="2026-08-30">
+      <description>
+        <p>Open Omni System Settings UI: Redesigned the Open Omni downloader interface with a macOS System Settings-style sidebar layout (Download, Profiles, Settings navigation), centered action controls, neutral input placeholders, and theme-adaptive icons.</p>
+      </description>
+    </release>
+    <release version="0.8.13" date="2026-08-29">
+      <description>
+        <p>OmniDisc Subsystem Integration: Bundled end-to-end encrypted messaging, low-latency voice/screen streaming, and guild management. Integrated the Open Omni unified social downloader route with persistent profile presets and live task cancellation.</p>
+      </description>
+    </release>
     <release version="0.8.5" date="2026-07-31">
       <description>
         <p>The League page now shows loading skeletons instead of pretending to be empty: the match history no longer says "no matches" while it is still fetching, and the profile, match details, win analysis and scouting draw placeholder shapes that respect the reduced-motion preference. Behind it, talking to the League client got cheaper — one shared HTTP client instead of building a new one per request, no extra liveness probe when the push connection already proves the client is alive, and on Windows the expensive process query only runs after a cheap check confirms the client is actually running. The Telegram section speaks all eleven languages again: an earlier change had left a duplicate block in the translation files that silently swallowed sixty-five strings, and the original translations were restored from history rather than replaced with English. Portable mode on macOS now says plainly in settings that the WebView keeps its session data under the user profile and cannot be redirected — being honest about the limitation instead of erasing data to hide it. And the mascot panel's square corners no longer poke past the rounded corners of the home card.</p>

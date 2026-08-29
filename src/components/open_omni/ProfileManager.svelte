@@ -122,14 +122,14 @@
   });
 </script>
 
-<div class="profile-manager">
-  <div class="pill-group" role="tablist" aria-label="Platform">
+<div class="pm">
+  <div class="pm-segmented" role="tablist" aria-label="Platform">
     {#each platforms as platform}
       <button
         type="button"
         role="tab"
         aria-selected={activePlatform === platform.key}
-        class:active={activePlatform === platform.key}
+        class:on={activePlatform === platform.key}
         onclick={() => (activePlatform = platform.key)}
       >
         {platform.label}
@@ -138,12 +138,16 @@
   </div>
 
   {#if error}
-    <div class="error-message" role="alert">{error}</div>
+    <div class="pm-alert" role="alert">{error}</div>
   {/if}
 
-  <div class="add-profile-field">
-    <div class="input-with-button">
-      <svg class="field-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+  <div class="pm-group">
+    <div class="pm-row">
+      <svg class="pm-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" aria-hidden="true">
+        <path d="M5.5 10.5c-.8.8-2.2.8-3 0-.8-.8-.8-2.2 0-3L4 6" />
+        <path d="M10.5 5.5c.8-.8 2.2-.8 3 0 .8.8.8 2.2 0 3L12 10" />
+        <path d="M6.3 9.7 9.7 6.3" />
+      </svg>
       <input
         type="text"
         bind:value={newUrl}
@@ -153,331 +157,242 @@
         spellcheck="false"
         aria-label="Profile URL or username"
       />
-      <button type="button" class="add-btn" onclick={addProfile} disabled={!newUrl.trim() || loading}>
+      <button type="button" class="pm-add-btn" onclick={addProfile} disabled={!newUrl.trim() || loading}>
         Add
       </button>
     </div>
   </div>
 
   {#if loading}
-    <p class="loading">Loading profiles…</p>
+    <p class="pm-empty">Loading profiles…</p>
   {:else if profiles.length === 0}
-    <p class="empty">No profiles added yet</p>
+    <p class="pm-empty">No profiles added yet</p>
   {:else}
-    <ul class="profiles-list">
+    <div class="pm-group">
       {#each profiles as profile}
-        <li class="profile-item">
-          <div class="profile-info">
-            <div class="avatar" aria-hidden="true">{initials(profile)}</div>
-            <div>
-              <p class="profile-name">{profile.username || profile.url}</p>
-              {#if profile.username}
-                <p class="profile-url">{profile.url}</p>
-              {/if}
-            </div>
+        <div class="pm-row pm-profile-row">
+          <div class="pm-avatar" aria-hidden="true">{initials(profile)}</div>
+          <div class="pm-info">
+            <p class="pm-name">{profile.username || profile.url}</p>
+            {#if profile.username}
+              <p class="pm-url">{profile.url}</p>
+            {/if}
           </div>
-          <button class="delete-btn" onclick={() => promptDelete(profile.url)} aria-label="Delete profile {profile.username || profile.url}">
-            Delete
+          <button
+            class="pm-remove"
+            onclick={() => promptDelete(profile.url)}
+            aria-label="Remove profile {profile.username || profile.url}"
+          >
+            Remove
           </button>
-        </li>
+        </div>
       {/each}
-    </ul>
+    </div>
   {/if}
 </div>
 
 {#if confirmDeleteUrl}
   <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
   <div
-    class="confirm-overlay"
+    class="pm-overlay"
     role="presentation"
     onclick={cancelDelete}
     onkeydown={onDialogKeydown}
   >
     <div
-      class="confirm-dialog"
+      class="pm-dialog"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="confirm-title"
+      aria-labelledby="pm-confirm-title"
       tabindex="-1"
       bind:this={dialogEl}
       onclick={(e) => e.stopPropagation()}
       onkeydown={onDialogKeydown}
     >
-      <p class="confirm-title" id="confirm-title">Delete this profile?</p>
-      <p class="confirm-url">{confirmDeleteUrl}</p>
-      <div class="confirm-actions">
-        <button class="confirm-no" onclick={cancelDelete}>Cancel</button>
-        <button class="confirm-yes" onclick={confirmDelete}>Delete</button>
+      <p class="pm-dialog-title" id="pm-confirm-title">Delete this profile?</p>
+      <p class="pm-dialog-url">{confirmDeleteUrl}</p>
+      <div class="pm-dialog-actions">
+        <button class="pm-dialog-btn" onclick={cancelDelete}>Cancel</button>
+        <button class="pm-dialog-btn danger" onclick={confirmDelete}>Delete</button>
       </div>
     </div>
   </div>
 {/if}
 
 <style>
-  /* Reads --glass-*, --accent-* custom properties inherited from the
-     page shell (src/routes/open-omni/+page.svelte). */
-  .profile-manager {
-    max-width: 440px;
-    width: 100%;
-    margin: 0 auto;
+  /* Reads --oo-accent / --oo-border / --oo-group-bg / --oo-text* custom
+     properties inherited from the shell in +page.svelte. */
+  .pm {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 14px;
   }
 
-  .pill-group {
+  .pm-segmented {
     display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
+    background: color-mix(in srgb, var(--oo-text) 6%, transparent);
+    border-radius: var(--oo-radius, 9px);
+    padding: 2px;
+    gap: 1px;
   }
-
-  .pill-group button {
-    padding: 8px 16px;
-    border-radius: 999px;
-    border: 1px solid var(--glass-border);
-    background: var(--glass-surface-strong);
-    color: var(--text);
-    font-size: 13px;
+  .pm-segmented button {
+    flex: 1;
+    padding: 6px 0;
+    font-size: 12px;
     font-weight: 500;
-    cursor: pointer;
-    transition: border-color 0.15s ease, background 0.15s ease;
+    color: var(--oo-text-secondary);
+    border-radius: 7px;
+  }
+  .pm-segmented button.on {
+    background: var(--oo-group-bg);
+    color: var(--oo-text);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
   }
 
-  .pill-group button:hover:not(.active) {
-    border-color: var(--accent-line);
-  }
-
-  .pill-group button.active {
-    background: var(--accent-gradient);
-    border-color: transparent;
-    color: var(--on-accent);
-    font-weight: 500;
-    box-shadow: 0 3px 12px -4px var(--accent-glow);
-  }
-
-  .error-message {
-    padding: 10px 14px;
+  .pm-alert {
+    padding: 9px 12px;
     background: var(--error);
     color: var(--on-error);
-    border-radius: var(--glass-radius-sm, 10px);
-    font-size: 13px;
-    text-align: center;
+    border-radius: var(--oo-radius, 9px);
+    font-size: 12.5px;
   }
 
-  .input-with-button {
+  .pm-group {
+    background: var(--oo-group-bg);
+    border-radius: var(--oo-radius, 9px);
+    box-shadow: 0 0 0 1px var(--oo-border);
+    overflow: hidden;
+  }
+
+  .pm-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    background: var(--glass-surface-strong);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--glass-radius, 14px);
-    padding: 0 8px 0 14px;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    gap: 9px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--oo-border);
   }
+  .pm-row:last-child { border-bottom: 0; }
 
-  .input-with-button:focus-within {
-    border-color: var(--accent-line);
-    box-shadow: 0 0 0 3px var(--accent-soft);
-  }
+  .pm-icon { width: 15px; height: 15px; color: var(--oo-text-secondary); flex-shrink: 0; }
 
-  .field-icon {
-    color: var(--text-secondary);
-    flex-shrink: 0;
-  }
-
-  .input-with-button input {
+  .pm-row input {
     flex: 1;
-    padding: 12px 0;
+    border: 0;
     background: transparent;
-    border: none;
-    color: var(--text);
-    font-size: 14px;
-    box-sizing: border-box;
-  }
-
-  .input-with-button input:focus {
-    outline: none;
-  }
-
-  .add-btn {
-    padding: 8px 18px;
-    border-radius: 999px;
-    border: none;
-    background: var(--accent-gradient);
-    color: var(--on-accent);
-    font-weight: 500;
+    color: var(--oo-text);
     font-size: 13px;
-    cursor: pointer;
-    white-space: nowrap;
-    box-shadow: 0 3px 12px -4px var(--accent-glow);
-  }
-
-  .add-btn:hover:not(:disabled) {
-    box-shadow: 0 4px 16px -4px var(--accent-glow);
-  }
-
-  .add-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    box-shadow: none;
-  }
-
-  .profiles-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .profile-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 14px;
-    background: var(--glass-surface-strong);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--glass-radius, 14px);
-    transition: border-color 0.15s ease;
-  }
-
-  .profile-item:hover {
-    border-color: var(--accent-line);
-  }
-
-  .profile-info {
-    display: flex;
-    align-items: center;
-    gap: 12px;
     min-width: 0;
   }
+  .pm-row input:focus { outline: none; }
 
-  .avatar {
-    width: 36px;
-    height: 36px;
+  .pm-add-btn {
+    padding: 5px 13px;
+    border-radius: 999px;
+    background: var(--oo-accent);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .pm-add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .pm-profile-row { gap: 10px; }
+
+  .pm-avatar {
+    width: 26px;
+    height: 26px;
     border-radius: 50%;
-    background: var(--accent-gradient);
-    color: var(--on-accent);
+    background: var(--oo-accent);
+    color: #fff;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 500;
-    font-size: 13px;
+    font-size: 11px;
+    font-weight: 600;
     flex-shrink: 0;
-    box-shadow: 0 3px 10px -3px var(--accent-glow);
   }
 
-  .profile-name {
-    font-size: 13.5px;
+  .pm-info { min-width: 0; flex: 1; }
+  .pm-name {
+    font-size: 13px;
     font-weight: 500;
-    margin: 0;
-    color: var(--text);
+    color: var(--oo-text);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .pm-url {
+    font-size: 11px;
+    color: var(--oo-text-secondary);
+    margin-top: 1px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
 
-  .profile-url {
-    font-size: 11.5px;
-    color: var(--text-secondary);
-    margin: 3px 0 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .delete-btn {
-    padding: 5px 12px;
-    border-radius: 999px;
-    border: 1px solid var(--error);
-    background: transparent;
-    color: var(--error);
+  .pm-remove {
     font-size: 12px;
-    cursor: pointer;
+    font-weight: 500;
+    color: var(--error, #ff453a);
     flex-shrink: 0;
   }
+  .pm-remove:hover { opacity: 0.75; }
 
-  .delete-btn:hover {
-    background: var(--error);
-    color: var(--on-error);
-  }
-
-  .loading, .empty {
+  .pm-empty {
     text-align: center;
-    color: var(--text-secondary);
-    padding: 20px 0;
-    font-size: 13px;
-    margin: 0;
+    color: var(--oo-text-secondary);
+    padding: 18px 0;
+    font-size: 12.5px;
   }
 
-  .confirm-overlay {
+  .pm-overlay {
     position: fixed;
     inset: 0;
-    background: var(--dialog-backdrop, rgba(0, 0, 0, 0.4));
+    background: rgba(0, 0, 0, 0.4);
     display: flex;
     align-items: center;
     justify-content: center;
     z-index: 1000;
   }
 
-  .confirm-dialog {
-    background: var(--glass-surface-strong);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--glass-radius-lg, 20px);
-    padding: 24px;
-    max-width: 380px;
+  .pm-dialog {
+    background: var(--oo-group-bg);
+    border-radius: 12px;
+    padding: 20px;
+    max-width: 340px;
     width: 90%;
     text-align: center;
-    backdrop-filter: blur(24px) saturate(140%);
-    -webkit-backdrop-filter: blur(24px) saturate(140%);
-    box-shadow: 0 18px 40px -20px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 18px 40px -20px rgba(0, 0, 0, 0.4);
     outline: none;
   }
-
-  .confirm-title {
-    font-size: 15px;
-    font-weight: 500;
+  .pm-dialog-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--oo-text);
     margin: 0 0 6px;
-    color: var(--text);
   }
-
-  .confirm-url {
-    font-weight: 400;
+  .pm-dialog-url {
+    font-size: 12px;
+    color: var(--oo-text-secondary);
     word-break: break-all;
-    font-size: 12.5px;
-    color: var(--text-secondary);
-    margin: 0 0 18px;
+    margin: 0 0 16px;
   }
-
-  .confirm-actions {
+  .pm-dialog-actions {
     display: flex;
-    gap: 10px;
+    gap: 8px;
     justify-content: center;
   }
-
-  .confirm-actions button {
+  .pm-dialog-btn {
     flex: 1;
-    padding: 9px 12px;
-    border-radius: 999px;
+    padding: 8px 10px;
+    border-radius: 7px;
     font-weight: 500;
-    font-size: 13px;
-    cursor: pointer;
+    font-size: 12.5px;
+    background: color-mix(in srgb, var(--oo-text) 6%, transparent);
+    color: var(--oo-text);
   }
-
-  .confirm-no {
-    background: transparent;
-    color: var(--text);
-    border: 1px solid var(--glass-border);
+  .pm-dialog-btn.danger {
+    background: var(--error, #ff453a);
+    color: #fff;
   }
-
-  .confirm-yes {
-    background: var(--error);
-    color: var(--on-error);
-    border: none;
-  }
-
-  .confirm-yes:hover {
-    opacity: 0.9;
-  }
+  .pm-dialog-btn.danger:hover { opacity: 0.9; }
 </style>

@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.8.14] - 2026-08-30
+
+### Added & UI
+- **Open Omni System Settings Interface**: Redesigned `/open-omni` layout with macOS System Settings-style sidebar navigation (Download, Profiles, Settings), centered action buttons, and responsive drawer handling.
+- **Theme-Adaptive Icon System**: Integrated high-contrast navigation icons with automatic brightness/inversion filtering across light and dark themes.
+
+### Documentation
+- **OmniDisc Subsystem & Repository Alignment**: Added multi-language documentation for OmniDisc MLS messaging and updated upstream repository links.
+
+---
+
 ## [0.8.13] - 2026-08-29
 
 ### Added

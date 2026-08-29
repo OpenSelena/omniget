@@ -53,10 +53,10 @@
   }
 </script>
 
-<div class="settings-manager">
+<div class="sm">
   {#if saveStatus}
     <div
-      class="status-alert"
+      class="sm-alert"
       class:success={saveStatusType === 'success'}
       class:error={saveStatusType === 'error'}
       role="status"
@@ -66,149 +66,135 @@
     </div>
   {/if}
 
-  <div class="settings-field">
-    <div class="input-with-button">
-      <svg class="field-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
-      <input id="output-dir" aria-label="Output directory" type="text" bind:value={outputDir} placeholder="E:\OmniGet" autocomplete="off" spellcheck="false" />
-      <button type="button" class="browse-btn" onclick={browseOutputDir}>
-        Browse
-      </button>
+  <div class="sm-group">
+    <div class="sm-row">
+      <svg class="sm-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true">
+        <path d="M2 4.6a1 1 0 0 1 1-1h2.6l1.1 1.4H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z" />
+      </svg>
+      <span class="sm-label">Output</span>
+      <input
+        id="output-dir"
+        aria-label="Output directory"
+        type="text"
+        bind:value={outputDir}
+        placeholder="Choose a folder…"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button type="button" class="sm-choose-btn" onclick={browseOutputDir}>Choose…</button>
+    </div>
+    <div class="sm-row">
+      <svg class="sm-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4.3 2h4.4L12 5.3V13a.7.7 0 0 1-.7.7H4.3a.7.7 0 0 1-.7-.7V2.7A.7.7 0 0 1 4.3 2Z" />
+        <path d="M8.7 2v3.3H12" />
+      </svg>
+      <span class="sm-label">Cookies</span>
+      <input
+        id="cookies-file"
+        aria-label="Cookies file (optional, needed for Stories and Highlights)"
+        type="text"
+        bind:value={cookiesFile}
+        placeholder="Choose a cookies file…"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button type="button" class="sm-choose-btn" onclick={browseCookiesFile}>Choose…</button>
     </div>
   </div>
 
-  <div class="settings-field">
-    <div class="input-with-button">
-      <svg class="field-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
-      <input id="cookies-file" aria-label="Cookies file (optional, needed for Stories and Highlights)" type="text" bind:value={cookiesFile} placeholder="instagram.com_cookies.txt" autocomplete="off" spellcheck="false" />
-      <button type="button" class="browse-btn" onclick={browseCookiesFile}>
-        Browse
-      </button>
-    </div>
-  </div>
+  <p class="sm-hint">Cookies are only required for downloading Stories and Highlights.</p>
 
-  <button type="button" class="primary-btn" onclick={handleSave} disabled={saving}>
-    {saving ? 'Saving…' : 'Save settings'}
-  </button>
+  <div class="sm-actions">
+    <button type="button" class="sm-save-btn" onclick={handleSave} disabled={saving}>
+      {saving ? 'Saving…' : 'Save Settings'}
+    </button>
+  </div>
 </div>
 
 <style>
-  /* Reads --glass-*, --accent-* custom properties inherited from the
-     page shell (src/routes/open-omni/+page.svelte). */
-  .settings-manager {
-    max-width: 440px;
-    width: 100%;
-    margin: 0 auto;
+  /* Reads --oo-accent / --oo-border / --oo-group-bg / --oo-text* custom
+     properties inherited from the shell in +page.svelte. */
+  .sm {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 14px;
   }
 
-  .status-alert {
-    padding: 10px 14px;
-    border-radius: var(--glass-radius-sm, 10px);
-    font-size: 13px;
+  .sm-alert {
+    padding: 9px 12px;
+    border-radius: var(--oo-radius, 9px);
+    font-size: 12.5px;
     text-align: center;
   }
+  .sm-alert.success { background: var(--success); color: var(--on-success); }
+  .sm-alert.error { background: var(--error); color: var(--on-error); }
 
-  .status-alert.success {
-    background: var(--success);
-    color: var(--on-success);
+  .sm-group {
+    background: var(--oo-group-bg);
+    border-radius: var(--oo-radius, 9px);
+    box-shadow: 0 0 0 1px var(--oo-border);
+    overflow: hidden;
   }
 
-  .status-alert.error {
-    background: var(--error);
-    color: var(--on-error);
-  }
-
-  .settings-field label {
-    display: block;
-    font-size: 12.5px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    margin-bottom: 8px;
-  }
-
-  .optional-tag {
-    font-weight: 400;
-    color: var(--text-muted, var(--text-secondary));
-  }
-
-  .input-with-button {
+  .sm-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    background: var(--glass-surface-strong);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--glass-radius, 14px);
-    padding: 0 8px 0 14px;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    gap: 9px;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--oo-border);
   }
+  .sm-row:last-child { border-bottom: 0; }
 
-  .input-with-button:focus-within {
-    border-color: var(--accent-line);
-    box-shadow: 0 0 0 3px var(--accent-soft);
-  }
+  .sm-icon { width: 15px; height: 15px; color: var(--oo-text-secondary); flex-shrink: 0; }
 
-  .field-icon {
-    color: var(--text-secondary);
+  .sm-label {
+    font-size: 13px;
+    color: var(--oo-text);
     flex-shrink: 0;
   }
 
-  .input-with-button input {
+  .sm-row input {
     flex: 1;
-    padding: 12px 0;
+    border: 0;
     background: transparent;
-    border: none;
-    color: var(--text);
-    font-size: 14px;
-    box-sizing: border-box;
+    color: var(--oo-text);
+    font-size: 12.5px;
+    min-width: 0;
+    text-align: right;
   }
+  .sm-row input::placeholder { color: var(--oo-text-secondary); opacity: 0.8; }
+  .sm-row input:focus { outline: none; }
 
-  .input-with-button input:focus {
-    outline: none;
-  }
-
-  .browse-btn {
-    padding: 7px 16px;
-    border-radius: 999px;
-    border: 1px solid var(--glass-border);
-    background: var(--glass-surface);
-    color: var(--text);
-    font-size: 13px;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: border-color 0.15s ease;
-  }
-
-  .browse-btn:hover {
-    border-color: var(--accent-line);
-  }
-
-  .primary-btn {
-    width: 100%;
-    padding: 13px;
-    border: none;
-    border-radius: var(--glass-radius, 14px);
+  .sm-choose-btn {
+    padding: 4px 12px;
+    border-radius: 6px;
+    font-size: 12px;
     font-weight: 500;
-    font-size: 14px;
-    cursor: pointer;
-    background: var(--accent-gradient);
-    color: var(--on-accent);
-    box-shadow: 0 6px 20px -6px var(--accent-glow);
-    transition: box-shadow 0.12s ease, transform 0.12s ease;
+    background: var(--oo-group-bg);
+    box-shadow: 0 0 0 1px var(--oo-border);
+    color: var(--oo-text);
+    flex-shrink: 0;
+  }
+  .sm-choose-btn:hover { background: color-mix(in srgb, var(--oo-text) 5%, var(--oo-group-bg)); }
+
+  .sm-hint {
+    font-size: 11.5px;
+    color: var(--oo-text-secondary);
+    margin: -6px 0 0;
   }
 
-  .primary-btn:hover:not(:disabled) {
-    box-shadow: 0 8px 24px -6px var(--accent-glow);
+  .sm-actions {
+    display: flex;
+    justify-content: center;
   }
-
-  .primary-btn:active:not(:disabled) {
-    transform: scale(0.99);
+  .sm-save-btn {
+    padding: 8px 26px;
+    border-radius: var(--oo-radius, 9px);
+    font-weight: 600;
+    font-size: 13px;
+    background: var(--oo-accent);
+    color: #fff;
   }
-
-  .primary-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    box-shadow: none;
-  }
+  .sm-save-btn:hover:not(:disabled) { filter: brightness(1.06); }
+  .sm-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 </style>

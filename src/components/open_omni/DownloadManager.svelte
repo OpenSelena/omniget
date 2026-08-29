@@ -24,7 +24,10 @@
 
   const dispatch = createEventDispatcher();
 
-  const RING_CIRCUMFERENCE = 2 * Math.PI * 58;
+  // Ring geometry lives in one place (r=44) so the SVG markup below and this
+  // circumference constant can never drift out of sync.
+  const RING_RADIUS = 44;
+  const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
 
   let url = $state('');
   let contentType = $state('all');
@@ -208,16 +211,16 @@
   ];
 </script>
 
-<div class="download-manager">
+<div class="dl">
   {#if depsChecked && depsStatus}
-    <div class="deps-check error" role="alert">
+    <div class="dl-alert error" role="alert">
       <span>{depsStatus}</span>
     </div>
   {/if}
 
   {#if status}
     <div
-      class="status-alert"
+      class="dl-alert"
       class:success={statusType === 'success'}
       class:error={statusType === 'error'}
       class:info={statusType === 'info'}
@@ -225,15 +228,46 @@
       aria-live="polite"
     >
       <span>{status}</span>
-      <button class="close-alert" onclick={clearStatus} aria-label="Dismiss">×</button>
+      <button class="dl-alert-close" onclick={clearStatus} aria-label="Dismiss">×</button>
     </div>
   {/if}
 
-  <div class="url-field">
-    <div class="url-input-shell">
-      <svg class="url-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+  {#if !url.trim() && savedProfiles.length > 0}
+    <div class="dl-quicklist" role="listbox" aria-label="Saved profiles">
+      {#each savedProfiles as profile, index}
+        <button
+          type="button"
+          class="dl-chip"
+          class:on={selectedProfileIndex === index}
+          onclick={() => selectProfile(index)}
+          disabled={downloading}
+          role="option"
+          aria-selected={selectedProfileIndex === index}
+        >
+          <span>{profile.username || profile.url}</span>
+          {#if profile._platformLabel}
+            <span class="dl-chip-sub">{profile._platformLabel}</span>
+          {/if}
+        </button>
+      {/each}
+    </div>
+  {:else if !url.trim() && savedProfiles.length === 0}
+    <p class="dl-hint">
+      No saved profiles —
+      <button type="button" class="dl-link" onclick={() => dispatch('switchToProfiles')}>add one</button>
+    </p>
+  {/if}
+
+  <div class="dl-group">
+    <div class="dl-row">
+      <svg class="dl-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" aria-hidden="true">
+        <path d="M5.5 10.5c-.8.8-2.2.8-3 0-.8-.8-.8-2.2 0-3L4 6" />
+        <path d="M10.5 5.5c.8-.8 2.2-.8 3 0 .8.8.8 2.2 0 3L12 10" />
+        <path d="M6.3 9.7 9.7 6.3" />
+      </svg>
       <input
-        id="profile-url" aria-label="Profile URL or handle"
+        id="profile-url"
+        aria-label="Profile URL or handle"
         type="text"
         bind:value={url}
         placeholder="https://instagram.com/username"
@@ -243,104 +277,74 @@
         spellcheck="false"
       />
     </div>
-    {#if !url.trim() && savedProfiles.length > 0}
-      <div class="chip-list" role="listbox" aria-label="Saved profiles">
-        {#each savedProfiles as profile, index}
-          <button
-            type="button"
-            class="chip"
-            class:selected={selectedProfileIndex === index}
-            onclick={() => selectProfile(index)}
-            disabled={downloading}
-            role="option"
-            aria-selected={selectedProfileIndex === index}
-          >
-            <span>{profile.username || profile.url}</span>
-            {#if profile._platformLabel}
-              <span class="chip-platform">{profile._platformLabel}</span>
-            {/if}
-            {#if selectedProfileIndex === index}
-              <span class="chip-check" aria-hidden="true">✓</span>
-            {/if}
-          </button>
-        {/each}
-      </div>
-    {:else if !url.trim() && savedProfiles.length === 0}
-      <p class="hint-muted">
-        No saved profiles —
-        <button type="button" class="inline-link" onclick={() => dispatch('switchToProfiles')}>add one</button>
-      </p>
-    {/if}
   </div>
 
-  <div class="segment-block">
-    <div class="pill-group" role="group" aria-label="Content type">
-      {#each CONTENT_TYPES as type}
-        <button
-          type="button"
-          class:active={contentType === type.key}
-          onclick={() => (contentType = type.key)}
-          disabled={downloading || ((type.key === 'stories' || type.key === 'highlights') && !isInstagram)}
-          title={(type.key === 'stories' || type.key === 'highlights') && !isInstagram ? 'Instagram only' : ''}
-          aria-pressed={contentType === type.key}
-        >
-          {type.label}
-        </button>
-      {/each}
-    </div>
+  <div class="dl-segmented" role="group" aria-label="Content type">
+    {#each CONTENT_TYPES as type}
+      <button
+        type="button"
+        class:on={contentType === type.key}
+        onclick={() => (contentType = type.key)}
+        disabled={downloading || ((type.key === 'stories' || type.key === 'highlights') && !isInstagram)}
+        title={(type.key === 'stories' || type.key === 'highlights') && !isInstagram ? 'Instagram only' : ''}
+        aria-pressed={contentType === type.key}
+      >
+        {type.label}
+      </button>
+    {/each}
   </div>
 
   {#if missingOutputDir}
-    <p class="field-warning" role="alert">
+    <p class="dl-warning" role="alert">
       Set an output directory in
-      <button type="button" class="inline-link" onclick={() => dispatch('switchToSettings')}>Settings</button>
+      <button type="button" class="dl-link" onclick={() => dispatch('switchToSettings')}>Settings</button>
       before downloading.
     </p>
   {/if}
   {#if needsCookiesWarning}
-    <p class="field-warning" role="alert">
+    <p class="dl-warning" role="alert">
       Stories and Highlights need a cookies file — add one in
-      <button type="button" class="inline-link" onclick={() => dispatch('switchToSettings')}>Settings</button>.
+      <button type="button" class="dl-link" onclick={() => dispatch('switchToSettings')}>Settings</button>.
     </p>
   {/if}
   {#if platformMismatch}
-    <p class="field-warning" role="alert">Stories and Highlights are only supported for Instagram.</p>
+    <p class="dl-warning" role="alert">Stories and Highlights are only supported for Instagram.</p>
   {/if}
 
-  <div class="button-group">
+  <div class="dl-actions">
     {#if downloading}
-      <button class="primary-btn stop-btn" onclick={handleStop} disabled={cancelling}>
-        {cancelling ? 'Cancelling…' : 'Stop download'}
+      <button class="dl-btn stop" onclick={handleStop} disabled={cancelling}>
+        {cancelling ? 'Cancelling…' : 'Stop Download'}
       </button>
     {:else}
       <button
-        class="primary-btn"
+        class="dl-btn primary"
         onclick={startDownload}
         disabled={!getDownloadUrl() || missingOutputDir || needsCookiesWarning || platformMismatch}
       >
-        Start download
+        Start Download
       </button>
     {/if}
   </div>
 
   {#if downloading}
-    <div class="ring-wrap" role="status" aria-live="polite" aria-atomic="true">
-      <svg class="om-ring" class:indeterminate={ringFraction === null} viewBox="0 0 140 140" width="140" height="140" aria-hidden="true">
-        <circle class="om-ring-track" cx="70" cy="70" r="58" />
+    <div class="dl-progress" role="status" aria-live="polite" aria-atomic="true">
+      <svg class="dl-ring" class:indeterminate={ringFraction === null} viewBox="0 0 104 104" width="104" height="104" aria-hidden="true">
+        <circle class="dl-ring-track" cx="52" cy="52" r={RING_RADIUS} />
         {#if ringFraction === null}
-          <circle class="om-ring-progress" cx="70" cy="70" r="58" />
+          <circle class="dl-ring-progress" cx="52" cy="52" r={RING_RADIUS} />
         {:else}
           <circle
-            class="om-ring-progress"
-            cx="70" cy="70" r="58"
+            class="dl-ring-progress"
+            cx="52" cy="52" r={RING_RADIUS}
             stroke-dasharray={RING_CIRCUMFERENCE}
             stroke-dashoffset={ringDashoffset}
           />
         {/if}
-        <text x="70" y="65" text-anchor="middle" class="om-ring-count">{filesDownloaded}</text>
-        <text x="70" y="84" text-anchor="middle" class="om-ring-label">files</text>
+        <text x="52" y="49" text-anchor="middle" class="dl-ring-count">{filesDownloaded}</text>
+        <text x="52" y="66" text-anchor="middle" class="dl-ring-label">files</text>
       </svg>
-      <p class="ring-stage">
+      <p class="dl-progress-stage">
         {#if stageTotal && stageTotal > 1}
           Stage {stageIndex ?? 1} of {stageTotal} · {stage ?? ''}
         {:else}
@@ -348,338 +352,190 @@
         {/if}
       </p>
       {#if lastMessage}
-        <p class="ring-message" title={lastMessage}>{lastMessage}</p>
+        <p class="dl-progress-msg" title={lastMessage}>{lastMessage}</p>
       {/if}
     </div>
   {/if}
 </div>
 
 <style>
-  /*
-    Reads --glass-*, --accent-* custom properties inherited from the
-    page shell (src/routes/open-omni/+page.svelte). No local card
-    wrappers — the parent glass panel is the only surface; this
-    component only lays out content inside it.
-  */
-  .download-manager {
-    max-width: 440px;
-    width: 100%;
-    margin: 0 auto;
+  /* Reads --oo-accent / --oo-border / --oo-group-bg / --oo-text* custom
+     properties inherited from the shell in +page.svelte. */
+  .dl {
     display: flex;
     flex-direction: column;
-    gap: 1.5rem;
+    gap: 14px;
   }
 
-  .deps-check {
-    padding: 10px 14px;
-    border-radius: var(--glass-radius-sm, 10px);
-    font-size: 13px;
-    font-weight: 500;
-    text-align: center;
-  }
-
-  .deps-check.error {
-    background: var(--error);
-    color: var(--on-error);
-  }
-
-  .status-alert {
-    padding: 10px 14px;
-    border-radius: var(--glass-radius-sm, 10px);
+  .dl-alert {
+    padding: 9px 12px;
+    border-radius: var(--oo-radius, 9px);
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 12px;
-    font-size: 13px;
+    font-size: 12.5px;
   }
-
-  .status-alert.success {
-    background: var(--success);
-    color: var(--on-success);
+  .dl-alert.success { background: var(--success); color: var(--on-success); }
+  .dl-alert.error { background: var(--error); color: var(--on-error); }
+  .dl-alert.info {
+    background: color-mix(in srgb, var(--oo-accent) 12%, transparent);
+    color: var(--oo-accent);
   }
-
-  .status-alert.error {
-    background: var(--error);
-    color: var(--on-error);
-  }
-
-  .status-alert.info {
-    background: var(--glass-surface-strong);
-    color: var(--text);
-    border: 1px solid var(--glass-border);
-  }
-
-  .close-alert {
-    background: none;
-    border: none;
-    font-size: 18px;
+  .dl-alert-close {
+    font-size: 16px;
     line-height: 1;
-    cursor: pointer;
-    opacity: 0.8;
-    padding: 0;
-    color: inherit;
+    opacity: 0.7;
   }
 
-  .url-field label {
-    display: block;
-    font-size: 12.5px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    margin-bottom: 8px;
-  }
-
-  .url-input-shell {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    background: var(--glass-surface-strong);
-    border: 1px solid var(--glass-border);
-    border-radius: var(--glass-radius, 14px);
-    padding: 0 14px;
-    transition: border-color 0.15s ease, box-shadow 0.15s ease;
-  }
-
-  .url-input-shell:focus-within {
-    border-color: var(--accent-line);
-    box-shadow: 0 0 0 3px var(--accent-soft);
-  }
-
-  .url-icon {
-    color: var(--text-secondary);
-    flex-shrink: 0;
-  }
-
-  .url-input-shell input {
-    flex: 1;
-    padding: 12px 0;
-    background: transparent;
-    border: none;
-    color: var(--text);
-    font-size: 14px;
-    box-sizing: border-box;
-  }
-
-  .url-input-shell input:focus {
-    outline: none;
-  }
-
-  .url-input-shell input:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-  }
-
-  .hint-muted {
-    font-size: 12.5px;
-    color: var(--text-secondary);
-    font-style: italic;
-    margin: 12px 0 0;
-  }
-
-  .inline-link {
-    background: none;
-    border: none;
-    padding: 0;
-    color: var(--accent);
-    font-size: inherit;
-    font-style: normal;
-    cursor: pointer;
-    text-decoration: underline;
-  }
-
-  .inline-link:hover {
-    opacity: 0.8;
-  }
-
-  .chip-list {
+  .dl-quicklist {
     display: flex;
     flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 12px;
+    gap: 6px;
   }
-
-  .chip {
+  .dl-chip {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 6px 14px;
+    padding: 5px 11px;
     border-radius: 999px;
-    border: 1px solid var(--glass-border);
-    background: var(--glass-surface-strong);
-    color: var(--text);
-    font-size: 12.5px;
-    cursor: pointer;
-    transition: border-color 0.15s ease, background 0.15s ease;
+    font-size: 11.5px;
+    background: var(--oo-group-bg);
+    box-shadow: 0 0 0 1px var(--oo-border);
+    color: var(--oo-text);
   }
+  .dl-chip:disabled { opacity: 0.5; cursor: not-allowed; }
+  .dl-chip.on { background: var(--oo-accent); color: #fff; box-shadow: none; font-weight: 500; }
+  .dl-chip-sub { font-size: 10px; opacity: 0.75; }
 
-  .chip:hover:not(:disabled) {
-    border-color: var(--accent-line);
-  }
-
-  .chip.selected {
-    background: var(--accent-gradient);
-    border-color: transparent;
-    color: var(--on-accent);
-    font-weight: 500;
-    box-shadow: 0 3px 12px -4px var(--accent-glow);
-  }
-
-  .chip:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
-
-  .chip-platform {
-    font-size: 10.5px;
-    opacity: 0.75;
-  }
-
-  .chip.selected .chip-platform {
-    opacity: 0.9;
-  }
-
-  .chip-check {
-    font-weight: bold;
-  }
-
-  .segment-label {
-    display: block;
-    font-size: 12.5px;
-    font-weight: 500;
-    color: var(--text-secondary);
-    margin-bottom: 10px;
-  }
-
-  .pill-group {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-  }
-
-  .pill-group button {
-    padding: 8px 16px;
-    border-radius: 999px;
-    border: 1px solid var(--glass-border);
-    background: var(--glass-surface-strong);
-    color: var(--text);
-    font-size: 13px;
-    font-weight: 500;
-    cursor: pointer;
-    transition: border-color 0.15s ease, background 0.15s ease;
-  }
-
-  .pill-group button:hover:not(:disabled):not(.active) {
-    border-color: var(--accent-line);
-  }
-
-  .pill-group button.active {
-    background: var(--accent-gradient);
-    border-color: transparent;
-    color: var(--on-accent);
-    box-shadow: 0 3px 12px -4px var(--accent-glow);
-  }
-
-  .pill-group button:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
-
-  .field-warning {
+  .dl-hint {
     font-size: 12px;
-    color: var(--error);
-    margin: -0.75rem 0 0;
+    color: var(--oo-text-secondary);
   }
+  .dl-link {
+    color: var(--oo-accent);
+    text-decoration: underline;
+    font-size: inherit;
+  }
+  .dl-link:hover { opacity: 0.8; }
 
-  .primary-btn {
-    width: 100%;
-    padding: 13px;
-    border: none;
-    border-radius: var(--glass-radius, 14px);
+  .dl-group {
+    background: var(--oo-group-bg);
+    border-radius: var(--oo-radius, 9px);
+    box-shadow: 0 0 0 1px var(--oo-border);
+    overflow: hidden;
+  }
+  .dl-row {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 10px 12px;
+  }
+  .dl-icon {
+    width: 15px;
+    height: 15px;
+    color: var(--oo-text-secondary);
+    flex-shrink: 0;
+  }
+  .dl-row input {
+    flex: 1;
+    border: 0;
+    background: transparent;
+    color: var(--oo-text);
+    font-size: 13px;
+    min-width: 0;
+  }
+  .dl-row input:focus { outline: none; }
+  .dl-row input:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .dl-segmented {
+    display: flex;
+    background: color-mix(in srgb, var(--oo-text) 6%, transparent);
+    border-radius: var(--oo-radius, 9px);
+    padding: 2px;
+    gap: 1px;
+  }
+  .dl-segmented button {
+    flex: 1;
+    padding: 6px 0;
+    font-size: 12px;
     font-weight: 500;
-    font-size: 14px;
-    cursor: pointer;
-    background: var(--accent-gradient);
-    color: var(--on-accent);
-    box-shadow: 0 6px 20px -6px var(--accent-glow);
-    transition: transform 0.12s ease, box-shadow 0.12s ease, opacity 0.12s ease;
+    color: var(--oo-text-secondary);
+    border-radius: 7px;
+  }
+  .dl-segmented button.on {
+    background: var(--oo-group-bg);
+    color: var(--oo-text);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+  }
+  .dl-segmented button:disabled { opacity: 0.4; cursor: not-allowed; }
+  .dl-segmented button:disabled.on { background: transparent; box-shadow: none; }
+
+  .dl-warning {
+    font-size: 12px;
+    color: var(--error, #d9362c);
+    margin: -4px 0 0;
   }
 
-  .primary-btn:hover:not(:disabled) {
-    box-shadow: 0 8px 24px -6px var(--accent-glow);
+  .dl-actions {
+    display: flex;
+    justify-content: center;
   }
-
-  .primary-btn:active:not(:disabled) {
-    transform: scale(0.99);
+  .dl-btn {
+    padding: 8px 26px;
+    border-radius: var(--oo-radius, 9px);
+    font-weight: 600;
+    font-size: 13px;
+    background: var(--oo-accent);
+    color: #fff;
   }
+  .dl-btn:hover:not(:disabled) { filter: brightness(1.06); }
+  .dl-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+  .dl-btn.stop { background: var(--error, #ff453a); }
 
-  .primary-btn:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-    box-shadow: none;
-  }
-
-  .stop-btn {
-    background: var(--error);
-    color: var(--on-error);
-    box-shadow: 0 6px 20px -6px color-mix(in srgb, var(--error) 45%, transparent);
-  }
-
-  .ring-wrap {
+  .dl-progress {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 4px;
+    padding-top: 2px;
   }
-
-  .om-ring-track {
+  .dl-ring { color: var(--oo-accent); }
+  .dl-ring-track {
     fill: none;
-    stroke: var(--glass-surface-strong);
-    stroke-width: 12;
+    stroke: color-mix(in srgb, var(--oo-text) 8%, transparent);
+    stroke-width: 8;
   }
-
-  .om-ring-progress {
+  .dl-ring-progress {
     fill: none;
-    stroke: var(--accent);
-    stroke-width: 12;
+    stroke: currentColor;
+    stroke-width: 8;
     stroke-linecap: round;
     transform: rotate(-90deg);
-    transform-origin: 70px 70px;
-    transition: stroke-dashoffset 0.4s ease;
-    filter: drop-shadow(0 0 6px var(--accent-glow));
+    transform-origin: 52px 52px;
+    transition: stroke-dashoffset 0.35s ease;
   }
-
-  .om-ring.indeterminate .om-ring-progress {
-    stroke-dasharray: 90 274.42;
+  .dl-ring.indeterminate .dl-ring-progress {
+    stroke-dasharray: 70 207;
     transition: none;
-    animation: om-ring-spin 1.1s linear infinite;
+    animation: dl-ring-spin 1.1s linear infinite;
   }
-
-  @keyframes om-ring-spin {
+  @keyframes dl-ring-spin {
     from { transform: rotate(-90deg); }
     to { transform: rotate(270deg); }
   }
+  .dl-ring-count { font-size: 17px; font-weight: 700; fill: var(--oo-text); }
+  .dl-ring-label { font-size: 9.5px; fill: var(--oo-text-secondary); }
 
-  .om-ring-count {
-    font-size: 22px;
-    font-weight: 500;
-    fill: var(--text);
-  }
-
-  .om-ring-label {
-    font-size: 11px;
-    fill: var(--text-secondary);
-  }
-
-  .ring-stage {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--text);
+  .dl-progress-stage {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--oo-text);
     margin: 10px 0 2px;
     text-align: center;
   }
-
-  .ring-message {
-    font-size: 12px;
-    color: var(--text-secondary);
+  .dl-progress-msg {
+    font-size: 11.5px;
+    color: var(--oo-text-secondary);
     margin: 0;
     max-width: 280px;
     white-space: nowrap;
