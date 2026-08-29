@@ -249,7 +249,7 @@
     font-size: 14px;
     color: var(--secondary);
     background: var(--input-bg);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     outline: none;
     box-sizing: border-box;

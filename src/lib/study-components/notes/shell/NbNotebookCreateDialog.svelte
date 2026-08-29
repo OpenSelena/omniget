@@ -184,7 +184,7 @@
     width: min(440px, 92vw);
     background: var(--bg, var(--page-bg));
     color: var(--text);
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     border-radius: 14px;
     padding: 18px 18px 14px;
     display: flex;
@@ -227,7 +227,7 @@
   }
   input[type="text"] {
     padding: 8px 10px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: 8px;
     background: var(--bg);
     color: var(--text);
@@ -249,7 +249,7 @@
     grid-template-columns: repeat(9, 1fr);
   }
   .icon-btn {
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: 8px;
     background: transparent;
     color: var(--secondary);
@@ -280,7 +280,7 @@
   .swatch {
     aspect-ratio: 1 / 1;
     border-radius: 999px;
-    border: 1px solid color-mix(in oklab, var(--content-border) 60%, transparent);
+    border: none;
     background: transparent;
     cursor: pointer;
     transition: transform 120ms, border-color 120ms;

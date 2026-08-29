@@ -527,7 +527,7 @@
     gap: 8px;
     padding: 8px 14px;
     background: rgba(0, 0, 0, 0.35);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: none;
     border-radius: 999px;
     color: rgba(255, 255, 255, 0.9);
     font-family: inherit;
@@ -685,7 +685,7 @@
     min-width: 0;
     min-height: 0;
     background: rgba(0, 0, 0, 0.18);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: none;
     border-radius: 14px;
     overflow: hidden;
     backdrop-filter: blur(20px);
@@ -695,7 +695,7 @@
     display: flex;
     gap: 4px;
     padding: 10px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: none;
   }
   .np-tab {
     flex: 1;
@@ -817,7 +817,7 @@
   }
   .np-retry {
     appearance: none;
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    border: none;
     background: rgba(255, 255, 255, 0.06);
     color: rgba(255, 255, 255, 0.9);
     font-size: 13px;
@@ -851,7 +851,7 @@
   }
   .np-sync-btn {
     appearance: none;
-    border: 1px solid rgba(255, 255, 255, 0.16);
+    border: none;
     background: rgba(255, 255, 255, 0.05);
     color: rgba(255, 255, 255, 0.78);
     width: 24px;
@@ -885,7 +885,7 @@
   }
   .np-trans-toggle {
     appearance: none;
-    border: 1px solid rgba(255, 255, 255, 0.16);
+    border: none;
     background: rgba(255, 255, 255, 0.05);
     color: rgba(255, 255, 255, 0.75);
     font-size: 12px;

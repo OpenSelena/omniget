@@ -1027,7 +1027,7 @@
   }
 
   .card {
-    border: 1px solid color-mix(in oklab, var(--input-border) 70%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
     overflow: hidden;
@@ -1087,8 +1087,7 @@
     flex-direction: column;
     gap: 14px;
     padding: 4px 18px 18px;
-    border-top: 1px solid
-      color-mix(in oklab, var(--input-border) 50%, transparent);
+    border-top: none;
   }
 
   .lede {
@@ -1134,7 +1133,7 @@
   .field input,
   .field select {
     padding: 8px 10px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
     color: var(--text);
@@ -1178,8 +1177,7 @@
     display: flex;
     justify-content: flex-end;
     padding-top: 6px;
-    border-top: 1px solid
-      color-mix(in oklab, var(--input-border) 40%, transparent);
+    border-top: none;
   }
 
   .btn {
@@ -1249,7 +1247,7 @@
     margin: 8px 0 0;
     padding: 12px;
     background: var(--bg);
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     font-size: 11px;
     line-height: 1.5;
@@ -1306,7 +1304,7 @@
     align-items: center;
     gap: 12px;
     padding: 10px 12px;
-    border: 1px solid color-mix(in oklab, var(--input-border) 50%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     background: color-mix(in oklab, var(--surface) 60%, transparent);
   }
@@ -1366,7 +1364,7 @@
     justify-content: space-between;
     gap: 12px;
     padding-top: 8px;
-    border-top: 1px solid color-mix(in oklab, var(--input-border) 40%, transparent);
+    border-top: none;
   }
   .cleanup-label {
     display: flex;
@@ -1378,7 +1376,7 @@
   .cleanup-keep {
     width: 56px;
     padding: 4px 8px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
     color: var(--text);
@@ -1410,7 +1408,7 @@
   }
   .modal {
     background: var(--popup-bg, var(--surface));
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     padding: 20px;
     max-width: 460px;
@@ -1435,7 +1433,7 @@
     display: flex;
     justify-content: flex-end;
     gap: 8px;
-    border-top: 1px solid color-mix(in oklab, var(--input-border) 40%, transparent);
+    border-top: none;
     padding-top: 12px;
   }
 
@@ -1447,7 +1445,7 @@
   .raw-input {
     flex: 1;
     padding: 7px 10px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
     color: var(--text);
@@ -1463,7 +1461,7 @@
     margin: 8px 0 0;
     padding: 10px 12px;
     background: var(--bg);
-    border: 1px solid color-mix(in oklab, var(--input-border) 50%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     font-size: 11px;
     color: var(--secondary);

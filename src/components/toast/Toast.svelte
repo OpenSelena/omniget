@@ -59,7 +59,7 @@
     gap: var(--space-2);
     padding: var(--space-3) var(--space-4);
     background: var(--popup-bg);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-lg);
     box-shadow: var(--elev-2);
     pointer-events: auto;

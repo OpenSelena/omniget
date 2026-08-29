@@ -147,7 +147,7 @@
     width: min(440px, 92vw);
     background: var(--bg);
     color: var(--text);
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     border-radius: 14px;
     padding: 18px;
     display: flex;
@@ -200,7 +200,7 @@
   }
   input[type="text"] {
     padding: 8px 10px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: 8px;
     background: var(--bg);
     color: var(--text);

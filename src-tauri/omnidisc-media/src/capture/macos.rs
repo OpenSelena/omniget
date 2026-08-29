@@ -474,6 +474,43 @@ impl CaptureApi for Platform {
         })
     }
 
+    fn thumbnail_for(source: &SourceId) -> Option<String> {
+        let content = shareable().ok()?;
+        match source {
+            SourceId::Display { id } => {
+                let d = content
+                    .displays()
+                    .into_iter()
+                    .find(|d| d.display_id() == *id)?;
+                let filter = match own_app(&content) {
+                    Some(me) => SCContentFilter::create()
+                        .with_display(&d)
+                        .with_excluding_applications(&[&me], &[])
+                        .build(),
+                    None => SCContentFilter::create()
+                        .with_display(&d)
+                        .with_excluding_windows(&[])
+                        .build(),
+                };
+                thumbnail(&filter, d.width(), d.height())
+            }
+            SourceId::Window { id } => {
+                let w = content
+                    .windows()
+                    .into_iter()
+                    .find(|w| w.window_id() == *id)?;
+                let frame = w.frame();
+                let filter = SCContentFilter::create().with_window(&w).build();
+                thumbnail(
+                    &filter,
+                    (frame.size.width as u32).max(1),
+                    (frame.size.height as u32).max(1),
+                )
+            }
+            SourceId::Synthetic { .. } => None,
+        }
+    }
+
     fn start_video(
         opts: &CaptureOptions,
         sink: VideoSink,

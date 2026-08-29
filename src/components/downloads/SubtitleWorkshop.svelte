@@ -373,7 +373,7 @@
 
   .panel {
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--border-radius);
     width: min(900px, 100%);
     max-height: 92vh;
@@ -419,7 +419,7 @@
 
   button {
     padding: 7px 12px;
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--button-elevated);
     color: var(--text);
@@ -441,7 +441,7 @@
   input,
   textarea {
     padding: 6px 8px;
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
     color: var(--text);
@@ -460,7 +460,7 @@
     gap: 1px;
     height: 56px;
     background: var(--bg);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--border-radius);
     padding: 2px;
     overflow: hidden;
@@ -493,7 +493,7 @@
     gap: 8px;
     align-items: start;
     padding: 8px;
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--border-radius);
   }
 

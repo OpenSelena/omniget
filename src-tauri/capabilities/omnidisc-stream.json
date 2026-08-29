@@ -1,0 +1,14 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "omnidisc-stream",
+  "description": "Capability for OmniDisc stream viewer pop-out windows",
+  "windows": ["omnidisc-stream-*"],
+  "permissions": [
+    "core:default",
+    "core:window:allow-set-fullscreen",
+    "core:window:allow-is-fullscreen",
+    "core:window:allow-close",
+    "core:window:allow-set-title",
+    "core:window:allow-start-dragging"
+  ]
+}

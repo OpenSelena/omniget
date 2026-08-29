@@ -720,7 +720,7 @@
     position: relative;
     padding: 16px 20px;
     background: var(--surface);
-    border: 1px solid color-mix(in oklab, var(--input-border) 40%, transparent);
+    border: none;
     border-radius: var(--border-radius, 10px);
     margin-bottom: 16px;
     max-height: 180px;
@@ -784,7 +784,7 @@
   .meta-actions {
     padding: 14px 16px;
     background: var(--surface);
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     display: flex;
     flex-direction: column;
@@ -821,7 +821,7 @@
   .subj-edit {
     padding: 4px 10px;
     border-radius: 999px;
-    border: 1px dashed color-mix(in oklab, var(--input-border) 80%, transparent);
+    border: none;
     background: transparent;
     color: var(--accent);
     font-size: 12px;
@@ -871,8 +871,7 @@
     flex: 1;
     min-width: 140px;
     padding: 4px 10px;
-    border: 1px dashed
-      color-mix(in oklab, var(--input-border) 80%, transparent);
+    border: none;
     border-radius: 999px;
     background: transparent;
     color: var(--text);
@@ -901,7 +900,7 @@
     gap: 4px;
     padding: 2px 8px;
     border-radius: 999px;
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     background: transparent;
     color: var(--secondary);
     font: inherit;
@@ -928,7 +927,7 @@
     align-items: center;
     gap: 8px;
     padding: 8px 12px;
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     background: transparent;
     color: var(--text);
@@ -1008,7 +1007,7 @@
   .sel-btn {
     padding: 6px 12px;
     border-radius: 999px;
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     background: transparent;
     color: var(--text);
     font: inherit;
@@ -1111,7 +1110,7 @@
   .lsearch {
     flex: 1;
     background: var(--input-bg);
-    border: 1px solid var(--input-border);
+    border: none;
     color: var(--secondary);
     padding: 8px 12px;
     border-radius: var(--border-radius);
@@ -1129,7 +1128,7 @@
   }
   .module {
     background: var(--button-elevated);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     overflow: hidden;
   }
@@ -1184,7 +1183,7 @@
     align-items: center;
     gap: var(--padding);
     padding: 8px calc(var(--padding) * 1.5);
-    border-top: 1px solid var(--input-border);
+    border-top: none;
     transition: background 150ms ease;
   }
   .lesson-row:hover {

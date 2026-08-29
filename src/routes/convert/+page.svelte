@@ -548,8 +548,8 @@
   }
 
   .divider {
-    height: 1px;
-    background: var(--button-stroke);
+    height: 0;
+    background: none;
   }
 
   .file-row {
@@ -699,7 +699,7 @@
     background: var(--button-elevated);
     border-radius: calc(var(--border-radius) / 2);
     color: var(--secondary);
-    border: 1px solid var(--input-border);
+    border: none;
     font-variant-numeric: tabular-nums;
   }
 

@@ -209,7 +209,7 @@
     gap: var(--space-2);
     padding: var(--space-3);
     background: var(--surface-mut);
-    border-left: 1px solid var(--border);
+    border-left: none;
   }
 
   .head {
@@ -253,7 +253,7 @@
     box-sizing: border-box;
     padding: 6px var(--space-2);
     border-radius: var(--radius-sm);
-    border: 1px solid var(--input-border);
+    border: none;
     background: var(--input-bg);
     color: var(--text);
     font: inherit;
@@ -280,7 +280,7 @@
     justify-content: center;
     gap: 4px;
     padding: 4px;
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-sm);
     font-size: var(--text-xs);
     color: var(--text-muted);

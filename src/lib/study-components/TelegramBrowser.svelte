@@ -3500,7 +3500,7 @@
   .tg-mini-list {
     display: flex;
     flex-direction: column;
-    border-right: 1px solid var(--content-border);
+    border-right: none;
     background: color-mix(in oklab, var(--surface) 60%, transparent);
     max-height: calc(100vh - 140px);
     position: sticky;
@@ -3509,7 +3509,7 @@
   }
   .tg-mini-list-header {
     padding: 8px 10px;
-    border-bottom: 1px solid var(--content-border);
+    border-bottom: none;
     flex-shrink: 0;
   }
   .tg-mini-list-scroll {
@@ -3665,7 +3665,7 @@
     letter-spacing: 0.01em;
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 0 0 1px var(--content-border);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
   }
   @keyframes date-divider-fade {
     from { opacity: 0; transform: translateY(-4px); }
@@ -4089,7 +4089,7 @@
     gap: 2px;
     overflow-x: auto;
     padding: 0 0 6px;
-    border-bottom: 1px solid var(--content-border);
+    border-bottom: none;
     scrollbar-width: none;
   }
   .chat-tabs::-webkit-scrollbar { display: none; }
@@ -4147,7 +4147,7 @@
   .chip {
     padding: 6px 14px;
     border-radius: var(--tg-radius-pill);
-    border: 1px solid var(--content-border);
+    border: none;
     background: var(--surface);
     color: var(--tertiary);
     font-family: inherit;
@@ -4449,7 +4449,7 @@
   }
   .action {
     background: transparent;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     padding: 2px 8px;
     font-family: inherit;
@@ -4482,7 +4482,7 @@
     padding: 8px 14px;
     background: var(--surface);
     color: var(--text);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--tg-radius-input);
     font-family: inherit;
     font-size: 13px;
@@ -4496,7 +4496,7 @@
   }
   .ghost-btn {
     background: transparent;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     color: var(--secondary);
     font-family: inherit;
@@ -4594,7 +4594,7 @@
     gap: 6px;
     padding: 3px 10px;
     border-radius: 999px;
-    border: 1px solid var(--content-border);
+    border: none;
     background: var(--surface);
     font-size: 11px;
     color: var(--tertiary);
@@ -4664,7 +4664,7 @@
     text-align: center;
     margin: 12px 0 0;
     padding: 12px;
-    border-top: 1px dashed var(--content-border);
+    border-top: none;
   }
   .flood-wait-pill {
     display: inline-flex;
@@ -4689,7 +4689,7 @@
   }
   .icon-btn {
     background: transparent;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--tg-radius-pill);
     width: 32px;
     height: 32px;
@@ -4724,7 +4724,7 @@
   .settings-panel {
     padding: var(--padding);
     background: var(--surface);
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: var(--border-radius);
     display: flex;
     flex-direction: column;
@@ -4870,7 +4870,7 @@
   .bar-btn {
     padding: 6px 14px;
     border-radius: var(--border-radius);
-    border: 1px solid var(--input-border);
+    border: none;
     background: var(--surface);
     color: var(--secondary);
     font-family: inherit;
@@ -4947,7 +4947,7 @@
     padding: 4px 8px;
     background: var(--surface);
     color: var(--text);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: 6px;
     font-family: var(--font-mono, "IBM Plex Mono", monospace);
     font-size: 12px;
@@ -4972,7 +4972,7 @@
     width: min(420px, 92vw);
     max-height: 80vh;
     background: var(--button-elevated);
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: calc(var(--border-radius) * 1.4);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.28);
     z-index: 81;
@@ -5056,7 +5056,7 @@
   .keymap-dl kbd {
     padding: 2px 6px;
     background: var(--surface);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: 4px;
     font-family: var(--font-mono, "IBM Plex Mono", monospace);
     font-size: 11px;

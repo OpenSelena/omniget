@@ -292,7 +292,7 @@
     margin: 0 12px 10px;
     padding: 6px 10px;
     background: transparent;
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     border-radius: 6px;
     color: color-mix(in oklab, currentColor 70%, transparent);
     font-size: 12px;

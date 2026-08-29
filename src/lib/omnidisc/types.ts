@@ -155,6 +155,20 @@ export interface OmnidiscAttachment {
   height?: number;
   durationMs?: number;
   encrypted: boolean;
+  /// When the server deletes the bytes. Files here are temporary by design.
+  expiresAt?: number;
+  expired?: boolean;
+}
+
+export type StoragePressure = "ok" | "warning" | "critical" | "purged";
+
+export interface OmnidiscStorage {
+  usedBytes: number;
+  totalBytes: number;
+  ratio: number;
+  level: StoragePressure;
+  attachmentTtlSeconds: number;
+  purgedFiles?: number;
 }
 
 export interface OmnidiscDevice {

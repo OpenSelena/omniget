@@ -1104,7 +1104,7 @@
   .search-input {
     flex: 1;
     background: var(--input-bg);
-    border: 1px solid var(--input-border);
+    border: none;
     color: var(--secondary);
     padding: 10px 14px;
     border-radius: var(--border-radius);
@@ -1131,7 +1131,7 @@
   }
   .preset {
     background: transparent;
-    border: 1px solid var(--input-border);
+    border: none;
     color: var(--tertiary);
     padding: 4px 12px;
     border-radius: 999px;
@@ -1167,7 +1167,7 @@
   }
   .bulk-btn {
     background: transparent;
-    border: 1px solid var(--input-border);
+    border: none;
     color: var(--secondary);
     padding: 4px 12px;
     border-radius: var(--border-radius);
@@ -1208,7 +1208,7 @@
     left: 0;
     margin-top: 4px;
     background: var(--button-elevated);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     padding: 4px;
     display: flex;
@@ -1238,12 +1238,12 @@
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    border: 1px solid var(--input-border);
+    border: none;
   }
 
   .table-wrap {
     overflow-x: auto;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
   }
   .card-table {
@@ -1255,7 +1255,7 @@
   .card-table td {
     padding: 8px 10px;
     text-align: left;
-    border-bottom: 1px solid color-mix(in oklab, var(--input-border) 50%, transparent);
+    border-bottom: none;
   }
   .card-table th {
     font-size: 11px;
@@ -1288,7 +1288,7 @@
     width: 10px;
     height: 10px;
     border-radius: 50%;
-    border: 1px solid var(--input-border);
+    border: none;
   }
   .deck-col {
     max-width: 160px;
@@ -1331,7 +1331,7 @@
   }
   .page-btn {
     background: transparent;
-    border: 1px solid var(--input-border);
+    border: none;
     color: var(--secondary);
     padding: 6px 14px;
     border-radius: var(--border-radius);
@@ -1367,7 +1367,7 @@
   .modal {
     width: min(440px, 100%);
     background: var(--button-elevated);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     padding: calc(var(--padding) * 2);
     display: flex;
@@ -1389,7 +1389,7 @@
   }
   .modal select {
     background: var(--input-bg);
-    border: 1px solid var(--input-border);
+    border: none;
     color: var(--secondary);
     padding: 6px 10px;
     border-radius: var(--border-radius);
@@ -1426,7 +1426,7 @@
   .edit-field textarea,
   .edit-field input {
     padding: 8px 10px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
     color: var(--text);
@@ -1448,7 +1448,7 @@
   .util-btn {
     padding: 5px 12px;
     background: transparent;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     color: var(--tertiary);
     font: inherit;
@@ -1559,7 +1559,7 @@
   .btn-secondary {
     padding: 8px 16px;
     background: transparent;
-    border: 1px solid var(--input-border);
+    border: none;
     color: var(--secondary);
     border-radius: var(--border-radius);
     font-family: inherit;
@@ -1582,7 +1582,7 @@
     width: min(480px, 100%);
     height: 100%;
     background: var(--button-elevated);
-    border-left: 1px solid var(--input-border);
+    border-left: none;
     overflow-y: auto;
     padding: calc(var(--padding) * 2);
     display: flex;
@@ -1638,7 +1638,7 @@
     gap: 10px;
     padding: 8px 10px;
     background: var(--bg);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     font-size: 13px;
   }

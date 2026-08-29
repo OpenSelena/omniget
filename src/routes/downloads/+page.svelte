@@ -1260,9 +1260,9 @@
     padding: var(--space-2) var(--space-3);
     font-size: var(--text-sm);
     font-weight: 500;
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-full);
-    background: var(--surface);
+    background: var(--fill-1);
     color: var(--text-dim);
     cursor: pointer;
     transition: background-color var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out);
@@ -1316,7 +1316,6 @@
 
   .download-item {
     background: var(--surface);
-    border: 1px solid var(--border);
     border-radius: var(--radius-md);
     padding: var(--space-3) var(--space-4);
     display: flex;
@@ -1507,7 +1506,7 @@
     font-weight: 500;
     color: var(--text);
     background: var(--button);
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: calc(var(--border-radius) - 4px);
     cursor: pointer;
   }
@@ -1571,7 +1570,6 @@
     line-height: 1.4;
     color: var(--secondary);
     background: var(--button-elevated);
-    border: 1px solid var(--button-stroke);
     border-radius: 999px;
     letter-spacing: 0.2px;
     flex-shrink: 0;

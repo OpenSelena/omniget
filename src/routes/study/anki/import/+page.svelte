@@ -463,7 +463,7 @@
     gap: 6px;
     padding: calc(var(--padding) * 1.5);
     background: var(--button-elevated);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
   }
   .format-card h3 {
@@ -504,7 +504,7 @@
   }
   .csv-options select {
     background: var(--input-bg);
-    border: 1px solid var(--input-border);
+    border: none;
     color: var(--secondary);
     padding: 6px 8px;
     border-radius: var(--border-radius);
@@ -572,7 +572,7 @@
     flex-direction: column;
     gap: var(--padding);
     padding: calc(var(--padding) * 2);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--button-elevated);
   }
@@ -612,7 +612,7 @@
     align-items: baseline;
     padding: 8px 12px;
     background: var(--bg);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
   }
   .row-label {
@@ -646,7 +646,7 @@
     display: flex;
     justify-content: flex-end;
     padding-top: var(--padding);
-    border-top: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border-top: none;
   }
   .back-link {
     color: var(--accent);
@@ -669,7 +669,7 @@
     flex-direction: column;
     gap: var(--padding);
     padding-top: calc(var(--padding) * 1.5);
-    border-top: 1px solid color-mix(in oklab, var(--input-border) 50%, transparent);
+    border-top: none;
   }
   .section-heading {
     margin: 0;
@@ -695,7 +695,7 @@
     gap: 8px;
     padding: calc(var(--padding) * 1.25);
     background: var(--button-elevated);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
   }
   .export-card h3 {
@@ -729,7 +729,7 @@
   }
   .export-options select {
     background: var(--input-bg);
-    border: 1px solid var(--input-border);
+    border: none;
     color: var(--secondary);
     padding: 6px 8px;
     border-radius: var(--border-radius);
@@ -740,7 +740,7 @@
     align-self: flex-start;
     padding: 7px 14px;
     background: transparent;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     color: var(--text);
     font-family: inherit;

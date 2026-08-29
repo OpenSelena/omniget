@@ -246,7 +246,7 @@
     gap: var(--space-4);
     min-height: 48px;
     padding: 0 var(--space-4);
-    border-bottom: 1px solid var(--border);
+    border-bottom: none;
   }
 
   .title {
@@ -313,7 +313,7 @@
     flex-direction: column;
     gap: var(--space-2);
     padding: var(--space-3);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
   }
@@ -334,7 +334,7 @@
     min-width: 0;
     padding: 8px var(--space-3);
     border-radius: var(--radius-sm);
-    border: 1px solid var(--input-border);
+    border: none;
     background: var(--input-bg);
     color: var(--text);
     font: inherit;
@@ -430,7 +430,7 @@
     justify-content: space-between;
     gap: var(--space-3);
     padding: var(--space-2) 0;
-    border-bottom: 1px solid var(--border);
+    border-bottom: none;
   }
 
   .who {
@@ -503,7 +503,7 @@
 
   .ghost {
     padding: 4px var(--space-2);
-    border: 1px solid var(--border-hi);
+    border: none;
     border-radius: var(--radius-sm);
     background: transparent;
     color: var(--text);

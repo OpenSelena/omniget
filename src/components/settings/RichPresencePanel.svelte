@@ -154,7 +154,7 @@
     width: 100%;
     padding: 8px 10px;
     background: var(--button-elevated);
-    border: 1px solid var(--input-border, var(--border));
+    border: none;
     border-radius: calc(var(--border-radius) / 2);
     color: var(--text);
     font-family: ui-monospace, monospace;

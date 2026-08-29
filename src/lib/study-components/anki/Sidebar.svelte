@@ -85,7 +85,7 @@
     gap: var(--space-5);
     padding: var(--space-4) var(--space-3);
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-md);
     position: sticky;
     top: var(--space-3);
@@ -99,7 +99,7 @@
     align-items: center;
     gap: var(--space-2);
     padding: 4px var(--space-2) var(--space-2);
-    border-bottom: 1px solid var(--border);
+    border-bottom: none;
     margin-bottom: var(--space-2);
   }
 

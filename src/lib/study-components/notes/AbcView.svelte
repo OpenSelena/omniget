@@ -217,7 +217,7 @@
     font-size: 12px;
     line-height: 1.5;
     background: var(--surface);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     padding: 8px 10px;
     color: var(--text);

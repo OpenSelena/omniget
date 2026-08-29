@@ -77,7 +77,7 @@
     flex-direction: column;
     gap: var(--space-2);
     padding: var(--space-2);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-md);
     background: var(--surface);
     box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.25));
@@ -88,7 +88,7 @@
     box-sizing: border-box;
     padding: 6px var(--space-2);
     border-radius: var(--radius-sm);
-    border: 1px solid var(--input-border);
+    border: none;
     background: var(--input-bg);
     color: var(--text);
     font: inherit;

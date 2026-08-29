@@ -137,7 +137,7 @@
   .primary:active { transform: scale(0.97); }
   .secondary {
     padding: 5px 10px;
-    border: 1px solid color-mix(in oklab, var(--content-border) 80%, transparent);
+    border: none;
     border-radius: 999px;
     background: transparent;
     color: var(--secondary);

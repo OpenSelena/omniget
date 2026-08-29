@@ -267,6 +267,7 @@
   });
 
   let mascotCompact = $derived(omniState.kind !== "idle");
+  let isStage = $derived(omniState.kind === "idle" && !advancedMode);
 
   function pickRandom(raw: string): string {
     if (raw.includes("|")) {
@@ -956,7 +957,7 @@
   }
 </script>
 
-<div class="home-mac">
+<div class="home-mac" class:home-mac--stage={isStage}>
   {#if STUDY_MAINTENANCE_NOTICE && !studyNoticeDismissed}
     <div class="study-maintenance-banner" role="status">
       <div class="study-maintenance-text">
@@ -976,7 +977,40 @@
     </div>
   {/if}
 
-  <div class="home-mac-workspace">
+  {#if isStage}
+    <div class="home-stage">
+      <div class="home-stage-tools">
+        <div class="mac-segmented" role="tablist">
+          <button
+            type="button"
+            class="mac-segmented-btn"
+            class:active={!advancedMode}
+            role="tab"
+            aria-selected={!advancedMode}
+            onclick={() => { advancedMode = false; }}
+          >
+            {$t('omnibox.mode_normal')}
+          </button>
+          <button
+            type="button"
+            class="mac-segmented-btn"
+            class:active={advancedMode}
+            role="tab"
+            aria-selected={advancedMode}
+            onclick={() => { advancedMode = true; }}
+          >
+            {$t('omnibox.mode_advanced')}
+          </button>
+        </div>
+      </div>
+      <HomeHero emotion={mascotEmotion} stage celebrate={mascotEmotion === "amazed"} />
+      <h1 class="home-stage-title">{$t('home.hero_title')}</h1>
+      <p class="home-stage-copy">{$t('home.hero_subtitle')}</p>
+      <HomeUrlBar variant="stage" bind:url bind:mode={homeInputMode} onInput={handleInput} onModeChange={handleHomeModeChange} />
+      <SupportedServices />
+    </div>
+  {:else}
+  <div class="home-mac-workspace" class:home-mac-workspace--idle={omniState.kind === "idle"}>
     <div class="home-mac-hero">
       <HomeHero
         emotion={mascotEmotion}
@@ -986,19 +1020,23 @@
       />
     </div>
     <div class="home-mac-main">
-      <div class="mode-toggle-row">
+      <div class="mac-segmented" role="tablist">
         <button
           type="button"
-          class="mode-toggle-btn"
+          class="mac-segmented-btn"
           class:active={!advancedMode}
+          role="tab"
+          aria-selected={!advancedMode}
           onclick={() => { advancedMode = false; }}
         >
           {$t('omnibox.mode_normal')}
         </button>
         <button
           type="button"
-          class="mode-toggle-btn"
+          class="mac-segmented-btn"
           class:active={advancedMode}
+          role="tab"
+          aria-selected={advancedMode}
           onclick={() => { advancedMode = true; }}
         >
           {$t('omnibox.mode_advanced')}
@@ -1267,6 +1305,7 @@
       {/if}
     </HomeInspector>
   </div>
+  {/if}
 
   {#if showP2pSendDialog}
     <P2pSendDialog onClose={() => { showP2pSendDialog = false; }} />
@@ -1299,7 +1338,6 @@
     max-width: 640px;
     padding: 8px 12px;
     background: color-mix(in oklab, var(--secondary) 8%, transparent);
-    border: 1px solid color-mix(in oklab, var(--secondary) 18%, transparent);
     border-radius: var(--border-radius);
     color: var(--secondary);
     font-size: 12px;
@@ -1352,33 +1390,6 @@
     gap: var(--space-3);
     width: 100%;
     max-width: 640px;
-  }
-
-  .mode-toggle-row {
-    display: inline-flex;
-    background: var(--button);
-    border-radius: var(--border-radius);
-    padding: 3px;
-    gap: 2px;
-    margin-bottom: 4px;
-  }
-  .mode-toggle-btn {
-    padding: 5px 14px;
-    font-size: 11.5px;
-    font-weight: 500;
-    color: var(--gray);
-    background: transparent;
-    border: none;
-    border-radius: calc(var(--border-radius) - 3px);
-    cursor: pointer;
-  }
-  .mode-toggle-btn.active {
-    background: var(--cta);
-    color: var(--on-cta);
-  }
-  .mode-toggle-btn:not(.active):hover {
-    color: var(--secondary);
-    background: var(--button-elevated);
   }
 
   .loop-icon {
@@ -1488,14 +1499,14 @@
   .download-primary-btn {
     background: var(--cta);
     color: var(--on-cta);
-    font-size: 15px;
-    font-weight: 500;
-    padding: 12px 32px;
-    border-radius: var(--border-radius);
+    font-size: var(--text-base);
+    font-weight: 600;
+    height: 32px;
+    padding: 0 var(--space-4);
+    border-radius: var(--radius-md);
     border: none;
     cursor: pointer;
     width: 100%;
-    max-width: 300px;
     transition: background 150ms;
   }
 
@@ -1525,8 +1536,7 @@
     flex-direction: column;
     gap: 8px;
     padding: 10px 12px;
-    background: var(--button);
-    border: 1px solid var(--input-border);
+    background: var(--control-bg);
     border-radius: var(--border-radius);
   }
 
@@ -1670,8 +1680,8 @@
   .referer-input {
     padding: 6px var(--padding);
     font-size: 13px;
-    background: var(--button);
-    border: 1px solid var(--input-border);
+    background: var(--control-bg);
+    border: none;
     border-radius: calc(var(--border-radius) - 2px);
     color: var(--secondary);
   }
@@ -1681,8 +1691,8 @@
   }
 
   .referer-input:focus-visible {
-    border-color: var(--secondary);
-    outline: none;
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
   }
 
   .timerange-wrapper {
@@ -1707,8 +1717,8 @@
     width: 96px;
     padding: 6px var(--padding);
     font-size: 13px;
-    background: var(--button);
-    border: 1px solid var(--input-border);
+    background: var(--control-bg);
+    border: none;
     border-radius: calc(var(--border-radius) - 2px);
     color: var(--secondary);
     text-align: center;
@@ -1719,8 +1729,8 @@
   }
 
   .timerange-input:focus-visible {
-    border-color: var(--secondary);
-    outline: none;
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
   }
 
   .timerange-sep {
@@ -1742,8 +1752,8 @@
   .schedule-preset {
     padding: 4px 10px;
     font-size: 12px;
-    background: var(--button);
-    border: 1px solid var(--input-border);
+    background: var(--fill-2);
+    border: none;
     border-radius: calc(var(--border-radius) - 2px);
     color: var(--text);
     cursor: pointer;
@@ -1775,10 +1785,10 @@
     gap: 6px;
     margin: 0;
     font-size: 12px;
-    color: #f4a72b;
+    color: var(--warning);
   }
   .cookie-hint.expired {
-    color: #e0564f;
+    color: var(--error);
   }
   .cookie-hint svg {
     flex-shrink: 0;
@@ -1806,7 +1816,7 @@
     padding: var(--padding) calc(var(--padding) * 2);
     font-size: 14.5px;
     font-weight: 500;
-    background: var(--button);
+    background: var(--fill-2);
     border: none;
     border-radius: var(--border-radius);
     color: var(--button-text);
@@ -1833,18 +1843,17 @@
     flex-direction: column;
     gap: var(--padding);
     padding: var(--padding) calc(var(--padding) * 1.5);
-    background: var(--button-elevated);
+    background: var(--control-bg);
     border-radius: var(--border-radius);
-    border-left: 3px solid var(--blue);
   }
 
   .feedback-card[data-status="error"] {
-    border-left-color: var(--red);
+    background: color-mix(in srgb, var(--error) 12%, var(--control-bg));
   }
 
   .external-url-card {
     width: 100%;
-    border-left-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 10%, var(--control-bg));
   }
 
   .card-row {
@@ -1937,7 +1946,7 @@
     gap: var(--space-2);
     padding: var(--space-2) var(--space-4);
     font-size: var(--text-sm);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-sm);
     background: var(--surface);
     color: var(--text);

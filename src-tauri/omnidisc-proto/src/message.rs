@@ -104,6 +104,14 @@ pub struct Attachment {
     pub duration_ms: Option<u64>,
     #[serde(default)]
     pub encrypted: bool,
+    /// When the server will delete the bytes. Files are deliberately temporary:
+    /// the instance never becomes a place where an old leak can be found.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub expires_at: Option<String>,
+    /// The bytes are already gone. The row survives as a tombstone so the
+    /// message reads "this file expired" instead of offering a dead link.
+    #[serde(default)]
+    pub expired: bool,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Default)]

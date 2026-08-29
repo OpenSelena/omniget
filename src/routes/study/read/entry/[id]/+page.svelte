@@ -431,7 +431,7 @@
     align-items: center;
     gap: 12px;
     padding: 10px 16px;
-    border-bottom: 1px solid var(--content-border);
+    border-bottom: none;
     background: var(--button-elevated);
     flex-shrink: 0;
     flex-wrap: wrap;
@@ -443,7 +443,7 @@
     padding: 6px 10px;
     background: transparent;
     color: var(--tertiary);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     font-size: 12px;
     cursor: pointer;
@@ -488,7 +488,7 @@
     padding: 0 6px;
     background: transparent;
     color: var(--tertiary);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: 6px;
     cursor: pointer;
     font-size: 12px;
@@ -552,7 +552,7 @@
     width: 160px;
     flex-shrink: 0;
     background: var(--button-elevated);
-    border-right: 1px solid var(--content-border);
+    border-right: none;
     display: flex;
     flex-direction: column;
     overflow-y: auto;

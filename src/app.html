@@ -5,6 +5,17 @@
     <link rel="icon" href="%sveltekit.assets%/favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>OmniGet</title>
+    <script>
+      document.documentElement.setAttribute("data-shell", "mac");
+      var p =
+        (navigator.userAgentData && navigator.userAgentData.platform) ||
+        navigator.platform ||
+        "";
+      document.documentElement.setAttribute(
+        "data-platform",
+        /mac/i.test(p) ? "macos" : "other"
+      );
+    </script>
     %sveltekit.head%
   </head>
   <body data-sveltekit-preload-data="hover">

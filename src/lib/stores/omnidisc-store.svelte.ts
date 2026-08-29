@@ -48,6 +48,7 @@ import {
   parseRelationship,
   parseRole,
   parseSession,
+  parseStorage,
   parseUser,
   str,
   withCategories,
@@ -56,6 +57,7 @@ import { canIn, resolvePermissions, type PermissionName } from "$lib/omnidisc/pe
 import { compareSnowflakes, isAfter } from "$lib/omnidisc/snowflake";
 
 const STORAGE_KEY = "omnidisc.instances";
+export const DEFAULT_INSTANCE_URL = "https://chat.tonho.wtf";
 const PAGE_SIZE = 50;
 const TYPING_TTL_MS = 5_000;
 const TYPING_THROTTLE_MS = 8_000;
@@ -110,6 +112,7 @@ let selectedInstanceId = $state<string | null>(null);
 let selectedGuildId = $state<string | null>(null);
 let selectedChannelId = $state<string | null>(null);
 let memberListOpen = $state(true);
+let storageByInstance = $state<Record<string, import("$lib/omnidisc/types").OmnidiscStorage>>({});
 
 let drafts = $state<Record<string, string>>({});
 let guildsByInstance = $state<Record<string, OmnidiscGuild[]>>({});
@@ -554,12 +557,49 @@ export function selectChannel(guildId: string | null, channelId: string | null) 
   }
 }
 
+export function getStorage(
+  instanceId: string | null,
+): import("$lib/omnidisc/types").OmnidiscStorage | null {
+  return instanceId ? (storageByInstance[instanceId] ?? null) : null;
+}
+
+/// Files are deleted on a clock, so the client needs the clock to show a
+/// countdown rather than letting an attachment quietly stop working.
+export function getAttachmentTtlSeconds(instanceId: string | null): number {
+  return getStorage(instanceId)?.attachmentTtlSeconds ?? 1800;
+}
+
 export function isMemberListOpen(): boolean {
   return memberListOpen;
 }
 
 export function toggleMemberList() {
   memberListOpen = !memberListOpen;
+}
+
+const IMMERSIVE_KEY = "omnidisc.immersive";
+
+function loadImmersive(): boolean {
+  try {
+    return localStorage.getItem(IMMERSIVE_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+let immersive = $state(loadImmersive());
+
+export function isImmersive(): boolean {
+  return immersive;
+}
+
+export function toggleImmersive() {
+  immersive = !immersive;
+  try {
+    localStorage.setItem(IMMERSIVE_KEY, immersive ? "1" : "0");
+  } catch {
+    /* per-viewer convenience only */
+  }
 }
 
 export function getDraft(key: string): string {
@@ -1214,8 +1254,12 @@ function handleDispatch(instance: OmnidiscInstance, t: string, d: unknown) {
           delete next[message.authorId];
           typingByChannel = { ...typingByChannel, [message.channelId]: next };
         }
-        if (message.channelId === selectedChannelId) void ackChannel(message.channelId);
-        else void maybeNotify(instance, message);
+        if (message.channelId === selectedChannelId) {
+          void ackChannel(message.channelId);
+          if (!windowFocused()) void maybeNotify(instance, message);
+        } else {
+          void maybeNotify(instance, message);
+        }
       }
       return;
     }
@@ -1259,6 +1303,11 @@ function handleDispatch(instance: OmnidiscInstance, t: string, d: unknown) {
     case "MESSAGE_ACK": {
       const parsed = parseReadState(d);
       if (parsed) setReadState(parsed.channelId, { lastReadId: parsed.lastReadId, mentionCount: parsed.mentionCount });
+      return;
+    }
+    case "STORAGE_STATUS": {
+      const parsed = parseStorage(d);
+      if (parsed) storageByInstance = { ...storageByInstance, [instance.id]: parsed };
       return;
     }
     case "TYPING_START": {

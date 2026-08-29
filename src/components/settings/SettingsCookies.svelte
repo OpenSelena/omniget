@@ -747,7 +747,7 @@
     gap: 12px;
     padding: 10px 12px;
     background: color-mix(in oklab, var(--button) 55%, transparent);
-    border: 1px solid color-mix(in oklab, var(--content-border) 35%, transparent);
+    border: none;
     border-radius: var(--border-radius);
   }
   .bulk-info {
@@ -781,7 +781,7 @@
     gap: 6px;
     padding: 7px 14px;
     background: transparent;
-    border: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
+    border: none;
     border-radius: 999px;
     color: var(--secondary);
     font-size: 13px;
@@ -817,7 +817,7 @@
     padding: 40px 20px;
     color: var(--tertiary);
     background: color-mix(in oklab, var(--button) 15%, transparent);
-    border: 1px dashed color-mix(in oklab, var(--content-border) 50%, transparent);
+    border: none;
     border-radius: 14px;
   }
   .empty-state svg { color: var(--tertiary); opacity: 0.6; }
@@ -827,7 +827,7 @@
   .add-generic {
     padding: 14px 18px;
     border-radius: 14px;
-    border: 1px dashed color-mix(in oklab, var(--content-border) 40%, transparent);
+    border: none;
     margin-top: 4px;
   }
   .add-toggle {
@@ -848,7 +848,7 @@
     min-width: 200px;
     padding: 7px 12px;
     background: color-mix(in oklab, var(--button) 50%, transparent);
-    border: 1px solid color-mix(in oklab, var(--content-border) 40%, transparent);
+    border: none;
     border-radius: 8px;
     color: var(--secondary);
     font: inherit;
@@ -866,7 +866,7 @@
   .confirm {
     width: min(420px, 100%);
     background: var(--surface, var(--bg));
-    border: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
+    border: none;
     border-radius: 14px;
     padding: 20px;
     display: flex; flex-direction: column; gap: 12px;
@@ -895,7 +895,7 @@
   .importer-btn {
     padding: 6px 12px;
     border-radius: 8px;
-    border: 1px solid color-mix(in oklab, var(--content-border) 60%, transparent);
+    border: none;
     background: color-mix(in oklab, var(--button) 25%, transparent);
     color: var(--text);
     font-size: 12px;

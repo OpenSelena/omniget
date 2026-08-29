@@ -342,7 +342,7 @@
     width: min(420px, calc(100vw - 32px));
     max-height: min(70vh, 640px);
     background: rgba(20, 20, 20, 0.97);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none;
     border-radius: 14px;
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
     z-index: 109;
@@ -363,7 +363,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 14px 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: none;
   }
   .drawer-title { font-size: 13px; font-weight: 700; letter-spacing: 0.02em; }
   .muted { color: rgba(255, 255, 255, 0.5); font-weight: 500; }

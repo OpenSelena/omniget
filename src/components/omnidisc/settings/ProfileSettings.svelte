@@ -184,7 +184,7 @@
     flex-direction: column;
     gap: var(--space-2);
     padding: 0 var(--space-3) var(--space-3);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
     overflow: hidden;
@@ -247,7 +247,7 @@
     box-sizing: border-box;
     padding: 8px var(--space-2);
     border-radius: var(--radius-sm);
-    border: 1px solid var(--input-border);
+    border: none;
     background: var(--input-bg);
     color: var(--text);
     font: inherit;
@@ -260,7 +260,7 @@
     height: 34px;
     padding: 2px;
     border-radius: var(--radius-sm);
-    border: 1px solid var(--input-border);
+    border: none;
     background: var(--input-bg);
   }
 
@@ -287,7 +287,7 @@
   .ghost {
     align-self: flex-start;
     padding: 6px var(--space-3);
-    border: 1px solid var(--border-hi);
+    border: none;
     border-radius: var(--radius-sm);
     background: transparent;
     color: var(--text);
@@ -318,7 +318,7 @@
 
   .seg {
     padding: 6px var(--space-3);
-    border: 1px solid var(--border);
+    border: none;
     background: transparent;
     color: var(--text-muted);
     font: inherit;

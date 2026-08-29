@@ -433,7 +433,7 @@
     align-items: flex-start;
     gap: var(--padding);
     padding: var(--padding);
-    border-bottom: 1px solid var(--input-border);
+    border-bottom: none;
   }
 
   .panel-header > div {
@@ -566,7 +566,7 @@
     padding: var(--padding) calc(var(--padding) * 1.5);
     background: var(--button);
     border-radius: var(--border-radius);
-    border: 1px dashed var(--input-border);
+    border: none;
   }
 
   .empty-title {
@@ -677,7 +677,7 @@
   .input {
     padding: 7px 10px;
     background: var(--button-elevated);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     color: var(--secondary);
     font-family: inherit;
@@ -724,7 +724,7 @@
   .ghost-btn {
     padding: 6px 10px;
     background: transparent;
-    border: 1px solid var(--input-border);
+    border: none;
     color: var(--gray);
     border-radius: var(--border-radius);
     font-family: inherit;

@@ -341,7 +341,7 @@
   .ptab {
     padding: var(--space-2) var(--space-4);
     background: var(--surface-hi);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-sm);
     color: var(--text-muted);
     font-family: inherit;
@@ -392,7 +392,7 @@
     width: 100%;
     padding: var(--space-2) var(--space-3);
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-sm);
     color: var(--text);
     font-family: inherit;

@@ -31,6 +31,7 @@ base64 = "0.22"
 [target.'cfg(target_os = "macos")'.dependencies]
 screencapturekit = { version = "8.0.1", features = ["macos_14_0"] }
 objc2 = "0.6"
+block2 = "0.6"
 objc2-foundation = { version = "0.3", features = ["NSArray", "NSString", "NSGeometry", "NSThread", "NSKeyValueCoding", "NSObject", "NSValue"] }
 objc2-app-kit = { version = "0.3", features = ["NSView", "NSWindow", "NSResponder", "NSColor", "NSGraphics"] }
 objc2-quartz-core = { version = "0.3", features = ["CALayer", "CAMetalLayer"] }
@@ -38,6 +39,12 @@ objc2-core-foundation = { version = "0.3.2", features = ["CFDictionary", "CFNumb
 objc2-core-video = { version = "0.3.2", features = ["CVPixelBuffer", "CVImageBuffer", "CVBuffer", "CVReturn", "CVBase", "CVPixelBufferPool", "CVPixelFormatDescription"] }
 objc2-core-media = { version = "0.3.2", features = ["CMSampleBuffer", "CMFormatDescription", "CMTime", "CMBase", "CMBlockBuffer", "CMAttachment", "CMSync"] }
 objc2-video-toolbox = { version = "0.3.2", features = ["VTCompressionSession", "VTCompressionProperties", "VTSession", "VTErrors", "VTBase", "VTVideoEncoderList", "VTUtilities"] }
+
+[target.'cfg(target_os = "linux")'.dependencies]
+ashpd = { version = "0.13", default-features = false, features = ["tokio", "screencast"] }
+pipewire = "0.10"
+libspa = "0.10"
+yuv = "0.8"
 
 [target.'cfg(windows)'.dependencies]
 windows-core = "0.61"

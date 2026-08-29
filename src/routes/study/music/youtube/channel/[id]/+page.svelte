@@ -333,7 +333,7 @@
   .action {
     padding: 10px 18px;
     border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: none;
     background: rgba(255, 255, 255, 0.08);
     color: #fff;
     font: inherit;

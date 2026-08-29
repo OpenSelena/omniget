@@ -894,7 +894,7 @@
   .search-input {
     width: 100%;
     padding: 9px 12px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
     color: var(--secondary);
@@ -912,7 +912,7 @@
   }
   .chip {
     padding: 5px 12px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: 999px;
     background: var(--surface);
     color: var(--tertiary);
@@ -953,7 +953,7 @@
     gap: 10px;
     padding: 48px 20px;
     text-align: center;
-    border: 1px dashed var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
   }
@@ -985,7 +985,7 @@
     position: relative;
     display: flex;
     flex-direction: column;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
     transition: border-color 150ms ease, transform 100ms ease;
@@ -1143,7 +1143,7 @@
     right: 0;
     min-width: 140px;
     background: var(--surface);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     box-shadow: 0 4px 18px color-mix(in oklab, black 18%, transparent);
     display: flex;
@@ -1196,7 +1196,7 @@
     width: 30px;
     height: 30px;
     border-radius: 999px;
-    border: 1px solid var(--input-border);
+    border: none;
     background: var(--surface);
     color: var(--tertiary);
     text-decoration: none;
@@ -1213,7 +1213,7 @@
     gap: 5px;
     padding: 6px 10px;
     border-radius: 999px;
-    border: 1px solid var(--input-border);
+    border: none;
     background: var(--surface);
     color: var(--tertiary);
     font-size: 11px;
@@ -1254,7 +1254,7 @@
     cursor: not-allowed;
   }
   .btn-secondary {
-    border: 1px solid var(--input-border);
+    border: none;
     background: transparent;
     color: var(--secondary);
   }
@@ -1307,7 +1307,7 @@
     width: 100%;
     max-width: 440px;
     background: var(--surface);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     display: flex;
     flex-direction: column;
@@ -1318,7 +1318,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 14px 18px;
-    border-bottom: 1px solid var(--input-border);
+    border-bottom: none;
   }
   .dialog-head h2 {
     margin: 0;
@@ -1353,7 +1353,7 @@
     justify-content: flex-end;
     gap: 8px;
     padding: 12px 18px;
-    border-top: 1px solid var(--input-border);
+    border-top: none;
   }
 
   .field {
@@ -1368,7 +1368,7 @@
   .field-input {
     width: 100%;
     padding: 8px 11px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
     color: var(--secondary);
@@ -1397,7 +1397,7 @@
   .toast {
     pointer-events: auto;
     padding: 10px 14px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
     color: var(--secondary);

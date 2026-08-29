@@ -244,7 +244,7 @@
   .dialog {
     background: rgb(20, 20, 20);
     color: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none;
     border-radius: 14px;
     width: min(520px, 92vw);
     max-height: 88vh;
@@ -265,13 +265,13 @@
   .hint { margin: 0; color: rgba(255, 255, 255, 0.65); font-size: 13px; line-height: 1.5; }
 
   .connected-block { display: flex; flex-direction: column; gap: 10px; }
-  .connected-line { display: flex; align-items: baseline; gap: 8px; padding: 10px 12px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.06); border-radius: 8px; }
+  .connected-line { display: flex; align-items: baseline; gap: 8px; padding: 10px 12px; background: rgba(255, 255, 255, 0.03); border: none; border-radius: 8px; }
   .connected-label { font-size: 11px; color: rgba(255, 255, 255, 0.5); text-transform: uppercase; letter-spacing: 0.06em; }
   .connected-email { font-size: 13px; font-weight: 600; font-family: ui-monospace, monospace; }
 
   .field { display: flex; flex-direction: column; gap: 4px; }
   .field span { font-size: 11px; color: rgba(255, 255, 255, 0.55); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
-  .field input { padding: 10px 12px; background: rgba(0, 0, 0, 0.3); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 6px; color: rgba(255, 255, 255, 0.95); font-family: inherit; font-size: 13px; outline: none; }
+  .field input { padding: 10px 12px; background: rgba(0, 0, 0, 0.3); border: none; border-radius: 6px; color: rgba(255, 255, 255, 0.95); font-family: inherit; font-size: 13px; outline: none; }
   .field input:focus { border-color: var(--accent); }
   .field input:disabled { opacity: 0.5; }
 
@@ -296,7 +296,7 @@
   .row-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
   .cta { padding: 9px 18px; border: 0; border-radius: 999px; background: var(--accent); color: var(--on-accent, white); font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; }
   .cta:disabled { opacity: 0.5; cursor: default; }
-  .cta-secondary { padding: 7px 14px; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 999px; background: transparent; color: rgba(255, 255, 255, 0.95); font-family: inherit; font-size: 12px; cursor: pointer; }
+  .cta-secondary { padding: 7px 14px; border: none; border-radius: 999px; background: transparent; color: rgba(255, 255, 255, 0.95); font-family: inherit; font-size: 12px; cursor: pointer; }
   .cta-secondary:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
   .cta-secondary:disabled { opacity: 0.4; cursor: default; }
   .link { background: transparent; border: 0; color: rgba(255, 255, 255, 0.5); font-family: inherit; font-size: 11px; cursor: pointer; padding: 0; font-weight: 600; }

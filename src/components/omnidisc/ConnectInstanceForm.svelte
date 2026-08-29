@@ -387,7 +387,7 @@
     width: 100%;
     padding: 10px var(--space-3);
     border-radius: var(--radius-md);
-    border: 1px solid var(--input-border);
+    border: none;
     background: var(--input-bg);
     color: var(--text);
     font: inherit;
@@ -463,7 +463,7 @@
     gap: var(--space-2);
     border-radius: var(--radius-md);
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: none;
   }
 
   .step {
@@ -510,7 +510,7 @@
     gap: var(--space-2);
     padding: var(--space-4);
     border-radius: var(--radius-md);
-    border: 1px solid var(--border);
+    border: none;
     background: var(--surface);
   }
 

@@ -251,7 +251,7 @@
   .pages,
   .blocks {
     background: color-mix(in oklab, var(--input-border) 14%, transparent);
-    border: 1px solid color-mix(in oklab, var(--input-border) 50%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     padding: 16px;
   }
@@ -307,7 +307,7 @@
     flex-direction: column;
     gap: 2px;
     padding: 10px 12px;
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
     color: var(--text);

@@ -443,7 +443,7 @@
     gap: 2px;
     padding: 2px;
     background: var(--button-elevated);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
   }
   .tab {
@@ -506,7 +506,7 @@
     justify-content: space-between;
     gap: 12px;
     padding: 12px 16px;
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
   }
@@ -648,7 +648,7 @@
   }
   .modal {
     background: var(--popup-bg, var(--surface));
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     padding: 20px;
     max-width: 480px;
@@ -668,7 +668,7 @@
     display: flex;
     justify-content: flex-end;
     gap: 8px;
-    border-top: 1px solid color-mix(in oklab, var(--input-border) 40%, transparent);
+    border-top: none;
     padding-top: 12px;
   }
 
@@ -688,7 +688,7 @@
     justify-content: space-between;
     gap: 12px;
     padding: 8px 12px;
-    border: 1px solid color-mix(in oklab, var(--input-border) 50%, transparent);
+    border: none;
     border-radius: var(--border-radius);
   }
   .torrent-info {

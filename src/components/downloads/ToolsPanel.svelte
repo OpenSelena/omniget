@@ -731,7 +731,7 @@
     gap: 12px;
     padding: 16px 18px;
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-md, 12px);
   }
   .tool-head {
@@ -761,7 +761,7 @@
     min-width: 220px;
     padding: 8px 12px;
     background: var(--button);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius, 8px);
     color: var(--secondary);
     font: inherit;
@@ -797,7 +797,7 @@
   .thumb-chip {
     padding: 6px 12px;
     background: var(--button);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: 999px;
     color: var(--secondary);
     font: inherit;
@@ -829,7 +829,7 @@
   .tool-select {
     padding: 7px 10px;
     background: var(--button);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius, 8px);
     color: var(--secondary);
     font: inherit;
@@ -843,7 +843,7 @@
   .tool-btn.ghost {
     background: transparent;
     color: var(--secondary);
-    border: 1px solid var(--input-border);
+    border: none;
   }
   .tool-btn.ghost:hover:not(:disabled) {
     border-color: var(--accent);
@@ -853,7 +853,7 @@
     width: 88px;
     padding: 7px 10px;
     background: var(--button);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius, 8px);
     color: var(--secondary);
     font: inherit;
@@ -885,7 +885,7 @@
     gap: 10px;
     align-items: baseline;
     padding: 5px 0;
-    border-bottom: 1px solid color-mix(in oklab, var(--border) 40%, transparent);
+    border-bottom: none;
     font-size: var(--text-sm);
   }
   .cc-author {

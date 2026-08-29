@@ -395,7 +395,7 @@
   }
   .variant-select {
     padding: 5px 8px;
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-sm, 6px);
     background: var(--surface);
     color: var(--text);
@@ -439,7 +439,7 @@
   }
   .menu-btn {
     padding: 5px 10px;
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-sm, 6px);
     background: transparent;
     color: var(--text);
@@ -464,7 +464,7 @@
     z-index: 50;
     min-width: 240px;
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-md, 8px);
     box-shadow: var(--elev-2, 0 8px 24px rgba(0, 0, 0, 0.2));
     padding: 4px;
@@ -493,7 +493,7 @@
   }
   .menu-path {
     padding: 6px 12px 4px;
-    border-top: 1px solid var(--border);
+    border-top: none;
     margin-top: 4px;
   }
   .menu-path code {

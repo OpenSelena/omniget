@@ -161,7 +161,7 @@
     min-height: 180px;
     max-height: 60vh;
     background: var(--popup-bg);
-    border-top: 1px solid var(--content-border);
+    border-top: none;
     display: flex;
     flex-direction: column;
     z-index: 100;
@@ -173,7 +173,7 @@
     align-items: center;
     gap: 8px;
     padding: 8px 12px;
-    border-bottom: 1px solid var(--content-border);
+    border-bottom: none;
     flex-shrink: 0;
   }
 
@@ -189,7 +189,7 @@
     padding: 3px 8px;
     background: var(--button);
     color: var(--secondary);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: calc(var(--border-radius) - 4px);
     cursor: pointer;
   }
@@ -210,7 +210,7 @@
     padding: 4px 10px;
     background: var(--button);
     color: var(--secondary);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: calc(var(--border-radius) - 4px);
     cursor: pointer;
   }

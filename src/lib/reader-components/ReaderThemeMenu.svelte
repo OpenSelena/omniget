@@ -55,7 +55,7 @@
     margin-top: 4px;
     padding: 6px;
     background: var(--popup-bg, var(--primary));
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: 8px;
     box-shadow: 0 8px 24px var(--dialog-backdrop, rgba(0, 0, 0, 0.2));
     display: flex;
@@ -105,7 +105,7 @@
     width: 14px;
     height: 14px;
     border-radius: 50%;
-    border: 1px solid var(--content-border);
+    border: none;
     flex-shrink: 0;
   }
   .name {

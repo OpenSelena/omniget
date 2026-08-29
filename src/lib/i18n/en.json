@@ -389,7 +389,9 @@
     "mode_batch": "Batch",
     "mode_torrent": "Torrent",
     "mode_p2p": "P2P",
-    "inspector_title": "Download options"
+    "inspector_title": "Download options",
+    "hero_title": "OmniGet",
+    "hero_subtitle": "Paste a link or search. We'll take it from there."
   },
   "tools": {
     "tab": "Tools",
@@ -1637,7 +1639,8 @@
     "cookie_error_message": "Automatic cookie detection only works with Firefox. Chrome, Edge, and other Chromium-based browsers block cookie access. To use cookies: install Firefox and log in to your accounts there, or export a cookies.txt file from your browser and set it in Settings > Download > Cookie file.",
     "cookie_file_label": "Cookie file (cookies.txt)",
     "cookie_file_choose": "Choose file",
-    "cookie_file_hint": "Export cookies from your browser using an extension like 'Get cookies.txt LOCALLY' and select the file here. This is required for Chrome/Edge users who need authenticated downloads."
+    "cookie_file_hint": "Export cookies from your browser using an extension like 'Get cookies.txt LOCALLY' and select the file here. This is required for Chrome/Edge users who need authenticated downloads.",
+    "dismiss": "Dismiss"
   },
   "platforms": {
     "bilibili": {
@@ -4226,7 +4229,9 @@
       "sign_in": "Sign in again",
       "reconnect": "Reconnect",
       "remove": "Forget this server",
-      "insecure": "{{name}} — unencrypted connection (http)"
+      "insecure": "{{name}} — unencrypted connection (http)",
+      "immersive_enter": "Focus mode — hide the app sidebar",
+      "immersive_exit": "Exit focus mode — show the app sidebar"
     },
     "channels": {
       "title": "Channels",
@@ -4511,7 +4516,8 @@
       "rtt": "Ping",
       "loss": "Loss",
       "encode": "Encode",
-      "no_active": "No stream running yet."
+      "no_active": "No stream running yet.",
+      "preview_alt": "Live preview of your shared screen"
     },
     "emoji": {
       "title": "Emoji",
@@ -4907,7 +4913,9 @@
       "encrypted_note": "Encrypted — save it to open it",
       "too_large": "That file is bigger than this server accepts ({{limit}}).",
       "too_many": "You can attach up to {{count}} files to one message.",
-      "unreadable": "OmniGet could not read that file."
+      "unreadable": "OmniGet could not read that file.",
+      "expires_in": "expires in {{minutes}} min",
+      "expired": "This file expired and was deleted from the server."
     },
     "e2ee": {
       "dm_locked": "Only you and {{name}} can read these messages",
@@ -4954,6 +4962,12 @@
       "in_call": "In a call",
       "leave": "Leave the call",
       "joining": "Connecting…"
+    },
+    "storage": {
+      "warning": "This server's disk is {{percent}}% full. Files are deleted after {{minutes}} minutes anyway; save anything you need now.",
+      "critical": "This server's disk is {{percent}}% full. Every stored file is about to be deleted to free space.",
+      "purged": "The disk filled up, so all {{count}} stored files were deleted. Messages are untouched — only attachments are gone.",
+      "retention_note": "Files are deleted from the server after {{minutes}} minutes."
     }
   },
   "ytdlp_missing_banner": {

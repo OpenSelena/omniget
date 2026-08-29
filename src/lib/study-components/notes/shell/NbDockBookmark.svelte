@@ -69,7 +69,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 8px 12px;
-    border-bottom: 1px solid color-mix(in oklab, var(--content-border) 30%, transparent);
+    border-bottom: none;
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.05em;

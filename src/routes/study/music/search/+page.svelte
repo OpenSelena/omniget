@@ -179,7 +179,7 @@
     gap: 8px;
     padding: 8px 14px;
     background: color-mix(in oklab, var(--button) 60%, transparent);
-    border: 1px solid color-mix(in oklab, var(--content-border) 60%, transparent);
+    border: none;
     border-radius: 999px;
     width: min(100%, 480px);
   }
@@ -231,7 +231,7 @@
     display: inline-flex;
     padding: 6px 14px;
     background: color-mix(in oklab, var(--button) 60%, transparent);
-    border: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
+    border: none;
     border-radius: 999px;
     color: var(--secondary);
     font-size: 12px;

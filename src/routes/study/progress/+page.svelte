@@ -653,7 +653,7 @@
     gap: calc(var(--padding) * 2);
     align-items: center;
     padding: calc(var(--padding) * 2);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--button-elevated);
   }
@@ -705,7 +705,7 @@
     flex-direction: column;
     gap: var(--space-3);
     padding: var(--space-5);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-md);
     background: var(--surface);
     box-shadow: var(--elev-1);
@@ -780,7 +780,7 @@
     flex-direction: column;
     gap: 8px;
     padding: var(--padding);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
     text-decoration: none;
@@ -1076,7 +1076,7 @@
     align-items: center;
     gap: 10px;
     padding: 10px 12px;
-    border: 1px solid color-mix(in oklab, var(--input-border) 50%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     background: color-mix(in oklab, var(--accent) 4%, transparent);
   }

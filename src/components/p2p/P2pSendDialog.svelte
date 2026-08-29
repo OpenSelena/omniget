@@ -480,7 +480,7 @@
     font-size: 13px;
     font-weight: 500;
     background: var(--button);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     color: var(--secondary);
     cursor: pointer;
@@ -589,7 +589,7 @@
     font-size: 13px;
     font-weight: 500;
     background: transparent;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     color: var(--gray);
     cursor: pointer;

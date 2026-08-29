@@ -431,7 +431,7 @@
   .filter {
     flex: 1;
     padding: 8px 12px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
     color: var(--text);
@@ -613,7 +613,7 @@
   }
   .modal {
     background: var(--popup-bg, var(--surface));
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     padding: 20px;
     max-width: 460px;
@@ -633,7 +633,7 @@
   .modal-input {
     width: 100%;
     padding: 8px 12px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
     color: var(--text);
@@ -650,7 +650,7 @@
     display: flex;
     justify-content: flex-end;
     gap: 8px;
-    border-top: 1px solid color-mix(in oklab, var(--input-border) 40%, transparent);
+    border-top: none;
     padding-top: 12px;
   }
 

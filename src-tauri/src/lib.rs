@@ -812,13 +812,20 @@ pub fn run() {
 
             Ok(())
         })
-        .on_window_event(|window, event| {
-            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-                if window.label() == "main" {
-                    api.prevent_close();
-                    let _ = window.hide();
-                }
+        .on_window_event(|window, event| match event {
+            tauri::WindowEvent::CloseRequested { api, .. } if window.label() == "main" => {
+                api.prevent_close();
+                let _ = window.hide();
             }
+            tauri::WindowEvent::Destroyed
+                if window.label().starts_with("omnidisc-stream-") =>
+            {
+                commands::omnidisc::stream::on_stream_window_destroyed(
+                    &window.app_handle().clone(),
+                    window.label(),
+                );
+            }
+            _ => {}
         })
         .invoke_handler(tauri::generate_handler![
             commands::auth_webview::open_auth_webview,

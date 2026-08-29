@@ -173,7 +173,7 @@
   }
   .dock-head {
     padding: 8px 12px;
-    border-bottom: 1px solid color-mix(in oklab, var(--content-border) 30%, transparent);
+    border-bottom: none;
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
@@ -185,7 +185,7 @@
   }
   .tabs {
     display: flex;
-    border-bottom: 1px solid color-mix(in oklab, var(--content-border) 25%, transparent);
+    border-bottom: none;
   }
   .tab {
     flex: 1;
@@ -232,7 +232,7 @@
   }
   .ref {
     padding: 6px 10px;
-    border-bottom: 1px solid color-mix(in oklab, var(--content-border) 18%, transparent);
+    border-bottom: none;
   }
   .ref-page {
     background: transparent;
@@ -270,7 +270,7 @@
     justify-content: space-between;
     align-items: baseline;
     padding: 6px 10px;
-    border-bottom: 1px solid color-mix(in oklab, var(--content-border) 18%, transparent);
+    border-bottom: none;
     gap: 8px;
   }
   .key {

@@ -61,7 +61,7 @@
     max-height: 420px;
     overflow-y: auto;
     background: var(--surface);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     box-shadow: 0 12px 32px color-mix(in oklab, black 28%, transparent);
     padding: 4px;
@@ -73,7 +73,7 @@
   .group + .group {
     margin-top: 6px;
     padding-top: 6px;
-    border-top: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border-top: none;
   }
   .group-label {
     font-size: 10px;

@@ -191,7 +191,7 @@
   .dialog {
     background: rgb(20, 20, 20);
     color: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none;
     border-radius: 14px;
     width: min(540px, 92vw);
     max-height: 86vh;
@@ -205,7 +205,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 16px 18px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: none;
   }
   .head h3 {
     margin: 0;
@@ -250,7 +250,7 @@
   .field input, .field select {
     padding: 10px 12px;
     background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: none;
     border-radius: 10px;
     color: white;
     font-size: 14px;
@@ -283,7 +283,7 @@
     flex: 1;
     padding: 10px 12px;
     background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: none;
     border-radius: 10px;
     color: rgba(255, 255, 255, 0.6);
     font-family: monospace;
@@ -293,7 +293,7 @@
   .cta-ghost {
     padding: 10px 14px;
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    border: none;
     border-radius: 999px;
     color: rgba(255, 255, 255, 0.85);
     font-size: 12px;

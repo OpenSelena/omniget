@@ -606,7 +606,7 @@
     }
   }
   .left {
-    border-right: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border-right: none;
     padding: 12px;
     display: flex;
     flex-direction: column;
@@ -769,7 +769,7 @@
     align-items: center;
     gap: 12px;
     padding: 10px 12px;
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
     transition: background 120ms ease;
@@ -830,7 +830,7 @@
     width: 100%;
     max-width: 460px;
     background: var(--surface);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     padding: 20px;
     display: flex;
@@ -848,7 +848,7 @@
   }
   .modal input {
     padding: 10px 12px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
     color: var(--text);
@@ -899,7 +899,7 @@
     margin: 0;
     padding: 4px;
     background: var(--bg);
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     max-height: 320px;
     overflow-y: auto;

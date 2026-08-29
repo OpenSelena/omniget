@@ -42,6 +42,11 @@
   </branding>
   <content_rating type="oars-1.1" />
   <releases>
+    <release version="0.9.0" date="2026-08-29">
+      <description>
+        <p>Chat ships turned on, already connected, with voice, video and screen sharing built in. Screen sharing now reaches viewers: streams are discovered from the media layer rather than from a status message that could go missing, and the person sharing sees a preview of their own screen. Calls and screen sharing work on Linux through the desktop's screen-sharing portal on both X11 and Wayland, using VAAPI or NVENC where the machine has them. The macOS microphone works again — the app now asks for the permission macOS requires, where before the system quietly handed it an empty microphone. Files sent through chat are deleted from the server after thirty minutes and are encrypted at rest until then, so what the server no longer holds cannot leak later; each attachment shows how long it has left. If the disk fills, everyone is warned while there is still room. Animations and the share preview stop while the window is in the background, so a chat behind a game costs as little as possible.</p>
+      </description>
+    </release>
     <release version="0.8.9" date="2026-08-28">
       <description>
         <p>Menus in the chat opened where nothing could see them, so the buttons that opened them looked broken. The server rail hides horizontal overflow because it scrolls, and its plus menu was placed outside the rail's width, so clicking it opened a menu the browser then erased. The message list was worse: every row is layout-contained for scrolling performance, which anchors even a fixed-position element to that one row, so the message menu and the reaction picker were cut off for anything in the lower half of the conversation and the image viewer opened as a sliver instead of filling the window. Menus are now measured from the button that opens them and drawn outside the list, flipping above when they would fall off the bottom, and they close when you click away, press Escape, resize or scroll.</p>

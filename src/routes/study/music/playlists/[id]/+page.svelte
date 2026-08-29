@@ -521,7 +521,7 @@
   .play-big:disabled { opacity: 0.4; cursor: default; }
   .ghost-big {
     width: 40px; height: 40px; padding: 0;
-    background: transparent; border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    background: transparent; border: none;
     border-radius: 50%; color: var(--tertiary); cursor: pointer;
     display: grid; place-items: center;
     transition: color 120ms ease, border-color 120ms ease;
@@ -577,7 +577,7 @@
   .ico {
     width: 26px; height: 26px; padding: 0;
     background: transparent;
-    border: 1px solid color-mix(in oklab, var(--content-border) 60%, transparent);
+    border: none;
     border-radius: 4px;
     color: var(--tertiary);
     cursor: pointer;
@@ -616,7 +616,7 @@
   }
   .confirm-dialog {
     background: var(--surface, var(--button-elevated));
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: 12px;
     padding: 20px;
     max-width: 380px;
@@ -627,7 +627,7 @@
   .confirm-actions { display: flex; justify-content: flex-end; gap: 8px; }
   .confirm-actions .ghost {
     padding: 8px 14px; background: transparent;
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     border-radius: 8px; color: var(--secondary); font-family: inherit; font-size: 13px; cursor: pointer;
   }
   .confirm-actions .danger {

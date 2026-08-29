@@ -163,7 +163,7 @@
   }
   .dialog {
     background: var(--surface, var(--button-elevated));
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: 12px;
     width: min(440px, 92vw);
     max-height: 80vh;
@@ -175,7 +175,7 @@
   .head {
     position: relative;
     padding: 16px 18px 12px;
-    border-bottom: 1px solid color-mix(in oklab, var(--content-border) 60%, transparent);
+    border-bottom: none;
   }
   .head h3 {
     margin: 0;

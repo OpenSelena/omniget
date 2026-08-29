@@ -578,7 +578,7 @@
     gap: 14px;
     padding: 14px 18px;
     background: var(--fill-1);
-    border: 1px solid rgba(255, 255, 255, 0.07);
+    border: none;
     border-radius: 14px;
     color: var(--text);
     text-decoration: none;

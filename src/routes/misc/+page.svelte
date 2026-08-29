@@ -109,7 +109,7 @@
     align-items: flex-start;
     gap: 14px;
     padding: 16px 18px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
     text-decoration: none;

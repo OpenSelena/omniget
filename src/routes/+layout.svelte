@@ -12,6 +12,7 @@
   import {
     getUnreadCount as getChatUnreadCount,
     getMentionTotal as getChatMentionCount,
+    isImmersive,
     initOmnidisc,
   } from "$lib/stores/omnidisc-store.svelte";
   import { getSettings } from "$lib/stores/settings-store.svelte";
@@ -31,7 +32,7 @@
   import { ensureTrackerNotifications } from "$lib/tracker-notifications.svelte";
   import { t, locale, isRtlLocale } from "$lib/i18n";
   import { get } from "svelte/store";
-  import { CORE_NAV_ITEMS, type NavItem } from "$lib/nav-config";
+  import { CORE_NAV_ITEMS, pluginIconForRoute, type NavItem } from "$lib/nav-config";
   import {
     STUDY_FOCUS_ENABLED,
     STUDY_PROGRESS_ENABLED,
@@ -50,7 +51,7 @@
   );
 
   let coreNavItems = $derived(
-    CORE_NAV_ITEMS.filter((item) => item.href !== "/omnidisc" || (getSettings()?.omnidisc?.enabled ?? false))
+    CORE_NAV_ITEMS.filter((item) => item.href !== "/omnidisc" || (getSettings()?.omnidisc?.enabled ?? true))
   );
 
   let allNav = $derived([...coreNavItems, ...leagueNavItems, ...pluginNavItems].sort((a, b) => (a.order ?? 50) - (b.order ?? 50)));
@@ -69,6 +70,7 @@
 
   let isStudyRoute = $derived(page.url.pathname.startsWith("/study"));
   let isStreamPopout = $derived(page.url.pathname === "/omnidisc/stream");
+  let hideAppSidebar = $derived(page.url.pathname.startsWith("/omnidisc") && isImmersive());
   let isCoreRoute = $derived(
     page.url.pathname === "/" ||
     page.url.pathname.startsWith("/downloads") ||
@@ -112,11 +114,12 @@
             if (n.route === "/study/progress" && !STUDY_PROGRESS_ENABLED) continue;
             if (n.route === "/study/achievements" && !STUDY_ACHIEVEMENTS_ENABLED) continue;
             if (n.route === "/study/notes" && !STUDY_NOTES_ENABLED) continue;
+            const icon = pluginIconForRoute(n.route);
             items.push({
               href: n.route,
               label: n.label[get(locale)] || n.label["en"] || p.id,
-              icon: "plugin",
-              iconSvg: n.icon_svg || undefined,
+              icon,
+              iconSvg: icon === "plugin" ? n.icon_svg || undefined : undefined,
               group: "plugins",
               pluginId: p.id,
               order: n.order,
@@ -131,7 +134,7 @@
 
   let omnidiscStarted = false;
   $effect(() => {
-    if (omnidiscStarted || !(getSettings()?.omnidisc?.enabled ?? false)) return;
+    if (omnidiscStarted || !(getSettings()?.omnidisc?.enabled ?? true)) return;
     omnidiscStarted = true;
     void initOmnidisc();
   });
@@ -274,10 +277,9 @@
   $effect(() => {
     document.documentElement.setAttribute("data-shell", "mac");
     // O shell é o mesmo em todas as plataformas, mas os controles de janela
-    // não: o macOS põe fechar/minimizar à esquerda, Windows e Linux à direita.
-    // Sem isto o app reservava 78px à esquerda em todo mundo (espaço morto fora
-    // do macOS) e colocava os próprios botões exatamente onde o Windows desenha
-    // o botão de fechar.
+    // não: o macOS põe fechar/minimizar à esquerda (sobre a sidebar, titlebar
+    // overlay), Windows e Linux à direita. Sem data-platform o app reservava
+    // espaço morto e encostava a busca no botão de fechar.
     document.documentElement.setAttribute("data-platform", isMac() ? "macos" : "other");
     document.documentElement.setAttribute("dir", isRtlLocale($locale) ? "rtl" : "ltr");
     document.documentElement.setAttribute("lang", $locale || "en");
@@ -312,7 +314,9 @@
   </div>
 {:else}
 <div class="shell" data-reduce-motion={settings?.accessibility?.reduce_motion} data-reduce-transparency={settings?.accessibility?.reduce_transparency}>
-  <AppSidebar {primaryNav} {appNav} {pluginNav} {badgeLabel} {chatBadgeCount} />
+  {#if !hideAppSidebar}
+    <AppSidebar {primaryNav} {appNav} {pluginNav} {badgeLabel} {chatBadgeCount} />
+  {/if}
 
   <div class="shell-body">
     <AppToolbar />
@@ -344,7 +348,14 @@
           {@render children()}
         </div>
       {:else if isCoreRoute}
-        <div class="core-shell">
+        <div
+          class="core-shell"
+          class:core-shell--flush={
+            page.url.pathname === "/" ||
+            page.url.pathname.startsWith("/downloads") ||
+            page.url.pathname.startsWith("/settings")
+          }
+        >
           {@render children()}
         </div>
       {:else}
@@ -413,15 +424,22 @@
     flex-direction: column;
   }
 
+  .content:has(.core-shell--flush) {
+    overflow: hidden;
+  }
+
   .core-shell {
     flex: 1;
     display: flex;
     flex-direction: column;
     min-height: 0;
-    max-width: 1200px;
     width: 100%;
-    margin: 0 auto;
-    padding: var(--padding);
+    margin: 0;
+    padding: var(--space-3) var(--space-4) var(--space-4);
+  }
+
+  .core-shell--flush {
+    padding: 0;
   }
 
   .study-shell {

@@ -1,5 +1,6 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
+  import { page } from "$app/state";
   import { t } from "$lib/i18n";
   import { translateBackendError } from "$lib/error-translate";
   import {
@@ -28,6 +29,7 @@
     isSpeaking,
     joinVoice,
   } from "$lib/stores/omnidisc-voice-store.svelte";
+  import { isStreamer } from "$lib/stores/omnidisc-stream-store.svelte";
   import type { ChannelKind, OmnidiscChannel } from "$lib/omnidisc/types";
   import OmnidiscPrompt from "./OmnidiscPrompt.svelte";
   import VoiceBar from "./VoiceBar.svelte";
@@ -35,7 +37,8 @@
 
   let instance = $derived(getSelectedInstance());
   let guilds = $derived(getGuilds(instance?.id ?? null));
-  let guild = $derived(getGuild(getSelectedGuildId()) ?? guilds[0] ?? null);
+  let homeMode = $derived(!page.url.pathname.startsWith("/omnidisc/g/"));
+  let guild = $derived(homeMode ? null : (getGuild(getSelectedGuildId()) ?? guilds[0] ?? null));
   let dms = $derived(getDms(instance?.id ?? null));
   let selectedChannelId = $derived(getSelectedChannelId());
   let isOwner = $derived(canManageGuild(guild?.id ?? null));
@@ -57,21 +60,55 @@
   let inviteError = $state<string | null>(null);
   let inviteTimer: ReturnType<typeof setTimeout> | null = null;
 
+  interface ChannelGroup {
+    id: string;
+    category: string;
+    channels: OmnidiscChannel[];
+  }
+
   let groups = $derived.by(() => {
-    if (!guild) return [] as { category: string; channels: OmnidiscChannel[] }[];
-    const map = new Map<string, OmnidiscChannel[]>();
+    if (!guild) return [] as ChannelGroup[];
+    const map = new Map<string, ChannelGroup>();
     for (const channel of guild.channels) {
       if (channel.kind === "category") {
-        if (!map.has(channel.name)) map.set(channel.name, []);
+        if (!map.has(channel.id)) map.set(channel.id, { id: channel.id, category: channel.name, channels: [] });
         continue;
       }
-      const key = channel.category ?? "";
-      const list = map.get(key) ?? [];
-      list.push(channel);
-      map.set(key, list);
+      const key = channel.parentId ?? "";
+      const group = map.get(key) ?? { id: key, category: channel.category ?? "", channels: [] };
+      group.channels.push(channel);
+      map.set(key, group);
     }
-    return [...map.entries()].map(([category, channels]) => ({ category, channels }));
+    return [...map.values()];
   });
+
+  const COLLAPSED_KEY = "omnidisc.collapsed-categories";
+
+  function loadCollapsed(): Record<string, boolean> {
+    try {
+      return JSON.parse(localStorage.getItem(COLLAPSED_KEY) ?? "{}") as Record<string, boolean>;
+    } catch {
+      return {};
+    }
+  }
+
+  let collapsed = $state<Record<string, boolean>>(loadCollapsed());
+
+  function toggleCategory(id: string) {
+    collapsed = { ...collapsed, [id]: !collapsed[id] };
+    try {
+      localStorage.setItem(COLLAPSED_KEY, JSON.stringify(collapsed));
+    } catch {
+      /* per-viewer convenience only */
+    }
+  }
+
+  function visibleChannels(group: ChannelGroup): OmnidiscChannel[] {
+    if (!collapsed[group.id]) return group.channels;
+    return group.channels.filter(
+      (c) => c.id === selectedChannelId || isUnread(c.id) || getMentionCount(c.id) > 0,
+    );
+  }
 
   function openCreate() {
     createError = null;
@@ -142,8 +179,8 @@
 <aside class="channel-list" aria-label={$t("omnidisc.channels.title")}>
   <header class="head">
     <div class="head-text">
-      <h2 class="title">{guild?.name ?? instance?.name ?? $t("omnidisc.title")}</h2>
-      {#if instance && guild}
+      <h2 class="title">{homeMode ? (instance?.name || $t("omnidisc.title")) : (guild?.name || instance?.name || $t("omnidisc.title"))}</h2>
+      {#if instance?.name && guild}
         <span class="sub">{instance.name}</span>
       {/if}
     </div>
@@ -170,7 +207,7 @@
   {/if}
 
   <nav class="groups">
-    {#if dms.length > 0 || (!guild && instance)}
+    {#if homeMode && instance}
       <h3 class="category">{$t("omnidisc.channels.dms")}</h3>
       {#if dms.length === 0}
         <p class="empty-body inset">{$t("omnidisc.channels.no_dms")}</p>
@@ -200,7 +237,7 @@
     {/if}
 
     {#if !guild}
-      {#if instance && guilds.length === 0}
+      {#if !homeMode && instance && guilds.length === 0}
         <div class="empty">
           <p class="empty-title">{$t("omnidisc.channels.no_guilds")}</p>
           <p class="empty-body">{$t("omnidisc.channels.no_guilds_hint")}</p>
@@ -212,12 +249,20 @@
         <p class="empty-body">{$t("omnidisc.channels.empty_hint")}</p>
       </div>
     {:else}
-      {#each groups as group (group.category)}
+      {#each groups as group (group.id)}
         {#if group.category}
-          <h3 class="category">{group.category}</h3>
+          <button
+            type="button"
+            class="category cat-toggle"
+            aria-expanded={!collapsed[group.id]}
+            onclick={() => toggleCategory(group.id)}
+          >
+            <svg class="chev" class:closed={collapsed[group.id]} viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+            {group.category}
+          </button>
         {/if}
         <ul class="channels">
-          {#each group.channels as channel (channel.id)}
+          {#each visibleChannels(group) as channel (channel.id)}
             <li>
               {#if channel.kind === "voice"}
                 {@const count = getVoiceMemberCount(channel.id)}
@@ -261,6 +306,7 @@
                       <li class="voice-member" class:speaking={talking}>
                         <span class="mini-avatar" aria-hidden="true">{initial(name)}</span>
                         <span class="member-name">{name}</span>
+                        {#if m.streaming || isStreamer(m.userId)}<span class="live-mini">{$t("omnidisc.stream.live")}</span>{/if}
                         {#if talking}<span class="sr-only">{$t("omnidisc.voice.speaking")}</span>{/if}
                         {#if m.selfDeaf || m.serverDeaf}
                           <svg class="flag" viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-label={$t("omnidisc.voice.user_deafened", { name })}><path d="M4 14v-2a8 8 0 0 1 16 0v2" /><rect x="3" y="14" width="4" height="6" rx="1" /><rect x="17" y="14" width="4" height="6" rx="1" /><path d="M4 4l16 16" /></svg>
@@ -344,7 +390,7 @@
     flex-direction: column;
     min-height: 0;
     background: var(--surface-mut);
-    border-right: 1px solid var(--border);
+    border-right: none;
   }
 
   .head {
@@ -353,7 +399,7 @@
     justify-content: space-between;
     gap: var(--space-2);
     padding: var(--space-3) var(--space-3) var(--space-3) var(--space-4);
-    border-bottom: 1px solid var(--border);
+    border-bottom: none;
     min-height: 48px;
   }
 
@@ -441,6 +487,45 @@
     letter-spacing: var(--track-caps);
     text-transform: uppercase;
     color: var(--text-muted);
+  }
+
+  .cat-toggle {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    width: calc(100% - var(--space-2) * 2);
+    padding: 0;
+    border: none;
+    background: none;
+    font: inherit;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .cat-toggle:hover {
+    color: var(--text);
+  }
+
+  .cat-toggle:focus-visible {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+  }
+
+  .chev {
+    transition: transform 120ms ease;
+    flex-shrink: 0;
+  }
+
+  .chev.closed {
+    transform: rotate(-90deg);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .chev {
+      transition: none;
+    }
   }
 
   .channels {
@@ -575,6 +660,17 @@
     white-space: nowrap;
   }
 
+  .live-mini {
+    flex: 0 0 auto;
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--on-accent);
+    background: var(--danger);
+    padding: 0 4px;
+    border-radius: var(--radius-sm);
+  }
+
   .flag {
     flex: 0 0 12px;
     color: var(--text-muted);
@@ -594,7 +690,7 @@
     padding: var(--space-2);
     border-radius: var(--radius-sm);
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: none;
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
@@ -620,7 +716,7 @@
   .mini {
     flex: 1;
     padding: 4px var(--space-2);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-sm);
     background: var(--surface-mut);
     color: var(--text);
@@ -697,7 +793,7 @@
     width: 100%;
     margin-top: var(--space-3);
     padding: 6px var(--space-2);
-    border: 1px dashed var(--border-hi);
+    border: none;
     border-radius: var(--radius-sm);
     background: transparent;
     color: var(--text-muted);
@@ -759,7 +855,7 @@
     gap: var(--space-2);
     padding: 8px var(--space-3);
     border-radius: var(--radius-md);
-    border: 1px solid var(--border);
+    border: none;
     color: var(--text-muted);
     font-size: var(--text-sm);
     cursor: pointer;

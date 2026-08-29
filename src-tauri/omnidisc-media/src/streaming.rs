@@ -258,6 +258,12 @@ pub async fn start_stream(
                 simulcast: false,
                 video_encoder: match path {
                     PublishPath::PreEncoded => VideoEncoderBackend::PreEncoded,
+                    // On Linux the SDK's own VAAPI/NVENC backends replace the
+                    // encoder we write by hand elsewhere, so ask for one by
+                    // name instead of leaving the choice to `Auto`.
+                    #[cfg(target_os = "linux")]
+                    PublishPath::Raw => encode::preferred_backend(),
+                    #[cfg(not(target_os = "linux"))]
                     PublishPath::Raw => VideoEncoderBackend::Auto,
                 },
                 video_encoding: Some(VideoEncoding {

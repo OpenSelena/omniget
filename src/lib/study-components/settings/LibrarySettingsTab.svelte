@@ -117,7 +117,7 @@
     padding: 16px;
     margin-top: 16px;
     background: color-mix(in oklab, var(--accent) 4%, transparent);
-    border: 1px solid color-mix(in oklab, var(--content-border) 40%, transparent);
+    border: none;
     border-radius: 8px;
   }
 

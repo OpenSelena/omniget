@@ -172,7 +172,7 @@
     width: 40px;
     height: 40px;
     padding: 0;
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     border-radius: 50%;
     background: transparent;
     color: var(--tertiary);

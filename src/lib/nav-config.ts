@@ -18,3 +18,14 @@ export const CORE_NAV_ITEMS: NavItem[] = [
   { href: "/settings", labelKey: "nav.settings", icon: "settings", group: "app", order: 40 },
   { href: "/about", labelKey: "nav.about", icon: "about", group: "app", order: 50 },
 ];
+
+export function pluginIconForRoute(route: string): string {
+  if (route.startsWith("/courses")) return "courses";
+  if (route.startsWith("/convert")) return "convert";
+  if (route.startsWith("/telegram")) return "telegram";
+  if (route.startsWith("/study/music")) return "music";
+  if (route.startsWith("/study")) return "study";
+  if (route.includes("/library")) return "library";
+  if (route.startsWith("/misc")) return "misc";
+  return "plugin";
+}

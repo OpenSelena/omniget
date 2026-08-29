@@ -127,6 +127,7 @@ let devices = $state<AudioDevices>({ inputs: [], outputs: [] });
 let devicesLoading = $state(false);
 let micTesting = $state(false);
 let micLevel = $state<{ rmsDb: number; peak: number; at: number }>({ rmsDb: -100, peak: 0, at: 0 });
+let micSilent = $state(false);
 
 let incoming = $state<IncomingCall | null>(null);
 let ringNow = $state(Date.now());
@@ -255,6 +256,10 @@ export function micLevelStale(now = Date.now()): boolean {
   return micTesting && micLevel.at > 0 && now - micLevel.at > MIC_SILENCE_AFTER_MS;
 }
 
+export function isMicSilent(): boolean {
+  return micSilent;
+}
+
 export function isInVoiceChannel(channelId: string): boolean {
   return session?.channelId === channelId && connState !== "idle";
 }
@@ -329,6 +334,7 @@ function handleEvent(p: VoiceEventPayload) {
     }
     case "level": {
       micLevel = { rmsDb: p.rms_db ?? -100, peak: p.peak ?? 0, at: Date.now() };
+      if ((p.peak ?? 0) > 0 && micSilent) micSilent = false;
       return;
     }
     case "device": {
@@ -381,6 +387,10 @@ function handleDeviceEvent(kind: DeviceKind, status: DeviceStatus, cause?: Devic
       showToast("error", `${translate("omnidisc.voice.listen_only")} ${translateBackendError(micError, translate)}`);
       return;
     case "silent":
+      if (kind === "input") {
+        micSilent = true;
+        return;
+      }
       outputError = deviceErrorCode("output", cause);
       showToast("error", `${translate("omnidisc.voice.no_output")} ${translateBackendError(outputError, translate)}`);
       return;

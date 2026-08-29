@@ -182,7 +182,7 @@
   .modal {
     width: min(420px, 96vw);
     background: var(--surface);
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: 16px;
     overflow: hidden;
     display: flex;
@@ -191,7 +191,7 @@
   .head {
     position: relative;
     padding: 20px 24px 16px;
-    border-bottom: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
+    border-bottom: none;
   }
   .head h2 {
     margin: 0;
@@ -296,14 +296,14 @@
   }
   .foot {
     padding: 12px 20px;
-    border-top: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
+    border-top: none;
     display: flex;
     justify-content: flex-end;
   }
   .ghost-btn {
     padding: 8px 14px;
     border-radius: 8px;
-    border: 1px solid var(--content-border);
+    border: none;
     background: transparent;
     color: var(--text);
     font-size: 13px;

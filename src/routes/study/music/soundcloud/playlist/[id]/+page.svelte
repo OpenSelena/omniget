@@ -266,7 +266,7 @@
   .play-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 32px; background: #ff5500; color: white; border: 0; border-radius: 999px; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 200ms ease, transform 200ms ease; }
   .play-btn:hover:not(:disabled) { background: #ff7733; transform: scale(1.04); }
   .play-btn:disabled { opacity: 0.5; cursor: default; }
-  .bulk-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.92); border: 1px solid rgba(255,255,255,0.12); border-radius: 999px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 200ms ease; }
+  .bulk-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 22px; background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.92); border: none; border-radius: 999px; font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: background 200ms ease; }
   .bulk-btn:hover:not(:disabled) { background: rgba(255,255,255,0.12); }
   .bulk-btn:disabled { opacity: 0.6; cursor: not-allowed; }
   .actions { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }

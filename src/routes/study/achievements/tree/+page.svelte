@@ -349,7 +349,7 @@
   }
   .family {
     background: var(--surface);
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     padding: calc(var(--padding) * 0.9);
     display: flex;

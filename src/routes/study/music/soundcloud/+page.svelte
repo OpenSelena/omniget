@@ -481,16 +481,16 @@
   .cta-import { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; background: #ff5500; color: white; border: 0; border-radius: 999px; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; transition: background 200ms ease; }
   .cta-import:hover { background: #ff7733; }
   .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.65); display: grid; place-items: center; z-index: 999; }
-  .dialog { background: #1c1c1c; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; width: min(480px, 92vw); display: flex; flex-direction: column; }
-  .d-head { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+  .dialog { background: #1c1c1c; border: none; border-radius: 12px; width: min(480px, 92vw); display: flex; flex-direction: column; }
+  .d-head { display: flex; justify-content: space-between; align-items: center; padding: 16px 20px; border-bottom: none; }
   .d-head h3 { margin: 0; font-size: 16px; font-weight: 700; }
   .d-close { background: transparent; border: 0; color: rgba(255,255,255,0.6); font-size: 22px; line-height: 1; cursor: pointer; padding: 0 8px; }
   .d-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 12px; }
   .d-hint { margin: 0; color: rgba(255,255,255,0.6); font-size: 13px; line-height: 1.5; }
-  .d-input { width: 100%; padding: 12px 14px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: white; font-family: inherit; font-size: 14px; box-sizing: border-box; }
+  .d-input { width: 100%; padding: 12px 14px; background: rgba(255,255,255,0.05); border: none; border-radius: 8px; color: white; font-family: inherit; font-size: 14px; box-sizing: border-box; }
   .d-input:focus { outline: 0; border-color: #ff5500; }
   .d-error { margin: 0; color: #e22134; font-size: 13px; }
-  .d-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 20px; border-top: 1px solid rgba(255,255,255,0.05); }
+  .d-foot { display: flex; justify-content: flex-end; gap: 8px; padding: 12px 20px; border-top: none; }
   .d-foot .cta { padding: 9px 22px; }
   .d-foot .cta:disabled { opacity: 0.5; cursor: not-allowed; }
 

@@ -92,7 +92,7 @@
     gap: 6px;
     padding: 2px 8px;
     background: color-mix(in oklab, var(--accent) 8%, transparent);
-    border: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
+    border: none;
     border-radius: 999px;
     color: var(--text);
     font: inherit;
@@ -128,7 +128,7 @@
     z-index: 120;
     min-width: 220px;
     background: var(--bg);
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     border-radius: 10px;
     padding: 4px;
     display: flex;

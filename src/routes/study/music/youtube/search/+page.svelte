@@ -385,7 +385,7 @@
     gap: 8px;
     padding: 8px 14px;
     background: color-mix(in oklab, var(--button) 60%, transparent);
-    border: 1px solid color-mix(in oklab, var(--content-border) 60%, transparent);
+    border: none;
     border-radius: 999px;
     width: min(100%, 480px);
   }
@@ -439,7 +439,7 @@
   .sort-select {
     background: color-mix(in oklab, var(--button) 60%, transparent);
     color: var(--secondary);
-    border: 1px solid color-mix(in oklab, var(--content-border) 60%, transparent);
+    border: none;
     border-radius: 999px;
     padding: 6px 10px;
     font: inherit;
@@ -499,7 +499,7 @@
     display: inline-flex;
     align-items: center;
     background: color-mix(in oklab, var(--button) 50%, transparent);
-    border: 1px solid color-mix(in oklab, var(--content-border) 40%, transparent);
+    border: none;
     border-radius: 999px;
     overflow: hidden;
   }

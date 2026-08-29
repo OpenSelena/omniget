@@ -433,7 +433,7 @@
     padding: 12px 24px;
     background: rgba(15, 15, 15, 0.92);
     backdrop-filter: blur(12px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+    border-bottom: none;
   }
   .yt-brand {
     margin: 0;
@@ -452,7 +452,7 @@
     padding: 9px 18px;
     border-radius: 999px;
     background: #121212;
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    border: none;
     color: #aaa;
     font-size: 14px;
     text-decoration: none;

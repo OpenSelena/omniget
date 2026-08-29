@@ -191,7 +191,7 @@
   }
   .dialog {
     background: var(--bg-card, #1a1a1a);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: none;
     border-radius: 12px;
     width: min(560px, 90vw);
     max-height: 80vh; overflow: auto;
@@ -199,7 +199,7 @@
   }
   .head {
     display: flex; justify-content: space-between; align-items: center;
-    padding: 16px 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 16px 20px; border-bottom: none;
   }
   .head h3 { margin: 0; font-size: 16px; }
   .close {
@@ -216,7 +216,7 @@
     word-break: break-all;
   }
   .foot {
-    padding: 12px 20px; border-top: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 12px 20px; border-top: none;
     display: flex; justify-content: flex-end;
   }
 </style>

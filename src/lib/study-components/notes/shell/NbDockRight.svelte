@@ -55,7 +55,7 @@
     overflow: hidden;
   }
   .stack.multi .slot:not(:last-child) {
-    border-bottom: 1px solid color-mix(in oklab, var(--content-border) 30%, transparent);
+    border-bottom: none;
   }
   .stack.multi .slot {
     flex: 1 1 0;

@@ -388,7 +388,7 @@
     gap: 18px;
     padding: 18px;
     background: color-mix(in oklab, var(--button) 25%, transparent);
-    border: 1px solid color-mix(in oklab, var(--content-border) 40%, transparent);
+    border: none;
     border-radius: 14px;
     transition: border-color 120ms;
   }
@@ -541,7 +541,7 @@
   .ghost-btn {
     padding: 5px 12px;
     background: transparent;
-    border: 1px solid color-mix(in oklab, var(--content-border) 40%, transparent);
+    border: none;
     border-radius: 999px;
     color: var(--secondary);
     font-size: 12px;
@@ -572,7 +572,7 @@
     list-style: none;
     margin: 8px 0 0;
     padding: 8px 0 0;
-    border-top: 1px dashed color-mix(in oklab, var(--content-border) 30%, transparent);
+    border-top: none;
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -618,7 +618,7 @@
     height: 24px;
     padding: 0;
     background: transparent;
-    border: 1px solid color-mix(in oklab, var(--content-border) 30%, transparent);
+    border: none;
     border-radius: 6px;
     color: var(--tertiary);
     cursor: pointer;

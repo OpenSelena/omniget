@@ -76,7 +76,7 @@
     gap: 12px;
     padding: 16px 18px;
     background: #1f1f1f;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none;
     border-radius: 12px;
     color: #f1f1f1;
   }
@@ -97,7 +97,7 @@
   .btn.ghost {
     background: transparent;
     color: #f1f1f1;
-    border: 1px solid rgba(255, 255, 255, 0.22);
+    border: none;
   }
   .btn.ghost:hover { background: rgba(255, 255, 255, 0.08); }
   .btn.link {
@@ -111,7 +111,7 @@
     margin: 0;
     padding: 10px 12px;
     background: #0f0f0f;
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: none;
     border-radius: 8px;
     font-size: 12px;
     font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;

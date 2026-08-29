@@ -153,7 +153,7 @@
     align-items: flex-start;
     gap: var(--padding);
     padding: var(--padding);
-    border-bottom: 1px solid var(--input-border);
+    border-bottom: none;
   }
 
   .drawer-header > div {
@@ -216,7 +216,7 @@
 
   .ghost-btn {
     background: transparent;
-    border: 1px solid var(--input-border);
+    border: none;
     color: var(--gray);
     font-family: inherit;
     font-size: 11px;

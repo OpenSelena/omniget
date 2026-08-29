@@ -449,7 +449,7 @@
     align-items: flex-start;
     gap: var(--padding);
     padding: var(--padding);
-    border-bottom: 1px solid var(--input-border);
+    border-bottom: none;
   }
 
   .panel-header > div {
@@ -484,7 +484,7 @@
 
   .tabs {
     display: flex;
-    border-bottom: 1px solid var(--input-border);
+    border-bottom: none;
   }
 
   .tab {
@@ -539,7 +539,7 @@
     width: 100%;
     padding: 8px 12px;
     background: var(--button);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     color: var(--secondary);
     font-family: inherit;
@@ -555,7 +555,7 @@
     display: flex;
     flex-direction: column;
     gap: 8px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     padding: var(--padding);
     margin: 0;
@@ -601,7 +601,7 @@
   }
 
   .advanced {
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     padding: 8px var(--padding);
   }
@@ -634,7 +634,7 @@
     justify-content: flex-end;
     gap: 8px;
     padding-top: var(--padding);
-    border-top: 1px solid var(--input-border);
+    border-top: none;
   }
 
   .button {
@@ -675,7 +675,7 @@
   .button.ghost {
     background: transparent;
     color: var(--gray);
-    border: 1px solid var(--input-border);
+    border: none;
   }
 
   .sessions-section {

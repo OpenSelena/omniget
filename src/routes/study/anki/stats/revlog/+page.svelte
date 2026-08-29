@@ -370,7 +370,7 @@
 
   .filter-card {
     background: var(--surface);
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     padding: 4px;
   }
@@ -405,7 +405,7 @@
     gap: 12px;
     padding: 12px 16px;
     flex-wrap: wrap;
-    border-top: 1px solid color-mix(in oklab, var(--input-border) 50%, transparent);
+    border-top: none;
   }
 
   .field {
@@ -420,7 +420,7 @@
   .field input,
   .field select {
     padding: 7px 10px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
     color: var(--text);
@@ -459,7 +459,7 @@
     min-width: 90px;
     padding: 10px 14px;
     background: var(--surface);
-    border: 1px solid color-mix(in oklab, var(--input-border) 50%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     display: flex;
     flex-direction: column;
@@ -496,7 +496,7 @@
 
   .table-wrap {
     overflow-x: auto;
-    border: 1px solid color-mix(in oklab, var(--input-border) 50%, transparent);
+    border: none;
     border-radius: var(--border-radius);
   }
   .revlog-table {
@@ -513,11 +513,11 @@
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.03em;
-    border-bottom: 1px solid color-mix(in oklab, var(--input-border) 50%, transparent);
+    border-bottom: none;
   }
   .revlog-table td {
     padding: 6px 10px;
-    border-bottom: 1px solid color-mix(in oklab, var(--input-border) 25%, transparent);
+    border-bottom: none;
     color: var(--text);
   }
   .revlog-table tr:last-child td {

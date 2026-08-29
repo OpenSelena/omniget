@@ -97,7 +97,7 @@
     height: 38px;
     border-radius: 50%;
     background: color-mix(in oklab, var(--content-bg) 70%, var(--accent) 4%);
-    border: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
+    border: none;
     color: color-mix(in oklab, currentColor 70%, transparent);
     display: grid;
     place-items: center;

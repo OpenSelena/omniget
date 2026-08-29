@@ -264,7 +264,7 @@
 
   .rule-row {
     padding: var(--space-3, 12px);
-    border-bottom: 1px solid var(--border);
+    border-bottom: none;
   }
 
   .rule-row:last-child {
@@ -300,7 +300,7 @@
   }
 
   .icon-btn {
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-sm, 6px);
     background: transparent;
     color: var(--text);
@@ -343,7 +343,7 @@
   .rule-field input[type="text"],
   .rule-field select {
     background: var(--bg);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-sm, 6px);
     color: var(--text);
     font: inherit;
@@ -378,7 +378,7 @@
     flex: 1;
     min-width: 20ch;
     background: var(--bg);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-sm, 6px);
     color: var(--text);
     font: inherit;

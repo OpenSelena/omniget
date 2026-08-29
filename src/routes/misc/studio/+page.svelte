@@ -601,7 +601,7 @@
     flex-direction: column;
     gap: 12px;
     padding: 18px 20px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
   }
@@ -648,7 +648,7 @@
   .toggle-btn {
     padding: 6px 14px;
     border-radius: 999px;
-    border: 1px solid var(--input-border);
+    border: none;
     background: var(--bg);
     color: var(--secondary);
     font-size: 12px;
@@ -673,7 +673,7 @@
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
     padding: 10px 12px;
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
   }
@@ -727,7 +727,7 @@
     align-items: center;
     gap: 12px;
     padding: 12px 24px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: 999px;
     background: var(--bg);
     color: var(--secondary);
@@ -797,7 +797,7 @@
     justify-content: space-between;
     gap: 12px;
     padding: 10px 14px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
   }
@@ -840,7 +840,7 @@
   }
   .btn-reveal {
     padding: 6px 12px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: transparent;
     color: var(--secondary);
@@ -880,7 +880,7 @@
   }
   .translate-select {
     padding: 4px 10px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
     color: var(--secondary);

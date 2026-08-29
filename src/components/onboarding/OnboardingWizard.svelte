@@ -572,7 +572,7 @@
   }
 
   .dep-row + .dep-row {
-    border-top: 1px solid var(--button-stroke);
+    border-top: none;
   }
 
   .dep-info {

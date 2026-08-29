@@ -184,7 +184,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 16px 20px;
-    border-bottom: 1px solid color-mix(in oklab, var(--content-border) 40%, transparent);
+    border-bottom: none;
   }
 
   .head h2 {
@@ -257,7 +257,7 @@
     justify-content: flex-end;
     gap: 8px;
     padding: 12px 20px;
-    border-top: 1px solid color-mix(in oklab, var(--content-border) 40%, transparent);
+    border-top: none;
   }
 
   .btn {
@@ -266,7 +266,7 @@
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     background: transparent;
     color: inherit;
   }

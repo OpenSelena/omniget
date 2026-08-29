@@ -365,7 +365,7 @@
     display: flex;
     align-items: flex-start;
     gap: var(--padding);
-    border-bottom: 1px solid var(--input-border);
+    border-bottom: none;
     padding-bottom: var(--padding);
   }
 
@@ -471,13 +471,13 @@
     font-size: 11.5px;
     text-transform: uppercase;
     letter-spacing: 0.3px;
-    border-bottom: 1px solid var(--input-border);
+    border-bottom: none;
   }
 
   .buckets-table td {
     padding: 8px;
     color: var(--secondary);
-    border-bottom: 1px solid var(--input-border);
+    border-bottom: none;
   }
 
   .buckets-table tr:last-child td {
@@ -509,7 +509,7 @@
     flex-direction: column;
     gap: 10px;
     padding-top: var(--padding);
-    border-top: 1px solid var(--input-border);
+    border-top: none;
   }
 
   .bw-bar-container {
@@ -587,7 +587,7 @@
   .ghost-btn {
     background: transparent;
     color: var(--gray);
-    border: 1px solid var(--input-border);
+    border: none;
     align-self: flex-start;
     font-size: 11.5px;
   }
@@ -602,7 +602,7 @@
     flex-direction: column;
     gap: 10px;
     padding-top: var(--padding);
-    border-top: 1px solid var(--input-border);
+    border-top: none;
   }
 
   .toggle-row {
@@ -632,7 +632,7 @@
     justify-content: flex-end;
     gap: 8px;
     padding-top: var(--padding);
-    border-top: 1px solid var(--input-border);
+    border-top: none;
   }
 
   .button {

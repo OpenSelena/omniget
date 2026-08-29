@@ -40,7 +40,7 @@
     flex: 0 0 auto;
     padding: 8px 16px;
     background: var(--fill-1);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: 999px;
     color: var(--text-muted);
     font: inherit;

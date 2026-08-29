@@ -11,9 +11,14 @@ mod windows;
 #[cfg(windows)]
 pub use self::windows::*;
 
-#[cfg(not(any(target_os = "macos", windows)))]
+#[cfg(target_os = "linux")]
+mod linux;
+#[cfg(target_os = "linux")]
+pub use self::linux::*;
+
+#[cfg(not(any(target_os = "macos", windows, target_os = "linux")))]
 mod stub;
-#[cfg(not(any(target_os = "macos", windows)))]
+#[cfg(not(any(target_os = "macos", windows, target_os = "linux")))]
 pub use self::stub::*;
 
 #[derive(Debug, Clone)]
@@ -51,6 +56,7 @@ pub fn unix_micros() -> i64 {
 
 pub trait CaptureApi {
     fn list_sources(thumbnails: bool) -> Result<StreamSources, StreamError>;
+    fn thumbnail_for(source: &SourceId) -> Option<String>;
     fn start_video(
         opts: &CaptureOptions,
         sink: VideoSink,
@@ -63,6 +69,10 @@ pub trait CaptureApi {
 
 pub fn list_sources(thumbnails: bool) -> Result<StreamSources, StreamError> {
     Platform::list_sources(thumbnails)
+}
+
+pub fn thumbnail_for(source: &SourceId) -> Option<String> {
+    Platform::thumbnail_for(source)
 }
 
 pub fn start_video(

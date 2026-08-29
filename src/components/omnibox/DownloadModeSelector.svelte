@@ -44,7 +44,7 @@
 <style>
   .mode-group {
     display: flex;
-    background: var(--button);
+    background: var(--fill-1);
     border-radius: var(--border-radius);
     padding: 3px;
     gap: 2px;

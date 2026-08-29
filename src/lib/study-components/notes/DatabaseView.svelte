@@ -274,7 +274,7 @@
     gap: 6px;
     padding: 10px;
     background: color-mix(in oklab, var(--input-border) 12%, transparent);
-    border: 1px solid color-mix(in oklab, var(--input-border) 50%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     font-size: 12px;
     contain: layout;
@@ -358,11 +358,11 @@
     color: var(--tertiary);
     letter-spacing: 0.05em;
     font-weight: 600;
-    border-bottom: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border-bottom: none;
   }
   .db-table tbody td {
     padding: 4px 6px;
-    border-bottom: 1px solid color-mix(in oklab, var(--input-border) 30%, transparent);
+    border-bottom: none;
     vertical-align: top;
   }
   .db-table tbody tr:last-child td {
@@ -414,7 +414,7 @@
   }
   .page-btn {
     padding: 2px 8px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: transparent;
     color: var(--secondary);

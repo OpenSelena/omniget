@@ -135,7 +135,7 @@
   .ghost {
     background: transparent;
     color: var(--text);
-    border: 1px solid var(--content-border);
+    border: none;
   }
   .primary:disabled {
     opacity: 0.6;

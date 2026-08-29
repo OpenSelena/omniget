@@ -15,9 +15,17 @@ const MAX_BACKLOG_MS: usize = 120;
 
 #[derive(Debug, Clone, Copy, PartialEq)]
 pub enum CaptureEvent {
-    Level { rms_db: f32, peak: f32 },
+    Level {
+        rms_db: f32,
+        peak: f32,
+    },
     Speaking(bool),
     Underrun,
+    /// The device delivers buffers but every sample is a digital zero. Real
+    /// microphones always carry a noise floor, so two seconds of exact zeros
+    /// means the OS is withholding the signal (macOS TCC) or the hardware is
+    /// dead — either way the user must be told, because nothing errors.
+    SilentInput,
 }
 
 pub struct CaptureFlags {
@@ -120,8 +128,12 @@ struct Pipeline {
     hang: u32,
     tick: u32,
     underruns: u64,
+    zero_ticks: u32,
+    silent_flagged: bool,
     tone: Option<(f32, f32)>,
 }
+
+const SILENT_INPUT_TICKS: u32 = 200;
 
 impl Pipeline {
     fn new(consumer: rtrb::Consumer<f32>, sample_rate: u32) -> Self {
@@ -142,6 +154,8 @@ impl Pipeline {
             hang: 0,
             tick: 0,
             underruns: 0,
+            zero_ticks: 0,
+            silent_flagged: false,
             tone: None,
         }
     }
@@ -209,6 +223,18 @@ impl Pipeline {
 
         let transmitting = flags.transmitting();
         let (rms, peak) = level(&self.frame);
+        if got && self.tone.is_none() {
+            if peak == 0.0 {
+                self.zero_ticks = self.zero_ticks.saturating_add(1);
+                if self.zero_ticks == SILENT_INPUT_TICKS && !self.silent_flagged {
+                    self.silent_flagged = true;
+                    sink(CaptureEvent::SilentInput);
+                }
+            } else {
+                self.zero_ticks = 0;
+                self.silent_flagged = false;
+            }
+        }
         let rms_db = if rms > 0.0 {
             20.0 * rms.log10()
         } else {

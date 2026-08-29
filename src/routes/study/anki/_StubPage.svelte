@@ -70,7 +70,7 @@
     display: flex;
     justify-content: flex-end;
     padding-top: var(--padding);
-    border-top: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border-top: none;
   }
   .back-link {
     color: var(--accent);

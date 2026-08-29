@@ -329,7 +329,7 @@
   .card {
     padding: 16px 18px;
     background: var(--surface);
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius, 10px);
     display: flex;
     flex-direction: column;
@@ -370,7 +370,7 @@
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     background: transparent;
     color: inherit;
   }
@@ -479,7 +479,7 @@
     align-items: center;
     gap: 10px;
     padding: 10px 12px;
-    border: 1px solid color-mix(in oklab, var(--content-border) 60%, transparent);
+    border: none;
     border-radius: 8px;
     cursor: pointer;
     font-size: 13px;

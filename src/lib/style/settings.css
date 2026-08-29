@@ -11,13 +11,12 @@
   }
 
   .downloads-mac .download-item {
-    border-bottom: 1px solid var(--border);
+    border-bottom: none;
     border-radius: 0;
     box-shadow: none;
   }
 
   .downloads-mac .downloads-list {
-    border: 1px solid var(--border);
     border-radius: var(--radius-md);
     overflow: hidden;
     background: var(--surface);
@@ -66,17 +65,16 @@
   .settings-search {
     width: 100%;
     padding: calc(var(--padding) / 1.5) var(--padding);
-    background: var(--button);
+    background: var(--control-bg);
     color: var(--secondary);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     font-size: 0.95rem;
     outline: none;
-    transition: border-color var(--duration-fast) var(--ease-out);
+    transition: box-shadow var(--duration-fast) var(--ease-out);
   }
 
   .settings-search:focus {
-    border-color: var(--accent);
     box-shadow: 0 0 0 3px var(--accent-soft);
   }
 
@@ -126,11 +124,9 @@
     gap: calc(var(--space-1) / 2);
     padding-top: var(--space-4);
     margin-top: var(--space-2);
-    border-top: 1px solid var(--border);
   }
 
   .settings-section-head:first-child {
-    border-top: none;
     padding-top: 0;
     margin-top: 0;
   }
@@ -176,7 +172,7 @@
     align-items: flex-start;
     gap: var(--space-1);
     padding: calc(var(--space-5) / 2.4) var(--space-3);
-    border: 1px solid var(--border);
+    border: 1px solid transparent;
     border-radius: var(--radius-md, 6px);
     background: var(--surface);
     color: var(--text);
@@ -187,7 +183,7 @@
 
   @media (hover: hover) {
     .preset-card:hover {
-      border-color: var(--accent);
+      background: var(--surface-hi);
     }
   }
 
@@ -215,26 +211,26 @@
 
   .sb-chip {
     padding: calc(var(--space-1) * 1.25) var(--space-3);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: 999px;
-    background: var(--surface);
+    background: var(--fill-1);
     color: var(--text-muted, var(--text));
     font: inherit;
     font-size: 12px;
     cursor: pointer;
-    transition: border-color var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
+    transition: background var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
   }
 
   @media (hover: hover) {
     .sb-chip:hover {
-      border-color: var(--accent);
+      background: var(--fill-2);
+      color: var(--text);
     }
   }
 
   .sb-chip.on {
-    border-color: var(--accent);
-    background: color-mix(in srgb, var(--accent) 16%, var(--surface));
-    color: var(--text);
+    background: var(--accent-soft);
+    color: var(--accent);
   }
 
   .sb-chip:focus-visible {
@@ -245,7 +241,7 @@
   .ghost-btn {
     padding: calc(var(--space-3) / 2) var(--space-3);
     border-radius: 8px;
-    border: 1px solid var(--border);
+    border: none;
     background: transparent;
     color: var(--text);
     font-size: 0.85rem;
@@ -279,8 +275,8 @@
   .naming-input {
     padding: calc(var(--space-3) / 2) calc(var(--space-5) / 2.4);
     border-radius: 6px;
-    border: 1px solid var(--border);
-    background: var(--surface);
+    border: none;
+    background: var(--control-bg);
     color: var(--text);
     font-family: ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
     font-size: 0.8rem;
@@ -289,7 +285,6 @@
   .naming-input:focus-visible {
     outline: var(--focus-ring);
     outline-offset: var(--focus-ring-offset);
-    border-color: var(--accent);
   }
 
   .naming-help {
@@ -323,9 +318,9 @@
   .downloads-speed-input {
     width: 88px;
     padding: calc(var(--space-3) / 2) var(--space-2);
-    background: var(--surface);
+    background: var(--control-bg);
     color: var(--text);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--border-radius, 6px);
     font: inherit;
     text-align: right;
@@ -344,7 +339,6 @@
     gap: calc(var(--space-1) / 2);
     padding-top: var(--space-4);
     margin-top: var(--space-2);
-    border-top: 1px solid var(--border);
   }
 
   .settings-disclosure > summary::-webkit-details-marker {
@@ -377,7 +371,6 @@
   .settings-drill-list {
     display: flex;
     flex-direction: column;
-    border: 1px solid var(--border);
     border-radius: var(--radius-md);
     overflow: hidden;
     background: var(--surface);
@@ -391,7 +384,7 @@
     width: 100%;
     padding: var(--space-3) var(--space-4);
     border: none;
-    border-bottom: 1px solid var(--border);
+    border-bottom: none;
     background: transparent;
     text-align: left;
     cursor: pointer;
@@ -501,7 +494,6 @@
   }
 
   .deps-table-wrap {
-    border: 1px solid var(--border);
     border-radius: var(--radius-md);
     background: var(--surface);
   }
@@ -537,7 +529,7 @@
     letter-spacing: 0.03em;
     text-transform: uppercase;
     color: var(--text-dim, var(--gray));
-    border-bottom: 1px solid var(--border);
+    border-bottom: none;
   }
 
   .deps-table th.deps-col-action {
@@ -545,7 +537,7 @@
   }
 
   .deps-table :global(.deps-table-row) {
-    border-bottom: 1px solid var(--border);
+    border-bottom: none;
   }
 
   .deps-table :global(.deps-table-row:last-child) {
@@ -572,7 +564,6 @@
 
   .card {
     background: var(--surface);
-    border: 1px solid var(--border);
     border-radius: var(--radius-md);
     padding: 0 var(--space-4);
   }
@@ -610,15 +601,15 @@
   }
 
   .divider {
-    height: 1px;
-    background: var(--button-stroke);
+    height: 0;
+    background: none;
   }
 
   .select {
     padding: calc(var(--padding) / 2) calc(var(--space-4) + var(--space-3)) calc(var(--padding) / 2) var(--padding);
     font-size: var(--text-base);
     font-weight: 500;
-    background: var(--button-elevated);
+    background: var(--control-bg);
     border-radius: calc(var(--border-radius) / 2);
     color: var(--secondary);
     border: none;
@@ -642,16 +633,16 @@
     font-size: var(--text-base);
     font-weight: 500;
     text-align: center;
-    background: var(--button-elevated);
+    background: var(--control-bg);
     border-radius: calc(var(--border-radius) / 2);
     color: var(--secondary);
-    border: 1px solid var(--input-border);
+    border: none;
     font-variant-numeric: tabular-nums;
   }
 
   .input-number:focus-visible {
-    border-color: var(--blue);
-    outline: none;
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
   }
 
   .input-hotkey {
@@ -659,17 +650,17 @@
     padding: calc(var(--padding) / 2);
     font-size: var(--text-sm);
     font-weight: 500;
-    background: var(--button-elevated);
+    background: var(--control-bg);
     border-radius: calc(var(--border-radius) / 2);
     color: var(--secondary);
-    border: 1px solid var(--input-border);
+    border: none;
     text-align: center;
     flex-shrink: 0;
   }
 
   .input-hotkey:focus-visible {
-    border-color: var(--blue);
-    outline: none;
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
   }
 
   .hotkey-row {
@@ -685,8 +676,10 @@
 
   .hotkey-mode-switch {
     display: flex;
-    border-radius: calc(var(--border-radius) / 2);
-    overflow: hidden;
+    gap: 2px;
+    padding: 2px;
+    background: var(--fill-1);
+    border-radius: calc(var(--border-radius) / 2 + 2px);
   }
 
   .hotkey-mode-btn {
@@ -695,22 +688,15 @@
     font-weight: 500;
     background: transparent;
     color: var(--gray);
-    border: 1px solid var(--input-border);
+    border: none;
+    border-radius: calc(var(--border-radius) / 2);
     cursor: pointer;
-  }
-
-  .hotkey-mode-btn:first-child {
-    border-radius: calc(var(--border-radius) / 2) 0 0 calc(var(--border-radius) / 2);
-    border-right: none;
-  }
-
-  .hotkey-mode-btn:last-child {
-    border-radius: 0 calc(var(--border-radius) / 2) calc(var(--border-radius) / 2) 0;
   }
 
   .hotkey-mode-btn.active {
     background: var(--button-elevated);
     color: var(--secondary);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
   }
 
   .hotkey-mode-btn:focus-visible {
@@ -724,13 +710,13 @@
   }
 
   .hotkey-record-btn.recording {
-    border-color: var(--blue);
+    box-shadow: 0 0 0 3px var(--accent-soft);
     animation: hotkey-pulse calc(var(--duration-bounce) * 3) var(--ease-in-out) infinite;
   }
 
   @keyframes hotkey-pulse {
-    0%, 100% { border-color: var(--blue); }
-    50% { border-color: var(--input-border); }
+    0%, 100% { box-shadow: 0 0 0 3px var(--accent-soft); }
+    50% { box-shadow: 0 0 0 3px transparent; }
   }
 
   .template-row {
@@ -744,15 +730,15 @@
     padding: calc(var(--padding) / 2);
     font-size: var(--text-sm);
     font-weight: 500;
-    background: var(--button-elevated);
+    background: var(--control-bg);
     border-radius: calc(var(--border-radius) / 2);
     color: var(--secondary);
-    border: 1px solid var(--input-border);
+    border: none;
   }
 
   .input-template:focus-visible {
-    border-color: var(--blue);
-    outline: none;
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
   }
 
   .template-preview {
@@ -768,7 +754,7 @@
     width: 44px;
     height: 24px;
     border-radius: var(--radius-full);
-    background: var(--toggle-off, var(--surface-hi));
+    background: var(--toggle-off, var(--fill-3));
     border: none;
     cursor: pointer;
     padding: 0;
@@ -902,14 +888,14 @@
     padding: calc(var(--padding) / 2);
     font-size: var(--text-base);
     font-weight: 500;
-    background: var(--button-elevated);
+    background: var(--control-bg);
     border-radius: calc(var(--border-radius) / 2);
     color: var(--secondary);
-    border: 1px solid var(--input-border);
+    border: none;
   }
   .input-text:focus-visible {
-    border-color: var(--blue);
-    outline: none;
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
   }
 
   .flag-grid {
@@ -945,14 +931,14 @@
     width: 70px;
     padding: calc(var(--space-1) / 2) calc(var(--space-3) / 2);
     font-size: var(--text-xs);
-    background: var(--button-elevated);
+    background: var(--control-bg);
     color: var(--secondary);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: 4px;
   }
   .flag-value-input:focus-visible {
-    border-color: var(--blue);
-    outline: none;
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
   }
 
 
@@ -1014,7 +1000,7 @@
     font-weight: 500;
     color: var(--accent);
     background: transparent;
-    border: 1px dashed var(--border);
+    border: none;
     border-radius: var(--radius-sm);
     cursor: pointer;
   }

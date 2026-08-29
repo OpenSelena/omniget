@@ -39,7 +39,7 @@
     display: flex;
     flex-direction: column;
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-md);
     color: inherit;
     text-align: left;

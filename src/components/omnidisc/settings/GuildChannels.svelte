@@ -350,7 +350,7 @@
     box-sizing: border-box;
     padding: 8px var(--space-2);
     border-radius: var(--radius-sm);
-    border: 1px solid var(--input-border);
+    border: none;
     background: var(--input-bg);
     color: var(--text);
     font: inherit;
@@ -419,7 +419,7 @@
 
   .tri-btn {
     padding: 3px var(--space-2);
-    border: 1px solid var(--border);
+    border: none;
     background: transparent;
     color: var(--text-muted);
     font: inherit;

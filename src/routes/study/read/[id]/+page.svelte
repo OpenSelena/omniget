@@ -2532,7 +2532,7 @@
     flex-wrap: wrap;
     gap: 0.75rem;
     padding: 0.5rem 0;
-    border-bottom: 1px solid color-mix(in oklab, var(--content-border) 60%, transparent);
+    border-bottom: none;
     position: sticky;
     top: 0;
     z-index: 20;
@@ -2546,7 +2546,7 @@
     gap: 0.35rem;
     padding: 0.4rem 0.75rem;
     background: transparent;
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: var(--border-radius);
     color: var(--secondary);
     cursor: pointer;
@@ -2575,7 +2575,7 @@
     gap: 0.3rem;
     padding: 0.25rem;
     background: var(--button-elevated);
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: var(--border-radius);
   }
   .tool-btn {
@@ -2622,7 +2622,7 @@
     width: 48px;
     padding: 4px 6px;
     background: var(--input-bg);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: 4px;
     color: var(--secondary);
     font-family: var(--font-mono, "IBM Plex Mono", monospace);
@@ -2654,7 +2654,7 @@
     margin: 0;
     padding: 0.3rem;
     background: var(--popup-bg, var(--button-elevated));
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: var(--border-radius);
     min-width: 220px;
     display: flex;
@@ -2700,7 +2700,7 @@
   }
   .sidebar {
     background: var(--button-elevated);
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: var(--border-radius);
     padding: 0.75rem;
     width: 300px;
@@ -2732,7 +2732,7 @@
   .search-input {
     padding: 0.4rem 0.6rem;
     background: var(--input-bg);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     color: var(--secondary);
     font-family: inherit;
@@ -2774,7 +2774,7 @@
     font-variant-numeric: tabular-nums;
     font-size: 10px;
     padding: 2px 6px;
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: 3px;
     min-width: 28px;
     text-align: center;
@@ -2869,7 +2869,7 @@
     width: 100%;
     max-width: 900px;
     background: white;
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: var(--border-radius);
     overflow: hidden;
     box-shadow: 0 6px 28px rgba(0, 0, 0, 0.18);
@@ -2890,7 +2890,7 @@
     border-radius: 999px;
     background: color-mix(in oklab, var(--bg-elevated) 92%, transparent);
     color: var(--text-muted);
-    border: 1px solid var(--border);
+    border: none;
     font-size: 11px;
     font-family: var(--font-mono, "IBM Plex Mono", monospace);
     font-variant-numeric: tabular-nums;
@@ -2927,7 +2927,7 @@
     width: 100%;
     max-width: 900px;
     background: color-mix(in oklab, var(--content-border) 20%, transparent);
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: var(--border-radius);
     display: flex;
     align-items: center;
@@ -3107,7 +3107,7 @@
     width: 100%;
     max-width: 480px;
     background: var(--bg-elevated, var(--surface, var(--bg)));
-    border: 1px solid var(--border, var(--input-border));
+    border: none;
     border-radius: 10px;
     padding: 20px;
     display: flex;
@@ -3134,7 +3134,7 @@
   }
   .meta-field input {
     padding: 8px 10px;
-    border: 1px solid var(--border, var(--input-border));
+    border: none;
     border-radius: 6px;
     background: var(--bg, var(--surface));
     color: var(--text, var(--primary));
@@ -3256,14 +3256,14 @@
     gap: 4px;
     padding: 4px 6px;
     background: var(--button-elevated);
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: 999px;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.28);
   }
   .hl-color {
     width: 22px;
     height: 22px;
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: 50%;
     cursor: pointer;
     padding: 0;
@@ -3291,7 +3291,7 @@
     z-index: 60;
     width: 280px;
     background: var(--surface);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     box-shadow: 0 12px 32px rgba(0, 0, 0, 0.32);
     padding: 12px;
@@ -3379,7 +3379,7 @@
   }
   .ep-drawer {
     padding: 4px 6px;
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: 4px;
     background: transparent;
     color: var(--secondary);
@@ -3402,7 +3402,7 @@
     width: 100%;
     min-height: 60px;
     padding: 6px 8px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: 4px;
     background: var(--bg);
     color: var(--text);
@@ -3420,7 +3420,7 @@
     justify-content: space-between;
     gap: 6px;
     padding-top: 4px;
-    border-top: 1px solid color-mix(in oklab, var(--input-border) 30%, transparent);
+    border-top: none;
   }
   .ep-btn {
     padding: 6px 12px;
@@ -3521,7 +3521,7 @@
   .btn {
     padding: 0.5rem 1rem;
     border-radius: var(--border-radius);
-    border: 1px solid var(--content-border);
+    border: none;
     background: transparent;
     color: var(--secondary);
     cursor: pointer;

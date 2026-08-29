@@ -424,7 +424,7 @@
   .ghost-btn {
     padding: 7px 16px;
     background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: none;
     border-radius: 999px;
     color: rgba(255, 255, 255, 0.85);
     font-family: inherit;

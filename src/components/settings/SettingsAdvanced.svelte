@@ -329,7 +329,7 @@
             <span class="setting-label">{$t('omnidisc.settings_enable')}</span>
             <span class="setting-path">{$t('omnidisc.settings_enable_desc')}</span>
           </div>
-          <button class="toggle" class:on={settings.omnidisc?.enabled} onclick={() => updateSettings({ omnidisc: { enabled: !(settings.omnidisc?.enabled ?? false) } })} role="switch" aria-checked={settings.omnidisc?.enabled ?? false} aria-label={$t('omnidisc.settings_enable') as string}><span class="toggle-knob"></span></button>
+          <button class="toggle" class:on={settings.omnidisc?.enabled ?? true} onclick={() => updateSettings({ omnidisc: { enabled: !(settings.omnidisc?.enabled ?? true) } })} role="switch" aria-checked={settings.omnidisc?.enabled ?? true} aria-label={$t('omnidisc.settings_enable') as string}><span class="toggle-knob"></span></button>
         </div>
       </div>
     {:else if subView === "debug"}

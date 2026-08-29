@@ -978,8 +978,7 @@
     align-items: center;
     gap: 12px;
     padding: calc(var(--padding) * 3) var(--padding);
-    border: 1px dashed
-      color-mix(in oklab, var(--input-border) 70%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     background: color-mix(in oklab, var(--accent) 3%, transparent);
     text-align: center;
@@ -1044,7 +1043,7 @@
     display: flex;
     flex-direction: column;
     gap: 4px;
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
     padding: 6px;
@@ -1112,7 +1111,7 @@
   }
 
   .detail {
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
     padding: calc(var(--padding) * 1.25);
@@ -1173,8 +1172,7 @@
     flex-direction: column;
     gap: 8px;
     padding-top: 8px;
-    border-top: 1px solid
-      color-mix(in oklab, var(--input-border) 50%, transparent);
+    border-top: none;
   }
   .block h4 {
     margin: 0;
@@ -1252,8 +1250,7 @@
   .tpl-tabs button {
     padding: 4px 10px;
     border-radius: 999px;
-    border: 1px solid
-      color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     background: transparent;
     color: var(--secondary);
     cursor: pointer;
@@ -1292,7 +1289,7 @@
     margin: 0;
     padding: 10px 12px;
     background: var(--bg);
-    border: 1px solid color-mix(in oklab, var(--input-border) 50%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     font-size: 11px;
     line-height: 1.55;
@@ -1335,7 +1332,7 @@
     display: flex;
     flex-direction: column;
     gap: 14px;
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     box-shadow: 0 20px 50px color-mix(in oklab, black 40%, transparent);
   }
   .modal h3 {
@@ -1352,7 +1349,7 @@
   }
   .lbl input {
     padding: 8px 10px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
     color: var(--text);
@@ -1385,8 +1382,7 @@
     align-items: flex-start;
     gap: 10px;
     padding: 10px 12px;
-    border: 1px solid
-      color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     cursor: pointer;
     transition: border-color 120ms ease, background 120ms ease;
@@ -1421,8 +1417,7 @@
     justify-content: flex-end;
     gap: 8px;
     padding-top: 6px;
-    border-top: 1px solid
-      color-mix(in oklab, var(--input-border) 40%, transparent);
+    border-top: none;
   }
 
   .btn {
@@ -1483,7 +1478,7 @@
     width: 100%;
     font-size: 17px;
     font-weight: 600;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
     color: var(--text);
@@ -1514,7 +1509,7 @@
   }
   .lbl.inline select {
     padding: 6px 8px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
     color: var(--text);
@@ -1527,8 +1522,7 @@
   }
   .fields.editable input[type="text"] {
     padding: 6px 8px;
-    border: 1px solid
-      color-mix(in oklab, var(--input-border) 70%, transparent);
+    border: none;
     border-radius: calc(var(--border-radius) - 2px);
     background: var(--bg);
     color: var(--text);
@@ -1561,8 +1555,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border: 1px solid
-      color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     background: var(--bg);
     color: var(--secondary);
     border-radius: 6px;
@@ -1593,8 +1586,7 @@
   textarea.css-edit {
     width: 100%;
     padding: 10px 12px;
-    border: 1px solid
-      color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
     color: var(--text);

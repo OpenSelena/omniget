@@ -1789,7 +1789,7 @@
     background: var(--button);
     border-radius: var(--border-radius);
     color: var(--secondary);
-    border: 1px solid var(--input-border);
+    border: none;
   }
 
   .input::placeholder {

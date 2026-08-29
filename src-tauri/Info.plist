@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>OmniGet uses the microphone for voice calls in the chat.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>OmniGet uses the camera for video calls in the chat.</string>
+</dict>
+</plist>

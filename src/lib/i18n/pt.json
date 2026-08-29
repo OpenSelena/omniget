@@ -389,7 +389,9 @@
     "mode_batch": "Batch",
     "mode_torrent": "Torrent",
     "mode_p2p": "P2P",
-    "inspector_title": "Download options"
+    "inspector_title": "Download options",
+    "hero_title": "OmniGet",
+    "hero_subtitle": "Cole um link ou pesquise. A gente cuida do resto."
   },
   "tools": {
     "tab": "Ferramentas",
@@ -1637,7 +1639,8 @@
     "cookie_error_message": "A detecção automática de cookies funciona apenas com Firefox. Chrome, Edge e outros navegadores baseados em Chromium bloqueiam o acesso. Para usar cookies: instale o Firefox e faça login nas suas contas, ou exporte um arquivo cookies.txt do seu navegador e configure em Configurações > Download > Arquivo de cookies.",
     "cookie_file_label": "Arquivo de cookies (cookies.txt)",
     "cookie_file_choose": "Escolher arquivo",
-    "cookie_file_hint": "Exporte cookies do seu navegador usando uma extensão como 'Get cookies.txt LOCALLY' e selecione o arquivo aqui. Necessário para usuários de Chrome/Edge que precisam de downloads autenticados."
+    "cookie_file_hint": "Exporte cookies do seu navegador usando uma extensão como 'Get cookies.txt LOCALLY' e selecione o arquivo aqui. Necessário para usuários de Chrome/Edge que precisam de downloads autenticados.",
+    "dismiss": "Dispensar"
   },
   "platforms": {
     "bilibili": {
@@ -4226,7 +4229,9 @@
       "sign_in": "Sign in again",
       "reconnect": "Reconnect",
       "remove": "Forget this server",
-      "insecure": "{{name}} — conexão sem criptografia (http)"
+      "insecure": "{{name}} — conexão sem criptografia (http)",
+      "immersive_enter": "Modo foco — esconder a barra lateral do app",
+      "immersive_exit": "Sair do modo foco — mostrar a barra lateral do app"
     },
     "channels": {
       "title": "Channels",
@@ -4474,44 +4479,45 @@
       "relay_only_desc": "Sends all voice through the server's relay instead of straight to the other person. Needs a relay (TURN) on the server; adds a little delay. Applies to your next call."
     },
     "stream": {
-      "live": "LIVE",
-      "you_live": "You're live",
-      "share_screen": "Share screen",
-      "stop_sharing": "Stop sharing",
-      "share_title": "Share your screen",
-      "pick_source": "What to share",
-      "loading_sources": "Looking for screens and windows…",
-      "recheck": "Check again",
-      "audio": "Audio",
-      "audio_none": "No audio",
-      "audio_system": "System audio",
-      "quality": "Quality",
-      "resolution": "Resolution",
-      "framerate": "Frame rate",
-      "implied_bitrate": "About {{kbps}} Mbps · {{codec}}",
-      "hevc_note": "Your Mac's H.264 encoder tops out near 60 fps at 4K, so 4K120 uses HEVC. Viewers without HEVC can't watch.",
-      "custom_bitrate": "Set the bitrate myself",
-      "mode": "Motion",
-      "mode_text": "Text & UI",
-      "mode_game": "Fast motion",
-      "cursor": "Show my cursor",
-      "starting": "Starting…",
-      "share_cta": "Share {{res}}",
-      "watch": "Watch",
-      "stop_watching": "Stop watching",
-      "watch_unsupported": "Watching a stream is not available on this platform yet.",
-      "volume": "Stream volume",
-      "fullscreen": "Fullscreen",
-      "connecting": "Connecting…",
-      "inspector": "Connection details",
-      "sending": "Sending",
-      "receiving": "Receiving",
+      "live": "AO VIVO",
+      "you_live": "Você está transmitindo",
+      "share_screen": "Compartilhar tela",
+      "stop_sharing": "Parar de compartilhar",
+      "share_title": "Compartilhar sua tela",
+      "pick_source": "O que compartilhar",
+      "loading_sources": "Procurando telas e janelas…",
+      "recheck": "Verificar de novo",
+      "audio": "Áudio",
+      "audio_none": "Sem áudio",
+      "audio_system": "Áudio do sistema",
+      "quality": "Qualidade",
+      "resolution": "Resolução",
+      "framerate": "Taxa de quadros",
+      "implied_bitrate": "Cerca de {{kbps}} Mbps · {{codec}}",
+      "hevc_note": "O encoder H.264 do seu Mac chega perto de 60 fps em 4K, então 4K120 usa HEVC. Quem não tem HEVC não consegue assistir.",
+      "custom_bitrate": "Definir o bitrate manualmente",
+      "mode": "Movimento",
+      "mode_text": "Texto e interface",
+      "mode_game": "Movimento rápido",
+      "cursor": "Mostrar meu cursor",
+      "starting": "Iniciando…",
+      "share_cta": "Compartilhar {{res}}",
+      "watch": "Assistir",
+      "stop_watching": "Parar de assistir",
+      "watch_unsupported": "Assistir a uma transmissão ainda não está disponível nesta plataforma.",
+      "volume": "Volume da transmissão",
+      "fullscreen": "Tela cheia",
+      "connecting": "Conectando…",
+      "inspector": "Detalhes da conexão",
+      "sending": "Enviando",
+      "receiving": "Recebendo",
       "software": "software",
-      "software_warn": "Encoding in software — this uses more CPU. Close other apps or lower the quality.",
+      "software_warn": "Codificando em software — isso usa mais CPU. Feche outros apps ou reduza a qualidade.",
       "rtt": "Ping",
-      "loss": "Loss",
-      "encode": "Encode",
-      "no_active": "No stream running yet."
+      "loss": "Perda",
+      "encode": "Codificação",
+      "no_active": "Nenhuma transmissão em andamento.",
+      "preview_alt": "Prévia ao vivo da sua tela compartilhada"
     },
     "emoji": {
       "title": "Emoji",
@@ -4907,7 +4913,9 @@
       "encrypted_note": "Encrypted — save it to open it",
       "too_large": "That file is bigger than this server accepts ({{limit}}).",
       "too_many": "You can attach up to {{count}} files to one message.",
-      "unreadable": "OmniGet could not read that file."
+      "unreadable": "OmniGet could not read that file.",
+      "expires_in": "expira em {{minutes}} min",
+      "expired": "Este arquivo expirou e foi apagado do servidor."
     },
     "e2ee": {
       "dm_locked": "Only you and {{name}} can read these messages",
@@ -4954,6 +4962,12 @@
       "in_call": "In a call",
       "leave": "Leave the call",
       "joining": "Connecting…"
+    },
+    "storage": {
+      "warning": "O disco deste servidor está {{percent}}% cheio. Os arquivos são apagados depois de {{minutes}} minutos de qualquer forma; salve agora o que precisar.",
+      "critical": "O disco deste servidor está {{percent}}% cheio. Todos os arquivos guardados estão prestes a ser apagados para liberar espaço.",
+      "purged": "O disco encheu, então os {{count}} arquivos guardados foram apagados. As mensagens continuam — só os anexos foram embora.",
+      "retention_note": "Os arquivos são apagados do servidor depois de {{minutes}} minutos."
     }
   },
   "ytdlp_missing_banner": {

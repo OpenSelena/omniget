@@ -112,7 +112,7 @@
     gap: 6px;
     padding: 7px 12px;
     background: color-mix(in oklab, var(--content-bg) 80%, var(--accent) 4%);
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     border-radius: 8px;
     color: inherit;
     font-size: 13px;
@@ -134,7 +134,7 @@
     right: 0;
     min-width: 240px;
     background: var(--content-bg);
-    border: 1px solid color-mix(in oklab, var(--content-border) 80%, transparent);
+    border: none;
     border-radius: 10px;
     box-shadow: 0 8px 24px color-mix(in oklab, black 16%, transparent);
     padding: 4px;

@@ -2853,7 +2853,7 @@
     display: inline-flex;
     border-radius: 8px;
     background: color-mix(in oklab, var(--content-bg) 80%, var(--accent) 4%);
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     padding: 2px;
     gap: 2px;
   }
@@ -2895,7 +2895,7 @@
     gap: 14px;
     padding: 12px;
     background: var(--surface);
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     height: fit-content;
     position: sticky;
@@ -3065,7 +3065,7 @@
     gap: 4px;
     padding: 2px 8px;
     border-radius: 999px;
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     background: transparent;
     color: var(--secondary);
     font: inherit;
@@ -3148,7 +3148,7 @@
     gap: 0.4rem;
     padding: 0.45rem 0.75rem;
     background: transparent;
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: var(--border-radius);
     color: var(--secondary);
     cursor: pointer;
@@ -3182,7 +3182,7 @@
     padding: 8px 12px;
     border-radius: var(--border-radius);
     background: var(--input-bg);
-    border: 1px solid var(--input-border);
+    border: none;
     color: var(--secondary);
     font-size: 13px;
     font-family: inherit;
@@ -3200,7 +3200,7 @@
   }
   .sort select {
     background: var(--input-bg);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     color: var(--secondary);
     padding: 6px 8px;
@@ -3232,7 +3232,7 @@
     display: flex;
     flex-direction: column;
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-md);
     box-shadow: var(--elev-1);
     overflow: hidden;
@@ -3467,7 +3467,7 @@
     max-width: 100%;
     height: 100%;
     background: var(--button-elevated);
-    border-left: 1px solid var(--content-border);
+    border-left: none;
     display: flex;
     flex-direction: column;
     padding: calc(var(--padding) * 2);
@@ -3527,7 +3527,7 @@
     gap: 0.5rem;
     padding: 0.5rem 0.6rem;
     background: var(--input-bg);
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: var(--border-radius);
     transition: opacity 150ms ease;
   }
@@ -3583,7 +3583,7 @@
     padding: 0.5rem 0.85rem;
     border-radius: var(--border-radius);
     background: transparent;
-    border: 1px solid var(--content-border);
+    border: none;
     color: var(--secondary);
     cursor: pointer;
     font-family: inherit;
@@ -3643,7 +3643,7 @@
     align-items: center;
     gap: 12px;
     padding: 10px 14px;
-    border: 1px solid color-mix(in oklab, var(--input-border) 40%, transparent);
+    border: none;
     background: color-mix(in oklab, var(--surface, var(--primary)) 60%, transparent);
     border-radius: var(--border-radius);
     color: var(--secondary);
@@ -3701,7 +3701,7 @@
     max-height: 85vh;
     overflow-y: auto;
     background: var(--surface);
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     padding: calc(var(--padding) * 1.25);
     display: flex;
@@ -3752,8 +3752,7 @@
     flex-direction: column;
     gap: 6px;
     padding-top: 8px;
-    border-top: 1px solid
-      color-mix(in oklab, var(--input-border) 50%, transparent);
+    border-top: none;
   }
   .health-section h3 {
     margin: 0;
@@ -3904,7 +3903,7 @@
     gap: 10px;
     padding: 22px 20px;
     border-radius: 12px;
-    border: 1px solid var(--content-border);
+    border: none;
     background: var(--surface);
     text-align: left;
     transition: border-color 150ms ease, transform 150ms ease;
@@ -4047,7 +4046,7 @@
     gap: 5px;
     padding: 4px 10px;
     border-radius: 999px;
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     background: transparent;
     color: var(--tertiary);
     font-family: inherit;
@@ -4107,7 +4106,7 @@
     overflow-y: auto;
     padding: 4px;
     background: var(--surface, var(--button-elevated));
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: 8px;
     box-shadow: 0 8px 24px color-mix(in oklab, black 18%, transparent);
     display: flex;
@@ -4169,7 +4168,7 @@
 
   .view-mode-toggle {
     display: inline-flex;
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     border-radius: 7px;
     padding: 1px;
     background: color-mix(in oklab, var(--content-bg) 80%, transparent);
@@ -4303,7 +4302,7 @@
     height: 26px;
     padding: 0;
     background: transparent;
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     border-radius: 6px;
     color: color-mix(in oklab, currentColor 55%, transparent);
     cursor: pointer;
@@ -4324,7 +4323,7 @@
     gap: 5px;
     padding: 4px 10px;
     border-radius: 999px;
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     background: transparent;
     color: var(--tertiary);
     font-family: inherit;
@@ -4377,7 +4376,7 @@
     max-width: 280px;
     padding: 4px;
     background: var(--surface, var(--button-elevated));
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: 8px;
     box-shadow: 0 8px 28px color-mix(in oklab, black 22%, transparent);
     display: flex;
@@ -4515,7 +4514,7 @@
     min-width: 160px;
     padding: 4px;
     background: var(--surface, var(--button-elevated));
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: 8px;
     box-shadow: 0 8px 24px color-mix(in oklab, black 22%, transparent);
     display: flex;
@@ -4544,7 +4543,7 @@
     gap: 2px;
     padding: 0;
     margin: 0;
-    border-bottom: 1px solid color-mix(in oklab, var(--content-border) 60%, transparent);
+    border-bottom: none;
     scrollbar-width: thin;
   }
   .tab-wrap {
@@ -4618,7 +4617,7 @@
     gap: 12px;
     padding: 10px 18px;
     background: var(--surface, var(--button-elevated));
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: 999px;
     box-shadow: 0 8px 28px color-mix(in oklab, black 30%, transparent);
   }
@@ -4630,7 +4629,7 @@
   .bulk-btn {
     padding: 6px 14px;
     background: transparent;
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     border-radius: 999px;
     color: var(--secondary);
     font-family: inherit;

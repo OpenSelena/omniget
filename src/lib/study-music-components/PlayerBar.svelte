@@ -346,7 +346,7 @@
     height: 80px;
     padding: 0 18px;
     background: color-mix(in oklab, var(--primary) 90%, var(--button-elevated));
-    border-top: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
+    border-top: none;
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
   }

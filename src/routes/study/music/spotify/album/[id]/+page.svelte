@@ -218,7 +218,7 @@
   .actions { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
   .play-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 32px; background: #1db954; color: #000; border: 0; border-radius: 999px; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; transition: transform 200ms ease, background 200ms ease; }
   .play-btn:hover { background: #1ed760; transform: scale(1.04); }
-  .fav-btn { width: 44px; height: 44px; padding: 0; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 50%; color: white; cursor: pointer; display: grid; place-items: center; transition: background 200ms ease; }
+  .fav-btn { width: 44px; height: 44px; padding: 0; background: rgba(255,255,255,0.08); border: none; border-radius: 50%; color: white; cursor: pointer; display: grid; place-items: center; transition: background 200ms ease; }
   .fav-btn:hover { background: rgba(255,255,255,0.16); }
   .fav-btn.on { color: #1db954; }
   .fav-btn:disabled { opacity: 0.5; cursor: default; }

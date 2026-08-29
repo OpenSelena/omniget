@@ -8,10 +8,12 @@
   let {
     emotion = "idle",
     compact = false,
+    stage = false,
     bubbleText,
   }: {
     emotion?: MascotEmotion;
     compact?: boolean;
+    stage?: boolean;
     bubbleText?: string;
   } = $props();
 
@@ -55,7 +57,7 @@
   }
 </script>
 
-<div class="mascot" class:compact>
+<div class="mascot" class:compact class:stage>
   {#if !errored}
     <img
       src={currentSrc}
@@ -106,6 +108,10 @@
     height: 72px;
   }
 
+  .mascot.stage {
+    height: 168px;
+  }
+
   .mascot-img {
     height: 100px;
     width: auto;
@@ -123,6 +129,11 @@
     height: 72px;
   }
 
+  .mascot.stage .mascot-img {
+    height: 168px;
+    filter: drop-shadow(0 18px 28px color-mix(in srgb, var(--accent) 28%, transparent));
+  }
+
   .mascot-img.visible {
     opacity: 1;
     transform: scale(1);
@@ -136,7 +147,6 @@
 
   .mascot-bubble {
     background: var(--surface-hi);
-    border: 1px solid var(--border);
     border-radius: var(--radius-md);
     padding: var(--space-2) var(--space-4);
     font-size: var(--text-sm);
@@ -175,6 +185,10 @@
     .mascot-img {
       transition: opacity var(--duration-base) var(--ease-out);
       transform: none;
+    }
+
+    .mascot.stage .mascot-img {
+      filter: none;
     }
   }
 </style>

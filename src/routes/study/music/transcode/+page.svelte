@@ -300,7 +300,7 @@
   }
   .card {
     background: color-mix(in oklab, var(--surface, var(--button-elevated)) 80%, transparent);
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: 12px;
     padding: 20px;
     display: flex;
@@ -318,7 +318,7 @@
   .field select {
     padding: 8px 10px;
     background: var(--surface, var(--button-elevated));
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: 6px;
     color: var(--secondary);
     font-family: inherit;
@@ -330,7 +330,7 @@
   .ghost {
     padding: 8px 14px;
     background: transparent;
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     border-radius: 6px;
     color: var(--secondary);
     font-family: inherit;

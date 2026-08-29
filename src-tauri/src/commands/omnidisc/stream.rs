@@ -7,6 +7,7 @@ use omnidisc_proto::bitrate::StreamingPolicy;
 use serde::Deserialize;
 use serde_json::json;
 use std::collections::HashMap;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 use tauri::{Emitter, Manager, WebviewUrl, WebviewWindowBuilder};
 use tokio::sync::Mutex;
@@ -14,6 +15,7 @@ use tokio::sync::Mutex;
 pub struct StreamManager {
     active: Mutex<Option<ActiveStream>>,
     viewers: Mutex<HashMap<String, Viewer>>,
+    preview_gen: AtomicU64,
 }
 
 impl Default for StreamManager {
@@ -21,6 +23,7 @@ impl Default for StreamManager {
         Self {
             active: Mutex::new(None),
             viewers: Mutex::new(HashMap::new()),
+            preview_gen: AtomicU64::new(0),
         }
     }
 }
@@ -77,7 +80,11 @@ pub async fn omnidisc_media_capabilities(
     // kind of thing that gets an app denied for good.
     Ok(MediaCapabilities {
         voice: state.omnidisc_voice.livekit_backend().is_some(),
-        screen_share: cfg!(any(target_os = "macos", target_os = "windows")),
+        screen_share: cfg!(any(
+            target_os = "macos",
+            target_os = "windows",
+            target_os = "linux"
+        )),
         stream_viewer: cfg!(any(target_os = "macos", target_os = "windows")),
     })
 }
@@ -120,6 +127,7 @@ pub async fn omnidisc_stream_start(
     if !backend.is_connected().await {
         return Err(StreamError::NotConnected.code().to_string());
     }
+    let preview_source = args.source.clone();
     let req = StreamRequest {
         source: args.source,
         fps: args.fps,
@@ -152,6 +160,12 @@ pub async fn omnidisc_stream_start(
         .await;
     let url = state.omnidisc_voice.session_info().await.map(|s| s.url);
     schedule_overdrive(app.clone());
+    let gen = state
+        .omnidisc_stream
+        .preview_gen
+        .fetch_add(1, Ordering::SeqCst)
+        + 1;
+    spawn_preview(app.clone(), preview_source, gen);
     let stats = current_publish_stats(&state).await.unwrap_or_default();
     emit_voice(
         &app,
@@ -166,6 +180,44 @@ pub async fn omnidisc_stream_start(
         json!({ "audio": audio_mode }),
     );
     Ok(stats)
+}
+
+fn spawn_preview(app: tauri::AppHandle, source: SourceId, gen: u64) {
+    tauri::async_runtime::spawn(async move {
+        loop {
+            tokio::time::sleep(std::time::Duration::from_secs(3)).await;
+            let Some(state) = app.try_state::<crate::AppState>() else {
+                return;
+            };
+            if state.omnidisc_stream.preview_gen.load(Ordering::SeqCst) != gen {
+                return;
+            }
+            if state.omnidisc_stream.active.lock().await.is_none() {
+                return;
+            }
+            // The preview only exists so the sharer can see what they are
+            // sharing. Behind a game it is invisible, and a screenshot plus a
+            // JPEG encode every few seconds is exactly the kind of background
+            // cost that shows up as dropped frames.
+            let visible = app
+                .get_webview_window("main")
+                .and_then(|w| w.is_focused().ok())
+                .unwrap_or(true);
+            if !visible {
+                continue;
+            }
+            let src = source.clone();
+            let thumb =
+                tokio::task::spawn_blocking(move || omnidisc_media::capture::thumbnail_for(&src))
+                    .await
+                    .ok()
+                    .flatten();
+            if let Some(image) = thumb {
+                let url = state.omnidisc_voice.session_info().await.map(|s| s.url);
+                emit_voice(&app, url, "stream_preview", json!({ "image": image }));
+            }
+        }
+    });
 }
 
 fn schedule_overdrive(app: tauri::AppHandle) {
@@ -187,11 +239,33 @@ async fn current_publish_stats(state: &crate::AppState) -> Option<PublishStats> 
     Some(stream.stats().await)
 }
 
+/// Tear down the active publish without announcing anything: the caller is
+/// already leaving the channel and the leave itself carries the flag change.
+pub async fn stop_active_for_leave(state: &crate::AppState) {
+    state
+        .omnidisc_stream
+        .preview_gen
+        .fetch_add(1, Ordering::SeqCst);
+    let stream = state.omnidisc_stream.active.lock().await.take();
+    if let Some(stream) = stream {
+        if let Some(b) = state.omnidisc_voice.livekit_backend() {
+            if let Some(room) = b.current_room().await {
+                stream.stop(&room).await;
+            }
+        }
+    }
+    state.omnidisc_voice.set_streaming(false);
+}
+
 #[tauri::command]
 pub async fn omnidisc_stream_stop(
     app: tauri::AppHandle,
     state: tauri::State<'_, crate::AppState>,
 ) -> Result<(), String> {
+    state
+        .omnidisc_stream
+        .preview_gen
+        .fetch_add(1, Ordering::SeqCst);
     let stream = state.omnidisc_stream.active.lock().await.take();
     if let Some(stream) = stream {
         if let Some(b) = state.omnidisc_voice.livekit_backend() {
@@ -356,6 +430,33 @@ fn sanitize(s: &str) -> String {
     s.chars()
         .map(|c| if c.is_ascii_alphanumeric() { c } else { '-' })
         .collect()
+}
+
+/// The OS red-dot close bypasses `omnidisc_stream_unwatch`, and a `Viewer`
+/// left behind blocks every later watch of the same user.
+pub fn on_stream_window_destroyed(app: &tauri::AppHandle, label: &str) {
+    let Some(rest) = label.strip_prefix("omnidisc-stream-") else {
+        return;
+    };
+    let rest = rest.to_string();
+    let app = app.clone();
+    tauri::async_runtime::spawn(async move {
+        let Some(state) = app.try_state::<crate::AppState>() else {
+            return;
+        };
+        let removed = {
+            let mut viewers = state.omnidisc_stream.viewers.lock().await;
+            let key = viewers.keys().find(|k| sanitize(k) == rest).cloned();
+            key.and_then(|k| viewers.remove(&k).map(|_| k))
+        };
+        if let Some(user_id) = removed {
+            if let Some(b) = state.omnidisc_voice.livekit_backend() {
+                if let Some(p) = b.video_publication_for(&user_id) {
+                    p.set_subscribed(false);
+                }
+            }
+        }
+    });
 }
 
 async fn create_surface_on_main(

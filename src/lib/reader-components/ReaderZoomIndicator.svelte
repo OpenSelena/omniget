@@ -17,7 +17,7 @@
     padding: 6px 14px;
     background: var(--popup-bg, var(--bg-elevated, var(--bg)));
     color: var(--text, var(--secondary));
-    border: 1px solid var(--border, var(--content-border));
+    border: none;
     border-radius: 999px;
     font-size: 13px;
     font-weight: 600;

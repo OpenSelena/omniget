@@ -550,7 +550,7 @@
     align-items: center;
     gap: 12px;
     padding: 10px 16px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: none;
     background: var(--bg-elevated);
     flex-shrink: 0;
   }
@@ -562,7 +562,7 @@
     padding: 6px 10px;
     background: transparent;
     color: var(--text-muted);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: 6px;
     font-size: 12px;
     cursor: pointer;
@@ -598,7 +598,7 @@
     padding: 0;
     background: transparent;
     color: var(--text-muted);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: 6px;
     cursor: pointer;
     font-size: 12px;
@@ -657,7 +657,7 @@
     padding: 6px 14px;
     background: transparent;
     color: var(--text);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: 6px;
     font-size: 12px;
     cursor: pointer;
@@ -676,7 +676,7 @@
   .sidebar {
     width: 48px;
     background: var(--bg-elevated);
-    border-right: 1px solid var(--border);
+    border-right: none;
     display: flex;
     flex-direction: column;
     transition: width 0.15s ease;
@@ -692,7 +692,7 @@
     align-items: center;
     gap: 8px;
     padding: 8px 10px;
-    border-bottom: 1px solid var(--border);
+    border-bottom: none;
     min-height: 38px;
   }
 

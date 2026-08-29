@@ -423,7 +423,7 @@
     gap: var(--space-3);
     min-height: 48px;
     padding: 0 var(--space-4);
-    border-bottom: 1px solid var(--border);
+    border-bottom: none;
   }
 
   .name {
@@ -448,7 +448,7 @@
     flex: 1;
     margin: 0;
     padding-left: var(--space-3);
-    border-left: 1px solid var(--border);
+    border-left: none;
     font-size: var(--text-xs);
     color: var(--text-muted);
     overflow: hidden;
@@ -505,7 +505,7 @@
     display: flex;
     flex-direction: column;
     padding: var(--space-1);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-md);
     background: var(--surface);
     box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.25));

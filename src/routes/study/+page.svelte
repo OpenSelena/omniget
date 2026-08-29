@@ -434,7 +434,7 @@
     gap: 0.3rem;
     padding: 0.3rem 0.65rem;
     background: color-mix(in oklab, var(--streak-color) 10%, transparent);
-    border: 1px solid color-mix(in oklab, var(--streak-color) 35%, var(--content-border));
+    border: none;
     border-radius: 999px;
     color: var(--streak-color);
     cursor: pointer;
@@ -459,7 +459,7 @@
     gap: 1rem;
     padding: calc(var(--padding) * 3);
     background: var(--button-elevated);
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: calc(var(--border-radius) * 1.4);
     animation: hero-in 420ms cubic-bezier(0.22, 1, 0.36, 1) both;
     animation-delay: 80ms;
@@ -782,7 +782,7 @@
     align-items: center;
     gap: 12px;
     padding: 8px 12px;
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
     color: var(--text);
@@ -813,7 +813,7 @@
     gap: 0.6rem;
     margin-top: calc(var(--padding) * 2);
     padding: 0.75rem 1rem;
-    border-top: 1px solid color-mix(in oklab, var(--content-border) 60%, transparent);
+    border-top: none;
     color: var(--tertiary);
     font-size: 12px;
     animation: fade-in 480ms cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -824,7 +824,7 @@
     height: 32px;
     border-radius: 50%;
     object-fit: cover;
-    border: 1px solid var(--content-border);
+    border: none;
     flex-shrink: 0;
   }
   .made-by-text strong {

@@ -539,7 +539,7 @@
 
   .plugin-card {
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-md);
     padding: var(--space-4);
     display: flex;

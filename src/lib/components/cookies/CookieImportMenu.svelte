@@ -96,7 +96,7 @@
     right: 0;
     min-width: 240px;
     background: var(--surface, var(--bg));
-    border: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
+    border: none;
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);

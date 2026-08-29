@@ -62,7 +62,7 @@
     height: 100%;
     width: 100%;
     overflow: hidden;
-    border: 1px solid color-mix(in oklab, var(--content-border) 30%, transparent);
+    border: none;
     border-radius: 4px;
     background: var(--primary, var(--page-bg));
     transition: border-color 120ms ease;
@@ -73,7 +73,7 @@
   .leaf-tabs {
     height: 32px;
     flex-shrink: 0;
-    border-bottom: 1px solid color-mix(in oklab, var(--content-border) 30%, transparent);
+    border-bottom: none;
     overflow: hidden;
   }
   .leaf-body {

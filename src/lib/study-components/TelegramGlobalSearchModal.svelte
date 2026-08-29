@@ -177,7 +177,7 @@
     align-items: center;
     gap: 12px;
     padding: 14px 18px;
-    border-bottom: 1px solid var(--input-border);
+    border-bottom: none;
   }
 
   .search-icon {
@@ -206,7 +206,7 @@
     border-radius: 4px;
     background: var(--button-elevated);
     color: var(--gray);
-    border: 1px solid var(--input-border);
+    border: none;
     flex-shrink: 0;
   }
 
@@ -320,7 +320,7 @@
     display: flex;
     justify-content: space-between;
     padding: 8px 18px;
-    border-top: 1px solid var(--input-border);
+    border-top: none;
     font-size: 11px;
     color: var(--gray);
   }

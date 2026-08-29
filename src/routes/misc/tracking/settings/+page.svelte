@@ -207,7 +207,7 @@
     flex-direction: column;
     gap: 16px;
     padding: 18px 20px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
   }
@@ -281,7 +281,7 @@
     display: flex;
     gap: 8px;
     flex-wrap: wrap;
-    border-top: 1px solid var(--input-border);
+    border-top: none;
     padding-top: 16px;
   }
 
@@ -292,7 +292,7 @@
     font-family: inherit;
     cursor: pointer;
     font-weight: 500;
-    border: 1px solid var(--input-border);
+    border: none;
     background: transparent;
     color: var(--secondary);
   }
@@ -318,7 +318,7 @@
   .toast {
     pointer-events: auto;
     padding: 10px 14px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
     color: var(--secondary);

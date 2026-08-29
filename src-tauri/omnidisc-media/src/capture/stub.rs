@@ -1,5 +1,5 @@
 use super::{AudioSink, CaptureApi, CaptureGeometry, CaptureOptions, VideoSink};
-use crate::stream::{AudioMode, StreamError, StreamSources};
+use crate::stream::{AudioMode, SourceId, StreamError, StreamSources};
 
 pub struct CapturedFrame {
     pub width: u32,
@@ -37,6 +37,10 @@ pub struct Platform;
 impl CaptureApi for Platform {
     fn list_sources(_thumbnails: bool) -> Result<StreamSources, StreamError> {
         Err(StreamError::Unsupported)
+    }
+
+    fn thumbnail_for(_source: &SourceId) -> Option<String> {
+        None
     }
 
     fn start_video(

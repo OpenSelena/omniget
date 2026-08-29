@@ -18,6 +18,7 @@
     isMicTesting,
     getMicLevel,
     micLevelStale,
+    isMicSilent,
     isPttRegistered,
     refreshPttStatus,
   } from "$lib/stores/omnidisc-voice-store.svelte";
@@ -169,7 +170,7 @@
           <div class="meter" role="meter" aria-label={$t("omnidisc.voice.mic_level")} aria-valuemin="0" aria-valuemax="100" aria-valuenow={testing ? levelPercent : 0}>
             <div class="meter-fill" class:hot={levelPercent > 85} style:width={`${testing ? levelPercent : 0}%`}></div>
           </div>
-          {#if testing && stale}
+          {#if testing && (stale || isMicSilent())}
             <span class="meter-note">{$t("omnidisc.voice.mic_silent")}</span>
           {/if}
           {#if micError}

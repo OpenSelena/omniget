@@ -319,7 +319,7 @@
   .tabs {
     display: flex;
     gap: 8px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    border-bottom: none;
     padding-bottom: 0;
   }
   .tab {

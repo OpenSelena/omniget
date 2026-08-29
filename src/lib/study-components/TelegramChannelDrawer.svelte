@@ -596,7 +596,7 @@
     align-items: center;
     gap: var(--padding);
     padding: var(--padding);
-    border-bottom: 1px solid var(--input-border);
+    border-bottom: none;
   }
 
   .header-info {
@@ -663,7 +663,7 @@
 
   .drawer-tabs {
     display: flex;
-    border-bottom: 1px solid var(--input-border);
+    border-bottom: none;
   }
 
   .tab-btn {
@@ -730,7 +730,7 @@
   .danger-zone {
     margin-top: var(--padding);
     padding-top: var(--padding);
-    border-top: 1px solid var(--input-border);
+    border-top: none;
   }
 
   .action-row {
@@ -938,7 +938,7 @@
     width: 100%;
     padding: 8px 12px;
     background: var(--button);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     color: var(--secondary);
     font-family: inherit;

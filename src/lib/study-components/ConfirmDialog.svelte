@@ -111,7 +111,7 @@
   }
   .sheet {
     background: var(--popup-bg, var(--button-elevated));
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: var(--border-radius, 11px);
     padding: calc(var(--padding, 10px) * 2);
     max-width: 420px;
@@ -149,7 +149,7 @@
   }
   .btn.outline {
     background: transparent;
-    border: 1px solid var(--content-border);
+    border: none;
     color: var(--secondary);
   }
   .btn.outline:hover {

@@ -69,7 +69,7 @@
     width: 100%;
     max-width: 460px;
     background: var(--surface);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     padding: 20px;
     display: flex;
@@ -82,7 +82,7 @@
   }
   .modal input {
     padding: 10px 12px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
     color: var(--text);

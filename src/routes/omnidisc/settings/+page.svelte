@@ -77,7 +77,7 @@
     align-items: center;
     min-height: 48px;
     padding: 0 var(--space-4);
-    border-bottom: 1px solid var(--border);
+    border-bottom: none;
   }
 
   .title {

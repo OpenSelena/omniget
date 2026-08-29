@@ -413,7 +413,7 @@
     display: flex;
     flex-direction: column;
     background: var(--button-elevated);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     overflow: hidden;
     min-height: 320px;
@@ -436,7 +436,7 @@
     font-size: 11px;
     color: var(--tertiary);
     padding: 2px 8px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: 6px;
     background: var(--bg);
   }
@@ -474,7 +474,7 @@
     justify-content: center;
     padding: 10px 20px;
     background: transparent;
-    border: 1px solid var(--input-border);
+    border: none;
     color: var(--secondary);
     border-radius: var(--border-radius);
     font-family: inherit;
@@ -503,7 +503,7 @@
     gap: 4px;
     padding: 14px 8px;
     background: var(--button-elevated);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     color: var(--secondary);
     cursor: pointer;
@@ -566,7 +566,7 @@
     font-size: 10px;
     color: var(--tertiary);
     padding: 1px 5px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: 4px;
   }
 
@@ -577,7 +577,7 @@
     gap: var(--padding);
     padding: calc(var(--padding) * 4) calc(var(--padding) * 2);
     background: var(--button-elevated);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     text-align: center;
   }

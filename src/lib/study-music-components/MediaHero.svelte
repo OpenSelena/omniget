@@ -193,7 +193,7 @@
     gap: 8px;
     padding: 10px 18px;
     background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: none;
     color: rgba(255, 255, 255, 0.92);
     border-radius: 999px;
     font: inherit;

@@ -80,6 +80,10 @@ pub enum EngineNotification {
         user_id: String,
         quality: Quality,
     },
+    Stream {
+        user_id: String,
+        active: bool,
+    },
     Level {
         rms_db: f32,
         peak: f32,

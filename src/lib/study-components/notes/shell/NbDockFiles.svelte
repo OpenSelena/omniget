@@ -535,7 +535,7 @@
   }
   .search {
     padding: 6px 9px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: 6px;
     background: var(--bg);
     color: var(--text);
@@ -667,7 +667,7 @@
   }
   .closed-section {
     margin-top: 8px;
-    border-top: 1px dashed color-mix(in oklab, var(--content-border) 40%, transparent);
+    border-top: none;
     padding-top: 6px;
   }
   .closed-toggle {
@@ -718,7 +718,7 @@
     color: var(--text);
   }
   .dock-foot {
-    border-top: 1px solid color-mix(in oklab, var(--content-border) 40%, transparent);
+    border-top: none;
     padding-top: 6px;
   }
   .new-nb {
@@ -727,7 +727,7 @@
     gap: 6px;
     width: 100%;
     padding: 6px 8px;
-    border: 1px dashed color-mix(in oklab, var(--content-border) 60%, transparent);
+    border: none;
     border-radius: 6px;
     background: transparent;
     color: var(--tertiary);
@@ -746,7 +746,7 @@
     z-index: 220;
     min-width: 180px;
     background: var(--bg);
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     border-radius: 8px;
     padding: 4px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.34);
@@ -756,7 +756,7 @@
   }
   .ctx-menu hr {
     border: 0;
-    border-top: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
+    border-top: none;
     margin: 3px 0;
   }
   .ctx-item {
@@ -786,7 +786,7 @@
   }
   .rename-card {
     background: var(--bg);
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     border-radius: 10px;
     padding: 14px;
     width: min(360px, 90vw);
@@ -805,7 +805,7 @@
   }
   .rename-card input {
     padding: 7px 9px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: 6px;
     background: var(--bg);
     color: var(--text);

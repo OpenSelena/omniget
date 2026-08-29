@@ -728,7 +728,7 @@
     padding: calc(var(--padding) / 2) var(--padding);
     font-size: var(--text-sm);
     background: var(--input-bg);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     color: var(--secondary);
     outline: none;
@@ -861,7 +861,7 @@
     background: var(--button);
     border-radius: var(--border-radius);
     color: var(--secondary);
-    border: 1px solid var(--input-border);
+    border: none;
   }
 
   .input::placeholder { color: var(--gray); }

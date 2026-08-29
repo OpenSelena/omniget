@@ -279,7 +279,7 @@
     display: flex;
     gap: 4px;
     flex-wrap: wrap;
-    border-bottom: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
+    border-bottom: none;
     padding-bottom: 0;
   }
 

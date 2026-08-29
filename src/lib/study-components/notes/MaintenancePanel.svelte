@@ -238,7 +238,7 @@
   .card {
     padding: 14px 16px;
     background: var(--surface);
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     display: flex;
     flex-direction: column;
@@ -266,7 +266,7 @@
   .btn {
     padding: 8px 12px;
     border-radius: var(--border-radius);
-    border: 1px solid var(--input-border);
+    border: none;
     background: var(--bg);
     color: var(--text);
     font: inherit;
@@ -304,7 +304,7 @@
   .modal {
     width: min(480px, calc(100vw - 48px));
     background: var(--surface);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     padding: 18px 20px;
     display: flex;
