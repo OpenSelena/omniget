@@ -105,7 +105,7 @@ jobs:
 
             Then open it normally. If it still refuses, allow it under
             **System Settings → Privacy & Security**.
-          releaseDraft: true
+          releaseDraft: false
           prerelease: false
           includeUpdaterJson: false
           args: ${{ matrix.args }}
