@@ -9,6 +9,11 @@
   import { listen } from "@tauri-apps/api/event";
   import { initDownloadListener } from "$lib/stores/download-listener";
   import { getCounts } from "$lib/stores/download-store.svelte";
+  import {
+    getUnreadCount as getChatUnreadCount,
+    getMentionTotal as getChatMentionCount,
+    initOmnidisc,
+  } from "$lib/stores/omnidisc-store.svelte";
   import { getSettings } from "$lib/stores/settings-store.svelte";
   import { queueExternalPrefill, type ExternalUrlEvent } from "$lib/stores/external-url-store.svelte";
   import Toast from "$components/toast/Toast.svelte";
@@ -44,7 +49,11 @@
       : []
   );
 
-  let allNav = $derived([...CORE_NAV_ITEMS, ...leagueNavItems, ...pluginNavItems].sort((a, b) => (a.order ?? 50) - (b.order ?? 50)));
+  let coreNavItems = $derived(
+    CORE_NAV_ITEMS.filter((item) => item.href !== "/omnidisc" || (getSettings()?.omnidisc?.enabled ?? false))
+  );
+
+  let allNav = $derived([...coreNavItems, ...leagueNavItems, ...pluginNavItems].sort((a, b) => (a.order ?? 50) - (b.order ?? 50)));
   let primaryNav = $derived(allNav.filter((item) => item.group === "primary"));
   let appNav = $derived(allNav.filter((item) => item.group === "app"));
   let pluginNav = $derived(allNav.filter((item) => item.group === "plugins"));
@@ -55,14 +64,15 @@
 
   let counts = $derived(getCounts());
   let badgeLabel = $derived(counts.badge > 99 ? "99+" : String(counts.badge));
+  let chatBadgeCount = $derived(getChatMentionCount() || getChatUnreadCount());
   let settings = $derived(getSettings());
 
   let isStudyRoute = $derived(page.url.pathname.startsWith("/study"));
+  let isStreamPopout = $derived(page.url.pathname === "/omnidisc/stream");
   let isCoreRoute = $derived(
     page.url.pathname === "/" ||
     page.url.pathname.startsWith("/downloads") ||
     page.url.pathname.startsWith("/settings") ||
-    page.url.pathname.startsWith("/open-omni") ||
     page.url.pathname.startsWith("/marketplace") ||
     page.url.pathname.startsWith("/league") ||
     page.url.pathname.startsWith("/about"),
@@ -118,6 +128,13 @@
       })
       .catch(() => {});
   }
+
+  let omnidiscStarted = false;
+  $effect(() => {
+    if (omnidiscStarted || !(getSettings()?.omnidisc?.enabled ?? false)) return;
+    omnidiscStarted = true;
+    void initOmnidisc();
+  });
 
   onMount(() => {
     initDownloadListener();
@@ -288,8 +305,13 @@
   });
 </script>
 
+{#if isStreamPopout}
+  <div class="stream-popout">
+    {@render children()}
+  </div>
+{:else}
 <div class="shell" data-reduce-motion={settings?.accessibility?.reduce_motion} data-reduce-transparency={settings?.accessibility?.reduce_transparency}>
-  <AppSidebar {primaryNav} {appNav} {pluginNav} {badgeLabel} />
+  <AppSidebar {primaryNav} {appNav} {pluginNav} {badgeLabel} {chatBadgeCount} />
 
   <div class="shell-body">
     <AppToolbar />
@@ -330,6 +352,7 @@
     </main>
   </div>
 </div>
+{/if}
 
 <Toast />
 <CommandPalette />

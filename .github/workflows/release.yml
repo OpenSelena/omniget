@@ -33,7 +33,7 @@ jobs:
         if: matrix.platform == 'ubuntu-22.04' || matrix.platform == 'ubuntu-24.04-arm'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev patchelf xdg-utils
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev libasound2-dev patchelf xdg-utils
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -69,8 +69,43 @@ jobs:
         with:
           tagName: v__VERSION__
           releaseName: 'OmniGet v__VERSION__'
-          generateReleaseNotes: true
-          releaseDraft: false
+          releaseBody: |
+            ## Downloads
+
+            **Windows**: `.exe` installer or portable.
+            **macOS**: `.dmg` (Apple Silicon `aarch64` or Intel `x86_64`).
+            **Linux**: `.AppImage` (universal) or `.deb` (Debian/Ubuntu).
+
+            ---
+
+            ### Debian/Ubuntu users — AppImage compatibility
+
+            **Debian 12+ ships without FUSE 2 by default**, which AppImage requires.
+            If `./omniget.AppImage` fails with a libfuse error, run:
+
+            ```bash
+            sudo apt install libfuse2
+            ```
+
+            …or use `./omniget.AppImage --appimage-extract-and-run`.
+
+            **Easier alternative**: download the `.deb` instead — works out of the
+            box on Debian 12+ and Ubuntu 22.04+.
+
+            ---
+
+            ### macOS users — "OmniGet is damaged and can't be opened"
+
+            The app is not notarized with Apple yet, so Gatekeeper quarantines it.
+            After moving the app to `/Applications`, run:
+
+            ```bash
+            xattr -cr /Applications/omniget.app
+            ```
+
+            Then open it normally. If it still refuses, allow it under
+            **System Settings → Privacy & Security**.
+          releaseDraft: true
           prerelease: false
           includeUpdaterJson: false
           args: ${{ matrix.args }}

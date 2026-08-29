@@ -18,9 +18,3 @@ pub use omniget_core::platforms::YouTubeDownloader;
 
 pub mod magnet;
 pub mod noop;
-
-#[cfg(not(target_os = "android"))]
-pub mod gallerydl;
-#[cfg(not(target_os = "android"))]
-pub mod generic_ytdlp;
-// Ported to omniget-core: bluesky, direct_file, douyin, instagram, pinterest, p2p, reddit, tiktok, twitch, twitter, vimeo, youtube

@@ -200,6 +200,11 @@ pub struct AppState {
     pub active_p2p_sends: ActiveP2pSends,
     pub frontend_ready: Arc<tokio::sync::Mutex<bool>>,
     pub pending_external_events: Arc<tokio::sync::Mutex<Vec<external_url::ExternalUrlEvent>>>,
+    pub omnidisc_gateways: commands::omnidisc::gateway::Gateways,
+    pub omnidisc_voice: Arc<commands::omnidisc::voice::VoiceManager>,
+    pub omnidisc_stream: Arc<commands::omnidisc::stream::StreamManager>,
+    pub omnidisc_mls: Arc<commands::omnidisc::mls::MlsManager>,
+    pub omnidisc_uploads: Arc<commands::omnidisc::upload::UploadManager>,
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
@@ -219,9 +224,6 @@ pub fn run() {
     );
 
     let mut registry = core::registry::PlatformRegistry::new();
-    // gallery-dl first: it claims bulk-listing URLs (profiles, subreddits)
-    // that the single-post Twitter/Reddit downloaders would otherwise match
-    registry.register(Arc::new(platforms::gallerydl::GalleryDlDownloader::new()));
     registry.register(Arc::new(omniget_core::platforms::InstagramDownloader::new()));
     registry.register(Arc::new(omniget_core::platforms::ThreadsDownloader::new()));
     registry.register(Arc::new(omniget_core::platforms::PinterestDownloader::new()));
@@ -246,7 +248,7 @@ pub fn run() {
         omniget_core::platforms::DirectFileDownloader::new(),
     ));
     registry.register(Arc::new(
-        platforms::generic_ytdlp::GenericYtdlpDownloader::new(),
+        omniget_core::platforms::GenericYtdlpDownloader::new(),
     ));
 
     let state = AppState {
@@ -258,6 +260,11 @@ pub fn run() {
         active_p2p_sends: Arc::new(tokio::sync::Mutex::new(HashMap::new())),
         frontend_ready: Arc::new(tokio::sync::Mutex::new(false)),
         pending_external_events: Arc::new(tokio::sync::Mutex::new(Vec::new())),
+        omnidisc_gateways: commands::omnidisc::gateway::new_gateways(),
+        omnidisc_voice: Arc::new(commands::omnidisc::voice::VoiceManager::new()),
+        omnidisc_stream: Arc::new(commands::omnidisc::stream::StreamManager::default()),
+        omnidisc_mls: Arc::new(commands::omnidisc::mls::MlsManager::default()),
+        omnidisc_uploads: Arc::new(commands::omnidisc::upload::UploadManager::default()),
     };
 
     tauri::Builder::default()
@@ -298,7 +305,11 @@ pub fn run() {
         .plugin(
             tauri_plugin_global_shortcut::Builder::new()
                 .with_handler(|app, shortcut, event| {
-                    if event.state == tauri_plugin_global_shortcut::ShortcutState::Pressed {
+                    let pressed = event.state == tauri_plugin_global_shortcut::ShortcutState::Pressed;
+                    if hotkey::handle_ptt(app, shortcut, pressed) {
+                        return;
+                    }
+                    if pressed {
                         hotkey::on_hotkey_pressed(app, shortcut);
                     }
                 })
@@ -330,7 +341,7 @@ pub fn run() {
                 // Nao e so Windows. No Linux o wry usa este caminho para
                 // `base_data_directory`, `base_cache_directory` e os cookies do
                 // WebKitGTK; sem ele o modo portatil deixa
-                // `XDG_DATA_HOME/wtf.tonho.omniget` no perfil do usuario — a
+                // `XDG_DATA_HOME/com.igect.omniget` no perfil do usuario — a
                 // mesma #209, fora do Windows. Foi o smoke test do B55 que
                 // pegou isso, na primeira vez que rodou.
                 //
@@ -636,6 +647,7 @@ pub fn run() {
             }
             tray::setup(app.handle())?;
             hotkey::register_from_settings(app.handle());
+            commands::omnidisc::voice::start(app.handle());
 
             // Migration: drop the manifests / binary copies the previous
             // native-messaging code left under `~/.config/...` so Chrome and
@@ -798,6 +810,98 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::auth_webview::open_auth_webview,
+            commands::omnidisc::omnidisc_connect,
+            commands::omnidisc::auth::omnidisc_register,
+            commands::omnidisc::auth::omnidisc_login,
+            commands::omnidisc::auth::omnidisc_logout,
+            commands::omnidisc::auth::omnidisc_has_session,
+            commands::omnidisc::api::omnidisc_list_messages,
+            commands::omnidisc::api::omnidisc_send_message,
+            commands::omnidisc::api::omnidisc_edit_message,
+            commands::omnidisc::api::omnidisc_delete_message,
+            commands::omnidisc::api::omnidisc_add_reaction,
+            commands::omnidisc::api::omnidisc_remove_reaction,
+            commands::omnidisc::api::omnidisc_ack,
+            commands::omnidisc::gateway::omnidisc_typing,
+            commands::omnidisc::api::omnidisc_create_guild,
+            commands::omnidisc::api::omnidisc_create_channel,
+            commands::omnidisc::api::omnidisc_create_invite,
+            commands::omnidisc::api::omnidisc_join_invite,
+            commands::omnidisc::api::omnidisc_create_dm,
+            commands::omnidisc::api::omnidisc_update_me,
+            commands::omnidisc::api::omnidisc_get_user,
+            commands::omnidisc::api::omnidisc_get_guild,
+            commands::omnidisc::api::omnidisc_get_me,
+            commands::omnidisc::api::omnidisc_search,
+            commands::omnidisc::api::omnidisc_list_pins,
+            commands::omnidisc::api::omnidisc_pin_message,
+            commands::omnidisc::api::omnidisc_list_relationships,
+            commands::omnidisc::api::omnidisc_add_relationship,
+            commands::omnidisc::api::omnidisc_accept_relationship,
+            commands::omnidisc::api::omnidisc_remove_relationship,
+            commands::omnidisc::api::omnidisc_block_user,
+            commands::omnidisc::api::omnidisc_list_notes,
+            commands::omnidisc::api::omnidisc_put_note,
+            commands::omnidisc::api::omnidisc_update_guild,
+            commands::omnidisc::api::omnidisc_delete_guild,
+            commands::omnidisc::api::omnidisc_leave_guild,
+            commands::omnidisc::api::omnidisc_transfer_guild,
+            commands::omnidisc::api::omnidisc_create_role,
+            commands::omnidisc::api::omnidisc_update_role,
+            commands::omnidisc::api::omnidisc_delete_role,
+            commands::omnidisc::api::omnidisc_set_member_role,
+            commands::omnidisc::api::omnidisc_update_member,
+            commands::omnidisc::api::omnidisc_kick_member,
+            commands::omnidisc::api::omnidisc_ban_member,
+            commands::omnidisc::api::omnidisc_unban_member,
+            commands::omnidisc::api::omnidisc_list_bans,
+            commands::omnidisc::api::omnidisc_audit_log,
+            commands::omnidisc::api::omnidisc_update_channel,
+            commands::omnidisc::api::omnidisc_delete_channel,
+            commands::omnidisc::api::omnidisc_put_overwrite,
+            commands::omnidisc::api::omnidisc_delete_overwrite,
+            commands::omnidisc::api::omnidisc_list_sessions,
+            commands::omnidisc::api::omnidisc_revoke_session,
+            commands::omnidisc::api::omnidisc_revoke_other_sessions,
+            commands::omnidisc::device::omnidisc_device_fingerprint,
+            commands::omnidisc::device::omnidisc_list_user_devices,
+            commands::omnidisc::device::omnidisc_revoke_device,
+            commands::omnidisc::mls::omnidisc_mls_sync,
+            commands::omnidisc::mls::omnidisc_mls_status,
+            commands::omnidisc::mls::omnidisc_mls_recall,
+            commands::omnidisc::mls::omnidisc_mls_device_revoked,
+            commands::omnidisc::upload::omnidisc_instance_limits,
+            commands::omnidisc::upload::omnidisc_stage_file,
+            commands::omnidisc::upload::omnidisc_upload_start,
+            commands::omnidisc::upload::omnidisc_upload_cancel,
+            commands::omnidisc::upload::omnidisc_download_attachment,
+            commands::omnidisc::gateway::omnidisc_gateway_connect,
+            commands::omnidisc::gateway::omnidisc_gateway_disconnect,
+            commands::omnidisc::gateway::omnidisc_gateway_send,
+            commands::omnidisc::gateway::omnidisc_gateway_status,
+            commands::omnidisc::voice::omnidisc_voice_join,
+            commands::omnidisc::voice::omnidisc_voice_leave,
+            commands::omnidisc::voice::omnidisc_voice_set_mute,
+            commands::omnidisc::voice::omnidisc_voice_set_deaf,
+            commands::omnidisc::voice::omnidisc_voice_set_volume,
+            commands::omnidisc::voice::omnidisc_voice_devices,
+            commands::omnidisc::voice::omnidisc_voice_set_device,
+            commands::omnidisc::voice::omnidisc_voice_stats,
+            commands::omnidisc::voice::omnidisc_voice_ptt,
+            commands::omnidisc::voice::omnidisc_voice_status,
+            commands::omnidisc::voice::omnidisc_voice_set_noise_suppression,
+            commands::omnidisc::voice::omnidisc_voice_mic_test,
+            commands::omnidisc::voice::omnidisc_voice_set_ducking,
+            commands::omnidisc::voice::omnidisc_voice_ptt_status,
+            commands::omnidisc::stream::omnidisc_media_capabilities,
+            commands::omnidisc::stream::omnidisc_stream_sources,
+            commands::omnidisc::stream::omnidisc_stream_start,
+            commands::omnidisc::stream::omnidisc_stream_stop,
+            commands::omnidisc::stream::omnidisc_stream_stats,
+            commands::omnidisc::stream::omnidisc_stream_set_volume,
+            commands::omnidisc::stream::omnidisc_stream_set_viewport,
+            commands::omnidisc::stream::omnidisc_stream_watch,
+            commands::omnidisc::stream::omnidisc_stream_unwatch,
             commands::league::league_status,
             commands::league::league_get,
             commands::league::league_install_dir,
@@ -996,9 +1100,6 @@ pub fn run() {
             commands::p2p::p2p_cancel_send,
             commands::p2p::p2p_pause_send,
             commands::p2p::p2p_resume_send,
-            commands::app_lifecycle::force_exit_app,
-            commands::app_lifecycle::get_debug_info,
-            commands::app_lifecycle::get_portable_info,
             commands::open_omni::open_omni_check_python_dependencies,
             commands::open_omni::open_omni_run_gallery_dl_download,
             commands::open_omni::open_omni_cancel_download,
@@ -1007,6 +1108,9 @@ pub fn run() {
             commands::open_omni::open_omni_load_profiles,
             commands::open_omni::open_omni_save_profile,
             commands::open_omni::open_omni_delete_profile,
+            commands::app_lifecycle::force_exit_app,
+            commands::app_lifecycle::get_debug_info,
+            commands::app_lifecycle::get_portable_info,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

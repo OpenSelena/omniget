@@ -1057,7 +1057,7 @@ pub async fn download_with_custom_args(
     }
 
     let downloader: Arc<dyn crate::platforms::traits::PlatformDownloader> =
-        Arc::new(crate::platforms::generic_ytdlp::GenericYtdlpDownloader::new());
+        Arc::new(omniget_core::platforms::GenericYtdlpDownloader::new());
 
     let title = url.clone();
     let ytdlp_path = ytdlp::find_ytdlp_cached().await;

@@ -137,7 +137,7 @@ impl<R: Runtime + 'static> PluginHost for PluginHostImpl<R> {
                         "external_data_cache: OS cache dir unavailable on this platform"
                     )
                 })?
-                .join("wtf.tonho.omniget")
+                .join("com.igect.omniget")
         };
         let dir = base.join("external-cache").join(plugin_id).join(namespace);
         std::fs::create_dir_all(&dir).map_err(|e| {

@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.8.13] - 2026-08-29
+
+### Added
+- **OmniDisc Subsystem Integration**: Bundled end-to-end encrypted messaging, voice/screen streaming, and guild management (`omnidisc-proto`, `omnidisc-media`, `omnidisc-mls`).
+- **Open Omni Social Downloader**: Integrated `/open-omni` unified downloader route with `gallery-dl` / `yt-dlp` backend runners, persistent profile presets, and live task cancellation.
+
+### Refactored & Optimized
+- **Platform Architecture Cleanup**: Removed 14,000+ lines of duplicate legacy platform extractors from `src-tauri/src/platforms/`, standardizing downloader implementations under `omniget_core::platforms`.
+- **Standard Library Synchronization**: Converted all `once_cell::sync` occurrences across Tauri commands and queues to `std::sync::OnceLock` and `std::sync::LazyLock`.
+- **Dependency Pruning**: Removed obsolete `once_cell` and `open` crates from workspace manifests.
+
+### Packaging & Infrastructure
+- **Storage Identifier & Migration**: Standardized app ID to `com.igect.omniget` with automatic migration from legacy directory locations.
+- **CI / CD Pipeline Updates**: Configured GitHub Actions release workflow and AppImage zsync for the `igect/omniget` repository.
+
+---
+
 ## [0.8.12] - 2026-08-23
 
 ### Added
@@ -14,30 +31,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Open Omni Presets & Concurrency Control**: Persistent JSON presets for domain extractors, authentication cookie injection, and concurrency throttling.
 - **Loop Mascot Reactive Controller**: Reactive mascot state controller responding in real-time to active download states (Idle, Amazed, Downloading, Queue, Paused, Error).
 - **Offline Release Notes Fallback**: Bundled local changelog fallback in `changelog-store.svelte.ts` ensuring update details load when offline or GitHub API rate-limited.
-
-### Platform & Engine Improvements
-- **macOS WebKit Cookie Store Extraction**: Integrated native `objc2-web-kit` cookie extraction from WKWebView to resolve HttpOnly session cookies for authenticated downloads.
-- **Instagram & Bilibili Parsers**: Improved Instagram Reels video stream detection and Bilibili collection parsing in `omniget-core`.
 - **Rust Standard Library Modernization**: Migrated global synchronization primitives to `std::sync::OnceLock` and `std::sync::LazyLock`, eliminating the external `once_cell` crate.
 - **Dependency Hygiene**: Dropped redundant `open` crate dependency in favor of Tauri's native opener plugin.
 
 ### Packaging & Infrastructure
 - **App Storage Migration**: Non-destructive automatic migration moving legacy configuration and plugin folders (`wtf.tonho.omniget`, `omniget`) to `com.igect.omniget`.
 - **Identifier Standard**: Standardized bundle identifier to `com.igect.omniget` across Tauri configuration, Flatpak manifests, and CI/CD pipelines.
-- **Repository Alignment**: Standardized all project URLs, documentation links, and CI workflow targets to `igect/omniget`.
-- **Source Builds**: Enabled building locally without requiring private updater signing keys (`createUpdaterArtifacts: false`).
-
----
-
 ## [0.8.11] - 2026-08-17
 
 ### Refactored & Optimized
 - **Platform Architecture Cleanup**: Removed orphaned and unreferenced legacy platform extractor files from `src-tauri/src/platforms/`, consolidating all platform downloader logic solely within `omniget-core::platforms`.
 - **Rust Standard Library Modernization**: Migrated all `once_cell::sync::OnceCell` and `Lazy` occurrences to Rust standard library's `std::sync::OnceLock` and `std::sync::LazyLock`, dropping the external `once_cell` crate dependency across the workspace.
-- **Dependency Trimming**: Removed unused `open` crate dependency from Cargo configurations in favor of Tauri's native opener plugin.
-- **Fallback Title Generation**: Streamlined generic video title generation in the download queue, removing redundant name tables in favor of lightweight timestamp-based fallbacks.
-- **Universal Relative Time Formatting**: Refactored `timeAgo` to leverage native browser `Intl.RelativeTimeFormat`, ensuring accurate locale-aware time formatting without hardcoded dictionaries.
-- **Bundle Hygiene**: Removed dev-only audit routes from the production application bundle.
 
 ---
 

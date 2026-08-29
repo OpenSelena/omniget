@@ -23,6 +23,13 @@
   {:else if icon === "downloads"}
     <path d="M12 3v12m0 0l-4-4m4 4l4-4" />
     <path d="M4 17v2a1 1 0 001 1h14a1 1 0 001-1v-2" />
+  {:else if icon === "chat"}
+    <path d="M21 12a8 8 0 0 1-8 8H7l-4 3V12a8 8 0 0 1 8-8h2a8 8 0 0 1 8 8z" />
+    <path d="M8 12h.01M12 12h.01M16 12h.01" />
+  {:else if icon === "open_omni"}
+    <circle cx="12" cy="12" r="9" />
+    <path d="M3.6 9h16.8M3.6 15h16.8" />
+    <path d="M11.5 3a17 17 0 0 0 0 18M12.5 3a17 17 0 0 1 0 18" />
   {:else if icon === "marketplace"}
     <path d="M3 21h18" />
     <path d="M3 7v1a3 3 0 0 0 6 0V7" />
@@ -41,10 +48,6 @@
   {:else if icon === "about"}
     <circle cx="12" cy="12" r="10" />
     <path d="M12 16v-4m0-4h.01" />
-  {:else if icon === "open_omni"}
-    <rect x="4" y="4" width="16" height="16" rx="4" />
-    <circle cx="12" cy="12" r="3" />
-    <circle cx="16.5" cy="7.5" r=".5" fill="currentColor" />
   {:else}
     <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
   {/if}

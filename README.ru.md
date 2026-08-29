@@ -24,10 +24,10 @@ epub-reader, spaced-repetition
 </p>
 
 <p align="center">
-  <a href="https://github.com/igect/omniget/releases/latest"><img src="https://img.shields.io/github/v/release/igect/omniget?style=for-the-badge&label=release" alt="Последний релиз" /></a>
+  <a href="https://github.com/tonhowtf/omniget/releases/latest"><img src="https://img.shields.io/github/v/release/tonhowtf/omniget?style=for-the-badge&label=release" alt="Последний релиз" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-green?style=for-the-badge" alt="Лицензия GPL-3.0" /></a>
-  <a href="https://github.com/igect/omniget/stargazers"><img src="https://img.shields.io/github/stars/igect/omniget?style=for-the-badge" alt="GitHub stars" /></a>
-  <a href="https://github.com/igect/omniget/releases"><img src="https://img.shields.io/github/downloads/igect/omniget/total?style=for-the-badge&label=downloads" alt="Всего загрузок" /></a>
+  <a href="https://github.com/tonhowtf/omniget/stargazers"><img src="https://img.shields.io/github/stars/tonhowtf/omniget?style=for-the-badge" alt="GitHub stars" /></a>
+  <a href="https://github.com/tonhowtf/omniget/releases"><img src="https://img.shields.io/github/downloads/tonhowtf/omniget/total?style=for-the-badge&label=downloads" alt="Всего загрузок" /></a>
   <a href="https://hosted.weblate.org/engage/omniget/"><img src="https://hosted.weblate.org/widget/omniget/frontend-json/svg-badge.svg" alt="Статус перевода" /></a>
 </p>
 
@@ -59,15 +59,15 @@ epub-reader, spaced-repetition
   <tr>
     <td><strong>Windows</strong></td>
     <td>
-      <a href="https://github.com/igect/omniget/releases/latest"><img alt="Скачать OmniGet для Windows" src="https://img.shields.io/badge/Windows-Portable_EXE-0078D6?style=for-the-badge&logo=windows&logoColor=white" height="38"></a>
+      <a href="https://github.com/tonhowtf/omniget/releases/latest"><img alt="Скачать OmniGet для Windows" src="https://img.shields.io/badge/Windows-Portable_EXE-0078D6?style=for-the-badge&logo=windows&logoColor=white" height="38"></a>
       <br/>
-      <sub>Скачайте <code>.exe</code> из Releases и дважды кликните. Это портативная версия, она запускается откуда угодно. Есть также установщик <code>.msi</code>, а если привычнее командная строка — <code>winget install -e --id igect.OmniGet</code>.</sub>
+      <sub>Скачайте <code>.exe</code> из Releases и дважды кликните. Это портативная версия, она запускается откуда угодно. Есть также установщик <code>.msi</code>, а если привычнее командная строка — <code>winget install -e --id tonhowtf.OmniGet</code>.</sub>
     </td>
   </tr>
   <tr>
     <td><strong>macOS</strong></td>
     <td>
-      <a href="https://github.com/igect/omniget/releases/latest"><img alt="Скачать OmniGet для macOS" src="https://img.shields.io/badge/macOS-DMG-000000?style=for-the-badge&logo=apple&logoColor=white" height="38"></a>
+      <a href="https://github.com/tonhowtf/omniget/releases/latest"><img alt="Скачать OmniGet для macOS" src="https://img.shields.io/badge/macOS-DMG-000000?style=for-the-badge&logo=apple&logoColor=white" height="38"></a>
       <br/>
       <sub>Откройте <code>.dmg</code> и перетащите OmniGet в папку «Программы». Сначала прочитайте заметку о первом запуске ниже.</sub>
     </td>
@@ -75,7 +75,7 @@ epub-reader, spaced-repetition
   <tr>
     <td><strong>Linux</strong></td>
     <td>
-      <a href="https://github.com/igect/omniget/releases/latest"><img alt="Скачать OmniGet для Linux в формате deb, rpm или AppImage" src="https://img.shields.io/badge/Linux-deb_·_rpm_·_AppImage-FFAA33?style=for-the-badge&logo=linux&logoColor=white" height="38"></a>
+      <a href="https://github.com/tonhowtf/omniget/releases/latest"><img alt="Скачать OmniGet для Linux в формате deb, rpm или AppImage" src="https://img.shields.io/badge/Linux-deb_·_rpm_·_AppImage-FFAA33?style=for-the-badge&logo=linux&logoColor=white" height="38"></a>
       <br/>
       <sub>Debian и Ubuntu — <code>.deb</code>, Fedora и openSUSE — <code>.rpm</code>, остальные дистрибутивы — <code>.AppImage</code>. Собираются сборки для x86_64 и ARM64.</sub>
     </td>
@@ -344,7 +344,7 @@ OmniGet работает на любом современном настольн
 Для разработчиков. Если вы просто хотите пользоваться OmniGet, [возьмите релиз](#загрузка-и-установка).
 
 ```bash
-git clone https://github.com/igect/omniget.git
+git clone https://github.com/tonhowtf/omniget.git
 cd omniget
 pnpm install
 pnpm tauri dev
@@ -365,7 +365,7 @@ sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file lib
 
 ### Интерфейс командной строки (собирается вручную)
 
-В репозитории также есть `omniget-cli` — небольшая программа на Rust, которая делает OmniGet пригодным для скриптов. Она входит в каждый релиз: скачайте `omniget-cli-<версия>-<платформа>` из [последнего релиза](https://github.com/igect/omniget/releases/latest) для Windows, macOS (Intel и Apple Silicon) или Linux. Чтобы собрать её из этого репозитория:
+В репозитории также есть `omniget-cli` — небольшая программа на Rust, которая делает OmniGet пригодным для скриптов. Она входит в каждый релиз: скачайте `omniget-cli-<версия>-<платформа>` из [последнего релиза](https://github.com/tonhowtf/omniget/releases/latest) для Windows, macOS (Intel и Apple Silicon) или Linux. Чтобы собрать её из этого репозитория:
 
 ```bash
 cargo build --release -p omniget-cli
@@ -387,7 +387,7 @@ omniget import-cookies cookies.txt     # формат Netscape
 
 **Сообщество.** Вопросы, помощь и обсуждение релизов — в [Discord](https://discord.gg/jgdxyPy7Vn).
 
-Нашли баг или есть идея? [Откройте issue](https://github.com/igect/omniget/issues). Pull request приветствуются, см. [CONTRIBUTING.md](CONTRIBUTING.md).
+Нашли баг или есть идея? [Откройте issue](https://github.com/tonhowtf/omniget/issues). Pull request приветствуются, см. [CONTRIBUTING.md](CONTRIBUTING.md).
 
 OmniGet переводится на [Weblate](https://hosted.weblate.org/engage/omniget/). Выберите язык, переводите в браузере, и Weblate сам откроет pull request.
 
@@ -395,7 +395,7 @@ OmniGet переводится на [Weblate](https://hosted.weblate.org/engage/
 
 Спасибо всем участникам, сделавшим вклад в этот проект!
 
-[![Участники](https://contrib.rocks/image?repo=igect/omniget)](https://github.com/igect/omniget/graphs/contributors)
+[![Участники](https://contrib.rocks/image?repo=tonhowtf/omniget)](https://github.com/tonhowtf/omniget/graphs/contributors)
 
 ## Уведомление для владельцев платформ
 

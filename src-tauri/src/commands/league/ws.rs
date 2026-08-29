@@ -23,8 +23,9 @@ static LAST_EMITTED: LazyLock<
 static TRADES_HANDLED: LazyLock<tokio::sync::Mutex<std::collections::HashSet<i64>>> =
     LazyLock::new(|| tokio::sync::Mutex::new(std::collections::HashSet::new()));
 #[allow(clippy::type_complexity)]
-static SWAPS_HANDLED: LazyLock<tokio::sync::Mutex<std::collections::HashSet<(&'static str, i64)>>> =
-    LazyLock::new(|| tokio::sync::Mutex::new(std::collections::HashSet::new()));
+static SWAPS_HANDLED: LazyLock<
+    tokio::sync::Mutex<std::collections::HashSet<(&'static str, i64)>>,
+> = LazyLock::new(|| tokio::sync::Mutex::new(std::collections::HashSet::new()));
 
 /// A queue pops after roughly twelve seconds without an answer, so a longer
 /// delay would simply waste the queue slot.

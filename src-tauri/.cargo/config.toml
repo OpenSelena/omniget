@@ -1,0 +1,9 @@
+# libwebrtc (via the livekit SDK) ships built against the static MSVC runtime,
+# so everything else has to match or the link fails with LNK2038/LNK1169. This
+# mirrors what livekit/rust-sdks sets in its own .cargo/config.toml. It also
+# drops the VC++ redistributable requirement for Windows users.
+[target.x86_64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]
+
+[target.aarch64-pc-windows-msvc]
+rustflags = ["-C", "target-feature=+crt-static"]

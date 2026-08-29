@@ -2,8 +2,8 @@
   import { open } from "@tauri-apps/plugin-shell";
   import { t } from "$lib/i18n";
 
-  const GITHUB_URL = "https://github.com/igect";
-  const APP_VERSION = "0.8.12";
+  const GITHUB_URL = "https://github.com/igect/omniget";
+  const APP_VERSION = "0.8.13";
 
   async function openGitHub() {
     await open(GITHUB_URL);

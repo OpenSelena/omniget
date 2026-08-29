@@ -1,14 +1,15 @@
 use std::collections::HashMap;
-use std::sync::{LazyLock, Mutex};
+use std::sync::Mutex;
 
 use discord_rich_presence::activity::{Activity, Assets, Button, Timestamps};
 use discord_rich_presence::{DiscordIpc, DiscordIpcClient};
 use serde_json::{json, Value};
+use std::sync::LazyLock;
 
 pub use omniget_core::models::settings::RpcSettings;
 
 const GITHUB_BUTTON_LABEL: &str = "View on GitHub";
-const GITHUB_BUTTON_URL: &str = "https://github.com/igect";
+const GITHUB_BUTTON_URL: &str = "https://github.com/igect/omniget";
 const APP_LARGE_TEXT: &str = "omniget";
 
 const SOURCE_PRIORITIES: &[&str] = &["focus", "music", "video", "course", "reading"];

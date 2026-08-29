@@ -25,8 +25,13 @@ fn check_portable_mode() {
                 let portable_settings = data_dir.join("settings.json");
                 if !portable_settings.exists() {
                     if let Some(os_settings) = dirs::data_dir()
-                        .map(|d| d.join("wtf.tonho.omniget").join("settings.json"))
+                        .map(|d| d.join("com.igect.omniget").join("settings.json"))
                         .filter(|p| p.exists())
+                        .or_else(|| {
+                            dirs::data_dir()
+                                .map(|d| d.join("wtf.tonho.omniget").join("settings.json"))
+                                .filter(|p| p.exists())
+                        })
                     {
                         let _ = std::fs::copy(&os_settings, &portable_settings);
                     }

@@ -3,9 +3,9 @@
 Yes — plugin development is supported and contributions are welcome. OmniGet's own Courses, Telegram, and Convert features ship as plugins built on the same SDK described here. This guide documents how the system actually works today, including the parts that are still rough. Where something is unstable or not wired up yet, it says so.
 
 - SDK crate: [`src-tauri/omniget-plugin-sdk`](../src-tauri/omniget-plugin-sdk) (v0.2.0, ABI v2)
-- Template: <https://github.com/igect/omniget-plugin-template>
-- Registry: <https://github.com/igect/omniget-plugins>
-- Real-world examples: [omniget-plugin-courses](https://github.com/igect/omniget-plugin-courses), [omniget-plugin-telegram](https://github.com/igect/omniget-plugin-telegram), [omniget-plugin-convert](https://github.com/igect/omniget-plugin-convert)
+- Template: <https://github.com/tonhowtf/omniget-plugin-template>
+- Registry: <https://github.com/tonhowtf/omniget-plugins>
+- Real-world examples: [omniget-plugin-courses](https://github.com/tonhowtf/omniget-plugin-courses), [omniget-plugin-telegram](https://github.com/tonhowtf/omniget-plugin-telegram), [omniget-plugin-convert](https://github.com/tonhowtf/omniget-plugin-convert)
 
 ## 1. Overview
 
@@ -94,12 +94,12 @@ The loader wraps `omniget_plugin_init` and `initialize` in `catch_unwind`, so a 
 
 ## 2. Quick start
 
-> **Template status:** the [omniget-plugin-template](https://github.com/igect/omniget-plugin-template) repo has the right repo layout and a working 4-platform release CI, but its Rust code still shows an older Tauri-plugin style (`Builder::new(...)`, `#[tauri::command]`) and its `Cargo.toml` lacks `crate-type = ["cdylib"]` and the `omniget-plugin-sdk` dependency. Use the template for structure and CI, but wire the crate itself like the snippet above and like the real plugins (e.g. `omniget-plugin-convert`, the smallest one).
+> **Template status:** the [omniget-plugin-template](https://github.com/tonhowtf/omniget-plugin-template) repo has the right repo layout and a working 4-platform release CI, but its Rust code still shows an older Tauri-plugin style (`Builder::new(...)`, `#[tauri::command]`) and its `Cargo.toml` lacks `crate-type = ["cdylib"]` and the `omniget-plugin-sdk` dependency. Use the template for structure and CI, but wire the crate itself like the snippet above and like the real plugins (e.g. `omniget-plugin-convert`, the smallest one).
 
 ### 2.1 Set up the repo
 
 ```bash
-git clone https://github.com/igect/omniget-plugin-template.git omniget-plugin-myplugin
+git clone https://github.com/tonhowtf/omniget-plugin-template.git omniget-plugin-myplugin
 cd omniget-plugin-myplugin
 ```
 
@@ -121,9 +121,9 @@ tokio = { version = "1", features = ["full"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 anyhow = "1"
-omniget-plugin-sdk = { git = "https://github.com/igect/omniget" }
+omniget-plugin-sdk = { git = "https://github.com/tonhowtf/omniget" }
 # Optional: shared download/HTTP/ffmpeg machinery from the core.
-# omniget-core = { git = "https://github.com/igect/omniget", features = ["desktop"] }
+# omniget-core = { git = "https://github.com/tonhowtf/omniget", features = ["desktop"] }
 ```
 
 **The `[patch]` trick for local development.** All official plugins are developed against a sibling clone of the omniget repo, so SDK changes are picked up immediately without pushing to GitHub:
@@ -134,12 +134,12 @@ omniget-plugin-sdk = { git = "https://github.com/igect/omniget" }
 ```
 
 ```toml
-[patch."https://github.com/igect/omniget"]
+[patch."https://github.com/tonhowtf/omniget"]
 omniget-plugin-sdk = { path = "../omniget/src-tauri/omniget-plugin-sdk" }
 omniget-core = { path = "../omniget/src-tauri/omniget-core" }
 ```
 
-Note that a path `[patch]` is not optional: cargo fails if `../omniget` does not exist. The official plugin repos keep the patch permanently and their release CI checks out `igect/omniget` as a sibling directory so the paths resolve (see the "Checkout host (for omniget-plugin-sdk path patch)" step in `omniget-plugin-courses`'s `release.yml`). If you prefer building purely against the pinned git dependency, simply omit the `[patch]` section.
+Note that a path `[patch]` is not optional: cargo fails if `../omniget` does not exist. The official plugin repos keep the patch permanently and their release CI checks out `tonhowtf/omniget` as a sibling directory so the paths resolve (see the "Checkout host (for omniget-plugin-sdk path patch)" step in `omniget-plugin-courses`'s `release.yml`). If you prefer building purely against the pinned git dependency, simply omit the `[patch]` section.
 
 ### 2.3 Build
 
@@ -153,9 +153,9 @@ This produces `target/release/libomniget_plugin_myplugin.so` (Linux), `.dylib` (
 
 Plugins live in `{app-data}/plugins/{plugin-id}/`, where `{app-data}` is (see `omniget-core/src/core/paths.rs`):
 
-- Linux: `~/.local/share/wtf.tonho.omniget/`
-- macOS: `~/Library/Application Support/wtf.tonho.omniget/`
-- Windows: `%APPDATA%\wtf.tonho.omniget\`
+- Linux: `~/.local/share/com.igect.omniget/`
+- macOS: `~/Library/Application Support/com.igect.omniget/`
+- Windows: `%APPDATA%\com.igect.omniget\`
 - Override for testing: set the `OMNIGET_DATA_DIR` environment variable before launching OmniGet.
 
 Copy your files there:
@@ -286,7 +286,7 @@ Plainly: **the plugin API is young and not yet stable.** Here is exactly what is
 - When `ABI_VERSION` bumps, **every plugin must be rebuilt** against the new SDK. There is no compatibility shim.
 - Beyond the version handshake, the boundary passes a Rust trait object (`*mut dyn OmnigetPlugin`) and Rust types (`String`, `serde_json::Value`, futures) across the dynamic-library boundary. **Rust does not guarantee ABI stability between compiler versions**, so a plugin and a core built with sufficiently different `rustc` versions can misbehave even when `ABI_VERSION` matches. Build plugins with a current stable toolchain, close to what OmniGet's release CI uses (both the core and the plugin templates build with `dtolnay/rust-toolchain@stable`). If you hit inexplicable crashes at load time, rebuild with the same toolchain as the core release.
 - Within an ABI version, the SDK extends the `PluginHost` trait using **default method implementations** (`get_cookie_file`, `cookie_status`, `emit_download_log`), so plugins built against a newer SDK still load on older hosts and vice versa. Trait methods *without* defaults cannot be added without an ABI bump.
-- Build against the SDK **from the omniget git repo** (`omniget-plugin-sdk = { git = "https://github.com/igect/omniget" }`), optionally pinned to a tag/rev matching the OmniGet release you target. The crate is not published to crates.io.
+- Build against the SDK **from the omniget git repo** (`omniget-plugin-sdk = { git = "https://github.com/tonhowtf/omniget" }`), optionally pinned to a tag/rev matching the OmniGet release you target. The crate is not published to crates.io.
 - `min_omniget_version` and `capabilities` are currently informational, not enforced. Do not rely on them as a compatibility mechanism.
 
 Expect breaking changes between minor OmniGet versions while the SDK is pre-1.0. The upside: because official features are themselves plugins, breakage is felt (and fixed) by the core team first.
@@ -317,7 +317,7 @@ The template's `.github/workflows/release.yml` builds all four targets and packa
 
 ### Getting listed in the registry
 
-The in-app marketplace reads `plugins.json` from <https://github.com/igect/omniget-plugins> (with a jsDelivr fallback). To get listed, open a PR adding an entry:
+The in-app marketplace reads `plugins.json` from <https://github.com/tonhowtf/omniget-plugins> (with a jsDelivr fallback). To get listed, open a PR adding an entry:
 
 ```json
 {
@@ -344,4 +344,4 @@ So a registry listing is effectively "shipped to all users"; expect review of yo
 
 ## Questions?
 
-Open an issue at <https://github.com/igect/omniget/issues> — questions about the plugin API are welcome, and they help decide what gets stabilized first.
+Open an issue at <https://github.com/tonhowtf/omniget/issues> — questions about the plugin API are welcome, and they help decide what gets stabilized first.

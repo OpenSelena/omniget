@@ -16,7 +16,7 @@
     searchActive?: boolean;
   } = $props();
 
-  type AdvancedDrill = "performance" | "torrent" | "expert" | "league" | "debug";
+  type AdvancedDrill = "performance" | "torrent" | "expert" | "league" | "omnidisc" | "debug";
   let subView = $state<AdvancedDrill | null>(null);
 
   let settings = $derived(getSettings());
@@ -26,6 +26,7 @@
     { id: "torrent", titleKey: "settings.advanced.section_torrent", hintKey: "settings.advanced.section_torrent_desc" },
     { id: "expert", titleKey: "settings.advanced.section_expert", hintKey: "settings.advanced.section_expert_desc" },
     { id: "league", titleKey: "league.settings_title", hintKey: "league.settings_desc" },
+    { id: "omnidisc", titleKey: "omnidisc.settings_title", hintKey: "omnidisc.settings_desc" },
     { id: "debug", titleKey: "settings.advanced.section_debug", hintKey: "settings.advanced.section_debug_desc" },
   ];
 
@@ -320,6 +321,16 @@
             <button class="toggle" class:on={settings.league?.auto_accept} onclick={() => { const next = !(settings.league?.auto_accept ?? false); updateSettings({ league: { auto_accept: next } }); invoke("league_auto_accept_set", { enabled: next }).catch(() => {}); }} role="switch" aria-checked={settings.league?.auto_accept ?? false} aria-label={$t('league.settings_auto_accept') as string}><span class="toggle-knob"></span></button>
           </div>
         {/if}
+      </div>
+    {:else if subView === "omnidisc"}
+      <div class="card">
+        <div class="setting-row">
+          <div class="setting-col">
+            <span class="setting-label">{$t('omnidisc.settings_enable')}</span>
+            <span class="setting-path">{$t('omnidisc.settings_enable_desc')}</span>
+          </div>
+          <button class="toggle" class:on={settings.omnidisc?.enabled} onclick={() => updateSettings({ omnidisc: { enabled: !(settings.omnidisc?.enabled ?? false) } })} role="switch" aria-checked={settings.omnidisc?.enabled ?? false} aria-label={$t('omnidisc.settings_enable') as string}><span class="toggle-knob"></span></button>
+        </div>
       </div>
     {:else if subView === "debug"}
       <div class="card">
