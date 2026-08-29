@@ -21,8 +21,12 @@ jobs:
           # lets the AppImage run on older distros. Its PipeWire headers
           # (0.3.48) are too old for the screen-capture backend to compile, so
           # that one feature is left out and the client says so at runtime.
+          # The `--` is required: the Tauri CLI forwards what follows it to
+          # cargo, and rejects the flag otherwise. Only the app's default
+          # feature (`linux-capture`) is dropped; `rnnoise` stays because the
+          # dependency declaration asks for it by name.
           - platform: 'ubuntu-22.04'
-            args: '--no-default-features --features rnnoise'
+            args: '-- --no-default-features'
           - platform: 'ubuntu-24.04-arm'
             args: ''
           - platform: 'windows-latest'
