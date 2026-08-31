@@ -10,9 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.8.15] - 2026-08-31
 
 ### Fixed & Improved
-- **Open Omni Responsive Workspace**: Reworked the Open Omni layout so Download, Profiles, and Settings use the available desktop space rather than a cramped fixed-size card.
-- **Theme & Accessibility Compatibility**: Aligned Open Omni controls, dialogs, focus indicators, and text colors with the app theme system, including light, dark, and reduced-motion support.
-- **Small-Window Layout**: Added adaptive navigation and form layouts so profile controls, filters, and settings remain usable at narrow widths.
+- **Open Omni Responsive Workspace**: Reworked the Open Omni social downloader (`/open-omni`) layout so Download, Profiles, and Settings utilize the full available desktop workspace instead of being confined to fixed-size cards.
+- **Theme & Accessibility System Harmony**: Aligned Open Omni controls, dialogs, focus indicators, and text colors with the app design system tokens, including light, dark, and reduced-motion support.
+- **Small-Window & Mobile Layout**: Added adaptive navigation drawer and form layouts ensuring profile controls, filters, and settings remain fully usable at narrow widths.
+- **CI / CD Pipeline Automation**: Configured GitHub Actions release workflows to automatically publish multi-platform release assets upon build completion.
 
 ---
 

@@ -96,11 +96,11 @@ export async function initChangelog(): Promise<void> {
 export async function fetchChangelog(): Promise<string> {
   if (changelogBody) return changelogBody;
 
-  const localNotes = getLocalReleaseNotes(currentVersion || "0.8.12");
+  const localNotes = getLocalReleaseNotes(currentVersion || "0.8.15");
 
   try {
     const res = await fetch(
-      `https://api.github.com/repos/igect/omniget/releases/tags/v${currentVersion || "0.8.12"}`,
+      `https://api.github.com/repos/igect/omniget/releases/tags/v${currentVersion || "0.8.15"}`,
       { headers: { Accept: "application/vnd.github.v3+json" } }
     );
     if (res.ok) {
