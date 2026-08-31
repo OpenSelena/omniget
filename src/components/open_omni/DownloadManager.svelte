@@ -457,7 +457,8 @@
   }
   .dl-segmented button {
     flex: 1;
-    padding: 6px 0;
+    min-height: 38px;
+    padding: 7px 8px;
     font-size: 12px;
     font-weight: 500;
     color: var(--oo-text-secondary);
@@ -482,16 +483,17 @@
     justify-content: center;
   }
   .dl-btn {
-    padding: 8px 26px;
+    min-height: 42px;
+    padding: 9px 26px;
     border-radius: var(--oo-radius, 9px);
     font-weight: 600;
     font-size: 13px;
     background: var(--oo-accent);
-    color: #fff;
+    color: var(--on-accent);
   }
   .dl-btn:hover:not(:disabled) { filter: brightness(1.06); }
   .dl-btn:disabled { opacity: 0.45; cursor: not-allowed; }
-  .dl-btn.stop { background: var(--error, #ff453a); }
+  .dl-btn.stop { background: var(--error); color: var(--on-error); }
 
   .dl-progress {
     display: flex;
@@ -542,5 +544,15 @@
     overflow: hidden;
     text-overflow: ellipsis;
     text-align: center;
+  }
+
+  @media (max-width: 440px) {
+    .dl-segmented { flex-wrap: wrap; }
+    .dl-segmented button { flex: 1 1 28%; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dl-ring.indeterminate .dl-ring-progress { animation: none; }
+    .dl-ring-progress { transition: none; }
   }
 </style>

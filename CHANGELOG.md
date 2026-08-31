@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.8.15] - 2026-08-31
+
+### Fixed & Improved
+- **Open Omni Responsive Workspace**: Reworked the Open Omni layout so Download, Profiles, and Settings use the available desktop space rather than a cramped fixed-size card.
+- **Theme & Accessibility Compatibility**: Aligned Open Omni controls, dialogs, focus indicators, and text colors with the app theme system, including light, dark, and reduced-motion support.
+- **Small-Window Layout**: Added adaptive navigation and form layouts so profile controls, filters, and settings remain usable at narrow widths.
+
+---
+
 ## [0.8.14] - 2026-08-30
 
 ### Added & UI

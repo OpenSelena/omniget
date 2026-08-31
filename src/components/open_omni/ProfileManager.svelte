@@ -149,6 +149,7 @@
         <path d="M6.3 9.7 9.7 6.3" />
       </svg>
       <input
+        id="profile-url"
         type="text"
         bind:value={newUrl}
         placeholder="Enter profile URL or username"
@@ -237,7 +238,8 @@
   }
   .pm-segmented button {
     flex: 1;
-    padding: 6px 0;
+    min-height: 38px;
+    padding: 7px 8px;
     font-size: 12px;
     font-weight: 500;
     color: var(--oo-text-secondary);
@@ -268,7 +270,8 @@
     display: flex;
     align-items: center;
     gap: 9px;
-    padding: 10px 12px;
+    min-height: 48px;
+    padding: 10px 14px;
     border-bottom: 1px solid var(--oo-border);
   }
   .pm-row:last-child { border-bottom: 0; }
@@ -286,10 +289,11 @@
   .pm-row input:focus { outline: none; }
 
   .pm-add-btn {
-    padding: 5px 13px;
-    border-radius: 999px;
+    min-height: 34px;
+    padding: 6px 15px;
+    border-radius: var(--oo-radius-sm);
     background: var(--oo-accent);
-    color: #fff;
+    color: var(--on-accent);
     font-size: 12px;
     font-weight: 500;
   }
@@ -330,6 +334,8 @@
   }
 
   .pm-remove {
+    min-height: 32px;
+    padding: 5px 8px;
     font-size: 12px;
     font-weight: 500;
     color: var(--error, #ff453a);
@@ -347,7 +353,7 @@
   .pm-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--dialog-backdrop);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -355,13 +361,12 @@
   }
 
   .pm-dialog {
-    background: var(--oo-group-bg);
+    background: var(--popup-bg);
     border-radius: 12px;
     padding: 20px;
     max-width: 340px;
     width: 90%;
     text-align: center;
-    box-shadow: 0 18px 40px -20px rgba(0, 0, 0, 0.4);
     outline: none;
   }
   .pm-dialog-title {
@@ -373,7 +378,7 @@
   .pm-dialog-url {
     font-size: 12px;
     color: var(--oo-text-secondary);
-    word-break: break-all;
+    overflow-wrap: anywhere;
     margin: 0 0 16px;
   }
   .pm-dialog-actions {
@@ -383,6 +388,7 @@
   }
   .pm-dialog-btn {
     flex: 1;
+    min-height: 40px;
     padding: 8px 10px;
     border-radius: 7px;
     font-weight: 500;
@@ -392,7 +398,13 @@
   }
   .pm-dialog-btn.danger {
     background: var(--error, #ff453a);
-    color: #fff;
+    color: var(--on-error);
   }
   .pm-dialog-btn.danger:hover { opacity: 0.9; }
+
+  @media (max-width: 440px) {
+    .pm-segmented { flex-wrap: wrap; }
+    .pm-segmented button { flex: 1 1 42%; }
+    .pm-row { padding-inline: 12px; }
+  }
 </style>

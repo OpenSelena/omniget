@@ -140,7 +140,8 @@
     display: flex;
     align-items: center;
     gap: 9px;
-    padding: 10px 12px;
+    min-height: 48px;
+    padding: 10px 14px;
     border-bottom: 1px solid var(--oo-border);
   }
   .sm-row:last-child { border-bottom: 0; }
@@ -166,7 +167,8 @@
   .sm-row input:focus { outline: none; }
 
   .sm-choose-btn {
-    padding: 4px 12px;
+    min-height: 34px;
+    padding: 6px 12px;
     border-radius: 6px;
     font-size: 12px;
     font-weight: 500;
@@ -188,13 +190,20 @@
     justify-content: center;
   }
   .sm-save-btn {
-    padding: 8px 26px;
+    min-height: 42px;
+    padding: 9px 26px;
     border-radius: var(--oo-radius, 9px);
     font-weight: 600;
     font-size: 13px;
     background: var(--oo-accent);
-    color: #fff;
+    color: var(--on-accent);
   }
   .sm-save-btn:hover:not(:disabled) { filter: brightness(1.06); }
   .sm-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  @media (max-width: 500px) {
+    .sm-row { align-items: flex-start; flex-wrap: wrap; }
+    .sm-row input { order: 3; flex-basis: calc(100% - 24px); text-align: left; }
+    .sm-choose-btn { margin-left: auto; }
+  }
 </style>

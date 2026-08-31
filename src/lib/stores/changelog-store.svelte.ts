@@ -66,7 +66,7 @@ export async function initChangelog(): Promise<void> {
   try {
     currentVersion = await getVersion();
   } catch {
-    currentVersion = "0.8.14";
+    currentVersion = "0.8.15";
   }
 
   const lastSeen = localStorage.getItem(STORAGE_KEY);
