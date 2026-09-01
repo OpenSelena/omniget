@@ -945,7 +945,7 @@
       "silence_done": "無音 {{saved}} 分を検出 — 再生時にスキップできます",
       "portable_label": "Portable Mode",
       "portable_active": "Portable mode is active. OmniGet's data is stored in {{dir}}.",
-      "portable_macos_notice": "On macOS the WebView still stores its session data under ~/Library, and portable mode cannot redirect it. Only OmniGet's own data is portable here — see github.com/tonhowtf/omniget/issues/227."
+      "portable_macos_notice": "On macOS the WebView still stores its session data under ~/Library, and portable mode cannot redirect it. Only OmniGet's own data is portable here — see github.com/igect/omniget/issues/227."
     },
     "dependencies": {
       "title": "依存関係",
@@ -1477,7 +1477,7 @@
     "roadmap_community_discord": "Discordでお気軽にどうぞ：",
     "roadmap_community_issue": "またはリポジトリでIssueを作成してください：",
     "tagline": "どこからでも、何でもダウンロード。",
-    "credit": "tonho.wtf が愛を込めて作りました"
+    "credit": "igect が愛を込めて作りました"
   },
   "marketplace": {
     "title": "マーケットプレイス",

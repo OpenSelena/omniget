@@ -42,6 +42,11 @@
   </branding>
   <content_rating type="oars-1.1" />
   <releases>
+    <release version="0.8.16" date="2026-09-02">
+      <description>
+        <p>Auto-Update Flow &amp; Settings Detection: Automatic update checking when opening Settings, live download progress reporting, reliable process relaunch upon completion, and informative toast alerts on update failures. Updated author attribution to @igect across About section and translations.</p>
+      </description>
+    </release>
     <release version="0.8.15" date="2026-08-31">
       <description>
         <p>Open Omni Responsive Workspace: Reworked the Open Omni social downloader layout to dynamically adapt to desktop and small-screen window sizes, improved theme and accessibility contrast across light and dark modes, refined mobile drawer navigation, and automated multi-platform release publishing.</p>

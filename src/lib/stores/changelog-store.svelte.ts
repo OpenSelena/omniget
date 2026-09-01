@@ -66,7 +66,7 @@ export async function initChangelog(): Promise<void> {
   try {
     currentVersion = await getVersion();
   } catch {
-    currentVersion = "0.8.15";
+    currentVersion = "0.8.16";
   }
 
   const lastSeen = localStorage.getItem(STORAGE_KEY);
@@ -96,11 +96,11 @@ export async function initChangelog(): Promise<void> {
 export async function fetchChangelog(): Promise<string> {
   if (changelogBody) return changelogBody;
 
-  const localNotes = getLocalReleaseNotes(currentVersion || "0.8.15");
+  const localNotes = getLocalReleaseNotes(currentVersion || "0.8.16");
 
   try {
     const res = await fetch(
-      `https://api.github.com/repos/igect/omniget/releases/tags/v${currentVersion || "0.8.15"}`,
+      `https://api.github.com/repos/igect/omniget/releases/tags/v${currentVersion || "0.8.16"}`,
       { headers: { Accept: "application/vnd.github.v3+json" } }
     );
     if (res.ok) {

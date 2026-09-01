@@ -945,7 +945,7 @@
       "silence_done": "发现 {{saved}} 的静音 —— 播放时可以跳过",
       "portable_label": "Portable Mode",
       "portable_active": "Portable mode is active. OmniGet's data is stored in {{dir}}.",
-      "portable_macos_notice": "On macOS the WebView still stores its session data under ~/Library, and portable mode cannot redirect it. Only OmniGet's own data is portable here — see github.com/tonhowtf/omniget/issues/227."
+      "portable_macos_notice": "On macOS the WebView still stores its session data under ~/Library, and portable mode cannot redirect it. Only OmniGet's own data is portable here — see github.com/igect/omniget/issues/227."
     },
     "dependencies": {
       "title": "依赖项",
@@ -1477,7 +1477,7 @@
     "roadmap_community_discord": "在 Discord 上联系我们：",
     "roadmap_community_issue": "或在代码仓库中提交 Issue：",
     "tagline": "随时随地，下载一切。",
-    "credit": "由 tonho.wtf 用心打造"
+    "credit": "由 igect 用心打造"
   },
   "marketplace": {
     "title": "插件市场",

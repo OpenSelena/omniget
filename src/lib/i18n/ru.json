@@ -945,7 +945,7 @@
       "silence_done": "Найдено тишины: {{saved}} — плеер может её пропускать",
       "portable_label": "Portable Mode",
       "portable_active": "Portable mode is active. OmniGet's data is stored in {{dir}}.",
-      "portable_macos_notice": "On macOS the WebView still stores its session data under ~/Library, and portable mode cannot redirect it. Only OmniGet's own data is portable here — see github.com/tonhowtf/omniget/issues/227."
+      "portable_macos_notice": "On macOS the WebView still stores its session data under ~/Library, and portable mode cannot redirect it. Only OmniGet's own data is portable here — see github.com/igect/omniget/issues/227."
     },
     "dependencies": {
       "title": "Зависимости",
@@ -1477,7 +1477,7 @@
     "roadmap_community_discord": "свяжитесь с нами в Discord:",
     "roadmap_community_issue": "или откройте задачу в репозитории:",
     "tagline": "Скачивайте что угодно, откуда угодно.",
-    "credit": "Сделано с любовью tonho.wtf"
+    "credit": "Сделано с любовью igect"
   },
   "marketplace": {
     "title": "Маркетплейс",

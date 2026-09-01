@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [0.8.16] - 2026-09-02
+
+### Fixed & Improved
+- **Auto-Update Flow & Settings Detection**: Added automatic update verification when opening Settings, live download progress reporting (percentage and stages), reliable process relaunch upon completion, and informative toast alerts on update failures.
+- **Author Attribution & Branding**: Updated About page author link and watermark to `@igect` (`https://github.com/igect`), fixed repository links to `https://github.com/igect/omniget`, and updated "Made with love by igect" across all 10 language translations.
+
+---
+
 ## [0.8.15] - 2026-08-31
 
 ### Fixed & Improved

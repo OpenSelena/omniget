@@ -945,7 +945,7 @@
       "silence_done": "Βρέθηκε σιωπή {{saved}} — ο player μπορεί να την προσπερνά",
       "portable_label": "Portable Mode",
       "portable_active": "Portable mode is active. OmniGet's data is stored in {{dir}}.",
-      "portable_macos_notice": "On macOS the WebView still stores its session data under ~/Library, and portable mode cannot redirect it. Only OmniGet's own data is portable here — see github.com/tonhowtf/omniget/issues/227."
+      "portable_macos_notice": "On macOS the WebView still stores its session data under ~/Library, and portable mode cannot redirect it. Only OmniGet's own data is portable here — see github.com/igect/omniget/issues/227."
     },
     "dependencies": {
       "title": "Εξαρτήσεις",
@@ -1477,7 +1477,7 @@
     "roadmap_community_discord": "βρείτε μας στο discord:",
     "roadmap_community_issue": "ή ανοίξτε ένα θέμα (issue) στο αποθετήριο:",
     "tagline": "Κατεβάστε οτιδήποτε, από οπουδήποτε.",
-    "credit": "Φτιαγμένο με αγάπη από tonho.wtf"
+    "credit": "Φτιαγμένο με αγάπη από igect"
   },
   "marketplace": {
     "title": "Marketplace",
