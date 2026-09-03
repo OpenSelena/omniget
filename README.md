@@ -185,6 +185,7 @@ Things people search for, and OmniGet does:
 - **System Dependency Detection**: Detect and use system-installed `yt-dlp`, `FFmpeg`, and `PDFium` binaries with source indicators (`PATH`, `Managed`, `Flatpak`).
 - **Follow a channel** and auto download new uploads, with a tray notification.
 - **Download Bilibili at maximum quality**, sign in once and unlock 4K, HDR, Hi-Res lossless audio and Dolby Atmos.
+- **Open Omni Social Archiver**: Archive profiles, stories, highlights, and reels from Instagram, TikTok, Facebook, and X (Twitter) with multi-stage progress tracking and automatic organization into `OpenOmni/<Platform>/<Username>/<Type>` folders.
 - **OmniDisc Voice, Video & MLS Messaging**: Connect to decentralized community instances, join low-latency voice channels, stream your screen in 60fps, and communicate with MLS end-to-end encryption.
 
 Downloads are reliable, not a guessing game. Speed and ETA come straight from the downloader instead of being faked from a percentage, so they stay correct even when the file size is unknown or the stream is live. A stall is shown as a stall, not a frozen "3 seconds left". The queue resumes interrupted downloads and retries with backoff.
@@ -238,6 +239,15 @@ OmniGet includes **OmniDisc**, a privacy-first, decentralized communication plat
 - **Crystal Clear Voice & Video**: Low-latency voice channels with noise suppression, automatic ducking, and screen/window sharing at full 60fps.
 - **Decentralized & Self-Hostable**: Connect to any compatible community instance or run your own server. No central platform lock-in.
 - **Roles & Permissions**: Full guild hierarchy, granular channel permissions, audit logs, and member management.
+
+### Open Omni: Social Media Archiver
+
+OmniGet features **Open Omni**, a built-in social media archiver accessible straight from the sidebar. Archive complete profiles, photos, videos, carousels, reels, and stories from Instagram, TikTok, Facebook, and X (Twitter) with one click.
+
+- **One-Click Archiving**: Save entire feeds, highlights, and temporary stories before they vanish.
+- **Smart Organization**: Every download automatically sorts into `OpenOmni/<Platform>/<Username>/<Type>`.
+- **Live Pipeline & Control**: Real-time progress counters, background downloading, and instant cancellation.
+
 
 ---
 
