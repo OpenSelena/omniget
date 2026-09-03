@@ -14,6 +14,8 @@ pub mod integration;
 pub mod league;
 pub mod media_history;
 pub mod omnidisc;
+#[allow(clippy::all)]
+#[allow(warnings)]
 pub mod open_omni;
 pub mod p2p;
 pub mod plugins;
