@@ -113,7 +113,7 @@ jobs:
 
             Then open it normally. If it still refuses, allow it under
             **System Settings → Privacy & Security**.
-          releaseDraft: true
+          releaseDraft: false
           prerelease: false
           includeUpdaterJson: false
           args: ${{ matrix.args }}
@@ -254,9 +254,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v6
-
-      - name: Generate latest.json, update release notes, and publish release
+      - name: Generate and upload latest.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -267,24 +265,10 @@ jobs:
           REPO="${GITHUB_REPOSITORY}"
           PUB_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-          NOTES=$(python3 -c "
-import sys, re
-try:
-    with open('CHANGELOG.md', 'r', encoding='utf-8') as f:
-        content = f.read()
-    tag = sys.argv[1].lstrip('v')
-    match = re.search(r'## \[' + re.escape(tag) + r'\][^\n]*\n(.*?)(?=\n---|\n## \[|\Z)', content, re.DOTALL)
-    if match:
-        print(match.group(1).strip())
-except Exception:
-    pass
-" "$TAG" || true)
-
           JSON=$(jq -n \
             --arg v "$VERSION" \
-            --arg n "$NOTES" \
             --arg d "$PUB_DATE" \
-            '{version: $v, notes: $n, pub_date: $d, platforms: {}}')
+            '{version: $v, notes: "", pub_date: $d, platforms: {}}')
 
           declare -A PLATFORM_MAP=(
             ["aarch64.app.tar.gz.sig"]="darwin-aarch64"
@@ -348,22 +332,5 @@ except Exception:
           cat latest.json
 
           gh release upload "$TAG" latest.json --repo "$REPO" --clobber
-
-          if [ -n "$NOTES" ]; then
-            RELEASE_BODY=$(gh release view "$TAG" --repo "$REPO" --json body -q .body || true)
-            if ! echo "$RELEASE_BODY" | grep -q "## What's New"; then
-              COMBINED_NOTES="## What's New in v${VERSION}
-
-${NOTES}
-
----
-
-${RELEASE_BODY}"
-              gh release edit "$TAG" --notes "$COMBINED_NOTES" --repo "$REPO"
-            fi
-          fi
-
-          echo "Publishing release from draft..."
-          gh release edit "$TAG" --draft=false --repo "$REPO"
 
           rm -rf "$TMPDIR"
