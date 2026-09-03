@@ -186,7 +186,7 @@ pub async fn open_omni_check_python_dependencies() -> Result<DependencyStatus, S
         })
     })
     .await
-    .map_err(|e| format!("Task failed: {}", e))
+    .map_err(|e| format!("Task failed: {}", e))?
 }
 
 fn detect_platform_name(url: &str) -> &'static str {
