@@ -6,13 +6,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 For full release notes, assets, and signatures of each version, see
-[GitHub Releases](https://github.com/tonhowtf/omniget/releases).
+[GitHub Releases](https://github.com/igect/omniget/releases).
 
 ## [Unreleased]
 
-## [0.9.0] — 2026-08-29
+## [0.9.0] — 2026-09-04
 
 ### Added
+- **Open Omni Social Downloader**:
+  - Full Instagram, TikTok, Facebook, and X/Twitter media and profile archival.
+  - Multi-stage download engine with real-time file counters and stage progress reporting.
+  - Critical stability audit fixes: decoupled process stream reader EOF from cancellation, RAII `DownloadRegistration` process lifetime management preventing orphaned child processes, async non-blocking cancellation, URL parameter injection protection, and atomic `.tmp` file storage.
+  - Svelte 5 UI architecture: native HTML `<dialog>` modal with `showModal()`, cached dependency store `open_omni_deps_store`, persistent draft state, and theme-adaptive mask icons.
+- **Branding & Distribution**:
+  - Configured for `com.igect.omniget` with automatic GitHub release updates and web portal at `omniget.nav.bd`.
 - **Chat is enabled by default** and pre-connected to `chat.tonho.wtf`: the
   first screen is register/login, not a server address. Running your own
   instance is still one click away under "change server".
