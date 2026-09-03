@@ -371,7 +371,8 @@
     "section_app": "Приложение",
     "section_plugins": "Плагины",
     "expand_plugins": "Развернуть плагины",
-    "collapse_plugins": "Свернуть плагины"
+    "collapse_plugins": "Свернуть плагины",
+    "open_omni": "Open Omni"
   },
   "command_palette": {
     "open": "Поиск",

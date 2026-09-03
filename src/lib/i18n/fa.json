@@ -371,7 +371,8 @@
     "section_app": "برنامه",
     "section_plugins": "افزونه‌ها",
     "expand_plugins": "باز کردن افزونه‌ها",
-    "collapse_plugins": "بستن افزونه‌ها"
+    "collapse_plugins": "بستن افزونه‌ها",
+    "open_omni": "Open Omni"
   },
   "command_palette": {
     "open": "Search",

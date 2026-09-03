@@ -371,7 +371,8 @@
     "section_app": "App",
     "section_plugins": "Plugins",
     "expand_plugins": "Expand plugins",
-    "collapse_plugins": "Collapse plugins"
+    "collapse_plugins": "Collapse plugins",
+    "open_omni": "Open Omni"
   },
   "command_palette": {
     "open": "Search",
