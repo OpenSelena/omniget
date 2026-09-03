@@ -126,7 +126,10 @@ fn omniget_open_omni_dir() -> Result<PathBuf, String> {
 fn atomic_write(path: &Path, content: &str) -> Result<(), String> {
     let parent = path.parent().ok_or("Missing parent directory")?;
     fs::create_dir_all(parent).map_err(|e| format!("Failed to create directory: {}", e))?;
-    let tmp_path = path.with_extension(format!("tmp.{}", Utc::now().timestamp_nanos_opt().unwrap_or(0)));
+    let tmp_path = path.with_extension(format!(
+        "tmp.{}",
+        Utc::now().timestamp_nanos_opt().unwrap_or(0)
+    ));
     fs::write(&tmp_path, content).map_err(|e| format!("Failed to write temporary file: {}", e))?;
     fs::rename(&tmp_path, path).map_err(|e| {
         let _ = fs::remove_file(&tmp_path);
@@ -201,7 +204,11 @@ fn detect_platform_name(url: &str) -> &'static str {
         "TikTok"
     } else if host == "facebook.com" || host.ends_with(".facebook.com") {
         "Facebook"
-    } else if host == "x.com" || host.ends_with(".x.com") || host == "twitter.com" || host.ends_with(".twitter.com") {
+    } else if host == "x.com"
+        || host.ends_with(".x.com")
+        || host == "twitter.com"
+        || host.ends_with(".twitter.com")
+    {
         "X"
     } else {
         "Other"
@@ -232,9 +239,8 @@ fn sanitize_path_component(input: &str) -> String {
     let trimmed = cleaned.trim().trim_matches('_');
     let lower = trimmed.to_ascii_lowercase();
     const RESERVED: &[&str] = &[
-        "con", "prn", "aux", "nul",
-        "com1", "com2", "com3", "com4", "com5", "com6", "com7", "com8", "com9",
-        "lpt1", "lpt2", "lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9",
+        "con", "prn", "aux", "nul", "com1", "com2", "com3", "com4", "com5", "com6", "com7", "com8",
+        "com9", "lpt1", "lpt2", "lpt3", "lpt4", "lpt5", "lpt6", "lpt7", "lpt8", "lpt9",
     ];
     if trimmed.is_empty() || RESERVED.contains(&lower.as_str()) {
         return "unknown_user".to_string();
@@ -259,9 +265,7 @@ fn extract_username_generic(url: &str) -> Option<String> {
 
     let cleaned = candidate.split(['?', '#']).next()?;
     let cleaned = cleaned.trim_start_matches('@');
-    if cleaned.is_empty()
-        || ["p", "reel", "tv", "stories", "highlights"].contains(&cleaned)
-    {
+    if cleaned.is_empty() || ["p", "reel", "tv", "stories", "highlights"].contains(&cleaned) {
         return None;
     }
 
@@ -386,7 +390,10 @@ fn run_gallery_dl_download_blocking(
         .map_err(|e| format!("Output directory is not writable: {} ({})", output_dir, e))?;
     let _ = fs::remove_file(&test_file);
 
-    let cookies_trimmed = cookies_file.as_ref().map(|c| c.trim().to_string()).filter(|c| !c.is_empty());
+    let cookies_trimmed = cookies_file
+        .as_ref()
+        .map(|c| c.trim().to_string())
+        .filter(|c| !c.is_empty());
     if let Some(ref cookies) = cookies_trimmed {
         if !Path::new(cookies).is_file() {
             return Err("The configured cookies file does not exist or is not a file.".to_string());
@@ -547,7 +554,11 @@ fn run_single_content_download(
     }
 
     if (content_type == "stories" || content_type == "highlights") && platform_name != "Instagram" {
-        let label = if content_type == "stories" { "Stories" } else { "Highlights" };
+        let label = if content_type == "stories" {
+            "Stories"
+        } else {
+            "Highlights"
+        };
         return Err(format!(
             "{} are only available for Instagram. gallery-dl has no {} support for {}.",
             label, content_type, platform_name
@@ -557,8 +568,15 @@ fn run_single_content_download(
     if (content_type == "stories" || content_type == "highlights")
         && cookies_file.as_deref().unwrap_or("").trim().is_empty()
     {
-        let label = if content_type == "stories" { "Stories" } else { "Highlights" };
-        return Err(format!("{} require an Instagram cookies file to be configured.", label));
+        let label = if content_type == "stories" {
+            "Stories"
+        } else {
+            "Highlights"
+        };
+        return Err(format!(
+            "{} require an Instagram cookies file to be configured.",
+            label
+        ));
     }
 
     let username = extract_username_generic(url).unwrap_or_else(|| "unknown_user".to_string());
@@ -577,7 +595,11 @@ fn run_single_content_download(
         .join(media_folder);
 
     fs::create_dir_all(&final_dest).map_err(|e| {
-        format!("Failed to create output folder {}: {}", final_dest.display(), e)
+        format!(
+            "Failed to create output folder {}: {}",
+            final_dest.display(),
+            e
+        )
     })?;
 
     let media_type_name = match content_type {
@@ -591,7 +613,10 @@ fn run_single_content_download(
     let _ = app.emit(
         &format!("download_{}", reg.id),
         DownloadProgress {
-            message: format!("Preparing to download {} for {}...", media_type_name, username),
+            message: format!(
+                "Preparing to download {} for {}...",
+                media_type_name, username
+            ),
             files_downloaded: base_count,
             stage: Some(media_type_name.to_string()),
             stage_index: Some(stage_index),
@@ -657,7 +682,11 @@ fn run_single_content_download(
     cmd.arg("--Print")
         .arg("after:FILE_OK:{filename}.{extension}");
     cmd.arg("--sleep-request")
-        .arg(if platform_name == "Instagram" { "6-12" } else { "2" });
+        .arg(if platform_name == "Instagram" {
+            "6-12"
+        } else {
+            "2"
+        });
     cmd.arg("--http-timeout").arg("30");
     cmd.arg(url);
 
@@ -810,7 +839,10 @@ fn run_single_content_download(
         let error_msg = if !stderr_message.is_empty() {
             stderr_message
         } else {
-            format!("gallery-dl exited with code {}", status.code().unwrap_or(-1))
+            format!(
+                "gallery-dl exited with code {}",
+                status.code().unwrap_or(-1)
+            )
         };
         Ok(DownloadResult {
             success: false,
@@ -842,7 +874,9 @@ pub async fn open_omni_cancel_download(download_id: String) -> Result<String, St
     tauri::async_runtime::spawn_blocking(move || {
         let pid = {
             let mut map = get_running_downloads();
-            let rd = map.get_mut(&download_id).ok_or("No running download found for that ID")?;
+            let rd = map
+                .get_mut(&download_id)
+                .ok_or("No running download found for that ID")?;
             rd.cancelled.store(true, Ordering::SeqCst);
             rd.pid
         };
@@ -974,9 +1008,7 @@ pub fn open_omni_save_profile(platform: String, url: String) -> Result<String, S
             if let Some(new_name) = &username {
                 let existing_name = profile.get("username").and_then(|v| v.as_str());
                 if let Some(existing_name) = existing_name {
-                    if !existing_name.is_empty()
-                        && existing_name.eq_ignore_ascii_case(new_name)
-                    {
+                    if !existing_name.is_empty() && existing_name.eq_ignore_ascii_case(new_name) {
                         return Err("Profile already exists".to_string());
                     }
                 }
