@@ -443,7 +443,7 @@ OmniGet's Courses, Telegram, and Convert features are all plugins — Rust dynam
 
 ## Notice to platform owners
 
-If you represent a listed platform and have concerns, email **tonhowtf@gmail.com** from a company address. The platform comes off the list right away.
+If you represent a listed platform and have concerns, email **igect@vk.com** from a company address. The platform comes off the list right away.
 
 ## Legal
 

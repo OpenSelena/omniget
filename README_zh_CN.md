@@ -409,7 +409,7 @@ OmniGet 在 [Weblate](https://hosted.weblate.org/engage/omniget/) 上进行翻�
 
 ## 致平台方
 
-如果你代表某个被列出的平台并有顾虑，请用公司邮箱发邮件至 **tonhowtf@gmail.com**。该平台会立即从列表中移除。
+如果你代表某个被列出的平台并有顾虑，请用公司邮箱发邮件至 **igect@vk.com**。该平台会立即从列表中移除。
 
 ## 法律声明
 

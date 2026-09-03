@@ -13,7 +13,7 @@ Only the latest minor release receives security updates.
 
 **Do not open a public issue for security vulnerabilities.**
 
-Email **tonhowtf@gmail.com** with:
+Email **igect@vk.com** with:
 
 - A description of the vulnerability
 - Steps to reproduce

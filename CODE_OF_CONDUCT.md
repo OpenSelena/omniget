@@ -6,7 +6,7 @@ All participants — contributors, maintainers, and users — are expected to he
 
 ## Reporting
 
-Report unacceptable behavior to **tonhowtf@gmail.com**. All reports are reviewed promptly and kept confidential.
+Report unacceptable behavior to **igect@vk.com**. All reports are reviewed promptly and kept confidential.
 
 ## Enforcement
 

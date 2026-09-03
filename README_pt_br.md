@@ -427,7 +427,7 @@ Os recursos de Cursos, Telegram e Conversão do OmniGet são todos plugins — b
 
 ## Aviso aos donos de plataformas
 
-Se você representa uma plataforma listada e tem alguma preocupação, envie um e-mail para **tonhowtf@gmail.com** a partir de um endereço corporativo. A plataforma sai da lista na hora.
+Se você representa uma plataforma listada e tem alguma preocupação, envie um e-mail para **igect@vk.com** a partir de um endereço corporativo. A plataforma sai da lista na hora.
 
 ## Aspectos legais
 
