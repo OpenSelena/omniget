@@ -191,7 +191,7 @@
   }
   .music-player {
     grid-area: player;
-    border-top: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
+    border-top: none;
   }
   .exit-btn {
     position: absolute;
@@ -203,7 +203,7 @@
     gap: 8px;
     padding: 6px 10px;
     background: color-mix(in oklab, var(--button) 60%, transparent);
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     border-radius: 999px;
     color: var(--tertiary);
     font-family: inherit;

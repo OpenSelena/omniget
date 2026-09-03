@@ -398,7 +398,7 @@
     gap: var(--padding);
     padding: calc(var(--padding) * 2);
     background: var(--button-elevated);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
   }
   .card-head {
@@ -560,7 +560,7 @@
   .nt-table th,
   .nt-table td {
     padding: 8px 10px;
-    border-bottom: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border-bottom: none;
     text-align: left;
   }
   .nt-table th {

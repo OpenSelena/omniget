@@ -199,6 +199,20 @@ impl CaptureApi for Platform {
         })
     }
 
+    fn thumbnail_for(source: &SourceId) -> Option<String> {
+        audio::ensure_mta();
+        match source {
+            SourceId::Display { id } => sources::monitor_from_id(*id)
+                .ok()
+                .and_then(|m| sources::monitor_thumbnail(&m)),
+            SourceId::Window { id } => sources::windows_list()
+                .into_iter()
+                .find(|w| sources::window_id(w.handle) == *id)
+                .and_then(|w| sources::window_thumbnail(&w)),
+            SourceId::Synthetic { .. } => None,
+        }
+    }
+
     fn start_video(
         opts: &CaptureOptions,
         sink: VideoSink,

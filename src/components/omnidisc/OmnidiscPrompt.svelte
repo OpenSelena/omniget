@@ -95,7 +95,7 @@
     max-width: 400px;
     padding: var(--space-5);
     border-radius: var(--radius-lg);
-    border: 1px solid var(--border);
+    border: none;
     background: var(--surface);
   }
 
@@ -142,7 +142,7 @@
     width: 100%;
     padding: 10px var(--space-3);
     border-radius: var(--radius-md);
-    border: 1px solid var(--input-border);
+    border: none;
     background: var(--input-bg);
     color: var(--text);
     font: inherit;

@@ -303,7 +303,7 @@
     z-index: 95;
     background: rgba(20, 20, 20, 0.96);
     color: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none;
     border-radius: 14px;
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
     display: flex;
@@ -316,7 +316,7 @@
     align-items: center;
     gap: 6px;
     padding: 10px 10px 10px 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: none;
   }
   .tabs {
     display: flex;
@@ -378,7 +378,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 8px 14px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    border-bottom: none;
   }
   .muted { color: rgba(255, 255, 255, 0.5); font-size: 11px; }
   .small { font-size: 11px; }
@@ -545,7 +545,7 @@
     gap: 4px 12px;
     margin: 12px 0 0;
     padding-top: 12px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: none;
     font-size: 12px;
   }
   .info-meta dt {

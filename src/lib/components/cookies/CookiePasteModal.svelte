@@ -90,14 +90,14 @@
     display: flex;
     flex-direction: column;
     background: var(--surface, var(--bg));
-    border: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
+    border: none;
     border-radius: 16px;
     overflow: hidden;
   }
   .modal-head {
     position: relative;
     padding: 20px 56px 16px 20px;
-    border-bottom: 1px solid color-mix(in oklab, var(--content-border) 30%, transparent);
+    border-bottom: none;
   }
   .modal-head h2 { margin: 0; font-size: 18px; font-weight: 600; color: var(--secondary); }
   .subtitle { margin: 4px 0 0; font-size: 12px; color: var(--tertiary); line-height: 1.5; }
@@ -120,7 +120,7 @@
   textarea, input[type="url"], input[type="text"] {
     padding: 8px 12px;
     background: color-mix(in oklab, var(--button) 40%, transparent);
-    border: 1px solid color-mix(in oklab, var(--content-border) 40%, transparent);
+    border: none;
     border-radius: 8px;
     color: var(--secondary);
     font: inherit;
@@ -132,7 +132,7 @@
   textarea:focus, input:focus { border-color: var(--accent); }
   .modal-foot {
     padding: 14px 20px;
-    border-top: 1px solid color-mix(in oklab, var(--content-border) 30%, transparent);
+    border-top: none;
     display: flex;
     justify-content: flex-end;
     gap: 10px;
@@ -140,7 +140,7 @@
   .ghost-btn {
     padding: 7px 16px;
     background: transparent;
-    border: 1px solid color-mix(in oklab, var(--content-border) 40%, transparent);
+    border: none;
     border-radius: 999px;
     color: var(--secondary);
     font-size: 13px;

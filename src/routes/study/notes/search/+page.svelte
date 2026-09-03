@@ -251,7 +251,7 @@
     align-items: center;
     padding: 8px;
     background: var(--surface);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
   }
   .search-bar input {
@@ -309,7 +309,7 @@
     flex-direction: column;
     gap: 4px;
     padding: 12px 14px;
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
     color: var(--text);

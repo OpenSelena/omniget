@@ -366,7 +366,7 @@
   .dialog {
     background: rgb(20, 20, 20);
     color: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none;
     border-radius: 14px;
     width: min(540px, 92vw);
     max-height: 80vh;
@@ -432,7 +432,7 @@
     gap: 10px;
     padding: 10px 12px;
     background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: none;
     border-radius: 8px;
   }
   .row.missing {
@@ -483,7 +483,7 @@
     height: 26px;
     padding: 0;
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none;
     border-radius: 50%;
     color: rgba(255, 255, 255, 0.5);
     font-size: 16px;
@@ -502,7 +502,7 @@
     flex-direction: column;
     gap: 10px;
     padding: 14px 20px 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: none;
     background: rgba(255, 255, 255, 0.02);
   }
   .add-btn {
@@ -531,7 +531,7 @@
   }
   .reset-btn {
     padding: 8px 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: none;
     border-radius: 8px;
     background: transparent;
     color: rgba(255, 255, 255, 0.7);
@@ -565,7 +565,7 @@
     margin: 0;
     padding: 12px;
     background: rgba(0, 0, 0, 0.35);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: none;
     border-radius: 8px;
     font-family: ui-monospace, monospace;
     font-size: 11px;

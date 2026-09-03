@@ -73,7 +73,7 @@
     gap: 14px;
     padding: 32px 28px;
     background: color-mix(in oklab, var(--button) 30%, transparent);
-    border: 1px solid color-mix(in oklab, var(--content-border) 40%, transparent);
+    border: none;
     border-radius: 16px;
   }
   .hero-icon {
@@ -157,7 +157,7 @@
     padding: 9px 18px;
     background: transparent;
     color: var(--secondary);
-    border: 1px solid color-mix(in oklab, var(--content-border) 60%, transparent);
+    border: none;
     border-radius: 999px;
     font-size: 13px;
     font-weight: 500;

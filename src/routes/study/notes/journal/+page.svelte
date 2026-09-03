@@ -435,7 +435,7 @@
     }
   }
   .left {
-    border-right: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border-right: none;
     padding: 12px;
     display: flex;
     flex-direction: column;
@@ -598,7 +598,7 @@
     width: 100%;
     max-width: 460px;
     background: var(--surface);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     padding: 20px;
     display: flex;
@@ -621,7 +621,7 @@
   }
   .modal input {
     padding: 10px 12px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
     color: var(--text);
@@ -652,7 +652,7 @@
     flex-direction: column;
     gap: 4px;
     padding: 12px;
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     background: transparent;
     cursor: pointer;

@@ -477,7 +477,7 @@
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
-    border-bottom: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border-bottom: none;
   }
   .back {
     color: var(--tertiary);
@@ -499,7 +499,7 @@
   }
   .filters {
     grid-area: filters;
-    border-right: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border-right: none;
     padding: 12px;
     display: flex;
     flex-direction: column;
@@ -525,7 +525,7 @@
   }
   .field input[type="text"] {
     padding: 6px 8px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
     color: var(--text);
@@ -582,7 +582,7 @@
     position: fixed;
     transform: translate(-50%, -100%);
     background: var(--surface);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     padding: 6px 10px;
     font-size: 11px;

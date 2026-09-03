@@ -117,7 +117,7 @@
     gap: 16px;
     padding: 8px 12px 8px 16px;
     background: rgb(28, 28, 30);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none;
     border-radius: 999px;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
     color: rgba(255, 255, 255, 0.95);
@@ -133,7 +133,7 @@
     font-weight: 600;
     color: rgba(255, 255, 255, 0.85);
     padding-right: 4px;
-    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    border-right: none;
     margin-right: 4px;
   }
   .actions {

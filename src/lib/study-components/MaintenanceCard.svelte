@@ -42,7 +42,7 @@
     width: min(560px, 100%);
     padding: 32px 28px;
     background: var(--surface, var(--bg));
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: 14px;
     text-align: center;
     display: flex;

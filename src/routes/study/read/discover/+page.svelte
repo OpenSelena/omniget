@@ -450,7 +450,7 @@
     padding: 6px 10px;
     background: transparent;
     color: var(--tertiary);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     font-size: 12px;
     cursor: pointer;
@@ -482,7 +482,7 @@
     padding: 6px 10px;
     background: var(--input-bg);
     color: var(--secondary);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     font-family: inherit;
     font-size: 12px;
@@ -493,7 +493,7 @@
     padding: 6px 12px;
     background: var(--input-bg);
     color: var(--secondary);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     font-size: 13px;
     font-family: inherit;
@@ -519,7 +519,7 @@
     border-radius: 999px;
     font-size: 11px;
     font-weight: 500;
-    border: 1px solid var(--input-border);
+    border: none;
     background: var(--input-bg);
     color: var(--tertiary);
     cursor: pointer;
@@ -585,7 +585,7 @@
     align-items: baseline;
     gap: 8px;
     padding-bottom: 8px;
-    border-bottom: 1px solid var(--input-border);
+    border-bottom: none;
     margin-bottom: var(--padding);
   }
   .src-name {
@@ -597,7 +597,7 @@
     margin-top: var(--padding);
     padding: 8px 12px;
     background: var(--button-elevated);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
   }
   .failed-sources summary {
@@ -617,7 +617,7 @@
     flex-direction: column;
     gap: 8px;
     background: var(--button-elevated);
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: var(--border-radius);
     overflow: hidden;
     padding: 0;
@@ -719,7 +719,7 @@
     padding: 6px 12px;
     background: transparent;
     color: var(--tertiary);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     font-size: 12px;
     cursor: pointer;

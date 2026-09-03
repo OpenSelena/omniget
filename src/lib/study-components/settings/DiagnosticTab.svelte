@@ -241,7 +241,7 @@
   }
   .card {
     background: color-mix(in oklab, var(--button) 30%, transparent);
-    border: 1px solid color-mix(in oklab, var(--content-border) 40%, transparent);
+    border: none;
     border-radius: 12px;
     padding: 16px 20px;
     display: grid;
@@ -268,7 +268,7 @@
   .danger {
     padding: 6px 12px;
     border-radius: 999px;
-    border: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
+    border: none;
     background: transparent;
     color: var(--secondary);
     font: inherit;
@@ -299,7 +299,7 @@
   th,
   td {
     padding: 8px 10px;
-    border-bottom: 1px solid color-mix(in oklab, var(--content-border) 30%, transparent);
+    border-bottom: none;
     text-align: left;
     vertical-align: top;
   }

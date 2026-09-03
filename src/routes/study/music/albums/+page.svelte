@@ -224,7 +224,7 @@
     gap: 20px;
     color: rgba(255, 255, 255, 0.95);
   }
-  .spotify-block { display: flex; flex-direction: column; gap: 16px; margin-top: 24px; padding-top: 24px; border-top: 1px solid color-mix(in oklab, var(--content-border) 40%, transparent); }
+  .spotify-block { display: flex; flex-direction: column; gap: 16px; margin-top: 24px; padding-top: 24px; border-top: none; }
   .block-head { display: flex; align-items: center; gap: 12px; }
   .block-head h2 { margin: 0; font-size: 18px; font-weight: 800; color: var(--secondary); display: inline-flex; align-items: center; gap: 10px; }
   .spotify-mark { display: inline-flex; align-items: center; }
@@ -252,7 +252,7 @@
     padding: 8px 14px;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: none;
     color: rgba(255, 255, 255, 0.95);
     font-family: inherit;
     font-size: 13px;
@@ -264,7 +264,7 @@
     padding: 8px 14px;
     border-radius: 999px;
     background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: none;
     color: rgba(255, 255, 255, 0.95);
     font-family: inherit;
     font-size: 12px;

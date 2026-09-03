@@ -504,7 +504,7 @@
   }
   .back-btn {
     background: transparent;
-    border: 1px solid var(--input-border);
+    border: none;
     color: var(--text);
     padding: 6px 12px;
     border-radius: var(--border-radius);
@@ -528,8 +528,7 @@
   .empty {
     padding: calc(var(--padding) * 3) var(--padding);
     text-align: center;
-    border: 1px dashed
-      color-mix(in oklab, var(--input-border) 70%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     background: color-mix(in oklab, var(--accent) 3%, transparent);
   }
@@ -559,7 +558,7 @@
 
   .card {
     background: var(--surface);
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     padding: calc(var(--padding) * 0.9);
     display: flex;

@@ -153,9 +153,9 @@ This produces `target/release/libomniget_plugin_myplugin.so` (Linux), `.dylib` (
 
 Plugins live in `{app-data}/plugins/{plugin-id}/`, where `{app-data}` is (see `omniget-core/src/core/paths.rs`):
 
-- Linux: `~/.local/share/com.igect.omniget/`
-- macOS: `~/Library/Application Support/com.igect.omniget/`
-- Windows: `%APPDATA%\com.igect.omniget\`
+- Linux: `~/.local/share/wtf.tonho.omniget/`
+- macOS: `~/Library/Application Support/wtf.tonho.omniget/`
+- Windows: `%APPDATA%\wtf.tonho.omniget\`
 - Override for testing: set the `OMNIGET_DATA_DIR` environment variable before launching OmniGet.
 
 Copy your files there:

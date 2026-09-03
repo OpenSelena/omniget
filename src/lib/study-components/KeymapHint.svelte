@@ -94,7 +94,7 @@
     width: min(90vw, 480px);
     max-height: 80vh;
     background: var(--surface);
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: 12px;
     z-index: 1001;
     overflow: hidden;
@@ -106,7 +106,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 12px 16px;
-    border-bottom: 1px solid var(--content-border);
+    border-bottom: none;
   }
   .keymap-head h3 {
     margin: 0;
@@ -133,7 +133,7 @@
     overflow-y: auto;
   }
   .keymap-table tr {
-    border-bottom: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
+    border-bottom: none;
   }
   .keymap-table tr:last-child {
     border-bottom: 0;
@@ -153,7 +153,7 @@
   kbd {
     display: inline-block;
     padding: 2px 6px;
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: 4px;
     background: color-mix(in oklab, var(--surface) 95%, var(--secondary));
     font-family: var(--font-mono, monospace);

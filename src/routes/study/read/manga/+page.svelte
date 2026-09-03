@@ -341,7 +341,7 @@
     padding: 6px 10px;
     background: transparent;
     color: var(--tertiary);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     font-size: 12px;
     cursor: pointer;
@@ -357,7 +357,7 @@
     padding: 6px 12px;
     background: transparent;
     color: var(--tertiary);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     font-size: 12px;
     cursor: pointer;
@@ -396,7 +396,7 @@
     padding: 6px 12px;
     background: var(--input-bg);
     color: var(--secondary);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     font-size: 13px;
     font-family: inherit;
@@ -455,7 +455,7 @@
     display: flex;
     flex-direction: column;
     background: var(--button-elevated);
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: var(--border-radius);
     overflow: hidden;
     color: inherit;
@@ -489,7 +489,7 @@
     align-items: center;
     justify-content: center;
     background: color-mix(in oklab, var(--primary) 75%, transparent);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: 50%;
     font-size: 13px;
     cursor: pointer;

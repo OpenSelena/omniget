@@ -672,7 +672,7 @@
     resize: vertical;
     padding: 8px var(--space-3);
     border-radius: var(--radius-md);
-    border: 1px solid var(--input-border);
+    border: none;
     background: var(--input-bg);
     color: var(--text);
     font: inherit;
@@ -707,7 +707,7 @@
 
   .mini {
     padding: 2px var(--space-2);
-    border: 1px solid var(--border-hi);
+    border: none;
     border-radius: var(--radius-sm);
     background: transparent;
     color: var(--text);
@@ -753,7 +753,7 @@
     gap: 4px;
     padding: 2px var(--space-2);
     border-radius: var(--radius-full);
-    border: 1px solid var(--border);
+    border: none;
     background: var(--surface);
     font: inherit;
     font-size: var(--text-xs);
@@ -791,7 +791,7 @@
     display: none;
     gap: 2px;
     padding: 2px;
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-sm);
     background: var(--surface);
     box-shadow: var(--shadow-sm, 0 2px 6px rgba(0, 0, 0, 0.18));
@@ -839,7 +839,7 @@
     flex-direction: column;
     min-width: 180px;
     padding: var(--space-1);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-md);
     background: var(--surface);
     box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.25));

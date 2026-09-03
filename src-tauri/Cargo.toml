@@ -4,9 +4,9 @@ resolver = "2"
 
 [package]
 name = "omniget"
-version = "0.8.16"
+version = "0.9.0"
 description = "Universal media downloader"
-authors = ["you"]
+authors = ["igect"]
 edition = "2021"
 
 [lib]
@@ -15,6 +15,13 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
+
+[features]
+default = ["linux-capture"]
+# Off for the x86_64 Linux release, whose runner has PipeWire headers older than
+# the capture backend can compile against. Everything else in the client is
+# unaffected, and `MediaCapabilities` reports the loss rather than hiding it.
+linux-capture = ["omnidisc-media/linux-capture"]
 
 [dependencies]
 tauri = { version = "2", features = ["protocol-asset", "tray-icon", "macos-private-api"] }
@@ -62,16 +69,18 @@ hex = "0.4"
 thiserror = "1"
 hmac = "0.12"
 qrcode = { version = "0.14", default-features = false, features = ["svg"] }
+open = "5"
 omniget-core = { path = "omniget-core", features = ["desktop"] }
 omniget-plugin-sdk = { path = "omniget-plugin-sdk" }
 omnidisc-proto = { path = "omnidisc-proto" }
-omnidisc-media = { path = "omnidisc-media" }
+omnidisc-media = { path = "omnidisc-media", default-features = false, features = ["rnnoise"] }
 omnidisc-mls = { path = "omnidisc-mls" }
 libloading = "0.8"
 which = "7"
 librqbit = "8.1.1"
 keepawake = "0.5"
 discord-rich-presence = "0.2"
+once_cell = "1"
 tokio-tungstenite = { version = "0.30.0", features = ["native-tls"] }
 native-tls = "0.2.18"
 fs4 = "1"

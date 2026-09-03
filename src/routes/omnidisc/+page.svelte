@@ -1,14 +1,27 @@
 <script lang="ts">
+  import { onMount } from "svelte";
   import { page } from "$app/state";
   import { goto } from "$app/navigation";
   import { t } from "$lib/i18n";
-  import { hasInstances, resetConnect } from "$lib/stores/omnidisc-store.svelte";
+  import {
+    hasInstances,
+    resetConnect,
+    connectInstance,
+    getConnectStep,
+    DEFAULT_INSTANCE_URL,
+  } from "$lib/stores/omnidisc-store.svelte";
   import ConnectInstanceForm from "$components/omnidisc/ConnectInstanceForm.svelte";
 
   let hasAny = $derived(hasInstances());
   let addRequested = $derived(page.url.searchParams.get("add") === "1");
   let showForm = $state(false);
   let onboarding = $derived(!hasAny || addRequested || showForm);
+
+  onMount(() => {
+    if (!hasInstances() && !addRequested && getConnectStep() === "idle") {
+      void connectInstance(DEFAULT_INSTANCE_URL);
+    }
+  });
 
   function done() {
     showForm = false;
@@ -135,7 +148,7 @@
   .secondary {
     padding: 8px var(--space-4);
     border-radius: var(--radius-md);
-    border: 1px solid var(--border-hi);
+    border: none;
     background: var(--surface);
     color: var(--text);
     font: inherit;

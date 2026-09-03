@@ -262,7 +262,7 @@
   }
   .period-tab {
     padding: 6px 14px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: none;
     border-radius: 999px;
     background: transparent;
     color: rgba(255, 255, 255, 0.65);
@@ -288,7 +288,7 @@
   .stat {
     padding: 16px 18px;
     background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: none;
     border-radius: 10px;
     display: flex;
     flex-direction: column;

@@ -209,7 +209,7 @@
   .search-input {
     flex: 1;
     padding: 10px 14px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
     color: var(--text);
@@ -254,7 +254,7 @@
   .result-link {
     flex: 1;
     text-align: left;
-    border: 1px solid color-mix(in oklab, var(--input-border) 50%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
     padding: 12px 14px;

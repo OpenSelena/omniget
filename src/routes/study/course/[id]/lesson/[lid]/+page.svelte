@@ -1538,7 +1538,7 @@
     gap: var(--padding);
     padding: var(--padding);
     background: var(--button-elevated);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     overflow-y: auto;
     max-height: calc(100vh - 80px);
@@ -1661,7 +1661,7 @@
   .speed-select {
     background: rgba(255, 255, 255, 0.12);
     color: #f5f5f5;
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    border: none;
     border-radius: 4px;
     padding: 2px 4px;
     font-size: 12px;
@@ -1678,7 +1678,7 @@
     gap: 4px;
     background: transparent;
     color: inherit;
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    border: none;
     border-radius: 4px;
     padding: 2px 8px;
     font-size: 11px;
@@ -1758,13 +1758,13 @@
   }
   :global(.md-render hr) {
     border: 0;
-    border-top: 1px solid var(--input-border);
+    border-top: none;
     margin: 12px 0;
   }
   .lesson-description {
     margin-top: 16px;
     padding-top: 12px;
-    border-top: 1px solid var(--input-border);
+    border-top: none;
   }
   .lesson-description h3 {
     font-size: 12px;
@@ -1802,7 +1802,7 @@
   }
   .btn {
     background: var(--button-elevated);
-    border: 1px solid var(--input-border);
+    border: none;
     color: var(--secondary);
     border-radius: var(--border-radius);
     padding: 6px 12px;
@@ -1868,7 +1868,7 @@
     gap: var(--padding);
     padding: var(--padding);
     background: var(--button-elevated);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
   }
   .notes-head {
@@ -1898,7 +1898,7 @@
     width: 100%;
     min-height: 72px;
     background: var(--input-bg);
-    border: 1px solid var(--input-border);
+    border: none;
     color: var(--secondary);
     border-radius: var(--border-radius);
     padding: 8px;
@@ -1942,7 +1942,7 @@
     flex-direction: column;
     gap: 6px;
     padding: 8px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--input-bg);
   }
@@ -2016,7 +2016,7 @@
     gap: 8px;
     padding: calc(var(--padding) * 1.5);
     background: var(--button-elevated);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
   }
   .attachments-head h2 {
@@ -2040,7 +2040,7 @@
     align-items: center;
     gap: 6px;
     background: var(--input-bg);
-    border: 1px solid var(--input-border);
+    border: none;
     color: var(--secondary);
     font-size: 12px;
     padding: 6px 10px;
@@ -2075,7 +2075,7 @@
     width: min(1100px, 95vw);
     height: min(90vh, 900px);
     background: var(--button-elevated);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     display: flex;
     flex-direction: column;
@@ -2088,7 +2088,7 @@
     justify-content: space-between;
     gap: 8px;
     padding: 10px 14px;
-    border-bottom: 1px solid var(--input-border);
+    border-bottom: none;
   }
   .viewer-title {
     display: inline-flex;

@@ -92,7 +92,7 @@
     font-weight: 500;
     color: var(--gray);
     background: var(--button);
-    border: 1px solid var(--button-stroke);
+    border: none;
     border-radius: calc(var(--border-radius) - 2px);
     cursor: pointer;
     box-shadow: var(--button-box-shadow);
@@ -128,10 +128,9 @@
     margin: 0;
     padding: 4px;
     list-style: none;
-    background: var(--button);
-    border: 1px solid var(--button-stroke);
+    background: var(--popup-bg);
     border-radius: var(--border-radius);
-    box-shadow: var(--button-box-shadow);
+    box-shadow: var(--elev-2);
   }
 
   .cookie-picker-option {

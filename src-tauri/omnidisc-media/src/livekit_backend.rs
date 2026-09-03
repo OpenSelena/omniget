@@ -370,6 +370,14 @@ impl LiveKitBackend {
                     }
                 }
                 CaptureEvent::Underrun => tracing::debug!("[omnidisc-media] microphone underrun"),
+                CaptureEvent::SilentInput => {
+                    tracing::warn!("[omnidisc-media] microphone delivers only digital silence");
+                    shared.emit(EngineNotification::Device {
+                        kind: DeviceKind::Input,
+                        status: DeviceStatus::Silent,
+                        cause: None,
+                    });
+                }
             }
         });
         let feeder =
@@ -624,8 +632,15 @@ async fn run_room_events(
                 participant,
             } => {
                 if publication.kind() == TrackKind::Video {
-                    if let Ok(mut m) = shared.video_publications.lock() {
-                        m.insert(participant.identity().0, publication.clone());
+                    if publication.source() == TrackSource::Screenshare {
+                        let id = participant.identity().0;
+                        if let Ok(mut m) = shared.video_publications.lock() {
+                            m.insert(id.clone(), publication.clone());
+                        }
+                        shared.emit(EngineNotification::Stream {
+                            user_id: id,
+                            active: true,
+                        });
                     }
                 } else {
                     subscribe_audio(&publication);
@@ -635,13 +650,20 @@ async fn run_room_events(
                 publication,
                 participant,
             } => {
-                if publication.kind() == TrackKind::Video {
+                if publication.kind() == TrackKind::Video
+                    && publication.source() == TrackSource::Screenshare
+                {
+                    let id = participant.identity().0;
                     if let Ok(mut m) = shared.video_publications.lock() {
-                        m.remove(&participant.identity().0);
+                        m.remove(&id);
                     }
                     if let Ok(mut m) = shared.remote_video.lock() {
-                        m.remove(&participant.identity().0);
+                        m.remove(&id);
                     }
+                    shared.emit(EngineNotification::Stream {
+                        user_id: id,
+                        active: false,
+                    });
                 }
             }
             RoomEvent::TrackSubscribed {
@@ -920,8 +942,14 @@ impl MediaBackend for LiveKitBackend {
                 });
                 for (_, publication) in participant.track_publications() {
                     if publication.kind() == TrackKind::Video {
-                        if let Ok(mut m) = shared.video_publications.lock() {
-                            m.insert(participant.identity().0, publication.clone());
+                        if publication.source() == TrackSource::Screenshare {
+                            if let Ok(mut m) = shared.video_publications.lock() {
+                                m.insert(participant.identity().0, publication.clone());
+                            }
+                            shared.emit(EngineNotification::Stream {
+                                user_id: participant.identity().0,
+                                active: true,
+                            });
                         }
                     } else {
                         subscribe_audio(&publication);

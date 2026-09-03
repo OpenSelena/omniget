@@ -90,9 +90,8 @@
 
 /* secondary — second-most-important action */
 .btn-secondary {
-  background: var(--surface);
+  background: var(--fill-2);
   color: var(--text);
-  border-color: var(--border);
 }
 
 @media (hover: hover) {
@@ -117,16 +116,14 @@
 
 /* destructive — delete, cancel-with-loss */
 .btn-destructive {
-  background: var(--surface);
+  background: color-mix(in srgb, var(--danger) 14%, transparent);
   color: var(--danger);
-  border-color: color-mix(in srgb, var(--danger) 40%, transparent);
 }
 
 @media (hover: hover) {
   .btn-destructive:hover:not(:disabled) {
     background: var(--danger);
     color: var(--on-status);
-    border-color: var(--danger);
   }
 }
 
@@ -137,9 +134,8 @@
   font-size: var(--text-sm);
   font-weight: 500;
   border-radius: var(--radius-full);
-  background: var(--surface);
+  background: var(--fill-1);
   color: var(--text-dim);
-  border-color: var(--border);
 }
 
 @media (hover: hover) {

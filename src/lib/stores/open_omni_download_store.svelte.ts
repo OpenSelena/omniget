@@ -4,9 +4,22 @@ import {
   listenToDownloadProgress,
   generateDownloadId,
   type DownloadProgress,
+  type DownloadResult,
 } from "$lib/api/open_omni";
 
 export type StatusType = "success" | "error" | "info";
+
+export interface OpenOmniDraft {
+  url: string;
+  contentType: string;
+  selectedProfileUrl: string | null;
+}
+
+let draft = $state<OpenOmniDraft>({
+  url: "",
+  contentType: "all",
+  selectedProfileUrl: null,
+});
 
 let active = $state(false);
 let downloadId = $state<string | null>(null);
@@ -17,10 +30,17 @@ let stageTotal = $state<number | null>(null);
 let lastMessage = $state("");
 let status = $state("");
 let statusType = $state<StatusType>("info");
-let lastFilesCount = $state(0);
-let unlisten: (() => void) | null = null;
-let cancelledByUser = false;
+let statusDetail = $state("");
 let cancelling = $state(false);
+let unlisten: (() => void) | null = null;
+
+export function getDraft(): OpenOmniDraft {
+  return draft;
+}
+
+export function setDraft(newDraft: Partial<OpenOmniDraft>) {
+  draft = { ...draft, ...newDraft };
+}
 
 export function isActive(): boolean {
   return active;
@@ -58,8 +78,8 @@ export function getStatusType(): StatusType {
   return statusType;
 }
 
-export function getLastFilesCount(): number {
-  return lastFilesCount;
+export function getStatusDetail(): string {
+  return statusDetail;
 }
 
 export function isCancelling(): boolean {
@@ -69,11 +89,10 @@ export function isCancelling(): boolean {
 export function clearStatus() {
   status = "";
   statusType = "info";
+  statusDetail = "";
 }
 
 function applyProgress(progressData: DownloadProgress) {
-  // Prefer clean "Downloaded: …" messages; keep other non-empty messages
-  // but never let an empty payload wipe the last useful text.
   if (progressData.message && progressData.message.trim()) {
     lastMessage = progressData.message.trim();
   }
@@ -104,13 +123,10 @@ export async function startDownload(
   outputDir: string,
   cookiesFile: string,
   contentType: string,
-) {
+): Promise<DownloadResult | null> {
   if (active) {
     throw new Error("A download is already in progress");
   }
-
-  cancelledByUser = false;
-  cancelling = false;
 
   const cleanUrl = url.trim();
   const cleanOutputDir = outputDir.trim();
@@ -119,26 +135,22 @@ export async function startDownload(
   if (!cleanUrl || !cleanOutputDir) {
     status = "Please fill in all required fields";
     statusType = "error";
-    return;
+    statusDetail = "";
+    return null;
   }
 
-  if ((contentType === "stories" || contentType === "highlights") && !cleanCookiesFile) {
-    status = "Stories and Highlights require a cookies file — set one in Settings.";
-    statusType = "error";
-    return;
-  }
-
+  cancelling = false;
   active = true;
   resetProgressState();
-  status = "Starting download…";
+  status = "Starting download...";
   statusType = "info";
+  statusDetail = "";
 
   const id = generateDownloadId();
   downloadId = id;
 
   try {
     unlisten = await listenToDownloadProgress(id, applyProgress);
-
     const result = await runGalleryDlDownload(
       cleanUrl,
       cleanOutputDir,
@@ -147,28 +159,30 @@ export async function startDownload(
       id,
     );
 
-    if (cancelledByUser || result.cancelled) {
-      status = "Download cancelled";
+    filesDownloaded = result.files_count;
+
+    if (result.cancelled) {
+      status = `Download cancelled — ${result.files_count} file(s) saved before stopping.`;
       statusType = "info";
-      filesDownloaded = result.files_count;
+      statusDetail = "";
     } else if (result.success) {
-      status = `Downloaded ${result.files_count} files successfully!`;
+      status = `Downloaded ${result.files_count} file(s) successfully!`;
       statusType = "success";
-      filesDownloaded = result.files_count;
-      lastFilesCount = result.files_count;
+      statusDetail = "";
     } else {
-      status = result.message || "Download failed";
+      const lines = (result.message || "Download failed").split("\n");
+      status = lines[0] || "Download failed";
       statusType = "error";
-      filesDownloaded = result.files_count;
+      statusDetail = lines.length > 1 ? lines.slice(1).join("\n") : "";
     }
-  } catch (error) {
-    if (cancelledByUser) {
-      status = "Download cancelled";
-      statusType = "info";
-    } else {
-      status = `Download failed: ${error}`;
-      statusType = "error";
-    }
+
+    return result;
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error);
+    status = `Download failed: ${msg}`;
+    statusType = "error";
+    statusDetail = "";
+    return null;
   } finally {
     active = false;
     cancelling = false;
@@ -176,7 +190,7 @@ export async function startDownload(
       try {
         unlisten();
       } catch {
-        // ignore – listener may already be gone
+        // ignore
       }
       unlisten = null;
     }
@@ -188,29 +202,16 @@ export async function stopDownload() {
   if (!active || !downloadId) return;
   if (cancelling) return;
 
-  cancelledByUser = true;
   cancelling = true;
-  status = "Cancelling download…";
+  status = "Cancelling download...";
   statusType = "info";
 
   try {
     await cancelDownload(downloadId);
-    // The run function owns final cleanup. We keep active=true until it
-    // returns so a new download cannot race the cancelled task's listener.
   } catch (error) {
     console.error("Failed to cancel download:", error);
     status = `Failed to cancel: ${error}`;
     statusType = "error";
     cancelling = false;
-  }
-}
-
-export async function reattachIfActive() {
-  if (!active || !downloadId || unlisten) return;
-
-  try {
-    unlisten = await listenToDownloadProgress(downloadId, applyProgress);
-  } catch (error) {
-    console.error("Failed to reattach progress listener:", error);
   }
 }

@@ -136,7 +136,7 @@
     gap: 6px;
     padding: 4px 8px;
     background: transparent;
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: var(--border-radius);
     color: var(--tertiary);
     font-size: 11px;
@@ -152,7 +152,7 @@
   }
 
   .log-panel {
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--popup-bg);
     overflow: hidden;
@@ -163,14 +163,14 @@
     justify-content: space-between;
     align-items: center;
     padding: 6px 8px;
-    border-bottom: 1px solid var(--content-border);
+    border-bottom: none;
     font-size: 11px;
     color: var(--tertiary);
   }
 
   .log-copy {
     padding: 2px 8px;
-    border: 1px solid var(--content-border);
+    border: none;
     background: transparent;
     border-radius: var(--border-radius);
     color: var(--secondary);

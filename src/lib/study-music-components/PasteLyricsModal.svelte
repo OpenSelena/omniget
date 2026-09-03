@@ -143,7 +143,7 @@
     width: min(560px, 100%);
     background: rgb(24, 24, 24);
     color: rgba(255, 255, 255, 0.92);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none;
     border-radius: 16px;
     box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7);
     display: flex;
@@ -187,7 +187,7 @@
     padding: 12px 14px;
     background: rgb(14, 14, 14);
     color: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: none;
     border-radius: 10px;
     font-family: ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
     font-size: 13px;
@@ -228,7 +228,7 @@
   .ghost {
     background: transparent;
     color: rgba(255, 255, 255, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    border: none;
   }
   .ghost:hover:not(:disabled) {
     color: white;

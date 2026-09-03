@@ -261,14 +261,14 @@
 
   .nb-dock-left {
     grid-area: dock-left;
-    border-right: 1px solid color-mix(in oklab, var(--content-border) 40%, transparent);
+    border-right: none;
     overflow: hidden;
     min-width: 0;
   }
 
   .nb-dock-right {
     grid-area: dock-right;
-    border-left: 1px solid color-mix(in oklab, var(--content-border) 40%, transparent);
+    border-left: none;
     overflow: hidden;
     min-width: 0;
   }
@@ -299,7 +299,7 @@
 
   .nb-status {
     grid-area: statusbar;
-    border-top: 1px solid color-mix(in oklab, var(--content-border) 40%, transparent);
+    border-top: none;
   }
 
   .exit-btn {
@@ -312,7 +312,7 @@
     gap: 6px;
     padding: 4px 8px;
     background: color-mix(in oklab, var(--button) 60%, transparent);
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     border-radius: 999px;
     color: var(--tertiary, var(--muted-fg));
     font-family: inherit;

@@ -11,10 +11,32 @@ mod windows;
 #[cfg(windows)]
 pub use self::windows::*;
 
-#[cfg(not(any(target_os = "macos", windows)))]
+#[cfg(all(target_os = "linux", feature = "linux-capture"))]
+mod linux;
+#[cfg(all(target_os = "linux", feature = "linux-capture"))]
+pub use self::linux::*;
+
+#[cfg(not(any(
+    target_os = "macos",
+    windows,
+    all(target_os = "linux", feature = "linux-capture")
+)))]
 mod stub;
-#[cfg(not(any(target_os = "macos", windows)))]
+#[cfg(not(any(
+    target_os = "macos",
+    windows,
+    all(target_os = "linux", feature = "linux-capture")
+)))]
 pub use self::stub::*;
+
+/// Whether this build can capture a screen at all. The interface asks the
+/// backend rather than the operating system, so a client compiled without the
+/// Linux capture backend says so instead of offering a button that fails.
+pub const SCREEN_CAPTURE_SUPPORTED: bool = cfg!(any(
+    target_os = "macos",
+    windows,
+    all(target_os = "linux", feature = "linux-capture")
+));
 
 #[derive(Debug, Clone)]
 pub struct CaptureOptions {
@@ -51,6 +73,7 @@ pub fn unix_micros() -> i64 {
 
 pub trait CaptureApi {
     fn list_sources(thumbnails: bool) -> Result<StreamSources, StreamError>;
+    fn thumbnail_for(source: &SourceId) -> Option<String>;
     fn start_video(
         opts: &CaptureOptions,
         sink: VideoSink,
@@ -63,6 +86,10 @@ pub trait CaptureApi {
 
 pub fn list_sources(thumbnails: bool) -> Result<StreamSources, StreamError> {
     Platform::list_sources(thumbnails)
+}
+
+pub fn thumbnail_for(source: &SourceId) -> Option<String> {
+    Platform::thumbnail_for(source)
 }
 
 pub fn start_video(

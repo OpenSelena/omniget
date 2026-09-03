@@ -76,7 +76,7 @@
     gap: 8px;
     padding: 14px 16px;
     background: color-mix(in oklab, var(--surface) 90%, var(--accent) 4%);
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius, 8px);
     margin-top: 16px;
     color: var(--accent);

@@ -1,30 +1,31 @@
 use super::{get_client, lcu_get_raw, lcu_post_raw, lcu_send, league_settings, LcuClient};
 use base64::Engine;
 use futures::{SinkExt, StreamExt};
+use once_cell::sync::OnceCell;
 use serde_json::{json, Value};
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{LazyLock, OnceLock};
 use tauri::{Emitter, Manager};
 use tauri_plugin_notification::NotificationExt;
 use tokio_tungstenite::tungstenite::client::IntoClientRequest;
 use tokio_tungstenite::tungstenite::Message;
 use tokio_tungstenite::Connector;
 
-static APP: OnceLock<tauri::AppHandle> = OnceLock::new();
+static APP: OnceCell<tauri::AppHandle> = OnceCell::new();
 static STARTED: AtomicBool = AtomicBool::new(false);
 static WS_CONNECTED: AtomicBool = AtomicBool::new(false);
 static MESSAGE_SENT: AtomicBool = AtomicBool::new(false);
 static ACCEPT_PENDING: AtomicBool = AtomicBool::new(false);
 static NOTIFIED_READY_CHECK: AtomicBool = AtomicBool::new(false);
 #[allow(clippy::type_complexity)]
-static LAST_EMITTED: LazyLock<
+static LAST_EMITTED: once_cell::sync::Lazy<
     tokio::sync::Mutex<std::collections::HashMap<&'static str, (String, std::time::Instant)>>,
-> = LazyLock::new(|| tokio::sync::Mutex::new(std::collections::HashMap::new()));
-static TRADES_HANDLED: LazyLock<tokio::sync::Mutex<std::collections::HashSet<i64>>> =
-    LazyLock::new(|| tokio::sync::Mutex::new(std::collections::HashSet::new()));
+> = once_cell::sync::Lazy::new(|| tokio::sync::Mutex::new(std::collections::HashMap::new()));
+static TRADES_HANDLED: once_cell::sync::Lazy<tokio::sync::Mutex<std::collections::HashSet<i64>>> =
+    once_cell::sync::Lazy::new(|| tokio::sync::Mutex::new(std::collections::HashSet::new()));
 #[allow(clippy::type_complexity)]
-static SWAPS_HANDLED: LazyLock<tokio::sync::Mutex<std::collections::HashSet<(&'static str, i64)>>> =
-    LazyLock::new(|| tokio::sync::Mutex::new(std::collections::HashSet::new()));
+static SWAPS_HANDLED: once_cell::sync::Lazy<
+    tokio::sync::Mutex<std::collections::HashSet<(&'static str, i64)>>,
+> = once_cell::sync::Lazy::new(|| tokio::sync::Mutex::new(std::collections::HashSet::new()));
 
 /// A queue pops after roughly twelve seconds without an answer, so a longer
 /// delay would simply waste the queue slot.

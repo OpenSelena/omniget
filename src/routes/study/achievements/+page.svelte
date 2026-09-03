@@ -374,12 +374,12 @@
     flex-direction: column;
     align-items: center;
     padding: 4px 16px;
-    border-right: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border-right: none;
   }
   @media (max-width: 760px) {
     .level-block {
       border-right: 0;
-      border-bottom: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+      border-bottom: none;
       padding-bottom: 12px;
     }
   }
@@ -496,7 +496,7 @@
     align-items: center;
     gap: 6px;
     padding: 6px 12px;
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: 999px;
     background: transparent;
     color: var(--secondary);
@@ -533,7 +533,7 @@
     display: flex;
     gap: var(--space-3);
     padding: var(--space-4);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-md);
     background: var(--surface);
     box-shadow: var(--elev-1);
@@ -670,7 +670,7 @@
     flex-direction: column;
     gap: 2px;
     background: var(--surface);
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     overflow: hidden;
   }
@@ -681,7 +681,7 @@
     gap: 12px;
     padding: 8px 14px;
     font-size: 13px;
-    border-bottom: 1px solid color-mix(in oklab, var(--input-border) 30%, transparent);
+    border-bottom: none;
   }
   .hist-row:last-child {
     border-bottom: 0;
@@ -709,7 +709,7 @@
     align-items: center;
     gap: 12px;
     padding-top: 12px;
-    border-top: 1px solid color-mix(in oklab, var(--input-border) 50%, transparent);
+    border-top: none;
   }
   .foot-hint {
     color: var(--tertiary);

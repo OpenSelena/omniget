@@ -154,7 +154,7 @@
     align-items: center;
     gap: 8px;
     padding: 8px 16px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: none;
     border-radius: 999px;
     background: transparent;
     color: rgba(255, 255, 255, 0.85);

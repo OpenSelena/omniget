@@ -108,7 +108,7 @@
     min-width: 220px;
     padding: 4px;
     background: rgb(28, 28, 30);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none;
     border-radius: 8px;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(0, 0, 0, 0.4);
     display: flex;

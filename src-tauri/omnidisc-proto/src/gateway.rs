@@ -393,6 +393,32 @@ pub enum DispatchEvent {
         code: String,
     },
     SessionsReplace(Vec<SessionInfo>),
+    StorageStatus(StorageStatus),
+}
+
+/// How full the instance's disk is. Broadcast when it crosses a threshold so
+/// people can save what matters before the sweep, and again after one.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct StorageStatus {
+    pub used_bytes: u64,
+    pub total_bytes: u64,
+    /// 0.0–1.0 of the whole volume.
+    pub ratio: f64,
+    pub level: StoragePressure,
+    /// Seconds a finished upload survives before the janitor deletes it.
+    pub attachment_ttl_seconds: u64,
+    /// Set when this status is the announcement of a purge that just ran.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub purged_files: Option<u64>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum StoragePressure {
+    Ok,
+    Warning,
+    Critical,
+    Purged,
 }
 
 impl DispatchEvent {
@@ -435,6 +461,7 @@ impl DispatchEvent {
             Self::InviteCreate(_) => "INVITE_CREATE",
             Self::InviteDelete { .. } => "INVITE_DELETE",
             Self::SessionsReplace(_) => "SESSIONS_REPLACE",
+            Self::StorageStatus(_) => "STORAGE_STATUS",
         }
     }
 }

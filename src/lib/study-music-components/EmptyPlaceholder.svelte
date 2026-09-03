@@ -44,7 +44,7 @@
     color: var(--text);
     border-radius: 16px;
     background: var(--fill-1);
-    border: 1px dashed var(--border);
+    border: none;
   }
   .empty.compact {
     padding: 24px 16px;

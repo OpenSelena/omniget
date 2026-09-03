@@ -294,7 +294,7 @@
     padding: 6px 10px;
     background: transparent;
     color: var(--tertiary);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     font-size: 12px;
     cursor: pointer;
@@ -351,7 +351,7 @@
     padding: 6px 10px;
     background: var(--input-bg);
     color: var(--secondary);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     font-family: inherit;
     font-size: 12px;
@@ -362,7 +362,7 @@
     padding: 6px 12px;
     background: var(--input-bg);
     color: var(--secondary);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     font-size: 13px;
     font-family: inherit;
@@ -387,7 +387,7 @@
     flex-direction: column;
     gap: 0;
     background: var(--button-elevated);
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: var(--border-radius);
     overflow: hidden;
     padding: 0;
@@ -477,7 +477,7 @@
     padding: 6px 12px;
     background: transparent;
     color: var(--tertiary);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     font-size: 12px;
     cursor: pointer;

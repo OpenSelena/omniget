@@ -71,7 +71,7 @@
     padding: calc(var(--padding) * 0.75);
     background: transparent;
     border: none;
-    border-bottom: 1px solid var(--button-stroke);
+    border-bottom: none;
     cursor: pointer;
     text-align: left;
   }

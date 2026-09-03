@@ -63,7 +63,7 @@
     width: 100%;
     padding: 18px 20px;
     background: var(--fill-1);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: 12px;
     color: var(--text);
     font-family: inherit;

@@ -363,7 +363,6 @@
   "nav": {
     "home": "ホーム",
     "downloads": "ダウンロード",
-    "open_omni": "Open Omni",
     "marketplace": "マーケットプレイス",
     "settings": "設定",
     "about": "このアプリについて",
@@ -390,7 +389,9 @@
     "mode_batch": "Batch",
     "mode_torrent": "Torrent",
     "mode_p2p": "P2P",
-    "inspector_title": "Download options"
+    "inspector_title": "Download options",
+    "hero_title": "OmniGet",
+    "hero_subtitle": "Paste a link or search. We'll take it from there."
   },
   "tools": {
     "tab": "ツール",
@@ -744,7 +745,8 @@
       "lang_it": "Italiano",
       "lang_fr": "Français",
       "lang_es": "Español",
-      "lang_el": "Ελληνικά"
+      "lang_el": "Ελληνικά",
+      "lang_fa": "فارسی"
     },
     "download": {
       "default_output_dir": "既定のフォルダ",
@@ -945,7 +947,7 @@
       "silence_done": "無音 {{saved}} 分を検出 — 再生時にスキップできます",
       "portable_label": "Portable Mode",
       "portable_active": "Portable mode is active. OmniGet's data is stored in {{dir}}.",
-      "portable_macos_notice": "On macOS the WebView still stores its session data under ~/Library, and portable mode cannot redirect it. Only OmniGet's own data is portable here — see github.com/igect/omniget/issues/227."
+      "portable_macos_notice": "On macOS the WebView still stores its session data under ~/Library, and portable mode cannot redirect it. Only OmniGet's own data is portable here — see github.com/tonhowtf/omniget/issues/227."
     },
     "dependencies": {
       "title": "依存関係",
@@ -1477,7 +1479,7 @@
     "roadmap_community_discord": "Discordでお気軽にどうぞ：",
     "roadmap_community_issue": "またはリポジトリでIssueを作成してください：",
     "tagline": "どこからでも、何でもダウンロード。",
-    "credit": "igect が愛を込めて作りました"
+    "credit": "tonho.wtf が愛を込めて作りました"
   },
   "marketplace": {
     "title": "マーケットプレイス",
@@ -1637,7 +1639,8 @@
     "cookie_error_message": "自動Cookie検出はFirefoxでのみ動作します。Chrome、Edgeなどはアクセスをブロックします。Firefoxをインストールしてログインするか、cookies.txtファイルを設定 > ダウンロード > Cookieファイルで設定してください。",
     "cookie_file_label": "Cookie ファイル (cookies.txt)",
     "cookie_file_choose": "ファイルを選択",
-    "cookie_file_hint": "ブラウザ拡張機能でCookieをエクスポートし、ここでファイルを選択してください。"
+    "cookie_file_hint": "ブラウザ拡張機能でCookieをエクスポートし、ここでファイルを選択してください。",
+    "dismiss": "Dismiss"
   },
   "platforms": {
     "bilibili": {
@@ -1756,7 +1759,8 @@
     "extractor_broken": "The site extractor is broken. Update yt-dlp in Settings → Dependencies, then retry.",
     "drm_protected": "ダウンロードしたストリームはDRMで保護されているため結合できません。このコンテンツはサポートされていません。",
     "output_missing": "ダウンロードは完了しましたが、フォルダにファイルが見つからないか空です。ディスク容量とウイルス対策ソフトの設定を確認して、もう一度お試しください。",
-    "course_platform_url": "コースプラットフォームはURLからダウンロードできません。コースページを開いてください（コースプラグインとログイン済みアカウントが必要です）。"
+    "course_platform_url": "コースプラットフォームはURLからダウンロードできません。コースページを開いてください（コースプラグインとログイン済みアカウントが必要です）。",
+    "plugin_outdated": "This plugin is outdated and doesn't support this action. Update it in the Marketplace, then restart OmniGet."
   },
   "debug": {
     "title": "アクティビティログ",
@@ -4225,7 +4229,9 @@
       "sign_in": "Sign in again",
       "reconnect": "Reconnect",
       "remove": "Forget this server",
-      "insecure": "{{name}} — 暗号化されていない接続 (http)"
+      "insecure": "{{name}} — 暗号化されていない接続 (http)",
+      "immersive_enter": "Focus mode — hide the app sidebar",
+      "immersive_exit": "Exit focus mode — show the app sidebar"
     },
     "channels": {
       "title": "Channels",
@@ -4510,7 +4516,9 @@
       "rtt": "Ping",
       "loss": "Loss",
       "encode": "Encode",
-      "no_active": "No stream running yet."
+      "no_active": "No stream running yet.",
+      "preview_alt": "Live preview of your shared screen",
+      "portal_picker": "Your desktop will ask which screen or window to share after you press Share."
     },
     "emoji": {
       "title": "Emoji",
@@ -4906,7 +4914,9 @@
       "encrypted_note": "Encrypted — save it to open it",
       "too_large": "That file is bigger than this server accepts ({{limit}}).",
       "too_many": "You can attach up to {{count}} files to one message.",
-      "unreadable": "OmniGet could not read that file."
+      "unreadable": "OmniGet could not read that file.",
+      "expires_in": "expires in {{minutes}} min",
+      "expired": "This file expired and was deleted from the server."
     },
     "e2ee": {
       "dm_locked": "Only you and {{name}} can read these messages",
@@ -4953,6 +4963,12 @@
       "in_call": "In a call",
       "leave": "Leave the call",
       "joining": "Connecting…"
+    },
+    "storage": {
+      "warning": "This server's disk is {{percent}}% full. Files are deleted after {{minutes}} minutes anyway; save anything you need now.",
+      "critical": "This server's disk is {{percent}}% full. Every stored file is about to be deleted to free space.",
+      "purged": "The disk filled up, so all {{count}} stored files were deleted. Messages are untouched — only attachments are gone.",
+      "retention_note": "Files are deleted from the server after {{minutes}} minutes."
     }
   },
   "ytdlp_missing_banner": {

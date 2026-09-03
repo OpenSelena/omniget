@@ -706,7 +706,7 @@
     gap: 10px;
     padding: 48px 20px;
     text-align: center;
-    border: 1px dashed var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
   }
@@ -783,7 +783,7 @@
     gap: 5px;
     padding: 6px 10px;
     border-radius: 999px;
-    border: 1px solid var(--input-border);
+    border: none;
     background: var(--surface);
     color: var(--tertiary);
     font-size: 11px;
@@ -845,7 +845,7 @@
     padding: 4px 10px;
     border-radius: 999px;
     background: transparent;
-    border: 1px solid var(--input-border);
+    border: none;
     color: var(--tertiary);
     font-size: 11px;
   }
@@ -941,7 +941,7 @@
   .meta {
     margin: 0;
     padding: 12px 16px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
     display: flex;
@@ -1026,7 +1026,7 @@
     cursor: not-allowed;
   }
   .btn-secondary {
-    border: 1px solid var(--input-border);
+    border: none;
     background: transparent;
     color: var(--secondary);
   }
@@ -1117,7 +1117,7 @@
     border-radius: 50%;
     background: color-mix(in oklab, var(--status-color) 16%, var(--surface));
     color: var(--status-color);
-    border: 1px solid color-mix(in oklab, var(--status-color) 30%, var(--input-border));
+    border: none;
     z-index: 1;
   }
   .event.first .event-icon {
@@ -1190,7 +1190,7 @@
     width: 100%;
     max-width: 440px;
     background: var(--surface);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     display: flex;
     flex-direction: column;
@@ -1201,7 +1201,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 14px 18px;
-    border-bottom: 1px solid var(--input-border);
+    border-bottom: none;
   }
   .dialog-head h2 {
     margin: 0;
@@ -1236,7 +1236,7 @@
     justify-content: flex-end;
     gap: 8px;
     padding: 12px 18px;
-    border-top: 1px solid var(--input-border);
+    border-top: none;
   }
 
   .field {
@@ -1251,7 +1251,7 @@
   .field-input {
     width: 100%;
     padding: 8px 11px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
     color: var(--secondary);
@@ -1288,7 +1288,7 @@
   .toast {
     pointer-events: auto;
     padding: 10px 14px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
     color: var(--secondary);

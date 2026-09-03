@@ -235,7 +235,7 @@
   .play-btn { display: inline-flex; align-items: center; gap: 8px; padding: 12px 32px; background: #1db954; color: #000; border: 0; border-radius: 999px; font-family: inherit; font-size: 14px; font-weight: 700; cursor: pointer; transition: transform 200ms ease, background 200ms ease; }
   .play-btn:hover { background: #1ed760; transform: scale(1.04); }
   .play-btn:disabled { opacity: 0.5; cursor: default; transform: none; }
-  .follow-btn { padding: 10px 20px; background: transparent; border: 1px solid rgba(255,255,255,0.4); border-radius: 999px; color: white; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; transition: border-color 200ms ease, background 200ms ease; }
+  .follow-btn { padding: 10px 20px; background: transparent; border: none; border-radius: 999px; color: white; font-family: inherit; font-size: 13px; font-weight: 700; cursor: pointer; transition: border-color 200ms ease, background 200ms ease; }
   .follow-btn:hover { border-color: white; }
   .follow-btn.on { background: rgba(29,185,84,0.15); border-color: #1db954; color: #1db954; }
   .follow-btn:disabled { opacity: 0.5; cursor: default; }

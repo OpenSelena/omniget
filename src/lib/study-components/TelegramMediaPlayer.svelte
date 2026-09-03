@@ -811,7 +811,7 @@
     max-width: 600px;
     padding: 32px;
     background: var(--surface);
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: var(--border-radius);
     color: var(--secondary);
     display: flex;

@@ -182,7 +182,7 @@
   .dialog {
     background: rgb(20, 20, 20);
     color: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none;
     border-radius: 14px;
     width: min(540px, 92vw);
     max-height: 86vh;
@@ -249,7 +249,7 @@
   }
   .preset-btn {
     padding: 5px 12px;
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none;
     border-radius: 999px;
     background: transparent;
     color: rgba(255, 255, 255, 0.65);
@@ -299,7 +299,7 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: none;
     margin-top: 12px;
   }
   .crossfade-head {
@@ -368,12 +368,12 @@
     justify-content: space-between;
     gap: 8px;
     padding: 14px 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: none;
     background: rgba(255, 255, 255, 0.02);
   }
   .reset-btn {
     padding: 8px 14px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: none;
     border-radius: 999px;
     background: transparent;
     color: rgba(255, 255, 255, 0.65);

@@ -35,10 +35,10 @@
   font-family: inherit;
   font-size: var(--text-base);
   color: var(--text);
-  background: var(--input-bg);
-  border: 1px solid var(--input-border);
+  background: var(--control-bg);
+  border: none;
   border-radius: var(--radius-sm);
-  transition: border-color var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
+  transition: background var(--duration-fast) var(--ease-out), box-shadow var(--duration-fast) var(--ease-out);
 }
 
 .input::placeholder {
@@ -46,13 +46,12 @@
 }
 
 .input:hover:not(:disabled):not(:focus) {
-  border-color: color-mix(in srgb, var(--input-border) 60%, var(--text-dim));
+  background: color-mix(in srgb, var(--control-bg) 88%, var(--text));
 }
 
 .input:focus,
 .input:focus-visible {
   outline: none;
-  border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-soft);
 }
 
@@ -62,7 +61,7 @@
 }
 
 .input.error {
-  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 12%, var(--control-bg));
 }
 
 .input.error:focus {
@@ -92,12 +91,12 @@ textarea.input {
   height: 16px;
   margin: 0;
   flex-shrink: 0;
-  border: 1px solid var(--input-border);
-  background: var(--input-bg);
+  border: none;
+  background: var(--fill-2);
   cursor: pointer;
   display: inline-grid;
   place-content: center;
-  transition: background var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out);
+  transition: background var(--duration-fast) var(--ease-out);
 }
 
 .checkbox {
@@ -110,13 +109,12 @@ textarea.input {
 
 .checkbox:hover:not(:disabled),
 .radio:hover:not(:disabled) {
-  border-color: var(--text-dim);
+  background: var(--fill-3);
 }
 
 .checkbox:checked,
 .radio:checked {
   background: var(--accent);
-  border-color: var(--accent);
 }
 
 .checkbox:checked::before {
@@ -220,13 +218,12 @@ textarea.input {
 
 .surface-card {
   background: var(--surface);
-  border: 1px solid var(--border);
   border-radius: var(--radius-md);
 }
 
 .surface-card.interactive {
   cursor: pointer;
-  transition: background var(--duration-fast) var(--ease-out), border-color var(--duration-fast) var(--ease-out);
+  transition: background var(--duration-fast) var(--ease-out);
 }
 
 @media (hover: hover) {
@@ -362,20 +359,13 @@ textarea.input {
 
 .separator {
   border: none;
-  height: 1px;
-  margin: 0;
-  background: var(--border);
+  height: 0;
+  margin: var(--space-2) 0;
+  background: none;
 }
 
 .separator.inset {
   margin-left: var(--space-3);
-}
-
-@media (min-resolution: 2dppx) {
-  .separator {
-    transform: scaleY(0.5);
-    transform-origin: bottom;
-  }
 }
 
 /* ---------- Tooltip ---------- */
@@ -389,7 +379,6 @@ textarea.input {
   line-height: var(--leading-xs);
   color: var(--text);
   background: var(--popup-bg);
-  border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   box-shadow: var(--elev-2);
   pointer-events: none;
@@ -400,7 +389,6 @@ textarea.input {
 
 .popover {
   background: var(--popup-bg);
-  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--elev-2);
   padding: var(--space-1);
@@ -454,9 +442,9 @@ textarea.input {
 }
 
 .menu-separator {
-  height: 1px;
+  height: 0;
   margin: var(--space-1) var(--space-2);
-  background: var(--border);
+  background: none;
 }
 
 /* ---------- Dialog / sheet ---------- */
@@ -475,7 +463,6 @@ textarea.input {
 .dialog-card {
   width: min(440px, 100%);
   background: var(--popup-bg);
-  border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   box-shadow: var(--elev-3);
   padding: var(--space-5);
@@ -691,16 +678,15 @@ textarea.input {
   max-width: 420px;
   padding: var(--space-3) var(--space-4);
   background: var(--popup-bg);
-  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--elev-2);
   font-size: var(--text-base);
   color: var(--text);
 }
 
-.toast-card.success { border-color: color-mix(in srgb, var(--success) 35%, transparent); }
-.toast-card.error { border-color: color-mix(in srgb, var(--danger) 35%, transparent); }
-.toast-card.warning { border-color: color-mix(in srgb, var(--warning) 35%, transparent); }
+.toast-card.success { background: color-mix(in srgb, var(--success) 12%, var(--popup-bg)); }
+.toast-card.error { background: color-mix(in srgb, var(--danger) 12%, var(--popup-bg)); }
+.toast-card.warning { background: color-mix(in srgb, var(--warning) 12%, var(--popup-bg)); }
 
 /* ---------- Kbd ---------- */
 
@@ -709,8 +695,7 @@ textarea.input {
   align-items: center;
   padding: 1px calc(var(--space-1) * 1.25);
   border-radius: var(--radius-xs);
-  background: var(--fill-1);
-  border: 1px solid var(--border);
+  background: var(--fill-2);
   font-size: var(--text-caption);
   font-family: var(--font-mono);
   color: var(--text-muted);

@@ -208,7 +208,7 @@
     padding: 6px 14px;
     background: transparent;
     color: var(--tertiary);
-    border: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
+    border: none;
     border-radius: 999px;
     font-size: 12px;
     cursor: pointer;
@@ -223,7 +223,7 @@
     padding: 6px 14px;
     background: transparent;
     color: var(--tertiary);
-    border: 1px solid color-mix(in oklab, var(--content-border) 60%, transparent);
+    border: none;
     border-radius: 999px;
     font-size: 12px;
     font-weight: 500;

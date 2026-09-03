@@ -1,6 +1,7 @@
 pub mod capture;
 pub mod devices;
 pub mod io;
+pub mod permission;
 pub mod playback;
 pub mod resample;
 

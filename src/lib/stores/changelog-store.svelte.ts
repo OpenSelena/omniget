@@ -1,5 +1,4 @@
 import { getVersion } from "@tauri-apps/api/app";
-import changelogRaw from "../../../CHANGELOG.md?raw";
 
 const STORAGE_KEY = "omniget_last_seen_version";
 const CHANGELOG_BODY_KEY = "omniget_pending_changelog";
@@ -36,37 +35,11 @@ export function storeChangelogForUpdate(body: string, version: string): void {
   localStorage.setItem(CHANGELOG_BODY_KEY, JSON.stringify({ body, version }));
 }
 
-function getLocalReleaseNotes(versionStr: string): string {
-  if (!changelogRaw) return "";
-  const lines = changelogRaw.split("\n");
-  const targetHeader = `## [${versionStr}]`;
-  let capturing = false;
-  const result: string[] = [];
-
-  for (const line of lines) {
-    if (line.startsWith("## [")) {
-      if (line.startsWith(targetHeader)) {
-        capturing = true;
-        continue;
-      } else if (capturing) {
-        break;
-      }
-    }
-    if (capturing) {
-      if (line.trim() === "---") continue;
-      result.push(line);
-    }
-  }
-
-  const text = result.join("\n").trim();
-  return text || changelogRaw;
-}
-
 export async function initChangelog(): Promise<void> {
   try {
     currentVersion = await getVersion();
   } catch {
-    currentVersion = "0.8.16";
+    currentVersion = "0.9.0";
   }
 
   const lastSeen = localStorage.getItem(STORAGE_KEY);
@@ -96,16 +69,14 @@ export async function initChangelog(): Promise<void> {
 export async function fetchChangelog(): Promise<string> {
   if (changelogBody) return changelogBody;
 
-  const localNotes = getLocalReleaseNotes(currentVersion || "0.8.16");
-
   try {
     const res = await fetch(
-      `https://api.github.com/repos/igect/omniget/releases/tags/v${currentVersion || "0.8.16"}`,
+      `https://api.github.com/repos/igect/omniget/releases/tags/v${currentVersion}`,
       { headers: { Accept: "application/vnd.github.v3+json" } }
     );
     if (res.ok) {
       const data = await res.json();
-      if (data.body && data.body.trim().length > 0) {
+      if (data.body) {
         changelogBody = data.body;
         return data.body;
       }
@@ -119,17 +90,12 @@ export async function fetchChangelog(): Promise<string> {
     );
     if (res.ok) {
       const data = await res.json();
-      if (data.body && data.body.trim().length > 0) {
+      if (data.body) {
         changelogBody = data.body;
         return data.body;
       }
     }
   } catch {}
-
-  if (localNotes) {
-    changelogBody = localNotes;
-    return localNotes;
-  }
 
   return "";
 }

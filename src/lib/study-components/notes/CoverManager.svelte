@@ -148,7 +148,7 @@
     width: 100%;
     max-width: 520px;
     background: var(--surface);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     padding: 20px;
     display: flex;
@@ -175,7 +175,7 @@
   }
   .field input {
     padding: 8px 10px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
     color: var(--text);
@@ -187,7 +187,7 @@
     border-color: var(--accent);
   }
   .preview {
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     overflow: hidden;
     background: var(--bg);

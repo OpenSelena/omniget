@@ -249,7 +249,7 @@
     height: 100%;
     overflow: hidden;
     background: color-mix(in oklab, var(--primary) 96%, black);
-    border-right: 1px solid color-mix(in oklab, var(--content-border) 40%, transparent);
+    border-right: none;
     scrollbar-width: thin;
   }
   .brand,
@@ -353,7 +353,7 @@
     height: 22px;
     padding: 0;
     background: transparent;
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     border-radius: 50%;
     color: var(--tertiary);
     font-size: 14px;
@@ -431,7 +431,7 @@
     gap: 2px;
     padding-top: 12px;
     padding-bottom: 4px;
-    border-top: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
+    border-top: none;
     background: color-mix(in oklab, var(--primary) 96%, black);
   }
   .footer-item {

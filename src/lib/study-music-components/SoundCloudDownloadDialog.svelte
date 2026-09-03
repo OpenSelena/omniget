@@ -247,7 +247,7 @@
   }
   .dialog {
     width: min(560px, 100%); max-height: 90vh; overflow-y: auto;
-    background: #111; border: 1px solid rgba(255,255,255,0.08); border-radius: 12px;
+    background: #111; border: none; border-radius: 12px;
     color: white; padding: 20px; display: flex; flex-direction: column; gap: 16px;
   }
   .head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
@@ -280,10 +280,10 @@
   .codec-pill { padding: 6px 14px; background: rgba(255,255,255,0.06); border: 1px solid transparent; border-radius: 999px; color: white; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer; transition: background 200ms ease; }
   .codec-pill:hover { background: rgba(255,255,255,0.1); }
   .codec-pill.on { background: #ff5500; color: white; }
-  .quality-select { background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.08); border-radius: 6px; color: white; padding: 8px 10px; font-family: inherit; font-size: 13px; }
+  .quality-select { background: rgba(255,255,255,0.06); border: none; border-radius: 6px; color: white; padding: 8px 10px; font-family: inherit; font-size: 13px; }
   .quality-select:focus { outline: 0; border-color: #ff5500; }
   .folder-row { display: flex; gap: 8px; }
-  .folder-row input { flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.05); border-radius: 6px; color: white; padding: 8px 12px; font-family: inherit; font-size: 13px; outline: none; }
+  .folder-row input { flex: 1; background: rgba(255,255,255,0.06); border: none; border-radius: 6px; color: white; padding: 8px 12px; font-family: inherit; font-size: 13px; outline: none; }
   .remember { display: flex; align-items: center; gap: 8px; font-size: 12px; color: rgba(255,255,255,0.7); cursor: pointer; user-select: none; }
   .remember input { accent-color: #ff5500; }
   .actions { display: flex; justify-content: flex-end; gap: 8px; }

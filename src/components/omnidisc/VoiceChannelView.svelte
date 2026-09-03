@@ -22,6 +22,8 @@
     refreshStreamStats,
     getStreamStats,
     getMediaCapabilities,
+    isStreamer,
+    getStreamPreview,
   } from "$lib/stores/omnidisc-stream-store.svelte";
   import type { OmnidiscChannel } from "$lib/omnidisc/types";
 
@@ -63,7 +65,7 @@
   function isLive(userId: string): boolean {
     const m = members.find((x) => x.userId === userId);
     if (!m) return false;
-    return m.streaming || (userId === me && publishing);
+    return m.streaming || isStreamer(userId) || (userId === me && publishing);
   }
 
   async function toggleWatch(userId: string) {
@@ -144,6 +146,10 @@
               {/if}
             </div>
           {:else if live && m.userId === me}
+            {@const preview = getStreamPreview()}
+            {#if preview}
+              <img class="self-preview" src={preview} alt={$t("omnidisc.stream.preview_alt")} />
+            {/if}
             <span class="res-badge you-live">{$t("omnidisc.stream.you_live")}</span>
           {/if}
           <span class="badges">
@@ -256,7 +262,7 @@
     padding: var(--space-3) var(--space-2);
     border-radius: var(--radius-md);
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: none;
   }
 
   .tile.live {
@@ -308,6 +314,13 @@
     color: var(--danger);
   }
 
+  .self-preview {
+    width: 100%;
+    border-radius: var(--radius-sm);
+    border: none;
+    display: block;
+  }
+
   .vol {
     display: flex;
     align-items: center;
@@ -331,7 +344,7 @@
 
   .inspector {
     width: min(560px, 100%);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-md);
     background: var(--surface);
   }
@@ -441,7 +454,7 @@
   .btn {
     padding: 8px var(--space-4);
     border-radius: var(--radius-md);
-    border: 1px solid var(--border-hi);
+    border: none;
     background: var(--surface);
     color: var(--text);
     font: inherit;

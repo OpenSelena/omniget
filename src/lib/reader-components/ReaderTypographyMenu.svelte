@@ -132,7 +132,7 @@
     height: 36px;
     background: transparent;
     color: inherit;
-    border: 1px solid var(--border, #ddd);
+    border: none;
     border-radius: 6px;
     font-size: 16px;
     cursor: pointer;
@@ -163,7 +163,7 @@
     padding: 6px 8px;
     background: transparent;
     color: inherit;
-    border: 1px solid var(--border, #ddd);
+    border: none;
     border-radius: 6px;
     font-size: 11px;
     cursor: pointer;

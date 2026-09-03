@@ -189,7 +189,7 @@
 
   .panel {
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--border-radius);
     width: min(640px, 100%);
     max-height: 90vh;
@@ -248,7 +248,7 @@
     flex: 1;
     min-width: 120px;
     padding: 8px 10px;
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
     color: var(--text);
@@ -256,7 +256,7 @@
 
   button {
     padding: 8px 14px;
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--button-elevated);
     color: var(--text);
@@ -280,7 +280,7 @@
     flex-direction: column;
     gap: 8px;
     padding: 12px;
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
   }

@@ -133,7 +133,7 @@
     box-sizing: border-box;
     padding: 8px var(--space-2);
     border-radius: var(--radius-sm);
-    border: 1px solid var(--input-border);
+    border: none;
     background: var(--input-bg);
     color: var(--text);
     font: inherit;
@@ -163,7 +163,7 @@
     align-items: center;
     gap: var(--space-2);
     padding: var(--space-2);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-sm);
     background: var(--surface);
   }
@@ -177,7 +177,7 @@
 
   .ghost {
     padding: 4px var(--space-2);
-    border: 1px solid var(--border-hi);
+    border: none;
     border-radius: var(--radius-sm);
     background: transparent;
     color: var(--text);

@@ -217,7 +217,7 @@
 
 <style>
   .playlists-page { display: flex; flex-direction: column; gap: 20px; }
-  .spotify-section { display: flex; flex-direction: column; gap: 16px; margin-top: 16px; padding-top: 24px; border-top: 1px solid color-mix(in oklab, var(--content-border) 40%, transparent); }
+  .spotify-section { display: flex; flex-direction: column; gap: 16px; margin-top: 16px; padding-top: 24px; border-top: none; }
   .section-head { display: flex; align-items: center; gap: 12px; }
   .section-head h2 { margin: 0; font-size: 18px; font-weight: 800; color: var(--secondary); }
   .badge-spotify { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700; color: #1db954; }
@@ -283,7 +283,7 @@
   .ghost {
     padding: 8px 12px;
     background: transparent;
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     border-radius: 8px;
     color: var(--secondary);
     font-family: inherit;

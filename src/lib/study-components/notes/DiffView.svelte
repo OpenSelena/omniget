@@ -133,7 +133,7 @@
     margin: 0;
     padding: 8px;
     background: var(--bg);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     font-family: var(--font-mono, ui-monospace, monospace);
     font-size: 12px;

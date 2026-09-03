@@ -2,22 +2,22 @@ import { describe, it, expect } from "vitest";
 import { CORE_NAV_ITEMS } from "./nav-config";
 
 describe("CORE_NAV_ITEMS", () => {
-  it("has the expected core entries", () => {
+  it("has the expected 7 core entries", () => {
     expect(CORE_NAV_ITEMS).toHaveLength(7);
   });
 
-  it("OmniDisc sits in primary group", () => {
-    const chat = CORE_NAV_ITEMS.find((i) => i.href === "/omnidisc");
-    expect(chat?.group).toBe("primary");
-    expect(chat?.icon).toBe("chat");
-    expect(chat?.order).toBe(25);
-  });
-
-  it("OpenOmni sits in primary group", () => {
+  it("Open Omni sits in the primary group", () => {
     const openOmni = CORE_NAV_ITEMS.find((i) => i.href === "/open-omni");
     expect(openOmni?.group).toBe("primary");
     expect(openOmni?.icon).toBe("open_omni");
     expect(openOmni?.order).toBe(28);
+  });
+
+  it("OmniDisc sits between Downloads and the app group", () => {
+    const chat = CORE_NAV_ITEMS.find((i) => i.href === "/omnidisc");
+    expect(chat?.group).toBe("primary");
+    expect(chat?.icon).toBe("chat");
+    expect(chat?.order).toBe(25);
   });
 
   it("Home is first in primary group", () => {

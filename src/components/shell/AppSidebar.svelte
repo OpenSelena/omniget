@@ -37,12 +37,13 @@
 </script>
 
 <aside class="mac-source-list">
+  <div class="mac-source-list-drag" data-tauri-drag-region></div>
   <div class="mac-nav-section">
     <div class="mac-nav-section-header">{$t("nav.section_primary")}</div>
     {#each primaryNav as item}
       {@const title = itemTitle(item)}
       <a href={item.href} class="mac-nav-item" class:active={isActive(item.href)} title={title}>
-        <NavIcon icon={item.icon} iconSvg={item.iconSvg} />
+        <NavIcon icon={item.icon} iconSvg={item.iconSvg} active={isActive(item.href)} />
         <span class="mac-nav-label">{title}</span>
         {#if item.badge === "downloads" && badgeCount > 0}
           <span class="mac-nav-badge">{badgeLabel}</span>
@@ -58,7 +59,7 @@
     {#each appNav as item}
       {@const title = itemTitle(item)}
       <a href={item.href} class="mac-nav-item" class:active={isActive(item.href)} title={title}>
-        <NavIcon icon={item.icon} iconSvg={item.iconSvg} />
+        <NavIcon icon={item.icon} iconSvg={item.iconSvg} active={isActive(item.href)} />
         <span class="mac-nav-label">{title}</span>
       </a>
     {/each}
@@ -88,7 +89,7 @@
         {#each pluginNav as item}
           {@const title = itemTitle(item)}
           <a href={item.href} class="mac-nav-item" class:active={isActive(item.href)} title={title}>
-            <NavIcon icon={item.icon} iconSvg={item.iconSvg} />
+            <NavIcon icon={item.icon} iconSvg={item.iconSvg} active={isActive(item.href)} />
             <span class="mac-nav-label">{title}</span>
           </a>
         {/each}
@@ -96,3 +97,9 @@
     </div>
   {/if}
 </aside>
+
+<style>
+  .mac-source-list :global(.mac-nav-item.active .nav-icon) {
+    color: var(--accent);
+  }
+</style>

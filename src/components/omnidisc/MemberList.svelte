@@ -140,7 +140,7 @@
     overflow-y: auto;
     padding: var(--space-3) var(--space-2);
     background: var(--surface-mut);
-    border-left: 1px solid var(--border);
+    border-left: none;
   }
 
   .group-title {
@@ -232,7 +232,7 @@
     gap: var(--space-2);
     padding: var(--space-3);
     border-radius: var(--radius-md);
-    border: 1px solid var(--border);
+    border: none;
     background: var(--surface);
     box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.25));
   }

@@ -191,7 +191,7 @@
     justify-content: space-between;
     gap: var(--space-3);
     padding: var(--space-3) 0;
-    border-bottom: 1px solid var(--border);
+    border-bottom: none;
   }
 
   .who {
@@ -257,7 +257,7 @@
   .ghost {
     flex: 0 0 auto;
     padding: 4px var(--space-2);
-    border: 1px solid var(--border-hi);
+    border: none;
     border-radius: var(--radius-sm);
     background: transparent;
     color: var(--text);

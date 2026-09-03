@@ -344,7 +344,7 @@
     flex-direction: column;
     gap: var(--space-3);
     padding-bottom: var(--space-3);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-md);
     background: var(--surface);
     box-shadow: var(--shadow-lg, 0 8px 24px rgba(0, 0, 0, 0.25));
@@ -434,7 +434,7 @@
   .chip {
     padding: 2px var(--space-2);
     border-radius: var(--radius-full);
-    border: 1px solid var(--border);
+    border: none;
     font-size: var(--text-xs);
     color: var(--text-secondary, var(--text));
   }
@@ -453,7 +453,7 @@
     resize: vertical;
     padding: 6px var(--space-2);
     border-radius: var(--radius-sm);
-    border: 1px solid var(--input-border);
+    border: none;
     background: var(--input-bg);
     color: var(--text);
     font: inherit;
@@ -476,14 +476,14 @@
   .moderation {
     flex-direction: column;
     align-items: stretch;
-    border-top: 1px solid var(--border);
+    border-top: none;
     padding-top: var(--space-2);
   }
 
   .btn {
     flex: 1 1 auto;
     padding: 6px var(--space-2);
-    border: 1px solid var(--border-hi);
+    border: none;
     border-radius: var(--radius-sm);
     background: transparent;
     color: var(--text);
@@ -548,7 +548,7 @@
     box-sizing: border-box;
     padding: 8px var(--space-2);
     border-radius: var(--radius-sm);
-    border: 1px solid var(--input-border);
+    border: none;
     background: var(--input-bg);
     color: var(--text);
     font: inherit;

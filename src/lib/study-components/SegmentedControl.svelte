@@ -55,7 +55,7 @@
 <style>
   .seg {
     display: inline-flex;
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: var(--border-radius, 11px);
     overflow: hidden;
     background: var(--primary);

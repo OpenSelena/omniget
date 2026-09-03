@@ -344,7 +344,7 @@
     gap: 6px;
     padding: 0 6px 0 10px;
     height: 100%;
-    border-right: 1px solid color-mix(in oklab, var(--content-border) 30%, transparent);
+    border-right: none;
     font-size: 12px;
     color: var(--secondary, var(--text));
     cursor: pointer;
@@ -426,7 +426,7 @@
     width: min(520px, 92vw);
     max-height: 60vh;
     background: var(--secondary-bg, var(--page-bg));
-    border: 1px solid color-mix(in oklab, var(--content-border) 60%, transparent);
+    border: none;
     border-radius: 8px;
     box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);
     display: flex;
@@ -435,7 +435,7 @@
   .picker-input {
     background: transparent;
     border: 0;
-    border-bottom: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
+    border-bottom: none;
     padding: 12px 16px;
     color: var(--text);
     font-size: 14px;

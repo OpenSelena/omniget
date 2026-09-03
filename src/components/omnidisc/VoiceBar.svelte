@@ -251,7 +251,7 @@
     justify-content: center;
     gap: var(--space-2);
     height: 30px;
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-sm);
     background: var(--surface-mut);
     color: var(--text);
@@ -285,7 +285,7 @@
     flex-direction: column;
     gap: var(--space-2);
     padding: var(--space-2) var(--space-3);
-    border-top: 1px solid var(--border);
+    border-top: none;
     background: var(--surface);
   }
 
@@ -395,7 +395,7 @@
     height: 32px;
     display: grid;
     place-items: center;
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-sm);
     background: var(--surface-mut);
     color: var(--text);
@@ -479,7 +479,7 @@
     flex: 1;
     height: 30px;
     padding: 0 var(--space-3);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-sm);
     background: var(--surface-mut);
     color: var(--text);

@@ -167,7 +167,7 @@
     justify-content: flex-end;
     gap: calc(var(--padding) * 0.5);
     padding: calc(var(--padding) * 0.75) calc(var(--padding) * 1.5) calc(var(--padding) * 1.25);
-    border-top: 1px solid var(--content-border);
+    border-top: none;
   }
 
   .button {
@@ -183,7 +183,7 @@
   .button-secondary {
     background: transparent;
     color: var(--secondary);
-    border: 1px solid var(--content-border);
+    border: none;
   }
 
   .button-secondary:hover {

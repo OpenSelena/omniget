@@ -237,7 +237,7 @@
     font-size: 13px;
     font-weight: 500;
     background: transparent;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     color: var(--gray);
     cursor: pointer;

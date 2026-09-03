@@ -224,7 +224,7 @@
 
   .surface-card {
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-md);
     padding: var(--space-5);
   }
@@ -341,7 +341,7 @@
   .btn-outline {
     background: transparent;
     color: var(--text);
-    border: 1px solid var(--border-hi);
+    border: none;
     border-radius: var(--radius-sm);
     padding: 9px 16px;
     font-family: inherit;

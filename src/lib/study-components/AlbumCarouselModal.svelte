@@ -115,7 +115,7 @@
     width: min(90vw, 720px);
     max-height: 80vh;
     background: var(--surface);
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: 12px;
     z-index: 1001;
     overflow: hidden;
@@ -127,7 +127,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 10px 14px;
-    border-bottom: 1px solid var(--content-border);
+    border-bottom: none;
   }
   .album-counter {
     font-size: 13px;
@@ -161,7 +161,7 @@
     width: 40px;
     height: 40px;
     border-radius: 50%;
-    border: 1px solid var(--content-border);
+    border: none;
     background: var(--surface);
     color: var(--secondary);
     cursor: pointer;

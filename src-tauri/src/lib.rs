@@ -224,6 +224,9 @@ pub fn run() {
     );
 
     let mut registry = core::registry::PlatformRegistry::new();
+    // gallery-dl first: it claims bulk-listing URLs (profiles, subreddits)
+    // that the single-post Twitter/Reddit downloaders would otherwise match
+    registry.register(Arc::new(platforms::gallerydl::GalleryDlDownloader::new()));
     registry.register(Arc::new(omniget_core::platforms::InstagramDownloader::new()));
     registry.register(Arc::new(omniget_core::platforms::ThreadsDownloader::new()));
     registry.register(Arc::new(omniget_core::platforms::PinterestDownloader::new()));
@@ -248,7 +251,7 @@ pub fn run() {
         omniget_core::platforms::DirectFileDownloader::new(),
     ));
     registry.register(Arc::new(
-        omniget_core::platforms::GenericYtdlpDownloader::new(),
+        platforms::generic_ytdlp::GenericYtdlpDownloader::new(),
     ));
 
     let state = AppState {
@@ -341,7 +344,7 @@ pub fn run() {
                 // Nao e so Windows. No Linux o wry usa este caminho para
                 // `base_data_directory`, `base_cache_directory` e os cookies do
                 // WebKitGTK; sem ele o modo portatil deixa
-                // `XDG_DATA_HOME/com.igect.omniget` no perfil do usuario — a
+                // `XDG_DATA_HOME/wtf.tonho.omniget` no perfil do usuario — a
                 // mesma #209, fora do Windows. Foi o smoke test do B55 que
                 // pegou isso, na primeira vez que rodou.
                 //
@@ -404,6 +407,15 @@ pub fn run() {
             }
 
             commands::host_queue::register_event_listeners(app.handle());
+            {
+                let handle = app.handle().clone();
+                platforms::bilibili::notify::set_emitter(Box::new(
+                    move |event: &str, payload: serde_json::Value| {
+                        use tauri::Emitter;
+                        let _ = handle.emit(event, payload);
+                    },
+                ));
+            }
             {
                 let handle = app.handle().clone();
                 omniget_core::platforms::bilibili::notify::set_emitter(Box::new(
@@ -800,13 +812,20 @@ pub fn run() {
 
             Ok(())
         })
-        .on_window_event(|window, event| {
-            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-                if window.label() == "main" {
-                    api.prevent_close();
-                    let _ = window.hide();
-                }
+        .on_window_event(|window, event| match event {
+            tauri::WindowEvent::CloseRequested { api, .. } if window.label() == "main" => {
+                api.prevent_close();
+                let _ = window.hide();
             }
+            tauri::WindowEvent::Destroyed
+                if window.label().starts_with("omnidisc-stream-") =>
+            {
+                commands::omnidisc::stream::on_stream_window_destroyed(
+                    &window.app_handle().clone(),
+                    window.label(),
+                );
+            }
+            _ => {}
         })
         .invoke_handler(tauri::generate_handler![
             commands::auth_webview::open_auth_webview,
@@ -1100,6 +1119,9 @@ pub fn run() {
             commands::p2p::p2p_cancel_send,
             commands::p2p::p2p_pause_send,
             commands::p2p::p2p_resume_send,
+            commands::app_lifecycle::force_exit_app,
+            commands::app_lifecycle::get_debug_info,
+            commands::app_lifecycle::get_portable_info,
             commands::open_omni::open_omni_check_python_dependencies,
             commands::open_omni::open_omni_run_gallery_dl_download,
             commands::open_omni::open_omni_cancel_download,
@@ -1108,9 +1130,6 @@ pub fn run() {
             commands::open_omni::open_omni_load_profiles,
             commands::open_omni::open_omni_save_profile,
             commands::open_omni::open_omni_delete_profile,
-            commands::app_lifecycle::force_exit_app,
-            commands::app_lifecycle::get_debug_info,
-            commands::app_lifecycle::get_portable_info,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

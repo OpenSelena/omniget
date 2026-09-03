@@ -112,7 +112,7 @@
     gap: 2px;
     padding: 4px;
     background: var(--surface);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     box-shadow: 0 8px 24px color-mix(in oklab, black 24%, transparent);
   }

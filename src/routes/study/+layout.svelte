@@ -1108,7 +1108,7 @@
     width: min(600px, 90vw);
     max-height: 70vh;
     background: var(--button-elevated);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
     display: flex;
@@ -1118,7 +1118,7 @@
   .palette input {
     background: transparent;
     border: none;
-    border-bottom: 1px solid var(--input-border);
+    border-bottom: none;
     color: var(--secondary);
     padding: 14px 16px;
     font-size: 15px;
@@ -1128,7 +1128,7 @@
     display: flex;
     gap: 4px;
     padding: 6px 6px 0;
-    border-bottom: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border-bottom: none;
   }
   .palette-tab {
     padding: 6px 12px;
@@ -1211,7 +1211,7 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    border-top: 1px solid var(--input-border);
+    border-top: none;
     padding: 8px 14px;
     font-size: 11px;
     color: var(--tertiary);
@@ -1254,7 +1254,7 @@
     overflow-x: auto;
     scrollbar-width: none;
     -ms-overflow-style: none;
-    border-bottom: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
+    border-bottom: none;
     margin-bottom: calc(var(--padding) * 2);
   }
   .subnav::-webkit-scrollbar {

@@ -83,10 +83,10 @@
     background: color-mix(in oklab, var(--surface-bg, var(--primary)) 60%, transparent);
   }
   .nb-dock-sidebar[data-side="left"] {
-    border-right: 1px solid color-mix(in oklab, var(--content-border) 30%, transparent);
+    border-right: none;
   }
   .nb-dock-sidebar[data-side="right"] {
-    border-left: 1px solid color-mix(in oklab, var(--content-border) 30%, transparent);
+    border-left: none;
   }
   .icon-btn {
     width: 26px;

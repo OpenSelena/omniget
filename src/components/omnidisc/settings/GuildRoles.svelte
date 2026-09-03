@@ -285,7 +285,7 @@
   .add,
   .danger {
     padding: 6px var(--space-3);
-    border: 1px solid var(--border-hi);
+    border: none;
     border-radius: var(--radius-sm);
     background: transparent;
     color: var(--text);
@@ -340,7 +340,7 @@
     box-sizing: border-box;
     padding: 8px var(--space-2);
     border-radius: var(--radius-sm);
-    border: 1px solid var(--input-border);
+    border: none;
     background: var(--input-bg);
     color: var(--text);
     font: inherit;
@@ -352,7 +352,7 @@
     height: 34px;
     padding: 2px;
     border-radius: var(--radius-sm);
-    border: 1px solid var(--input-border);
+    border: none;
     background: var(--input-bg);
   }
 

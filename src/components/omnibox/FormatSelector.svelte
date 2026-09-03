@@ -346,7 +346,7 @@
     font-weight: 500;
     color: var(--secondary);
     background: var(--button);
-    border: 1px solid var(--button-stroke);
+    border: none;
     border-radius: 999px;
     cursor: pointer;
     transition: background 0.15s, border-color 0.15s, color 0.15s;
@@ -413,7 +413,7 @@
     opacity: 0.7;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    border-bottom: 1px solid var(--content-border);
+    border-bottom: none;
     position: sticky;
     top: 0;
     background: var(--button);
@@ -432,7 +432,7 @@
     border: none;
     cursor: pointer;
     text-align: left;
-    border-bottom: 1px solid var(--button-stroke);
+    border-bottom: none;
   }
 
   .format-row:last-child {

@@ -157,7 +157,7 @@
     padding: 10px 12px;
     border-radius: 10px;
     background: color-mix(in oklab, var(--surface) 80%, transparent);
-    border: 1px solid color-mix(in oklab, var(--content-border) 40%, transparent);
+    border: none;
     font-size: 12px;
   }
   .bili-loading,
@@ -207,7 +207,7 @@
   .bili-select {
     padding: 5px 8px;
     border-radius: 6px;
-    border: 1px solid color-mix(in oklab, var(--content-border) 60%, transparent);
+    border: none;
     background: var(--surface);
     color: var(--text);
     font-size: 12px;

@@ -754,7 +754,7 @@
     gap: 0.35rem;
     padding: 0.4rem 0.75rem;
     background: transparent;
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: var(--border-radius);
     color: var(--secondary);
     cursor: pointer;
@@ -795,7 +795,7 @@
   }
   .playlist {
     background: var(--button-elevated);
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: var(--border-radius);
     padding: 0.6rem;
     max-height: calc(100vh - 8rem);
@@ -810,7 +810,7 @@
     align-items: center;
     gap: 0.2rem;
     padding: 0.25rem 0.3rem 0.5rem;
-    border-bottom: 1px solid color-mix(in oklab, var(--content-border) 60%, transparent);
+    border-bottom: none;
     font-size: 12px;
   }
   .crumb {
@@ -912,7 +912,7 @@
   .player-shell {
     width: 100%;
     background: black;
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: var(--border-radius);
     overflow: hidden;
     aspect-ratio: 16 / 9;
@@ -933,7 +933,7 @@
     gap: 0.75rem;
     text-align: center;
     background: var(--button-elevated);
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: var(--border-radius);
     aspect-ratio: 16 / 9;
     justify-content: center;
@@ -967,7 +967,7 @@
     height: 28px;
     padding: 0;
     background: transparent;
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: 6px;
     color: var(--secondary);
     cursor: pointer;
@@ -986,7 +986,7 @@
     min-width: 200px;
     padding: 4px;
     background: var(--surface, var(--button-elevated));
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: 8px;
     box-shadow: 0 8px 24px color-mix(in oklab, black 22%, transparent);
     display: flex;
@@ -1001,7 +1001,7 @@
     max-width: 280px;
     padding: 4px;
     background: var(--surface, var(--button-elevated));
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: 8px;
     box-shadow: 0 8px 28px color-mix(in oklab, black 22%, transparent);
     display: flex;

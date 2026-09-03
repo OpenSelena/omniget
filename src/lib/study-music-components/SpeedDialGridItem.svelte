@@ -39,7 +39,7 @@
     gap: 8px;
     padding: 14px 8px 12px;
     background: var(--tint);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: 16px;
     color: var(--text);
     font: inherit;

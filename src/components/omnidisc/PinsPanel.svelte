@@ -101,7 +101,7 @@
     gap: var(--space-2);
     padding: var(--space-3);
     background: var(--surface-mut);
-    border-left: 1px solid var(--border);
+    border-left: none;
   }
 
   .head {
@@ -181,7 +181,7 @@
     flex-direction: column;
     gap: 2px;
     padding-bottom: var(--space-2);
-    border-bottom: 1px solid var(--border);
+    border-bottom: none;
   }
 
   .jump {
@@ -229,7 +229,7 @@
   .unpin {
     align-self: flex-start;
     padding: 2px var(--space-2);
-    border: 1px solid var(--border-hi);
+    border: none;
     border-radius: var(--radius-sm);
     background: transparent;
     color: var(--text-muted);

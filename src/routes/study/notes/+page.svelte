@@ -584,7 +584,7 @@
   }
   .meta-field input {
     padding: 6px 10px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
     color: var(--text);

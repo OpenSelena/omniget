@@ -142,7 +142,7 @@
 <style>
   .heatmap-host {
     background: var(--surface);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     padding: 12px;
   }
@@ -217,7 +217,7 @@
     position: fixed;
     transform: translate(-50%, -100%);
     background: var(--surface);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     padding: 4px 8px;
     font-size: 11px;

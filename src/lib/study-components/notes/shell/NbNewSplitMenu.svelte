@@ -98,7 +98,7 @@
     z-index: 50;
     min-width: 180px;
     background: var(--secondary-bg, var(--page-bg));
-    border: 1px solid color-mix(in oklab, var(--content-border) 60%, transparent);
+    border: none;
     border-radius: 6px;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
     padding: 4px;

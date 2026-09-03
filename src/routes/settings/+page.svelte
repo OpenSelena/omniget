@@ -4,8 +4,8 @@
   import { open } from "@tauri-apps/plugin-dialog";
   import { t, locale, loadTranslations } from "$lib/i18n";
   import { getSettings, updateSettings, resetSettings } from "$lib/stores/settings-store.svelte";
-  import { getUpdateInfo, refreshUpdateInfo } from "$lib/stores/update-store.svelte";
-  import { installUpdate, type UpdateProgress } from "$lib/updater";
+  import { getUpdateInfo } from "$lib/stores/update-store.svelte";
+  import { installUpdate } from "$lib/updater";
   import { showToast } from "$lib/stores/toast-store.svelte";
   import { refreshYtdlpStatus } from "$lib/stores/dependency-store.svelte";
   import { isDebugEnabled, setDebugEnabled, setDebugPanelOpen } from "$lib/stores/debug-store.svelte";
@@ -38,7 +38,6 @@
   let isWindows = typeof navigator !== "undefined" && navigator.userAgent.includes("Windows");
   let resetting = $state(false);
   let updating = $state(false);
-  let updateProgress = $state<UpdateProgress | null>(null);
   let deps = $state<DependencyStatus[]>([]);
   let installingDep = $state<string | null>(null);
 
@@ -83,21 +82,15 @@
   $effect(() => {
     if (settings) {
       loadDeps();
-      refreshUpdateInfo();
     }
   });
 
   async function handleUpdate() {
     updating = true;
-    updateProgress = null;
     try {
-      await installUpdate((progress) => {
-        updateProgress = progress;
-      });
-    } catch (e: any) {
+      await installUpdate();
+    } catch {
       updating = false;
-      updateProgress = null;
-      showToast("error", typeof e === "string" ? e : e.message ?? $t("common.error"));
     }
   }
 
@@ -497,13 +490,7 @@
       <div class="update-banner">
         <span class="update-text">
           {#if updating}
-            {#if updateProgress && updateProgress.percent > 0}
-              {$t('settings.update_downloading')} ({updateProgress.percent}%)
-            {:else if updateProgress?.stage === 'installing'}
-              {$t('settings.update_downloading')}...
-            {:else}
-              {$t('settings.update_downloading')}
-            {/if}
+            {$t('settings.update_downloading')}
           {:else}
             {$t('settings.update_available', { version: updateInfo.version })}
           {/if}

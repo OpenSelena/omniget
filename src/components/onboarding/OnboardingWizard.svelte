@@ -159,6 +159,7 @@
               <option value="fr">Français</option>
               <option value="es">Español</option>
               <option value="el">Ελληνικά</option>
+              <option value="fa">فارسی</option>
             </select>
           </div>
           <div class="theme-row">
@@ -571,7 +572,7 @@
   }
 
   .dep-row + .dep-row {
-    border-top: 1px solid var(--button-stroke);
+    border-top: none;
   }
 
   .dep-info {

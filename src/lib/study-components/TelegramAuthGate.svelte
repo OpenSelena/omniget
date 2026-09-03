@@ -287,7 +287,7 @@
     max-width: 420px;
     padding: calc(var(--padding) * 2.5);
     background: var(--button-elevated);
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: calc(var(--border-radius) * 1.4);
     display: flex;
     flex-direction: column;
@@ -305,7 +305,7 @@
   .tabs {
     display: flex;
     gap: 4px;
-    border-bottom: 1px solid var(--input-border);
+    border-bottom: none;
   }
   .tabs button {
     padding: 8px 16px;
@@ -355,7 +355,7 @@
     padding: 8px 12px;
     background: var(--surface);
     color: var(--text);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     font-family: inherit;
     font-size: 14px;

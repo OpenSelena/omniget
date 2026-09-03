@@ -248,7 +248,7 @@
     width: min(900px, calc(100vw - 48px));
     max-height: calc(100vh - 80px);
     background: var(--surface);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     display: flex;
     flex-direction: column;
@@ -286,12 +286,12 @@
     margin: 0;
     padding: 0;
     overflow-y: auto;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
   }
   .list li {
-    border-bottom: 1px solid color-mix(in oklab, var(--input-border) 50%, transparent);
+    border-bottom: none;
   }
   .list li:last-child {
     border-bottom: 0;

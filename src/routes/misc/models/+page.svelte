@@ -297,7 +297,7 @@
     flex-direction: column;
     gap: 10px;
     padding: 16px 18px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
   }
@@ -417,7 +417,7 @@
 
   .btn-secondary {
     padding: 7px 16px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: transparent;
     color: var(--secondary);

@@ -240,7 +240,7 @@
   }
   .bridge-action {
     appearance: none;
-    border: 1px solid rgba(255, 255, 255, 0.12);
+    border: none;
     background: rgba(255, 255, 255, 0.04);
     color: inherit;
     padding: 6px 12px;

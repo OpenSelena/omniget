@@ -177,6 +177,7 @@
           <option value="fr">{$t('settings.appearance.lang_fr')}</option>
           <option value="es">{$t('settings.appearance.lang_es')}</option>
           <option value="el">{$t('settings.appearance.lang_el')}</option>
+          <option value="fa">{$t('settings.appearance.lang_fa')}</option>
         </select>
       </div>
     </div>

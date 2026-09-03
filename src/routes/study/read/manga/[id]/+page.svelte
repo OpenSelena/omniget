@@ -232,7 +232,7 @@
     padding: 6px 10px;
     background: transparent;
     color: var(--tertiary);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     font-size: 12px;
     cursor: pointer;
@@ -250,7 +250,7 @@
   .cover {
     aspect-ratio: 2 / 3;
     background: var(--input-bg);
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: var(--border-radius);
     overflow: hidden;
     display: flex;
@@ -361,7 +361,7 @@
     justify-content: center;
     width: 20px;
     height: 20px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: 50%;
     cursor: pointer;
     flex-shrink: 0;

@@ -71,7 +71,7 @@
 
 <style>
   .dialog-container {
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-xl);
     background: var(--popup-bg);
     color: var(--text);

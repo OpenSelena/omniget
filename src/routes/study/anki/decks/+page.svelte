@@ -660,7 +660,7 @@
     justify-content: space-between;
     gap: var(--padding);
     padding: 8px 12px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--button-elevated);
     transition: border-color 150ms ease;
@@ -738,7 +738,7 @@
     display: inline-flex;
     align-items: center;
     background: transparent;
-    border: 1px solid var(--input-border);
+    border: none;
     color: var(--tertiary);
     padding: 4px 10px;
     border-radius: 999px;
@@ -816,7 +816,7 @@
     align-items: center;
     padding: 8px 16px;
     background: transparent;
-    border: 1px solid var(--input-border);
+    border: none;
     color: var(--secondary);
     border-radius: var(--border-radius);
     font-family: inherit;
@@ -846,7 +846,7 @@
   .modal {
     width: min(440px, 100%);
     background: var(--button-elevated);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     padding: calc(var(--padding) * 2);
     display: flex;
@@ -882,7 +882,7 @@
   .modal input,
   .modal select {
     background: var(--input-bg);
-    border: 1px solid var(--input-border);
+    border: none;
     color: var(--secondary);
     padding: 6px 10px;
     border-radius: var(--border-radius);

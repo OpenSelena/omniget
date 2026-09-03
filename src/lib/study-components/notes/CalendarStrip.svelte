@@ -113,7 +113,7 @@
     gap: 6px;
     padding: 8px;
     background: var(--surface);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
   }
   .nav-btn {
@@ -195,7 +195,7 @@
   .month-btn {
     flex: 0 0 auto;
     padding: 4px 10px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: transparent;
     color: var(--secondary);

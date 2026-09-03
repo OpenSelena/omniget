@@ -16,6 +16,25 @@
 
   let items = $derived(message.attachments ?? []);
 
+  // Files die on a clock, so the clock has to be on screen. A minute-resolution
+  // tick is enough to keep the label honest without waking the UI constantly.
+  let now = $state(Date.now());
+  $effect(() => {
+    if (!items.some((a) => a.expiresAt && !a.expired)) return;
+    const timer = setInterval(() => (now = Date.now()), 30_000);
+    return () => clearInterval(timer);
+  });
+
+  function isGone(a: OmnidiscAttachment): boolean {
+    return a.expired === true || (a.expiresAt !== undefined && a.expiresAt <= now);
+  }
+
+  function expiryLabel(a: OmnidiscAttachment): string | null {
+    if (!a.expiresAt || isGone(a)) return null;
+    const minutes = Math.max(1, Math.round((a.expiresAt - now) / 60000));
+    return $t("omnidisc.attachments.expires_in", { minutes }) as string;
+  }
+
   function sizeLabel(bytes: number): string {
     if (bytes < 1024) return `${bytes} B`;
     const units = ["KB", "MB", "GB"];
@@ -82,8 +101,19 @@
   <ul class="attachments">
     {#each items as attachment (attachment.id)}
       {@const kind = kindOf(attachment)}
-      <li class="item" class:media={kind === "image"}>
-        {#if kind === "image"}
+      {@const gone = isGone(attachment)}
+      <li class="item" class:media={kind === "image" && !gone}>
+        {#if gone}
+          <div class="file expired">
+            <span class="glyph" aria-hidden="true">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9" /><path d="M12 7v5l3 2" /></svg>
+            </span>
+            <span class="detail">
+              <span class="name" title={attachment.filename}>{attachment.filename}</span>
+              <span class="meta">{$t("omnidisc.attachments.expired")}</span>
+            </span>
+          </div>
+        {:else if kind === "image"}
           <button
             type="button"
             class="image-button"
@@ -114,7 +144,7 @@
             <span class="detail">
               <span class="name" title={attachment.filename}>{attachment.filename}</span>
               <span class="meta">
-                {sizeLabel(attachment.size)}{#if attachment.encrypted} · {$t("omnidisc.attachments.encrypted_note")}{/if}
+                {sizeLabel(attachment.size)}{#if attachment.encrypted} · {$t("omnidisc.attachments.encrypted_note")}{/if}{#if expiryLabel(attachment)} · {expiryLabel(attachment)}{/if}
               </span>
             </span>
             <button
@@ -178,7 +208,7 @@
   .image-button {
     display: block;
     padding: 0;
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-md);
     background: var(--fill-1);
     overflow: hidden;
@@ -216,9 +246,15 @@
     align-items: center;
     gap: var(--space-2);
     padding: var(--space-2);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-md);
     background: var(--surface);
+  }
+
+  .file.expired {
+    background: transparent;
+    border: 1px dashed var(--border);
+    color: var(--text-muted);
   }
 
   .glyph {
@@ -251,7 +287,7 @@
   .save {
     flex: 0 0 auto;
     padding: 4px var(--space-2);
-    border: 1px solid var(--border-hi);
+    border: none;
     border-radius: var(--radius-sm);
     background: transparent;
     color: var(--text);

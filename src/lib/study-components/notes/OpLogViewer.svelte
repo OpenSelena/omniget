@@ -98,7 +98,7 @@
 
 <style>
   .op-log {
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
   }
@@ -156,7 +156,7 @@
     align-items: center;
     padding: 6px 10px;
     background: var(--surface);
-    border: 1px solid color-mix(in oklab, var(--input-border) 50%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     font-size: 12px;
   }
@@ -198,7 +198,7 @@
   .btn {
     padding: 4px 10px;
     border-radius: var(--border-radius);
-    border: 1px solid var(--input-border);
+    border: none;
     background: transparent;
     color: var(--text);
     font: inherit;

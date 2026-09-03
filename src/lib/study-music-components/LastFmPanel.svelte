@@ -285,7 +285,7 @@
   .dialog {
     background: rgb(20, 20, 20);
     color: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none;
     border-radius: 14px;
     width: min(560px, 92vw);
     max-height: 86vh;
@@ -336,7 +336,7 @@
     gap: 12px;
     padding: 14px;
     background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.06);
+    border: none;
     border-radius: 10px;
   }
   .step-num {
@@ -378,7 +378,7 @@
   .field input {
     padding: 8px 10px;
     background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none;
     border-radius: 6px;
     color: rgba(255, 255, 255, 0.95);
     font-family: ui-monospace, monospace;
@@ -408,7 +408,7 @@
   .cta-secondary {
     align-self: flex-start;
     padding: 7px 14px;
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    border: none;
     border-radius: 999px;
     background: transparent;
     color: rgba(255, 255, 255, 0.95);

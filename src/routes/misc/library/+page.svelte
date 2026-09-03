@@ -415,7 +415,7 @@
   .search-input {
     width: 100%;
     padding: 9px 12px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
     color: var(--secondary);
@@ -433,7 +433,7 @@
   }
   .chip {
     padding: 5px 12px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: 999px;
     background: var(--surface);
     color: var(--tertiary);
@@ -490,7 +490,7 @@
     align-items: center;
     gap: 12px;
     padding: 10px 14px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
   }
@@ -536,7 +536,7 @@
     flex-direction: column;
     gap: 8px;
     padding: 14px 16px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
   }
@@ -606,7 +606,7 @@
     cursor: pointer;
   }
   .btn-secondary {
-    border: 1px solid var(--input-border);
+    border: none;
     color: var(--secondary);
   }
   .btn-secondary:hover {
@@ -614,7 +614,7 @@
     color: var(--accent);
   }
   .btn-danger {
-    border: 1px solid color-mix(in oklab, oklch(60% 0.22 25) 40%, var(--input-border));
+    border: none;
     color: oklch(70% 0.22 25);
   }
   .btn-danger:hover {

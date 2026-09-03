@@ -10,12 +10,13 @@
   import InstanceRail from "$components/omnidisc/InstanceRail.svelte";
   import ChannelList from "$components/omnidisc/ChannelList.svelte";
   import MemberList from "$components/omnidisc/MemberList.svelte";
+  import StorageBanner from "$components/omnidisc/StorageBanner.svelte";
   import type { Snippet } from "svelte";
 
   let { children }: { children: Snippet } = $props();
 
   let settings = $derived(getSettings());
-  let enabled = $derived(settings?.omnidisc?.enabled ?? false);
+  let enabled = $derived(settings?.omnidisc?.enabled ?? true);
   let showShell = $derived(hasInstances());
   let inChannel = $derived(page.url.pathname.startsWith("/omnidisc/g/"));
   let isStreamPopout = $derived(page.url.pathname === "/omnidisc/stream");
@@ -49,6 +50,7 @@
       <InstanceRail />
       <ChannelList />
       <section class="od-main">
+        <StorageBanner />
         {@render children()}
       </section>
       {#if showMembers}
@@ -88,7 +90,7 @@
     max-width: 480px;
     padding: var(--space-5);
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--border-radius);
   }
 

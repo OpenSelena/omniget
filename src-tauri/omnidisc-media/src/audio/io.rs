@@ -241,6 +241,7 @@ fn build_input(
     feeder: &Feeder,
     faults: FaultSink,
 ) -> Result<cpal::Stream, AudioIoError> {
+    super::permission::ensure_microphone_access()?;
     let device = devices::find(DeviceKind::Input, device_id).ok_or(AudioIoError::NoDevice)?;
     let supported = device.default_input_config().map_err(classify)?;
     let config: StreamConfig = supported.config();

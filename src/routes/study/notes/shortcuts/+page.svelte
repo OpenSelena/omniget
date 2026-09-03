@@ -155,7 +155,7 @@
   }
   .sec {
     background: var(--surface);
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     padding: calc(var(--padding) * 0.9);
     display: flex;
@@ -175,7 +175,7 @@
   }
   .sc-table td {
     padding: 6px 8px;
-    border-bottom: 1px solid color-mix(in oklab, var(--input-border) 40%, transparent);
+    border-bottom: none;
     vertical-align: top;
   }
   .sc-table tr:last-child td {
@@ -192,7 +192,7 @@
     display: inline-block;
     padding: 2px 6px;
     background: var(--bg);
-    border: 1px solid var(--input-border);
+    border: none;
     border-bottom-width: 2px;
     border-radius: 4px;
     font-family: var(--font-mono, ui-monospace, monospace);

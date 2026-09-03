@@ -23,6 +23,13 @@
   let { onClose }: { onClose: () => void } = $props();
 
   let sources = $state<StreamSources | null>(null);
+  /// The Linux backend answers with a single placeholder because the portal
+  /// shows its own picker after "share" is pressed.
+  let portalPicker = $derived(
+    sources?.displays.length === 1 &&
+      sources.windows.length === 0 &&
+      sources.displays[0].title === "__omnidisc_portal_picker__",
+  );
   let loading = $state(true);
   let loadError = $state<string | null>(null);
   let selected = $state<SourceId | null>(null);
@@ -126,6 +133,14 @@
             <button type="button" class="btn" onclick={() => void load()}>{$t("omnidisc.voice.retry")}</button>
           {/if}
         </div>
+      {:else if sources && portalPicker}
+        <!-- On Wayland an unprivileged app cannot enumerate windows: the
+             desktop's own dialog is the picker. Saying so beats drawing a grid
+             we cannot fill. -->
+        <section>
+          <h3>{$t("omnidisc.stream.pick_source")}</h3>
+          <p class="muted">{$t("omnidisc.stream.portal_picker")}</p>
+        </section>
       {:else if sources}
         <section>
           <h3>{$t("omnidisc.stream.pick_source")}</h3>
@@ -233,7 +248,7 @@
     display: flex;
     flex-direction: column;
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-lg, 12px);
     box-shadow: 0 24px 60px -12px color-mix(in srgb, var(--bg) 70%, transparent);
   }
@@ -245,7 +260,7 @@
   }
   header {
     justify-content: space-between;
-    border-bottom: 1px solid var(--border);
+    border-bottom: none;
   }
   header h2 {
     font-size: var(--text-lg);
@@ -254,7 +269,7 @@
   footer {
     justify-content: flex-end;
     gap: var(--space-2);
-    border-top: 1px solid var(--border);
+    border-top: none;
   }
   .close {
     display: grid;
@@ -299,7 +314,7 @@
     flex-direction: column;
     gap: var(--space-1);
     padding: 0;
-    border: 2px solid var(--border);
+    border: none;
     border-radius: var(--radius-md);
     background: var(--surface-mut);
     cursor: pointer;
@@ -353,7 +368,7 @@
   }
   .pill {
     padding: 6px var(--space-3);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-full, 999px);
     background: var(--surface-mut);
     color: var(--text);
@@ -396,7 +411,7 @@
   }
   .btn {
     padding: 8px var(--space-4);
-    border: 1px solid var(--border-hi, var(--border));
+    border: none;
     border-radius: var(--radius-md);
     background: var(--surface-mut);
     color: var(--text);

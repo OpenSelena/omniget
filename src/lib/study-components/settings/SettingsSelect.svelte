@@ -24,7 +24,7 @@
   .select {
     padding: 6px 10px;
     background: color-mix(in oklab, var(--content-bg) 80%, var(--accent) 4%);
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     border-radius: 6px;
     color: inherit;
     font-size: 13px;

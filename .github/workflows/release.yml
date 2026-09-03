@@ -17,8 +17,16 @@ jobs:
             args: '--target aarch64-apple-darwin'
           - platform: 'macos-latest'
             args: '--target x86_64-apple-darwin'
+          # Ubuntu 22.04 keeps the x86_64 build on glibc 2.35, which is what
+          # lets the AppImage run on older distros. Its PipeWire headers
+          # (0.3.48) are too old for the screen-capture backend to compile, so
+          # that one feature is left out and the client says so at runtime.
+          # The `--` is required: the Tauri CLI forwards what follows it to
+          # cargo, and rejects the flag otherwise. Only the app's default
+          # feature (`linux-capture`) is dropped; `rnnoise` stays because the
+          # dependency declaration asks for it by name.
           - platform: 'ubuntu-22.04'
-            args: ''
+            args: '-- --no-default-features'
           - platform: 'ubuntu-24.04-arm'
             args: ''
           - platform: 'windows-latest'
@@ -33,7 +41,7 @@ jobs:
         if: matrix.platform == 'ubuntu-22.04' || matrix.platform == 'ubuntu-24.04-arm'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev libasound2-dev patchelf xdg-utils
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev libasound2-dev libpipewire-0.3-dev clang libclang-dev patchelf xdg-utils
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -64,7 +72,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-          LDAI_UPDATE_INFORMATION: ${{ contains(matrix.platform, 'ubuntu') && 'gh-releases-zsync|igect|omniget|latest|*AppImage.zsync' || '' }}
+          LDAI_UPDATE_INFORMATION: ${{ contains(matrix.platform, 'ubuntu') && 'gh-releases-zsync|tonhowtf|omniget|latest|*AppImage.zsync' || '' }}
           NODE_OPTIONS: --max-old-space-size=6144
         with:
           tagName: v__VERSION__
@@ -105,7 +113,7 @@ jobs:
 
             Then open it normally. If it still refuses, allow it under
             **System Settings → Privacy & Security**.
-          releaseDraft: false
+          releaseDraft: true
           prerelease: false
           includeUpdaterJson: false
           args: ${{ matrix.args }}
@@ -246,9 +254,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v6
-
-      - name: Generate and upload latest.json and update release notes
+      - name: Generate and upload latest.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -259,24 +265,10 @@ jobs:
           REPO="${GITHUB_REPOSITORY}"
           PUB_DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 
-          NOTES=$(python3 -c "
-import sys, re
-try:
-    with open('CHANGELOG.md', 'r', encoding='utf-8') as f:
-        content = f.read()
-    tag = sys.argv[1].lstrip('v')
-    match = re.search(r'## \[' + re.escape(tag) + r'\][^\n]*\n(.*?)(?=\n---|\n## \[|\Z)', content, re.DOTALL)
-    if match:
-        print(match.group(1).strip())
-except Exception:
-    pass
-" "$TAG" || true)
-
           JSON=$(jq -n \
             --arg v "$VERSION" \
-            --arg n "$NOTES" \
             --arg d "$PUB_DATE" \
-            '{version: $v, notes: $n, pub_date: $d, platforms: {}}')
+            '{version: $v, notes: "", pub_date: $d, platforms: {}}')
 
           declare -A PLATFORM_MAP=(
             ["aarch64.app.tar.gz.sig"]="darwin-aarch64"
@@ -340,19 +332,5 @@ except Exception:
           cat latest.json
 
           gh release upload "$TAG" latest.json --repo "$REPO" --clobber
-
-          if [ -n "$NOTES" ]; then
-            RELEASE_BODY=$(gh release view "$TAG" --repo "$REPO" --json body -q .body || true)
-            if ! echo "$RELEASE_BODY" | grep -q "## What's New"; then
-              COMBINED_NOTES="## What's New in v${VERSION}
-
-${NOTES}
-
----
-
-${RELEASE_BODY}"
-              gh release edit "$TAG" --notes "$COMBINED_NOTES" --repo "$REPO"
-            fi
-          fi
 
           rm -rf "$TMPDIR"

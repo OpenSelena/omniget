@@ -1,9 +1,9 @@
+use once_cell::sync::OnceCell;
 use serde::Serialize;
-use std::sync::OnceLock;
 
 pub type Emitter = Box<dyn Fn(&str, serde_json::Value) + Send + Sync + 'static>;
 
-static EMITTER: OnceLock<Emitter> = OnceLock::new();
+static EMITTER: OnceCell<Emitter> = OnceCell::new();
 
 pub fn set_emitter(emitter: Emitter) {
     let _ = EMITTER.set(emitter);

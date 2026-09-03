@@ -118,6 +118,7 @@ let busy = $state(false);
 let lastError = $state<string | null>(null);
 let streamers = $state<Record<string, boolean>>({});
 let capabilities = $state<MediaCapabilities>(ASSUMED_CAPABILITIES);
+let previewImage = $state<string | null>(null);
 
 let unlisten: UnlistenFn | null = null;
 let initialized = false;
@@ -168,6 +169,14 @@ export async function refreshMediaCapabilities(): Promise<void> {
 
 export function isStreamer(userId: string): boolean {
   return streamers[userId] === true;
+}
+
+export function getStreamerIds(): string[] {
+  return Object.keys(streamers).filter((id) => streamers[id]);
+}
+
+export function getStreamPreview(): string | null {
+  return previewImage;
 }
 
 export function markStreamer(userId: string, on: boolean) {
@@ -304,6 +313,10 @@ export async function refreshStreamStats(): Promise<StreamStats | null> {
 interface StreamEventPayload {
   type: string;
   audio?: AudioMode;
+  user_id?: string;
+  active?: boolean;
+  image?: string;
+  state?: string;
 }
 
 export async function initStream(): Promise<void> {
@@ -315,6 +328,19 @@ export async function initStream(): Promise<void> {
       const p = event.payload;
       if (p.type === "stream_stopped") {
         publishing = null;
+        previewImage = null;
+      } else if (p.type === "stream_preview" && typeof p.image === "string") {
+        previewImage = p.image;
+      } else if (p.type === "stream" && typeof p.user_id === "string") {
+        markStreamer(p.user_id, p.active === true);
+        if (p.active !== true && watchingIds.includes(p.user_id)) {
+          void unwatchStream(p.user_id);
+        }
+      } else if (p.type === "state" && (p.state === "idle" || p.state === "failed")) {
+        streamers = {};
+        previewImage = null;
+        publishing = null;
+        for (const id of watchingIds) void unwatchStream(id);
       }
     });
   } catch (e) {

@@ -24,10 +24,10 @@ epub-reader, spaced-repetition
 </p>
 
 <p align="center">
-  <a href="https://github.com/igect/omniget/releases/latest"><img src="https://img.shields.io/github/v/release/igect/omniget?style=for-the-badge&label=release" alt="最新版本" /></a>
+  <a href="https://github.com/tonhowtf/omniget/releases/latest"><img src="https://img.shields.io/github/v/release/tonhowtf/omniget?style=for-the-badge&label=release" alt="最新版本" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-green?style=for-the-badge" alt="许可证 GPL-3.0" /></a>
-  <a href="https://github.com/igect/omniget/stargazers"><img src="https://img.shields.io/github/stars/igect/omniget?style=for-the-badge" alt="GitHub stars" /></a>
-  <a href="https://github.com/igect/omniget/releases"><img src="https://img.shields.io/github/downloads/igect/omniget/total?style=for-the-badge&label=downloads" alt="总下载量" /></a>
+  <a href="https://github.com/tonhowtf/omniget/stargazers"><img src="https://img.shields.io/github/stars/tonhowtf/omniget?style=for-the-badge" alt="GitHub stars" /></a>
+  <a href="https://github.com/tonhowtf/omniget/releases"><img src="https://img.shields.io/github/downloads/tonhowtf/omniget/total?style=for-the-badge&label=downloads" alt="总下载量" /></a>
   <a href="https://hosted.weblate.org/engage/omniget/"><img src="https://hosted.weblate.org/widget/omniget/frontend-json/svg-badge.svg" alt="翻译进度" /></a>
 </p>
 
@@ -59,7 +59,7 @@ epub-reader, spaced-repetition
   <tr>
     <td><strong>Windows</strong></td>
     <td>
-      <a href="https://github.com/igect/omniget/releases/latest"><img alt="下载 Windows 版 OmniGet" src="https://img.shields.io/badge/Windows-Portable_EXE-0078D6?style=for-the-badge&logo=windows&logoColor=white" height="38"></a>
+      <a href="https://github.com/tonhowtf/omniget/releases/latest"><img alt="下载 Windows 版 OmniGet" src="https://img.shields.io/badge/Windows-Portable_EXE-0078D6?style=for-the-badge&logo=windows&logoColor=white" height="38"></a>
       <br/>
       <sub>从 Releases 下载 <code>.exe</code> 并双击运行。它是便携版，放在哪里都能运行。也提供 <code>.msi</code> 安装包；习惯命令行的话可以用 <code>winget install -e --id tonhowtf.OmniGet</code>。</sub>
     </td>
@@ -67,7 +67,7 @@ epub-reader, spaced-repetition
   <tr>
     <td><strong>macOS</strong></td>
     <td>
-      <a href="https://github.com/igect/omniget/releases/latest"><img alt="下载 macOS 版 OmniGet" src="https://img.shields.io/badge/macOS-DMG-000000?style=for-the-badge&logo=apple&logoColor=white" height="38"></a>
+      <a href="https://github.com/tonhowtf/omniget/releases/latest"><img alt="下载 macOS 版 OmniGet" src="https://img.shields.io/badge/macOS-DMG-000000?style=for-the-badge&logo=apple&logoColor=white" height="38"></a>
       <br/>
       <sub>打开 <code>.dmg</code>，把 OmniGet 拖进“应用程序”文件夹。请先阅读下面的首次启动说明。</sub>
     </td>
@@ -75,7 +75,7 @@ epub-reader, spaced-repetition
   <tr>
     <td><strong>Linux</strong></td>
     <td>
-      <a href="https://github.com/igect/omniget/releases/latest"><img alt="下载 Linux 版 OmniGet，提供 deb、rpm 与 AppImage" src="https://img.shields.io/badge/Linux-deb_·_rpm_·_AppImage-FFAA33?style=for-the-badge&logo=linux&logoColor=white" height="38"></a>
+      <a href="https://github.com/tonhowtf/omniget/releases/latest"><img alt="下载 Linux 版 OmniGet，提供 deb、rpm 与 AppImage" src="https://img.shields.io/badge/Linux-deb_·_rpm_·_AppImage-FFAA33?style=for-the-badge&logo=linux&logoColor=white" height="38"></a>
       <br/>
       <sub>Debian 与 Ubuntu 用 <code>.deb</code>，Fedora 与 openSUSE 用 <code>.rpm</code>，其他发行版用 <code>.AppImage</code>。x86_64 与 ARM64 均已提供。</sub>
     </td>
@@ -174,7 +174,6 @@ OmniGet 是围绕它做的应用。下载一个文件、粘贴链接、看到带
 - **跳过赞助片段**（SponsorBlock），并自动嵌入元数据和缩略图。
 - **关注频道**，自动下载新发布的内容，并通过托盘通知提醒。
 - **以最高画质下载哔哩哔哩**，登录一次即可解锁 4K、HDR、Hi-Res 无损音频和杜比全景声。
-- **OmniDisc 语音、视频与 MLS 即时通讯**：连接去中心化社区节点，加入低延迟语音房间，流畅 60fps 屏幕共享，并享受 MLS 端到端加密隐私保障。
 
 下载是可靠的，而不是靠猜。速度和剩余时间直接来自下载器，而不是用百分比伪造出来的，所以即使文件大小未知或是直播流，它们也保持准确。卡住时会明确显示为卡住，而不是停在“还剩 3 秒”。队列会续传中断的下载，并按退避策略重试。
 
@@ -218,15 +217,6 @@ OmniGet 是围绕它做的应用。下载一个文件、粘贴链接、看到带
   <br/>
   <em>本地音乐库、同步歌词、流媒体来源，一个播放器全搞定。</em>
 </p>
-
-### OmniDisc：去中心化语音、视频与即时通讯
-
-OmniGet 内置了 **OmniDisc**，这是一个直接集成在桌面客户端中的注重隐私、去中心化的通讯平台。连接自建或社区节点，与好友畅聊，加入超低延迟语音频道，并以高清 60fps 分享屏幕。
-
-- **端到端加密（MLS）**：群组与私聊均采用 Messaging Layer Security（MLS）协议保护通信隐私。
-- **超清语音与屏幕共享**：超低延迟语音频道，配备降噪、音频闪避与流畅的 60fps 屏幕/窗口推流。
-- **去中心化与自建支持**：可连接任意兼容社区实例或运行自建服务器，无中心化平台限制。
-- **角色与权限系统**：完整的工会/服务器层级体系、细粒度频道权限、审计日志与成员管理。
 
 ---
 
@@ -354,7 +344,7 @@ OmniGet 可在任何主流桌面 Linux 上运行。Debian 与 Ubuntu 建议用 `
 面向开发者。如果你只是想使用 OmniGet，请[下载发行版](#下载与安装)。
 
 ```bash
-git clone https://github.com/igect/omniget.git
+git clone https://github.com/tonhowtf/omniget.git
 cd omniget
 pnpm install
 pnpm tauri dev
@@ -375,7 +365,7 @@ sudo apt-get install -y libwebkit2gtk-4.1-dev build-essential curl wget file lib
 
 ### 命令行工具（需自行构建）
 
-仓库中还包含 `omniget-cli`，一个让 OmniGet 可被脚本调用的小型 Rust 程序。它随每个 Release 一起发布——请在[最新 Release](https://github.com/igect/omniget/releases/latest) 中下载 `omniget-cli-<版本>-<目标平台>`，支持 Windows、macOS（Intel 与 Apple Silicon）和 Linux。若要从本仓库自行构建：
+仓库中还包含 `omniget-cli`，一个让 OmniGet 可被脚本调用的小型 Rust 程序。它随每个 Release 一起发布——请在[最新 Release](https://github.com/tonhowtf/omniget/releases/latest) 中下载 `omniget-cli-<版本>-<目标平台>`，支持 Windows、macOS（Intel 与 Apple Silicon）和 Linux。若要从本仓库自行构建：
 
 ```bash
 cargo build --release -p omniget-cli
@@ -397,7 +387,7 @@ omniget import-cookies cookies.txt     # Netscape 格式
 
 **社区。** 提问、求助和版本讨论都在 [Discord](https://discord.gg/jgdxyPy7Vn)。
 
-发现 bug 或有功能建议？[提交 issue](https://github.com/igect/omniget/issues)。欢迎提交 PR，详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+发现 bug 或有功能建议？[提交 issue](https://github.com/tonhowtf/omniget/issues)。欢迎提交 PR，详见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 OmniGet 在 [Weblate](https://hosted.weblate.org/engage/omniget/) 上进行翻译。选择一种语言，在浏览器里翻译，Weblate 会自动开 PR。
 
@@ -405,7 +395,7 @@ OmniGet 在 [Weblate](https://hosted.weblate.org/engage/omniget/) 上进行翻�
 
 感谢所有为本项目做出贡献的开发者！
 
-[![贡献者](https://contrib.rocks/image?repo=igect/omniget)](https://github.com/igect/omniget/graphs/contributors)
+[![贡献者](https://contrib.rocks/image?repo=tonhowtf/omniget)](https://github.com/tonhowtf/omniget/graphs/contributors)
 
 ## 致平台方
 

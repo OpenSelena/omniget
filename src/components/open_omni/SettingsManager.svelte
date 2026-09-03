@@ -10,6 +10,11 @@
   let saveStatusType = $state<'success' | 'error'>('success');
   let statusTimer: ReturnType<typeof setTimeout> | null = null;
 
+  let isDirty = $derived(
+    outputDir.trim() !== getOutputDir().trim() ||
+    cookiesFile.trim() !== getCookiesFile().trim()
+  );
+
   onMount(async () => {
     await loadSettings();
     outputDir = getOutputDir();
@@ -17,13 +22,25 @@
   });
 
   async function browseOutputDir() {
-    const selected = await open({ directory: true, multiple: false, title: 'Select Output Directory' });
-    if (selected && typeof selected === 'string') outputDir = selected;
+    try {
+      const selected = await open({ directory: true, multiple: false, title: 'Select Output Directory' });
+      if (selected && typeof selected === 'string') outputDir = selected;
+    } catch (err) {
+      console.error('Failed to open directory dialog:', err);
+    }
   }
 
   async function browseCookiesFile() {
-    const selected = await open({ directory: false, multiple: false, title: 'Select Cookies File' });
-    if (selected && typeof selected === 'string') cookiesFile = selected;
+    try {
+      const selected = await open({ directory: false, multiple: false, title: 'Select Cookies File' });
+      if (selected && typeof selected === 'string') cookiesFile = selected;
+    } catch (err) {
+      console.error('Failed to open file dialog:', err);
+    }
+  }
+
+  function clearCookies() {
+    cookiesFile = '';
   }
 
   async function handleSave() {
@@ -77,12 +94,13 @@
         aria-label="Output directory"
         type="text"
         bind:value={outputDir}
-        placeholder="Choose a folder…"
+        placeholder="Choose a folder..."
         autocomplete="off"
         spellcheck="false"
       />
-      <button type="button" class="sm-choose-btn" onclick={browseOutputDir}>Choose…</button>
+      <button type="button" class="sm-choose-btn" onclick={browseOutputDir}>Choose...</button>
     </div>
+
     <div class="sm-row">
       <svg class="sm-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true">
         <path d="M4.3 2h4.4L12 5.3V13a.7.7 0 0 1-.7.7H4.3a.7.7 0 0 1-.7-.7V2.7A.7.7 0 0 1 4.3 2Z" />
@@ -94,26 +112,32 @@
         aria-label="Cookies file (optional, needed for Stories and Highlights)"
         type="text"
         bind:value={cookiesFile}
-        placeholder="Choose a cookies file…"
+        placeholder="Choose a cookies file..."
         autocomplete="off"
         spellcheck="false"
       />
-      <button type="button" class="sm-choose-btn" onclick={browseCookiesFile}>Choose…</button>
+      {#if cookiesFile}
+        <button type="button" class="sm-clear-btn" onclick={clearCookies} title="Clear cookies file">×</button>
+      {/if}
+      <button type="button" class="sm-choose-btn" onclick={browseCookiesFile}>Choose...</button>
     </div>
   </div>
 
   <p class="sm-hint">Cookies are only required for downloading Stories and Highlights.</p>
 
   <div class="sm-actions">
-    <button type="button" class="sm-save-btn" onclick={handleSave} disabled={saving}>
-      {saving ? 'Saving…' : 'Save Settings'}
+    <button
+      type="button"
+      class="sm-save-btn"
+      onclick={handleSave}
+      disabled={saving || !isDirty}
+    >
+      {saving ? 'Saving...' : 'Save Settings'}
     </button>
   </div>
 </div>
 
 <style>
-  /* Reads --oo-accent / --oo-border / --oo-group-bg / --oo-text* custom
-     properties inherited from the shell in +page.svelte. */
   .sm {
     display: flex;
     flex-direction: column;
@@ -126,13 +150,21 @@
     font-size: 12.5px;
     text-align: center;
   }
-  .sm-alert.success { background: var(--success); color: var(--on-success); }
-  .sm-alert.error { background: var(--error); color: var(--on-error); }
+
+  .sm-alert.success {
+    background: var(--success);
+    color: var(--on-success);
+  }
+
+  .sm-alert.error {
+    background: var(--error);
+    color: var(--on-error);
+  }
 
   .sm-group {
     background: var(--oo-group-bg);
     border-radius: var(--oo-radius, 9px);
-    box-shadow: 0 0 0 1px var(--oo-border);
+    border: 1px solid var(--oo-border);
     overflow: hidden;
   }
 
@@ -144,9 +176,17 @@
     padding: 10px 14px;
     border-bottom: 1px solid var(--oo-border);
   }
-  .sm-row:last-child { border-bottom: 0; }
 
-  .sm-icon { width: 15px; height: 15px; color: var(--oo-text-secondary); flex-shrink: 0; }
+  .sm-row:last-child {
+    border-bottom: 0;
+  }
+
+  .sm-icon {
+    width: 15px;
+    height: 15px;
+    color: var(--oo-text-secondary);
+    flex-shrink: 0;
+  }
 
   .sm-label {
     font-size: 13px;
@@ -163,8 +203,31 @@
     min-width: 0;
     text-align: right;
   }
-  .sm-row input::placeholder { color: var(--oo-text-secondary); opacity: 0.8; }
-  .sm-row input:focus { outline: none; }
+
+  .sm-row input::placeholder {
+    color: var(--oo-text-secondary);
+    opacity: 0.8;
+  }
+
+  .sm-row input:focus {
+    outline: none;
+  }
+
+  .sm-clear-btn {
+    background: transparent;
+    border: none;
+    color: var(--oo-text-secondary);
+    font-size: 18px;
+    line-height: 1;
+    cursor: pointer;
+    padding: 0 4px;
+    display: flex;
+    align-items: center;
+  }
+
+  .sm-clear-btn:hover {
+    color: var(--error);
+  }
 
   .sm-choose-btn {
     min-height: 34px;
@@ -173,11 +236,16 @@
     font-size: 12px;
     font-weight: 500;
     background: var(--oo-group-bg);
-    box-shadow: 0 0 0 1px var(--oo-border);
+    border: 1px solid var(--oo-border);
     color: var(--oo-text);
     flex-shrink: 0;
+    cursor: pointer;
+    transition: background 150ms ease;
   }
-  .sm-choose-btn:hover { background: color-mix(in srgb, var(--oo-text) 5%, var(--oo-group-bg)); }
+
+  .sm-choose-btn:hover {
+    background: color-mix(in srgb, var(--oo-text) 5%, var(--oo-group-bg));
+  }
 
   .sm-hint {
     font-size: 11.5px;
@@ -189,6 +257,7 @@
     display: flex;
     justify-content: center;
   }
+
   .sm-save-btn {
     min-height: 42px;
     padding: 9px 26px;
@@ -197,13 +266,32 @@
     font-size: 13px;
     background: var(--oo-accent);
     color: var(--on-accent);
+    border: none;
+    cursor: pointer;
+    transition: filter 150ms ease, opacity 150ms ease;
   }
-  .sm-save-btn:hover:not(:disabled) { filter: brightness(1.06); }
-  .sm-save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .sm-save-btn:hover:not(:disabled) {
+    filter: brightness(1.06);
+  }
+
+  .sm-save-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
 
   @media (max-width: 500px) {
-    .sm-row { align-items: flex-start; flex-wrap: wrap; }
-    .sm-row input { order: 3; flex-basis: calc(100% - 24px); text-align: left; }
-    .sm-choose-btn { margin-left: auto; }
+    .sm-row {
+      align-items: flex-start;
+      flex-wrap: wrap;
+    }
+    .sm-row input {
+      order: 3;
+      flex-basis: calc(100% - 24px);
+      text-align: left;
+    }
+    .sm-choose-btn {
+      margin-left: auto;
+    }
   }
 </style>

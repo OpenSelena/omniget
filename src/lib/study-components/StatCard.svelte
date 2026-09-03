@@ -52,7 +52,7 @@
     gap: 0.25rem;
     padding: calc(var(--padding, 10px) * 2);
     background: var(--button-elevated);
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: var(--border-radius, 11px);
   }
   .icon {

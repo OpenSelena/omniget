@@ -254,7 +254,7 @@
   .search-bar input { flex: 1; background: transparent; border: 0; outline: 0; color: white; font-family: inherit; font-size: 15px; }
   .spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.2); border-top-color: #ff5500; border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  .tabs { display: flex; gap: 8px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+  .tabs { display: flex; gap: 8px; border-bottom: none; }
   .tab { padding: 8px 16px; background: transparent; border: 0; border-bottom: 2px solid transparent; color: rgba(255,255,255,0.55); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; transition: color 200ms ease, border-color 200ms ease; }
   .tab:hover { color: white; }
   .tab.on { color: white; border-bottom-color: #ff5500; }

@@ -256,6 +256,31 @@ export function parseAttachment(raw: unknown): OmnidiscAttachment | null {
     height: num(raw.height),
     durationMs: num(raw.duration_ms),
     encrypted: raw.encrypted === true,
+    expiresAt: parseTimestamp(raw.expires_at),
+    expired: raw.expired === true,
+  };
+}
+
+function parseTimestamp(raw: unknown): number | undefined {
+  const text = str(raw);
+  if (!text) return undefined;
+  const ms = Date.parse(text);
+  return Number.isFinite(ms) ? ms : undefined;
+}
+
+export function parseStorage(raw: unknown): import("./types").OmnidiscStorage | null {
+  if (!isRecord(raw)) return null;
+  const level = str(raw.level);
+  if (level !== "ok" && level !== "warning" && level !== "critical" && level !== "purged") {
+    return null;
+  }
+  return {
+    usedBytes: num(raw.used_bytes) ?? 0,
+    totalBytes: num(raw.total_bytes) ?? 0,
+    ratio: num(raw.ratio) ?? 0,
+    level,
+    attachmentTtlSeconds: num(raw.attachment_ttl_seconds) ?? 1800,
+    purgedFiles: num(raw.purged_files),
   };
 }
 

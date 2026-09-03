@@ -285,7 +285,7 @@
     flex-direction: column;
     gap: 14px;
     padding: 20px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
   }
@@ -296,7 +296,7 @@
   }
   .pick-btn {
     padding: 10px 18px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
     color: var(--secondary);
@@ -344,7 +344,7 @@
     flex-direction: column;
     gap: 6px;
     padding: 10px 12px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
   }
@@ -364,7 +364,7 @@
   }
   .marker-btn {
     padding: 4px 10px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: transparent;
     color: var(--secondary);
@@ -409,7 +409,7 @@
     flex-direction: column;
     gap: 12px;
     padding: 16px 20px;
-    border: 1px solid color-mix(in oklab, oklch(70% 0.18 145) 60%, var(--input-border));
+    border: none;
     border-radius: var(--border-radius);
     background: color-mix(in oklab, oklch(70% 0.18 145) 4%, var(--surface));
   }
@@ -457,7 +457,7 @@
   .btn-link,
   .btn-reveal {
     padding: 6px 14px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: transparent;
     color: var(--secondary);

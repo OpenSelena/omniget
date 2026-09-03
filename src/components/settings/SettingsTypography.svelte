@@ -391,7 +391,7 @@
     flex-direction: column;
     gap: 6px;
     padding: 12px 14px;
-    border: 1px solid color-mix(in oklab, var(--content-border) 60%, transparent);
+    border: none;
     border-radius: 10px;
     background: var(--surface, var(--bg));
     color: inherit;
@@ -438,7 +438,7 @@
     gap: 16px;
     align-items: center;
     padding: 10px 0;
-    border-top: 1px solid color-mix(in oklab, var(--content-border) 30%, transparent);
+    border-top: none;
   }
   .font-row:first-of-type {
     border-top: 0;
@@ -457,7 +457,7 @@
   }
   .font-field select {
     padding: 6px 8px;
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     border-radius: 6px;
     background: var(--bg);
     color: inherit;
@@ -505,7 +505,7 @@
 
   .reset-btn {
     padding: 4px 10px;
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     border-radius: 6px;
     background: transparent;
     color: inherit;
@@ -531,7 +531,7 @@
     margin-top: 8px;
     padding: 16px 18px;
     border-radius: 10px;
-    border: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
+    border: none;
     background: var(--bg);
     line-height: var(--leading-base);
   }

@@ -7,11 +7,11 @@ pub mod meta;
 pub mod stats;
 pub mod ws;
 
+use once_cell::sync::Lazy;
 use serde::Serialize;
 use serde_json::{json, Value};
 use std::collections::HashSet;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::LazyLock;
 use tokio::sync::Mutex;
 
 #[derive(Clone)]
@@ -28,12 +28,12 @@ pub struct LeagueStatus {
     pub region: Option<String>,
 }
 
-static CACHED_CLIENT: LazyLock<Mutex<Option<LcuClient>>> = LazyLock::new(|| Mutex::new(None));
+static CACHED_CLIENT: Lazy<Mutex<Option<LcuClient>>> = Lazy::new(|| Mutex::new(None));
 static AUTO_ACCEPT: AtomicBool = AtomicBool::new(false);
-static CS_HANDLED: LazyLock<Mutex<HashSet<i64>>> = LazyLock::new(|| Mutex::new(HashSet::new()));
-static CS_FIRST_SEEN: LazyLock<Mutex<std::collections::HashMap<i64, std::time::Instant>>> =
-    LazyLock::new(|| Mutex::new(std::collections::HashMap::new()));
-static CS_DECLARED: LazyLock<Mutex<HashSet<i64>>> = LazyLock::new(|| Mutex::new(HashSet::new()));
+static CS_HANDLED: Lazy<Mutex<HashSet<i64>>> = Lazy::new(|| Mutex::new(HashSet::new()));
+static CS_FIRST_SEEN: Lazy<Mutex<std::collections::HashMap<i64, std::time::Instant>>> =
+    Lazy::new(|| Mutex::new(std::collections::HashMap::new()));
+static CS_DECLARED: Lazy<Mutex<HashSet<i64>>> = Lazy::new(|| Mutex::new(HashSet::new()));
 
 async fn discover_client() -> Option<LcuClient> {
     let (credentials, source) = locator::discover().await?;
@@ -67,7 +67,7 @@ async fn get_client() -> Result<LcuClient, String> {
     Ok(discovered)
 }
 
-static HTTP_CLIENT: LazyLock<Option<reqwest::Client>> = LazyLock::new(|| {
+static HTTP_CLIENT: Lazy<Option<reqwest::Client>> = Lazy::new(|| {
     reqwest::Client::builder()
         .danger_accept_invalid_certs(true)
         .timeout(std::time::Duration::from_secs(10))
@@ -90,8 +90,7 @@ async fn lcu_reachable(client: &LcuClient) -> bool {
 
 /// The client's own web server is easy to swamp: a scouting pass touches ten
 /// players at once, so requests are queued instead of fired all together.
-static LCU_GATE: LazyLock<tokio::sync::Semaphore> =
-    LazyLock::new(|| tokio::sync::Semaphore::new(4));
+static LCU_GATE: Lazy<tokio::sync::Semaphore> = Lazy::new(|| tokio::sync::Semaphore::new(4));
 
 async fn lcu_send(
     client: &LcuClient,
@@ -175,15 +174,14 @@ enum CacheKind {
 const PATCH_STATIC_TTL: std::time::Duration = std::time::Duration::from_secs(15 * 60);
 const IMMUTABLE_CAP: usize = 400;
 
-static PATCH_CACHE: LazyLock<
-    Mutex<std::collections::HashMap<String, (std::time::Instant, Value)>>,
-> = LazyLock::new(|| Mutex::new(std::collections::HashMap::new()));
-static IMMUTABLE_CACHE: LazyLock<
+static PATCH_CACHE: Lazy<Mutex<std::collections::HashMap<String, (std::time::Instant, Value)>>> =
+    Lazy::new(|| Mutex::new(std::collections::HashMap::new()));
+static IMMUTABLE_CACHE: Lazy<
     Mutex<(
         std::collections::VecDeque<String>,
         std::collections::HashMap<String, Value>,
     )>,
-> = LazyLock::new(|| {
+> = Lazy::new(|| {
     Mutex::new((
         std::collections::VecDeque::new(),
         std::collections::HashMap::new(),
@@ -263,14 +261,14 @@ async fn lcu_post_raw(client: &LcuClient, path: &str) -> Result<Value, String> {
 /// Settings are read on every websocket event, and reading them means parsing the
 /// settings file from disk. A short cache keeps that off the hot path while still
 /// picking up a toggle the user just flipped.
-static SETTINGS_CACHE: LazyLock<
+static SETTINGS_CACHE: Lazy<
     std::sync::Mutex<
         Option<(
             omniget_core::models::settings::LeagueSettings,
             std::time::Instant,
         )>,
     >,
-> = LazyLock::new(|| std::sync::Mutex::new(None));
+> = Lazy::new(|| std::sync::Mutex::new(None));
 
 const SETTINGS_TTL: std::time::Duration = std::time::Duration::from_millis(2000);
 
@@ -3045,9 +3043,8 @@ fn estimated_ranks(level: i64) -> [i64; 4] {
     ranks
 }
 
-static HASTE_TABLE: LazyLock<
-    Mutex<Option<(std::time::Instant, std::collections::HashMap<i64, i64>)>>,
-> = LazyLock::new(|| Mutex::new(None));
+static HASTE_TABLE: Lazy<Mutex<Option<(std::time::Instant, std::collections::HashMap<i64, i64>)>>> =
+    Lazy::new(|| Mutex::new(None));
 const HASTE_TABLE_TTL: std::time::Duration = std::time::Duration::from_secs(6 * 60 * 60);
 
 /// Ability-haste per item, from the English game-data mirror. The client

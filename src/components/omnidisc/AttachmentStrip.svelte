@@ -100,7 +100,7 @@
     gap: var(--space-2);
     max-width: 260px;
     padding: 6px var(--space-2);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-md);
     background: var(--surface);
   }

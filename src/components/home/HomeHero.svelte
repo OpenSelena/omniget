@@ -7,18 +7,20 @@
   let {
     emotion,
     compact = false,
+    stage = false,
     bubbleText,
     celebrate = false,
   }: {
     emotion: MascotEmotion;
     compact?: boolean;
+    stage?: boolean;
     bubbleText?: string;
     celebrate?: boolean;
   } = $props();
 </script>
 
-<div class="home-hero" class:compact>
-  <Mascot {emotion} {compact} {bubbleText} />
+<div class="home-hero" class:compact class:stage>
+  <Mascot {emotion} compact={compact && !stage} stage={stage} bubbleText={stage ? undefined : bubbleText} />
   <Confetti active={celebrate} />
 </div>
 
@@ -36,5 +38,9 @@
 
   .home-hero.compact {
     max-height: none;
+  }
+
+  .home-hero.stage {
+    width: auto;
   }
 </style>

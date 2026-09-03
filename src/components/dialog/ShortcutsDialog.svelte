@@ -190,7 +190,7 @@
     display: inline-block;
     min-width: 20px;
     padding: 2px 6px;
-    border: 1px solid var(--content-border);
+    border: none;
     border-bottom-width: 2px;
     border-radius: 4px;
     background: var(--input-bg);

@@ -259,7 +259,7 @@
   .text-input,
   .args-input {
     background: var(--button);
-    border: 1px solid var(--button-stroke);
+    border: none;
     border-radius: var(--border-radius);
     padding: 10px 12px;
     font-size: 14px;
@@ -307,7 +307,7 @@
   .ghost-btn {
     background: var(--button);
     color: var(--secondary);
-    border: 1px solid var(--button-stroke);
+    border: none;
     border-radius: calc(var(--border-radius) - 2px);
     padding: 6px 12px;
     font-size: var(--text-sm);
@@ -322,7 +322,7 @@
     cursor: not-allowed;
   }
   .templates {
-    border-top: 1px solid var(--button-stroke);
+    border-top: none;
     padding-top: 12px;
     display: flex;
     flex-direction: column;
@@ -358,7 +358,6 @@
     display: flex;
     gap: 4px;
     background: var(--button);
-    border: 1px solid var(--button-stroke);
     border-radius: calc(var(--border-radius) - 2px);
     overflow: hidden;
   }

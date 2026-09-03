@@ -9,10 +9,13 @@
     selectInstance,
     getGuilds,
     getSelectedGuildId,
+    getGuildUnread,
     createGuild,
     joinInvite,
     reconnectInstance,
     resetConnect,
+    isImmersive,
+    toggleImmersive,
   } from "$lib/stores/omnidisc-store.svelte";
   import type { OmnidiscGuild, OmnidiscInstance } from "$lib/omnidisc/types";
   import OmnidiscPrompt from "./OmnidiscPrompt.svelte";
@@ -219,21 +222,48 @@
   {#if guilds.length > 0}
     <div class="rail-divider" role="presentation"></div>
     {#each guilds as guild (guild.id)}
+      {@const unread = getGuildUnread(guild.id)}
       <button
         type="button"
         class="rail-item guild"
         class:active={selectedGuildId === guild.id}
+        class:unread={unread.unread}
         onclick={() => openGuild(guild)}
         title={guild.name}
         aria-label={guild.name}
         aria-pressed={selectedGuildId === guild.id}
       >
         <span class="initials">{initials(guild.name)}</span>
+        {#if unread.mentions > 0}
+          <span class="mention-pill">{unread.mentions > 99 ? "99+" : unread.mentions}</span>
+        {:else if unread.unread}
+          <span class="unread-dot" aria-hidden="true"></span>
+        {/if}
       </button>
     {/each}
   {/if}
 
   <div class="rail-spacer"></div>
+
+  <button
+    type="button"
+    class="rail-action"
+    onclick={toggleImmersive}
+    title={isImmersive() ? $t("omnidisc.rail.immersive_exit") : $t("omnidisc.rail.immersive_enter")}
+    aria-label={isImmersive() ? $t("omnidisc.rail.immersive_exit") : $t("omnidisc.rail.immersive_enter")}
+    aria-pressed={isImmersive()}
+  >
+    {#if isImmersive()}
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M8 3v18M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+      </svg>
+    {:else}
+      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M8 3v18M3 5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+        <path d="M13 9l3 3-3 3" />
+      </svg>
+    {/if}
+  </button>
 
   <div class="add-wrap">
     <button
@@ -313,7 +343,7 @@
     gap: var(--space-2);
     padding: var(--space-3) 0;
     background: var(--sidebar-bg);
-    border-right: 1px solid var(--border);
+    border-right: none;
     overflow-y: auto;
     overflow-x: hidden;
   }
@@ -383,6 +413,34 @@
     background: var(--text-dim);
   }
 
+  .mention-pill {
+    position: absolute;
+    right: -4px;
+    bottom: -4px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: var(--radius-full);
+    border: 2px solid var(--sidebar-bg);
+    background: var(--danger);
+    color: var(--on-accent);
+    font-size: 9px;
+    font-weight: 700;
+    line-height: 12px;
+    text-align: center;
+  }
+
+  .unread-dot {
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    width: 10px;
+    height: 10px;
+    border-radius: var(--radius-full);
+    border: 2px solid var(--sidebar-bg);
+    background: var(--text);
+  }
+
   .status-dot.connected {
     background: var(--success);
   }
@@ -418,7 +476,7 @@
     height: 28px;
     display: grid;
     place-items: center;
-    border: 1px solid var(--border-hi);
+    border: none;
     border-radius: var(--radius-full);
     background: transparent;
     color: var(--text-muted);
@@ -453,7 +511,7 @@
   .rail-item.add {
     background: transparent;
     color: var(--text-muted);
-    border: 1px dashed var(--border-hi);
+    border: none;
   }
 
   .rail-item.add:hover {
@@ -469,7 +527,7 @@
     min-width: 200px;
     padding: var(--space-1);
     border-radius: var(--radius-md);
-    border: 1px solid var(--border);
+    border: none;
     background: var(--surface);
   }
 

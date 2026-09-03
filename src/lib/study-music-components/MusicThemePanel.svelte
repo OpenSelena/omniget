@@ -152,7 +152,7 @@
   .dialog {
     background: rgb(20, 20, 20);
     color: rgba(255, 255, 255, 0.95);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none;
     border-radius: 14px;
     width: min(560px, 92vw);
     max-height: 86vh;
@@ -221,7 +221,7 @@
     gap: 8px;
     padding: 8px 10px;
     background: rgba(255, 255, 255, 0.04);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none;
     border-radius: 8px;
     color: rgba(255, 255, 255, 0.85);
     font-family: inherit;
@@ -256,7 +256,7 @@
   .picker {
     width: 48px;
     height: 36px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: none;
     border-radius: 8px;
     background: transparent;
     cursor: pointer;
@@ -265,7 +265,7 @@
     flex: 1;
     padding: 8px 10px;
     background: rgba(0, 0, 0, 0.3);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none;
     border-radius: 6px;
     color: rgba(255, 255, 255, 0.95);
     font-family: ui-monospace, monospace;
@@ -299,11 +299,11 @@
     justify-content: space-between;
     gap: 8px;
     padding-top: 8px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: none;
   }
   .reset {
     padding: 8px 14px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: none;
     border-radius: 999px;
     background: transparent;
     color: rgba(255, 255, 255, 0.65);

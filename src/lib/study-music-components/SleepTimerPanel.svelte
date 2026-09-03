@@ -138,7 +138,7 @@
   }
   .dialog {
     background: var(--bg-card, #1a1a1a);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: none;
     border-radius: 12px;
     width: min(440px, 90vw);
     max-height: 80vh;
@@ -151,7 +151,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 14px 18px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border-bottom: none;
   }
   .head h3 {
     margin: 0;
@@ -204,7 +204,7 @@
   .preset {
     appearance: none;
     background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none;
     color: inherit;
     padding: 6px 12px;
     border-radius: 8px;
@@ -223,7 +223,7 @@
     width: 80px;
     appearance: textfield;
     background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none;
     color: inherit;
     padding: 6px 10px;
     border-radius: 8px;
@@ -252,7 +252,7 @@
   .alt {
     appearance: none;
     background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    border: none;
     color: inherit;
     padding: 8px 14px;
     border-radius: 8px;

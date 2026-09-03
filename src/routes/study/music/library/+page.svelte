@@ -224,7 +224,7 @@
     gap: 8px;
     padding: 8px 14px;
     background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    border: none;
     border-radius: 999px;
     width: min(100%, 480px);
     transition: border-color 200ms ease;

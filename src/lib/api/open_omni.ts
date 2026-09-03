@@ -28,8 +28,14 @@ export interface AppSettings {
   cookies_file: string | null;
 }
 
-export async function checkPythonDependencies(): Promise<string> {
-  return await invoke<string>('open_omni_check_python_dependencies');
+export interface DependencyStatus {
+  ok: boolean;
+  message: string;
+  gallery_dl_version: string | null;
+}
+
+export async function checkPythonDependencies(): Promise<DependencyStatus> {
+  return await invoke<DependencyStatus>('open_omni_check_python_dependencies');
 }
 
 export async function runGalleryDlDownload(

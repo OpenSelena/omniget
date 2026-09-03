@@ -146,7 +146,7 @@
   .btn.ghost {
     background: color-mix(in oklab, var(--button) 55%, transparent);
     color: var(--secondary);
-    border: 1px solid color-mix(in oklab, var(--content-border) 58%, transparent);
+    border: none;
   }
 
   .btn.ghost:hover {

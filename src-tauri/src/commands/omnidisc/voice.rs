@@ -316,7 +316,10 @@ impl VoiceManager {
     }
 }
 
-async fn leave_current(manager: &VoiceManager, gateways: &gateway::Gateways) {
+async fn leave_current(state: &crate::AppState) {
+    let manager = &state.omnidisc_voice;
+    let gateways = &state.omnidisc_gateways;
+    super::stream::stop_active_for_leave(state).await;
     let previous = manager.session.lock().await.take();
     if let Err(e) = manager.engine.leave().await {
         tracing::warn!("[omnidisc] voice leave: {}", e);
@@ -362,7 +365,7 @@ pub async fn omnidisc_voice_join(
                     output_error: None,
                 });
             }
-            leave_current(&manager, &state.omnidisc_gateways).await;
+            leave_current(&state).await;
         }
     }
 
@@ -477,7 +480,7 @@ pub async fn push_room_key(app: &tauri::AppHandle, epoch: u64, key: [u8; 32]) {
 
 #[tauri::command]
 pub async fn omnidisc_voice_leave(state: tauri::State<'_, crate::AppState>) -> Result<(), String> {
-    leave_current(&state.omnidisc_voice, &state.omnidisc_gateways).await;
+    leave_current(&state).await;
     Ok(())
 }
 

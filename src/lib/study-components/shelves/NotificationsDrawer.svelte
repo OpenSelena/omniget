@@ -191,7 +191,7 @@
     width: min(420px, 90vw);
     height: 100%;
     background: var(--popup-bg, var(--primary));
-    border-left: 1px solid color-mix(in oklab, var(--content-border) 50%, transparent);
+    border-left: none;
     display: flex;
     flex-direction: column;
     box-shadow: -8px 0 24px color-mix(in oklab, black 25%, transparent);
@@ -217,7 +217,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 16px 20px;
-    border-bottom: 1px solid color-mix(in oklab, var(--content-border) 40%, transparent);
+    border-bottom: none;
   }
 
   .head h2 {
@@ -245,13 +245,13 @@
     display: flex;
     gap: 4px;
     padding: 12px 20px;
-    border-bottom: 1px solid color-mix(in oklab, var(--content-border) 30%, transparent);
+    border-bottom: none;
   }
 
   .ftab {
     padding: 6px 14px;
     background: transparent;
-    border: 1px solid color-mix(in oklab, var(--content-border) 60%, transparent);
+    border: none;
     border-radius: 999px;
     color: inherit;
     font-size: 12px;

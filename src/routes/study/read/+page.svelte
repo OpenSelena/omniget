@@ -1443,7 +1443,7 @@
     bottom: 0;
     width: min(420px, 90vw);
     background: var(--bg-elevated, var(--bg));
-    border-left: 1px solid var(--content-border, var(--input-border));
+    border-left: none;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -1480,7 +1480,7 @@
     align-items: center;
     gap: 10px;
     padding: 8px 10px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     transition: opacity 120ms ease;
   }
@@ -1553,7 +1553,7 @@
   .tag-chip.more {
     background: transparent;
     color: var(--tertiary);
-    border: 1px solid var(--input-border);
+    border: none;
   }
   .tag-chip.removable {
     padding-right: 4px;
@@ -1598,7 +1598,7 @@
     height: 22px;
     background: color-mix(in oklab, var(--primary) 75%, transparent);
     color: var(--secondary);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: 6px;
     cursor: pointer;
     font-size: 12px;
@@ -1630,7 +1630,7 @@
     overflow-y: auto;
   }
   .enrich-row {
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--button-elevated);
   }
@@ -1681,7 +1681,7 @@
     gap: 8px;
     padding: 12px;
     background: var(--button-elevated);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     margin-top: 12px;
   }
@@ -1722,7 +1722,7 @@
     gap: 0.4rem;
     padding: 0.45rem 0.75rem;
     background: transparent;
-    border: 1px solid var(--content-border);
+    border: none;
     border-radius: var(--border-radius);
     color: var(--secondary);
     cursor: pointer;
@@ -1750,7 +1750,7 @@
     padding: 8px 12px;
     border-radius: var(--border-radius);
     background: var(--input-bg);
-    border: 1px solid var(--input-border);
+    border: none;
     color: var(--secondary);
     font-size: 13px;
     font-family: inherit;
@@ -1764,7 +1764,7 @@
   }
   .sort select {
     background: var(--input-bg);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     color: var(--secondary);
     padding: 6px 8px;
@@ -1793,7 +1793,7 @@
     display: flex;
     flex-direction: column;
     background: var(--surface);
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--radius-md);
     box-shadow: var(--elev-1);
     overflow: hidden;

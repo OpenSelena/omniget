@@ -579,7 +579,7 @@
     }
   }
   .left {
-    border-right: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border-right: none;
     padding: 12px;
     display: flex;
     flex-direction: column;
@@ -627,7 +627,7 @@
     flex-direction: column;
     gap: 6px;
     padding: 12px;
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--surface);
     color: var(--text);
@@ -774,7 +774,7 @@
     gap: 4px;
     padding: 14px;
     background: var(--bg);
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
   }
   .prev-row {
@@ -808,7 +808,7 @@
     width: 100%;
     max-width: 560px;
     background: var(--surface);
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     padding: 20px;
     display: flex;
@@ -845,7 +845,7 @@
   }
   .form-field input {
     padding: 8px 10px;
-    border: 1px solid var(--input-border);
+    border: none;
     border-radius: var(--border-radius);
     background: var(--bg);
     color: var(--text);
@@ -872,7 +872,7 @@
     margin: 8px 0 0;
     padding: 4px;
     background: var(--bg);
-    border: 1px solid color-mix(in oklab, var(--input-border) 60%, transparent);
+    border: none;
     border-radius: var(--border-radius);
     max-height: 220px;
     overflow-y: auto;

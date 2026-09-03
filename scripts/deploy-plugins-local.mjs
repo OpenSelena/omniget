@@ -23,19 +23,19 @@ function appDataPluginsDir() {
   const platform = process.platform;
   if (platform === "win32") {
     const base = process.env.APPDATA || path.join(os.homedir(), "AppData", "Roaming");
-    return path.join(base, "com.igect.omniget", "plugins");
+    return path.join(base, "wtf.tonho.omniget", "plugins");
   }
   if (platform === "darwin") {
     return path.join(
       os.homedir(),
       "Library",
       "Application Support",
-      "com.igect.omniget",
+      "wtf.tonho.omniget",
       "plugins",
     );
   }
   const xdg = process.env.XDG_DATA_HOME || path.join(os.homedir(), ".local", "share");
-  return path.join(xdg, "com.igect.omniget", "plugins");
+  return path.join(xdg, "wtf.tonho.omniget", "plugins");
 }
 
 function dllFilename(crate) {

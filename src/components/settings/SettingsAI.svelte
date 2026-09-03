@@ -291,7 +291,7 @@
 
   .ghost-btn {
     padding: 0 16px;
-    border: 1px solid var(--border);
+    border: none;
     border-radius: var(--border-radius);
     background: transparent;
     color: var(--text);

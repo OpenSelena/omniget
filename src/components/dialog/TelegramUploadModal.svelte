@@ -404,7 +404,7 @@
 
   .dialog {
     background: var(--popup-bg, #1a1a1a);
-    border: 1px solid var(--content-border, rgba(255, 255, 255, 0.1));
+    border: none;
     border-radius: var(--border-radius, 12px);
     width: 490px;
     max-width: 90vw;
@@ -419,7 +419,7 @@
     align-items: center;
     justify-content: space-between;
     padding: 14px 18px;
-    border-bottom: 1px solid var(--content-border);
+    border-bottom: none;
   }
 
   .head h3 {
@@ -495,7 +495,7 @@
     padding: 8px 12px;
     font-size: 13px;
     background: var(--input-bg, rgba(0, 0, 0, 0.2));
-    border: 1px solid var(--input-border, rgba(255, 255, 255, 0.15));
+    border: none;
     border-radius: 8px;
     color: var(--text);
     box-sizing: border-box;
@@ -570,7 +570,7 @@
     justify-content: flex-end;
     gap: 10px;
     padding: 12px 18px;
-    border-top: 1px solid var(--content-border);
+    border-top: none;
   }
 
   .action-btn {

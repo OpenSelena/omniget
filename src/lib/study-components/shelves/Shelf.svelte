@@ -140,7 +140,7 @@
     height: 30px;
     border-radius: 50%;
     background: color-mix(in oklab, var(--content-bg) 80%, var(--accent) 4%);
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     color: inherit;
     font-size: 18px;
     line-height: 1;

@@ -2,6 +2,7 @@
   import DownloadManager from '$components/open_omni/DownloadManager.svelte';
   import ProfileManager from '$components/open_omni/ProfileManager.svelte';
   import SettingsManager from '$components/open_omni/SettingsManager.svelte';
+  import { setDraft } from '$lib/stores/open_omni_download_store.svelte';
 
   type TabKey = 'download' | 'profiles' | 'settings';
 
@@ -24,23 +25,35 @@
 
 <div class="oo-shell">
   <aside class="oo-sidebar" aria-label="Open Omni sections">
-    <nav class="oo-nav">
+    <nav class="oo-nav" role="tablist" aria-orientation="vertical">
       {#each NAV_ITEMS as item (item.key)}
         <button
           type="button"
+          role="tab"
+          id="tab-{item.key}"
+          aria-controls="tabpanel-{item.key}"
+          aria-selected={activeTab === item.key}
           class="oo-nav-item"
           class:active={activeTab === item.key}
-          aria-current={activeTab === item.key ? 'page' : undefined}
           onclick={() => switchTab(item.key)}
         >
-          <img src={item.icon} alt="" width="24" height="24" />
+          <span
+            class="oo-nav-icon"
+            style="--icon-url: url('{item.icon}')"
+            aria-hidden="true"
+          ></span>
           <span>{item.label}</span>
         </button>
       {/each}
     </nav>
   </aside>
 
-  <div class="oo-content">
+  <div
+    class="oo-content"
+    role="tabpanel"
+    id="tabpanel-{activeTab}"
+    aria-labelledby="tab-{activeTab}"
+  >
     <header class="oo-header">
       <p class="oo-kicker">Open Omni</p>
       <h1 class="oo-title">{NAV_ITEMS.find((i) => i.key === activeTab)?.label}</h1>
@@ -55,11 +68,16 @@
 
     {#if activeTab === 'download'}
       <DownloadManager
-        on:switchToProfiles={() => switchTab('profiles')}
-        on:switchToSettings={() => switchTab('settings')}
+        onSwitchToProfiles={() => switchTab('profiles')}
+        onSwitchToSettings={() => switchTab('settings')}
       />
     {:else if activeTab === 'profiles'}
-      <ProfileManager />
+      <ProfileManager
+        onSelectProfileForDownload={(profileUrl) => {
+          setDraft({ url: profileUrl, selectedProfileUrl: profileUrl });
+          switchTab('download');
+        }}
+      />
     {:else}
       <SettingsManager />
     {/if}
@@ -67,12 +85,6 @@
 </div>
 
 <style>
-  /*
-    Open Omni shell — macOS System Settings layout.
-    Reads app theme tokens: --accent, --cta, --bg, --button, --secondary,
-    --tertiary, --content-border. Falls back to sane defaults if a token
-    is not defined by the surrounding app shell.
-  */
   .oo-shell {
     --oo-accent: var(--accent);
     --oo-border: var(--content-border);
@@ -120,23 +132,25 @@
     font-weight: 500;
     color: var(--oo-text);
     text-align: left;
+    background: transparent;
+    border: none;
+    cursor: pointer;
     transition: background 150ms ease, color 150ms ease;
   }
 
-  .oo-nav-item img {
+  .oo-nav-icon {
     width: 20px;
     height: 20px;
-    object-fit: contain;
+    background-color: currentColor;
+    mask-image: var(--icon-url);
+    mask-size: contain;
+    mask-repeat: no-repeat;
+    mask-position: center;
+    -webkit-mask-image: var(--icon-url);
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
     flex-shrink: 0;
-    filter: brightness(0) invert(1);
-  }
-
-  :global([data-theme="light"]) .oo-nav-item:not(.active) img,
-  :global([data-theme="catppuccin-latte"]) .oo-nav-item:not(.active) img,
-  :global([data-theme="eink-day"]) .oo-nav-item:not(.active) img,
-  :global([data-theme="eink-sepia"]) .oo-nav-item:not(.active) img,
-  :global([data-theme="nyxvamp-radiance"]) .oo-nav-item:not(.active) img {
-    filter: brightness(0);
   }
 
   .oo-nav-item:not(.active):hover {
@@ -209,16 +223,19 @@
       min-height: 0;
       margin: var(--padding) auto;
     }
+
     .oo-sidebar {
       width: 100%;
       border-right: 0;
       border-bottom: 1px solid var(--oo-border);
       padding: 8px;
     }
+
     .oo-nav {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
+
     .oo-nav-item {
       justify-content: center;
       gap: 7px;
@@ -226,8 +243,17 @@
       padding: 6px;
       font-size: 12px;
     }
-    .oo-content { padding: 24px 20px 28px; }
-    .oo-header { margin-bottom: 22px; }
-    .oo-title { font-size: 22px; }
+
+    .oo-content {
+      padding: 24px 20px 28px;
+    }
+
+    .oo-header {
+      margin-bottom: 22px;
+    }
+
+    .oo-title {
+      font-size: 22px;
+    }
   }
 </style>

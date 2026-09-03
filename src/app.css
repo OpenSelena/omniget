@@ -1,7 +1,7 @@
 @import './lib/style/buttons.css';
 @import './lib/style/primitives.css';
 @import './lib/style/settings.css';
-@import './lib/style/macos-shell.css';
+@import './lib/style/macos-shell.css'; /* source list, toolbar, home workspace */
 @import '@fontsource/ibm-plex-mono/400.css';
 @import '@fontsource/ibm-plex-mono/500.css';
 
@@ -55,16 +55,13 @@
 
   --elev-0: none;
   --elev-1:
-    0 1px 2px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.04);
+    0 1px 2px rgba(0, 0, 0, 0.4);
   --elev-2:
     0 4px 12px rgba(0, 0, 0, 0.45),
-    0 1px 2px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.06);
+    0 1px 2px rgba(0, 0, 0, 0.4);
   --elev-3:
     0 24px 48px rgba(0, 0, 0, 0.55),
-    0 8px 16px rgba(0, 0, 0, 0.4),
-    0 0 0 1px rgba(255, 255, 255, 0.08);
+    0 8px 16px rgba(0, 0, 0, 0.4);
   --elev-glow:
     0 0 0 1px var(--accent),
     0 4px 16px var(--accent-glow),
@@ -449,6 +446,7 @@
   --fill-3: color-mix(in srgb, var(--secondary) 17%, transparent);
   --material: color-mix(in srgb, var(--bg) 78%, transparent);
   --material-blur: blur(24px) saturate(180%);
+  --control-bg: color-mix(in srgb, var(--bg) 72%, var(--surface));
 }
 
 [data-theme="light"],
@@ -459,16 +457,13 @@
   --bg-overlay: black;
   --on-warning: #5c3d00;
   --elev-1:
-    0 1px 2px rgba(0, 0, 0, 0.08),
-    0 0 0 1px rgba(0, 0, 0, 0.04);
+    0 1px 2px rgba(0, 0, 0, 0.08);
   --elev-2:
     0 4px 12px rgba(0, 0, 0, 0.10),
-    0 1px 2px rgba(0, 0, 0, 0.06),
-    0 0 0 1px rgba(0, 0, 0, 0.05);
+    0 1px 2px rgba(0, 0, 0, 0.06);
   --elev-3:
     0 24px 48px rgba(0, 0, 0, 0.18),
-    0 8px 16px rgba(0, 0, 0, 0.08),
-    0 0 0 1px rgba(0, 0, 0, 0.06);
+    0 8px 16px rgba(0, 0, 0, 0.08);
 }
 
 :root, [data-theme="dark"] {
@@ -487,7 +482,7 @@
   --button-press: #48484A;
   --button-text: var(--secondary);
   --button-stroke: rgba(255, 255, 255, 0.10);
-  --button-box-shadow: 0 0 0 1px var(--button-stroke) inset;
+  --button-box-shadow: none;
 
   --button-elevated: #3A3A3C;
   --button-elevated-hover: #48484A;
@@ -495,8 +490,8 @@
 
   --sidebar-bg: #252527;
   --sidebar-highlight: #2C2C2E;
-  --content-border: #38383A;
-  --input-border: #48484A;
+  --content-border: rgba(255, 255, 255, 0.07);
+  --input-border: rgba(255, 255, 255, 0.14);
   --input-bg: #1C1C1E;
 
   --popup-bg: #2C2C2E;
@@ -544,7 +539,7 @@
   --button-press: #E5E5EA;
   --button-text: var(--secondary);
   --button-stroke: rgba(0, 0, 0, 0.10);
-  --button-box-shadow: 0 0 0 1px var(--button-stroke) inset;
+  --button-box-shadow: none;
 
   --button-elevated: #FFFFFF;
   --button-elevated-hover: #F5F5F7;
@@ -552,8 +547,8 @@
 
   --sidebar-bg: #EBEBED;
   --sidebar-highlight: #E0E0E4;
-  --content-border: #D1D1D6;
-  --input-border: #D1D1D6;
+  --content-border: rgba(0, 0, 0, 0.08);
+  --input-border: rgba(0, 0, 0, 0.14);
   --input-bg: #FFFFFF;
 
   --popup-bg: #FFFFFF;
@@ -599,7 +594,7 @@
   --button-press: #585b70;
   --button-text: #cdd6f4;
   --button-stroke: rgba(205, 214, 244, 0.12);
-  --button-box-shadow: 0 0 0 1px var(--button-stroke) inset;
+  --button-box-shadow: none;
   --button-elevated: #45475a;
   --button-elevated-hover: #585b70;
   --button-elevated-press: #6c7086;
@@ -645,7 +640,7 @@
   --button-press: #5b6078;
   --button-text: #cad3f5;
   --button-stroke: rgba(202, 211, 245, 0.12);
-  --button-box-shadow: 0 0 0 1px var(--button-stroke) inset;
+  --button-box-shadow: none;
   --button-elevated: #494d64;
   --button-elevated-hover: #5b6078;
   --button-elevated-press: #6e738d;
@@ -691,7 +686,7 @@
   --button-press: #626880;
   --button-text: #c6d0f5;
   --button-stroke: rgba(198, 208, 245, 0.12);
-  --button-box-shadow: 0 0 0 1px var(--button-stroke) inset;
+  --button-box-shadow: none;
   --button-elevated: #51576d;
   --button-elevated-hover: #626880;
   --button-elevated-press: #737994;
@@ -737,7 +732,7 @@
   --button-press: #acb0be;
   --button-text: #4c4f69;
   --button-stroke: rgba(76, 79, 105, 0.10);
-  --button-box-shadow: 0 0 0 1px var(--button-stroke) inset;
+  --button-box-shadow: none;
   --button-elevated: #bcc0cc;
   --button-elevated-hover: #acb0be;
   --button-elevated-press: #9ca0b0;
@@ -783,7 +778,7 @@
   --button-press: #4b5263;
   --button-text: #abb2bf;
   --button-stroke: rgba(171, 178, 191, 0.12);
-  --button-box-shadow: 0 0 0 1px var(--button-stroke) inset;
+  --button-box-shadow: none;
   --button-elevated: #3e4452;
   --button-elevated-hover: #4b5263;
   --button-elevated-press: #5c6370;
@@ -829,7 +824,7 @@
   --button-press: #504C67;
   --button-text: #F8F8F2;
   --button-stroke: rgba(248, 248, 242, 0.12);
-  --button-box-shadow: 0 0 0 1px var(--button-stroke) inset;
+  --button-box-shadow: none;
   --button-elevated: #424450;
   --button-elevated-hover: #504C67;
   --button-elevated-press: #5E5A76;
@@ -875,7 +870,7 @@
   --button-press: #5A5E74;
   --button-text: #D9E0EE;
   --button-stroke: rgba(217, 224, 238, 0.10);
-  --button-box-shadow: 0 0 0 1px var(--button-stroke) inset;
+  --button-box-shadow: none;
   --button-elevated: #302D41;
   --button-elevated-hover: #494D64;
   --button-elevated-press: #5A5E74;
@@ -921,7 +916,7 @@
   --button-press: #3E3E42;
   --button-text: #C0C0CE;
   --button-stroke: rgba(192, 192, 206, 0.08);
-  --button-box-shadow: 0 0 0 1px var(--button-stroke) inset;
+  --button-box-shadow: none;
   --button-elevated: #1E1E20;
   --button-elevated-hover: #2E2E30;
   --button-elevated-press: #3E3E42;
@@ -967,7 +962,7 @@
   --button-press: #D0D0E0;
   --button-text: #1E1E2E;
   --button-stroke: rgba(30, 30, 46, 0.10);
-  --button-box-shadow: 0 0 0 1px var(--button-stroke) inset;
+  --button-box-shadow: none;
   --button-elevated: #E8D5FF;
   --button-elevated-hover: #DCCAF5;
   --button-elevated-press: #D0BFEB;
@@ -1013,7 +1008,7 @@
   --button-press: #d1c8ae;
   --button-text: var(--secondary);
   --button-stroke: rgba(29, 29, 27, 0.15);
-  --button-box-shadow: 0 0 0 1px var(--button-stroke) inset;
+  --button-box-shadow: none;
   --button-elevated: #ebe5d7;
   --button-elevated-hover: #dfd6c2;
   --button-elevated-press: #d1c8ae;
@@ -1059,7 +1054,7 @@
   --button-press: #c9b98d;
   --button-text: var(--secondary);
   --button-stroke: rgba(63, 46, 32, 0.15);
-  --button-box-shadow: 0 0 0 1px var(--button-stroke) inset;
+  --button-box-shadow: none;
   --button-elevated: #e6dcc3;
   --button-elevated-hover: #dccca8;
   --button-elevated-press: #c9b98d;
@@ -1105,7 +1100,7 @@
   --button-press: #262626;
   --button-text: var(--secondary);
   --button-stroke: rgba(212, 212, 208, 0.10);
-  --button-box-shadow: 0 0 0 1px var(--button-stroke) inset;
+  --button-box-shadow: none;
   --button-elevated: #121212;
   --button-elevated-hover: #1c1c1c;
   --button-elevated-press: #262626;
@@ -1135,6 +1130,21 @@
   --focus-ring-offset: 2px;
   color: var(--secondary);
   background-color: var(--primary);
+}
+
+:root, [data-theme] {
+  --control-bg: color-mix(in srgb, var(--bg) 72%, var(--surface));
+  --input-bg: var(--control-bg);
+}
+
+[data-platform="other"] {
+  --material: var(--popup-bg);
+  --material-blur: none;
+  --fill-1: color-mix(in srgb, var(--secondary) 10%, transparent);
+  --fill-2: color-mix(in srgb, var(--secondary) 16%, transparent);
+  --fill-3: color-mix(in srgb, var(--secondary) 22%, transparent);
+  --control-bg: color-mix(in srgb, var(--bg) 64%, var(--surface));
+  --input-bg: var(--control-bg);
 }
 
 *,
@@ -1330,4 +1340,13 @@ video {
 [data-reduce-transparency="true"] {
   --material: var(--bg);
   --material-blur: none;
+}
+
+/* A window nobody is looking at should not be asking the GPU for anything.
+   While the app is unfocused every decorative animation stops; the layout and
+   the colours stay exactly as they are, so nothing moves when focus returns. */
+[data-window-blurred] *,
+[data-window-blurred] *::before,
+[data-window-blurred] *::after {
+  animation-play-state: paused !important;
 }

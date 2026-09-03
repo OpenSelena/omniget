@@ -114,7 +114,7 @@
     gap: 6px;
     padding: 6px 10px;
     background: color-mix(in oklab, var(--content-bg) 80%, var(--accent) 3%);
-    border: 1px solid color-mix(in oklab, var(--content-border) 70%, transparent);
+    border: none;
     border-radius: 8px;
     transition: border-color var(--tg-duration-fast, 150ms);
     min-width: 240px;
@@ -167,6 +167,6 @@
     border-radius: 4px;
     background: color-mix(in oklab, var(--content-bg) 70%, var(--content-border) 30%);
     color: color-mix(in oklab, currentColor 60%, transparent);
-    border: 1px solid color-mix(in oklab, var(--content-border) 80%, transparent);
+    border: none;
   }
 </style>
