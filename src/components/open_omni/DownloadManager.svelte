@@ -27,7 +27,7 @@
     getDependencyStatus,
     isCheckingDependencies,
   } from '$lib/stores/open_omni_deps_store.svelte';
-  import { onMount } from 'svelte';
+  import { onMount, onDestroy } from 'svelte';
 
   interface Props {
     onSwitchToProfiles?: () => void;
@@ -44,7 +44,7 @@
   let contentType = $state(initialDraft.contentType);
   let selectedProfileUrl = $state<string | null>(initialDraft.selectedProfileUrl);
 
-  $effect(() => {
+  onDestroy(() => {
     setDraft({ url, contentType, selectedProfileUrl });
   });
 
@@ -161,19 +161,21 @@
   function selectProfile(profileUrl: string) {
     selectedProfileUrl = profileUrl;
     url = '';
+    if ((contentType === 'stories' || contentType === 'highlights') && detectPlatform(profileUrl) !== 'Instagram') {
+      contentType = 'photos';
+    }
+    setDraft({ url: '', contentType, selectedProfileUrl: profileUrl });
   }
 
-  $effect(() => {
+  function handleUrlInput() {
     if (url.trim()) {
       selectedProfileUrl = null;
     }
-  });
-
-  $effect(() => {
-    if ((contentType === 'stories' || contentType === 'highlights') && !isInstagram) {
+    if ((contentType === 'stories' || contentType === 'highlights') && detectPlatform(url) !== 'Instagram') {
       contentType = 'photos';
     }
-  });
+    setDraft({ url, contentType, selectedProfileUrl });
+  }
 
   const CONTENT_TYPES: Array<{ key: string; label: string }> = [
     { key: 'all', label: 'All' },
@@ -251,6 +253,7 @@
         aria-label="Profile URL or handle"
         type="text"
         bind:value={url}
+        oninput={handleUrlInput}
         placeholder="https://instagram.com/username"
         disabled={downloading}
         autocomplete="off"
@@ -264,7 +267,10 @@
       <button
         type="button"
         class:on={contentType === type.key}
-        onclick={() => (contentType = type.key)}
+        onclick={() => {
+          contentType = type.key;
+          setDraft({ contentType: type.key });
+        }}
         disabled={downloading || ((type.key === 'stories' || type.key === 'highlights') && !isInstagram)}
         title={(type.key === 'stories' || type.key === 'highlights') && !isInstagram ? 'Instagram only' : ''}
         aria-pressed={contentType === type.key}

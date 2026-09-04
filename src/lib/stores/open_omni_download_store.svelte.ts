@@ -39,7 +39,9 @@ export function getDraft(): OpenOmniDraft {
 }
 
 export function setDraft(newDraft: Partial<OpenOmniDraft>) {
-  draft = { ...draft, ...newDraft };
+  if (newDraft.url !== undefined) draft.url = newDraft.url;
+  if (newDraft.contentType !== undefined) draft.contentType = newDraft.contentType;
+  if (newDraft.selectedProfileUrl !== undefined) draft.selectedProfileUrl = newDraft.selectedProfileUrl;
 }
 
 export function isActive(): boolean {

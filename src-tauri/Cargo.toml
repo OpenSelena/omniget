@@ -4,7 +4,7 @@ resolver = "2"
 
 [package]
 name = "omniget"
-version = "0.9.1"
+version = "0.9.2"
 description = "Universal media downloader"
 authors = ["igect"]
 edition = "2021"

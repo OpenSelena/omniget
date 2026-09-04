@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
   import { loadProfiles, saveProfile, deleteProfile, type Profile } from '$lib/api/open_omni';
 
   interface Props {
@@ -101,8 +102,7 @@
     loadPlatformProfiles(p);
   }
 
-  $effect(() => {
-    // Initial load on mount for activePlatform
+  onMount(() => {
     loadPlatformProfiles(activePlatform);
   });
 </script>
