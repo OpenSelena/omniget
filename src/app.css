@@ -4,6 +4,16 @@
 @import './lib/style/macos-shell.css';
 @import './lib/style/notes.css';
 
+/* Lao script only (unicode-range), so Latin text keeps the chosen UI font. */
+@font-face {
+  font-family: 'OmniGet Lao';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('/fonts/noto-serif-lao-lao-wght-normal.woff2') format('woff2-variations');
+  unicode-range: U+0E81-0EDF, U+200C-200D, U+25CC;
+}
+
 /*
  * OmniGet design tokens — Apple-first.
  *
@@ -67,8 +77,8 @@
   --ease-spring: cubic-bezier(0.32, 1.4, 0.5, 1);
   --ease-in-out: cubic-bezier(0.45, 0, 0.25, 1);
 
-  --font-display: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro', system-ui, 'Segoe UI Variable Display', 'Segoe UI', sans-serif;
-  --font-body: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro', system-ui, 'Segoe UI Variable Text', 'Segoe UI', sans-serif;
+  --font-display: 'OmniGet Lao', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro', system-ui, 'Segoe UI Variable Display', 'Segoe UI', sans-serif;
+  --font-body: 'OmniGet Lao', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro', system-ui, 'Segoe UI Variable Text', 'Segoe UI', sans-serif;
   --font-mono: ui-monospace, 'SF Mono', Menlo, 'Cascadia Mono', Consolas, 'DejaVu Sans Mono', monospace;
   --font-system: var(--font-body);
 
