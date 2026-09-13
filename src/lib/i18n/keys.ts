@@ -2082,6 +2082,7 @@ export type TranslationKeys =
   | 'settings.appearance.lang_fr'
   | 'settings.appearance.lang_it'
   | 'settings.appearance.lang_ja'
+  | 'settings.appearance.lang_lo'
   | 'settings.appearance.lang_pt'
   | 'settings.appearance.lang_ru'
   | 'settings.appearance.lang_zh'
