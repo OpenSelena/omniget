@@ -9,7 +9,7 @@ spicetify, 下载管理器, tauri, rust, svelte.
 -->
 
 <p align="center">
-  <img src="assets/readme/hero.svg" alt="OmniGet：粘贴链接，拿到文件。下载、工具和学习库合在一个桌面应用里，支持 Windows、macOS 和 Linux。" width="100%" />
+  <img src="assets/readme/hero.png" alt="OmniGet：粘贴链接，拿到文件。下载、工具和学习库合在一个桌面应用里，支持 Windows、macOS 和 Linux。" width="100%" />
 </p>
 
 <h1 align="center">OmniGet</h1>
@@ -82,7 +82,7 @@ spicetify, 下载管理器, tauri, rust, svelte.
 OmniGet 把这一切都收进一个输入框。粘贴链接，看到带清晰度选项的预览，点下载。同一个窗口接着还能播放课程、打开 PDF、转写音频、备份 Pinterest 画板。yt-dlp 和 FFmpeg 自己安装、自己更新，没有什么要配置，也不用打开终端。
 
 <p align="center">
-  <img src="assets/readme/workflow.svg" alt="OmniGet 的工作方式：粘贴链接或按下快捷键，OmniGet 识别网站并用 yt-dlp 或原生提取器抓取，文件落到你的文件夹，并在内置播放器、阅读器或工具中打开。" width="100%" />
+  <img src="assets/readme/workflow.png" alt="OmniGet 的工作方式：粘贴链接或按下快捷键，OmniGet 识别网站并用 yt-dlp 或原生提取器抓取，文件落到你的文件夹，并在内置播放器、阅读器或工具中打开。" width="100%" />
 </p>
 
 ### 对比
@@ -197,7 +197,7 @@ OmniGet 为最常用的平台写了原生提取器，其余的交给 [yt-dlp](ht
 按你的熟悉程度选一个级别。
 
 <p align="center">
-  <img src="assets/readme/extension.svg" alt="配对流程：在 Chrome 里安装扩展，在 OmniGet 设置里点「配对扩展」，扩展在 localhost 找到应用并连接。之后每次下载都带上你的 Cookie。" width="100%" />
+  <img src="assets/readme/extension.png" alt="配对流程：在 Chrome 里安装扩展，在 OmniGet 设置里点「配对扩展」，扩展在 localhost 找到应用并连接。之后每次下载都带上你的 Cookie。" width="100%" />
 </p>
 
 ### 级别一：在应用里完成（不用另外下载，不用解压）

@@ -6,7 +6,10 @@ yt-dlp gui, instagram downloader, instagram story downloader, reels downloader, 
 x video downloader, pinterest downloader, pinterest board backup, tiktok downloader, reddit downloader,
 twitch vod downloader, bilibili downloader, telegram downloader, torrent client, magnet downloader,
 subtitle downloader, whisper transcription, text to speech, epub reader, pdf reader, anki flashcards,
-spaced repetition, music player, spicetify, media downloader, download manager, tauri, rust, svelte.
+spaced repetition, music player, spicetify, media downloader, download manager, reddit thread archiver,
+twitch chat downloader, twitch emotes, linkedin data export, spotify history, facebook album downloader,
+pdf tools, pdf repair, pdf to markdown, image compressor, video compressor, video to gif, ctf tools,
+mcp server, claude code plugin, tauri, rust, svelte.
 
 GitHub allows 20 topics. The repository uses exactly these 20:
 downloader, download-manager, media-downloader, video-downloader, youtube-downloader, yt-dlp,
@@ -16,7 +19,7 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 -->
 
 <p align="center">
-  <img src="assets/readme/hero.svg" alt="OmniGet: paste a link, get the file. Downloads, tools and a study library in one desktop app for Windows, macOS and Linux." width="100%" />
+  <img src="assets/readme/hero.gif" alt="OmniGet: paste a link, get the file. Loop, the mascot, sends video, music, PDF, image, course and torrent files into a folder. Courses, video, audio, images and torrents, then transcribe, convert, read and study." width="100%" />
 </p>
 
 <h1 align="center">OmniGet</h1>
@@ -44,7 +47,7 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 <p align="center">
   <a href="#download-and-install"><img src="https://img.shields.io/badge/Download_for_Windows,_macOS_or_Linux-→-F28500?style=for-the-badge" alt="Download OmniGet" height="40" /></a>
   &nbsp;
-  <a href="#the-tools-section-108-tools-in-16-categories"><img src="https://img.shields.io/badge/See_the_108_tools-→-3D5BF0?style=for-the-badge" alt="See the Tools section" height="40" /></a>
+  <a href="#the-tools-section-158-tools-in-25-categories"><img src="https://img.shields.io/badge/See_the_158_tools-→-3D5BF0?style=for-the-badge" alt="See the Tools section" height="40" /></a>
 </p>
 
 <p align="center">
@@ -65,7 +68,8 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 - [Your first download in one minute](#your-first-download-in-one-minute)
 - [What OmniGet downloads](#what-omniget-downloads)
 - [The browser extension, step by step](#the-browser-extension-step-by-step)
-- [The Tools section: 108 tools in 16 categories](#the-tools-section-108-tools-in-16-categories)
+- [The Tools section: 158 tools in 25 categories](#the-tools-section-158-tools-in-25-categories)
+- [OmniGet for AI agents: MCP server and Claude Code plugin](#omniget-for-ai-agents-mcp-server-and-claude-code-plugin)
 - [Plugins: Courses, Study, Telegram, Convert](#plugins-courses-study-telegram-convert)
 - [Built-in chat, off by default](#built-in-chat-off-by-default)
 - [For League of Legends players](#for-league-of-legends-players)
@@ -85,7 +89,7 @@ You bought a course and want it on your disk before the platform pulls it. You k
 OmniGet puts all of that behind one text box. Paste a link, see a preview with quality options, click download. The same window then plays the course, reads the PDF, transcribes the audio and backs up the Pinterest board. yt-dlp and FFmpeg install themselves and stay updated, so there is nothing to configure and no terminal to open.
 
 <p align="center">
-  <img src="assets/readme/workflow.svg" alt="How OmniGet works: paste a link or press the hotkey, OmniGet detects the site and fetches with yt-dlp or a native extractor, the file lands in your folder and opens in the built-in player, reader or tools." width="100%" />
+  <img src="assets/readme/workflow.png" alt="How OmniGet works in three steps: paste a link, OmniGet detects the site and picks a native extractor or yt-dlp, the file lands in your folder and opens in the built-in player." width="100%" />
 </p>
 
 ### How it compares
@@ -96,7 +100,7 @@ OmniGet puts all of that behind one text box. Paste a link, see a preview with q
 | Setup | Download one file, open it | Python, PATH, FFmpeg, flags | None | Installer, license key |
 | Logged-in content | Cookies from your browser through the extension | Manual `--cookies` export | Rarely | Sometimes |
 | Queue | Resume, retry with backoff, rules, followed channels | One command at a time | No | Varies |
-| After the download | Player, reader, flashcards, notes, 108 tools | Files | Files, often re-encoded | Files |
+| After the download | Player, reader, flashcards, notes, 158 tools | Files | Files, often re-encoded | Files |
 | Price and license | Free, GPL-3.0 | Free, Unlicense | Free with ads | Subscription |
 
 yt-dlp is the engine OmniGet runs on, and OmniGet would not exist without it. If you live in a terminal and only want files, yt-dlp alone is the right tool.
@@ -147,6 +151,18 @@ Then open OmniGet from Launchpad as usual.
 
 **Linux, AppImage on Debian 12+ or Ubuntu 24.04+.** Those releases ship without FUSE 2, which AppImage needs. If the file fails with a libfuse error, run `sudo apt install libfuse2`, or launch it with `./omniget.AppImage --appimage-extract-and-run`. The `.deb` avoids this entirely.
 
+### Linux media plugins
+
+OmniGet draws its window with WebKitGTK, and WebKitGTK plays every `<video>` and `<audio>` through GStreamer. If the GStreamer plugins are missing, WebKitGTK does not fail the media quietly: it aborts its own web process the moment a player appears, and you are left with an empty window. Most desktop distributions already have the plugins. Arch and the minimal server images treat them as optional, so install them once:
+
+```bash
+sudo apt install gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-libav   # Debian, Ubuntu
+sudo dnf install gstreamer1-plugins-good gstreamer1-plugins-bad-free gstreamer1-plugin-libav   # Fedora
+sudo pacman -S gst-plugins-good gst-plugins-bad gst-libav   # Arch
+```
+
+`gstreamer1.0-plugins-good` (`gst-plugins-good`) is the one that stops the crash, because the audio sink WebKitGTK insists on lives there. The other two carry the H.264 and AAC decoders, so without them a player opens but stays silent or black. The `.deb` and `.rpm` ask for all three, so this only comes up with the AppImage or a package built by hand.
+
 ### Portable mode
 
 Create an empty file named `portable.txt` (or `.portable`) next to the Windows `.exe` and relaunch. Settings, the database, cookies, plugins, caches, yt-dlp and FFmpeg all move to a `data` folder next to the executable. Nothing touches `AppData`, so the whole install fits on a USB stick.
@@ -181,7 +197,7 @@ OmniGet has native extractors for the platforms people use most, and hands every
 | Video and audio | YouTube (videos, playlists, channels, live from start, chapters, SponsorBlock), Instagram, TikTok, X/Twitter, Reddit, Twitch (VODs, clips, live), Vimeo, Bluesky, Threads, Pinterest, Douyin |
 | Bilibili, signed in | 4K, HDR, Dolby Vision, Hi-Res lossless and Dolby Atmos according to your subscription. Danmaku comments as XML, ASS or JSON, NFO files for Kodi and Jellyfin, custom naming templates, 11 URL types including bangumi, courses, favorites, watch later and history |
 | Image galleries | Whole galleries and profiles from 250+ sites through gallery-dl (DeviantArt, Pixiv, ArtStation, Flickr, Tumblr, Imgur, Kemono and more) |
-| Bulk | Paste many links or load a `.txt`, download whole subreddits, Reddit and X profiles, Instagram and Pinterest profiles |
+| Bulk | Paste many links or load a `.txt`, download whole subreddits, Reddit and X profiles, Instagram and Pinterest profiles, Facebook albums |
 | Files and transfer | `.torrent` files and magnet links with a built-in BitTorrent client, direct HTTP files, HLS and DASH manifests, and person-to-person transfer between two OmniGet installs with a short word code |
 | Telegram | Photos, videos, files and audio from any channel or group you belong to, through the Telegram plugin |
 
@@ -197,10 +213,12 @@ Options you set once and forget: default quality, audio-only format (MP3, M4A, O
 
 The extension does two jobs. On sites it recognizes (YouTube, Instagram, TikTok, X, Reddit, Twitch, Pinterest, Bluesky, Telegram, Vimeo, Udemy, Hotmart, Rocketseat, Bilibili, SoundCloud) it sends the page to OmniGet with one click or with **Alt+O**. On any other site it watches network traffic for MP4, HLS, DASH, WebM and audio streams and lists them in its popup. In both cases it forwards your cookies and referer, which is what lets OmniGet download private content you are logged into, such as Instagram stories, a paid course, or a members-only video. Cookies are grouped by real site, so a Brazilian `.com.br` domain gets its own entry instead of sharing one with every other `.com.br` site. The popup also has a **Force H.264** switch for YouTube, for computers that stutter on VP9 and AV1.
 
+For the sites the sniffer cannot see, there is **Deep search**, a switch in the popup that hooks the page's own video player and catches playlists that never show up as network requests. It asks for permission on all sites the first time and stays off until then. Around it, the sniffer estimates the size of an HLS stream before you download, pairs the separate video and audio tracks a site serves so you get one file, checks the first bytes of what it found so an HTML error page is never saved as a video, and lets you edit the capture rules in the options page. The same options page can back up the list of extensions you have installed, ahead of Chrome dropping Manifest V2 extensions; that needs the optional "management" permission and asks for it only when you use it.
+
 Pick the level that matches how comfortable you are.
 
 <p align="center">
-  <img src="assets/readme/extension.svg" alt="Pairing flow: install the extension in Chrome, click Pair extension in OmniGet Settings, the extension finds the app on localhost and connects. From then on every download carries your cookies." width="100%" />
+  <img src="assets/readme/extension.png" alt="Loop plugging a cable from a browser window into the OmniGet app window, with cookies travelling along it and a padlock and a house above it: the pairing stays on your own machine." width="100%" />
 </p>
 
 ### Level 1: from inside the app (no downloads, no zip files)
@@ -229,12 +247,16 @@ If the extension is installed but OmniGet is closed, clicks fall back to the `om
 
 ---
 
-## The Tools section: 108 tools in 16 categories
+## The Tools section: 158 tools in 25 categories
 
-Tools is the part of OmniGet that grew beyond downloading. Each tile is one job: an isolated Rust command with JSON in and JSON out, which is also what lets AI agents drive them through the built-in MCP server. The hub has a search box that understands English and Portuguese ("legenda" finds subtitle tools) and a platform filter, and tools that only run on Windows say so on the tile and stay hidden elsewhere.
+Tools is the part of OmniGet that grew beyond downloading. Each tile is one job: an isolated Rust command with JSON in and JSON out, which is also what lets AI agents drive them through the built-in MCP server. The hub has a search box that understands English and Portuguese ("legenda" finds subtitle tools) and a platform filter, and tools that only run on Windows say so on the tile and stay hidden elsewhere. Everything below runs on your machine; the only tools that touch the network are the ones that fetch from the site they are named after.
 
 <p align="center">
-  <img src="assets/readme/tools.png" alt="OmniGet Tools hub with 16 categories: YouTube, Speech and subtitles, Video editing, Instagram, X, Pinterest, Spotify, PDF, Documents, Images, System, Files, Downloads, Automation, Phone and AI" width="900" />
+  <img src="assets/readme/illustration-tools.png" alt="Loop, the OmniGet mascot, opening a toolbox full of tool tiles: microphone, subtitles, scissors, PDF, photo, gear, folder, magnet, phone, AI, music, globe, keyboard, chat and wrench" width="900" />
+</p>
+
+<p align="center">
+  <img src="assets/readme/tools.png" alt="OmniGet Tools hub with 25 categories: YouTube, Speech and subtitles, Video editing, Audio, Instagram, X, Facebook, Reddit, Pinterest, Twitch, Bilibili, Spotify, Music, LinkedIn, Games, PDF, Documents, Images, System, Files, Downloads, Automation, Phone, AI and CTF and analysis" width="900" />
 </p>
 
 Status legend: no mark means ready, **beta** means it works but has not been tested against every account type, **planned** means the tile exists so you can see where things are going and does nothing yet.
@@ -246,7 +268,11 @@ Status legend: no mark means ready, **beta** means it works but has not been tes
   </tr>
   <tr>
     <td><img src="assets/readme/tools-pinterest.png" alt="Pinterest tools in OmniGet: download pin, board backup, profile backup, search without AI or ads, similar pins, find the source, duplicates, color palette, offline gallery and keyword ideas" /></td>
-    <td><img src="assets/readme/tools-speech.png" alt="Speech and subtitles tools in OmniGet: transcribe with whisper.cpp, text to speech, translate subtitles, dub from subtitles, and planned voice cloning, voice design, vocal isolation and dictation" /></td>
+    <td><img src="assets/readme/tools-pdf.png" alt="PDF tools in OmniGet: merge, split, compress, convert, OCR, repair, password and permissions, watermark and numbering, crop margins, table of contents, check redaction, safe PDF and PDF to Markdown" /></td>
+  </tr>
+  <tr>
+    <td><img src="assets/readme/tools-linkedin.png" alt="LinkedIn tools in OmniGet: data overview, connections, messages and profile score, all read from the official data export" /></td>
+    <td><img src="assets/readme/tools-ctf.png" alt="CTF and analysis tools in OmniGet: hash and HMAC, what is this file, classic ciphers, XOR, encodings and frequency analysis" /></td>
   </tr>
 </table>
 
@@ -273,13 +299,26 @@ Status legend: no mark means ready, **beta** means it works but has not been tes
 - **Clone a voice**, **Design a voice** and **Isolate vocals** through a VoiceStudio install running on your machine. *beta*
 - **Dictation.** Press a global shortcut, speak, and whisper types the text where your cursor is. *beta*
 
-### Video editing (6)
+### Video editing (14)
 
 - **Cut a clip.** Pick a video on disk and cut out a section. The result lands in the downloads queue.
 - **Convert.** Change container, codec or resolution, or compress, through the Convert plugin.
+- **Compress to a size.** Hit an exact target, 10 MB for Discord or 25 MB for e-mail, with two-pass encoding.
+- **Video to GIF.** A clip as a GIF or animated WebP, with a palette that does not look muddy.
+- **Cut silence.** Find the dead air in a recording and cut it from picture and sound together.
+- **Convert subtitles.** SRT, VTT and ASS between each other, or burn one into the picture.
+- **Resync subtitles.** Late, early or drifting: shift it, stretch it for another frame rate, or fix it with two anchors.
+- **Restore video.** Take out flicker, grain and banding with the filters FFmpeg already carries.
+- **Stabilize video.** Two-pass vidstab: measure the shake across the whole clip, then undo it.
+- **Photo to sticker.** A photo or a clip into a WhatsApp or Telegram sticker that actually fits the size limit.
 - **Auto captions** and **Text to speech** open the speech tools above.
 - **Record screen.** Screen and system audio through FFmpeg, with a replay buffer that saves what just happened. *beta*
 - **Timeline editor.** *planned*
+
+### Audio (2)
+
+- **Normalize loudness.** Two-pass EBU R128, so the audio lands where streaming, podcast or broadcast expects it.
+- **Remove noise.** Hiss, fan and room noise taken out of a recording, with nothing to download.
 
 ### Instagram (24)
 
@@ -325,6 +364,17 @@ Public data comes through the FxTwitter API without login. Anything private (boo
 - **Your X archive.** Open the data zip offline: stats, top posts, likes and follow lists.
 - **Grok.** Ask Grok with live X search or summarize a thread, through the xAI API or your X session. *beta*
 
+### Facebook (2)
+
+- **Album download.** Paste an album link and every photo and video inside it lands in one folder.
+- **Download video.** A single video or reel, straight from the link box.
+
+### Reddit (3)
+
+- **Download post.** Video with sound from v.redd.it, galleries, single images and outside links.
+- **Archive thread.** The post and every comment as Markdown, a browsable HTML page and raw JSON, while they are still there.
+- **Read my data export.** The official Reddit data zip turned into a summary you can actually read.
+
 ### Pinterest (10)
 
 Works without login for anything public. Cookies are only needed for secret boards and for unsaving.
@@ -340,19 +390,59 @@ Works without login for anything public. Cookies are only needed for secret boar
 - **Offline gallery, PDF, CSV.** A board as a searchable HTML gallery, a PDF moodboard or a spreadsheet.
 - **Keyword ideas.** Search suggestions, refinements and the words top pins use.
 
+### Twitch (2)
+
+- **Emote pack.** Every emote and badge of a channel, from Twitch, BTTV, FFZ and 7TV, sorted by provider.
+- **VOD chat.** The whole chat replay of a VOD or clip as JSON, CSV and subtitles, with the busiest minutes marked.
+
+### Bilibili (2)
+
+Video downloads from Bilibili live on the home screen. These two are about the floating comments.
+
+- **Danmaku export.** A video's danmaku as XML, ASS or JSON without downloading the video.
+- **Burn danmaku.** Paint the comment track onto a local clip and get a shareable MP4.
+
 ### Spotify (2)
 
 - **Themes and colors.** Customize the Spotify client with Spicetify themes. *beta*
 - **Extensions.** Install Spicetify extensions and custom apps from its Marketplace. *beta*
 
-### PDF (6)
+### Music (3)
+
+- **Playlist to M3U.** Match an exported playlist with the audio files you own and write `.m3u8` and `.pls` for any local player.
+- **Synced lyrics.** Fetch lyrics from LRCLIB and save an `.lrc` next to each track.
+- **Spotify history.** Open your full data export and see everything Wrapped leaves out.
+
+### LinkedIn (4)
+
+All four read the official data export LinkedIn lets you request, on your own machine. Nothing logs in.
+
+- **Data overview.** Connections, messages, posts and what advertisers know about you.
+- **Connections.** Filter, group and export your connection list.
+- **Messages.** Browse your chat history and save it as a local page.
+- **Profile score.** An offline completeness check with what is missing.
+
+### Games (3)
+
+- **Switch album.** Import screenshots and clips from the Switch SD card, named by game and date.
+- **Clip organizer.** Sort Game Bar, ShadowPlay, OBS and Steam captures into folders by game.
+- **Runs on Linux?** The ProtonDB tier for one game or your whole Steam library.
+
+### PDF (13)
 
 - **Merge.** Join several PDFs into one, in the order you choose.
 - **Split.** Extract pages or break a PDF into parts.
 - **Compress.** Shrink a PDF while keeping it readable.
 - **Convert.** PDF to images or Word, and back.
 - **OCR.** Make scanned PDFs searchable. *beta*
+- **Repair.** Rebuild a file that will not open: broken cross-reference table, truncated download, junk before the header.
+- **Password and permissions.** Lock a PDF with AES-128, or take the password off one you can already open.
+- **Watermark and numbering.** Stamp text across every page, or Bates-number a batch for filing.
+- **Crop margins.** Cut the white border so the text fills an e-reader screen, found automatically or set by hand.
+- **Table of contents.** Read the bookmarks a PDF has, or give one that has none a proper outline.
+- **Check redaction.** Find text that is still in the file underneath a black bar, and read it back to you.
 - **Safe PDF.** Rebuild a PDF from pixels to strip scripts and forms.
+- **PDF to Markdown.** Clean Markdown with headings, lists and tables, ready to paste into an LLM.
 
 ### Documents (5)
 
@@ -362,32 +452,23 @@ Works without login for anything public. Cookies are only needed for secret boar
 - **Image galleries.** Whole galleries and profiles from 250+ sites with gallery-dl.
 - **Scribd.** Save readable books as PDF using your own session. *planned*
 
-### Images (3)
+### Images (9)
 
 - **Upscale.** Real-ESRGAN on any Vulkan GPU, 2x, 3x or 4x. *beta*
 - **Resize images.** Batch resize by width, height, fit or percent, converting the format if you want.
+- **Compress to a size.** Hit a target in KB by searching for the best quality that still fits, and say so when it cannot.
+- **Metadata and GPS.** See what a photo carries, location, camera and serial number, and strip it without touching the pixels.
+- **Duplicate photos.** The same picture saved twice, recompressed, resized or cropped, not just byte-identical copies.
+- **Stitch screenshots.** Join scrolled screenshots into one long image without repeating what overlaps.
+- **Icon pack.** One image into `favicon.ico`, the web PNGs, `apple-touch-icon` and a macOS `.icns`.
+- **Spritesheet.** Slice a sheet into frames, pack frames back with an atlas, or resize a folder by rule.
 - **OCR.** Copy the text out of images and slides. *beta*
 
-### Files (4)
-
-- **Duplicates.** Find identical files by hash and free space safely.
-- **Bulk rename.** Regex, counters and case changes with a preview before applying.
-- **Find files.** Instant search with Everything on Windows, Spotlight on macOS or fd on Linux.
-- **Keep awake.** Stop the computer from sleeping during long jobs.
-
-### Downloads (2)
-
-- **Accelerated download.** Big files with 16 connections, resume and checksum via aria2.
-- **HLS / DASH manifest.** Paste a `.m3u8` or `.mpd` with Referer and cookie. FFmpeg saves an MP4.
-
-### Phone (1)
-
-- **Send to phone.** Files, links and text to a paired KDE Connect device.
-
-### System (9, Windows-only items marked)
+### System (10, Windows-only items marked)
 
 - **Clean caches.** Temp files, logs and app caches with rules per operating system. You review the list before anything is deleted.
 - **Disk analyzer.** What takes space, as a treemap plus the largest files, with a send-to-trash button.
+- **Block ads by hosts.** Point ad and telemetry domains at nothing, inside a block of its own that never touches your own lines.
 - **Startup manager.** See what launches with the system and switch items off. *beta*
 - **Uninstaller.** Remove apps and the leftovers they leave behind. *beta*
 - **Privacy shield.** Control Windows telemetry, ad ID and tracking settings. Windows. *beta*
@@ -396,9 +477,26 @@ Works without login for anything public. Cookies are only needed for secret boar
 - **Registry cleaner.** Orphaned entries, with a `.reg` backup before removal. Windows. *beta*
 - **Software updater.** Update programs in bulk through winget, Chocolatey and Scoop. Windows. *beta*
 
+### Files (5)
+
+- **Duplicates.** Find identical files by hash and free space safely.
+- **Bulk rename.** Regex, counters and case changes with a preview before applying.
+- **Secure delete.** Overwrite the file before removing it, so a recovery tool finds nothing.
+- **Find files.** Instant search with Everything on Windows, Spotlight on macOS or fd on Linux.
+- **Keep awake.** Stop the computer from sleeping during long jobs.
+
+### Downloads (2)
+
+- **Accelerated download.** Big files with 16 connections, resume and checksum via aria2.
+- **HLS / DASH manifest.** Paste a `.m3u8` or `.mpd` with Referer and cookie. FFmpeg saves an MP4.
+
 ### Automation (1)
 
 - **Auto clicker.** Click at the exact speed you set, with a global hotkey, limits and random ranges. Windows, macOS and Linux. *beta*
+
+### Phone (1)
+
+- **Send to phone.** Files, links and text to a paired KDE Connect device.
 
 ### AI (6)
 
@@ -407,9 +505,46 @@ Works without login for anything public. Cookies are only needed for secret boar
 - **Local models (Ollama).** See, download and remove local models and use them as a free provider.
 - **Humanize text.** Rewrite AI-sounding text so it reads like a person wrote it, without changing what it says. Runs on the AI provider you configured. *beta*
 - **API keys.** A local vault for keys and accounts, with a connection test, balance for OpenRouter, DeepSeek, SiliconFlow and New API, and export to Claude Code, Codex, Cherry Studio, opencode or a `.env` file.
-- **MCP server.** OmniGet's tools exposed over the Model Context Protocol on the local bridge, 31 tools behind the same token the extension uses, with ready-made config snippets for Claude Code, Claude Desktop, Cursor, VS Code, Goose and Codex. *beta*
+- **MCP server.** OmniGet's tools exposed over the Model Context Protocol on the local bridge, 37 tools behind the same token the extension uses, with ready-made config snippets for Claude Code, Claude Desktop, Cursor, VS Code, Goose and Codex. See [OmniGet for AI agents](#omniget-for-ai-agents-mcp-server-and-claude-code-plugin). *beta*
+
+### CTF and analysis (6)
+
+Six small offline utilities for capture-the-flag puzzles, forensics homework and "what is this file" moments.
+
+- **Hash and HMAC.** MD5, the SHA family, CRC-32 and HMAC of text or a file, plus a guess at what an unknown hash is.
+- **What is this file.** Signature, readable strings, entropy, and anything hidden past the end of the real file.
+- **Classic ciphers.** Caesar, ROT13, Atbash, Vigenère and Rail Fence, with a brute force that picks the readable answer.
+- **XOR.** Apply a key, or recover one: a single byte by letter frequency, a repeating key by Hamming distance.
+- **Encodings.** base64, base32, hex, URL, HTML entities, binary and morse, both directions, with detection.
+- **Frequency analysis.** Histogram, entropy and index of coincidence, and what that combination usually means.
 
 Every tool that talks to an AI uses the provider you set in **Settings → AI**: OpenAI, Anthropic, or any OpenAI-compatible local endpoint such as Ollama or LM Studio. The key is stored locally and never logged. The auto clicker, dictation and the replay buffer can each get a global shortcut of their own.
+
+---
+
+## OmniGet for AI agents: MCP server and Claude Code plugin
+
+<p align="center">
+  <img src="assets/readme/illustration-agents.png" alt="Loop at a terminal handing a folder of files to a small robot that hands back a link, with microphone, subtitle and video tiles above the screen" width="900" />
+</p>
+
+Two doors, depending on where your agent lives.
+
+**Inside the app: the MCP server.** Turn it on in Tools → AI → MCP server and OmniGet exposes 37 of its tools over the Model Context Protocol on the same local bridge the browser extension uses, behind the same per-install token. An agent can queue a URL and watch, pause, resume or cancel it in the Downloads panel, merge, split, render, extract text from or sanitize PDFs, transcribe a file with whisper.cpp, run text to speech and OCR, resize images, find duplicates, search files, read X posts, threads, profiles, searches and trends, look up an Instagram profile through your session, compare LLM prices, humanize text, scan disks and caches, list startup items and installed apps, and pull large files or galleries with aria2 and gallery-dl. The page prints the config snippet for Claude Code, Claude Desktop, Cursor, VS Code, Goose and Codex, so it is a paste, not a setup. *beta*
+
+**Inside Claude Code: the `omniget` plugin.** The [`claude-plugin/`](claude-plugin/omniget) folder ships a plugin for [Claude Code](https://claude.com/claude-code) that needs no desktop app at all. Paste a video, audio or social post URL with a request and the `omniget-fetch` and `omniget-transcribe` skills trigger on their own. The slash commands are there when you want to be explicit:
+
+```
+/plugin marketplace add /path/to/omniget/claude-plugin
+/plugin install omniget
+/omniget:setup                       # installs yt-dlp, ffmpeg and omniget-cli after one confirmation
+/omniget:fetch <url> [--audio]       # the media file, to ~/Downloads/omniget
+/omniget:transcribe <url|file>       # captions, then local whisper.cpp, then Gemini or OpenAI if you added a key
+/omniget:research <url>              # caption plus transcript distilled into a Markdown note with [mm:ss] references
+/omniget:doctor                      # what is installed, what is missing, how to add it
+```
+
+Setup downloads the prebuilt `omniget-cli` for your OS, which gives the skill OmniGet's native Instagram, X, Bilibili and Threads extractors. A download that fails on a login wall is retried once with the cookies of the browser you name in `OMNIGET_COOKIES_FROM_BROWSER`. API keys go into `~/.config/ai-keys.env` from your own terminal and are never printed back.
 
 ---
 
@@ -428,6 +563,10 @@ Sign in to **Hotmart**, **Udemy**, **Kiwify**, **Rocketseat** or **Meta-Analysis
 ### Study
 
 Study turns the folder of files you downloaded into something you can actually finish.
+
+<p align="center">
+  <img src="assets/readme/illustration-study.png" alt="Loop with headphones reading a book on a cushion, surrounded by a paused video lesson, flashcards, a notebook with a knowledge graph, a pomodoro timer and a vinyl record" width="900" />
+</p>
 
 - Library and player. Point Study at your course folders (nothing is copied or moved). The player resumes to the second, and pressing **N** captures a note at the current timestamp that jumps back there when clicked.
 - Reader. PDF, EPUB, DJVU, MOBI, AZW3, FB2, CBZ, CBR, TXT, RTF and HTML, with highlights, bookmarks, collections, a focus mode and a paper-like theme. Covers, titles and authors are pulled from the files.
@@ -459,6 +598,10 @@ It is experimental and does nothing until you turn it on in **Settings → Advan
 
 A League menu sits in the sidebar. It reads your running League client locally, with no account and no third-party build site, and does nothing until the client is open. If you never play, switch it off in **Settings → Advanced → League of Legends** and the menu disappears.
 
+<p align="center">
+  <img src="assets/readme/illustration-league.png" alt="Loop in a gaming chair with a headset, looking at a monitor with a three-lane map and a ten-player scoreboard, with trophy, dice, chart and AI tiles beside it" width="900" />
+</p>
+
 Match scouting for both teams with rank, recent form, KDA and the champions each player actually plays. Win probability that shrinks win rates toward the baseline by sample size and always shows a range. Live gold, CS and level for all ten players. Goals per role you can edit. Runes and summoner spells recommended by the client itself, applied in one click and only ever replacing the page OmniGet created. Champion tiers by role. Player search by Riot ID. Opt-in automation: accept matches, pick and ban from your priority list, grab a champion off the ARAM bench. Every automation has its own switch.
 
 New and marked beta or experimental: a **Profile** tab that edits what other players see (rank shown in chat, challenge medals and title, banner and crest, chat icon, bulk friend management); a **skin, chroma and ward roulette** that rolls an owned skin the moment you lock in, with rerolls; a **champion and lane raffle** for when you want the queue to decide, plus an optional random pick in champion select; full **match history and ranked stats for any player** through the client's own backend gateway, with replay download; and an **AI coach** that reviews a game, spots trends over your last matches or answers a question about the current champ select, using your configured AI provider and OP.GG's public data.
@@ -482,6 +625,10 @@ New and marked beta or experimental: a **Profile** tab that edits what other pla
 ---
 
 ## Privacy and what OmniGet refuses to do
+
+<p align="center">
+  <img src="assets/readme/illustration-privacy.png" alt="Loop hugging a laptop with the OmniGet download icon and a green padlock, inside a glowing shield" width="700" />
+</p>
 
 Everything runs on your computer. There is no account, no server of ours in the middle, and no telemetry about what you download. Cookies and API keys live in your local profile. The only network calls OmniGet makes on its own are to the sites you asked it to download from, to GitHub for updates and plugins, and to the AI provider you configured, when you use an AI tool.
 
@@ -520,6 +667,12 @@ No. Download the app, open it, paste a link. The only terminal step is the one-t
 
 **macOS says the app is damaged.**
 Run the two commands in [the first launch section](#the-first-launch-warning-and-how-to-clear-it). It happens because the app is not notarized, and it happens once.
+
+**Can it read my Reddit, LinkedIn, Spotify, X or Instagram data export?**
+Yes. Request the export from the platform, then open the zip in the matching tool. It is parsed on your machine and nothing is uploaded.
+
+**Can an AI agent use OmniGet?**
+Yes, two ways. The MCP server in Tools → AI exposes 37 tools to Claude Code, Claude Desktop, Cursor, VS Code, Goose and Codex, and the `claude-plugin/` folder ships a Claude Code plugin that fetches and transcribes media without the desktop app. See [OmniGet for AI agents](#omniget-for-ai-agents-mcp-server-and-claude-code-plugin).
 
 **Can I transcribe a video to subtitles offline?**
 Yes. Tools → Speech and subtitles → Transcribe uses whisper.cpp locally. Models download on demand.
@@ -587,9 +740,9 @@ Bug reports and pull requests go to [Issues](https://github.com/tonhowtf/omniget
 
 Translations are managed on [Weblate](https://hosted.weblate.org/engage/omniget/). Pick your language and translate in the browser. New strings appear there a few hours after they land in `main`.
 
-OmniGet is built on [yt-dlp](https://github.com/yt-dlp/yt-dlp), [FFmpeg](https://ffmpeg.org/), [gallery-dl](https://github.com/mikf/gallery-dl), [whisper.cpp](https://github.com/ggerganov/whisper.cpp), [aria2](https://aria2.github.io/), [SponsorBlock](https://sponsor.ajay.app/), [Return YouTube Dislike](https://returnyoutubedislike.com/), [FxTwitter](https://github.com/FixTweet/FxTwitter), [Spicetify](https://spicetify.app/) and [Tauri](https://tauri.app/). Thank you to everyone who maintains them.
+OmniGet is built on [yt-dlp](https://github.com/yt-dlp/yt-dlp), [FFmpeg](https://ffmpeg.org/), [gallery-dl](https://github.com/mikf/gallery-dl), [whisper.cpp](https://github.com/ggerganov/whisper.cpp), [aria2](https://aria2.github.io/), [SponsorBlock](https://sponsor.ajay.app/), [Return YouTube Dislike](https://returnyoutubedislike.com/), [FxTwitter](https://github.com/FixTweet/FxTwitter), [Spicetify](https://spicetify.app/), [cat-catch](https://github.com/xifangczy/cat-catch) (parts of the extension's media sniffer) and [Tauri](https://tauri.app/). Thank you to everyone who maintains them.
 
-Loop, the creature on the home screen, is OmniGet's mascot. Fan art is welcome. The original artwork may not be used commercially or redistributed modified.
+Loop, the creature on the home screen, is OmniGet's mascot. Fan art is welcome. The original artwork may not be used commercially or redistributed modified. The illustrations in this README were generated with [Higgsfield](https://higgsfield.ai) from the original Loop artwork.
 
 <p align="center">
   <a href="https://star-history.com/#tonhowtf/omniget&Date"><img src="https://api.star-history.com/svg?repos=tonhowtf/omniget&type=Date" alt="Star history of tonhowtf/omniget" width="600" /></a>

@@ -9,7 +9,7 @@ leitor pdf, flashcards anki, repetição espaçada, player de música, spicetify
 -->
 
 <p align="center">
-  <img src="assets/readme/hero.svg" alt="OmniGet: cole um link, receba o arquivo. Downloads, ferramentas e biblioteca de estudo em um só app para Windows, macOS e Linux." width="100%" />
+  <img src="assets/readme/hero.png" alt="OmniGet: cole um link, receba o arquivo. Downloads, ferramentas e biblioteca de estudo em um só app para Windows, macOS e Linux." width="100%" />
 </p>
 
 <h1 align="center">OmniGet</h1>
@@ -82,7 +82,7 @@ Você comprou um curso e quer ele no seu disco antes que a plataforma tire do ar
 O OmniGet coloca tudo isso atrás de uma única caixa de texto. Cole um link, veja a prévia com as opções de qualidade, clique em baixar. A mesma janela depois reproduz o curso, abre o PDF, transcreve o áudio e faz backup do board do Pinterest. O yt-dlp e o FFmpeg se instalam e se atualizam sozinhos, então não há nada para configurar e nenhum terminal para abrir.
 
 <p align="center">
-  <img src="assets/readme/workflow.svg" alt="Como o OmniGet funciona: cole um link ou aperte o atalho, o OmniGet detecta o site e baixa com yt-dlp ou um extrator nativo, o arquivo cai na sua pasta e abre no player, no leitor ou nas ferramentas." width="100%" />
+  <img src="assets/readme/workflow.png" alt="Como o OmniGet funciona: cole um link ou aperte o atalho, o OmniGet detecta o site e baixa com yt-dlp ou um extrator nativo, o arquivo cai na sua pasta e abre no player, no leitor ou nas ferramentas." width="100%" />
 </p>
 
 ### Como se compara
@@ -197,7 +197,7 @@ A extensão faz dois trabalhos. Em sites que ela reconhece (YouTube, Instagram, 
 Escolha o nível que combina com o seu conforto.
 
 <p align="center">
-  <img src="assets/readme/extension.svg" alt="Fluxo de pareamento: instale a extensão no Chrome, clique em Parear extensão nas Configurações do OmniGet, a extensão encontra o app no localhost e conecta. A partir daí, todo download leva seus cookies." width="100%" />
+  <img src="assets/readme/extension.png" alt="Fluxo de pareamento: instale a extensão no Chrome, clique em Parear extensão nas Configurações do OmniGet, a extensão encontra o app no localhost e conecta. A partir daí, todo download leva seus cookies." width="100%" />
 </p>
 
 ### Nível 1: de dentro do app (sem downloads, sem zip)
