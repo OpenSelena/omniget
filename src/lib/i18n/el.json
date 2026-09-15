@@ -3870,6 +3870,7 @@
       "section_per_platform": "Per-platform options",
       "section_per_platform_desc": "YouTube, courses, and Bilibili-specific settings.",
       "download_attachments": "Λήψη συνημμένων",
+      "download_attachments_desc": "Αποθήκευση συνημμένων μαθημάτων μαζί με τα ληφθέντα μαθήματα.",
       "download_descriptions": "Αποθήκευση περιγραφών",
       "embed_metadata": "Ενσωμάτωση μεταδεδομένων",
       "embed_metadata_desc": "Γράψτε πληροφορίες τίτλου και καλλιτέχνη σε αρχεία που έχετε ληφθεί",

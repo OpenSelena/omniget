@@ -3870,6 +3870,7 @@
       "section_per_platform": "Per-platform options",
       "section_per_platform_desc": "YouTube, courses, and Bilibili-specific settings.",
       "download_attachments": "下載附件",
+      "download_attachments_desc": "將課程附件與下載的課程一起儲存。",
       "download_descriptions": "儲存描述",
       "embed_metadata": "嵌入中繼資料",
       "embed_metadata_desc": "將標題與藝術家資訊寫入下載的檔案",

@@ -28,6 +28,14 @@
       </div>
       <button class="toggle" class:on={settings.download.download_subtitles} onclick={() => toggleBool("download", "download_subtitles", settings.download.download_subtitles)} role="switch" aria-checked={settings.download.download_subtitles} aria-label={$t('settings.download.download_subtitles') as string}><span class="toggle-knob"></span></button>
     </div>
+    <div class="divider"></div>
+    <div class="setting-row">
+      <div class="setting-col">
+        <span class="setting-label">{$t('settings.download.download_attachments')}</span>
+        <span class="setting-path">{$t('settings.download.download_attachments_desc')}</span>
+      </div>
+      <button class="toggle" class:on={settings.download.download_attachments} onclick={() => toggleBool("download", "download_attachments", settings.download.download_attachments)} role="switch" aria-checked={settings.download.download_attachments} aria-label={$t('settings.download.download_attachments') as string}><span class="toggle-knob"></span></button>
+    </div>
     {#if settings.download.download_subtitles}
       <div class="divider"></div>
       <div class="setting-row">

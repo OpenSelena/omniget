@@ -2339,6 +2339,7 @@ export type TranslationKeys =
   | 'settings.download.courses_section'
   | 'settings.download.default_output_dir'
   | 'settings.download.download_attachments'
+  | 'settings.download.download_attachments_desc'
   | 'settings.download.download_descriptions'
   | 'settings.download.download_subtitles'
   | 'settings.download.download_subtitles_desc'
