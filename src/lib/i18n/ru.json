@@ -3870,6 +3870,7 @@
       "section_per_platform": "Настройки платформ",
       "section_per_platform_desc": "Настройки для YouTube, курсов и Bilibili.",
       "download_attachments": "Скачивать вложения",
+      "download_attachments_desc": "Сохранять вложения курса вместе со скачанными уроками.",
       "download_descriptions": "Сохранять описания",
       "embed_metadata": "Встраивать метаданные",
       "embed_metadata_desc": "Записывать информацию о названии и исполнителе в скачанные файлы",

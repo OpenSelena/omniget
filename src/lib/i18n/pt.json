@@ -3870,6 +3870,7 @@
       "section_per_platform": "Per-platform options",
       "section_per_platform_desc": "YouTube, courses, and Bilibili-specific settings.",
       "download_attachments": "Baixar anexos",
+      "download_attachments_desc": "Salvar anexos do curso junto com as aulas baixadas.",
       "download_descriptions": "Salvar descrições",
       "embed_metadata": "Embutir metadados",
       "embed_metadata_desc": "Gravar título e artista nos arquivos baixados",

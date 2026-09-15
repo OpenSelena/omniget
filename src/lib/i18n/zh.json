@@ -3870,6 +3870,7 @@
       "section_per_platform": "各平台专属选项",
       "section_per_platform_desc": "YouTube、课程和 Bilibili 专属设置。",
       "download_attachments": "下载附件",
+      "download_attachments_desc": "将课程附件与下载的课程一起保存。",
       "download_descriptions": "保存描述",
       "embed_metadata": "嵌入元数据",
       "embed_metadata_desc": "将标题和作者信息写入下载的文件",

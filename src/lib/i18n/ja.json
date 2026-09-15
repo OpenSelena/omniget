@@ -3870,6 +3870,7 @@
       "section_per_platform": "Per-platform options",
       "section_per_platform_desc": "YouTube, courses, and Bilibili-specific settings.",
       "download_attachments": "添付ファイルをダウンロード",
+      "download_attachments_desc": "コースの添付ファイルをダウンロードしたレッスンと一緒に保存します。",
       "download_descriptions": "説明を保存",
       "embed_metadata": "メタデータを埋め込む",
       "embed_metadata_desc": "タイトルやアーティスト情報をダウンロードファイルに書き込みます",
