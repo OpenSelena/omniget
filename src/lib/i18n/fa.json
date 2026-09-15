@@ -3870,7 +3870,7 @@
       "section_per_platform": "Per-platform options",
       "section_per_platform_desc": "YouTube, courses, and Bilibili-specific settings.",
       "download_attachments": "Download attachments",
-      "download_attachments_desc": "Save course attachments alongside the downloaded lessons.",
+      "download_attachments_desc": "پیوست‌های دوره را همراه با درس‌های دانلودشده ذخیره کنید.",
       "download_descriptions": "Save descriptions",
       "embed_metadata": "Embed metadata",
       "embed_metadata_desc": "Write title and artist info into downloaded files",
