@@ -3844,7 +3844,8 @@
       "lang_fr": "Français",
       "lang_es": "Español",
       "lang_el": "Ελληνικά",
-      "lang_fa": "فارسی"
+      "lang_fa": "فارسی",
+      "lang_lo": "ລາວ"
     },
     "download": {
       "default_output_dir": "默认文件夹",

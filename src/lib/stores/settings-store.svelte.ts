@@ -236,8 +236,9 @@ function applyTypography(typo: TypographySettings | undefined) {
   if (typeof document === "undefined") return;
   const t = typo ?? TYPOGRAPHY_DEFAULTS;
   const root = document.documentElement.style;
-  root.setProperty("--font-display", fontStack(t.font_display));
-  root.setProperty("--font-body", bodyFontStack(t.font_body));
+  // 'OmniGet Lao' is unicode-range limited to Lao, so it only affects Lao glyphs.
+  root.setProperty("--font-display", `'OmniGet Lao', ${fontStack(t.font_display)}`);
+  root.setProperty("--font-body", `'OmniGet Lao', ${bodyFontStack(t.font_body)}`);
   root.setProperty("--font-mono", monoFontStack(t.font_mono));
   root.setProperty("--leading-base", String(t.line_height_base));
   const scale = typeof t.spacing_scale === "number" ? t.spacing_scale : 1.0;

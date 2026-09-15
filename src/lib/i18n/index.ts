@@ -67,6 +67,11 @@ const config = {
       key: "",
       loader: async () => (await import("./fa.json")).default,
     },
+    {
+      locale: "lo",
+      key: "",
+      loader: async () => (await import("./lo.json")).default,
+    },
   ],
 };
 
