@@ -31,21 +31,22 @@ pub struct ScreencastSession {
 }
 
 fn token_path() -> Option<PathBuf> {
-    let base = std::env::var_os("OMNIGET_DATA_DIR")
+    if let Some(dir) = std::env::var_os("OMNIGET_DATA_DIR") {
+        return Some(PathBuf::from(dir).join("omnidisc-screencast.json"));
+    }
+    let data_root = std::env::var_os("XDG_DATA_HOME")
         .map(PathBuf::from)
-        .or_else(|| {
-            std::env::var_os("XDG_DATA_HOME")
-                .map(PathBuf::from)
-                .map(|p| p.join("wtf.tonho.omniget"))
-        })
-        .or_else(|| {
-            std::env::var_os("HOME").map(|h| {
-                PathBuf::from(h)
-                    .join(".local/share")
-                    .join("wtf.tonho.omniget")
-            })
-        })?;
-    Some(base.join("omnidisc-screencast.json"))
+        .or_else(|| std::env::var_os("HOME").map(|h| PathBuf::from(h).join(".local/share")))?;
+
+    let modern = data_root.join("com.openselena.omniget").join("omnidisc-screencast.json");
+    if modern.exists() {
+        return Some(modern);
+    }
+    let legacy = data_root.join("wtf.tonho.omniget").join("omnidisc-screencast.json");
+    if legacy.exists() {
+        return Some(legacy);
+    }
+    Some(modern)
 }
 
 fn load_token() -> Option<String> {

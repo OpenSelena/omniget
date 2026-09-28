@@ -11,7 +11,7 @@ Plugins: Courses, Study (course player with timestamped notes, PDF/EPUB/CBZ read
 ## Key facts
 
 - Name: OmniGet
-- Repository: https://github.com/tonhowtf/omniget
+- Repository: https://github.com/OpenSelena/omniget
 - License: GPL-3.0
 - Platforms: Windows, macOS (Apple Silicon and Intel), Linux (x86_64 and ARM64)
 - Cost: free, no account, no ads, no paid tier, no telemetry on what is downloaded
@@ -23,8 +23,8 @@ Plugins: Courses, Study (course player with timestamped notes, PDF/EPUB/CBZ read
 
 ## Install
 
-- Windows: `.exe` installer, portable `.exe` or `.msi` from Releases, or `winget install -e --id tonhowtf.OmniGet`
-- macOS: `.dmg` from Releases or `brew install --cask tonhowtf/tap/omniget`. Unsigned, so first launch needs `xattr -cr /Applications/omniget.app`
+- Windows: `.exe` installer, portable `.exe` or `.msi` from Releases, or `winget install -e --id OpenSelena.OmniGet`
+- macOS: `.dmg` from Releases or `brew install --cask OpenSelena/tap/omniget`. Unsigned, so first launch needs `xattr -cr /Applications/omniget.app`
 - Linux: `.deb` for Debian and Ubuntu, `.rpm` for Fedora and openSUSE, `.AppImage` elsewhere. On Debian 12+ and Ubuntu 24.04+ the AppImage needs `sudo apt install libfuse2`
 - Browser extension: exported from Settings → Plugins → Browser extension, or `omniget-chrome-extension-vX.Y.Z.zip` from Releases; loaded unpacked and paired with one click
 - OmniGet is not published on Flathub.

@@ -26,10 +26,29 @@ og_data_dir() {
     echo "$OMNIGET_DATA_DIR"
     return
   fi
+  local p
   case "$(og_os)" in
-    mac) echo "$HOME/Library/Application Support/wtf.tonho.omniget" ;;
-    linux) echo "${XDG_DATA_HOME:-$HOME/.local/share}/wtf.tonho.omniget" ;;
-    windows) echo "${APPDATA:-$HOME/AppData/Roaming}/wtf.tonho.omniget" ;;
+    mac)
+      p="$HOME/Library/Application Support/com.openselena.omniget"
+      [ -d "$p" ] && echo "$p" && return
+      p="$HOME/Library/Application Support/wtf.tonho.omniget"
+      [ -d "$p" ] && echo "$p" && return
+      echo "$HOME/Library/Application Support/com.openselena.omniget"
+      ;;
+    linux)
+      p="${XDG_DATA_HOME:-$HOME/.local/share}/com.openselena.omniget"
+      [ -d "$p" ] && echo "$p" && return
+      p="${XDG_DATA_HOME:-$HOME/.local/share}/wtf.tonho.omniget"
+      [ -d "$p" ] && echo "$p" && return
+      echo "${XDG_DATA_HOME:-$HOME/.local/share}/com.openselena.omniget"
+      ;;
+    windows)
+      p="${APPDATA:-$HOME/AppData/Roaming}/com.openselena.omniget"
+      [ -d "$p" ] && echo "$p" && return
+      p="${APPDATA:-$HOME/AppData/Roaming}/wtf.tonho.omniget"
+      [ -d "$p" ] && echo "$p" && return
+      echo "${APPDATA:-$HOME/AppData/Roaming}/com.openselena.omniget"
+      ;;
     *) echo "$HOME/.omniget" ;;
   esac
 }

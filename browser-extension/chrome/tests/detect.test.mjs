@@ -44,7 +44,7 @@ test("returns null for malformed URLs", () => {
 
 test("returns null for unsupported sites", () => {
   assertNull("https://www.google.com/search?q=omniget");
-  assertNull("https://github.com/tonhowtf/omniget");
+  assertNull("https://github.com/OpenSelena/omniget");
   assertNull("https://example.com/video/123");
 });
 

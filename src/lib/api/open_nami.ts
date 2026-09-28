@@ -32,10 +32,16 @@ export interface DependencyStatus {
   ok: boolean;
   message: string;
   gallery_dl_version: string | null;
+  yt_dlp_version?: string | null;
+  auto_provision_available?: boolean;
 }
 
 export async function checkPythonDependencies(): Promise<DependencyStatus> {
   return await invoke<DependencyStatus>('open_nami_check_python_dependencies');
+}
+
+export async function ensureBinaries(): Promise<DependencyStatus> {
+  return await invoke<DependencyStatus>('open_nami_ensure_binaries');
 }
 
 export async function runGalleryDlDownload(

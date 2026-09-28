@@ -2,7 +2,7 @@
 # Categories, GenericName and Keywords are hardcoded rather than derived from
 # `bundle.category`: settings.app_category() maps through a fixed AppCategory
 # table that cannot express a multi-value list like Network;FileTransfer;.
-# Keep these three lines in sync with flatpak/wtf.tonho.omniget.desktop.
+# Keep these three lines in sync with flatpak/com.openselena.omniget.desktop.
 Categories=Network;FileTransfer;Utility;
 GenericName=Download Manager
 Keywords=omniget;download;downloader;video;media;udemy;hotmart;youtube;telegram;

@@ -852,14 +852,14 @@ mod tests {
     fn the_pack_manifest_has_what_the_apps_read() {
         let v = pack_json(
             "Meu Pack",
-            "Tonho",
+            "OpenSelena",
             true,
             &["a.webp".into(), "b.webp".into()],
             &["😀".into()],
         );
         let pack = &v["sticker_packs"][0];
         assert_eq!(pack["name"], "Meu Pack");
-        assert_eq!(pack["publisher"], "Tonho");
+        assert_eq!(pack["publisher"], "OpenSelena");
         assert_eq!(pack["identifier"], "meu-pack");
         assert_eq!(pack["tray_image_file"], "tray.png");
         assert_eq!(pack["animated_sticker_pack"], true);

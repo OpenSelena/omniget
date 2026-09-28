@@ -1,13 +1,13 @@
 {
   "version": "v1.1.0",
   "entity": {
-    "type": "individual",
+    "type": "organization",
     "role": "owner",
-    "name": "Antonio Leandro",
-    "email": "tonhowtf@gmail.com",
-    "description": "Software engineer in Recife, Brazil. Author and sole maintainer of OmniGet.",
+    "name": "OpenSelena",
+    "email": "igect@vk.com",
+    "description": "OpenSelena IGECT - OmniGet Project.",
     "webpageUrl": {
-      "url": "https://tonho.wtf"
+      "url": "https://github.com/OpenSelena/omniget"
     }
   },
   "projects": [
@@ -16,10 +16,10 @@
       "name": "OmniGet",
       "description": "A free desktop app for Windows, macOS and Linux that turns a link into a file. yt-dlp and gallery-dl run underneath, with a torrent client and 156 built-in tools for what comes after the download: transcribing, converting, reading and studying what you saved. No account, no ads, no telemetry on what anyone downloads. Files stay on the machine that fetched them.",
       "webpageUrl": {
-        "url": "https://github.com/tonhowtf/omniget"
+        "url": "https://github.com/OpenSelena/omniget"
       },
       "repositoryUrl": {
-        "url": "https://github.com/tonhowtf/omniget"
+        "url": "https://github.com/OpenSelena/omniget"
       },
       "licenses": ["spdx:GPL-3.0-only"],
       "tags": ["downloader", "desktop", "media", "rust", "tauri", "privacy"]
@@ -30,7 +30,7 @@
       {
         "guid": "github-sponsors",
         "type": "payment-provider",
-        "address": "https://github.com/sponsors/tonhowtf",
+        "address": "https://github.com/sponsors/OpenSelena",
         "description": "GitHub Sponsors, recurring or one-off."
       },
       {

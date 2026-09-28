@@ -125,7 +125,7 @@ else
 fi
 echo
 
-OMNIGET_REPO="${OMNIGET_REPO:-tonhowtf/omniget}"
+OMNIGET_REPO="${OMNIGET_REPO:-OpenSelena/omniget}"
 
 # Prebuilt omniget-cli asset triple for this machine, or empty if unsupported.
 cli_triple() {

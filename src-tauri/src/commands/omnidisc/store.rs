@@ -24,7 +24,8 @@ use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::{Mutex, OnceLock};
 
-pub const SERVICE: &str = "wtf.tonho.omniget.omnidisc";
+pub const SERVICE: &str = "com.openselena.omniget.omnidisc";
+const LEGACY_SERVICE: &str = "wtf.tonho.omniget.omnidisc";
 const SESSIONS_FILE: &str = "sessions.bin";
 const KEY_FILE: &str = "session.key";
 const IV_LEN: usize = 16;
@@ -194,7 +195,17 @@ fn keyring_get(url: &str) -> Option<Result<Option<String>, String>> {
     }
     Some(keyring_entry(url).and_then(|e| match e.get_password() {
         Ok(t) => Ok(Some(t)),
-        Err(keyring::Error::NoEntry) => Ok(None),
+        Err(keyring::Error::NoEntry) => {
+            if let Ok(legacy_e) = keyring::Entry::new(LEGACY_SERVICE, url) {
+                match legacy_e.get_password() {
+                    Ok(t) => Ok(Some(t)),
+                    Err(keyring::Error::NoEntry) => Ok(None),
+                    Err(err) => Err(err.to_string()),
+                }
+            } else {
+                Ok(None)
+            }
+        }
         Err(err) => Err(err.to_string()),
     }))
 }
@@ -203,6 +214,9 @@ fn keyring_get(url: &str) -> Option<Result<Option<String>, String>> {
 fn keyring_delete(url: &str) -> Option<Result<(), String>> {
     if !use_keyring() {
         return None;
+    }
+    if let Ok(legacy_e) = keyring::Entry::new(LEGACY_SERVICE, url) {
+        let _ = legacy_e.delete_credential();
     }
     Some(
         keyring_entry(url).and_then(|e| match e.delete_credential() {

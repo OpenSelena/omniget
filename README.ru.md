@@ -22,7 +22,7 @@ OmniGet — бесплатный загрузчик и набор медиаин
 </p>
 
 <p align="center">
-  <sub>Русский перевод начал <a href="https://github.com/xJaroslav69">@xJaroslav69</a> (<a href="https://github.com/tonhowtf/omniget/pull/130">PR #130</a>). Спасибо.</sub>
+  <sub>Русский перевод начал <a href="https://github.com/xJaroslav69">@xJaroslav69</a> (<a href="https://github.com/OpenSelena/omniget/pull/130">PR #130</a>). Спасибо.</sub>
 </p>
 
 <p align="center">
@@ -30,9 +30,9 @@ OmniGet — бесплатный загрузчик и набор медиаин
 </p>
 
 <p align="center">
-  <a href="https://github.com/tonhowtf/omniget/releases/latest"><img src="https://img.shields.io/github/v/release/tonhowtf/omniget?style=for-the-badge&label=release&color=F28500" alt="Последний релиз" /></a>
-  <a href="https://github.com/tonhowtf/omniget/releases"><img src="https://img.shields.io/github/downloads/tonhowtf/omniget/total?style=for-the-badge&label=downloads&color=1E6FE8" alt="Всего загрузок" /></a>
-  <a href="https://github.com/tonhowtf/omniget/stargazers"><img src="https://img.shields.io/github/stars/tonhowtf/omniget?style=for-the-badge&color=FFD426" alt="Звёзды на GitHub" /></a>
+  <a href="https://github.com/OpenSelena/omniget/releases/latest"><img src="https://img.shields.io/github/v/release/OpenSelena/omniget?style=for-the-badge&label=release&color=F28500" alt="Последний релиз" /></a>
+  <a href="https://github.com/OpenSelena/omniget/releases"><img src="https://img.shields.io/github/downloads/OpenSelena/omniget/total?style=for-the-badge&label=downloads&color=1E6FE8" alt="Всего загрузок" /></a>
+  <a href="https://github.com/OpenSelena/omniget/stargazers"><img src="https://img.shields.io/github/stars/OpenSelena/omniget?style=for-the-badge&color=FFD426" alt="Звёзды на GitHub" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-2AA845?style=for-the-badge" alt="Лицензия GPL-3.0" /></a>
   <a href="https://discord.gg/jgdxyPy7Vn"><img src="https://img.shields.io/badge/Discord-сообщество-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Сообщество в Discord" /></a>
   <a href="https://hosted.weblate.org/engage/omniget/"><img src="https://hosted.weblate.org/widget/omniget/frontend-json/svg-badge.svg" alt="Статус перевода" /></a>
@@ -102,7 +102,7 @@ yt-dlp — это движок, на котором работает OmniGet, и
 
 ## Скачать и установить
 
-Выберите свою систему. Все сборки публикуются на [странице релизов](https://github.com/tonhowtf/omniget/releases/latest). Обновления приходят внутри приложения.
+Выберите свою систему. Все сборки публикуются на [странице релизов](https://github.com/OpenSelena/omniget/releases/latest). Обновления приходят внутри приложения.
 
 <table>
   <tr>
@@ -113,12 +113,12 @@ yt-dlp — это движок, на котором работает OmniGet, и
   <tr>
     <td><b>Windows 10 / 11</b></td>
     <td><code>omniget_x.y.z_x64-setup.exe</code> (установщик)<br/><code>omniget_x.y.z_x64-portable.exe</code> (без установки, запускается откуда угодно)<br/><code>omniget_x.y.z_x64_en-US.msi</code> (для ИТ-развёртывания)</td>
-    <td><code>winget install -e --id tonhowtf.OmniGet</code></td>
+    <td><code>winget install -e --id OpenSelena.OmniGet</code></td>
   </tr>
   <tr>
     <td><b>macOS 10.15+</b></td>
     <td><code>omniget_x.y.z_aarch64.dmg</code> для Apple Silicon (M1 и новее)<br/><code>omniget_x.y.z_x64.dmg</code> для Mac на Intel</td>
-    <td><code>brew install --cask tonhowtf/tap/omniget</code></td>
+    <td><code>brew install --cask OpenSelena/tap/omniget</code></td>
   </tr>
   <tr>
     <td><b>Linux</b></td>
@@ -214,7 +214,7 @@ codesign --force --deep --sign - /Applications/omniget.app
 
 ### Уровень 2: из zip-архива релиза
 
-В каждом релизе есть `omniget-chrome-extension-vX.Y.Z.zip`. Скачайте его из [последнего релиза](https://github.com/tonhowtf/omniget/releases/latest), распакуйте и повторите шаги 3–7, указав в **Загрузить распакованное расширение** распакованную папку. Это удобно, если приложение стоит на одной машине, а браузер на другой, или вы ставите расширение кому-то ещё.
+В каждом релизе есть `omniget-chrome-extension-vX.Y.Z.zip`. Скачайте его из [последнего релиза](https://github.com/OpenSelena/omniget/releases/latest), распакуйте и повторите шаги 3–7, указав в **Загрузить распакованное расширение** распакованную папку. Это удобно, если приложение стоит на одной машине, а браузер на другой, или вы ставите расширение кому-то ещё.
 
 ### Уровень 3: Firefox, другие браузеры и ручное сопряжение
 
@@ -531,7 +531,7 @@ Debian и Ubuntu: `.deb`. Fedora, openSUSE, семейство RHEL: `.rpm`. В�
 
 ## Командная строка
 
-`omniget-cli` выходит с каждым релизом для Windows, macOS (Intel и Apple Silicon) и Linux. Возьмите `omniget-cli-<версия>-<платформа>` из [последнего релиза](https://github.com/tonhowtf/omniget/releases/latest).
+`omniget-cli` выходит с каждым релизом для Windows, macOS (Intel и Apple Silicon) и Linux. Возьмите `omniget-cli-<версия>-<платформа>` из [последнего релиза](https://github.com/OpenSelena/omniget/releases/latest).
 
 ```bash
 omniget info <url>                     # название, форматы и размер, ничего не скачивает
@@ -548,7 +548,7 @@ omniget import-cookies cookies.txt     # формат Netscape
 Если вы просто хотите пользоваться OmniGet, [возьмите релиз](#скачать-и-установить). Для сборки нужны [Rust](https://rustup.rs/) (точная версия тулчейна закреплена в `rust-toolchain.toml`, потому что от неё зависит ABI плагинов), [Node.js](https://nodejs.org/) 18+ и [pnpm](https://pnpm.io/).
 
 ```bash
-git clone https://github.com/tonhowtf/omniget.git
+git clone https://github.com/OpenSelena/omniget.git
 cd omniget
 pnpm install
 pnpm tauri dev
@@ -580,7 +580,7 @@ pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'
 
 ## Участие и переводы
 
-Сообщения об ошибках и pull request'ы — в [Issues](https://github.com/tonhowtf/omniget/issues) и [Pull requests](https://github.com/tonhowtf/omniget/pulls). Вопросы и быстрая помощь — в [Discord](https://discord.gg/jgdxyPy7Vn).
+Сообщения об ошибках и pull request'ы — в [Issues](https://github.com/OpenSelena/omniget/issues) и [Pull requests](https://github.com/OpenSelena/omniget/pulls). Вопросы и быстрая помощь — в [Discord](https://discord.gg/jgdxyPy7Vn).
 
 Переводы ведутся на [Weblate](https://hosted.weblate.org/engage/omniget/). Выберите свой язык и переводите в браузере. Новые строки появляются там через несколько часов после попадания в `main`.
 
@@ -589,9 +589,9 @@ OmniGet построен на [yt-dlp](https://github.com/yt-dlp/yt-dlp), [FFmpe
 Loop, существо на главном экране, — маскот OmniGet. Фан-арт приветствуется. Оригинальную графику нельзя использовать в коммерческих целях и распространять в изменённом виде.
 
 <p align="center">
-  <a href="https://star-history.com/#tonhowtf/omniget&Date"><img src="https://api.star-history.com/svg?repos=tonhowtf/omniget&type=Date" alt="История звёзд tonhowtf/omniget" width="600" /></a>
+  <a href="https://star-history.com/#OpenSelena/omniget&Date"><img src="https://api.star-history.com/svg?repos=OpenSelena/omniget&type=Date" alt="История звёзд OpenSelena/omniget" width="600" /></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/tonhowtf/omniget/releases/latest"><b>Скачать OmniGet</b></a> · <a href="LICENSE">GPL-3.0</a>
+  <a href="https://github.com/OpenSelena/omniget/releases/latest"><b>Скачать OmniGet</b></a> · <a href="LICENSE">GPL-3.0</a>
 </p>

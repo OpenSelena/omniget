@@ -425,7 +425,7 @@ mod tests {
         let r = run(&opts(&dir), &noop_progress()).expect("roda");
         assert_eq!(r.conversations_total, 2);
         assert_eq!(r.total, 5);
-        assert_eq!(r.me, "Tonho Dev");
+        assert_eq!(r.me, "OpenSelena Dev");
         assert!(r.me_guessed);
         assert_eq!(r.sent, 2);
         assert_eq!(r.received, 3);

@@ -231,7 +231,7 @@ mod tests {
         // Path pessoal identifica a pessoa sozinho, e e o que mais aparece em
         // log colado em issue publica.
         for (entrada, proibido) in [
-            ("/Users/tonho/Downloads/x.mp4", "tonho"),
+            ("/Users/openselena/Downloads/x.mp4", "openselena"),
             ("/home/maria/videos", "maria"),
             ("C:\\Users\\Joao\\AppData", "Joao"),
         ] {

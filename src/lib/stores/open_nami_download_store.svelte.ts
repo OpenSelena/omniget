@@ -6,6 +6,7 @@ import {
   type DownloadProgress,
   type DownloadResult,
 } from "$lib/api/open_nami";
+import { parseProfileUrl } from "$lib/utils/open_nami_parser";
 
 export type StatusType = "success" | "error" | "info";
 
@@ -130,7 +131,8 @@ export async function startDownload(
     throw new Error("A download is already in progress");
   }
 
-  const cleanUrl = url.trim();
+  const parsed = parseProfileUrl(url.trim());
+  const cleanUrl = parsed.cleanUrl || url.trim();
   const cleanOutputDir = outputDir.trim();
   const cleanCookiesFile = cookiesFile.trim();
 

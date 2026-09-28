@@ -350,7 +350,7 @@ pub fn read_extension_metadata(url: &str) -> Option<ExtensionMetadata> {
 /// best we can do is delete the files and let Chrome / Firefox skip them
 /// silently the next time they look for a host.
 pub fn cleanup_legacy_native_messaging() {
-    let host_name = "wtf.tonho.omniget";
+    let host_names = ["wtf.tonho.omniget", "com.openselena.omniget"];
 
     if let Some(data_dir) = crate::core::paths::app_data_dir() {
         let dir = data_dir.join("chrome-native-host");
@@ -359,61 +359,63 @@ pub fn cleanup_legacy_native_messaging() {
         }
     }
 
-    #[cfg(target_os = "linux")]
-    {
-        if let Some(config_dir) = dirs::config_dir() {
-            let chrome = config_dir
-                .join("google-chrome")
-                .join("NativeMessagingHosts")
-                .join(format!("{host_name}.json"));
-            let _ = std::fs::remove_file(chrome);
+    for host_name in host_names {
+        #[cfg(target_os = "linux")]
+        {
+            if let Some(config_dir) = dirs::config_dir() {
+                let chrome = config_dir
+                    .join("google-chrome")
+                    .join("NativeMessagingHosts")
+                    .join(format!("{host_name}.json"));
+                let _ = std::fs::remove_file(chrome);
+            }
+            if let Some(home) = dirs::home_dir() {
+                let firefox = home
+                    .join(".mozilla")
+                    .join("native-messaging-hosts")
+                    .join(format!("{host_name}.json"));
+                let _ = std::fs::remove_file(firefox);
+            }
         }
-        if let Some(home) = dirs::home_dir() {
-            let firefox = home
-                .join(".mozilla")
-                .join("native-messaging-hosts")
-                .join(format!("{host_name}.json"));
-            let _ = std::fs::remove_file(firefox);
-        }
-    }
 
-    #[cfg(target_os = "macos")]
-    {
-        if let Some(data_dir) = dirs::data_dir() {
-            let chrome = data_dir
-                .join("Google")
-                .join("Chrome")
-                .join("NativeMessagingHosts")
-                .join(format!("{host_name}.json"));
-            let _ = std::fs::remove_file(chrome);
+        #[cfg(target_os = "macos")]
+        {
+            if let Some(data_dir) = dirs::data_dir() {
+                let chrome = data_dir
+                    .join("Google")
+                    .join("Chrome")
+                    .join("NativeMessagingHosts")
+                    .join(format!("{host_name}.json"));
+                let _ = std::fs::remove_file(chrome);
+            }
+            if let Some(home) = dirs::home_dir() {
+                let firefox = home
+                    .join("Library")
+                    .join("Application Support")
+                    .join("Mozilla")
+                    .join("NativeMessagingHosts")
+                    .join(format!("{host_name}.json"));
+                let _ = std::fs::remove_file(firefox);
+            }
         }
-        if let Some(home) = dirs::home_dir() {
-            let firefox = home
-                .join("Library")
-                .join("Application Support")
-                .join("Mozilla")
-                .join("NativeMessagingHosts")
-                .join(format!("{host_name}.json"));
-            let _ = std::fs::remove_file(firefox);
-        }
-    }
 
-    #[cfg(target_os = "windows")]
-    {
-        // Remove the registry keys created by the legacy `ensure_registered`
-        // path. Failure (key absent, no permissions) is fine — we ignore it.
-        use std::os::windows::process::CommandExt;
-        const CREATE_NO_WINDOW: u32 = 0x08000000;
+        #[cfg(target_os = "windows")]
+        {
+            // Remove the registry keys created by the legacy `ensure_registered`
+            // path. Failure (key absent, no permissions) is fine — we ignore it.
+            use std::os::windows::process::CommandExt;
+            const CREATE_NO_WINDOW: u32 = 0x08000000;
 
-        for vendor in ["Google\\Chrome", "Mozilla"] {
-            let _ = std::process::Command::new("reg")
-                .args([
-                    "delete",
-                    &format!("HKCU\\Software\\{vendor}\\NativeMessagingHosts\\{host_name}"),
-                    "/f",
-                ])
-                .creation_flags(CREATE_NO_WINDOW)
-                .status();
+            for vendor in ["Google\\Chrome", "Mozilla"] {
+                let _ = std::process::Command::new("reg")
+                    .args([
+                        "delete",
+                        &format!("HKCU\\Software\\{vendor}\\NativeMessagingHosts\\{host_name}"),
+                        "/f",
+                    ])
+                    .creation_flags(CREATE_NO_WINDOW)
+                    .status();
+            }
         }
     }
 }

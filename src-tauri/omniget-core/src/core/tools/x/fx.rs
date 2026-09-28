@@ -16,7 +16,7 @@ fn client() -> anyhow::Result<reqwest::Client> {
     let mut headers = HeaderMap::new();
     headers.insert(
         USER_AGENT,
-        HeaderValue::from_static("OmniGet/0.9 (+https://github.com/tonhowtf/omniget)"),
+        HeaderValue::from_static("OmniGet/0.9 (+https://github.com/OpenSelena/omniget)"),
     );
     Ok(
         crate::core::http_client::apply_global_proxy(reqwest::Client::builder())

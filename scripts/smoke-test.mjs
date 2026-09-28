@@ -120,6 +120,10 @@ if (code !== 0) {
 
 if (portable) {
   const vazouParaOPerfil = [
+    join(fakeProfile, "Local", "com.openselena.omniget"),
+    join(fakeProfile, "Roaming", "com.openselena.omniget"),
+    join(fakeProfile, "share", "com.openselena.omniget"),
+    join(fakeProfile, "Library", "Application Support", "com.openselena.omniget"),
     join(fakeProfile, "Local", "wtf.tonho.omniget"),
     join(fakeProfile, "Roaming", "wtf.tonho.omniget"),
     join(fakeProfile, "share", "wtf.tonho.omniget"),

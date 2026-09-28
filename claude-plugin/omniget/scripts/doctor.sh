@@ -70,12 +70,12 @@ case "$(og_os)" in
     echo "                   uv tool install mlx-whisper     (faster on Apple Silicon)"
     ;;
   linux)
-    echo "  OmniGet app:     https://github.com/tonhowtf/omniget/releases/latest  (.deb/.rpm/.AppImage)"
+    echo "  OmniGet app:     https://github.com/OpenSelena/omniget/releases/latest  (.deb/.rpm/.AppImage)"
     echo "  yt-dlp + ffmpeg: sudo apt install ffmpeg && pip install -U yt-dlp   (or your distro's packages)"
     echo "  local whisper:   whisper-bin-ubuntu-x64.tar.gz from https://github.com/ggml-org/whisper.cpp/releases"
     ;;
   windows)
-    echo "  OmniGet app:     winget install -e --id tonhowtf.OmniGet"
+    echo "  OmniGet app:     winget install -e --id OpenSelena.OmniGet"
     echo "  yt-dlp + ffmpeg: winget install yt-dlp.yt-dlp Gyan.FFmpeg"
     echo "  local whisper:   whisper-bin-x64.zip from https://github.com/ggml-org/whisper.cpp/releases"
     ;;

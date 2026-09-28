@@ -198,4 +198,4 @@ jobs:
           sudo apt-get install -y appstream
 
       - name: Validate flatpak metainfo
-        run: appstreamcli validate flatpak/wtf.tonho.omniget.metainfo.xml
+        run: appstreamcli validate flatpak/com.openselena.omniget.metainfo.xml

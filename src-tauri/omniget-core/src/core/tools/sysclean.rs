@@ -68,7 +68,7 @@ const DEFS: &[Def] = &[
     d("adobe", "apps", "Adobe (Media Cache)", "review", &["~/Library/Application Support/Adobe/Common/Media Cache Files", "~/Library/Application Support/Adobe/Common/Media Cache", "~/Library/Application Support/Adobe/Common/Peak Files"]),
     d("telegram", "apps", "Telegram", "review", &["~/Library/Group Containers/6N38VWS5BX.ru.keepcoder.Telegram/appstore/account-*/postbox/media", "~/Library/Application Support/Telegram Desktop/tdata/user_data/cache"]),
     d("whatsapp", "apps", "WhatsApp", "safe", &["~/Library/Group Containers/group.net.whatsapp.WhatsApp.shared/Message/Media/tmp", "~/Library/Containers/net.whatsapp.WhatsApp/Data/Library/Caches"]),
-    d("omniget-tmp", "apps", "OmniGet (temporários das tools)", "safe", &["~/Library/Application Support/wtf.tonho.omniget/tools/tmp"]),
+    d("omniget-tmp", "apps", "OmniGet (temporários das tools)", "safe", &["~/Library/Application Support/com.openselena.omniget/tools/tmp", "~/Library/Application Support/wtf.tonho.omniget/tools/tmp"]),
     d("xcode-derived", "dev", "Xcode DerivedData", "safe", &["~/Library/Developer/Xcode/DerivedData"]),
     d("xcode-device-support", "dev", "Xcode iOS DeviceSupport", "review", &["~/Library/Developer/Xcode/iOS DeviceSupport", "~/Library/Developer/Xcode/watchOS DeviceSupport", "~/Library/Developer/Xcode/tvOS DeviceSupport"]),
     d("simulator-caches", "dev", "Simulator caches", "safe", &["~/Library/Developer/CoreSimulator/Caches"]),
@@ -343,7 +343,10 @@ const DEFS: &[Def] = &[
         "apps",
         "OmniGet (temporários das tools)",
         "safe",
-        &["%APPDATA%\\wtf.tonho.omniget\\tools\\tmp"],
+        &[
+            "%APPDATA%\\com.openselena.omniget\\tools\\tmp",
+            "%APPDATA%\\wtf.tonho.omniget\\tools\\tmp",
+        ],
     ),
     d(
         "npm",
@@ -621,6 +624,8 @@ const DEFS: &[Def] = &[
         "OmniGet (temporários das tools)",
         "safe",
         &[
+            "~/.local/share/com.openselena.omniget/tools/tmp",
+            "~/.var/app/com.openselena.omniget/data/com.openselena.omniget/tools/tmp",
             "~/.local/share/wtf.tonho.omniget/tools/tmp",
             "~/.var/app/wtf.tonho.omniget/data/wtf.tonho.omniget/tools/tmp",
         ],
