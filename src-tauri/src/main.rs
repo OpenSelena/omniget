@@ -25,7 +25,8 @@ fn check_portable_mode() {
                 let portable_settings = data_dir.join("settings.json");
                 if !portable_settings.exists() {
                     if let Some(base) = dirs::data_dir() {
-                        let modern_settings = base.join("com.openselena.omniget").join("settings.json");
+                        let modern_settings =
+                            base.join("com.openselena.omniget").join("settings.json");
                         let legacy_settings = base.join("wtf.tonho.omniget").join("settings.json");
                         let source = if modern_settings.exists() {
                             Some(modern_settings)
