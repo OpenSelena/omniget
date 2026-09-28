@@ -11,7 +11,7 @@
   <meta property="og:type" content="website" />
   <meta property="og:title" content="OmniGet — Download Courses, Videos, Music & Books" />
   <meta property="og:description" content="Free, open-source desktop downloader & player. Supports 1,800+ sites, Udemy, Hotmart, Bilibili 4K, EPUB/PDF reader, Telegram uploader, and OpenNami social archiver under GPL-3.0." />
-  <meta property="og:image" content="./assets/readme/en/home-hero.png" />
+  <meta property="og:image" content="./assets/readme/home.png" />
   <meta property="og:url" content="https://omniget.nav.bd/" />
 
   <!-- Canonical -->
@@ -182,8 +182,9 @@
     .nav-brand:focus-visible,
     .faq-question:focus-visible,
     .demo-tab-btn:focus-visible,
-    .om-tab-btn:focus-visible,
-    .om-platform-btn:focus-visible,
+    .oo-nav-item:focus-visible,
+    .oo-pill-btn:focus-visible,
+    .oo-chip:focus-visible,
     .mobile-menu-toggle:focus-visible {
       outline: 2px solid var(--brand-orange);
       outline-offset: 2px;
@@ -627,131 +628,148 @@
     }
 
     /* ==========================================================================
-       OPEN OMNI LIVE APP PREVIEW (EXACT APP DESIGN MIRROR)
+       OPEN NAMI LIVE APP PREVIEW (DESKTOP SHELL MIRROR)
        ========================================================================== */
-    .open-omni-shell {
-      --oo-accent: #0071E3;
-      --glass-surface: rgba(255, 255, 255, 0.88);
-      --glass-surface-strong: #ffffff;
-      --glass-border: rgba(103, 103, 108, 0.22);
-      --glass-radius-lg: 20px;
-      --glass-radius: 14px;
-      --glass-radius-sm: 10px;
-      --accent-soft: rgba(0, 113, 227, 0.12);
-      --accent-line: rgba(0, 113, 227, 0.45);
-      --accent-glow: rgba(0, 113, 227, 0.35);
-      --accent-gradient: linear-gradient(135deg, #0077EE, #0055BB);
-      --on-accent: #ffffff;
-
+    .oo-shell {
       position: relative;
-      max-width: 560px;
+      max-width: 920px;
       margin: 0 auto 40px;
       width: 100%;
       text-align: left;
-      isolation: isolate;
-    }
-
-    .oo-ambient-wash {
-      position: absolute;
-      inset: -8% -8% auto -8%;
-      height: 280px;
-      background: radial-gradient(ellipse at 50% 0%, var(--accent-soft) 0%, transparent 70%);
-      pointer-events: none;
-      z-index: -1;
-    }
-
-    .oo-page-header {
-      width: 100%;
-      margin-bottom: 1.25rem;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      background: var(--glass-surface-strong);
-      border: 1px solid var(--glass-border);
-      border-radius: 28px;
-      padding: 1rem 1.25rem;
-      box-shadow: 0 4px 16px var(--shadow-ambient);
+      background: var(--bg-card);
+      border: 1px solid var(--border-line);
+      border-radius: 20px;
+      box-shadow: 0 20px 48px -16px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.04);
+      display: grid;
+      grid-template-columns: 210px minmax(0, 1fr);
+      min-height: 520px;
+      overflow: hidden;
       box-sizing: border-box;
     }
 
-    .oo-page-header .oo-mascot {
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      object-fit: cover;
-      background: #1a1a1a;
-      border: 2px solid #ffffff;
-      flex-shrink: 0;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
-    }
-
-    .oo-header-text h1 {
-      font-family: var(--font-display);
-      font-size: 1.35rem;
-      margin: 0;
-      font-weight: 700;
-      color: var(--text-head);
-      letter-spacing: -0.02em;
-    }
-
-    .oo-header-text p {
-      color: var(--text-muted);
-      margin: 0.2rem 0 0;
-      font-size: 0.82rem;
-    }
-
-    .oo-glass-panel {
-      width: 100%;
-      background: var(--glass-surface);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--glass-radius-lg);
-      padding: 1.35rem 1.25rem;
+    .oo-sidebar {
+      background: #f8fafc;
+      border-right: 1px solid var(--border-line);
+      padding: 24px 14px;
       box-sizing: border-box;
-      backdrop-filter: blur(20px) saturate(140%);
-      -webkit-backdrop-filter: blur(20px) saturate(140%);
-      box-shadow: 0 12px 32px -18px rgba(0, 0, 0, 0.14);
       display: flex;
       flex-direction: column;
-      gap: 1.25rem;
+      gap: 16px;
     }
 
-    .oo-tab-switcher {
-      display: inline-flex;
-      gap: 4px;
-      align-self: center;
-      background: var(--glass-surface-strong);
-      border: 1px solid var(--glass-border);
-      border-radius: 999px;
-      padding: 4px;
-    }
-
-    .oo-tab-btn {
+    .oo-sidebar-brand {
       display: flex;
       align-items: center;
-      gap: 6px;
-      padding: 8px 16px;
-      border: none;
-      border-radius: 999px;
-      background: transparent;
-      color: var(--text-muted);
-      font-size: 13.5px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: color 0.15s ease, background 0.2s ease;
-      font-family: inherit;
+      gap: 10px;
+      padding: 0 8px 14px;
+      border-bottom: 1px solid var(--border-line);
     }
 
-    .oo-tab-btn.active {
-      background: var(--accent-gradient);
-      color: var(--on-accent);
-      box-shadow: 0 4px 14px -4px var(--accent-glow);
+    .oo-sidebar-brand img {
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
+    }
+
+    .oo-sidebar-brand span {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--text-head);
+      letter-spacing: -0.01em;
+    }
+
+    .oo-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .oo-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 42px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-family: var(--font-body);
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-align: left;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+      width: 100%;
+    }
+
+    .oo-nav-item:hover:not(.active) {
+      background: #edf2f7;
+      color: var(--text-head);
+    }
+
+    .oo-nav-item.active {
+      background: var(--brand-blue);
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 2px 8px -1px rgba(2, 132, 199, 0.35);
+    }
+
+    .oo-nav-icon {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .oo-nav-item.active .oo-nav-icon {
+      filter: brightness(0) invert(1);
+    }
+
+    .oo-content {
+      padding: 32px 36px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      background: #ffffff;
+    }
+
+    .oo-header {
+      margin-bottom: 4px;
+    }
+
+    .oo-kicker {
+      margin: 0 0 4px;
+      color: var(--brand-orange);
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .oo-title {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-head);
+      margin: 0;
+    }
+
+    .oo-description {
+      margin: 6px 0 0;
+      color: var(--text-muted);
+      font-size: 13.5px;
+      line-height: 1.5;
     }
 
     .oo-field-label {
       display: block;
       font-size: 12.5px;
       font-weight: 600;
-      color: var(--text-body);
+      color: var(--text-head);
       margin-bottom: 8px;
     }
 
@@ -759,25 +777,26 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      background: var(--glass-surface-strong);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--glass-radius);
+      background: #f8fafc;
+      border: 1px solid var(--border-line);
+      border-radius: var(--radius-sm);
       padding: 0 14px;
       transition: border-color 0.15s ease, box-shadow 0.15s ease;
     }
 
     .oo-input-shell:focus-within {
-      border-color: var(--accent-line);
-      box-shadow: 0 0 0 3px var(--accent-soft);
+      border-color: var(--brand-blue);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
+      background: #ffffff;
     }
 
     .oo-input-shell input {
       flex: 1;
-      padding: 12px 0;
+      padding: 11px 0;
       background: transparent;
       border: none;
       color: var(--text-head);
-      font-size: 14px;
+      font-size: 13.5px;
       outline: none;
       font-family: inherit;
     }
@@ -795,30 +814,31 @@
       gap: 6px;
       padding: 6px 14px;
       border-radius: 999px;
-      border: 1px solid var(--glass-border);
-      background: var(--glass-surface-strong);
+      border: 1px solid var(--border-line);
+      background: #f8fafc;
       color: var(--text-head);
-      font-size: 12.5px;
+      font-size: 12px;
       cursor: pointer;
       transition: border-color 0.15s ease, background 0.15s ease;
       font-family: inherit;
     }
 
     .oo-chip:hover {
-      border-color: var(--accent-line);
+      border-color: var(--brand-blue);
+      background: #ffffff;
     }
 
     .oo-chip.selected {
-      background: var(--accent-gradient);
-      border-color: transparent;
-      color: var(--on-accent);
+      background: var(--brand-blue);
+      border-color: var(--brand-blue);
+      color: #ffffff;
       font-weight: 600;
-      box-shadow: 0 3px 12px -4px var(--accent-glow);
+      box-shadow: 0 2px 8px -1px rgba(2, 132, 199, 0.35);
     }
 
     .oo-chip-platform {
       font-size: 10.5px;
-      opacity: 0.75;
+      opacity: 0.8;
     }
 
     .oo-pill-group {
@@ -828,47 +848,68 @@
     }
 
     .oo-pill-btn {
-      padding: 8px 16px;
+      padding: 7px 15px;
       border-radius: 999px;
-      border: 1px solid var(--glass-border);
-      background: var(--glass-surface-strong);
+      border: 1px solid var(--border-line);
+      background: #f8fafc;
       color: var(--text-body);
-      font-size: 13px;
+      font-size: 12.5px;
       font-weight: 500;
       cursor: pointer;
       transition: border-color 0.15s ease, background 0.15s ease;
       font-family: inherit;
     }
 
+    .oo-pill-btn:hover {
+      border-color: var(--brand-blue);
+      background: #ffffff;
+    }
+
     .oo-pill-btn.active {
-      background: var(--accent-gradient);
-      border-color: transparent;
-      color: var(--on-accent);
-      box-shadow: 0 3px 12px -4px var(--accent-glow);
+      background: var(--brand-blue);
+      border-color: var(--brand-blue);
+      color: #ffffff;
+      box-shadow: 0 2px 8px -1px rgba(2, 132, 199, 0.35);
       font-weight: 600;
     }
 
     .oo-primary-btn {
       width: 100%;
-      padding: 13px;
+      padding: 12px;
       border: none;
-      border-radius: var(--glass-radius);
+      border-radius: var(--radius-sm);
       font-weight: 600;
-      font-size: 14px;
+      font-size: 13.5px;
       cursor: pointer;
-      background: var(--accent-gradient);
-      color: var(--on-accent);
-      box-shadow: 0 6px 20px -6px var(--accent-glow);
-      transition: transform 0.12s ease, box-shadow 0.12s ease;
+      background: var(--brand-blue);
+      color: #ffffff;
+      box-shadow: 0 4px 14px -3px rgba(2, 132, 199, 0.4);
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.15s ease;
       font-family: inherit;
     }
 
     .oo-primary-btn:hover {
-      box-shadow: 0 8px 24px -6px var(--accent-glow);
+      background: #0274b3;
+      box-shadow: 0 6px 20px -4px rgba(2, 132, 199, 0.5);
     }
 
     .oo-primary-btn:active {
       transform: scale(0.99);
+    }
+
+    .oo-profile-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8fafc;
+      border: 1px solid var(--border-line);
+      padding: 11px 16px;
+      border-radius: 12px;
+      transition: border-color 0.15s ease;
+    }
+
+    .oo-profile-card:hover {
+      border-color: #cbd5e1;
     }
 
     /* Live Progress Ring Widget (Mirror of DownloadManager.svelte SVG Ring) */
@@ -876,27 +917,27 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding-top: 14px;
+      padding-top: 10px;
     }
 
     .oo-ring-track {
       fill: none;
-      stroke: rgba(0, 0, 0, 0.08);
-      stroke-width: 10;
+      stroke: #f1f5f9;
+      stroke-width: 8;
     }
 
     .oo-ring-progress {
       fill: none;
-      stroke: var(--oo-accent);
-      stroke-width: 10;
+      stroke: var(--brand-blue);
+      stroke-width: 8;
       stroke-linecap: round;
       transform: rotate(-90deg);
-      transform-origin: 70px 70px;
-      transition: stroke-dashoffset 0.4s ease;
+      transform-origin: 60px 60px;
+      transition: stroke-dashoffset 0.35s ease;
     }
 
     .oo-ring-count {
-      font-size: 20px;
+      font-size: 17px;
       font-weight: 700;
       fill: var(--text-head);
     }
@@ -905,138 +946,33 @@
       font-size: 11px;
       fill: var(--text-muted);
     }
-      cursor: pointer;
-      transition: var(--transition-fast);
-    }
 
-    .om-browse-btn:hover {
-      background: #f1f5f9;
-      border-color: #94a3b8;
-    }
-
-    .om-segmented-group {
-      display: inline-flex;
-      background: #f1f5f9;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 3px;
-      gap: 4px;
-    }
-
-    .om-type-btn {
-      padding: 6px 14px;
-      border-radius: 6px;
-      background: transparent;
-      border: none;
-      font-family: var(--font-body);
-      font-size: 13px;
-      font-weight: 500;
-      color: #64748b;
-      cursor: pointer;
-      transition: var(--transition-fast);
-    }
-
-    .om-type-btn.active {
-      background: #ffffff;
-      color: #0f172a;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-      font-weight: 600;
-    }
-
-    .om-action-row {
-      display: flex;
-      gap: 14px;
-      margin-top: 28px;
-    }
-
-    .om-save-btn {
-      flex: 1;
-      height: 44px;
-      background: #ffffff;
-      border: 1px solid #cbd5e1;
-      border-radius: 8px;
-      font-family: var(--font-body);
-      font-size: 14px;
-      font-weight: 600;
-      color: #334155;
-      cursor: pointer;
-      transition: var(--transition-fast);
-    }
-
-    .om-save-btn:hover {
-      background: #f1f5f9;
-    }
-
-    .om-start-btn {
-      flex: 1;
-      height: 44px;
-      background: #60a5fa;
-      border: none;
-      border-radius: 8px;
-      font-family: var(--font-body);
-      font-size: 14px;
-      font-weight: 600;
-      color: #ffffff;
-      cursor: pointer;
-      transition: var(--transition-fast);
-      box-shadow: 0 4px 12px rgba(96, 165, 250, 0.35);
-    }
-
-    .om-start-btn:hover {
-      background: #3b82f6;
-    }
-
-    /* Live Progress Log Box */
-    .om-progress-box {
-      margin-top: 20px;
-      background: #090d16;
-      border-radius: 8px;
-      padding: 16px 20px;
-      font-family: var(--font-mono);
-      font-size: 13px;
-      color: #38bdf8;
-      display: none;
-    }
-
-    .om-progress-box.active {
-      display: block;
-      animation: pageFadeIn 0.2s ease-out;
-    }
-
-    /* Sub-tabs for Profiles View */
-    .om-platform-tabs {
-      display: flex;
-      gap: 24px;
-      border-bottom: 1px solid #e2e8f0;
-      margin-bottom: 24px;
-    }
-
-    .om-platform-btn {
-      background: none;
-      border: none;
-      font-family: var(--font-body);
-      font-size: 13.5px;
-      font-weight: 600;
-      color: #64748b;
-      padding-bottom: 8px;
-      cursor: pointer;
-      border-bottom: 2px solid transparent;
-    }
-
-    .om-platform-btn.active {
-      color: #2563eb;
-      border-bottom-color: #2563eb;
-    }
-
-    .om-profile-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      background: #ffffff;
-      border: 1px solid #e2e8f0;
-      border-radius: 8px;
-      padding: 12px 16px;
-      margin-bottom: 10px;
+    @media (max-width: 768px) {
+      .oo-shell {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+      .oo-sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--border-line);
+        padding: 12px;
+      }
+      .oo-sidebar-brand {
+        display: none;
+      }
+      .oo-nav {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+      }
+      .oo-nav-item {
+        justify-content: center;
+        padding: 8px 6px;
+        font-size: 12px;
+      }
+      .oo-content {
+        padding: 24px 18px;
+      }
     }
 
     /* Downloads Page */
@@ -1302,9 +1238,9 @@
           <!-- Interactive Demo Segment Switcher -->
           <div class="demo-tab-bar">
             <button class="demo-tab-btn active" onclick="switchDemoPane('home', this)">Home Omnibox</button>
-            <button class="demo-tab-btn" onclick="switchDemoPane('courses', this)">Course Player</button>
-            <button class="demo-tab-btn" onclick="switchDemoPane('reader', this)">eBook Reader</button>
-            <button class="demo-tab-btn" onclick="switchDemoPane('music', this)">Music Player</button>
+            <button class="demo-tab-btn" onclick="switchDemoPane('downloads', this)">Downloads</button>
+            <button class="demo-tab-btn" onclick="switchDemoPane('tools', this)">158 Tools Hub</button>
+            <button class="demo-tab-btn" onclick="switchDemoPane('opennami', this)">OpenNami Archiver</button>
             <button class="demo-tab-btn" onclick="switchDemoPane('settings', this)">Settings</button>
           </div>
 
@@ -1317,19 +1253,19 @@
             </div>
 
             <div class="demo-pane active" id="pane-home">
-              <img src="./assets/readme/en/home-hero.png" alt="Home Screen" onclick="viewModal(this.src)" />
+              <img src="./assets/readme/home.png" alt="OmniGet Home Omnibox" onclick="viewModal(this.src)" />
             </div>
-            <div class="demo-pane" id="pane-courses">
-              <img src="./assets/screenshot-courses.png" alt="Course Player" onclick="viewModal(this.src)" />
+            <div class="demo-pane" id="pane-downloads">
+              <img src="./assets/readme/downloads.png" alt="Active Downloads & Queue Manager" onclick="viewModal(this.src)" />
             </div>
-            <div class="demo-pane" id="pane-reader">
-              <img src="./assets/screenshot-reader.png" alt="EPUB Reader" onclick="viewModal(this.src)" />
+            <div class="demo-pane" id="pane-tools">
+              <img src="./assets/readme/tools.png" alt="158 Specialized Tools Hub" onclick="viewModal(this.src)" />
             </div>
-            <div class="demo-pane" id="pane-music">
-              <img src="./assets/screenshot-music.png" alt="Music Player" onclick="viewModal(this.src)" />
+            <div class="demo-pane" id="pane-opennami">
+              <img src="./assets/readme/tools-instagram.png" alt="OpenNami Social Archiver" onclick="viewModal(this.src)" />
             </div>
             <div class="demo-pane" id="pane-settings">
-              <img src="./assets/readme/en/settings-drill.png" alt="Settings" onclick="viewModal(this.src)" />
+              <img src="./assets/readme/settings.png" alt="OmniGet Engine & App Settings" onclick="viewModal(this.src)" />
             </div>
           </div>
         </div>
@@ -1445,62 +1381,66 @@
       </section>
     </div>
 
-    <!-- ==================== OPENNAMI TAB PAGE (EXACT APP SHELL MIRROR) ==================== -->
+    <!-- ==================== OPENNAMI TAB PAGE (DESKTOP SHELL MIRROR) ==================== -->
     <div class="page-tab-content" id="page-opennami">
       <section class="hero-section text-center" style="padding-bottom: 40px;">
         <div class="container">
           <div class="section-header">
-            <h2 class="section-title">Open Nami Engine</h2>
-            <p class="section-desc">Batch download profiles, reels, stories, and posts with full privacy.</p>
+            <h2 class="section-title">Open Nami Social Archiver</h2>
+            <p class="section-desc">Standalone batch extractor for Instagram, TikTok, Facebook, and X built directly into OmniGet.</p>
           </div>
 
-          <!-- EXACT APP SHELL MIRROR -->
-          <div class="open-omni-shell">
-            <div class="oo-ambient-wash" aria-hidden="true"></div>
-
-            <!-- Page Header with Mascot -->
-            <header class="oo-page-header">
-              <img class="oo-mascot" src="./static/open-nami-mascot.png" alt="Open Nami Mascot" />
-              <div class="oo-header-text">
-                <h1>Open Nami</h1>
-                <p>Social media profile &amp; batch downloader</p>
+          <!-- DESKTOP APP SHELL MIRROR -->
+          <div class="oo-shell">
+            <!-- Sidebar Navigation -->
+            <aside class="oo-sidebar" aria-label="Open Nami sections">
+              <div class="oo-sidebar-brand">
+                <img src="./static/loop.png" alt="OpenNami Logo" />
+                <span>Open Nami</span>
               </div>
-            </header>
-
-            <!-- Main Glass Panel -->
-            <div class="oo-glass-panel">
-              <!-- Tab Switcher -->
-              <nav class="oo-tab-switcher">
-                <button type="button" class="oo-tab-btn active" id="oo-switcher-download" onclick="switchOoPanel('download')">
-                  <i data-lucide="download" style="width: 14px; height: 14px;"></i> Download
+              <nav class="oo-nav" role="tablist">
+                <button type="button" class="oo-nav-item active" id="oo-tab-download" onclick="switchOoPanel('download')">
+                  <img src="./static/icons/open-nami-download.png" alt="" class="oo-nav-icon" />
+                  <span>Download</span>
                 </button>
-                <button type="button" class="oo-tab-btn" id="oo-switcher-profiles" onclick="switchOoPanel('profiles')">
-                  <i data-lucide="users" style="width: 14px; height: 14px;"></i> Profiles
+                <button type="button" class="oo-nav-item" id="oo-tab-profiles" onclick="switchOoPanel('profiles')">
+                  <img src="./static/icons/open-nami-profiles.png" alt="" class="oo-nav-icon" />
+                  <span>Profiles</span>
                 </button>
-                <button type="button" class="oo-tab-btn" id="oo-switcher-settings" onclick="switchOoPanel('settings')">
-                  <i data-lucide="settings" style="width: 14px; height: 14px;"></i> Settings
+                <button type="button" class="oo-nav-item" id="oo-tab-settings" onclick="switchOoPanel('settings')">
+                  <img src="./static/icons/open-nami-settings.png" alt="" class="oo-nav-icon" />
+                  <span>Settings</span>
                 </button>
               </nav>
+            </aside>
+
+            <!-- Main Content Area -->
+            <div class="oo-content">
+              <header class="oo-header">
+                <p class="oo-kicker">Open Nami</p>
+                <h3 class="oo-title" id="oo-content-title">Download</h3>
+                <p class="oo-description" id="oo-content-desc">Save posts and media from your connected social profiles.</p>
+              </header>
 
               <!-- PANEL 1: DOWNLOAD MANAGER -->
               <div id="oo-panel-download" style="display: flex; flex-direction: column; gap: 18px;">
                 <!-- Profile URL Field -->
                 <div>
-                  <label class="oo-field-label">Profile URL</label>
+                  <label class="oo-field-label">Profile URL or Handle</label>
                   <div class="oo-input-shell">
-                    <i data-lucide="link" style="width: 16px; height: 16px; color: var(--text-muted);"></i>
-                    <input type="text" id="oo-url-input" value="https://instagram.com/creative_studio" placeholder="https://instagram.com/username" />
+                    <i data-lucide="link" style="width: 16px; height: 16px; color: var(--text-muted); flex-shrink: 0;"></i>
+                    <input type="text" id="oo-url-input" value="https://instagram.com/creative_studio" placeholder="https://instagram.com/username" spellcheck="false" autocomplete="off" />
                   </div>
                   
                   <!-- Saved Profiles Chip List -->
                   <div class="oo-chip-list">
-                    <button class="oo-chip selected" onclick="selectOoChip(this, 'https://instagram.com/creative_studio')">
+                    <button type="button" class="oo-chip selected" onclick="selectOoChip(this, 'https://instagram.com/creative_studio')">
                       <span>@creative_studio</span> <span class="oo-chip-platform">Instagram</span>
                     </button>
-                    <button class="oo-chip" onclick="selectOoChip(this, 'https://tiktok.com/@tech_daily')">
+                    <button type="button" class="oo-chip" onclick="selectOoChip(this, 'https://tiktok.com/@tech_daily')">
                       <span>@tech_daily</span> <span class="oo-chip-platform">TikTok</span>
                     </button>
-                    <button class="oo-chip" onclick="selectOoChip(this, 'https://x.com/design_feed')">
+                    <button type="button" class="oo-chip" onclick="selectOoChip(this, 'https://x.com/design_feed')">
                       <span>@design_feed</span> <span class="oo-chip-platform">X</span>
                     </button>
                   </div>
@@ -1510,24 +1450,24 @@
                 <div>
                   <label class="oo-field-label">Content Type</label>
                   <div class="oo-pill-group">
-                    <button class="oo-pill-btn active" onclick="setOoContentType(this)">All</button>
-                    <button class="oo-pill-btn" onclick="setOoContentType(this)">Photos</button>
-                    <button class="oo-pill-btn" onclick="setOoContentType(this)">Videos</button>
-                    <button class="oo-pill-btn" onclick="setOoContentType(this)">Stories</button>
-                    <button class="oo-pill-btn" onclick="setOoContentType(this)">Highlights</button>
+                    <button type="button" class="oo-pill-btn active" onclick="setOoContentType(this)">All</button>
+                    <button type="button" class="oo-pill-btn" onclick="setOoContentType(this)">Photos</button>
+                    <button type="button" class="oo-pill-btn" onclick="setOoContentType(this)">Videos</button>
+                    <button type="button" class="oo-pill-btn" onclick="setOoContentType(this)">Stories</button>
+                    <button type="button" class="oo-pill-btn" onclick="setOoContentType(this)">Highlights</button>
                   </div>
                 </div>
 
                 <!-- Primary Download Button -->
-                <button class="oo-primary-btn" id="oo-download-btn" onclick="runOoLiveDownload()">Start Download</button>
+                <button type="button" class="oo-primary-btn" id="oo-download-btn" onclick="runOoLiveDownload()">Start Download</button>
 
                 <!-- Live Circular Progress Ring (Matches DownloadManager.svelte) -->
                 <div class="oo-ring-wrap" id="oo-ring-widget" style="display: none;">
-                  <svg width="140" height="140" viewBox="0 0 140 140">
-                    <circle class="oo-ring-track" cx="70" cy="70" r="58" />
-                    <circle class="oo-ring-progress" id="oo-ring-circle" cx="70" cy="70" r="58" stroke-dasharray="364.42" stroke-dashoffset="364.42" />
-                    <text class="oo-ring-count" x="70" y="66" text-anchor="middle" dominant-baseline="middle" id="oo-ring-count">0 / 42</text>
-                    <text class="oo-ring-label" x="70" y="88" text-anchor="middle" dominant-baseline="middle">Files Downloaded</text>
+                  <svg width="120" height="120" viewBox="0 0 120 120">
+                    <circle class="oo-ring-track" cx="60" cy="60" r="50" />
+                    <circle class="oo-ring-progress" id="oo-ring-circle" cx="60" cy="60" r="50" stroke-dasharray="314.16" stroke-dashoffset="314.16" />
+                    <text class="oo-ring-count" x="60" y="56" text-anchor="middle" dominant-baseline="middle" id="oo-ring-count">0 / 42</text>
+                    <text class="oo-ring-label" x="60" y="76" text-anchor="middle" dominant-baseline="middle">Files Downloaded</text>
                   </svg>
                   <div style="font-size: 13px; font-weight: 600; color: var(--text-head); margin-top: 10px;" id="oo-ring-stage">Connecting to profile...</div>
                   <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;" id="oo-ring-message">Fetching metadata & media streams...</div>
@@ -1537,31 +1477,31 @@
               <!-- PANEL 2: PROFILES MANAGER -->
               <div id="oo-panel-profiles" style="display: none; flex-direction: column; gap: 16px;">
                 <div class="oo-pill-group">
-                  <button class="oo-pill-btn active" onclick="switchOoPlatformTab('Instagram', this)">Instagram</button>
-                  <button class="oo-pill-btn" onclick="switchOoPlatformTab('TikTok', this)">TikTok</button>
-                  <button class="oo-pill-btn" onclick="switchOoPlatformTab('Facebook', this)">Facebook</button>
-                  <button class="oo-pill-btn" onclick="switchOoPlatformTab('X', this)">X</button>
+                  <button type="button" class="oo-pill-btn active" onclick="switchOoPlatformTab('Instagram', this)">Instagram</button>
+                  <button type="button" class="oo-pill-btn" onclick="switchOoPlatformTab('TikTok', this)">TikTok</button>
+                  <button type="button" class="oo-pill-btn" onclick="switchOoPlatformTab('Facebook', this)">Facebook</button>
+                  <button type="button" class="oo-pill-btn" onclick="switchOoPlatformTab('X', this)">X</button>
                 </div>
 
-                <div class="oo-input-shell">
-                  <input type="text" id="oo-new-profile-input" placeholder="Enter profile URL or username" />
-                  <button class="btn btn-primary" style="height: 34px; font-size: 12px; padding: 0 14px;" onclick="addOoProfile()">Add</button>
+                <div class="oo-input-shell" style="padding-right: 6px;">
+                  <input type="text" id="oo-new-profile-input" placeholder="Enter Instagram profile URL or username" />
+                  <button type="button" class="btn btn-primary" style="height: 34px; font-size: 12px; padding: 0 14px; border-radius: 8px;" onclick="addOoProfile()">Add</button>
                 </div>
 
                 <div id="oo-profiles-list" style="display: flex; flex-direction: column; gap: 10px;">
-                  <div style="display: flex; align-items: center; justify-content: space-between; background: #ffffff; border: 1px solid var(--glass-border); padding: 10px 14px; border-radius: 12px;">
+                  <div class="oo-profile-card">
                     <div>
                       <strong style="color: var(--text-head); font-size: 13.5px;">@creative_studio</strong>
                       <div style="font-size: 11.5px; color: var(--text-muted);">Monitored • 42 posts downloaded</div>
                     </div>
-                    <button class="btn btn-secondary" style="height: 32px; font-size: 12px; padding: 0 12px;" onclick="quickOoDownload('@creative_studio')">Fetch Latest</button>
+                    <button type="button" class="btn btn-secondary" style="height: 32px; font-size: 12px; padding: 0 12px; border-radius: 8px;" onclick="quickOoDownload('@creative_studio')">Fetch Latest</button>
                   </div>
-                  <div style="display: flex; align-items: center; justify-content: space-between; background: #ffffff; border: 1px solid var(--glass-border); padding: 10px 14px; border-radius: 12px;">
+                  <div class="oo-profile-card">
                     <div>
                       <strong style="color: var(--text-head); font-size: 13.5px;">@tech_daily</strong>
                       <div style="font-size: 11.5px; color: var(--text-muted);">Monitored • 18 videos downloaded</div>
                     </div>
-                    <button class="btn btn-secondary" style="height: 32px; font-size: 12px; padding: 0 12px;" onclick="quickOoDownload('@tech_daily')">Fetch Latest</button>
+                    <button type="button" class="btn btn-secondary" style="height: 32px; font-size: 12px; padding: 0 12px; border-radius: 8px;" onclick="quickOoDownload('@tech_daily')">Fetch Latest</button>
                   </div>
                 </div>
               </div>
@@ -1570,23 +1510,72 @@
               <div id="oo-panel-settings" style="display: none; flex-direction: column; gap: 16px;">
                 <div>
                   <label class="oo-field-label">Output Directory</label>
-                  <div class="oo-input-shell">
+                  <div class="oo-input-shell" style="padding-right: 6px;">
                     <input type="text" id="oo-settings-dir" value="C:/Downloads/OpenNami" />
-                    <button class="btn btn-secondary" style="height: 32px; font-size: 12px;" onclick="alert('Selected Output Directory destination folder.')">Browse</button>
+                    <button type="button" class="btn btn-secondary" style="height: 32px; font-size: 12px; padding: 0 12px; border-radius: 8px;" onclick="alert('Destination folder set to C:/Downloads/OpenNami')">Browse</button>
                   </div>
+                  <span style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px; display: block;">Media is saved in organized subfolders by platform and username.</span>
                 </div>
 
                 <div>
-                  <label class="oo-field-label">Cookies File (optional)</label>
-                  <div class="oo-input-shell">
+                  <label class="oo-field-label">Cookies File (Optional)</label>
+                  <div class="oo-input-shell" style="padding-right: 6px;">
                     <input type="text" id="oo-settings-cookies" value="cookies.txt" placeholder="cookies.txt" />
-                    <button class="btn btn-secondary" style="height: 32px; font-size: 12px;" onclick="alert('Selected Cookies File destination.')">Browse</button>
+                    <button type="button" class="btn btn-secondary" style="height: 32px; font-size: 12px; padding: 0 12px; border-radius: 8px;" onclick="alert('Loaded cookies.txt for private stories and highlights.')">Browse</button>
                   </div>
+                  <span style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px; display: block;">Required for private accounts, stories, and highlights. Export cookies with the browser extension.</span>
                 </div>
 
-                <button class="oo-primary-btn" onclick="alert('Open Nami configuration settings saved!')">Save Settings</button>
+                <button type="button" class="oo-primary-btn" onclick="alert('Open Nami configuration settings saved!')">Save Settings</button>
               </div>
 
+            </div>
+          </div>
+
+          <!-- REAL APP SHOWCASE & ARCHITECTURE -->
+          <div style="margin: 48px auto 0; max-width: 920px; text-align: left;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <h3 style="font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--text-head); margin: 0;">Comprehensive Social Media Tools</h3>
+                <p style="color: var(--text-muted); font-size: 13.5px; margin: 4px 0 0;">Native suite for post downloads, story extraction, high-res avatars, and profile analytics.</p>
+              </div>
+              <span style="background: rgba(2, 132, 199, 0.08); color: var(--brand-blue); border: 1px solid rgba(2, 132, 199, 0.2); font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 999px;">23 Instagram &amp; Social Tools</span>
+            </div>
+
+            <div class="demo-showcase-frame" style="border-radius: 16px; overflow: hidden; cursor: pointer;" onclick="viewModal('./assets/readme/tools-instagram.png')">
+              <div class="demo-frame-bar">
+                <div class="dot" style="background: #ff5f56;"></div>
+                <div class="dot" style="background: #ffbd2e;"></div>
+                <div class="dot" style="background: #27c93f;"></div>
+                <span style="font-size: 11.5px; color: #94a3b8; font-family: var(--font-mono); margin-left: 8px;">omniget // tools // instagram</span>
+              </div>
+              <img src="./assets/readme/tools-instagram.png" alt="OmniGet Instagram and Social Tools" style="width: 100%; display: block; border-radius: 0 0 16px 16px;" />
+            </div>
+
+            <div class="grid-3" style="margin-top: 32px;">
+              <div class="feature-card">
+                <div class="icon-box icon-purple">
+                  <i data-lucide="cpu"></i>
+                </div>
+                <h3>Standalone Rust Engine</h3>
+                <p>Native architecture executing directly within OmniGet. Zero Python, Node.js, or external CLI runtime dependencies required.</p>
+              </div>
+
+              <div class="feature-card">
+                <div class="icon-box icon-amber">
+                  <i data-lucide="refresh-cw"></i>
+                </div>
+                <h3>Dual-Engine Fallback</h3>
+                <p>Automatic stream and extractor switching prevents broken downloads when platform endpoints rate-limit or change layouts.</p>
+              </div>
+
+              <div class="feature-card">
+                <div class="icon-box icon-emerald">
+                  <i data-lucide="shield-check"></i>
+                </div>
+                <h3>Anti-Bot Hardening</h3>
+                <p>Built-in session challenge handling, checkpoint detection, and user-agent rotation preserve steady downloads without account flags.</p>
+              </div>
             </div>
           </div>
 
@@ -1823,15 +1812,44 @@
       if (pane) pane.classList.add('active');
     }
 
-    /* Open Omni App Shell Demo Controller (Mirrors Svelte App Components) */
-    function switchOoPanel(panel) {
-      document.getElementById('oo-switcher-download').classList.toggle('active', panel === 'download');
-      document.getElementById('oo-switcher-profiles').classList.toggle('active', panel === 'profiles');
-      document.getElementById('oo-switcher-settings').classList.toggle('active', panel === 'settings');
+    /* Open Nami App Shell Demo Controller (Mirrors Svelte App Components) */
+    const OO_PANEL_META = {
+      download: {
+        title: 'Download',
+        desc: 'Save posts and media from your connected social profiles.'
+      },
+      profiles: {
+        title: 'Profiles',
+        desc: 'Manage the profiles you use most often.'
+      },
+      settings: {
+        title: 'Settings',
+        desc: 'Choose where Open Nami saves downloaded media and configure cookies.'
+      }
+    };
 
-      document.getElementById('oo-panel-download').style.display = (panel === 'download') ? 'flex' : 'none';
-      document.getElementById('oo-panel-profiles').style.display = (panel === 'profiles') ? 'flex' : 'none';
-      document.getElementById('oo-panel-settings').style.display = (panel === 'settings') ? 'flex' : 'none';
+    function switchOoPanel(panel) {
+      const dlTab = document.getElementById('oo-tab-download');
+      const prTab = document.getElementById('oo-tab-profiles');
+      const stTab = document.getElementById('oo-tab-settings');
+      if (dlTab) dlTab.classList.toggle('active', panel === 'download');
+      if (prTab) prTab.classList.toggle('active', panel === 'profiles');
+      if (stTab) stTab.classList.toggle('active', panel === 'settings');
+
+      const dlPan = document.getElementById('oo-panel-download');
+      const prPan = document.getElementById('oo-panel-profiles');
+      const stPan = document.getElementById('oo-panel-settings');
+      if (dlPan) dlPan.style.display = (panel === 'download') ? 'flex' : 'none';
+      if (prPan) prPan.style.display = (panel === 'profiles') ? 'flex' : 'none';
+      if (stPan) stPan.style.display = (panel === 'settings') ? 'flex' : 'none';
+
+      const meta = OO_PANEL_META[panel];
+      if (meta) {
+        const titleEl = document.getElementById('oo-content-title');
+        const descEl = document.getElementById('oo-content-desc');
+        if (titleEl) titleEl.textContent = meta.title;
+        if (descEl) descEl.textContent = meta.desc;
+      }
     }
 
     function selectOoChip(chipEl, targetUrl) {
@@ -1865,7 +1883,7 @@
       const btn = document.getElementById('oo-download-btn');
 
       const maxFiles = 42;
-      const ringCircumference = 364.42;
+      const ringCircumference = 314.16;
 
       widget.style.display = 'flex';
       btn.innerText = 'Extracting Profile Media...';
@@ -1896,13 +1914,13 @@
       const list = document.getElementById('oo-profiles-list');
 
       const item = document.createElement('div');
-      item.style.cssText = 'display: flex; align-items: center; justify-content: space-between; background: #ffffff; border: 1px solid var(--glass-border); padding: 10px 14px; border-radius: 12px;';
+      item.className = 'oo-profile-card';
       item.innerHTML = `
         <div>
           <strong style="color: var(--text-head); font-size: 13.5px;">${val}</strong>
           <div style="font-size: 11.5px; color: var(--text-muted);">Monitored • Just added</div>
         </div>
-        <button class="btn btn-secondary" style="height: 32px; font-size: 12px; padding: 0 12px;" onclick="quickOoDownload('${val}')">Fetch Latest</button>
+        <button type="button" class="btn btn-secondary" style="height: 32px; font-size: 12px; padding: 0 12px; border-radius: 8px;" onclick="quickOoDownload('${val}')">Fetch Latest</button>
       `;
       list.prepend(item);
       input.value = '';
