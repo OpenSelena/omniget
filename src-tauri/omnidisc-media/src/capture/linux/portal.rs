@@ -38,11 +38,15 @@ fn token_path() -> Option<PathBuf> {
         .map(PathBuf::from)
         .or_else(|| std::env::var_os("HOME").map(|h| PathBuf::from(h).join(".local/share")))?;
 
-    let modern = data_root.join("com.openselena.omniget").join("omnidisc-screencast.json");
+    let modern = data_root
+        .join("com.openselena.omniget")
+        .join("omnidisc-screencast.json");
     if modern.exists() {
         return Some(modern);
     }
-    let legacy = data_root.join("wtf.tonho.omniget").join("omnidisc-screencast.json");
+    let legacy = data_root
+        .join("wtf.tonho.omniget")
+        .join("omnidisc-screencast.json");
     if legacy.exists() {
         return Some(legacy);
     }

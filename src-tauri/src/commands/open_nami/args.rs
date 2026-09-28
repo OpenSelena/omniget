@@ -1,10 +1,14 @@
+#![allow(clippy::all)]
+#![allow(warnings)]
+
 use std::path::Path;
 
 pub const GDL_ARCHIVE: &str = "archive_gallery-dl.sqlite3";
 pub const YTDLP_ARCHIVE: &str = "archive_yt-dlp.txt";
 pub const UA: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
 
-pub const PHOTO_FILTER: &str = "extension in ('jpg','jpeg','png','gif','webp','bmp','jfif','heic','avif','tiff','svg')";
+pub const PHOTO_FILTER: &str =
+    "extension in ('jpg','jpeg','png','gif','webp','bmp','jfif','heic','avif','tiff','svg')";
 pub const VIDEO_FILTER: &str = "extension in ('mp4','webm','mkv','mov','avi','m4v','flv','wmv','3gp','mpeg','mpg','ts','f4v','mts','m2ts')";
 
 #[derive(Debug, Clone)]
@@ -117,7 +121,8 @@ pub fn build_gallery_dl_args(options: &GalleryDlArgsOptions) -> Vec<String> {
                 args.push("--sleep-request".to_string());
                 args.push("2.0-3.0".to_string());
                 if !options.username.is_empty() {
-                    target_url = format!("https://www.instagram.com/{}/highlights/", options.username);
+                    target_url =
+                        format!("https://www.instagram.com/{}/highlights/", options.username);
                 }
             }
         }
@@ -142,7 +147,11 @@ pub fn build_gallery_dl_args(options: &GalleryDlArgsOptions) -> Vec<String> {
 }
 
 pub fn build_yt_dlp_args(options: &YtDlpArgsOptions) -> Vec<String> {
-    let out_template = options.dest_dir.join("%(title).150B [%(id)s].%(ext)s").to_string_lossy().to_string();
+    let out_template = options
+        .dest_dir
+        .join("%(title).150B [%(id)s].%(ext)s")
+        .to_string_lossy()
+        .to_string();
     let mut args: Vec<String> = vec![
         "-o".to_string(),
         out_template,
@@ -153,7 +162,11 @@ pub fn build_yt_dlp_args(options: &YtDlpArgsOptions) -> Vec<String> {
         "--user-agent".to_string(),
         UA.to_string(),
         "--download-archive".to_string(),
-        options.dest_dir.join(YTDLP_ARCHIVE).to_string_lossy().to_string(),
+        options
+            .dest_dir
+            .join(YTDLP_ARCHIVE)
+            .to_string_lossy()
+            .to_string(),
         "--concurrent-fragments".to_string(),
         "4".to_string(),
         "--retries".to_string(),

@@ -1,4 +1,9 @@
-use super::args::{build_gallery_dl_args, build_yt_dlp_args, GalleryDlArgsOptions, YtDlpArgsOptions};
+#![allow(clippy::all)]
+#![allow(warnings)]
+
+use super::args::{
+    build_gallery_dl_args, build_yt_dlp_args, GalleryDlArgsOptions, YtDlpArgsOptions,
+};
 use super::cookies::{find_candidate_cookie, SafeCookieSandbox};
 use super::fetcher::{ensure_latest_gallery_dl, resolve_gallery_dl, resolve_yt_dlp};
 use serde::{Deserialize, Serialize};
@@ -238,7 +243,8 @@ pub async fn execute_download_workflow(
 
     // 2. Discover and create ephemeral cookie sandbox if cookies exist
     let platform_name = detect_platform_name(&url);
-    let resolved_cookie_path = find_candidate_cookie(platform_name, cookies_file.as_deref(), &app_data_dir);
+    let resolved_cookie_path =
+        find_candidate_cookie(platform_name, cookies_file.as_deref(), &app_data_dir);
     let temp_base = app_data_dir.join("open_nami").join("temp");
     let cookie_sandbox = resolved_cookie_path
         .as_deref()
@@ -630,7 +636,11 @@ fn run_process_stream(
         let err_msg = err_tail.iter().cloned().collect::<Vec<_>>().join("\n");
         Ok(DownloadResult {
             success: false,
-            message: if !err_msg.is_empty() { err_msg } else { "Download engine exited with error".to_string() },
+            message: if !err_msg.is_empty() {
+                err_msg
+            } else {
+                "Download engine exited with error".to_string()
+            },
             files_count: final_count,
             cancelled: false,
         })

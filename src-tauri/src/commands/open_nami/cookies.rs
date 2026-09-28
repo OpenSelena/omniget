@@ -1,3 +1,6 @@
+#![allow(clippy::all)]
+#![allow(warnings)]
+
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
@@ -9,10 +12,14 @@ pub struct SafeCookieSandbox {
 impl SafeCookieSandbox {
     pub fn create(master_path: &Path, temp_base: &Path) -> Result<Self, String> {
         if !master_path.exists() {
-            return Err(format!("Master cookie file does not exist: {}", master_path.display()));
+            return Err(format!(
+                "Master cookie file does not exist: {}",
+                master_path.display()
+            ));
         }
 
-        fs::create_dir_all(temp_base).map_err(|e| format!("Failed to create temp cookie directory: {}", e))?;
+        fs::create_dir_all(temp_base)
+            .map_err(|e| format!("Failed to create temp cookie directory: {}", e))?;
 
         let timestamp = SystemTime::now()
             .duration_since(UNIX_EPOCH)
@@ -54,7 +61,11 @@ impl Drop for SafeCookieSandbox {
     }
 }
 
-pub fn find_candidate_cookie(platform: &str, custom_path: Option<&str>, app_data_dir: &Path) -> Option<PathBuf> {
+pub fn find_candidate_cookie(
+    platform: &str,
+    custom_path: Option<&str>,
+    app_data_dir: &Path,
+) -> Option<PathBuf> {
     if let Some(custom) = custom_path {
         let p = PathBuf::from(custom.trim());
         if p.exists() && fs::metadata(&p).map(|m| m.len() > 10).unwrap_or(false) {

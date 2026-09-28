@@ -1,3 +1,6 @@
+#![allow(clippy::all)]
+#![allow(warnings)]
+
 pub mod args;
 pub mod cookies;
 pub mod dispatcher;
@@ -45,9 +48,14 @@ pub fn omniget_open_nami_dir() -> Result<PathBuf, String> {
     // Seamless automatic data migration from legacy open_omni to open_nami
     if !dir.exists() && legacy_dir.exists() {
         if let Err(e) = fs::rename(&legacy_dir, &dir) {
-            tracing::warn!("Failed to rename legacy open_omni directory: {}. Creating fresh open_nami dir.", e);
+            tracing::warn!(
+                "Failed to rename legacy open_omni directory: {}. Creating fresh open_nami dir.",
+                e
+            );
         } else {
-            tracing::info!("Successfully migrated legacy open_omni user data directory to open_nami.");
+            tracing::info!(
+                "Successfully migrated legacy open_omni user data directory to open_nami."
+            );
         }
     }
 

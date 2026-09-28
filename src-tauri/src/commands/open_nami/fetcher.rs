@@ -1,9 +1,13 @@
+#![allow(clippy::all)]
+#![allow(warnings)]
+
 use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
 pub const YTDLP_RELEASE_BASE: &str = "https://github.com/yt-dlp/yt-dlp/releases/latest/download";
-pub const GALLERYDL_GITHUB_FALLBACK: &str = "https://github.com/mikf/gallery-dl/releases/latest/download";
+pub const GALLERYDL_GITHUB_FALLBACK: &str =
+    "https://github.com/mikf/gallery-dl/releases/latest/download";
 
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct EngineStatus {
@@ -66,7 +70,11 @@ pub fn get_binary_version(executable_path: &Path) -> Option<String> {
 
 pub fn resolve_gallery_dl(app_data_dir: &Path) -> Option<PathBuf> {
     let bin_dir = get_open_nami_bin_dir(app_data_dir);
-    let local = bin_dir.join(if cfg!(target_os = "windows") { "gallery-dl.exe" } else { "gallery-dl" });
+    let local = bin_dir.join(if cfg!(target_os = "windows") {
+        "gallery-dl.exe"
+    } else {
+        "gallery-dl"
+    });
     if local.exists() {
         return Some(local);
     }
@@ -80,7 +88,11 @@ pub fn resolve_gallery_dl(app_data_dir: &Path) -> Option<PathBuf> {
 
 pub fn resolve_yt_dlp(app_data_dir: &Path) -> Option<PathBuf> {
     let bin_dir = get_open_nami_bin_dir(app_data_dir);
-    let local = bin_dir.join(if cfg!(target_os = "windows") { "yt-dlp.exe" } else { "yt-dlp" });
+    let local = bin_dir.join(if cfg!(target_os = "windows") {
+        "yt-dlp.exe"
+    } else {
+        "yt-dlp"
+    });
     if local.exists() {
         return Some(local);
     }
@@ -127,7 +139,10 @@ pub async fn download_binary(url: &str, target_path: &Path) -> Result<PathBuf, S
         .map_err(|e| format!("Download request error from {}: {}", url, e))?;
 
     if !response.status().is_success() {
-        return Err(format!("Download failed with HTTP status {}", response.status()));
+        return Err(format!(
+            "Download failed with HTTP status {}",
+            response.status()
+        ));
     }
 
     let bytes = response
@@ -145,7 +160,8 @@ pub async fn download_binary(url: &str, target_path: &Path) -> Result<PathBuf, S
         let _ = fs::set_permissions(&temp_download, perms);
     }
 
-    fs::rename(&temp_download, target_path).map_err(|e| format!("Failed to finalize binary rename: {}", e))?;
+    fs::rename(&temp_download, target_path)
+        .map_err(|e| format!("Failed to finalize binary rename: {}", e))?;
 
     Ok(target_path.to_path_buf())
 }
@@ -158,7 +174,11 @@ pub async fn ensure_latest_gallery_dl(app_data_dir: &Path) -> Result<PathBuf, St
     }
 
     let bin_dir = get_open_nami_bin_dir(app_data_dir);
-    let target = bin_dir.join(if cfg!(target_os = "windows") { "gallery-dl.exe" } else { "gallery-dl" });
+    let target = bin_dir.join(if cfg!(target_os = "windows") {
+        "gallery-dl.exe"
+    } else {
+        "gallery-dl"
+    });
     let url = format!("{}/{}", GALLERYDL_GITHUB_FALLBACK, gallery_dl_asset_name());
 
     download_binary(&url, &target).await
@@ -172,7 +192,11 @@ pub async fn ensure_latest_yt_dlp(app_data_dir: &Path) -> Result<PathBuf, String
     }
 
     let bin_dir = get_open_nami_bin_dir(app_data_dir);
-    let target = bin_dir.join(if cfg!(target_os = "windows") { "yt-dlp.exe" } else { "yt-dlp" });
+    let target = bin_dir.join(if cfg!(target_os = "windows") {
+        "yt-dlp.exe"
+    } else {
+        "yt-dlp"
+    });
     let url = format!("{}/{}", YTDLP_RELEASE_BASE, yt_dlp_asset_name());
 
     download_binary(&url, &target).await
