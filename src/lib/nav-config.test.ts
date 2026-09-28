@@ -2,8 +2,16 @@ import { describe, it, expect } from "vitest";
 import { CORE_NAV_ITEMS } from "./nav-config";
 
 describe("CORE_NAV_ITEMS", () => {
-  it("has the expected 7 core entries", () => {
-    expect(CORE_NAV_ITEMS).toHaveLength(7);
+  it("has the expected 8 core entries", () => {
+    expect(CORE_NAV_ITEMS).toHaveLength(8);
+  });
+
+  it("Open Nami is in primary group with order 28", () => {
+    const nami = CORE_NAV_ITEMS.find((i) => i.href === "/open-nami");
+    expect(nami?.group).toBe("primary");
+    expect(nami?.icon).toBe("open-nami");
+    expect(nami?.label).toBe("Open Nami");
+    expect(nami?.order).toBe(28);
   });
 
   it("OmniDisc sits between Downloads and the app group", () => {

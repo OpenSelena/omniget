@@ -28,6 +28,7 @@
     convert: { glyph: "arrows-clockwise", from: "#FF7A7A", to: "#E33A3A" },
     misc: { glyph: "wrench", from: "#9B9BA3", to: "#63636B" },
     tools: { glyph: "toolbox", from: "#FF9F5A", to: "#E8641A" },
+    "open-nami": { glyph: "cloud-arrow-down", from: "#FF6584", to: "#D23B68" },
     music: { glyph: "music-notes", from: "#FF5E7A", to: "#E0203F" },
     library: { glyph: "books", from: "#D8A15C", to: "#A66A24" },
     read: { glyph: "book-open-text", from: "#FFA05C", to: "#E06A1A" },
