@@ -1,19 +1,21 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "id": "announcement-v093-opennami",
+  "id": "announcement-v0100-release",
   "active": true,
-  "badge": "Major Update",
-  "title": "Welcome to the Open Nami Engine!",
-  "thumbnail": "https://raw.githubusercontent.com/OpenSelena/openomni/main/assets/logo-light.svg",
-  "body": "OmniGet has been upgraded with the high-performance Open Nami download engine, intelligent dual-engine fallback, and sandboxed cookie storage.",
+  "badge": "v0.10.0 Released",
+  "title": "OmniGet v0.10.0: OpenNami & In-App Alerts",
+  "thumbnail": "https://raw.githubusercontent.com/OpenSelena/omniget/main/assets/readme/hero.png",
+  "body": "OmniGet has been upgraded with the OpenNami download architecture, dual-engine fallback, anti-bot hardening, Lao language support, and in-app announcements.",
   "highlights": [
-    "⚡ 3x Faster Metadata Extraction for YouTube & X",
-    "🔒 Sandboxed Private Cookie Storage",
-    "🔄 Dual-Engine Automatic Fallback"
+    "OpenNami Engine: Dual-engine fallback switches automatically when streams throttle",
+    "Anti-Bot Hardening: Handles challenge pages and protected site stream extraction",
+    "In-App Announcements: In-app modal for release updates and service notices",
+    "Lao (ລາວ) Translation: Full interface translation with bundled Noto Serif Lao",
+    "Attachments & Compatibility: Restored course attachment toggle and Linux SQLite fix"
   ],
   "cta": {
-    "label": "Read Release Notes →",
-    "url": "https://github.com/OpenSelena/omniget/releases"
+    "label": "View Release Notes",
+    "url": "https://github.com/OpenSelena/omniget/releases/tag/v0.10.0"
   },
   "expires_at": null
 }
