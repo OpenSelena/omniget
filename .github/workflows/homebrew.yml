@@ -31,7 +31,7 @@ jobs:
         if: steps.gate.outputs.skip != 'true'
         uses: actions/checkout@v4
         with:
-          repository: tonhowtf/homebrew-tap
+          repository: OpenSelena/homebrew-tap
           token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
           path: tap
 
@@ -48,16 +48,33 @@ jobs:
           curl -fsSL -o intel.dmg "$base/omniget_${version}_x64.dmg"
           arm_sha=$(sha256sum arm.dmg | cut -d' ' -f1)
           intel_sha=$(sha256sum intel.dmg | cut -d' ' -f1)
+          mkdir -p tap/Casks
           cask=tap/Casks/omniget.rb
-          sed -i -E "s/^  version \".*\"/  version \"$version\"/" "$cask"
-          python3 - "$cask" "$arm_sha" "$intel_sha" <<'PY'
-          import re, sys
-          path, arm, intel = sys.argv[1:4]
-          src = open(path).read()
-          src = re.sub(r'(on_arm do\n\s+sha256 ")[0-9a-f]{64}', lambda m: m.group(1) + arm, src, count=1)
-          src = re.sub(r'(on_intel do\n\s+sha256 ")[0-9a-f]{64}', lambda m: m.group(1) + intel, src, count=1)
-          open(path, "w").write(src)
-          PY
+          cat > "$cask" <<EOF
+cask "omniget" do
+  version "$version"
+
+  on_arm do
+    url "https://github.com/$REPO/releases/download/$TAG/omniget_#{version}_aarch64.dmg"
+    sha256 "$arm_sha"
+  end
+  on_intel do
+    url "https://github.com/$REPO/releases/download/$TAG/omniget_#{version}_x64.dmg"
+    sha256 "$intel_sha"
+  end
+
+  name "OmniGet"
+  desc "Universal downloader and media workstation"
+  homepage "https://github.com/$REPO"
+
+  app "omniget.app"
+
+  zap trash: [
+    "~/Library/Application Support/com.openselena.omniget",
+    "~/Library/Caches/com.openselena.omniget",
+  ]
+end
+EOF
           cd tap
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

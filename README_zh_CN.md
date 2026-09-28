@@ -22,7 +22,7 @@ spicetify, 下载管理器, tauri, rust, svelte.
 </p>
 
 <p align="center">
-  <sub>简体中文版由维护者创建，文字由 <a href="https://github.com/Tan665565">@Tan665565</a> 润色（<a href="https://github.com/tonhowtf/omniget/pull/154">PR #154</a>）。感谢。</sub>
+  <sub>简体中文版由维护者创建，文字由 <a href="https://github.com/Tan665565">@Tan665565</a> 润色（<a href="https://github.com/OpenSelena/omniget/pull/154">PR #154</a>）。感谢。</sub>
 </p>
 
 <p align="center">
@@ -30,9 +30,9 @@ spicetify, 下载管理器, tauri, rust, svelte.
 </p>
 
 <p align="center">
-  <a href="https://github.com/tonhowtf/omniget/releases/latest"><img src="https://img.shields.io/github/v/release/tonhowtf/omniget?style=for-the-badge&label=release&color=F28500" alt="最新版本" /></a>
-  <a href="https://github.com/tonhowtf/omniget/releases"><img src="https://img.shields.io/github/downloads/tonhowtf/omniget/total?style=for-the-badge&label=downloads&color=1E6FE8" alt="总下载量" /></a>
-  <a href="https://github.com/tonhowtf/omniget/stargazers"><img src="https://img.shields.io/github/stars/tonhowtf/omniget?style=for-the-badge&color=FFD426" alt="GitHub Star 数" /></a>
+  <a href="https://github.com/OpenSelena/omniget/releases/latest"><img src="https://img.shields.io/github/v/release/OpenSelena/omniget?style=for-the-badge&label=release&color=F28500" alt="最新版本" /></a>
+  <a href="https://github.com/OpenSelena/omniget/releases"><img src="https://img.shields.io/github/downloads/OpenSelena/omniget/total?style=for-the-badge&label=downloads&color=1E6FE8" alt="总下载量" /></a>
+  <a href="https://github.com/OpenSelena/omniget/stargazers"><img src="https://img.shields.io/github/stars/OpenSelena/omniget?style=for-the-badge&color=FFD426" alt="GitHub Star 数" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-2AA845?style=for-the-badge" alt="GPL-3.0 许可证" /></a>
   <a href="https://discord.gg/jgdxyPy7Vn"><img src="https://img.shields.io/badge/Discord-社区-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord 社区" /></a>
   <a href="https://hosted.weblate.org/engage/omniget/"><img src="https://hosted.weblate.org/widget/omniget/frontend-json/svg-badge.svg" alt="翻译状态" /></a>
@@ -102,7 +102,7 @@ yt-dlp 是 OmniGet 运行的引擎，没有它就没有 OmniGet。如果你常�
 
 ## 下载与安装
 
-选择你的系统。所有构建都发布在 [Releases 页面](https://github.com/tonhowtf/omniget/releases/latest)。更新在应用内推送。
+选择你的系统。所有构建都发布在 [Releases 页面](https://github.com/OpenSelena/omniget/releases/latest)。更新在应用内推送。
 
 <table>
   <tr>
@@ -113,12 +113,12 @@ yt-dlp 是 OmniGet 运行的引擎，没有它就没有 OmniGet。如果你常�
   <tr>
     <td><b>Windows 10 / 11</b></td>
     <td><code>omniget_x.y.z_x64-setup.exe</code>（安装版）<br/><code>omniget_x.y.z_x64-portable.exe</code>（免安装，放哪儿都能跑）<br/><code>omniget_x.y.z_x64_en-US.msi</code>（企业部署用）</td>
-    <td><code>winget install -e --id tonhowtf.OmniGet</code></td>
+    <td><code>winget install -e --id OpenSelena.OmniGet</code></td>
   </tr>
   <tr>
     <td><b>macOS 10.15+</b></td>
     <td><code>omniget_x.y.z_aarch64.dmg</code>，Apple Silicon（M1 及之后）<br/><code>omniget_x.y.z_x64.dmg</code>，Intel Mac</td>
-    <td><code>brew install --cask tonhowtf/tap/omniget</code></td>
+    <td><code>brew install --cask OpenSelena/tap/omniget</code></td>
   </tr>
   <tr>
     <td><b>Linux</b></td>
@@ -214,7 +214,7 @@ OmniGet 为最常用的平台写了原生提取器，其余的交给 [yt-dlp](ht
 
 ### 级别二：从发布包的 zip 安装
 
-每个版本都附带 `omniget-chrome-extension-vX.Y.Z.zip`。从[最新版本](https://github.com/tonhowtf/omniget/releases/latest)下载、解压，然后按上面第 3 到第 7 步操作，把**加载已解压的扩展程序**指向解压出的文件夹。适合应用装在一台电脑、浏览器在另一台的情况，或者你在帮别人安装。
+每个版本都附带 `omniget-chrome-extension-vX.Y.Z.zip`。从[最新版本](https://github.com/OpenSelena/omniget/releases/latest)下载、解压，然后按上面第 3 到第 7 步操作，把**加载已解压的扩展程序**指向解压出的文件夹。适合应用装在一台电脑、浏览器在另一台的情况，或者你在帮别人安装。
 
 ### 级别三：Firefox、其他浏览器和手动配对
 
@@ -531,7 +531,7 @@ Debian 和 Ubuntu：`.deb`。Fedora、openSUSE、RHEL 系：`.rpm`。其他：`.
 
 ## 命令行
 
-`omniget-cli` 随每个版本发布，支持 Windows、macOS（Intel 和 Apple Silicon）和 Linux。从[最新版本](https://github.com/tonhowtf/omniget/releases/latest)下载 `omniget-cli-<版本>-<平台>`。
+`omniget-cli` 随每个版本发布，支持 Windows、macOS（Intel 和 Apple Silicon）和 Linux。从[最新版本](https://github.com/OpenSelena/omniget/releases/latest)下载 `omniget-cli-<版本>-<平台>`。
 
 ```bash
 omniget info <url>                     # 标题、格式和大小，不下载任何东西
@@ -548,7 +548,7 @@ omniget import-cookies cookies.txt     # Netscape 格式
 如果你只是想用 OmniGet，请[直接下载发布版](#下载与安装)。构建需要 [Rust](https://rustup.rs/)（精确的工具链版本固定在 `rust-toolchain.toml` 里，因为插件 ABI 依赖它）、[Node.js](https://nodejs.org/) 18+ 和 [pnpm](https://pnpm.io/)。
 
 ```bash
-git clone https://github.com/tonhowtf/omniget.git
+git clone https://github.com/OpenSelena/omniget.git
 cd omniget
 pnpm install
 pnpm tauri dev
@@ -580,7 +580,7 @@ pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'
 
 ## 参与贡献与翻译
 
-Bug 报告和 Pull Request 请提到 [Issues](https://github.com/tonhowtf/omniget/issues) 和 [Pull requests](https://github.com/tonhowtf/omniget/pulls)。提问和快速求助在 [Discord](https://discord.gg/jgdxyPy7Vn)。
+Bug 报告和 Pull Request 请提到 [Issues](https://github.com/OpenSelena/omniget/issues) 和 [Pull requests](https://github.com/OpenSelena/omniget/pulls)。提问和快速求助在 [Discord](https://discord.gg/jgdxyPy7Vn)。
 
 翻译在 [Weblate](https://hosted.weblate.org/engage/omniget/) 上进行。选择你的语言，直接在浏览器里翻译。新字符串合入 `main` 几小时后就会出现在那里。
 
@@ -589,9 +589,9 @@ OmniGet 建立在 [yt-dlp](https://github.com/yt-dlp/yt-dlp)、[FFmpeg](https://
 主界面上的小生物 Loop 是 OmniGet 的吉祥物。欢迎同人创作。原始美术不得用于商业用途，也不得修改后再分发。
 
 <p align="center">
-  <a href="https://star-history.com/#tonhowtf/omniget&Date"><img src="https://api.star-history.com/svg?repos=tonhowtf/omniget&type=Date" alt="tonhowtf/omniget 的 Star 历史" width="600" /></a>
+  <a href="https://star-history.com/#OpenSelena/omniget&Date"><img src="https://api.star-history.com/svg?repos=OpenSelena/omniget&type=Date" alt="OpenSelena/omniget 的 Star 历史" width="600" /></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/tonhowtf/omniget/releases/latest"><b>下载 OmniGet</b></a> · <a href="LICENSE">GPL-3.0</a>
+  <a href="https://github.com/OpenSelena/omniget/releases/latest"><b>下载 OmniGet</b></a> · <a href="LICENSE">GPL-3.0</a>
 </p>

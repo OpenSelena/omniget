@@ -514,7 +514,7 @@ mod tests {
         assert_eq!(o.connections.by_year.len(), 2);
         assert_eq!(o.messages.total, 5);
         assert_eq!(o.messages.conversations, 2);
-        assert_eq!(o.messages.me, "Tonho Dev");
+        assert_eq!(o.messages.me, "OpenSelena Dev");
         assert_eq!(o.posts.total, 2);
         assert_eq!(o.posts.with_media, 1);
         assert_eq!(o.reactions.total, 3);

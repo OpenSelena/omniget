@@ -177,11 +177,11 @@ pub(crate) mod fixture {
                 "messages.csv",
                 concat!(
                     "CONVERSATION ID,CONVERSATION TITLE,FROM,SENDER PROFILE URL,TO,DATE,SUBJECT,CONTENT\n",
-                    "c1,,Ana Silva,https://www.linkedin.com/in/anasilva,Tonho Dev,2021-08-07 10:00:00 UTC,Oi,\"Bom dia!\nTudo certo?\"\n",
-                    "c1,,Tonho Dev,https://www.linkedin.com/in/tonhodev,Ana Silva,2021-08-07 10:05:00 UTC,,\"Tudo, e ai?\"\n",
-                    "c1,,Ana Silva,https://www.linkedin.com/in/anasilva,Tonho Dev,2021-08-07 10:06:00 UTC,,\n",
-                    "c2,,Tonho Dev,https://www.linkedin.com/in/tonhodev,Carla Dias,2022-03-04 09:00:00 UTC,Vaga,\"Oi, Carla\"\n",
-                    "c2,,Carla Dias,https://www.linkedin.com/in/carladias,Tonho Dev,2022-03-04 09:30:00 UTC,,Fechado\n"
+                    "c1,,Ana Silva,https://www.linkedin.com/in/anasilva,OpenSelena Dev,2021-08-07 10:00:00 UTC,Oi,\"Bom dia!\nTudo certo?\"\n",
+                    "c1,,OpenSelena Dev,https://www.linkedin.com/in/openselena,Ana Silva,2021-08-07 10:05:00 UTC,,\"Tudo, e ai?\"\n",
+                    "c1,,Ana Silva,https://www.linkedin.com/in/anasilva,OpenSelena Dev,2021-08-07 10:06:00 UTC,,\n",
+                    "c2,,OpenSelena Dev,https://www.linkedin.com/in/openselena,Carla Dias,2022-03-04 09:00:00 UTC,Vaga,\"Oi, Carla\"\n",
+                    "c2,,Carla Dias,https://www.linkedin.com/in/carladias,OpenSelena Dev,2022-03-04 09:30:00 UTC,,Fechado\n"
                 )
                 .to_string(),
             ),
@@ -200,13 +200,13 @@ pub(crate) mod fixture {
             ),
             (
                 "Invitations.csv",
-                "From,To,Sent At,Message,Direction\nTonho Dev,Ana Silva,2021-08-01 10:00:00,,OUTGOING\nCarla Dias,Tonho Dev,2022-03-01 10:00:00,,INCOMING\n".to_string(),
+                "From,To,Sent At,Message,Direction\nOpenSelena Dev,Ana Silva,2021-08-01 10:00:00,,OUTGOING\nCarla Dias,OpenSelena Dev,2022-03-01 10:00:00,,INCOMING\n".to_string(),
             ),
             (
                 "Profile.csv",
                 concat!(
                     "First Name,Last Name,Headline,Summary,Industry,Geo Location,Websites\n",
-                    "Tonho,Dev,\"Dev de Rust e Svelte que gosta de ferramenta local\",\"Trabalho com aplicativos de desktop ha dez anos.\",Software Development,\"Sao Paulo, Brasil\",[MY_WEBSITE:https://omniget.wtf]\n"
+                    "OpenSelena,Dev,\"Dev de Rust e Svelte que gosta de ferramenta local\",\"Trabalho com aplicativos de desktop ha dez anos.\",Software Development,\"Sao Paulo, Brasil\",[MY_WEBSITE:https://omniget.wtf]\n"
                 )
                 .to_string(),
             ),

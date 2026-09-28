@@ -359,7 +359,7 @@ mod tests {
     fn pontua_o_perfil_sintetico() {
         let dir = fixture::dir();
         let r = run_dir(&dir);
-        assert_eq!(r.name, "Tonho Dev");
+        assert_eq!(r.name, "OpenSelena Dev");
         assert_eq!(r.items.len(), 14);
         // Sem imagens no export: foto fica fora da conta.
         assert!(r.unknown.contains(&"photo".to_string()));
@@ -397,12 +397,12 @@ mod tests {
         let r = run_dir(&dir);
         let u = r.items.iter().find(|i| i.id == "custom_url").expect("url");
         assert_eq!(u.state, "ok");
-        assert_eq!(u.value, "tonhodev");
+        assert_eq!(u.value, "openselena");
     }
 
     #[test]
     fn url_com_sufixo_aleatorio_nao_conta_como_custom() {
-        assert!(looks_custom("tonho-dev"));
+        assert!(looks_custom("openselena-dev"));
         assert!(looks_custom("anasilva"));
         assert!(!looks_custom("ana-silva-1a2b3c4"));
         assert!(!looks_custom("anasilva123456"));

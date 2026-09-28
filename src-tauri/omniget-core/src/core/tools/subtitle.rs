@@ -646,8 +646,8 @@ mod tests {
 
     #[test]
     fn windows_paths_are_escaped_for_the_filter() {
-        let e = escape_filter_path(r"C:\Users\tonho\aula.srt");
-        assert_eq!(e, "C\\:/Users/tonho/aula.srt");
+        let e = escape_filter_path(r"C:\Users\openselena\aula.srt");
+        assert_eq!(e, "C\\:/Users/openselena/aula.srt");
         assert!(!e.contains('\\') || e.contains("\\:"));
     }
 

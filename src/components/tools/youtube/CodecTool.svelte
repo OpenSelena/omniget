@@ -36,7 +36,7 @@
       <div class="group-row"><div class="group-row-content"><div class="group-row-title">{$t("tools.codec.how")}</div><ol class="steps"><li>{$t("tools.codec.step1")}</li><li>{$t("tools.codec.step2")}</li><li>{$t("tools.codec.step3")}</li></ol></div></div>
       <div class="group-row">
         <div class="group-row-content"><div class="group-row-title">{$t("tools.codec.extension")}</div><div class="group-row-sub">{$t("tools.codec.extension_hint")}</div></div>
-        <div class="group-row-trailing btn-row"><a class="btn btn-secondary btn-sm" href="/settings">{$t("tools.codec.open_settings")}</a><button class="btn btn-ghost btn-sm" type="button" onclick={() => openUrl("https://github.com/tonhowtf/omniget#browser-extension")}>GitHub</button></div>
+        <div class="group-row-trailing btn-row"><a class="btn btn-secondary btn-sm" href="/settings">{$t("tools.codec.open_settings")}</a><button class="btn btn-ghost btn-sm" type="button" onclick={() => openUrl("https://github.com/OpenSelena/omniget#browser-extension")}>GitHub</button></div>
       </div>
     </div>
   </section>

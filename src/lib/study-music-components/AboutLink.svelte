@@ -8,7 +8,7 @@
 
   let { variant = "inline", text }: Props = $props();
 
-  const url = "https://github.com/tonhowtf/omniget";
+  const url = "https://github.com/OpenSelena/omniget";
 
   async function open() {
     try {

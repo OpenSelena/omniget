@@ -24,11 +24,19 @@ fn check_portable_mode() {
                 // OS profile. Adopt that file once if the portable dir has none.
                 let portable_settings = data_dir.join("settings.json");
                 if !portable_settings.exists() {
-                    if let Some(os_settings) = dirs::data_dir()
-                        .map(|d| d.join("wtf.tonho.omniget").join("settings.json"))
-                        .filter(|p| p.exists())
-                    {
-                        let _ = std::fs::copy(&os_settings, &portable_settings);
+                    if let Some(base) = dirs::data_dir() {
+                        let modern_settings = base.join("com.openselena.omniget").join("settings.json");
+                        let legacy_settings = base.join("wtf.tonho.omniget").join("settings.json");
+                        let source = if modern_settings.exists() {
+                            Some(modern_settings)
+                        } else if legacy_settings.exists() {
+                            Some(legacy_settings)
+                        } else {
+                            None
+                        };
+                        if let Some(src) = source {
+                            let _ = std::fs::copy(&src, &portable_settings);
+                        }
                     }
                 }
             }
