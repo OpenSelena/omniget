@@ -400,7 +400,7 @@ mod tests {
         );
         assert_eq!(
             normalize_profile_url("x", "OpenSelena"),
-            "https://x.com/OpenSelena"
+            "https://x.com/openselena"
         );
     }
 }
