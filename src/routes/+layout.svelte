@@ -26,6 +26,7 @@
   import { startClipboardMonitor, stopClipboardMonitor, onClipboardUrl } from "$lib/stores/clipboard-monitor";
   import { readText } from "@tauri-apps/plugin-clipboard-manager";
   import { initChangelog } from "$lib/stores/changelog-store.svelte";
+  import { checkAnnouncements } from "$lib/stores/announcement-store.svelte";
   import { needsOnboarding } from "$lib/stores/onboarding-store.svelte";
   import { isYtdlpAvailable, isDepsChecked, refreshYtdlpStatus } from "$lib/stores/dependency-store.svelte";
   import { showToast } from "$lib/stores/toast-store.svelte";
@@ -94,6 +95,7 @@
   let ShortcutsDialog = $state<any>(null);
   let LegalDialog = $state<any>(null);
   let RecoveryDialog = $state<any>(null);
+  let AnnouncementDialog = $state<any>(null);
 
   function handleExternalUrlEvent(event: Omit<ExternalUrlEvent, "id">) {
     if (event.action === "prefill") {
@@ -187,10 +189,16 @@
     import("$components/dialog/RecoveryDialog.svelte").then((m) => {
       RecoveryDialog = m.default;
     });
+    import("$components/dialog/AnnouncementDialog.svelte").then((m) => {
+      AnnouncementDialog = m.default;
+    });
 
     refreshYtdlpStatus();
     refreshUpdateInfo();
     initChangelog();
+    setTimeout(() => {
+      void checkAnnouncements();
+    }, 2000);
     reloadPluginNav();
 
     let unlistenExternalUrl: (() => void) | null = null;
@@ -428,6 +436,10 @@
 
 {#if RecoveryDialog}
   <RecoveryDialog />
+{/if}
+
+{#if AnnouncementDialog}
+  <AnnouncementDialog />
 {/if}
 
 <style>
