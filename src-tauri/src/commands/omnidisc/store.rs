@@ -25,6 +25,7 @@ use std::path::{Path, PathBuf};
 use std::sync::{Mutex, OnceLock};
 
 pub const SERVICE: &str = "com.openselena.omniget.omnidisc";
+#[cfg(any(target_os = "macos", windows))]
 const LEGACY_SERVICE: &str = "wtf.tonho.omniget.omnidisc";
 const SESSIONS_FILE: &str = "sessions.bin";
 const KEY_FILE: &str = "session.key";
