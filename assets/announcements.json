@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "id": "announcement-v093-opennami",
+  "active": true,
+  "badge": "Major Update",
+  "title": "Welcome to the Open Nami Engine!",
+  "thumbnail": "https://raw.githubusercontent.com/OpenSelena/openomni/main/assets/logo-light.svg",
+  "body": "OmniGet has been upgraded with the high-performance Open Nami download engine, intelligent dual-engine fallback, and sandboxed cookie storage.",
+  "highlights": [
+    "⚡ 3x Faster Metadata Extraction for YouTube & X",
+    "🔒 Sandboxed Private Cookie Storage",
+    "🔄 Dual-Engine Automatic Fallback"
+  ],
+  "cta": {
+    "label": "Read Release Notes →",
+    "url": "https://github.com/OpenSelena/omniget/releases"
+  },
+  "expires_at": null
+}
