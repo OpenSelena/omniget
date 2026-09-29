@@ -4,7 +4,7 @@
   "active": true,
   "badge": "Community",
   "title": "Join OpenSelena on Telegram",
-  "thumbnail": "https://raw.githubusercontent.com/OpenSelena/omniget/main/assets/announcement-openselena.jpg",
+  "thumbnail": "https://raw.githubusercontent.com/OpenSelena/omniget/main/assets/announcement-poster.png",
   "body": "Connect with the official OpenSelena community on Telegram. Stay up to date with new OmniGet releases, preview builds, feature discussions, and direct support.",
   "highlights": [
     "Instant Release Alerts: Direct download links and changelogs for OmniGet updates",
@@ -13,7 +13,7 @@
   ],
   "cta": {
     "label": "Join Telegram Channel",
-    "url": "https://t.me/s/OpenSelena/"
+    "url": "https://t.me/OpenSelena/"
   },
   "expires_at": null
 }
