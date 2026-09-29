@@ -1,21 +1,19 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "id": "announcement-v0100-release",
+  "id": "announcement-openselena-telegram",
   "active": true,
-  "badge": "v0.10.0 Released",
-  "title": "OmniGet v0.10.0: OpenNami & In-App Alerts",
-  "thumbnail": "https://raw.githubusercontent.com/OpenSelena/omniget/main/assets/readme/hero.png",
-  "body": "OmniGet has been upgraded with the OpenNami download architecture, dual-engine fallback, anti-bot hardening, Lao language support, and in-app announcements.",
+  "badge": "Community",
+  "title": "Join OpenSelena on Telegram",
+  "thumbnail": "https://raw.githubusercontent.com/OpenSelena/omniget/main/assets/announcement-openselena.jpg",
+  "body": "Connect with the official OpenSelena community on Telegram. Stay up to date with new OmniGet releases, preview builds, feature discussions, and direct support.",
   "highlights": [
-    "OpenNami Engine: Dual-engine fallback switches automatically when streams throttle",
-    "Anti-Bot Hardening: Handles challenge pages and protected site stream extraction",
-    "In-App Announcements: In-app modal for release updates and service notices",
-    "Lao (ລາວ) Translation: Full interface translation with bundled Noto Serif Lao",
-    "Attachments & Compatibility: Restored course attachment toggle and Linux SQLite fix"
+    "Instant Release Alerts: Direct download links and changelogs for OmniGet updates",
+    "Development Updates: Early access to experimental builds and roadmap discussions",
+    "Community Support: Troubleshooting, bug reporting, and feature discussions"
   ],
   "cta": {
-    "label": "View Release Notes",
-    "url": "https://github.com/OpenSelena/omniget/releases/tag/v0.10.0"
+    "label": "Join Telegram Channel",
+    "url": "https://t.me/s/OpenSelena/"
   },
   "expires_at": null
 }
