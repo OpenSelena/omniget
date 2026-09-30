@@ -3,6 +3,7 @@
   import { page } from "$app/stores";
   import { goto } from "$app/navigation";
   import { convertFileSrc, invoke } from "@tauri-apps/api/core";
+  import { mediaSrc } from "$lib/media-src";
   import { pluginInvoke } from "$lib/plugin-invoke";
   import { rpcSetSource, rpcClearSource } from "$lib/rpc";
   import { awardXp, bumpCounter } from "$lib/study-gamification";
@@ -292,8 +293,8 @@
       skipGaps = ctx.skip_gaps ?? null;
       thumbnailSlices = ctx.thumbnails ?? [];
       nextLessonAggregated = ctx.next_lesson ?? null;
-      videoSrc = convertFileSrc(ctx.lesson.video_path);
-      subtitleSrc = ctx.lesson.subtitle_path ? convertFileSrc(ctx.lesson.subtitle_path) : "";
+      videoSrc = await mediaSrc(ctx.lesson.video_path);
+      subtitleSrc = ctx.lesson.subtitle_path ? await mediaSrc(ctx.lesson.subtitle_path) : "";
       markedComplete = lessonRaw.completed;
       const defaultSubLang = playerSettings?.subtitles_default_lang ?? null;
       const secondarySubLang = playerSettings?.subtitles_secondary_lang ?? null;
@@ -594,7 +595,7 @@
   async function preloadNextLesson(nextId: number) {
     try {
       const next = await pluginInvoke<Lesson>("study", "study:lesson:get", { lessonId: nextId });
-      nextLessonPreloadUrl = convertFileSrc(next.video_path);
+      nextLessonPreloadUrl = await mediaSrc(next.video_path);
     } catch (e) {
       console.error("preloadNextLesson failed", e);
     }
