@@ -17,15 +17,23 @@
 //!                         host accepted (`ExtensionPayload`). Validates the
 //!                         URL, writes cookies + metadata to disk, then queues
 //!                         the URL through `external_url::handle_external_url`.
+//! * `GET  /media/{t}`  — unauthenticated by design; streams one file the app
+//!                         itself granted via `media_stream_url` (unguessable,
+//!                         expiring token). This is how the webview plays local
+//!                         video/audio: WebKitGTK's media loader bypasses the
+//!                         custom asset scheme entirely, so it needs a real
+//!                         HTTP endpoint with Range support.
 
+use std::collections::HashMap;
 use std::net::SocketAddr;
-use std::sync::atomic::{AtomicI64, Ordering};
-use std::sync::Arc;
+use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicI64, AtomicU16, Ordering};
+use std::sync::{Arc, Mutex, OnceLock};
 
 use axum::{
-    extract::DefaultBodyLimit,
-    extract::State,
-    http::{HeaderMap, Method, StatusCode},
+    body::Body,
+    extract::{DefaultBodyLimit, Path as AxumPath, State},
+    http::{HeaderMap, HeaderName, Method, StatusCode},
     response::{IntoResponse, Response},
     routing::{get, post},
     Json, Router,
@@ -34,7 +42,9 @@ use base64::Engine;
 use serde::{Deserialize, Serialize};
 use socket2::{Domain, Protocol, Socket, Type};
 use tauri::{AppHandle, Emitter};
+use tokio::io::{AsyncReadExt, AsyncSeekExt};
 use tokio::net::TcpListener;
+use tokio_util::io::ReaderStream;
 use tower_http::cors::{Any, CorsLayer};
 
 use crate::extension_storage::{
@@ -46,6 +56,235 @@ use tauri::Manager;
 /// Range of ports we'll try when picking a fresh `bridge.port`. Chosen above
 /// the most common dev-server / Vite ranges so collisions are rare.
 const PORT_RANGE: std::ops::Range<u16> = 47720..47730;
+
+/// The port the bridge actually bound this run; `0` until [`spawn`] gets that
+/// far. Media URLs handed to the webview are built from it.
+static BOUND_PORT: AtomicU16 = AtomicU16::new(0);
+
+/// One playback capability per file: unguessable token → (path, deadline).
+///
+/// WHY this exists: WebKitGTK's media loader never consults Tauri's registered
+/// asset scheme — the GStreamer source element performs a real HTTP request,
+/// so a `convertFileSrc` URL dies before the first byte and the player spins
+/// forever. Media therefore streams from this bridge instead. The grant, not
+/// the path, is the capability: only files the app itself handed a token for
+/// can be read, only from localhost, and only until the deadline — a webpage
+/// probing the port finds nothing to name.
+static MEDIA_GRANTS: OnceLock<Mutex<HashMap<String, MediaGrant>>> = OnceLock::new();
+
+struct MediaGrant {
+    path: PathBuf,
+    expires_ms: i64,
+}
+
+/// Grants outlive a single request on purpose — the player re-requests the
+/// same URL for every seek and every quality probe — but not forever.
+const MEDIA_GRANT_TTL_MS: i64 = 6 * 60 * 60 * 1000;
+
+/// Upper bound so a long session with hundreds of opened files cannot grow
+/// the map without limit; the soonest-to-expire grant is dropped first.
+const MEDIA_GRANT_CAP: usize = 512;
+
+fn media_grants() -> &'static Mutex<HashMap<String, MediaGrant>> {
+    MEDIA_GRANTS.get_or_init(|| Mutex::new(HashMap::new()))
+}
+
+fn media_grants_prune(map: &mut HashMap<String, MediaGrant>) {
+    let now = now_ms();
+    map.retain(|_, grant| grant.expires_ms > now);
+    while map.len() >= MEDIA_GRANT_CAP {
+        let victim = map
+            .iter()
+            .min_by_key(|(_, grant)| grant.expires_ms)
+            .map(|(token, _)| token.clone());
+        match victim {
+            Some(token) => {
+                map.remove(&token);
+            }
+            None => break,
+        }
+    }
+}
+
+/// Mints a playback URL for one local media file, for [`media_stream_url`].
+fn mint_media_grant(path: &str) -> Result<String, String> {
+    if !Path::new(path).is_file() {
+        return Err(format!("media: not a file: {path}"));
+    }
+    let port = BOUND_PORT.load(Ordering::SeqCst);
+    if port == 0 {
+        return Err("media: the local bridge is not running".to_string());
+    }
+    let token = generate_token();
+    let mut map = media_grants()
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner());
+    media_grants_prune(&mut map);
+    map.insert(
+        token.clone(),
+        MediaGrant {
+            path: PathBuf::from(path),
+            expires_ms: now_ms() + MEDIA_GRANT_TTL_MS,
+        },
+    );
+    Ok(format!("http://127.0.0.1:{port}/media/{token}"))
+}
+
+/// Looks a token up for [`media_stream`], dropping it when expired.
+fn media_grant_lookup(token: &str) -> Option<MediaGrant> {
+    let mut map = media_grants()
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner());
+    let grant = map.get(token)?;
+    if grant.expires_ms <= now_ms() {
+        map.remove(token);
+        return None;
+    }
+    Some(MediaGrant {
+        path: grant.path.clone(),
+        expires_ms: grant.expires_ms,
+    })
+}
+
+/// The Tauri command the player calls instead of `convertFileSrc`. Sync on
+/// purpose: it only stats the file and mints a token, and keeping it off the
+/// async runtime means it can never trip the nested-runtime class of bugs.
+#[tauri::command]
+pub fn media_stream_url(path: String) -> Result<String, String> {
+    mint_media_grant(&path)
+}
+
+/// MIME types the player asks this bridge for. `typefind` sniffs the bytes
+/// anyway; the header just stops WebKit from guessing a container wrong.
+fn media_mime(path: &Path) -> &'static str {
+    match path
+        .extension()
+        .and_then(|ext| ext.to_str())
+        .map(|ext| ext.to_ascii_lowercase())
+        .as_deref()
+    {
+        Some("mp4" | "m4v" | "mov") => "video/mp4",
+        Some("mkv") => "video/x-matroska",
+        Some("webm") => "video/webm",
+        Some("mp3") => "audio/mpeg",
+        Some("m4a") => "audio/mp4",
+        Some("flac") => "audio/flac",
+        Some("ogg" | "opus") => "audio/ogg",
+        Some("wav") => "audio/wav",
+        Some("vtt") => "text/vtt",
+        Some("srt") => "text/plain",
+        _ => "application/octet-stream",
+    }
+}
+
+/// Streams one granted file with HTTP Range support. WebKit requests
+/// `bytes=0-` for preload, then arbitrary windows for every seek; answering
+/// 200-with-full-body to those breaks the pipeline, so a real 206 is the
+/// contract here, same as the asset protocol serves on the other platforms.
+async fn media_stream(AxumPath(token): AxumPath<String>, headers: HeaderMap) -> Response {
+    let Some(grant) = media_grant_lookup(&token) else {
+        return StatusCode::NOT_FOUND.into_response();
+    };
+    let Ok(mut file) = tokio::fs::File::open(&grant.path).await else {
+        return StatusCode::NOT_FOUND.into_response();
+    };
+    let total = file
+        .metadata()
+        .await
+        .map(|meta| meta.len())
+        .unwrap_or_default();
+    let mime = media_mime(&grant.path);
+
+    let range = headers
+        .get("range")
+        .and_then(|value| value.to_str().ok())
+        .map(parse_byte_range);
+    let unsatisfiable = matches!(range, Some(Err(())));
+    let (status, start, end) = match range {
+        Some(Ok(spec)) => {
+            let (start, end) = match spec {
+                ByteRange::From(start, Some(end)) => (start, end),
+                ByteRange::From(start, None) => (start, total.saturating_sub(1)),
+                ByteRange::LastBytes(suffix) => (
+                    total.saturating_sub(suffix),
+                    total.saturating_sub(1),
+                ),
+            };
+            if start >= total {
+                (StatusCode::RANGE_NOT_SATISFIABLE, 0, 0)
+            } else {
+                (StatusCode::PARTIAL_CONTENT, start, end.min(total.saturating_sub(1)))
+            }
+        }
+        _ => (StatusCode::OK, 0, total.saturating_sub(1)),
+    };
+    if status == StatusCode::RANGE_NOT_SATISFIABLE {
+        let mut headers = HeaderMap::new();
+        headers.insert(
+            HeaderName::from_static("content-range"),
+            format!("bytes */{total}").parse().expect("valid header"),
+        );
+        return (status, headers, Body::empty()).into_response();
+    }
+    let length = end - start + 1;
+
+    if file.seek(std::io::SeekFrom::Start(start)).await.is_err() {
+        return StatusCode::INTERNAL_SERVER_ERROR.into_response();
+    }
+    let stream = ReaderStream::new(file.take(length));
+
+    let mut response_headers = HeaderMap::new();
+    response_headers.insert(
+        HeaderName::from_static("content-type"),
+        mime.parse().expect("valid header"),
+    );
+    response_headers.insert(
+        HeaderName::from_static("content-length"),
+        length.to_string().parse().expect("valid header"),
+    );
+    response_headers.insert(
+        HeaderName::from_static("accept-ranges"),
+        "bytes".parse().expect("valid header"),
+    );
+    if status == StatusCode::PARTIAL_CONTENT {
+        response_headers.insert(
+            HeaderName::from_static("content-range"),
+            format!("bytes {start}-{end}/{total}")
+                .parse()
+                .expect("valid header"),
+        );
+    }
+
+    (status, response_headers, Body::from_stream(stream)).into_response()
+}
+
+/// One parsed `Range` header. Multi-range requests are refused (nobody sends
+/// them for media) by parsing to `Err(())`, which answers 416.
+enum ByteRange {
+    From(u64, Option<u64>),
+    LastBytes(u64),
+}
+
+/// `bytes=start-end`, `bytes=start-` or `bytes=-suffix`.
+fn parse_byte_range(raw: &str) -> Result<ByteRange, ()> {
+    let spec = raw.strip_prefix("bytes=").ok_or(())?;
+    let spec = spec.split(',').next().ok_or(())?.trim();
+    let (start_str, end_str) = spec.split_once('-').ok_or(())?;
+    if start_str.is_empty() {
+        let suffix: u64 = end_str.trim().parse().map_err(|_| ())?;
+        return Ok(ByteRange::LastBytes(suffix));
+    }
+    let start: u64 = start_str.trim().parse().map_err(|_| ())?;
+    let end = if end_str.trim().is_empty() {
+        None
+    } else {
+        Some(end_str.trim().parse::<u64>().map_err(|_| ())?)
+    };
+    if end.is_some_and(|end| end < start) {
+        return Err(());
+    }
+    Ok(ByteRange::From(start, end))
+}
 
 #[derive(Clone)]
 pub struct BridgeState {
@@ -198,6 +437,8 @@ pub async fn spawn(app: AppHandle) {
         }
     };
 
+    BOUND_PORT.store(port, Ordering::SeqCst);
+
     let state = BridgeState {
         app: app.clone(),
         token: Arc::new(token),
@@ -214,6 +455,9 @@ pub async fn spawn(app: AppHandle) {
     let router = Router::new()
         .route("/v1/health", get(health))
         .route("/v1/pair", get(pair))
+        // Media grants are their own capability: the token in the path is
+        // unguessable and short-lived, so this stays out of the bearer check.
+        .route("/media/{token}", get(media_stream))
         .route(
             "/v1/enqueue",
             // The extension may attach the full text of a captured HLS playlist
@@ -650,5 +894,37 @@ mod tests {
     #[test]
     fn build_pairing_url_uses_loopback_address() {
         assert_eq!(build_pairing_url(47720), "http://127.0.0.1:47720");
+    }
+
+    #[test]
+    fn byte_ranges_parse_into_specs() {
+        use ByteRange::*;
+        assert!(matches!(parse_byte_range("bytes=0-"), Ok(From(0, None))));
+        assert!(matches!(
+            parse_byte_range("bytes=100-199"),
+            Ok(From(100, Some(199)))
+        ));
+        assert!(matches!(
+            parse_byte_range("bytes=-500"),
+            Ok(LastBytes(500))
+        ));
+        // Whitespace, a single range out of a multi-range request, and an
+        // end before start are all part of the contract.
+        assert!(matches!(parse_byte_range("bytes=0 -"), Ok(From(0, None))));
+        assert!(matches!(
+            parse_byte_range("bytes=0-9, 50-59"),
+            Ok(From(0, Some(9)))
+        ));
+        assert!(parse_byte_range("bytes=9-0").is_err());
+        assert!(parse_byte_range("attachments=0-9").is_err());
+    }
+
+    #[test]
+    fn media_mime_covers_the_players_formats() {
+        assert_eq!(media_mime(Path::new("a/b/lesson.mp4")), "video/mp4");
+        assert_eq!(media_mime(Path::new("a/b/lesson.MKV")), "video/x-matroska");
+        assert_eq!(media_mime(Path::new("a/b/track.flac")), "audio/flac");
+        assert_eq!(media_mime(Path::new("a/b/lyrics.vtt")), "text/vtt");
+        assert_eq!(media_mime(Path::new("a/b/blob.bin")), "application/octet-stream");
     }
 }

@@ -52,7 +52,7 @@ chrono = { version = "0.4", features = ["serde"] }
 dirs = "6"
 sanitize-filename = "0.6"
 unicode-normalization = "0.1"
-tokio-util = { version = "0.7", features = ["rt"] }
+tokio-util = { version = "0.7", features = ["io", "rt"] }
 url = "2"
 urlencoding = "2"
 rand = "0.10.0"

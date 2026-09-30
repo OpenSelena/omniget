@@ -1,4 +1,5 @@
 import { convertFileSrc } from "@tauri-apps/api/core";
+import { mediaSrc } from "$lib/media-src";
 import { pluginInvoke } from "$lib/plugin-invoke";
 import { dominantColorFromPath, palettePathOrUrl, type RGB } from "./dominant-color";
 import { spotifySdk, type SpotifySdkState } from "./spotify-sdk.svelte";
@@ -1146,7 +1147,11 @@ class MusicPlayerStore {
       this.queueIndex = idx;
       this.currentTrack = track;
       this.duration = (track.duration_ms ?? 0) / 1000;
-      this.audio.src = convertFileSrc(track.path);
+      void mediaSrc(track.path).then((url) => {
+        // The track may have changed while the URL resolved; only apply it
+        // if this restore is still the one on screen.
+        if (this.currentTrack?.path === track.path) this.audio!.src = url;
+      });
       this.updateMediaSessionMetadata(track);
       void this.refreshDominantColor(track);
       const t = Number(data.currentTime);
@@ -1700,7 +1705,7 @@ class MusicPlayerStore {
     try {
       const isHttpUrl =
         track.path.startsWith("http://") || track.path.startsWith("https://");
-      this.audio.src = isHttpUrl ? track.path : convertFileSrc(track.path);
+      this.audio.src = isHttpUrl ? track.path : await mediaSrc(track.path);
       await this.audio.play();
       this.ensureEqGraph();
       this.saveQueueNow();

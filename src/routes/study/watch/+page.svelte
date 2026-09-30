@@ -1,8 +1,9 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { convertFileSrc, invoke } from "@tauri-apps/api/core";
+  import { invoke } from "@tauri-apps/api/core";
   import { goto, replaceState } from "$app/navigation";
   import { page } from "$app/stores";
+  import { mediaSrc } from "$lib/media-src";
   import { pluginInvoke } from "$lib/plugin-invoke";
   import { showToast } from "$lib/stores/toast-store.svelte";
   import { t } from "$lib/i18n";
@@ -60,10 +61,26 @@
       : null) ?? "/study/library?mode=browse",
   );
 
-  const videoSrc = $derived(currentPath ? convertFileSrc(currentPath) : "");
-  const subtitleSrc = $derived(
-    currentSubtitle ? convertFileSrc(currentSubtitle) : "",
-  );
+  // The media URLs resolve through the local bridge on Linux (mediaSrc), so
+  // they land a tick after the route: state filled in by the effect below,
+  // and the player only mounts once its source exists.
+  let videoSrc = $state("");
+  let subtitleSrc = $state("");
+
+  $effect(() => {
+    const path = currentPath;
+    const subtitle = currentSubtitle;
+    let live = true;
+    void mediaSrc(path).then((url) => {
+      if (live) videoSrc = url;
+    });
+    void mediaSrc(subtitle).then((url) => {
+      if (live) subtitleSrc = url;
+    });
+    return () => {
+      live = false;
+    };
+  });
 
   function deriveName(p: string): string {
     if (!p) return "";
@@ -609,8 +626,9 @@
         </div>
       {:else}
         <div class="player-shell">
-          {#key currentPath}
-            <PlayerShell
+          {#if videoSrc}
+            {#key videoSrc}
+              <PlayerShell
               videoSrc={videoSrc}
               title={currentName}
               courseTitle="Pasta local"
@@ -648,7 +666,8 @@
               onTheaterToggle={() => {}}
               onClose={back}
             />
-          {/key}
+            {/key}
+          {/if}
         </div>
       {/if}
     </div>

@@ -867,6 +867,7 @@ pub fn run() {
             _ => {}
         })
         .invoke_handler(tauri::generate_handler![
+            local_bridge::media_stream_url,
             commands::auth_webview::open_auth_webview,
             commands::omnidisc::omnidisc_connect,
             commands::omnidisc::auth::omnidisc_register,
