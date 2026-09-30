@@ -227,6 +227,22 @@ export GTK_DATA_PREFIX="$APPDIR"
 export GTK_THEME="$APPIMAGE_GTK_THEME" # Custom themes are broken
 export GDK_BACKEND=x11 # Crash with Wayland backend on Wayland - We tested it without it and ended up with this: https://github.com/tauri-apps/tauri/issues/8541
 export XDG_DATA_DIRS="$APPDIR/usr/share:/usr/share:$XDG_DATA_DIRS" # g_get_system_data_dirs() from GLib
+
+# WebKitGTK plays media through GStreamer, and the bundled core libraries come
+# without plugins or the plugin-scanner helper — so the default scan finds no
+# appsink/autoaudiosink/decodebin and the first media pipeline dies (blank page
+# / eternal spinner). This MUST be set before exec: the app setting it at
+# runtime races WebKit's early GStreamer init through GLib's cached getenv and
+# loses nondeterministically. The user's own GST_PLUGIN_PATH always wins.
+if [ -z "${GST_PLUGIN_PATH:-}" ]; then
+    export GST_PLUGIN_PATH="$APPDIR/usr/lib/gstreamer-1.0:/usr/lib/gstreamer-1.0:/usr/lib64/gstreamer-1.0"
+fi
+if [ -z "${GST_PLUGIN_SCANNER:-}" ] && [ -x /usr/lib/gstreamer-1.0/gst-plugin-scanner ]; then
+    export GST_PLUGIN_SCANNER=/usr/lib/gstreamer-1.0/gst-plugin-scanner
+fi
+if [ -z "${GST_PLUGIN_SCANNER:-}" ] && [ -x /usr/lib64/gstreamer-1.0/gst-plugin-scanner ]; then
+    export GST_PLUGIN_SCANNER=/usr/lib64/gstreamer-1.0/gst-plugin-scanner
+fi
 EOF
 
 echo "Installing GLib schemas"
