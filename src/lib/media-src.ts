@@ -1,7 +1,11 @@
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
 import { currentOs } from "$lib/platform";
 
-const cache = new Map<string, Promise<string>>();
+const cache = new Map<string, { url: Promise<string>; mintedAt: number }>();
+
+// Grants live 6 hours server-side; re-mint before that so a cached URL can
+// never 404 mid-playback (the player reuses the URL on every seek).
+const CACHE_TTL_MS = 5 * 60 * 60 * 1000;
 
 /**
  * URL the webview can actually stream a local media file from.
@@ -18,13 +22,12 @@ const cache = new Map<string, Promise<string>>();
 export function mediaSrc(path: string): Promise<string> {
   if (!path) return Promise.resolve("");
   if (currentOs() !== "linux") return Promise.resolve(convertFileSrc(path));
-  let url = cache.get(path);
-  if (!url) {
-    url = invoke<string>("media_stream_url", { path }).catch((error) => {
-      console.warn("[media] stream URL unavailable, falling back to asset protocol:", error);
-      return convertFileSrc(path);
-    });
-    cache.set(path, url);
-  }
+  const hit = cache.get(path);
+  if (hit && Date.now() - hit.mintedAt < CACHE_TTL_MS) return hit.url;
+  const url = invoke<string>("media_stream_url", { path }).catch((error) => {
+    console.warn("[media] stream URL unavailable, falling back to asset protocol:", error);
+    return convertFileSrc(path);
+  });
+  cache.set(path, { url, mintedAt: Date.now() });
   return url;
 }
