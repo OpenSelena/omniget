@@ -199,7 +199,6 @@ async fn media_stream(AxumPath(token): AxumPath<String>, headers: HeaderMap) -> 
         .get("range")
         .and_then(|value| value.to_str().ok())
         .map(parse_byte_range);
-    let unsatisfiable = matches!(range, Some(Err(())));
     let (status, start, end) = match range {
         Some(Ok(spec)) => {
             let (start, end) = match spec {
