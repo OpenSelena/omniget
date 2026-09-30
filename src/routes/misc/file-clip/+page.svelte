@@ -1,7 +1,8 @@
 <script lang="ts">
-  import { invoke, convertFileSrc } from "@tauri-apps/api/core";
+  import { invoke } from "@tauri-apps/api/core";
   import { open as openDialog } from "@tauri-apps/plugin-dialog";
   import { emit } from "@tauri-apps/api/event";
+  import { mediaSrc } from "$lib/media-src";
 
   type ClipResult = {
     output_path: string;
@@ -40,7 +41,7 @@
         const parts = picked.replace(/\\/g, "/").split("/");
         sourceLabel = parts[parts.length - 1] ?? picked;
         try {
-          videoSrc = convertFileSrc(picked);
+          videoSrc = await mediaSrc(picked);
         } catch {
           videoSrc = "";
         }

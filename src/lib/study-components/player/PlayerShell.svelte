@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { convertFileSrc } from "@tauri-apps/api/core";
+  import { mediaSrc } from "$lib/media-src";
   import SkipGapsButton from "./SkipGapsButton.svelte";
   import SponsorBlockOverlay from "./SponsorBlockOverlay.svelte";
   import ChaptersList from "./ChaptersList.svelte";
@@ -108,10 +108,22 @@
   const progressPct = $derived(duration > 0 ? (currentTime / duration) * 100 : 0);
   const bufferedPct = $derived(duration > 0 ? (buffered / duration) * 100 : 0);
 
-  const subtitleResolved = $derived.by(() => {
-    if (selectedSubtitleLang == null) return null;
-    const track = subtitles.find((s) => s.lang === selectedSubtitleLang);
-    return track ? convertFileSrc(track.path) : null;
+  // Subtitle files go through the same transport as the video (mediaSrc):
+  // on Linux the asset scheme URL would fail the same way the media source
+  // would, and keeping both on one path makes the CORS story identical.
+  let subtitleResolved = $state<string | null>(null);
+
+  $effect(() => {
+    const lang = selectedSubtitleLang;
+    const track = lang == null ? null : subtitles.find((s) => s.lang === lang);
+    const path = track?.path ?? "";
+    let live = true;
+    void mediaSrc(path).then((url) => {
+      if (live) subtitleResolved = url || null;
+    });
+    return () => {
+      live = false;
+    };
   });
 
   const introMarker = $derived.by(() => {
