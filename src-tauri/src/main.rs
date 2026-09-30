@@ -88,6 +88,11 @@ fn setup_environment() {
     // ABI-compatible because the bundled libraries are the same gst the
     // system plugins were built against. GST_PLUGIN_PATH adds to the scan
     // instead of replacing it, and an explicit user choice always wins.
+    //
+    // This is only a FALLBACK: the authoritative fix lives in the AppRun hook
+    // (scripts/linux/linuxdeploy-plugin-gtk.sh), which sets the variable
+    // before exec. Setting it this late races WebKit's early GStreamer init
+    // through GLib's cached getenv and loses nondeterministically.
     #[cfg(target_os = "linux")]
     if std::env::var_os("APPIMAGE").is_some() && std::env::var_os("GST_PLUGIN_PATH").is_none() {
         let mut dirs: Vec<String> = Vec::new();
