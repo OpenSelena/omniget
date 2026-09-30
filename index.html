@@ -9,18 +9,99 @@
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="OmniGet" />
   <meta property="og:title" content="OmniGet — Download Courses, Videos, Music & Books" />
   <meta property="og:description" content="Free, open-source desktop downloader & player. Supports 1,800+ sites, Udemy, Hotmart, Bilibili 4K, EPUB/PDF reader, Telegram uploader, and OpenNami social archiver under GPL-3.0." />
-  <meta property="og:image" content="./assets/readme/home.png" />
+  <meta property="og:image" content="https://omniget.nav.bd/assets/readme/home.png" />
   <meta property="og:url" content="https://omniget.nav.bd/" />
 
-  <!-- Canonical -->
+  <!-- Canonical & Search Crawlers -->
   <link rel="canonical" href="https://omniget.nav.bd/" />
   <meta name="robots" content="index, follow" />
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="./static/favicon.png" />
-  <link rel="apple-touch-icon" href="./static/favicon.png" />
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="256x256" href="/static/favicon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/favicon.png" />
+
+  <!-- Google Structured Data (JSON-LD) for Brand Name & Search Snippets -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "OmniGet",
+    "alternateName": ["OmniGet Downloader", "OpenSelena OmniGet"],
+    "url": "https://omniget.nav.bd/"
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "OmniGet",
+    "operatingSystem": "Windows, macOS, Linux",
+    "applicationCategory": "MultimediaApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "Free and open-source universal desktop downloader and media player for Windows, macOS, and Linux.",
+    "downloadUrl": "https://omniget.nav.bd/#downloads",
+    "url": "https://omniget.nav.bd/",
+    "license": "https://www.gnu.org/licenses/gpl-3.0.html",
+    "author": {
+      "@type": "Organization",
+      "name": "OpenSelena",
+      "url": "https://github.com/OpenSelena"
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": [
+      {
+        "@type": "SiteNavigationElement",
+        "position": 1,
+        "name": "Downloads",
+        "description": "Download OmniGet for Windows, macOS, and Linux",
+        "url": "https://omniget.nav.bd/#downloads"
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "position": 2,
+        "name": "OpenNami",
+        "description": "Social media archiver and bulk downloader for Instagram, TikTok, and X",
+        "url": "https://omniget.nav.bd/#opennami"
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "position": 3,
+        "name": "Release Notes",
+        "description": "Changelog and release notes for the latest OmniGet versions",
+        "url": "https://omniget.nav.bd/#releasenotes"
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "position": 4,
+        "name": "FAQ",
+        "description": "Frequently asked questions regarding OmniGet features and formats",
+        "url": "https://omniget.nav.bd/#faq"
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "position": 5,
+        "name": "GitHub Repository",
+        "description": "Open source repository, source code, and community discussions on GitHub",
+        "url": "https://github.com/OpenSelena/omniget"
+      }
+    ]
+  }
+  </script>
 
   <!-- Google Fonts: Inter, Space Grotesk, JetBrains Mono, Fira Code -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -1162,17 +1243,17 @@
   <!-- Floating Pill Navbar Header -->
   <header class="header-nav">
     <div class="nav-inner">
-      <button class="nav-brand" onclick="switchPageTab('home')" aria-label="OmniGet home">
+      <a class="nav-brand" href="#home" onclick="switchPageTab('home')" aria-label="OmniGet home">
         <img src="./static/loop.png" alt="OmniGet Logo" />
         <span>OmniGet</span>
-      </button>
+      </a>
 
       <ul class="nav-links">
-        <li><button class="nav-link active" id="nav-home" onclick="switchPageTab('home')">Home</button></li>
-        <li><button class="nav-link" id="nav-opennami" onclick="switchPageTab('opennami')">OpenNami</button></li>
-        <li><button class="nav-link" id="nav-downloads" onclick="switchPageTab('downloads')">Downloads</button></li>
-        <li><button class="nav-link" id="nav-releasenotes" onclick="switchPageTab('releasenotes')">Release Notes</button></li>
-        <li><button class="nav-link" id="nav-faq" onclick="switchPageTab('faq')">FAQ</button></li>
+        <li><a class="nav-link active" id="nav-home" href="#home" onclick="switchPageTab('home')">Home</a></li>
+        <li><a class="nav-link" id="nav-opennami" href="#opennami" onclick="switchPageTab('opennami')">OpenNami</a></li>
+        <li><a class="nav-link" id="nav-downloads" href="#downloads" onclick="switchPageTab('downloads')">Downloads</a></li>
+        <li><a class="nav-link" id="nav-releasenotes" href="#releasenotes" onclick="switchPageTab('releasenotes')">Release Notes</a></li>
+        <li><a class="nav-link" id="nav-faq" href="#faq" onclick="switchPageTab('faq')">FAQ</a></li>
       </ul>
 
       <div class="nav-actions">
@@ -1195,11 +1276,11 @@
 
       <!-- Mobile dropdown nav -->
       <div class="mobile-nav-panel" id="mobileNavPanel">
-        <button class="nav-link" onclick="switchPageTab('home'); toggleMobileNav()">Home</button>
-        <button class="nav-link" onclick="switchPageTab('opennami'); toggleMobileNav()">OpenNami</button>
-        <button class="nav-link" onclick="switchPageTab('downloads'); toggleMobileNav()">Downloads</button>
-        <button class="nav-link" onclick="switchPageTab('releasenotes'); toggleMobileNav()">Release Notes</button>
-        <button class="nav-link" onclick="switchPageTab('faq'); toggleMobileNav()">FAQ</button>
+        <a class="nav-link" href="#home" onclick="switchPageTab('home'); toggleMobileNav()">Home</a>
+        <a class="nav-link" href="#opennami" onclick="switchPageTab('opennami'); toggleMobileNav()">OpenNami</a>
+        <a class="nav-link" href="#downloads" onclick="switchPageTab('downloads'); toggleMobileNav()">Downloads</a>
+        <a class="nav-link" href="#releasenotes" onclick="switchPageTab('releasenotes'); toggleMobileNav()">Release Notes</a>
+        <a class="nav-link" href="#faq" onclick="switchPageTab('faq'); toggleMobileNav()">FAQ</a>
       </div>
     </div>
   </header>
