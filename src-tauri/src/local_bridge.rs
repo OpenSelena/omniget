@@ -204,15 +204,18 @@ async fn media_stream(AxumPath(token): AxumPath<String>, headers: HeaderMap) -> 
             let (start, end) = match spec {
                 ByteRange::From(start, Some(end)) => (start, end),
                 ByteRange::From(start, None) => (start, total.saturating_sub(1)),
-                ByteRange::LastBytes(suffix) => (
-                    total.saturating_sub(suffix),
-                    total.saturating_sub(1),
-                ),
+                ByteRange::LastBytes(suffix) => {
+                    (total.saturating_sub(suffix), total.saturating_sub(1))
+                }
             };
             if start >= total {
                 (StatusCode::RANGE_NOT_SATISFIABLE, 0, 0)
             } else {
-                (StatusCode::PARTIAL_CONTENT, start, end.min(total.saturating_sub(1)))
+                (
+                    StatusCode::PARTIAL_CONTENT,
+                    start,
+                    end.min(total.saturating_sub(1)),
+                )
             }
         }
         _ => (StatusCode::OK, 0, total.saturating_sub(1)),
@@ -903,10 +906,7 @@ mod tests {
             parse_byte_range("bytes=100-199"),
             Ok(From(100, Some(199)))
         ));
-        assert!(matches!(
-            parse_byte_range("bytes=-500"),
-            Ok(LastBytes(500))
-        ));
+        assert!(matches!(parse_byte_range("bytes=-500"), Ok(LastBytes(500))));
         // Whitespace, a single range out of a multi-range request, and an
         // end before start are all part of the contract.
         assert!(matches!(parse_byte_range("bytes=0 -"), Ok(From(0, None))));
@@ -924,6 +924,9 @@ mod tests {
         assert_eq!(media_mime(Path::new("a/b/lesson.MKV")), "video/x-matroska");
         assert_eq!(media_mime(Path::new("a/b/track.flac")), "audio/flac");
         assert_eq!(media_mime(Path::new("a/b/lyrics.vtt")), "text/vtt");
-        assert_eq!(media_mime(Path::new("a/b/blob.bin")), "application/octet-stream");
+        assert_eq!(
+            media_mime(Path::new("a/b/blob.bin")),
+            "application/octet-stream"
+        );
     }
 }
