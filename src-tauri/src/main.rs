@@ -97,7 +97,10 @@ fn setup_environment() {
     if std::env::var_os("APPIMAGE").is_some() && std::env::var_os("GST_PLUGIN_PATH").is_none() {
         let mut dirs: Vec<String> = Vec::new();
         if let Some(appdir) = std::env::var_os("APPDIR") {
-            dirs.push(format!("{}/usr/lib/gstreamer-1.0", appdir.to_string_lossy()));
+            dirs.push(format!(
+                "{}/usr/lib/gstreamer-1.0",
+                appdir.to_string_lossy()
+            ));
         }
         for dir in ["/usr/lib/gstreamer-1.0", "/usr/lib64/gstreamer-1.0"] {
             if std::path::Path::new(dir).is_dir() {
