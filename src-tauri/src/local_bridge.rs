@@ -18,11 +18,10 @@
 //!                         URL, writes cookies + metadata to disk, then queues
 //!                         the URL through `external_url::handle_external_url`.
 //! * `GET  /media/{t}`  — unauthenticated by design; streams one file the app
-//!                         itself granted via `media_stream_url` (unguessable,
-//!                         expiring token). This is how the webview plays local
-//!                         video/audio: WebKitGTK's media loader bypasses the
-//!                         custom asset scheme entirely, so it needs a real
-//!                         HTTP endpoint with Range support.
+//!   itself granted via `media_stream_url` (unguessable, expiring token).
+//!   This is how the webview plays local video/audio: WebKitGTK's media
+//!   loader bypasses the custom asset scheme entirely, so it needs a real
+//!   HTTP endpoint with Range support.
 
 use std::collections::HashMap;
 use std::net::SocketAddr;
