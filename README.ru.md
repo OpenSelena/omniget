@@ -41,7 +41,7 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
   <a href="https://github.com/OpenSelena/omniget/releases"><img src="https://img.shields.io/github/downloads/OpenSelena/omniget/total?style=for-the-badge&label=downloads&color=1E6FE8" alt="Всего загрузок" /></a>
   <a href="https://github.com/OpenSelena/omniget/stargazers"><img src="https://img.shields.io/github/stars/OpenSelena/omniget?style=for-the-badge&color=FFD426" alt="Звёзды на GitHub" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-2AA845?style=for-the-badge" alt="Лицензия GPL-3.0" /></a>
-  <a href="https://discord.gg/jgdxyPy7Vn"><img src="https://img.shields.io/badge/Discord-community-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Сообщество в Discord" /></a>
+  <a href="https://t.me/OpenSelena"><img src="https://img.shields.io/badge/Telegram-channel-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white" alt="Канал в Telegram" /></a>
   <a href="https://hosted.weblate.org/engage/omniget/"><img src="https://hosted.weblate.org/widget/omniget/frontend-json/svg-badge.svg" alt="Статус перевода" /></a>
 </p>
 
@@ -737,7 +737,7 @@ pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'
 
 ## Участие и переводы
 
-Сообщения об ошибках и pull request'ы — в [Issues](https://github.com/OpenSelena/omniget/issues) и [Pull requests](https://github.com/OpenSelena/omniget/pulls). Вопросы и быстрая помощь — в [Discord](https://discord.gg/jgdxyPy7Vn). Вопросы безопасности и сообщения об уязвимостях: [SECURITY.md](SECURITY.md) или [igect@vk.com](mailto:igect@vk.com).
+Сообщения об ошибках и pull request'ы — в [Issues](https://github.com/OpenSelena/omniget/issues) и [Pull requests](https://github.com/OpenSelena/omniget/pulls). Вопросы и быстрая помощь — в [Telegram](https://t.me/OpenSelena). Вопросы безопасности и сообщения об уязвимостях: [SECURITY.md](SECURITY.md) или [igect@vk.com](mailto:igect@vk.com).
 
 Переводы ведутся на [Weblate](https://hosted.weblate.org/engage/omniget/). Выберите свой язык и переводите в браузере. Новые строки появляются там через несколько часов после попадания в `main`.
 
