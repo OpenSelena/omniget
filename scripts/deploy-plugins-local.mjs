@@ -118,7 +118,7 @@ function main() {
       installed_at: now,
       updated_at: now,
       enabled: true,
-      repo: `tonhowtf/${p.repo}`,
+      repo: `OpenSelena/${p.repo}`,
       source_release: "local",
     });
   }

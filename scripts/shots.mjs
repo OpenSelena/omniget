@@ -156,27 +156,27 @@ const SETTINGS = {
 const navLabel = (en) => ({ en });
 const PLUGINS = [
   {
-    id: "courses", name: "Courses", version: "1.4.0", description: "Download courses", author: "tonhowtf",
+    id: "courses", name: "Courses", version: "1.4.0", description: "Download courses", author: "OpenSelena",
     enabled: true, loaded: true, icon: null, load_error: null,
     nav: [{ route: "/courses", label: navLabel("Courses"), icon_svg: null, group: "plugins", order: 10 }],
   },
   {
-    id: "study", name: "Study", version: "2.1.0", description: "Reader, player, notes", author: "tonhowtf",
+    id: "study", name: "Study", version: "2.1.0", description: "Reader, player, notes", author: "OpenSelena",
     enabled: true, loaded: true, icon: null, load_error: null,
     nav: [{ route: "/study", label: navLabel("Study"), icon_svg: null, group: "plugins", order: 20 }],
   },
   {
-    id: "telegram", name: "Telegram", version: "1.2.0", description: "Telegram downloads", author: "tonhowtf",
+    id: "telegram", name: "Telegram", version: "1.2.0", description: "Telegram downloads", author: "OpenSelena",
     enabled: true, loaded: true, icon: null, load_error: null,
     nav: [{ route: "/telegram", label: navLabel("Telegram"), icon_svg: null, group: "plugins", order: 30 }],
   },
   {
-    id: "convert", name: "Convert", version: "1.0.3", description: "Media conversion", author: "tonhowtf",
+    id: "convert", name: "Convert", version: "1.0.3", description: "Media conversion", author: "OpenSelena",
     enabled: true, loaded: true, icon: null, load_error: null,
     nav: [{ route: "/convert", label: navLabel("Convert"), icon_svg: null, group: "plugins", order: 40 }],
   },
   {
-    id: "misc", name: "Utilities", version: "1.1.0", description: "Studio, clips, library", author: "tonhowtf",
+    id: "misc", name: "Utilities", version: "1.1.0", description: "Studio, clips, library", author: "OpenSelena",
     enabled: true, loaded: true, icon: null, load_error: null,
     nav: [{ route: "/misc", label: navLabel("Utilities"), icon_svg: null, group: "plugins", order: 50 }],
   },
@@ -201,11 +201,11 @@ const QUEUE = [
 ];
 
 const REGISTRY = [
-  { id: "courses", name: "Courses", description: "Download from Hotmart, Udemy, Kiwify and Rocketseat.", author: "tonhowtf", repo: "tonhowtf/omniget-plugin-courses", homepage: null, tags: ["courses", "education"], official: true, capabilities: ["nav"], installed: true, installed_version: "1.4.0" },
-  { id: "study", name: "Study", description: "Reader, player, notes, flashcards and focus tools.", author: "tonhowtf", repo: "tonhowtf/omniget-study", homepage: null, tags: ["study", "reader"], official: true, capabilities: ["nav"], installed: true, installed_version: "2.1.0" },
-  { id: "telegram", name: "Telegram", description: "Browse and batch-download from Telegram chats.", author: "tonhowtf", repo: "tonhowtf/omniget-plugin-telegram", homepage: null, tags: ["telegram"], official: true, capabilities: ["nav"], installed: true, installed_version: "1.2.0" },
-  { id: "convert", name: "Convert", description: "FFmpeg conversions with GPU acceleration.", author: "tonhowtf", repo: "tonhowtf/omniget-plugin-convert", homepage: null, tags: ["ffmpeg", "convert"], official: true, capabilities: ["nav"], installed: true, installed_version: "1.0.3" },
-  { id: "misc", name: "Utilities", description: "Screen recording studio, file clips and media library.", author: "tonhowtf", repo: "tonhowtf/omniget-plugin-misc", homepage: null, tags: ["studio", "library"], official: true, capabilities: ["nav"], installed: false, installed_version: null },
+  { id: "courses", name: "Courses", description: "Download from Hotmart, Udemy, Kiwify and Rocketseat.", author: "OpenSelena", repo: "OpenSelena/omniget-plugin-courses", homepage: null, tags: ["courses", "education"], official: true, capabilities: ["nav"], installed: true, installed_version: "1.4.0" },
+  { id: "study", name: "Study", description: "Reader, player, notes, flashcards and focus tools.", author: "OpenSelena", repo: "OpenSelena/omniget-study", homepage: null, tags: ["study", "reader"], official: true, capabilities: ["nav"], installed: true, installed_version: "2.1.0" },
+  { id: "telegram", name: "Telegram", description: "Browse and batch-download from Telegram chats.", author: "OpenSelena", repo: "OpenSelena/omniget-plugin-telegram", homepage: null, tags: ["telegram"], official: true, capabilities: ["nav"], installed: true, installed_version: "1.2.0" },
+  { id: "convert", name: "Convert", description: "FFmpeg conversions with GPU acceleration.", author: "OpenSelena", repo: "OpenSelena/omniget-plugin-convert", homepage: null, tags: ["ffmpeg", "convert"], official: true, capabilities: ["nav"], installed: true, installed_version: "1.0.3" },
+  { id: "misc", name: "Utilities", description: "Screen recording studio, file clips and media library.", author: "OpenSelena", repo: "OpenSelena/omniget-plugin-misc", homepage: null, tags: ["studio", "library"], official: true, capabilities: ["nav"], installed: false, installed_version: null },
 ];
 
 const DEPS = [

@@ -64,7 +64,7 @@ echo
 echo "How to fill gaps (ask the user before running any of these):"
 case "$(og_os)" in
   mac)
-    echo "  OmniGet app:     https://github.com/tonhowtf/omniget/releases/latest  (.dmg; then: xattr -cr /Applications/omniget.app)"
+    echo "  OmniGet app:     https://github.com/OpenSelena/omniget/releases/latest  (.dmg; then: xattr -cr /Applications/omniget.app)"
     echo "  yt-dlp + ffmpeg: brew install yt-dlp ffmpeg"
     echo "  local whisper:   brew install whisper-cpp        (whisper.cpp CLI, CPU/Metal)"
     echo "                   uv tool install mlx-whisper     (faster on Apple Silicon)"

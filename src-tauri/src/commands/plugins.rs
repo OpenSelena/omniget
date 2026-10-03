@@ -252,8 +252,8 @@ pub async fn plugin_command(
 }
 
 const REGISTRY_URLS: &[&str] = &[
-    "https://raw.githubusercontent.com/tonhowtf/omniget-plugins/main/plugins.json",
-    "https://cdn.jsdelivr.net/gh/tonhowtf/omniget-plugins@main/plugins.json",
+    "https://raw.githubusercontent.com/OpenSelena/omniget-plugins/main/plugins.json",
+    "https://cdn.jsdelivr.net/gh/OpenSelena/omniget-plugins@main/plugins.json",
 ];
 
 #[derive(Debug, Serialize)]

@@ -1,6 +1,6 @@
 # Issue #189: Homebrew install for macOS. Runs when a draft release is published
 # (drafts have no public download URLs yet) and regenerates the cask in
-# tonhowtf/homebrew-tap from the release's two DMGs. Requires the
+# OpenSelena/homebrew-tap from the release's two DMGs. Requires the
 # HOMEBREW_TAP_TOKEN secret: a fine-grained PAT with contents:write on the tap repo.
 name: Publish to Homebrew tap
 

@@ -446,7 +446,7 @@ Conversões com FFmpeg e aceleração por GPU quando a máquina tem: contêiner,
 
 ## Chat embutido, desligado por padrão
 
-O OmniGet traz um chat no estilo Discord chamado OmniDisc para servidores que você mesmo hospeda com o [omnidisc-server](https://github.com/tonhowtf/omnidisc-server). Canais de texto, mensagens diretas, amigos, cargos e permissões, fixados, busca, voz, vídeo e compartilhamento de tela. Mensagens diretas e os arquivos enviados nelas são criptografados de ponta a ponta com MLS, e a chave de uma chamada criptografada deriva do mesmo grupo, então quem opera o servidor não consegue ouvir. A voz roda em Rust em vez de no webview e o compartilhamento de tela usa o codificador de hardware da máquina. Arquivos enviados pelo chat ficam criptografados em repouso e são apagados do servidor depois de trinta minutos.
+O OmniGet traz um chat no estilo Discord chamado OmniDisc para servidores que você mesmo hospeda com o omnidisc-server. Canais de texto, mensagens diretas, amigos, cargos e permissões, fixados, busca, voz, vídeo e compartilhamento de tela. Mensagens diretas e os arquivos enviados nelas são criptografados de ponta a ponta com MLS, e a chave de uma chamada criptografada deriva do mesmo grupo, então quem opera o servidor não consegue ouvir. A voz roda em Rust em vez de no webview e o compartilhamento de tela usa o codificador de hardware da máquina. Arquivos enviados pelo chat ficam criptografados em repouso e são apagados do servidor depois de trinta minutos.
 
 É experimental e não faz nada até você ativar em **Configurações → Avançado → Chat (OmniDisc)** e adicionar um servidor.
 
@@ -572,7 +572,7 @@ pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'
 
 As releases assinam os artefatos do atualizador com uma chave privada que só o mantenedor tem, então um `pnpm tauri build` puro para com "A public key has been found, but no private key". A flag acima desliga esses artefatos numa build local e não muda mais nada.
 
-Os plugins ficam em repositórios próprios: [omniget-plugin-courses](https://github.com/tonhowtf/omniget-plugin-courses), [omniget-plugin-telegram](https://github.com/tonhowtf/omniget-plugin-telegram), [omniget-plugin-convert](https://github.com/tonhowtf/omniget-plugin-convert) e [omniget-study-release](https://github.com/tonhowtf/omniget-study-release). O registro é o [omniget-plugins](https://github.com/tonhowtf/omniget-plugins). `pnpm plugins:deploy` compila os checkouts vizinhos dos plugins e copia para a sua pasta de dados local.
+Os plugins ficam em repositórios próprios: [omniget-plugin-courses](https://github.com/OpenSelena/omniget-plugin-courses), [omniget-plugin-telegram](https://github.com/OpenSelena/omniget-plugin-telegram) e [omniget-plugin-convert](https://github.com/OpenSelena/omniget-plugin-convert) (o Study é integrado nativamente). O registro é o [omniget-plugins](https://github.com/OpenSelena/omniget-plugins). `pnpm plugins:deploy` compila os checkouts vizinhos dos plugins e copia para a sua pasta de dados local.
 
 Stack: Tauri 2, Rust, SvelteKit com Svelte 5, SQLite, yt-dlp, FFmpeg, librqbit para torrents, whisper.cpp, aria2, gallery-dl.
 
