@@ -21,7 +21,7 @@ Plugins: Courses, Study (course player with timestamped notes, PDF/EPUB/CBZ read
 - Extraction engine: yt-dlp, bundled and self-updating, verified by SHA-256 before it runs; FFmpeg, aria2, gallery-dl and whisper.cpp are managed the same way
 - Interface: graphical desktop app with a global hotkey (Ctrl+Shift+D), a command palette, 14 themes and 11 languages; no terminal, Python or manual setup required
 - Command line: omniget-cli ships with every release
-- Community: https://discord.gg/jgdxyPy7Vn
+- Community: https://t.me/OpenSelena
 
 ## Install
 

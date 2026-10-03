@@ -34,7 +34,7 @@ leitor pdf, flashcards anki, repetição espaçada, player de música, spicetify
   <a href="https://github.com/OpenSelena/omniget/releases"><img src="https://img.shields.io/github/downloads/OpenSelena/omniget/total?style=for-the-badge&label=downloads&color=1E6FE8" alt="Total de downloads" /></a>
   <a href="https://github.com/OpenSelena/omniget/stargazers"><img src="https://img.shields.io/github/stars/OpenSelena/omniget?style=for-the-badge&color=FFD426" alt="Estrelas no GitHub" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-2AA845?style=for-the-badge" alt="Licença GPL-3.0" /></a>
-  <a href="https://discord.gg/jgdxyPy7Vn"><img src="https://img.shields.io/badge/Discord-comunidade-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Comunidade no Discord" /></a>
+  <a href="https://t.me/OpenSelena"><img src="https://img.shields.io/badge/Telegram-canal-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white" alt="Canal no Telegram" /></a>
   <a href="https://hosted.weblate.org/engage/omniget/"><img src="https://hosted.weblate.org/widget/omniget/frontend-json/svg-badge.svg" alt="Status da tradução" /></a>
 </p>
 
@@ -580,7 +580,7 @@ Stack: Tauri 2, Rust, SvelteKit com Svelte 5, SQLite, yt-dlp, FFmpeg, librqbit p
 
 ## Contribuir e traduzir
 
-Relatos de bug e pull requests vão para [Issues](https://github.com/OpenSelena/omniget/issues) e [Pull requests](https://github.com/OpenSelena/omniget/pulls). Perguntas e ajuda rápida ficam no [Discord](https://discord.gg/jgdxyPy7Vn).
+Relatos de bug e pull requests vão para [Issues](https://github.com/OpenSelena/omniget/issues) e [Pull requests](https://github.com/OpenSelena/omniget/pulls). Perguntas e ajuda rápida ficam no [Telegram](https://t.me/OpenSelena).
 
 As traduções são feitas no [Weblate](https://hosted.weblate.org/engage/omniget/). Escolha o seu idioma e traduza pelo navegador. Novas strings aparecem lá algumas horas depois de entrarem na `main`.
 
