@@ -65,8 +65,8 @@ pub fn tool_usage_clear() -> Result<(), String> {
 // ── Chaves de API (estudo 24) ──
 
 #[tauri::command]
-pub fn tool_keys_kinds() -> Vec<ai_keys::Kind> {
-    ai_keys::KINDS.to_vec()
+pub fn tool_keys_kinds() -> Vec<ai_keys::KindView> {
+    ai_keys::kinds_view()
 }
 
 #[tauri::command]
