@@ -589,7 +589,7 @@ Study превращает папку скачанных файлов в то, �
 
 ## Встроенный чат: по умолчанию выключен
 
-OmniGet несёт в себе чат в духе Discord под названием OmniDisc для серверов, которые вы поднимаете сами с помощью [omnidisc-server](https://github.com/tonhowtf/omnidisc-server). Текстовые каналы, личные сообщения, друзья, роли и права, закреплённое, поиск, голос, видео и демонстрация экрана. Личные сообщения и отправленные в них файлы защищены сквозным шифрованием через MLS, а ключ для зашифрованного звонка выводится из той же группы, так что оператор сервера не может подслушать. Голос работает на Rust, а не в веб-представлении, а демонстрация экрана использует аппаратный кодировщик машины. Файлы, отправленные через чат, шифруются на диске и удаляются с сервера через тридцать минут.
+OmniGet несёт в себе чат в духе Discord под названием OmniDisc для серверов, которые вы поднимаете сами с помощью omnidisc-server. Текстовые каналы, личные сообщения, друзья, роли и права, закреплённое, поиск, голос, видео и демонстрация экрана. Личные сообщения и отправленные в них файлы защищены сквозным шифрованием через MLS, а ключ для зашифрованного звонка выводится из той же группы, так что оператор сервера не может подслушать. Голос работает на Rust, а не в веб-представлении, а демонстрация экрана использует аппаратный кодировщик машины. Файлы, отправленные через чат, шифруются на диске и удаляются с сервера через тридцать минут.
 
 Он экспериментальный и ничего не делает, пока вы не включите его в **Настройки → Дополнительно → Чат (OmniDisc)** и не добавите сервер.
 
@@ -729,7 +729,7 @@ pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'
 
 Релизы подписывают артефакты обновления приватным ключом, который есть только у мейнтейнера, поэтому обычный `pnpm tauri build` останавливается с ошибкой «A public key has been found, but no private key». Флаг выше отключает эти артефакты для локальной сборки и ничего больше не меняет.
 
-Плагины живут в своих репозиториях: [omniget-plugin-courses](https://github.com/tonhowtf/omniget-plugin-courses), [omniget-plugin-telegram](https://github.com/tonhowtf/omniget-plugin-telegram), [omniget-plugin-convert](https://github.com/tonhowtf/omniget-plugin-convert) и [omniget-study-release](https://github.com/tonhowtf/omniget-study-release). Реестр — [omniget-plugins](https://github.com/tonhowtf/omniget-plugins). `pnpm plugins:deploy` собирает соседние чекауты плагинов и копирует их в вашу локальную папку данных.
+Плагины живут в своих репозиториях: [omniget-plugin-courses](https://github.com/OpenSelena/omniget-plugin-courses), [omniget-plugin-telegram](https://github.com/OpenSelena/omniget-plugin-telegram) и [omniget-plugin-convert](https://github.com/OpenSelena/omniget-plugin-convert) (Study встроен нативно). Реестр — [omniget-plugins](https://github.com/OpenSelena/omniget-plugins). `pnpm plugins:deploy` собирает соседние чекауты плагинов и копирует их в вашу локальную папку данных.
 
 Стек: Tauri 2, Rust, SvelteKit на Svelte 5, SQLite, yt-dlp, FFmpeg, librqbit для торрентов, whisper.cpp, aria2, gallery-dl.
 

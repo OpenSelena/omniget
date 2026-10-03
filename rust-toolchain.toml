@@ -6,7 +6,7 @@
 # compiler so host and plugin builds agree by construction.
 #
 # Bumping this version requires rebuilding and re-releasing every plugin in
-# tonhowtf/omniget-plugins. Keep it in sync across all plugin repos.
+# OpenSelena/omniget-plugins. Keep it in sync across all plugin repos.
 [toolchain]
 channel = "1.97.0"
 components = ["rustfmt", "clippy"]

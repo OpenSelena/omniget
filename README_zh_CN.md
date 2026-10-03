@@ -446,7 +446,7 @@ FFmpeg 转换，机器支持时使用 GPU 加速：视频和音频的容器、�
 
 ## 内置聊天，默认关闭
 
-OmniGet 自带一个叫 OmniDisc 的 Discord 风格聊天，配合你自己用 [omnidisc-server](https://github.com/tonhowtf/omnidisc-server) 搭建的服务器使用。文字频道、私信、好友、角色与权限、置顶、搜索、语音、视频和屏幕共享。私信及其中发送的文件用 MLS 端到端加密，加密通话的密钥由同一个群组派生，所以服务器运营者无法窃听。语音在 Rust 里运行而不是在 WebView 里，屏幕共享使用机器的硬件编码器。通过聊天发送的文件在服务器上加密存储，三十分钟后删除。
+OmniGet 自带一个叫 OmniDisc 的 Discord 风格聊天，配合你自己用 omnidisc-server 搭建的服务器使用。文字频道、私信、好友、角色与权限、置顶、搜索、语音、视频和屏幕共享。私信及其中发送的文件用 MLS 端到端加密，加密通话的密钥由同一个群组派生，所以服务器运营者无法窃听。语音在 Rust 里运行而不是在 WebView 里，屏幕共享使用机器的硬件编码器。通过聊天发送的文件在服务器上加密存储，三十分钟后删除。
 
 它是实验性功能，在你于**设置 → 高级 → 聊天（OmniDisc）**开启并添加服务器之前什么都不会做。
 
@@ -572,7 +572,7 @@ pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'
 
 正式版本用只有维护者持有的私钥签名更新包，所以直接 `pnpm tauri build` 会停在 "A public key has been found, but no private key"。上面的参数在本地构建时关掉这些更新包，其他一切不变。
 
-插件在各自的仓库里：[omniget-plugin-courses](https://github.com/tonhowtf/omniget-plugin-courses)、[omniget-plugin-telegram](https://github.com/tonhowtf/omniget-plugin-telegram)、[omniget-plugin-convert](https://github.com/tonhowtf/omniget-plugin-convert) 和 [omniget-study-release](https://github.com/tonhowtf/omniget-study-release)。注册表是 [omniget-plugins](https://github.com/tonhowtf/omniget-plugins)。`pnpm plugins:deploy` 会构建旁边目录里的插件仓库并复制到你的本地数据文件夹。
+插件在各自的仓库里：[omniget-plugin-courses](https://github.com/OpenSelena/omniget-plugin-courses)、[omniget-plugin-telegram](https://github.com/OpenSelena/omniget-plugin-telegram) 和 [omniget-plugin-convert](https://github.com/OpenSelena/omniget-plugin-convert)（Study 已内置原生支持）。注册表是 [omniget-plugins](https://github.com/OpenSelena/omniget-plugins)。`pnpm plugins:deploy` 会构建旁边目录里的插件仓库并复制到你的本地数据文件夹。
 
 技术栈：Tauri 2、Rust、SvelteKit（Svelte 5）、SQLite、yt-dlp、FFmpeg、librqbit（种子）、whisper.cpp、aria2、gallery-dl。
 
