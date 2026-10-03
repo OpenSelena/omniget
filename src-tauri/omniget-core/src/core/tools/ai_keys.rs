@@ -196,10 +196,75 @@ pub const KINDS: &[Kind] = &[
 ];
 
 fn kind_of(id: &str) -> &'static Kind {
-    KINDS
-        .iter()
-        .find(|k| k.id == id)
-        .unwrap_or(&KINDS[KINDS.len() - 1])
+    find_kind(id).unwrap_or(&KINDS[KINDS.len() - 1])
+}
+
+/// A linha da tabela com este id, quando existe: quem não está na tabela é
+/// desconhecido, e desconhecido não é o mesmo que "OpenAI-compatível".
+pub fn find_kind(id: &str) -> Option<&'static Kind> {
+    KINDS.iter().find(|k| k.id == id)
+}
+
+impl Kind {
+    /// O provedor exige chave de API. Ollama roda na máquina do usuário e um
+    /// endpoint próprio ("custom") pode não ter autenticação; todo o resto tem.
+    pub fn needs_key(&self) -> bool {
+        !matches!(self.id, "ollama" | "custom")
+    }
+
+    /// O endereço da tabela é só um exemplo (Ollama local, relay New API,
+    /// endpoint próprio) — nesses casos quem digita é o usuário.
+    pub fn base_url_editable(&self) -> bool {
+        matches!(self.id, "ollama" | "custom") || self.base_url.contains("seu-site.com")
+    }
+}
+
+/// O que a tela de IA precisa da tabela: os dados do provedor e as duas
+/// capacidades do formulário (pede chave? pede endereço?).
+#[derive(Debug, Clone, Serialize)]
+pub struct KindView {
+    pub id: &'static str,
+    pub name: &'static str,
+    pub base_url: &'static str,
+    pub balance: bool,
+    pub env: &'static str,
+    pub needs_key: bool,
+    pub base_url_editable: bool,
+}
+
+impl KindView {
+    pub fn of(kind: &Kind) -> Self {
+        KindView {
+            id: kind.id,
+            name: kind.name,
+            base_url: kind.base_url,
+            balance: kind.balance,
+            env: kind.env,
+            needs_key: kind.needs_key(),
+            base_url_editable: kind.base_url_editable(),
+        }
+    }
+}
+
+/// A tabela como o frontend a vê (`tool_keys_kinds`).
+pub fn kinds_view() -> Vec<KindView> {
+    KINDS.iter().map(KindView::of).collect()
+}
+
+/// Endereço que o chat do app usa: o que o usuário digitou ou o da tabela.
+/// O Gemini só fala o dialeto OpenAI na rota `/openai`.
+pub fn app_base_url(kind: &str, base: &str) -> String {
+    let raw = if base.trim().is_empty() {
+        kind_of(kind).base_url
+    } else {
+        base.trim()
+    };
+    let trimmed = raw.trim_end_matches('/');
+    if kind == "gemini" && !trimmed.ends_with("/openai") {
+        format!("{}/openai", trimmed)
+    } else {
+        trimmed.to_string()
+    }
 }
 
 // ── Armazenamento ──────────────────────────────────────────────────────
@@ -624,19 +689,15 @@ pub fn export(format: &str, ids: &[String]) -> anyhow::Result<String> {
 /// Usa esta chave como a IA do OmniGet (Ajustes → IA).
 pub fn use_in_app(id: &str) -> anyhow::Result<()> {
     let e = get(id)?;
-    use crate::core::ai::{self, AiProvider};
-    match e.kind.as_str() {
-        "openai" => {
-            ai::set(AiProvider::Openai, e.model.clone(), String::new(), Some(e.key.clone()), None);
-        }
-        "anthropic" => {
-            ai::set(AiProvider::Anthropic, e.model.clone(), String::new(), None, Some(e.key.clone()));
-        }
-        "gemini" => return Err(anyhow!("o chat do OmniGet fala OpenAI/Anthropic; use a rota OpenAI-compatível do Gemini (…/v1beta/openai) como personalizado")),
-        _ => {
-            ai::set(AiProvider::Local, e.model.clone(), e.base_url.clone(), Some(e.key.clone()), None);
-        }
-    }
+    use crate::core::ai::{self, KeyAction};
+    // Guarda também o provedor da tabela (`kind`): sem ele a tela de IA não
+    // sabe qual endereço usar nem se a chave é obrigatória.
+    ai::set_with_kind(
+        &e.kind,
+        e.model.clone(),
+        e.base_url.clone(),
+        KeyAction::Set(&e.key),
+    );
     Ok(())
 }
 
@@ -651,5 +712,55 @@ mod tests {
         assert_eq!(hint("sk-1234567890abcd"), "sk-1…abcd");
         assert_eq!(site_of("https://x.com/v1/"), "https://x.com");
         assert_eq!(site_of("https://x.com"), "https://x.com");
+    }
+
+    #[test]
+    fn the_payload_carries_the_form_flags() {
+        // A tela de IA decide o formulário por estes dois campos; se eles não
+        // saírem no JSON, o formulário some (foi o bug do PR #352).
+        let json = serde_json::to_value(kinds_view()).unwrap();
+        let arr = json.as_array().unwrap();
+        let find = |id: &str| {
+            arr.iter()
+                .find(|k| k["id"] == id)
+                .unwrap_or_else(|| panic!("sem {}", id))
+                .clone()
+        };
+        assert_eq!(find("deepseek")["needs_key"], serde_json::json!(true));
+        assert_eq!(
+            find("deepseek")["base_url_editable"],
+            serde_json::json!(false)
+        );
+        assert_eq!(find("ollama")["needs_key"], serde_json::json!(false));
+        assert_eq!(find("ollama")["base_url_editable"], serde_json::json!(true));
+        assert_eq!(find("newapi")["needs_key"], serde_json::json!(true));
+        assert_eq!(find("newapi")["base_url_editable"], serde_json::json!(true));
+        assert_eq!(find("custom")["base_url_editable"], serde_json::json!(true));
+    }
+
+    #[test]
+    fn gemini_uses_its_openai_compatible_route() {
+        assert_eq!(
+            app_base_url("gemini", ""),
+            "https://generativelanguage.googleapis.com/v1beta/openai"
+        );
+        assert_eq!(
+            app_base_url(
+                "gemini",
+                "https://generativelanguage.googleapis.com/v1beta/openai"
+            ),
+            "https://generativelanguage.googleapis.com/v1beta/openai"
+        );
+        assert_eq!(app_base_url("deepseek", ""), "https://api.deepseek.com");
+        assert_eq!(
+            app_base_url("custom", "http://localhost:1234/v1/"),
+            "http://localhost:1234/v1"
+        );
+    }
+
+    #[test]
+    fn unknown_kinds_are_not_the_custom_row() {
+        assert!(find_kind("nao-existe").is_none());
+        assert_eq!(kind_of("nao-existe").id, "custom");
     }
 }

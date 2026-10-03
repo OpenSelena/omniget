@@ -1,4 +1,4 @@
-use omniget_core::core::ai::{self, AiConfigView, AiHistoryEntry, AiProvider};
+use omniget_core::core::ai::{self, AiConfigView, AiHistoryEntry, AiProvider, KeyAction};
 use serde::Serialize;
 
 const MAX_TRANSCRIPT_CHARS: usize = 12000;
@@ -8,15 +8,37 @@ pub fn ai_get_config() -> AiConfigView {
     ai::get().view()
 }
 
+// A tela manda o provedor da tabela (`kind`) junto do `provider` genérico, e a
+// intenção sobre a chave em `key_action`: "keep" mantém a guardada, "clear"
+// apaga (troca de provedor com o campo vazio) e "set" grava a digitada. O
+// segredo nunca volta para a UI, então a intenção precisa ser explícita.
 #[tauri::command]
 pub fn ai_set_config(
     provider: AiProvider,
+    kind: Option<String>,
     model: String,
     local_base_url: String,
-    openai_key: Option<String>,
-    anthropic_key: Option<String>,
-) -> AiConfigView {
-    ai::set(provider, model, local_base_url, openai_key, anthropic_key).view()
+    key_action: Option<String>,
+    key: Option<String>,
+) -> Result<AiConfigView, String> {
+    let action = match key_action.as_deref() {
+        None | Some("keep") => KeyAction::Keep,
+        Some("clear") => KeyAction::Clear,
+        Some("set") => match key.as_deref().map(str::trim) {
+            Some(k) if !k.is_empty() => KeyAction::Set(k),
+            _ => KeyAction::Clear,
+        },
+        Some(other) => return Err(format!("unknown key_action: {}", other)),
+    };
+    let kind = kind.unwrap_or_default();
+    if provider == AiProvider::None || kind.trim() == "none" {
+        return Ok(ai::clear().view());
+    }
+    // Cliente antigo (sem `kind`): mantém o caminho de antes.
+    if kind.trim().is_empty() {
+        return Ok(ai::set(provider, model, local_base_url, None, None).view());
+    }
+    Ok(ai::set_with_kind(&kind, model, local_base_url, action).view())
 }
 
 #[tauri::command]
