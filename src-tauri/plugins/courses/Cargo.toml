@@ -36,4 +36,4 @@ omniget-plugin-sdk = { path = "../../omniget-plugin-sdk" }
 
 [target.'cfg(windows)'.dependencies]
 webview2-com = "0.38"
-windows-core = "0.62"
+windows-core = "0.61"
