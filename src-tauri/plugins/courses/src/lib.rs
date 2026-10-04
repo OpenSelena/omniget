@@ -400,9 +400,34 @@ impl OmnigetPlugin for CoursesPlugin {
                         args.get("token").cloned().ok_or("missing 'token'")?,
                     )
                     .map_err(|e| e.to_string())?;
+                    let site_url: String = args
+                        .get("site_url")
+                        .or_else(|| args.get("siteUrl"))
+                        .and_then(|v| serde_json::from_value(v.clone()).ok())
+                        .unwrap_or_default();
+                    let app_version: String = args
+                        .get("app_version")
+                        .or_else(|| args.get("appVersion"))
+                        .and_then(|v| serde_json::from_value(v.clone()).ok())
+                        .unwrap_or_default();
+                    let device_id: String = args
+                        .get("device_id")
+                        .or_else(|| args.get("deviceId"))
+                        .and_then(|v| serde_json::from_value(v.clone()).ok())
+                        .unwrap_or_default();
+                    let os_value: String = args
+                        .get("os_value")
+                        .or_else(|| args.get("osValue"))
+                        .or_else(|| args.get("os"))
+                        .and_then(|v| serde_json::from_value(v.clone()).ok())
+                        .unwrap_or_default();
                     let res = commands::entregadigital::entregadigital_login_token(
                         wrap_state(&state),
                         token,
+                        site_url,
+                        app_version,
+                        device_id,
+                        os_value,
                     )
                     .await?;
                     serde_json::to_value(res).map_err(|e| e.to_string())
@@ -472,9 +497,14 @@ impl OmnigetPlugin for CoursesPlugin {
                         args.get("token").cloned().ok_or("missing 'token'")?,
                     )
                     .map_err(|e| e.to_string())?;
+                    let refresh_token: Option<String> = args
+                        .get("refresh_token")
+                        .or_else(|| args.get("refreshToken"))
+                        .and_then(|v| serde_json::from_value(v.clone()).ok());
                     let res = commands::nutror::nutror_login_token(
                         wrap_state(&state),
                         token,
+                        refresh_token,
                     )
                     .await?;
                     serde_json::to_value(res).map_err(|e| e.to_string())
@@ -493,12 +523,21 @@ impl OmnigetPlugin for CoursesPlugin {
                 }
                 "areademembros_login_token" => {
                     let token: String = serde_json::from_value(
-                        args.get("token").cloned().ok_or("missing 'token'")?,
+                        args.get("token")
+                            .or_else(|| args.get("cookies"))
+                            .cloned()
+                            .ok_or("missing 'token'")?,
                     )
                     .map_err(|e| e.to_string())?;
+                    let site_url: String = args
+                        .get("site_url")
+                        .or_else(|| args.get("siteUrl"))
+                        .and_then(|v| serde_json::from_value(v.clone()).ok())
+                        .unwrap_or_default();
                     let res = commands::areademembros::areademembros_login_token(
                         wrap_state(&state),
                         token,
+                        site_url,
                     )
                     .await?;
                     serde_json::to_value(res).map_err(|e| e.to_string())

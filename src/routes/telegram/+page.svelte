@@ -742,6 +742,7 @@
       const result = await pluginInvoke<{ id: number; file_name: string }>("telegram", "telegram_download_media", {
         chatId: selectedChat.id,
         chatType: selectedChat.chat_type,
+        chatTitle: selectedChat.title,
         messageId: item.message_id,
         fileName: item.file_name,
         outputDir,

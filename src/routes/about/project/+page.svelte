@@ -3,7 +3,7 @@
   import { t } from "$lib/i18n";
 
   const GITHUB_URL = "https://github.com/OpenSelena/omniget";
-  const APP_VERSION = "0.10.4";
+  const APP_VERSION = "0.10.5";
 
   async function openGitHub() {
     await open(GITHUB_URL);
