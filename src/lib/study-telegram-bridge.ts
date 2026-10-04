@@ -872,6 +872,7 @@ export function telegramExpandAlbum(args: {
 export function telegramDownloadMedia(args: {
   chatId: number;
   chatType: TelegramChatType;
+  chatTitle?: string;
   messageId: number;
   fileName: string;
   outputDir: string;
@@ -1276,6 +1277,7 @@ export function bookmarkMatchesSmartFolder(
 export async function enqueueTelegramDownload(args: {
   chatId: number;
   chatType: TelegramChatType;
+  chatTitle?: string;
   messageId: number;
   fileName: string;
   fileSize: number;
@@ -1291,6 +1293,7 @@ export async function enqueueTelegramDownload(args: {
   const tg = await telegramDownloadMedia({
     chatId: args.chatId,
     chatType: args.chatType,
+    chatTitle: args.chatTitle,
     messageId: args.messageId,
     fileName: args.fileName,
     outputDir: args.outputDir,

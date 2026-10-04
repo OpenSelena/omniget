@@ -149,19 +149,73 @@ pub async fn telegram_list_media(
     .map_err(|e| e.to_string())
 }
 
+pub fn sanitize_folder_name(name: &str) -> String {
+    let forbidden = ['<', '>', ':', '"', '/', '\\', '|', '?', '*'];
+    let cleaned: String = name
+        .chars()
+        .map(|c| if forbidden.contains(&c) || c.is_control() { '_' } else { c })
+        .collect();
+
+    let trimmed = cleaned.trim().trim_matches('.').trim();
+    if trimmed.is_empty() {
+        return "Telegram Media".to_string();
+    }
+
+    let upper = trimmed.to_ascii_uppercase();
+    let is_reserved = matches!(
+        upper.as_str(),
+        "CON" | "PRN" | "AUX" | "NUL"
+            | "COM1" | "COM2" | "COM3" | "COM4" | "COM5" | "COM6" | "COM7" | "COM8" | "COM9"
+            | "LPT1" | "LPT2" | "LPT3" | "LPT4" | "LPT5" | "LPT6" | "LPT7" | "LPT8" | "LPT9"
+    );
+
+    if is_reserved {
+        format!("{}_channel", trimmed)
+    } else if trimmed.chars().count() > 100 {
+        trimmed.chars().take(100).collect()
+    } else {
+        trimmed.to_string()
+    }
+}
+
+pub fn resolve_telegram_download_dir(base_dir: &str, chat_title: Option<&str>) -> std::path::PathBuf {
+    let base = std::path::PathBuf::from(base_dir);
+    let is_already_omnigram = base
+        .file_name()
+        .and_then(|n| n.to_str())
+        .map(|n| n.eq_ignore_ascii_case("OmniGram"))
+        .unwrap_or(false);
+
+    let omnigram_root = if is_already_omnigram {
+        base
+    } else {
+        base.join("OmniGram")
+    };
+
+    match chat_title {
+        Some(title) if !title.trim().is_empty() => {
+            let clean = sanitize_folder_name(title);
+            omnigram_root.join(clean)
+        }
+        _ => omnigram_root,
+    }
+}
+
 pub async fn telegram_download_media(
     host: Option<Arc<dyn PluginHost>>,
     state: &TelegramPluginState,
     chat_id: i64,
     chat_type: String,
+    chat_title: Option<String>,
     message_id: i32,
     file_name: String,
     output_dir: String,
 ) -> Result<TelegramDownloadStarted, String> {
     tracing::info!(
-        "[tg-cmd] telegram_download_media: chat_id={}, chat_type={}, message_id={}, file_name={}",
+        "[tg-cmd] telegram_download_media: chat_id={}, chat_type={}, chat_title={:?}, message_id={}, file_name={}",
         chat_id,
         chat_type,
+        chat_title,
         message_id,
         file_name
     );
@@ -187,7 +241,11 @@ pub async fn telegram_download_media(
     let file_name_clone = file_name.clone();
 
     tokio::spawn(async move {
-        let output_path = std::path::PathBuf::from(&output_dir).join(&file_name_clone);
+        let target_dir = resolve_telegram_download_dir(&output_dir, chat_title.as_deref());
+        if let Err(e) = tokio::fs::create_dir_all(&target_dir).await {
+            tracing::warn!("[tg-cmd] Failed to create target directory {:?}: {}", target_dir, e);
+        }
+        let output_path = target_dir.join(&file_name_clone);
 
         emit_event(
             &host,
@@ -344,6 +402,12 @@ pub async fn telegram_download_batch(
         },
     );
 
+    let target_dir = resolve_telegram_download_dir(&output_dir, Some(&chat_title));
+    if let Err(e) = tokio::fs::create_dir_all(&target_dir).await {
+        tracing::warn!("[tg-cmd] Failed to create target directory {:?}: {}", target_dir, e);
+    }
+    let target_dir_str = target_dir.to_string_lossy().to_string();
+
     tokio::spawn(async move {
         let semaphore = Arc::new(Semaphore::new(concurrent));
         let completed = Arc::new(std::sync::atomic::AtomicU32::new(0));
@@ -358,7 +422,7 @@ pub async fn telegram_download_batch(
             let host = host.clone();
             let chat_type = chat_type.clone();
             let chat_title = chat_title.clone();
-            let output_dir = output_dir.clone();
+            let target_dir_str = target_dir_str.clone();
             let cancel = cancel_token.clone();
             let completed = completed.clone();
             let failed = failed.clone();
@@ -370,7 +434,7 @@ pub async fn telegram_download_batch(
                     return;
                 }
 
-                let output_path = std::path::PathBuf::from(&output_dir).join(&item.file_name);
+                let output_path = std::path::PathBuf::from(&target_dir_str).join(&item.file_name);
 
                 // Skip existing files
                 if let Ok(true) = tokio::fs::try_exists(&output_path).await {
@@ -552,7 +616,7 @@ pub async fn telegram_download_batch(
                 } else {
                     None
                 },
-                file_path: Some(output_dir),
+                file_path: Some(target_dir_str),
                 file_size_bytes: None,
                 file_count: Some(done_count + skip_count),
             },

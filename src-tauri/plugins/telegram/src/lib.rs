@@ -170,11 +170,18 @@ impl OmnigetPlugin for TelegramPlugin {
                                 .map(|h| h.default_output_dir().to_string_lossy().to_string())
                                 .unwrap_or_default()
                         });
+                    let chat_title: Option<String> = args
+                        .get("chat_title")
+                        .or(args.get("chatTitle"))
+                        .or(args.get("channel_name"))
+                        .or(args.get("channelName"))
+                        .and_then(|v| serde_json::from_value(v.clone()).ok());
                     let res = commands::telegram::telegram_download_media(
                         host.clone(),
                         &state,
                         chat_id,
                         chat_type,
+                        chat_title,
                         message_id,
                         file_name,
                         output_dir,
