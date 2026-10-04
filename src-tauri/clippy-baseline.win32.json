@@ -1,7 +1,16 @@
 {
   "generated_on": "win32",
-  "total": 92,
+  "total": 142,
   "counts": {
+    "grammers_session|clippy::collapsible_if": 1,
+    "grammers_session|clippy::manual_range_contains": 4,
+    "grammers_session|clippy::map_flatten": 1,
+    "grammers_session|clippy::missing_const_for_thread_local": 1,
+    "grammers_session|clippy::redundant_field_names": 5,
+    "grammers_session|clippy::unwrap_or_default": 2,
+    "grammers_session|clippy::useless_conversion": 7,
+    "omniget-cli|dead_code": 7,
+    "omniget-cli|unused_imports": 1,
     "omniget_core|clippy::assertions_on_constants": 1,
     "omniget_core|clippy::bind_instead_of_map": 1,
     "omniget_core|clippy::collapsible_if": 2,
@@ -50,8 +59,20 @@
     "omniget_lib|clippy::useless_conversion": 1,
     "omniget_lib|clippy::useless_vec": 3,
     "omniget_lib|clippy::vec_init_then_push": 1,
+    "omniget_plugin_convert|clippy::new_without_default": 1,
+    "omniget_plugin_courses|clippy::bind_instead_of_map": 1,
+    "omniget_plugin_courses|clippy::collapsible_if": 1,
+    "omniget_plugin_courses|clippy::collapsible_match": 1,
+    "omniget_plugin_courses|clippy::double_ended_iterator_last": 2,
+    "omniget_plugin_courses|clippy::if_same_then_else": 2,
+    "omniget_plugin_courses|clippy::manual_pattern_char_comparison": 3,
+    "omniget_plugin_courses|clippy::needless_borrows_for_generic_args": 8,
+    "omniget_plugin_courses|clippy::new_without_default": 1,
+    "omniget_plugin_courses|clippy::single_match": 1,
+    "omniget_plugin_courses|clippy::unnecessary_sort_by": 4,
+    "omniget_plugin_courses|clippy::unused_enumerate_index": 2,
     "omniget_plugin_sdk|clippy::derivable_impls": 1,
-    "omniget-cli|dead_code": 7,
-    "omniget-cli|unused_imports": 1
+    "omniget_plugin_telegram|clippy::new_without_default": 1,
+    "omniget_plugin_telegram|clippy::unnecessary_sort_by": 1
   }
 }
