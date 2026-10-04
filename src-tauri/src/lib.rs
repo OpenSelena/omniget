@@ -738,6 +738,21 @@ pub fn run() {
                         // on any of the network calls below.
                         {
                             let mut mgr = mgr_for_plugins.blocking_write();
+                            let _ = mgr.register_builtin(
+                                omniget_plugin_convert::manifest(),
+                                Box::new(omniget_plugin_convert::ConvertPlugin::new()),
+                                std::sync::Arc::clone(&host),
+                            );
+                            let _ = mgr.register_builtin(
+                                omniget_plugin_telegram::manifest(),
+                                Box::new(omniget_plugin_telegram::TelegramPlugin::new()),
+                                std::sync::Arc::clone(&host),
+                            );
+                            let _ = mgr.register_builtin(
+                                omniget_plugin_courses::manifest(),
+                                Box::new(omniget_plugin_courses::CoursesPlugin::new()),
+                                std::sync::Arc::clone(&host),
+                            );
                             mgr.load_all(std::sync::Arc::clone(&host));
                         }
                         let _ = app_emit.emit("plugins-changed", ());

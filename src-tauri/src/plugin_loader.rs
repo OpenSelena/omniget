@@ -70,6 +70,9 @@ impl PluginManager {
             .collect();
 
         for entry in &enabled {
+            if self.is_loaded(&entry.id) {
+                continue;
+            }
             let plugin_dir = self.plugins_dir.join(&entry.id);
             match load_single_plugin(&plugin_dir, host.clone()) {
                 Ok(loaded) => {
@@ -91,6 +94,51 @@ impl PluginManager {
 
     pub fn is_loaded(&self, id: &str) -> bool {
         self.loaded.contains_key(id)
+    }
+
+    pub fn register_builtin(
+        &mut self,
+        manifest: PluginManifest,
+        mut plugin: Box<dyn OmnigetPlugin>,
+        host: Arc<dyn PluginHost>,
+    ) -> Result<(), PluginLoadError> {
+        let id = manifest.id.clone();
+        if self.is_user_removed(&id) {
+            tracing::info!("[plugins] Builtin plugin '{}' skipped (user removed)", id);
+            return Ok(());
+        }
+        if let Err(e) = plugin.initialize(host) {
+            let err = PluginLoadError::simple("initialize", format!("Plugin init failed: {e}"));
+            self.load_errors.insert(id.clone(), err.clone());
+            return Err(err);
+        }
+        self.loaded.insert(
+            id.clone(),
+            LoadedPlugin {
+                _lib: None,
+                plugin,
+                manifest: manifest.clone(),
+            },
+        );
+        self.load_errors.remove(&id);
+        if !self.installed.iter().any(|p| p.id == id) {
+            self.installed.push(InstalledPlugin {
+                id: id.clone(),
+                version: manifest.version.clone(),
+                installed_at: chrono::Utc::now().to_rfc3339(),
+                updated_at: chrono::Utc::now().to_rfc3339(),
+                enabled: true,
+                repo: None,
+                source_release: None,
+            });
+            let _ = self.save_installed();
+        }
+        tracing::info!(
+            "[plugins] Registered builtin plugin: {} v{}",
+            manifest.id,
+            manifest.version
+        );
+        Ok(())
     }
 
     pub fn load_one(&mut self, id: &str, host: Arc<dyn PluginHost>) -> Result<(), PluginLoadError> {
