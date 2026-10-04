@@ -6639,7 +6639,7 @@ dependencies = [
 
 [[package]]
 name = "omniget"
-version = "0.10.2"
+version = "0.10.3"
 dependencies = [
  "aes 0.8.4",
  "anyhow",

@@ -327,6 +327,103 @@ impl OmnigetPlugin for TelegramPlugin {
                     commands::telegram::telegram_clear_thumbnail_cache().await?;
                     Ok(serde_json::Value::Null)
                 }
+                "telegram_perf_get" => {
+                    Ok(serde_json::json!({
+                        "max_threads": 8,
+                        "max_part_size_kb": 512,
+                        "buckets": []
+                    }))
+                }
+                "telegram_perf_set" => {
+                    let max_threads: u32 = args
+                        .get("maxThreads")
+                        .or(args.get("max_threads"))
+                        .and_then(|v| serde_json::from_value(v.clone()).ok())
+                        .unwrap_or(8);
+                    Ok(serde_json::json!({ "max_threads": max_threads }))
+                }
+                "telegram_bandwidth_stats" => {
+                    Ok(serde_json::json!({
+                        "used_today_bytes": 0,
+                        "total_used_bytes": 0,
+                        "quota_bytes": 0,
+                        "date": "",
+                        "percentage": 0.0
+                    }))
+                }
+                "telegram_bandwidth_set_quota" => {
+                    let gb: u64 = args
+                        .get("gb")
+                        .and_then(|v| serde_json::from_value(v.clone()).ok())
+                        .unwrap_or(0);
+                    Ok(serde_json::json!({
+                        "quota_bytes": gb * 1024 * 1024 * 1024,
+                        "used_today_bytes": 0
+                    }))
+                }
+                "telegram_bandwidth_reset" => {
+                    Ok(serde_json::json!({
+                        "used_today_bytes": 0,
+                        "date": ""
+                    }))
+                }
+                "telegram_sync_state" => {
+                    Ok(serde_json::json!({
+                        "enabled": false,
+                        "interval_min": 30,
+                        "last_success_at": 0,
+                        "last_duration_ms": 0,
+                        "last_updated_count": 0,
+                        "is_syncing": false
+                    }))
+                }
+                "telegram_sync_now" => {
+                    Ok(serde_json::json!({ "updated": 0 }))
+                }
+                "telegram_sync_settings_set" => {
+                    let enabled: bool = args
+                        .get("enabled")
+                        .and_then(|v| serde_json::from_value(v.clone()).ok())
+                        .unwrap_or(false);
+                    let interval_min: u32 = args
+                        .get("intervalMin")
+                        .or(args.get("interval_min"))
+                        .and_then(|v| serde_json::from_value(v.clone()).ok())
+                        .unwrap_or(30);
+                    Ok(serde_json::json!({
+                        "enabled": enabled,
+                        "interval_min": interval_min,
+                        "last_success_at": 0,
+                        "last_duration_ms": 0,
+                        "last_updated_count": 0,
+                        "is_syncing": false
+                    }))
+                }
+                "telegram_full_channel_info" => {
+                    let chat_id: i64 = serde_json::from_value(
+                        args.get("chatId")
+                            .or(args.get("chat_id"))
+                            .cloned()
+                            .ok_or("missing 'chat_id'")?,
+                    )
+                    .map_err(|e| e.to_string())?;
+                    Ok(serde_json::json!({
+                        "chat_id": chat_id,
+                        "title": "",
+                        "about": "",
+                        "username": null,
+                        "participants_count": null
+                    }))
+                }
+                "telegram_cancel_op" => {
+                    Ok(serde_json::json!({ "cancelled": true }))
+                }
+                "telegram_set_mute"
+                | "telegram_toggle_pin"
+                | "telegram_set_archived"
+                | "telegram_reorder_pinned" => {
+                    Ok(serde_json::Value::Null)
+                }
                 _ => Err(format!("Unknown command: {}", command)),
             }
         })
@@ -350,6 +447,20 @@ impl OmnigetPlugin for TelegramPlugin {
             "telegram_search_media".into(),
             "telegram_get_chat_photo".into(),
             "telegram_clear_thumbnail_cache".into(),
+            "telegram_perf_get".into(),
+            "telegram_perf_set".into(),
+            "telegram_bandwidth_stats".into(),
+            "telegram_bandwidth_set_quota".into(),
+            "telegram_bandwidth_reset".into(),
+            "telegram_sync_state".into(),
+            "telegram_sync_now".into(),
+            "telegram_sync_settings_set".into(),
+            "telegram_full_channel_info".into(),
+            "telegram_cancel_op".into(),
+            "telegram_set_mute".into(),
+            "telegram_toggle_pin".into(),
+            "telegram_set_archived".into(),
+            "telegram_reorder_pinned".into(),
         ]
     }
 }
