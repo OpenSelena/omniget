@@ -253,8 +253,13 @@ impl OmnigetPlugin for CoursesPlugin {
                         args.get("token").cloned().ok_or("missing 'token'")?,
                     )
                     .map_err(|e| e.to_string())?;
+                    let site_id: Option<String> = args
+                        .get("site_id")
+                        .or(args.get("siteId"))
+                        .and_then(|v| serde_json::from_value(v.clone()).ok());
                     let res =
-                        commands::kajabi::kajabi_login_token(wrap_state(&state), token).await?;
+                        commands::kajabi::kajabi_login_token(wrap_state(&state), token, site_id)
+                            .await?;
                     serde_json::to_value(res).map_err(|e| e.to_string())
                 }
                 "skool_login" => {

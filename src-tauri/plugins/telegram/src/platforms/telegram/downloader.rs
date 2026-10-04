@@ -1,6 +1,5 @@
 use async_trait::async_trait;
 use grammers_client::types::Peer;
-use tokio::sync::mpsc;
 
 use super::auth::TelegramSessionHandle;
 use crate::platforms::traits::PlatformDownloader;
