@@ -1,10 +1,22 @@
 [workspace]
-members = [".", "omniget-core", "omniget-plugin-sdk", "omniget-cli", "omnidisc-proto", "omnidisc-media", "omnidisc-mls"]
+members = [
+    ".",
+    "omniget-core",
+    "omniget-plugin-sdk",
+    "omniget-cli",
+    "omnidisc-proto",
+    "omnidisc-media",
+    "omnidisc-mls",
+    "plugins/convert",
+    "plugins/telegram",
+    "plugins/courses",
+    "plugins/grammers-session",
+]
 resolver = "2"
 
 [package]
 name = "omniget"
-version = "0.10.1"
+version = "0.10.2"
 description = "OmniGet — Universal Downloader & Media Player"
 authors = ["OpenSelena", "igect"]
 edition = "2021"
@@ -72,6 +84,9 @@ qrcode = { version = "0.14", default-features = false, features = ["svg"] }
 open = "5"
 omniget-core = { path = "omniget-core", features = ["desktop"] }
 omniget-plugin-sdk = { path = "omniget-plugin-sdk" }
+omniget-plugin-convert = { path = "plugins/convert" }
+omniget-plugin-telegram = { path = "plugins/telegram" }
+omniget-plugin-courses = { path = "plugins/courses" }
 omnidisc-proto = { path = "omnidisc-proto" }
 omnidisc-media = { path = "omnidisc-media", default-features = false, features = ["rnnoise"] }
 omnidisc-mls = { path = "omnidisc-mls" }
@@ -127,3 +142,7 @@ opt-level = 1
 lto = "thin"
 codegen-units = 1
 strip = true
+
+[patch.crates-io]
+grammers-session = { path = "plugins/grammers-session" }
+
