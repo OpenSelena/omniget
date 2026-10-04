@@ -171,7 +171,9 @@ async fn ensure_auth_on_dc(client: &Client, target_dc_id: i32) -> anyhow::Result
                     },
                 )
                 .await
-                .map_err(|e| anyhow::anyhow!("ImportAuthorization on DC {}: {}", target_dc_id, e))?;
+                .map_err(|e| {
+                    anyhow::anyhow!("ImportAuthorization on DC {}: {}", target_dc_id, e)
+                })?;
 
             let mut copied = auth_copied_dcs().lock().await;
             if !copied.contains(&target_dc_id) {
@@ -195,7 +197,11 @@ async fn ensure_auth_on_dc(client: &Client, target_dc_id: i32) -> anyhow::Result
                 }
                 Ok(())
             } else {
-                Err(anyhow::anyhow!("ExportAuthorization to DC {}: {}", target_dc_id, e))
+                Err(anyhow::anyhow!(
+                    "ExportAuthorization to DC {}: {}",
+                    target_dc_id,
+                    e
+                ))
             }
         }
     }
