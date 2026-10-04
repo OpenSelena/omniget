@@ -229,6 +229,7 @@ pub fn resolve_telegram_download_dir(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub async fn telegram_download_media(
     host: Option<Arc<dyn PluginHost>>,
     state: &TelegramPluginState,
