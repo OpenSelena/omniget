@@ -3,8 +3,6 @@ name = "omniget-plugin-convert"
 version = "1.0.3"
 edition = "2021"
 
-[lib]
-crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 tokio = { version = "1", features = ["full"] }

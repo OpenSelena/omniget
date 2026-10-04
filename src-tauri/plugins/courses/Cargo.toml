@@ -3,8 +3,6 @@ name = "omniget-plugin-courses"
 version = "1.4.1"
 edition = "2021"
 
-[lib]
-crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 tauri = { version = "2", features = [] }

@@ -953,5 +953,3 @@ impl OmnigetPlugin for CoursesPlugin {
         ]
     }
 }
-
-omniget_plugin_sdk::export_plugin!(CoursesPlugin::new());

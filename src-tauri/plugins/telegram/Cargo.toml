@@ -3,8 +3,6 @@ name = "omniget-plugin-telegram"
 version = "1.2.1"
 edition = "2021"
 
-[lib]
-crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 tokio = { version = "1", features = ["full"] }
