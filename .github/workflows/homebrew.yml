@@ -50,31 +50,31 @@ jobs:
           intel_sha=$(sha256sum intel.dmg | cut -d' ' -f1)
           mkdir -p tap/Casks
           cask=tap/Casks/omniget.rb
-          cat > "$cask" <<EOF
-cask "omniget" do
-  version "$version"
-
-  on_arm do
-    url "https://github.com/$REPO/releases/download/$TAG/omniget_#{version}_aarch64.dmg"
-    sha256 "$arm_sha"
-  end
-  on_intel do
-    url "https://github.com/$REPO/releases/download/$TAG/omniget_#{version}_x64.dmg"
-    sha256 "$intel_sha"
-  end
-
-  name "OmniGet"
-  desc "Universal downloader and media workstation"
-  homepage "https://github.com/$REPO"
-
-  app "omniget.app"
-
-  zap trash: [
-    "~/Library/Application Support/com.openselena.omniget",
-    "~/Library/Caches/com.openselena.omniget",
-  ]
-end
-EOF
+          {
+            echo 'cask "omniget" do'
+            echo "  version \"$version\""
+            echo ""
+            echo "  on_arm do"
+            echo "    url \"https://github.com/$REPO/releases/download/$TAG/omniget_#{version}_aarch64.dmg\""
+            echo "    sha256 \"$arm_sha\""
+            echo "  end"
+            echo "  on_intel do"
+            echo "    url \"https://github.com/$REPO/releases/download/$TAG/omniget_#{version}_x64.dmg\""
+            echo "    sha256 \"$intel_sha\""
+            echo "  end"
+            echo ""
+            echo "  name \"OmniGet\""
+            echo "  desc \"Universal downloader and media workstation\""
+            echo "  homepage \"https://github.com/$REPO\""
+            echo ""
+            echo "  app \"omniget.app\""
+            echo ""
+            echo "  zap trash: ["
+            echo "    \"~/Library/Application Support/com.openselena.omniget\","
+            echo "    \"~/Library/Caches/com.openselena.omniget\","
+            echo "  ]"
+            echo "end"
+          } > "$cask"
           cd tap
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -82,3 +82,4 @@ EOF
           git diff --cached --quiet && { echo "cask already at $version"; exit 0; }
           git commit -m "omniget $version"
           git push
+
