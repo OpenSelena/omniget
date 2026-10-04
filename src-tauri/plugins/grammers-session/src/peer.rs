@@ -176,8 +176,8 @@ impl PeerId {
             PeerKind::UserSelf
         } else if -999999999999 <= self.0 && self.0 <= -1 {
             PeerKind::Chat
-        } else if -1997852516352 <= self.0 && self.0 <= -1000000000001
-            || (-2002147483649 <= self.0 && self.0 <= -4000000000000)
+        } else if (-1997852516352..=-1000000000001).contains(&self.0)
+            || (-4000000000000..=-2002147483649).contains(&self.0)
         {
             PeerKind::Channel
         } else {
