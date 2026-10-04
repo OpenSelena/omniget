@@ -89,7 +89,7 @@ pub async fn kajabi_verify_login(
 pub async fn kajabi_login_token(
     state: tauri::State<'_, CoursesState>,
     token: String,
-    site_id: String,
+    site_id: Option<String>,
 ) -> Result<String, String> {
     let _ = api::delete_saved_session().await;
     state.kajabi_session.lock().await.take();
@@ -97,6 +97,16 @@ pub async fn kajabi_login_token(
     *state.kajabi_courses_cache.lock().await = None;
 
     let parsed_token = omniget_core::core::cookie_parser::parse_bearer_input(&token);
+
+    let site_id = match site_id {
+        Some(s) if !s.trim().is_empty() => s,
+        _ => {
+            let sites = api::list_sites(&parsed_token)
+                .await
+                .map_err(|e| format!("Failed to list sites: {}", e))?;
+            sites.first().map(|s| s.id.clone()).unwrap_or_default()
+        }
+    };
 
     let client = omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent("KajabiMobileApp")
@@ -108,7 +118,9 @@ pub async fn kajabi_login_token(
             );
             h.insert("Kjb-App-Id", "Kajabi".parse().unwrap());
             h.insert("KJB-DP", "ANDROID".parse().unwrap());
-            h.insert("KJB-SITE-ID", site_id.parse().unwrap());
+            if let Ok(site_val) = site_id.parse() {
+                h.insert("KJB-SITE-ID", site_val);
+            }
             h.insert("Accept", "application/json".parse().unwrap());
             h
         })

@@ -3,7 +3,6 @@ pub mod downloader;
 
 use anyhow::anyhow;
 use async_trait::async_trait;
-use tokio::sync::mpsc;
 
 use crate::platforms::traits::PlatformDownloader;
 use omniget_core::models::media::{

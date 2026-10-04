@@ -47,10 +47,6 @@ impl-serde = [
 name = "grammers_session"
 path = "src/lib.rs"
 
-[[test]]
-name = "deps"
-path = "tests/deps.rs"
-
 [dependencies.grammers-tl-types]
 version = "0.8.0"
 

@@ -730,3 +730,81 @@ pub async fn telegram_clear_thumbnail_cache() -> Result<(), String> {
     thumbnail_cache::clear_cache().await;
     Ok(())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::path::PathBuf;
+
+    #[test]
+    fn test_sanitize_folder_name_forbidden_characters() {
+        assert_eq!(
+            sanitize_folder_name("My:Channel/Name?*"),
+            "My_Channel_Name__"
+        );
+        assert_eq!(sanitize_folder_name("<Test>|Pipe\""), "_Test__Pipe_");
+    }
+
+    #[test]
+    fn test_sanitize_folder_name_reserved_windows_names() {
+        assert_eq!(sanitize_folder_name("CON"), "CON_channel");
+        assert_eq!(sanitize_folder_name("prn"), "prn_channel");
+        assert_eq!(sanitize_folder_name("aux"), "aux_channel");
+        assert_eq!(sanitize_folder_name("NUL"), "NUL_channel");
+        assert_eq!(sanitize_folder_name("COM1"), "COM1_channel");
+        assert_eq!(sanitize_folder_name("lpt3"), "lpt3_channel");
+    }
+
+    #[test]
+    fn test_sanitize_folder_name_empty_or_whitespace() {
+        assert_eq!(sanitize_folder_name(""), "Telegram Media");
+        assert_eq!(sanitize_folder_name("   "), "Telegram Media");
+        assert_eq!(sanitize_folder_name("..."), "Telegram Media");
+    }
+
+    #[test]
+    fn test_resolve_telegram_download_dir_creates_omnigram_and_channel_folder() {
+        let base = "C:/Users/mint/Downloads";
+        let dir = resolve_telegram_download_dir(base, Some("Evelina Ava"));
+        assert_eq!(
+            dir,
+            PathBuf::from("C:/Users/mint/Downloads")
+                .join("OmniGram")
+                .join("Evelina Ava")
+        );
+
+        let dir2 = resolve_telegram_download_dir(base, Some("Ivana"));
+        assert_eq!(
+            dir2,
+            PathBuf::from("C:/Users/mint/Downloads")
+                .join("OmniGram")
+                .join("Ivana")
+        );
+    }
+
+    #[test]
+    fn test_resolve_telegram_download_dir_when_base_already_omnigram() {
+        let base = "C:/Users/mint/Downloads/OmniGram";
+        let dir = resolve_telegram_download_dir(base, Some("Evelina Ava"));
+        assert_eq!(
+            dir,
+            PathBuf::from("C:/Users/mint/Downloads/OmniGram").join("Evelina Ava")
+        );
+    }
+
+    #[test]
+    fn test_resolve_telegram_download_dir_with_none_or_empty_title() {
+        let base = "C:/Users/mint/Downloads";
+        let dir = resolve_telegram_download_dir(base, None);
+        assert_eq!(
+            dir,
+            PathBuf::from("C:/Users/mint/Downloads").join("OmniGram")
+        );
+
+        let dir2 = resolve_telegram_download_dir(base, Some("   "));
+        assert_eq!(
+            dir2,
+            PathBuf::from("C:/Users/mint/Downloads").join("OmniGram")
+        );
+    }
+}
