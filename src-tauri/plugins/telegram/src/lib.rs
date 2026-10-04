@@ -353,5 +353,3 @@ impl OmnigetPlugin for TelegramPlugin {
         ]
     }
 }
-
-omniget_plugin_sdk::export_plugin!(TelegramPlugin::new());

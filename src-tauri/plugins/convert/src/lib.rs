@@ -167,5 +167,3 @@ impl OmnigetPlugin for ConvertPlugin {
         ]
     }
 }
-
-omniget_plugin_sdk::export_plugin!(ConvertPlugin::new());
