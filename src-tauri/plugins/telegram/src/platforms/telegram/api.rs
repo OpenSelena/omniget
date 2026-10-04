@@ -770,6 +770,14 @@ pub async fn download_media(
 }
 
 fn is_retryable_error(err_str: &str) -> bool {
+    let lower = err_str.to_lowercase();
+    if lower.contains("rpc error 400")
+        || lower.contains("rpc error 401")
+        || lower.contains("rpc error 403")
+        || lower.contains("rpc error 404")
+    {
+        return false;
+    }
     let retryable = [
         "connection reset",
         "timed out",
@@ -782,7 +790,6 @@ fn is_retryable_error(err_str: &str) -> bool {
         "network",
         "rpc error",
     ];
-    let lower = err_str.to_lowercase();
     retryable.iter().any(|p| lower.contains(p))
 }
 

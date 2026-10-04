@@ -131,6 +131,11 @@ fn auth_copied_dcs() -> &'static Arc<Mutex<Vec<i32>>> {
     INSTANCE.get_or_init(|| Arc::new(Mutex::new(Vec::new())))
 }
 
+pub async fn clear_auth_copied_dcs() {
+    let mut copied = auth_copied_dcs().lock().await;
+    copied.clear();
+}
+
 async fn ensure_auth_on_dc(client: &Client, target_dc_id: i32) -> anyhow::Result<()> {
     {
         let copied = auth_copied_dcs().lock().await;
@@ -139,35 +144,61 @@ async fn ensure_auth_on_dc(client: &Client, target_dc_id: i32) -> anyhow::Result
         }
     }
 
-    tracing::info!("[tg-dl] copying auth to DC {}", target_dc_id);
-
-    let tl::enums::auth::ExportedAuthorization::Authorization(exported) = client
-        .invoke(&tl::functions::auth::ExportAuthorization {
-            dc_id: target_dc_id,
-        })
-        .await
-        .map_err(|e| anyhow::anyhow!("ExportAuthorization to DC {}: {}", target_dc_id, e))?;
-
-    let _: tl::enums::auth::Authorization = client
-        .invoke_in_dc(
-            target_dc_id,
-            &tl::functions::auth::ImportAuthorization {
-                id: exported.id,
-                bytes: exported.bytes,
-            },
-        )
-        .await
-        .map_err(|e| anyhow::anyhow!("ImportAuthorization on DC {}: {}", target_dc_id, e))?;
-
-    {
+    let home_dc = super::auth::get_home_dc();
+    if target_dc_id == home_dc {
         let mut copied = auth_copied_dcs().lock().await;
         if !copied.contains(&target_dc_id) {
             copied.push(target_dc_id);
         }
+        return Ok(());
     }
 
-    tracing::info!("[tg-dl] auth copied to DC {} successfully", target_dc_id);
-    Ok(())
+    tracing::info!("[tg-dl] copying auth to DC {}", target_dc_id);
+
+    match client
+        .invoke(&tl::functions::auth::ExportAuthorization {
+            dc_id: target_dc_id,
+        })
+        .await
+    {
+        Ok(tl::enums::auth::ExportedAuthorization::Authorization(exported)) => {
+            let _: tl::enums::auth::Authorization = client
+                .invoke_in_dc(
+                    target_dc_id,
+                    &tl::functions::auth::ImportAuthorization {
+                        id: exported.id,
+                        bytes: exported.bytes,
+                    },
+                )
+                .await
+                .map_err(|e| anyhow::anyhow!("ImportAuthorization on DC {}: {}", target_dc_id, e))?;
+
+            let mut copied = auth_copied_dcs().lock().await;
+            if !copied.contains(&target_dc_id) {
+                copied.push(target_dc_id);
+            }
+
+            tracing::info!("[tg-dl] auth copied to DC {} successfully", target_dc_id);
+            Ok(())
+        }
+        Err(e) => {
+            let err_str = e.to_string();
+            if err_str.contains("DC_ID_INVALID") {
+                tracing::warn!(
+                    "[tg-dl] ExportAuthorization returned DC_ID_INVALID for DC {}, treating as home DC",
+                    target_dc_id
+                );
+                super::auth::set_home_dc(target_dc_id);
+                let mut copied = auth_copied_dcs().lock().await;
+                if !copied.contains(&target_dc_id) {
+                    copied.push(target_dc_id);
+                }
+                Ok(())
+            } else {
+                Err(anyhow::anyhow!("ExportAuthorization to DC {}: {}", target_dc_id, e))
+            }
+        }
+    }
 }
 
 pub async fn download_file(
@@ -236,6 +267,14 @@ pub async fn download_file(
             Err(grammers_mtsender::InvocationError::Rpc(ref err))
                 if err.name == "AUTH_KEY_UNREGISTERED" =>
             {
+                let home_dc = super::auth::get_home_dc();
+                if dc == home_dc {
+                    drop(file);
+                    let _ = tokio::fs::remove_file(output_path).await;
+                    return Err(anyhow::anyhow!(
+                        "Telegram session is unauthorized. Please log in again."
+                    ));
+                }
                 tracing::warn!(
                     "[tg-dl] AUTH_KEY_UNREGISTERED on DC {}, re-copying auth",
                     dc

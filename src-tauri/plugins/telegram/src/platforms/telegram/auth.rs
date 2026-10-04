@@ -62,6 +62,22 @@ fn open_session() -> anyhow::Result<Arc<SqliteSession>> {
     Ok(Arc::new(session))
 }
 
+static HOME_DC: std::sync::atomic::AtomicI32 = std::sync::atomic::AtomicI32::new(0);
+
+pub fn set_home_dc(dc: i32) {
+    HOME_DC.store(dc, std::sync::atomic::Ordering::Relaxed);
+}
+
+pub fn get_home_dc() -> i32 {
+    let cached = HOME_DC.load(std::sync::atomic::Ordering::Relaxed);
+    if cached > 0 {
+        return cached;
+    }
+    let dc = open_session().map(|s| s.home_dc_id()).unwrap_or(2);
+    HOME_DC.store(dc, std::sync::atomic::Ordering::Relaxed);
+    dc
+}
+
 fn connection_params() -> ConnectionParams {
     let os_version = os_info::get();
     ConnectionParams {
@@ -94,6 +110,7 @@ pub fn create_client() -> anyhow::Result<Client> {
 }
 
 pub async fn delete_session() -> anyhow::Result<()> {
+    set_home_dc(0);
     let path = session_file_path()?;
     if tokio::fs::try_exists(&path).await.unwrap_or(false) {
         tokio::fs::remove_file(&path).await?;
@@ -110,6 +127,7 @@ pub async fn check_session(handle: &TelegramSessionHandle) -> anyhow::Result<Str
 
         if let Some(client) = existing_client {
             if client.is_authorized().await? {
+                let _ = get_home_dc();
                 return Ok(existing_phone);
             }
         }
@@ -121,6 +139,7 @@ pub async fn check_session(handle: &TelegramSessionHandle) -> anyhow::Result<Str
             let mut guard = handle.lock().await;
             guard.client = Some(client);
             guard.phone = phone.clone();
+            let _ = get_home_dc();
             return Ok(phone);
         }
 
@@ -519,6 +538,8 @@ pub async fn logout(handle: &TelegramSessionHandle) -> anyhow::Result<()> {
     guard.password_token = None;
     guard.updates_rx = None;
     drop(guard);
+    set_home_dc(0);
+    super::parallel_download::clear_auth_copied_dcs().await;
     delete_session().await?;
     Ok(())
 }
