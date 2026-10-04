@@ -153,7 +153,13 @@ pub fn sanitize_folder_name(name: &str) -> String {
     let forbidden = ['<', '>', ':', '"', '/', '\\', '|', '?', '*'];
     let cleaned: String = name
         .chars()
-        .map(|c| if forbidden.contains(&c) || c.is_control() { '_' } else { c })
+        .map(|c| {
+            if forbidden.contains(&c) || c.is_control() {
+                '_'
+            } else {
+                c
+            }
+        })
         .collect();
 
     let trimmed = cleaned.trim().trim_matches('.').trim();
@@ -164,9 +170,28 @@ pub fn sanitize_folder_name(name: &str) -> String {
     let upper = trimmed.to_ascii_uppercase();
     let is_reserved = matches!(
         upper.as_str(),
-        "CON" | "PRN" | "AUX" | "NUL"
-            | "COM1" | "COM2" | "COM3" | "COM4" | "COM5" | "COM6" | "COM7" | "COM8" | "COM9"
-            | "LPT1" | "LPT2" | "LPT3" | "LPT4" | "LPT5" | "LPT6" | "LPT7" | "LPT8" | "LPT9"
+        "CON"
+            | "PRN"
+            | "AUX"
+            | "NUL"
+            | "COM1"
+            | "COM2"
+            | "COM3"
+            | "COM4"
+            | "COM5"
+            | "COM6"
+            | "COM7"
+            | "COM8"
+            | "COM9"
+            | "LPT1"
+            | "LPT2"
+            | "LPT3"
+            | "LPT4"
+            | "LPT5"
+            | "LPT6"
+            | "LPT7"
+            | "LPT8"
+            | "LPT9"
     );
 
     if is_reserved {
@@ -178,7 +203,10 @@ pub fn sanitize_folder_name(name: &str) -> String {
     }
 }
 
-pub fn resolve_telegram_download_dir(base_dir: &str, chat_title: Option<&str>) -> std::path::PathBuf {
+pub fn resolve_telegram_download_dir(
+    base_dir: &str,
+    chat_title: Option<&str>,
+) -> std::path::PathBuf {
     let base = std::path::PathBuf::from(base_dir);
     let is_already_omnigram = base
         .file_name()
@@ -243,7 +271,11 @@ pub async fn telegram_download_media(
     tokio::spawn(async move {
         let target_dir = resolve_telegram_download_dir(&output_dir, chat_title.as_deref());
         if let Err(e) = tokio::fs::create_dir_all(&target_dir).await {
-            tracing::warn!("[tg-cmd] Failed to create target directory {:?}: {}", target_dir, e);
+            tracing::warn!(
+                "[tg-cmd] Failed to create target directory {:?}: {}",
+                target_dir,
+                e
+            );
         }
         let output_path = target_dir.join(&file_name_clone);
 
@@ -404,7 +436,11 @@ pub async fn telegram_download_batch(
 
     let target_dir = resolve_telegram_download_dir(&output_dir, Some(&chat_title));
     if let Err(e) = tokio::fs::create_dir_all(&target_dir).await {
-        tracing::warn!("[tg-cmd] Failed to create target directory {:?}: {}", target_dir, e);
+        tracing::warn!(
+            "[tg-cmd] Failed to create target directory {:?}: {}",
+            target_dir,
+            e
+        );
     }
     let target_dir_str = target_dir.to_string_lossy().to_string();
 

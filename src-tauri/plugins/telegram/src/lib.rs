@@ -334,13 +334,11 @@ impl OmnigetPlugin for TelegramPlugin {
                     commands::telegram::telegram_clear_thumbnail_cache().await?;
                     Ok(serde_json::Value::Null)
                 }
-                "telegram_perf_get" => {
-                    Ok(serde_json::json!({
-                        "max_threads": 8,
-                        "max_part_size_kb": 512,
-                        "buckets": []
-                    }))
-                }
+                "telegram_perf_get" => Ok(serde_json::json!({
+                    "max_threads": 8,
+                    "max_part_size_kb": 512,
+                    "buckets": []
+                })),
                 "telegram_perf_set" => {
                     let max_threads: u32 = args
                         .get("maxThreads")
@@ -349,15 +347,13 @@ impl OmnigetPlugin for TelegramPlugin {
                         .unwrap_or(8);
                     Ok(serde_json::json!({ "max_threads": max_threads }))
                 }
-                "telegram_bandwidth_stats" => {
-                    Ok(serde_json::json!({
-                        "used_today_bytes": 0,
-                        "total_used_bytes": 0,
-                        "quota_bytes": 0,
-                        "date": "",
-                        "percentage": 0.0
-                    }))
-                }
+                "telegram_bandwidth_stats" => Ok(serde_json::json!({
+                    "used_today_bytes": 0,
+                    "total_used_bytes": 0,
+                    "quota_bytes": 0,
+                    "date": "",
+                    "percentage": 0.0
+                })),
                 "telegram_bandwidth_set_quota" => {
                     let gb: u64 = args
                         .get("gb")
@@ -368,25 +364,19 @@ impl OmnigetPlugin for TelegramPlugin {
                         "used_today_bytes": 0
                     }))
                 }
-                "telegram_bandwidth_reset" => {
-                    Ok(serde_json::json!({
-                        "used_today_bytes": 0,
-                        "date": ""
-                    }))
-                }
-                "telegram_sync_state" => {
-                    Ok(serde_json::json!({
-                        "enabled": false,
-                        "interval_min": 30,
-                        "last_success_at": 0,
-                        "last_duration_ms": 0,
-                        "last_updated_count": 0,
-                        "is_syncing": false
-                    }))
-                }
-                "telegram_sync_now" => {
-                    Ok(serde_json::json!({ "updated": 0 }))
-                }
+                "telegram_bandwidth_reset" => Ok(serde_json::json!({
+                    "used_today_bytes": 0,
+                    "date": ""
+                })),
+                "telegram_sync_state" => Ok(serde_json::json!({
+                    "enabled": false,
+                    "interval_min": 30,
+                    "last_success_at": 0,
+                    "last_duration_ms": 0,
+                    "last_updated_count": 0,
+                    "is_syncing": false
+                })),
+                "telegram_sync_now" => Ok(serde_json::json!({ "updated": 0 })),
                 "telegram_sync_settings_set" => {
                     let enabled: bool = args
                         .get("enabled")
@@ -422,15 +412,11 @@ impl OmnigetPlugin for TelegramPlugin {
                         "participants_count": null
                     }))
                 }
-                "telegram_cancel_op" => {
-                    Ok(serde_json::json!({ "cancelled": true }))
-                }
+                "telegram_cancel_op" => Ok(serde_json::json!({ "cancelled": true })),
                 "telegram_set_mute"
                 | "telegram_toggle_pin"
                 | "telegram_set_archived"
-                | "telegram_reorder_pinned" => {
-                    Ok(serde_json::Value::Null)
-                }
+                | "telegram_reorder_pinned" => Ok(serde_json::Value::Null),
                 _ => Err(format!("Unknown command: {}", command)),
             }
         })
