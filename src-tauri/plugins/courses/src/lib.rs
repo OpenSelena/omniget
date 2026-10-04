@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+
 pub mod catalog;
 pub mod commands;
 pub mod platforms;
