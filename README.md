@@ -194,13 +194,13 @@ OmniGet has native extractors for the platforms people use most, and hands every
 
 | Category | Sites and formats |
 |---|---|
-| Online courses | Hotmart, Udemy, Kiwify, Rocketseat and Meta-Analysis Academy through the Courses plugin. Every lesson, section selection, attachments, resume where you stopped. |
+| Online courses | 38 supported platforms (Hotmart, Udemy, Kiwify, Rocketseat, Coursera, Domestika, Skillshare, and more) through the embedded Courses plugin. Every lesson, section selection, attachments, resume where you stopped. |
 | Video and audio | YouTube (videos, playlists, channels, live from start, chapters, SponsorBlock), Instagram, TikTok, X/Twitter, Reddit, Twitch (VODs, clips, live), Vimeo, Bluesky, Threads, Pinterest, Douyin |
 | Bilibili, signed in | 4K, HDR, Dolby Vision, Hi-Res lossless and Dolby Atmos according to your subscription. Danmaku comments as XML, ASS or JSON, NFO files for Kodi and Jellyfin, custom naming templates, 11 URL types including bangumi, courses, favorites, watch later and history |
 | Image galleries | Whole galleries and profiles from 250+ sites through gallery-dl (DeviantArt, Pixiv, ArtStation, Flickr, Tumblr, Imgur, Kemono and more) |
 | Bulk | Paste many links or load a `.txt`, download whole subreddits, Reddit and X profiles, Instagram and Pinterest profiles, Facebook albums |
 | Files and transfer | `.torrent` files and magnet links with a built-in BitTorrent client, direct HTTP files, HLS and DASH manifests, and person-to-person transfer between two OmniGet installs with a short word code |
-| Telegram | Photos, videos, files and audio from any channel or group you belong to, through the Telegram plugin |
+| Telegram | Photos, videos, files and audio from any channel or group you belong to, saved into organized channel folders (`OmniGram/<channel>/`), through the embedded Telegram plugin |
 
 Options you set once and forget: default quality, audio-only format (MP3, M4A, Opus, FLAC or WAV), subtitle languages and format (SRT, VTT, ASS, embedded or sidecar), thumbnail and metadata embedding, filename template, organize by platform, skip existing files, split by chapters, speed limit, concurrent downloads, proxy. Rules send a given channel or host to a folder and quality of your choice without asking again. Followed channels are checked in the background and can download new uploads automatically with a tray notification.
 
@@ -551,7 +551,7 @@ Setup downloads the prebuilt `omniget-cli` for your OS, which gives the skill Om
 
 ## Plugins: Courses, Study, Telegram, Convert
 
-Plugins are separate Rust libraries loaded at startup. OmniGet installs its official set on first launch and updates them by itself. The Marketplace page shows what is installed, what each plugin is allowed to do (events, notifications, settings, download folders, proxy, managed tools, download queue), and lets you hide, disable or uninstall any of them.
+Core plugins are embedded directly into the application binary, eliminating runtime download and ABI compatibility errors. The Marketplace page shows active plugins, what each plugin is allowed to do (events, notifications, settings, download folders, proxy, managed tools, download queue), and lets you configure or toggle them.
 
 <p align="center">
   <img src="assets/readme/marketplace.png" alt="OmniGet Marketplace listing the Courses, Study, Telegram and Convert plugins with version, author, permissions and enable switches" width="900" />
@@ -559,7 +559,7 @@ Plugins are separate Rust libraries loaded at startup. OmniGet installs its offi
 
 ### Courses
 
-Sign in to **Hotmart**, **Udemy**, **Kiwify**, **Rocketseat** or **Meta-Analysis Academy** through a browser window inside the app, with saved cookies from the extension, or with email and password where the platform allows it. OmniGet lists your purchases, opens the course outline so you can tick the sections you want (it tells you how many lectures are DRM-protected and will be skipped), and downloads every lesson and attachment with continuous lecture numbers if you want them. Hotmart uses the current OIDC login flow, so it keeps working after Hotmart's 2026 auth change, and free courses and courses delivered outside Hotmart Club are listed too. Downloaded courses appear in Study automatically.
+The embedded Courses plugin supports 38 learning platforms, including **Hotmart**, **Udemy**, **Kiwify**, **Rocketseat**, **Coursera**, **Domestika**, **Skillshare**, **Alura**, and **Ebac**. Sign in through a webview inside the app, with saved cookies from the extension, or with account credentials where available. OmniGet lists your purchases, opens the course outline so you can select the sections you want (DRM-protected lectures are skipped and reported), and downloads lessons and attachments with optional continuous numbering. Downloaded courses index into Study automatically.
 
 ### Study
 
@@ -579,7 +579,7 @@ Study turns the folder of files you downloaded into something you can actually f
 
 ### Telegram
 
-Sign in with a QR code or your phone number. Browse every channel and group you belong to, filter by photo, video, document or audio, search files, and download one item or the whole chat with a progress list. Videos from channels can be imported straight into the Study library.
+Sign in with a QR code or your phone number. Browse every channel and group you belong to, filter by photo, video, document or audio, search files, and download individual media or entire chat archives with a progress list. Media downloads are organized into `{download_dir}/OmniGram/{channel_name}/` with sanitized folder names. Videos from channels can be imported straight into the Study library.
 
 ### Convert
 
@@ -589,9 +589,9 @@ FFmpeg conversions with GPU acceleration where the machine has it: container, co
 
 ## Built-in chat, off by default
 
-OmniGet ships a Discord-style chat called OmniDisc for servers you host yourself with omnidisc-server. Text channels, direct messages, friends, roles and permissions, pins, search, voice, video and screen sharing. Direct messages and the files sent in them are end-to-end encrypted with MLS, and the key for an encrypted call is derived from the same group, so the server operator cannot listen in. Voice runs in Rust rather than the web view and screen sharing uses the machine's hardware encoder. Files sent through chat are encrypted at rest and deleted from the server after thirty minutes.
+OmniGet includes an optional Discord-style chat called OmniDisc. It connects out of the box to the public default instance (`https://chat.tonho.wtf`) or private servers hosted with `omnidisc-server`. Features include text channels, direct messages, friends, roles, voice, video, and screen sharing with hardware encoding. Direct messages and calls use MLS end-to-end encryption. Files sent through chat are encrypted at rest and deleted from the server after thirty minutes.
 
-It is experimental and does nothing until you turn it on in **Settings → Advanced → Chat (OmniDisc)** and add a server.
+OmniDisc is disabled by default. Turn it on in **Settings → Advanced → OmniDisc** or type `/omnidisc` into the command palette (**Ctrl+K**).
 
 ---
 
@@ -620,7 +620,7 @@ New and marked beta or experimental: a **Profile** tab that edits what other pla
 - Tray icon, start with system, start minimized, prevent sleep during downloads.
 - Every download keeps the exact yt-dlp command it ran. Open it, edit a flag, retry.
 - 14 themes, including Catppuccin (four flavors), Dracula, One Dark Pro, three e-ink variants and three Nyxvamp variants.
-- 11 languages: English, Portuguese, Spanish, French, Italian, Greek, Russian, Japanese, Persian, Simplified and Traditional Chinese.
+- 12 languages: English, Portuguese, Spanish, French, Italian, Greek, Russian, Japanese, Persian, Lao, Simplified and Traditional Chinese.
 - Runs on Windows, macOS (Apple Silicon and Intel) and Linux (x86_64 and ARM64).
 
 ---
@@ -646,7 +646,7 @@ Yes. GPL-3.0, no paid tier, no ads, no account.
 Partly. yt-dlp handles the long tail of sites and OmniGet bundles it, verifies it and updates it. On top of that sit native extractors for courses, Instagram, X, Pinterest, Bilibili, Telegram and torrents, a queue with resume and retry, the Tools section, and the Study library.
 
 **Can OmniGet download a Udemy or Hotmart course I bought?**
-Yes. Install the Courses plugin (it comes preinstalled), sign in through the app, pick the course and sections, and download. Lessons and attachments land in a folder per course and appear in Study. Kiwify, Rocketseat and Meta-Analysis Academy work the same way.
+Yes. The Courses plugin is embedded directly in the app. Sign in through the app, pick the course and sections, and download. Lessons and attachments land in a folder per course and appear in Study. 38 platforms are supported, including Hotmart, Udemy, Kiwify, Rocketseat, Coursera, Domestika, and more.
 
 **Can it download Instagram stories, close friends or highlights?**
 Yes, using your own session captured by the browser extension. Stories are downloaded without being marked as seen.
