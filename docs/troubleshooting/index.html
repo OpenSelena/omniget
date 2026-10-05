@@ -1,0 +1,1981 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>System Troubleshooting & Fixes · OmniGet Documentation</title>
+  <meta name="description" content="Step-by-step diagnostic and remediation guides for operating system permissions, Linux WebKitGTK/GStreamer crashes, and network errors." />
+  <link rel="canonical" href="https://omniget.nav.bd/docs/troubleshooting/" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="OmniGet Documentation" />
+  <meta property="og:title" content="System Troubleshooting & Fixes" />
+  <meta property="og:description" content="Step-by-step diagnostic and remediation guides for operating system permissions, Linux WebKitGTK/GStreamer crashes, and network errors." />
+  <meta property="og:url" content="https://omniget.nav.bd/docs/troubleshooting/" />
+  <meta property="og:image" content="https://omniget.nav.bd/assets/readme/home.png" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta name="twitter:card" content="summary_large_image" />
+
+  <link rel="icon" type="image/x-icon" href="../../favicon.ico" />
+  <link rel="icon" type="image/png" sizes="256x256" href="../../static/favicon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="../../static/favicon.png" />
+
+  <!-- Early Theme Init Script to eliminate Flash of Wrong Theme -->
+  <script>
+    (function() {
+      try {
+        var saved = localStorage.getItem('omniget_docs_theme') || localStorage.getItem('theme');
+        var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (saved === 'dark' || (!saved && prefersDark)) {
+          document.documentElement.classList.add('dark');
+          document.documentElement.setAttribute('data-theme', 'dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      } catch (e) {}
+    })();
+  </script>
+
+  <!-- Fonts (JetBrains Mono for code blocks) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      border: 0 solid transparent;
+    }
+
+    :root {
+      --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI Variable Text", "Segoe UI", system-ui, -apple-system, sans-serif;
+      --font-display: -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", system-ui, -apple-system, sans-serif;
+      --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+      /* LIGHT THEME (PURE WHITE & BLACK) */
+      --bg: #ffffff;
+      --bg-surface: #ffffff;
+      --bg-subtle: #f4f4f5;
+      --bg-muted: #e4e4e7;
+      --bg-card: #ffffff;
+      --bg-code: #000000;
+      --border: #e4e4e7;
+      --border-subtle: #f4f4f5;
+      --border-focus: #000000;
+
+      --text: #000000;
+      --text-muted: #52525b;
+      --text-subtle: #595962;
+      --text-inverse: #ffffff;
+
+      --primary: #000000;
+      --primary-hover: #27272a;
+      --primary-light: #f4f4f5;
+      --primary-border: #000000;
+
+      --callout-bg: #f4f4f5;
+      --callout-border: #e4e4e7;
+      --callout-text: #000000;
+
+      /* Header & Layout Dimensions */
+      --header-h: 64px;
+      --tabs-h: 46px;
+      --header-total-h: 110px;
+      --sidebar-w: 272px;
+      --toc-w: 240px;
+      --max-w: 1440px;
+
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.08);
+    }
+
+    html.dark {
+      /* DARK THEME (PURE OBSIDIAN BLACK & WHITE) */
+      --bg: #000000;
+      --bg-surface: #09090b;
+      --bg-subtle: #121212;
+      --bg-muted: #18181b;
+      --bg-card: #09090b;
+      --bg-code: #000000;
+      --border: rgba(255, 255, 255, 0.12);
+      --border-subtle: rgba(255, 255, 255, 0.06);
+      --border-focus: #ffffff;
+
+      --text: #ffffff;
+      --text-muted: #a1a1aa;
+      --text-subtle: #94a3b8;
+      --text-inverse: #000000;
+
+      --primary: #ffffff;
+      --primary-hover: #e4e4e7;
+      --primary-light: rgba(255, 255, 255, 0.1);
+      --primary-border: #ffffff;
+
+      --callout-bg: #09090b;
+      --callout-border: rgba(255, 255, 255, 0.15);
+      --callout-text: #ffffff;
+
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+      --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.6);
+      --shadow-lg: 0 10px 24px -3px rgba(0, 0, 0, 0.8);
+    }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.6;
+      font-size: 15px;
+      overflow-x: hidden;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* Official Vector SVG Icons (Lucide & SimpleIcons) */
+    .icon {
+      display: inline-block;
+      width: 15px;
+      height: 15px;
+      vertical-align: middle;
+      flex-shrink: 0;
+    }
+    .icon-sm { width: 13px; height: 13px; }
+    .icon-lg { width: 18px; height: 18px; }
+    .icon-fill { fill: currentColor; stroke: none; }
+
+    /* Unified Sticky Double Header (Row 1 + Row 2 stay fixed together) */
+    .nav-header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      width: 100%;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      transition: background-color 0.2s ease, border-color 0.2s ease;
+    }
+
+    .nav-header-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 24px;
+      height: var(--header-h);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .brand-logo-link {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      font-size: 16px;
+      letter-spacing: -0.02em;
+    }
+    .brand-logo-link img {
+      width: 28px;
+      height: 28px;
+      border-radius: 7px;
+    }
+    .brand-badge {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      background: var(--bg-muted);
+      color: var(--text);
+      border: 1px solid var(--border);
+      letter-spacing: 0.04em;
+    }
+
+    .search-trigger {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      height: 38px;
+      padding: 0 12px;
+      color: var(--text-muted);
+      font-size: 13.5px;
+      width: 280px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .search-trigger:hover {
+      border-color: var(--text);
+      color: var(--text);
+    }
+    .search-kbd {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      background: var(--bg-muted);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 2px 6px;
+      color: var(--text-subtle);
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+    .nav-link-item {
+      color: var(--text-muted);
+      transition: color 0.15s;
+    }
+    .nav-link-item:hover, .nav-link-item.active {
+      color: var(--text);
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .theme-toggle-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: grid;
+      place-items: center;
+      background: var(--bg-surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .theme-toggle-btn:hover {
+      border-color: var(--text);
+    }
+    .btn-top-download {
+      background: var(--text);
+      color: var(--text-inverse);
+      font-size: 13.5px;
+      font-weight: 600;
+      padding: 0 16px;
+      height: 36px;
+      border-radius: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: opacity 0.15s;
+    }
+    .btn-top-download:hover {
+      opacity: 0.85;
+    }
+
+    .nav-subtabs {
+      background: var(--bg);
+      width: 100%;
+      transition: background-color 0.2s ease;
+    }
+    .nav-subtabs-inner {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      gap: 28px;
+      height: var(--tabs-h);
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .nav-subtabs-inner::-webkit-scrollbar {
+      display: none;
+    }
+
+    .subtab-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text-muted);
+      position: relative;
+      white-space: nowrap;
+      transition: color 0.15s;
+      cursor: pointer;
+    }
+    .subtab-item:hover {
+      color: var(--text);
+    }
+    .subtab-item.active {
+      color: var(--text);
+      font-weight: 700;
+    }
+    .subtab-item.active::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: var(--primary);
+    }
+
+    .docs-layout {
+      max-width: var(--max-w);
+      margin: 0 auto;
+      padding: 0 24px;
+      display: flex;
+      min-height: calc(100vh - var(--header-total-h));
+    }
+
+    .docs-sidebar {
+      width: var(--sidebar-w);
+      flex-shrink: 0;
+      position: sticky;
+      top: var(--header-total-h);
+      height: calc(100vh - var(--header-total-h));
+      overflow-y: auto;
+      padding: 24px 20px 48px 0;
+      border-right: 1px solid var(--border);
+      scrollbar-width: thin;
+      transition: border-color 0.2s ease;
+    }
+    .docs-sidebar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .docs-sidebar::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    .sidebar-group {
+      margin-bottom: 24px;
+    }
+    .sidebar-group-header {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-subtle);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding-left: 12px;
+    }
+    .sidebar-nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .sidebar-link {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 7px 12px;
+      font-size: 13.5px;
+      border-radius: 8px;
+      color: var(--text-muted);
+      transition: all 0.15s ease;
+    }
+    .sidebar-link:hover {
+      color: var(--text);
+      background: var(--bg-subtle);
+    }
+    .sidebar-link.active {
+      background: var(--primary-light);
+      color: var(--text);
+      font-weight: 600;
+    }
+    .sidebar-tag {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 6px;
+      background: var(--bg-muted);
+      color: var(--text-subtle);
+      text-transform: uppercase;
+    }
+
+    .docs-main {
+      flex: 1;
+      min-width: 0;
+      padding: 36px 48px 80px;
+      max-width: 860px;
+    }
+
+    .docs-toc {
+      width: var(--toc-w);
+      flex-shrink: 0;
+      position: sticky;
+      top: var(--header-total-h);
+      height: calc(100vh - var(--header-total-h));
+      overflow-y: auto;
+      padding: 24px 0 48px 24px;
+      border-left: 1px solid var(--border);
+      transition: border-color 0.2s ease;
+    }
+    .toc-title {
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .toc-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .toc-link {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.4;
+      display: block;
+      transition: color 0.15s;
+    }
+    .toc-link:hover, .toc-link.active {
+      color: var(--text);
+      font-weight: 700;
+    }
+    .toc-community-box {
+      margin-top: 32px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 13px;
+    }
+    .toc-community-link {
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .toc-community-link:hover {
+      color: var(--text);
+    }
+
+    .breadcrumbs {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-subtle);
+      margin-bottom: 18px;
+    }
+    .breadcrumbs a {
+      color: var(--text-muted);
+      text-decoration: none;
+      transition: color 0.15s ease;
+    }
+    .breadcrumbs a:hover {
+      color: var(--text);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+    }
+    .breadcrumbs .breadcrumb-sep {
+      color: var(--text-subtle);
+      user-select: none;
+    }
+    .breadcrumbs .breadcrumb-current {
+      color: var(--text);
+      font-weight: 700;
+    }
+
+    h1, h2, h3, h4, h5, h6, .doc-h1, .doc-h2, .doc-h3, .doc-h4 {
+      font-family: var(--font-display);
+    }
+
+    .doc-h1 {
+      font-size: 36px;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      line-height: 1.2;
+      color: var(--text);
+      margin-bottom: 14px;
+      scroll-margin-top: calc(var(--header-total-h) + 24px);
+    }
+    .doc-lead {
+      font-size: 17px;
+      line-height: 1.6;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+    }
+
+    .doc-h2 {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      margin-top: 56px;
+      margin-bottom: 16px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border-subtle);
+      scroll-margin-top: calc(var(--header-total-h) + 24px);
+    }
+    .doc-h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 32px;
+      margin-bottom: 12px;
+      scroll-margin-top: calc(var(--header-total-h) + 24px);
+    }
+    .doc-h4 {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-top: 24px;
+      margin-bottom: 8px;
+      scroll-margin-top: calc(var(--header-total-h) + 24px);
+    }
+    .doc-p {
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      font-size: 15px;
+      line-height: 1.7;
+    }
+    .doc-p strong {
+      color: var(--text);
+    }
+    .doc-p a {
+      color: var(--text);
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      font-weight: 600;
+    }
+
+    .approach-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 24px 0 32px;
+    }
+    .approach-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: all 0.2s ease;
+      box-shadow: var(--shadow-sm);
+    }
+    .approach-card:hover {
+      border-color: var(--text);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .approach-badge {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      color: var(--text);
+      letter-spacing: 0.05em;
+    }
+    .approach-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .approach-desc {
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    .callout {
+      border-radius: 14px;
+      padding: 16px 20px;
+      margin: 20px 0;
+      display: flex;
+      gap: 14px;
+      font-size: 14px;
+      line-height: 1.6;
+      background: var(--callout-bg);
+      border: 1px solid var(--callout-border);
+      color: var(--callout-text);
+    }
+    .callout strong {
+      color: var(--text);
+    }
+    .callout a {
+      text-decoration: underline;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .code-container {
+      background: var(--bg-code);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      margin: 20px 0 28px;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+    .code-header {
+      background: rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 0 16px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .code-tabs {
+      display: flex;
+      gap: 16px;
+      height: 100%;
+    }
+    .code-tab-btn {
+      background: none;
+      border: none;
+      color: #a1a1aa;
+      font-family: var(--font-sans);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      padding: 0 4px;
+      position: relative;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      transition: color 0.15s;
+    }
+    .code-tab-btn:hover {
+      color: #ffffff;
+    }
+    .code-tab-btn.active {
+      color: #ffffff;
+      font-weight: 600;
+    }
+    .code-tab-btn.active::after {
+      content: "";
+      position: absolute;
+      bottom: -1px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #ffffff;
+    }
+    .btn-copy {
+      background: none;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 6px;
+      color: #a1a1aa;
+      font-size: 12px;
+      padding: 4px 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .btn-copy:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+      border-color: #ffffff;
+    }
+    .btn-copy.copied {
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+      border-color: #ffffff;
+    }
+    .code-body {
+      padding: 18px 20px;
+      overflow-x: auto;
+      background: #000000;
+    }
+    .code-body pre {
+      margin: 0;
+    }
+    .code-body code {
+      font-family: var(--font-mono);
+      font-size: 13.5px;
+      line-height: 1.65;
+      color: #ffffff;
+    }
+
+    .doc-table-wrap {
+      overflow-x: auto;
+      margin: 24px 0 32px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+    }
+    .doc-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 14px;
+      text-align: left;
+    }
+    .doc-table th {
+      background: var(--bg-subtle);
+      color: var(--text);
+      font-weight: 700;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .doc-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-muted);
+    }
+    .doc-table tr:last-child td {
+      border-bottom: none;
+    }
+    .doc-table tr:hover td {
+      background: var(--bg-subtle);
+    }
+
+    .doc-media-card {
+      margin: 28px 0 36px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      background: var(--bg-card);
+      box-shadow: var(--shadow-md);
+    }
+    .doc-media-card img {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+    }
+    .doc-media-caption {
+      padding: 12px 16px;
+      font-size: 13px;
+      color: var(--text-subtle);
+      border-top: 1px solid var(--border-subtle);
+      background: var(--bg-surface);
+    }
+
+    /* OpenNami Desktop App Shell Mirror */
+    .oo-shell {
+      position: relative;
+      width: 100%;
+      margin: 24px 0 36px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: var(--shadow-md);
+      display: grid;
+      grid-template-columns: 200px minmax(0, 1fr);
+      min-height: 480px;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+    .oo-sidebar {
+      background: var(--bg-subtle);
+      border-right: 1px solid var(--border);
+      padding: 20px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .oo-sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 6px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+    }
+    .oo-sidebar-brand img {
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
+    }
+    .oo-sidebar-brand span {
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--text);
+      letter-spacing: -0.01em;
+    }
+    .oo-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .oo-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 38px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      text-align: left;
+      width: 100%;
+    }
+    .oo-nav-item:hover:not(.active) {
+      background: var(--bg-muted);
+      color: var(--text);
+    }
+    .oo-nav-item.active {
+      background: var(--text);
+      color: var(--text-inverse);
+      font-weight: 600;
+    }
+    .oo-content {
+      padding: 24px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      background: var(--bg-surface);
+    }
+    .oo-header {
+      margin-bottom: 2px;
+    }
+    .oo-kicker {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--text-subtle);
+      margin-bottom: 4px;
+    }
+    .oo-title {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.01em;
+      margin-bottom: 4px;
+    }
+    .oo-description {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .oo-field-label {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+      display: block;
+    }
+    .oo-input-shell {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0 12px;
+      height: 40px;
+    }
+    .oo-input-shell input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--text);
+      font-family: var(--font-sans);
+      font-size: 13px;
+      width: 100%;
+    }
+    .oo-chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .oo-chip {
+      padding: 5px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+      border: 1px solid var(--border);
+      background: var(--bg-subtle);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.15s;
+    }
+    .oo-chip:hover {
+      border-color: var(--text);
+      color: var(--text);
+    }
+    .oo-chip.selected {
+      border-color: var(--text);
+      background: var(--bg-muted);
+      color: var(--text);
+      font-weight: 600;
+    }
+    .oo-chip-platform {
+      font-size: 10.5px;
+      opacity: 0.7;
+    }
+    .oo-pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .oo-pill-btn {
+      padding: 6px 14px;
+      border-radius: 8px;
+      font-size: 12.5px;
+      border: 1px solid var(--border);
+      background: var(--bg-subtle);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .oo-pill-btn:hover {
+      color: var(--text);
+      border-color: var(--text);
+    }
+    .oo-pill-btn.active {
+      background: var(--text);
+      color: var(--text-inverse);
+      border-color: var(--text);
+      font-weight: 600;
+    }
+    .oo-primary-btn {
+      height: 42px;
+      border-radius: 10px;
+      background: var(--text);
+      color: var(--text-inverse);
+      font-weight: 700;
+      font-size: 13.5px;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .oo-primary-btn:hover {
+      opacity: 0.88;
+    }
+    .oo-ring-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      text-align: center;
+    }
+    .oo-ring-track {
+      fill: none;
+      stroke: var(--border);
+      stroke-width: 8;
+    }
+    .oo-ring-progress {
+      fill: none;
+      stroke: var(--text);
+      stroke-width: 8;
+      stroke-linecap: round;
+      transform: rotate(-90deg);
+      transform-origin: 50% 50%;
+      transition: stroke-dashoffset 0.3s ease;
+    }
+    .oo-ring-count {
+      font-size: 16px;
+      font-weight: 700;
+      fill: var(--text);
+      font-family: var(--font-sans);
+    }
+    .oo-ring-label {
+      font-size: 10.5px;
+      fill: var(--text-subtle);
+      font-family: var(--font-sans);
+    }
+    .oo-profile-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 14px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+    @media (max-width: 768px) {
+      .oo-shell {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+      .oo-sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        padding: 12px;
+      }
+      .oo-nav {
+        flex-direction: row;
+        overflow-x: auto;
+      }
+    }
+
+    .page-nav-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 64px;
+      padding-top: 32px;
+      border-top: 1px solid var(--border);
+    }
+    .page-nav-card {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 18px 22px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      transition: all 0.2s ease;
+      background: var(--bg-card);
+    }
+    .page-nav-card:hover {
+      border-color: var(--text);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-md);
+    }
+    .page-nav-sub {
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: var(--text-subtle);
+    }
+    .page-nav-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* Modal Search Box */
+    .search-modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      display: none;
+      place-items: center;
+      z-index: 100;
+    }
+    .search-modal-backdrop.open {
+      display: grid;
+    }
+    .search-modal {
+      width: 90%;
+      max-width: 580px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+    .search-input-wrap {
+      display: flex;
+      align-items: center;
+      padding: 16px 20px;
+      gap: 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .search-modal-input {
+      flex: 1;
+      background: none;
+      border: none;
+      outline: none;
+      font-family: var(--font-sans);
+      font-size: 16px;
+      color: var(--text);
+    }
+    .search-results-list {
+      max-height: 340px;
+      overflow-y: auto;
+      padding: 12px;
+      list-style: none;
+    }
+    .search-result-item {
+      padding: 10px 14px;
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .search-result-item:hover {
+      background: var(--bg-subtle);
+    }
+    .search-result-title {
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--text);
+    }
+    .search-result-desc {
+      font-size: 12.5px;
+      color: var(--text-muted);
+    }
+
+    /* Release Box & Changelog Styles */
+    .release-box {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 28px;
+      transition: border-color 0.15s ease;
+      scroll-margin-top: calc(var(--header-total-h) + 24px);
+    }
+    .release-box:hover {
+      border-color: var(--border-focus);
+    }
+    .release-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 18px;
+    }
+    .release-tag-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      background: var(--primary);
+      color: var(--text-inverse);
+    }
+    .release-date {
+      font-size: 12.5px;
+      color: var(--text-subtle);
+      margin-top: 4px;
+    }
+    .release-title {
+      font-size: 19px;
+      font-weight: 700;
+      color: var(--text);
+      margin-top: 6px;
+      letter-spacing: -0.01em;
+      scroll-margin-top: calc(var(--header-total-h) + 24px);
+    }
+    .release-section {
+      margin-bottom: 16px;
+    }
+    .release-section-title {
+      font-size: 14.5px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .release-list {
+      margin-left: 20px;
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.65;
+      display: grid;
+      gap: 5px;
+    }
+    .release-list code {
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      background: var(--bg-subtle);
+      border: 1px solid var(--border);
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: var(--text);
+    }
+
+    @media (max-width: 1024px) {
+      .docs-toc { display: none; }
+      .docs-main { padding: 32px 24px 60px; }
+      .approach-grid { grid-template-columns: 1fr; }
+      .search-trigger { width: 200px; }
+      .nav-links { gap: 12px; font-size: 13px; }
+    }
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .search-trigger { width: 140px; }
+      .page-nav-grid { grid-template-columns: 1fr; }
+      .docs-sidebar {
+        display: none;
+        position: fixed;
+        top: var(--header-total-h);
+        left: 0;
+        bottom: 0;
+        width: 280px;
+        background: var(--bg);
+        z-index: 45;
+        border-right: 1px solid var(--border);
+        box-shadow: var(--shadow-lg);
+        padding: 24px 20px 48px;
+        overflow-y: auto;
+      }
+      .docs-sidebar.open {
+        display: block;
+      }
+      .mobile-sidebar-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        color: var(--text);
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+      .mobile-sidebar-backdrop {
+        display: none;
+        position: fixed;
+        inset: 0;
+        top: var(--header-total-h);
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 40;
+      }
+      .mobile-sidebar-backdrop.open {
+        display: block;
+      }
+    }
+    @media (min-width: 769px) {
+      .mobile-sidebar-toggle {
+        display: none;
+      }
+      .mobile-sidebar-backdrop {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ==================== STICKY DOUBLE-ROW HEADER ==================== -->
+  <header class="nav-header">
+    <div class="nav-header-inner">
+      <div class="brand-group">
+        <button class="mobile-sidebar-toggle" id="mobileSidebarToggle" onclick="toggleMobileSidebar()" aria-label="Toggle navigation menu" title="Toggle menu">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
+        <a href="../../" class="brand-logo-link" aria-label="OmniGet Home">
+          <img src="../../static/loop.png" alt="OmniGet Logo" />
+          <span>OmniGet</span>
+        </a>
+        <span class="brand-badge">DOCS</span>
+      </div>
+
+      <div class="search-trigger" onclick="openSearchModal()">
+        <span style="display: flex; align-items: center; gap: 8px;">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.34-4.34" />
+  <circle cx="11" cy="11" r="8" /></svg>
+          <span>Search docs...</span>
+        </span>
+        <kbd class="search-kbd">Ctrl K</kbd>
+      </div>
+
+      <nav class="nav-links">
+        <a class="nav-link-item" href="../">Overview</a>
+        <a class="nav-link-item" href="../installation/">Installation</a>
+        <a class="nav-link-item" href="../courses/">Courses</a>
+        <a class="nav-link-item" href="../opennami/">OpenNami</a>
+        <a class="nav-link-item" href="../mcp/">MCP & AI</a>
+        <a class="nav-link-item active" href="../troubleshooting/">Fixes</a>
+        <a class="nav-link-item" href="../changelog/">Changelog</a>
+      </nav>
+
+      <div class="nav-actions">
+        <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Toggle light and dark mode" title="Toggle theme">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="themeIconSun" style="display: none;"><circle cx="12" cy="12" r="4" />
+  <path d="M12 2v2" />
+  <path d="M12 20v2" />
+  <path d="m4.93 4.93 1.41 1.41" />
+  <path d="m17.66 17.66 1.41 1.41" />
+  <path d="M2 12h2" />
+  <path d="M20 12h2" />
+  <path d="m6.34 17.66-1.41 1.41" />
+  <path d="m19.07 4.93-1.41 1.41" /></svg>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="themeIconMoon"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" /></svg>
+        </button>
+
+        <a class="btn-top-download" href="https://github.com/OpenSelena/omniget/releases/latest">
+          <span>Get App</span>
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14" />
+  <path d="m12 5 7 7-7 7" /></svg>
+        </a>
+      </div>
+    </div>
+
+    <div class="nav-subtabs">
+      <div class="nav-subtabs-inner" id="topSubtabs">
+        <a href="../" class="subtab-item">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5" />
+  <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09" />
+  <path d="M9 12a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.4 22.4 0 0 1-4 2z" />
+  <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 .05 5 .05" /></svg>
+          <span>Quickstart</span>
+        </a>
+        <a href="../installation/" class="subtab-item">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3" />
+  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+  <path d="m7 10 5 5 5-5" /></svg>
+          <span>Installation</span>
+        </a>
+        <a href="../mcp/" class="subtab-item">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20v2" />
+  <path d="M12 2v2" />
+  <path d="M17 20v2" />
+  <path d="M17 2v2" />
+  <path d="M2 12h2" />
+  <path d="M2 17h2" />
+  <path d="M2 7h2" />
+  <path d="M20 12h2" />
+  <path d="M20 17h2" />
+  <path d="M20 7h2" />
+  <path d="M7 20v2" />
+  <path d="M7 2v2" />
+  <rect x="4" y="4" width="16" height="16" rx="2" />
+  <rect x="8" y="8" width="8" height="8" rx="1" /></svg>
+          <span>MCP Server</span>
+        </a>
+        <a href="../courses/" class="subtab-item">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z" />
+  <path d="M22 10v6" />
+  <path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5" /></svg>
+          <span>38 Course Platforms</span>
+        </a>
+        <a href="../opennami/" class="subtab-item">
+          <svg class="icon icon-fill" viewBox="0 0 24 24" fill="currentColor"><title>Instagram</title><path d="M7.0301.084c-1.2768.0602-2.1487.264-2.911.5634-.7888.3075-1.4575.72-2.1228 1.3877-.6652.6677-1.075 1.3368-1.3802 2.127-.2954.7638-.4956 1.6365-.552 2.914-.0564 1.2775-.0689 1.6882-.0626 4.947.0062 3.2586.0206 3.6671.0825 4.9473.061 1.2765.264 2.1482.5635 2.9107.308.7889.72 1.4573 1.388 2.1228.6679.6655 1.3365 1.0743 2.1285 1.38.7632.295 1.6361.4961 2.9134.552 1.2773.056 1.6884.069 4.9462.0627 3.2578-.0062 3.668-.0207 4.9478-.0814 1.28-.0607 2.147-.2652 2.9098-.5633.7889-.3086 1.4578-.72 2.1228-1.3881.665-.6682 1.0745-1.3378 1.3795-2.1284.2957-.7632.4966-1.636.552-2.9124.056-1.2809.0692-1.6898.063-4.948-.0063-3.2583-.021-3.6668-.0817-4.9465-.0607-1.2797-.264-2.1487-.5633-2.9117-.3084-.7889-.72-1.4568-1.3876-2.1228C21.2982 1.33 20.628.9208 19.8378.6165 19.074.321 18.2017.1197 16.9244.0645 15.6471.0093 15.236-.005 11.977.0014 8.718.0076 8.31.0215 7.0301.0839m.1402 21.6932c-1.17-.0509-1.8053-.2453-2.2287-.408-.5606-.216-.96-.4771-1.3819-.895-.422-.4178-.6811-.8186-.9-1.378-.1644-.4234-.3624-1.058-.4171-2.228-.0595-1.2645-.072-1.6442-.079-4.848-.007-3.2037.0053-3.583.0607-4.848.05-1.169.2456-1.805.408-2.2282.216-.5613.4762-.96.895-1.3816.4188-.4217.8184-.6814 1.3783-.9003.423-.1651 1.0575-.3614 2.227-.4171 1.2655-.06 1.6447-.072 4.848-.079 3.2033-.007 3.5835.005 4.8495.0608 1.169.0508 1.8053.2445 2.228.408.5608.216.96.4754 1.3816.895.4217.4194.6816.8176.9005 1.3787.1653.4217.3617 1.056.4169 2.2263.0602 1.2655.0739 1.645.0796 4.848.0058 3.203-.0055 3.5834-.061 4.848-.051 1.17-.245 1.8055-.408 2.2294-.216.5604-.4763.96-.8954 1.3814-.419.4215-.8181.6811-1.3783.9-.4224.1649-1.0577.3617-2.2262.4174-1.2656.0595-1.6448.072-4.8493.079-3.2045.007-3.5825-.006-4.848-.0608M16.953 5.5864A1.44 1.44 0 1 0 18.39 4.144a1.44 1.44 0 0 0-1.437 1.4424M5.8385 12.012c.0067 3.4032 2.7706 6.1557 6.173 6.1493 3.4026-.0065 6.157-2.7701 6.1506-6.1733-.0065-3.4032-2.771-6.1565-6.174-6.1498-3.403.0067-6.156 2.771-6.1496 6.1738M8 12.0077a4 4 0 1 1 4.008 3.9921A3.9996 3.9996 0 0 1 8 12.0077"/></svg>
+          <span>OpenNami</span>
+        </a>
+        <a href="../changelog/" class="subtab-item">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3" /><circle cx="12" cy="12" r="9" /></svg>
+          <span>Changelog</span>
+        </a>
+        <a href="../troubleshooting/" class="subtab-item active">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z" /></svg>
+          <span>Troubleshooting</span>
+        </a>
+      </div>
+    </div>
+  </header>
+  <div class="mobile-sidebar-backdrop" id="mobileSidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
+  <!-- ==================== THREE-COLUMN LAYOUT ==================== -->
+  <div class="docs-layout">
+    <aside class="docs-sidebar">
+      <div class="sidebar-group">
+        <div class="sidebar-group-header">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10" />
+  <path d="m16.24 7.76-1.804 5.411a2 2 0 0 1-1.265 1.265L7.76 16.24l1.804-5.411a2 2 0 0 1 1.265-1.265z" /></svg>
+          <span>Overview</span>
+        </div>
+        <ul class="sidebar-nav-list">
+          <li>
+            <a href="../" class="sidebar-link">
+              <span>Quickstart Guide</span>
+              <span class="sidebar-tag">Start</span>
+            </a>
+          </li>
+          <li>
+            <a href="../installation/" class="sidebar-link">
+              <span>Installation Packages</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-group-header">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z" />
+  <path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12" />
+  <path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17" /></svg>
+          <span>Core Engines</span>
+        </div>
+        <ul class="sidebar-nav-list">
+          <li>
+            <a href="../opennami/" class="sidebar-link">
+              <span>OpenNami Engine</span>
+              <span class="sidebar-tag">Social</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-group-header">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v16" />
+  <path d="M20.001 19A2 2 0 0022 17V5a2 2 0 00-1.999-2L16 3.002A5 5 0 0012 5a5 5 0 00-4-2H4a2 2 0 00-2 2v12a2 2 0 001.999 2H8a5 5 0 014 2 5 5 0 014-2z" /></svg>
+          <span>Courses &amp; Study</span>
+        </div>
+        <ul class="sidebar-nav-list">
+          <li>
+            <a href="../courses/" class="sidebar-link">
+              <span>38 Course Platforms</span>
+              <span class="sidebar-tag">v0.10.5</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-group-header">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4l3 3" /><circle cx="12" cy="12" r="9" /></svg>
+          <span>Changelog &amp; Releases</span>
+        </div>
+        <ul class="sidebar-nav-list">
+          <li>
+            <a href="../changelog/" class="sidebar-link">
+              <span>Dedicated Changelog</span>
+              <span class="sidebar-tag">Latest</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-group-header">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z" />
+  <path d="M20 2v4" />
+  <path d="M22 4h-4" />
+  <circle cx="4" cy="20" r="2" /></svg>
+          <span>AI &amp; Agent Bridge</span>
+        </div>
+        <ul class="sidebar-nav-list">
+          <li>
+            <a href="../mcp/" class="sidebar-link">
+              <span>MCP Server (127.0.0.1)</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-group-header">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z" /></svg>
+          <span>System &amp; Fixes</span>
+        </div>
+        <ul class="sidebar-nav-list">
+          <li>
+            <a href="../troubleshooting/" class="sidebar-link active">
+              <span>Troubleshooting Hub</span>
+            </a>
+          </li>
+        </ul>
+      </div>
+      <div class="sidebar-group">
+        <div class="sidebar-group-header">
+          <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+  <polyline points="15 3 21 3 21 9" />
+  <line x1="10" y1="14" x2="21" y2="3" /></svg>
+          <span>Community &amp; Source</span>
+        </div>
+        <ul class="sidebar-nav-list">
+          <li>
+            <a href="https://github.com/OpenSelena/omniget" target="_blank" rel="noopener" class="sidebar-link">
+              <span>GitHub Repository</span>
+              <svg class="icon icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: auto; opacity: 0.5;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
+            </a>
+          </li>
+          <li>
+            <a href="https://t.me/omniget" target="_blank" rel="noopener" class="sidebar-link">
+              <span>Telegram Community</span>
+              <svg class="icon icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: auto; opacity: 0.5;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <main class="docs-main">
+      <div class="breadcrumbs">
+        <a href="../">Documentation</a>
+        <span class="breadcrumb-sep">/</span>
+        <a href="./">Troubleshooting</a>
+        <span class="breadcrumb-sep">/</span>
+        <span class="breadcrumb-current">System Fixes & Diagnostics</span>
+      </div>
+
+      <h1 class="doc-h1">System Troubleshooting & Diagnostic Guides</h1>
+      <p class="doc-lead">Step-by-step diagnostic and remediation guides for macOS Gatekeeper warnings, Linux WebKitGTK and GStreamer crashes, network rate limits, and authentication errors.</p>
+
+
+      <div class="doc-media-card">
+        <img src="../../assets/readme/settings.png" alt="OmniGet Troubleshooting & Settings" />
+        <div class="doc-media-caption">OmniGet Settings: Configure network timeouts, proxy settings, cookie vaults, and inspect diagnostic logs.</div>
+      </div>
+
+      <p class="doc-p">
+        Practical diagnostic and remediation steps for operating system permissions, Linux WebKitGTK and GStreamer crashes, network rate limits, and companion extension pairing issues.
+      </p>
+
+      <!-- SECTION 1 -->
+      <h2 class="doc-h2" id="logs-paths">1. Diagnostic Log & Data Paths</h2>
+      <p class="doc-p">
+        When reporting issues or debugging downloads, inspect the local application logs located in your system profile:
+      </p>
+
+      <div class="doc-table-wrap">
+        <table class="doc-table">
+          <thead>
+            <tr>
+              <th>Operating System</th>
+              <th>Application Data & SQLite Database Path</th>
+              <th>Diagnostic Log Files</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Windows</strong></td>
+              <td><code>%APPDATA%\OmniGet\</code><br/>(e.g. <code>C:\Users\&lt;Name&gt;\AppData\Roaming\OmniGet\</code>)</td>
+              <td><code>%LOCALAPPDATA%\OmniGet\logs\app.log</code></td>
+            </tr>
+            <tr>
+              <td><strong>Windows Portable</strong></td>
+              <td><code>&lt;ExeFolder&gt;\data\</code> (when <code>portable.txt</code> exists)</td>
+              <td><code>&lt;ExeFolder&gt;\data\logs\app.log</code></td>
+            </tr>
+            <tr>
+              <td><strong>macOS</strong></td>
+              <td><code>~/Library/Application Support/OmniGet/</code></td>
+              <td><code>~/Library/Logs/OmniGet/app.log</code></td>
+            </tr>
+            <tr>
+              <td><strong>Linux</strong></td>
+              <td><code>~/.config/OmniGet/</code></td>
+              <td><code>~/.local/share/OmniGet/logs/app.log</code></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- SECTION 2 -->
+      <h2 class="doc-h2" id="macos">2. macOS Gatekeeper ("App is damaged") Fix</h2>
+      <p class="doc-p">
+        When opening OmniGet for the first time on macOS, Gatekeeper may refuse to launch the binary, displaying a prompt stating the application is "damaged and should be moved to the Trash".
+      </p>
+
+      <div class="callout">
+        <svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-top: 2px;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3" />
+  <path d="M12 9v4" />
+  <path d="M12 17h.01" /></svg>
+        <div>
+          <strong>Root cause:</strong>
+          OmniGet is distributed as free open-source software and is not signed with a paid Apple Developer certificate. macOS automatically flags downloaded DMG files with the <code>com.apple.quarantine</code> attribute.
+        </div>
+      </div>
+
+      <p class="doc-p">
+        To clear this flag and run the app normally, execute the following commands in Terminal:
+      </p>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span style="font-size: 13px; font-weight: 600; color: #a1a1aa;">Terminal</span>
+          <button class="btn-copy" onclick="copyCodeSnippet(this)"><svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+  <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg><span>Copy</span></button>
+        </div>
+        <div class="code-body">
+<pre><code># Strip quarantine attribute:
+xattr -cr /Applications/omniget.app
+
+# Re-sign the app ad-hoc:
+codesign --force --deep --sign - /Applications/omniget.app</code></pre>
+        </div>
+      </div>
+
+      <!-- SECTION 3 -->
+      <h2 class="doc-h2" id="linux">3. Linux WebKitGTK & GStreamer Audio Fix</h2>
+      <p class="doc-p">
+        On Linux, OmniGet's desktop window uses WebKitGTK. WebKitGTK plays all media through GStreamer. If the required GStreamer audio sinks are missing, WebKitGTK <strong>aborts its own web process</strong> the moment any video or audio is mounted, resulting in an empty or crashed window.
+      </p>
+
+      <p class="doc-p">
+        Install the complete GStreamer plugin set to resolve this crash:
+      </p>
+
+      <div class="code-container">
+        <div class="code-header">
+          <span style="font-size: 13px; font-weight: 600; color: #a1a1aa;">Terminal</span>
+          <button class="btn-copy" onclick="copyCodeSnippet(this)"><svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
+  <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg><span>Copy</span></button>
+        </div>
+        <div class="code-body">
+<pre><code># Ubuntu / Debian / Linux Mint:
+sudo apt install gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-libav
+
+# Fedora / RHEL:
+sudo dnf install gstreamer1-plugins-good gstreamer1-plugins-bad-free gstreamer1-plugin-libav
+
+# Arch Linux:
+sudo pacman -S gst-plugins-good gst-plugins-bad gst-libav</code></pre>
+        </div>
+      </div>
+
+      <!-- SECTION 4 -->
+      <h2 class="doc-h2" id="network-rate-limits">4. Network, HTTP 403 & 429 Rate Limit Errors</h2>
+      <p class="doc-p">
+        If downloads fail or stall unexpectedly, common HTTP error codes indicate the underlying cause:
+      </p>
+
+      <ul style="margin-left: 20px; color: var(--text-muted); display: grid; gap: 10px; margin-bottom: 24px; font-size: 14.5px;">
+        <li>
+          <strong>HTTP 403 Forbidden:</strong> The site rejected the download token or session cookie. Open the page in your browser, click the OmniGet Companion Extension icon to push fresh cookies to the desktop app, and retry.
+        </li>
+        <li>
+          <strong>HTTP 429 Too Many Requests:</strong> You have hit the platform's request ceiling. Navigate to <strong>Settings &rarr; Network</strong>, reduce <strong>Concurrent downloads</strong> to <code>1</code> or <code>2</code>, and enable <strong>Adaptive Backoff</strong>.
+        </li>
+        <li>
+          <strong>Proxy & VPN Configuration:</strong> If your ISP throttles or blocks media hosts, configure an HTTP or SOCKS5 proxy in <strong>Settings &rarr; Network &rarr; Proxy</strong> (e.g. <code>socks5://127.0.0.1:1080</code>).
+        </li>
+      </ul>
+
+      <!-- SECTION 5 -->
+      <h2 class="doc-h2" id="extension-pairing">5. Browser Extension Pairing & Port 47720-47730</h2>
+      <p class="doc-p">
+        The OmniGet Companion Extension communicates with the desktop app over local loopback ports <code>47720</code> to <code>47730</code> (configured in <code>src-tauri/src/local_bridge.rs</code> with <code>SO_REUSEADDR</code> to survive fast restarts).
+      </p>
+
+      <ol style="margin-left: 20px; color: var(--text-muted); display: grid; gap: 8px; margin-bottom: 24px; font-size: 14.5px;">
+        <li>Ensure the OmniGet desktop application is running before syncing. You can verify the local listener in your browser by visiting <code>http://127.0.0.1:47720/v1/health</code>; it will return <code>{"ok":true,"version":"0.10.5"}</code>.</li>
+        <li>If port 47720 is occupied by another application, OmniGet automatically cycles through ports <code>47721</code> to <code>47730</code> and persists the bound port in <code>settings.json</code>.</li>
+        <li>Open the extension's Options page (right-click the extension icon in your browser &rarr; <strong>Options</strong>).</li>
+        <li>In OmniGet, navigate to <strong>Settings &rarr; Plugins &rarr; Browser extension</strong>, click <strong>Copy pairing token</strong>, paste it into the extension Options field, and click <strong>Verify Connection</strong>.</li>
+      </ol>
+
+      <!-- SECTION 6 -->
+      <h2 class="doc-h2" id="engine-integrity">6. yt-dlp & FFmpeg Integrity Verification</h2>
+      <p class="doc-p">
+        Every release bundles and verifies the latest stable versions of yt-dlp and FFmpeg:
+      </p>
+
+      <div class="doc-media-card">
+        <img src="../../assets/readme/downloads.png" alt="OmniGet Command Inspector" />
+        <div class="doc-media-caption">Downloads Inspector: Click any download card to view and edit the exact yt-dlp command executed by the core.</div>
+      </div>
+
+      <ul style="margin-left: 20px; color: var(--text-muted); display: grid; gap: 8px; font-size: 14.5px;">
+        <li><strong>SHA-256 Checksums:</strong> Binaries are verified against official cryptographic release hashes before execution.</li>
+        <li><strong>Zipapp Acceleration:</strong> When Python 3.10+ is available, yt-dlp runs as an in-memory zipapp, launching in under one second.</li>
+        <li><strong>Command Replay Inspector:</strong> Click on any completed or failed download in the Downloads list to inspect the exact flags executed, edit parameters, and retry.</li>
+      </ul>
+
+
+      <div class="page-nav-grid">
+        <a href="../opennami/" class="page-nav-card">
+          <span class="page-nav-sub">Previous Guide</span>
+          <span class="page-nav-title">
+            <span>&larr; OpenNami Social Archiver</span>
+          </span>
+        </a>
+        <a href="../changelog/" class="page-nav-card" style="text-align: right;">
+          <span class="page-nav-sub">Next Guide</span>
+          <span class="page-nav-title" style="justify-content: flex-end; gap: 8px;">
+            <span>Release Notes &amp; Changelog &rarr;</span>
+          </span>
+        </a>
+      </div>
+
+    </main>
+
+    <aside class="docs-toc">
+      <div class="toc-title">
+        <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 5h.01" />
+  <path d="M3 12h.01" />
+  <path d="M3 19h.01" />
+  <path d="M8 5h13" />
+  <path d="M8 12h13" />
+  <path d="M8 19h13" /></svg>
+        <span>On this page</span>
+      </div>
+      <ul class="toc-list" id="tocList">
+          <li><a href="#logs-paths" class="toc-link">1. Diagnostic Log & Data Paths</a></li>
+          <li><a href="#macos" class="toc-link">2. macOS Gatekeeper ('Damaged') Fix</a></li>
+          <li><a href="#linux" class="toc-link">3. Linux WebKitGTK & GStreamer Fix</a></li>
+          <li><a href="#network-rate-limits" class="toc-link">4. Network, HTTP 403 & 429 Errors</a></li>
+          <li><a href="#extension-pairing" class="toc-link">5. Browser Extension Pairing & Port 47720</a></li>
+          <li><a href="#engine-integrity" class="toc-link">6. yt-dlp & FFmpeg Integrity</a></li>
+      </ul>
+
+      <div class="toc-community-box">
+        <a href="https://github.com/OpenSelena/omniget" class="toc-community-link" target="_blank" rel="noopener">
+          <svg class="icon icon-fill icon-sm" viewBox="0 0 24 24" fill="currentColor"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+          <span>Edit page on GitHub</span>
+        </a>
+        <a href="https://t.me/OpenSelena" class="toc-community-link" target="_blank" rel="noopener">
+          <svg class="icon icon-fill icon-sm" viewBox="0 0 24 24" fill="currentColor"><title>Telegram</title><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+          <span>Ask in Telegram</span>
+        </a>
+      </div>
+    </aside>
+  </div>
+
+  <!-- SEARCH MODAL -->
+  <div class="search-modal-backdrop" id="searchBackdrop" onclick="closeSearchModal(event)">
+    <div class="search-modal" onclick="event.stopPropagation()">
+      <div class="search-input-wrap">
+        <svg class="icon icon-lg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.34-4.34" />
+  <circle cx="11" cy="11" r="8" /></svg>
+        <input type="text" class="search-modal-input" id="searchInput" placeholder="Search documentation..." autocomplete="off" />
+      </div>
+      <ul class="search-results-list" id="searchResults">
+        <li class="search-result-item" onclick="location.href='../'">
+          <span class="search-result-title">Quickstart Guide</span>
+          <span class="search-result-desc">Three modes: Visual desktop app, local MCP, and portable mode</span>
+        </li>
+        <li class="search-result-item" onclick="location.href='../installation/'">
+          <span class="search-result-title">Installation & OS Binaries</span>
+          <span class="search-result-desc">Windows, macOS Apple Silicon, and Linux packages</span>
+        </li>
+        <li class="search-result-item" onclick="location.href='../mcp/'">
+          <span class="search-result-title">Model Context Protocol (MCP) Server</span>
+          <span class="search-result-desc">Local AI agent tools for Claude Code, Cursor, and VS Code</span>
+        </li>
+        <li class="search-result-item" onclick="location.href='../courses/'">
+          <span class="search-result-title">38 Online Course Platforms</span>
+          <span class="search-result-desc">Hotmart, Udemy, Rocketseat, Kajabi, and Kiwify integration</span>
+        </li>
+        <li class="search-result-item" onclick="location.href='../opennami/'">
+          <span class="search-result-title">OpenNami Social Archiver</span>
+          <span class="search-result-desc">Bulk Instagram, TikTok, and X profile downloader</span>
+        </li>
+        <li class="search-result-item" onclick="location.href='../troubleshooting/'">
+          <span class="search-result-title">System Troubleshooting</span>
+          <span class="search-result-desc">macOS Gatekeeper, Linux WebKitGTK, and diagnostic logs</span>
+        </li>
+        <li class="search-result-item" onclick="location.href='../#privacy'">
+          <span class="search-result-title">Privacy Policy &amp; Zero Telemetry</span>
+          <span class="search-result-desc">Local SQLite storage, loopback security, and DRM non-circumvention</span>
+        </li>
+        <li class="search-result-item" onclick="location.href='../changelog/'">
+          <span class="search-result-title">Release Notes &amp; Changelog</span>
+          <span class="search-result-desc">Version v0.10.5 updates, static plugins, and recent fixes</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <script>
+    function updateThemeIcons(theme) {
+      const sun = document.getElementById('themeIconSun');
+      const moon = document.getElementById('themeIconMoon');
+      if (!sun || !moon) return;
+      if (theme === 'dark') {
+        sun.style.display = 'inline-block';
+        moon.style.display = 'none';
+      } else {
+        sun.style.display = 'none';
+        moon.style.display = 'inline-block';
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.contains('dark') || 
+                     document.documentElement.getAttribute('data-theme') === 'dark';
+      const target = isDark ? 'light' : 'dark';
+      if (target === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.documentElement.setAttribute('data-theme', 'dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.setAttribute('data-theme', 'light');
+      }
+      localStorage.setItem('omniget_docs_theme', target);
+      localStorage.setItem('theme', target);
+      updateThemeIcons(target);
+    }
+
+    function toggleMobileSidebar() {
+      const sidebar = document.querySelector('.docs-sidebar');
+      const backdrop = document.getElementById('mobileSidebarBackdrop');
+      if (sidebar) sidebar.classList.toggle('open');
+      if (backdrop) backdrop.classList.toggle('open');
+    }
+
+    function closeMobileSidebar() {
+      const sidebar = document.querySelector('.docs-sidebar');
+      const backdrop = document.getElementById('mobileSidebarBackdrop');
+      if (sidebar) sidebar.classList.remove('open');
+      if (backdrop) backdrop.classList.remove('open');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const isDark = document.documentElement.classList.contains('dark') ||
+                     document.documentElement.getAttribute('data-theme') === 'dark';
+      updateThemeIcons(isDark ? 'dark' : 'light');
+
+      if (location.protocol === 'file:') {
+        document.querySelectorAll('a[href]').forEach(a => {
+          let h = a.getAttribute('href');
+          if (h && h.endsWith('/') && !h.startsWith('http') && !h.startsWith('#')) {
+            a.setAttribute('href', h + 'index.html');
+          }
+        });
+        document.querySelectorAll('.search-result-item[onclick]').forEach(item => {
+          let oc = item.getAttribute('onclick');
+          if (oc && oc.includes("location.href='")) {
+            item.setAttribute('onclick', oc.replace("/'", "/index.html'"));
+          }
+        });
+      }
+
+      document.querySelectorAll('.sidebar-link').forEach(link => {
+        link.addEventListener('click', closeMobileSidebar);
+      });
+    });
+
+    function switchCodeTab(btn, tabId) {
+      const container = btn.closest('.code-container');
+      if (!container) return;
+      container.querySelectorAll('.code-tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      container.querySelectorAll('.code-body pre').forEach(pre => {
+        pre.style.display = (pre.id === tabId) ? 'block' : 'none';
+      });
+    }
+
+    function copyCodeSnippet(btn) {
+      const container = btn.closest('.code-container');
+      if (!container) return;
+      const pres = Array.from(container.querySelectorAll('.code-body pre'));
+      const activePre = pres.find(p => window.getComputedStyle(p).display !== 'none') || pres[0];
+      if (!activePre) return;
+
+      const code = activePre.querySelector('code');
+      const text = (code ? code.innerText : activePre.innerText).trim();
+      const span = btn.querySelector('span');
+      const origText = span ? span.textContent : 'Copy';
+      const origSvg = btn.querySelector('svg') ? btn.querySelector('svg').outerHTML : '';
+      const checkSvg = '<svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+
+      const showSuccess = () => {
+        if (span) span.textContent = 'Copied!';
+        btn.classList.add('copied');
+        const curSvg = btn.querySelector('svg');
+        if (curSvg) curSvg.outerHTML = checkSvg;
+        setTimeout(() => {
+          if (span) span.textContent = origText;
+          btn.classList.remove('copied');
+          const nowSvg = btn.querySelector('svg');
+          if (nowSvg && origSvg) nowSvg.outerHTML = origSvg;
+        }, 2000);
+      };
+
+      const execCopy = () => {
+        try {
+          const ta = document.createElement('textarea');
+          ta.value = text;
+          ta.style.top = '0';
+          ta.style.left = '0';
+          ta.style.position = 'fixed';
+          ta.style.width = '2em';
+          ta.style.height = '2em';
+          ta.style.padding = '0';
+          ta.style.border = 'none';
+          ta.style.outline = 'none';
+          ta.style.boxShadow = 'none';
+          ta.style.background = 'transparent';
+          ta.setAttribute('readonly', '');
+          document.body.appendChild(ta);
+          ta.focus();
+          ta.select();
+          ta.setSelectionRange(0, ta.value.length);
+          const ok = document.execCommand('copy');
+          document.body.removeChild(ta);
+          return ok;
+        } catch (e) {
+          return false;
+        }
+      };
+
+      if (location.protocol === 'file:') {
+        execCopy();
+        showSuccess();
+      } else if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(text)
+          .then(showSuccess)
+          .catch(() => {
+            execCopy();
+            showSuccess();
+          });
+      } else {
+        execCopy();
+        showSuccess();
+      }
+    }
+
+    function openSearchModal() {
+      const modal = document.getElementById('searchBackdrop');
+      if (modal) {
+        modal.classList.add('open');
+        setTimeout(() => {
+          const inp = document.getElementById('searchInput');
+          if (inp) inp.focus();
+        }, 50);
+      }
+    }
+
+    function closeSearchModal(e) {
+      const modal = document.getElementById('searchBackdrop');
+      if (modal) modal.classList.remove('open');
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        openSearchModal();
+      }
+      if (e.key === 'Escape') {
+        closeSearchModal();
+      }
+    });
+
+    const sInput = document.getElementById('searchInput');
+    if (sInput) {
+      sInput.addEventListener('input', (e) => {
+        const q = e.target.value.toLowerCase();
+        document.querySelectorAll('#searchResults .search-result-item').forEach(item => {
+          const t = item.textContent.toLowerCase();
+          item.style.display = t.includes(q) ? 'flex' : 'none';
+        });
+      });
+    }
+
+  </script>
+</body>
+</html>
