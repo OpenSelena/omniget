@@ -1,0 +1,2152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>OmniGet — Universal Downloader & Media Player for Desktop</title>
+  <meta name="description" content="OmniGet is a free, open-source desktop app for Windows, macOS, and Linux. Download Udemy courses, YouTube videos, music, books, and 1,800+ sites with no command line." />
+  <meta name="author" content="OpenSelena, igect" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="OmniGet" />
+  <meta property="og:title" content="OmniGet — Download Courses, Videos, Music & Books" />
+  <meta property="og:description" content="Free, open-source desktop downloader & player. Supports 1,800+ sites, Udemy, Hotmart, Bilibili 4K, EPUB/PDF reader, Telegram uploader, and OpenNami social archiver under GPL-3.0." />
+  <meta property="og:image" content="https://omniget.nav.bd/assets/readme/home.png" />
+  <meta property="og:url" content="https://omniget.nav.bd/" />
+
+  <!-- Canonical & Search Crawlers -->
+  <link rel="canonical" href="https://omniget.nav.bd/" />
+  <meta name="robots" content="index, follow" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="256x256" href="/static/favicon.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/static/favicon.png" />
+
+  <!-- Google Structured Data (JSON-LD) for Brand Name & Search Snippets -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "OmniGet",
+    "alternateName": ["OmniGet Downloader", "OpenSelena OmniGet"],
+    "url": "https://omniget.nav.bd/"
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "OmniGet",
+    "operatingSystem": "Windows, macOS, Linux",
+    "applicationCategory": "MultimediaApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    },
+    "description": "Free and open-source universal desktop downloader and media player for Windows, macOS, and Linux.",
+    "downloadUrl": "https://omniget.nav.bd/#downloads",
+    "url": "https://omniget.nav.bd/",
+    "license": "https://www.gnu.org/licenses/gpl-3.0.html",
+    "author": {
+      "@type": "Organization",
+      "name": "OpenSelena",
+      "url": "https://github.com/OpenSelena"
+    }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "itemListElement": [
+      {
+        "@type": "SiteNavigationElement",
+        "position": 1,
+        "name": "Downloads",
+        "description": "Download OmniGet for Windows, macOS, and Linux",
+        "url": "https://omniget.nav.bd/#downloads"
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "position": 2,
+        "name": "OpenNami",
+        "description": "Social media archiver and bulk downloader for Instagram, TikTok, and X",
+        "url": "https://omniget.nav.bd/#opennami"
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "position": 3,
+        "name": "Release Notes",
+        "description": "Changelog and release notes for the latest OmniGet versions",
+        "url": "https://omniget.nav.bd/#releasenotes"
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "position": 4,
+        "name": "FAQ",
+        "description": "Frequently asked questions regarding OmniGet features and formats",
+        "url": "https://omniget.nav.bd/#faq"
+      },
+      {
+        "@type": "SiteNavigationElement",
+        "position": 5,
+        "name": "GitHub Repository",
+        "description": "Open source repository, source code, and community discussions on GitHub",
+        "url": "https://github.com/OpenSelena/omniget"
+      }
+    ]
+  }
+  </script>
+
+  <!-- Google Fonts: Inter, Space Grotesk, JetBrains Mono, Fira Code -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Official Real Web Icon Library (Lucide CDN, version-pinned) -->
+  <script src="https://unpkg.com/lucide@0.474.0/dist/umd/lucide.min.js"></script>
+
+  <style>
+    /* ==========================================================================
+       PURE LIGHT THEME DESIGN SYSTEM (HIGH CONTRAST & PREMIUM TYPOGRAPHY)
+       ========================================================================== */
+    :root {
+      --brand-orange: #FF7D38;
+      --brand-orange-hover: #ff9457;
+      --brand-blue: #0284c7;
+      --brand-emerald: #10b981;
+
+      --font-display: 'Space Grotesk', -apple-system, sans-serif;
+      --font-body: 'Inter', -apple-system, sans-serif;
+      --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+      --radius-sm: 10px;
+      --radius-md: 16px;
+      --radius-lg: 24px;
+      --radius-pill: 9999px;
+
+      --transition-fast: 0.15s ease;
+      --transition-smooth: 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+
+      /* Pure Light Mode Tokens */
+      --bg-page: #f8fafc;
+      --bg-nav: rgba(255, 255, 255, 0.92);
+      --bg-card: #ffffff;
+      --bg-card-hover: #f1f5f9;
+      --bg-code: #0a0f1d;
+
+      --text-head: #0f172a;
+      --text-body: #334155;
+      --text-muted: #475569;
+      --text-dim: #64748b;
+
+      --border-line: #e2e8f0;
+      --border-glow: rgba(255, 125, 56, 0.4);
+      --shadow-ambient: rgba(15, 23, 42, 0.06);
+
+      --faq-bg: #ffffff;
+      --faq-hover: #f8fafc;
+      --faq-ans-bg: #f1f5f9;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      background-color: var(--bg-page);
+      color: var(--text-body);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      /* NOTE: no global text-align here — components below set their own alignment
+         explicitly via .text-center, so nothing needs "!important" overrides. */
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* Utility: explicit centering, applied only where actually wanted */
+    .text-center { text-align: center; }
+
+    /* Floating Pill Header Navbar */
+    .header-nav {
+      position: fixed;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      width: calc(100% - 32px);
+      max-width: 1020px;
+      background: var(--bg-nav);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border-line);
+      border-radius: var(--radius-pill);
+      padding: 8px 24px;
+      box-shadow: 0 10px 30px var(--shadow-ambient);
+    }
+
+    .nav-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: relative;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--text-head);
+      cursor: pointer;
+      background: none;
+      border: none;
+    }
+
+    .nav-brand img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      list-style: none;
+    }
+
+    .nav-link {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px 12px;
+      border-radius: var(--radius-pill);
+      transition: var(--transition-fast);
+      background: none;
+      border: none;
+      font-family: inherit;
+    }
+
+    .nav-link:hover, .nav-link.active {
+      color: var(--text-head);
+      background: rgba(15, 23, 42, 0.05);
+    }
+
+    .nav-link:focus-visible,
+    .nav-brand:focus-visible,
+    .faq-question:focus-visible,
+    .demo-tab-btn:focus-visible,
+    .oo-nav-item:focus-visible,
+    .oo-pill-btn:focus-visible,
+    .oo-chip:focus-visible,
+    .mobile-menu-toggle:focus-visible {
+      outline: 2px solid var(--brand-orange);
+      outline-offset: 2px;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    /* Mobile hamburger toggle (hidden on desktop) */
+    .mobile-menu-toggle {
+      display: none;
+      background: none;
+      border: 1px solid var(--border-line);
+      border-radius: var(--radius-pill);
+      width: 38px;
+      height: 38px;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-head);
+    }
+
+    /* Mobile dropdown panel for nav links */
+    .mobile-nav-panel {
+      display: none;
+      position: absolute;
+      top: calc(100% + 10px);
+      left: 0;
+      right: 0;
+      background: var(--bg-card);
+      border: 1px solid var(--border-line);
+      border-radius: var(--radius-md);
+      box-shadow: 0 10px 30px var(--shadow-ambient);
+      padding: 8px;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .mobile-nav-panel.open {
+      display: flex;
+    }
+
+    .mobile-nav-panel .nav-link {
+      text-align: left;
+      width: 100%;
+      padding: 10px 14px;
+    }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      height: 38px;
+      padding: 0 18px;
+      font-family: var(--font-body);
+      font-size: 13.5px;
+      font-weight: 600;
+      border-radius: var(--radius-pill);
+      cursor: pointer;
+      border: 1px solid transparent;
+      transition: var(--transition-fast);
+      user-select: none;
+    }
+
+    .btn-primary {
+      background: var(--brand-orange);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(255, 125, 56, 0.3);
+    }
+
+    .btn-primary:hover {
+      background: var(--brand-orange-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: #ffffff;
+      color: var(--text-head);
+      border: 1px solid var(--border-line);
+      box-shadow: 0 2px 6px var(--shadow-ambient);
+    }
+
+    .btn-secondary:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
+    }
+
+    /* Tab Page Views Switcher */
+    .page-tab-content {
+      display: none;
+    }
+
+    .page-tab-content.active {
+      display: block;
+      animation: pageFadeIn 0.25s ease-out;
+    }
+
+    @keyframes pageFadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Hero Section */
+    .hero-section {
+      padding-top: 130px;
+      padding-bottom: 50px;
+    }
+
+    .hero-pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255, 125, 56, 0.1);
+      border: 1px solid rgba(255, 125, 56, 0.25);
+      color: var(--brand-orange);
+      padding: 4px 14px;
+      border-radius: var(--radius-pill);
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+
+    .hero-headline {
+      font-family: var(--font-display);
+      font-size: 3.2rem;
+      font-weight: 700;
+      line-height: 1.15;
+      letter-spacing: -0.03em;
+      color: var(--text-head);
+      max-width: 820px;
+      margin: 0 auto 20px;
+    }
+
+    .hero-headline span {
+      color: var(--brand-orange);
+    }
+
+    .hero-subhead {
+      font-size: 1.15rem;
+      color: var(--text-muted);
+      max-width: 620px;
+      margin: 0 auto 32px;
+      line-height: 1.6;
+    }
+
+    .hero-cta-group {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .hero-platform-sub {
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-bottom: 40px;
+    }
+
+    /* Tabbed Showcase Frame */
+    .demo-tab-bar {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-line);
+      padding: 6px;
+      border-radius: var(--radius-pill);
+      width: fit-content;
+      margin: 0 auto 24px;
+      box-shadow: 0 4px 12px var(--shadow-ambient);
+      flex-wrap: wrap;
+    }
+
+    .demo-tab-btn {
+      padding: 8px 18px;
+      border-radius: var(--radius-pill);
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: var(--transition-fast);
+      font-family: inherit;
+    }
+
+    .demo-tab-btn.active {
+      background: var(--brand-orange);
+      color: #ffffff;
+    }
+
+    .demo-showcase-frame {
+      max-width: 960px;
+      margin: 0 auto;
+      background: var(--bg-card);
+      border: 1px solid var(--border-line);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: 0 20px 50px var(--shadow-ambient);
+    }
+
+    .demo-frame-bar {
+      background: #f1f5f9;
+      border-bottom: 1px solid var(--border-line);
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .demo-pane {
+      display: none;
+    }
+
+    .demo-pane.active {
+      display: block;
+    }
+
+    .demo-pane img {
+      width: 100%;
+      height: auto;
+      display: block;
+      cursor: pointer;
+    }
+
+    /* Grid Sections */
+    .section-wrap {
+      padding: 60px 0;
+      border-top: 1px solid var(--border-line);
+    }
+
+    .section-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .section-title {
+      font-family: var(--font-display);
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: var(--text-head);
+      letter-spacing: -0.02em;
+    }
+
+    .section-desc {
+      font-size: 1rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+    }
+
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-line);
+      border-radius: var(--radius-md);
+      padding: 26px;
+      box-shadow: 0 4px 16px var(--shadow-ambient);
+      transition: var(--transition-fast);
+      text-align: left;
+    }
+
+    .feature-card:hover {
+      background: var(--bg-card-hover);
+      border-color: var(--brand-orange);
+      transform: translateY(-2px);
+    }
+
+    /* Distinct Tinted Icon Boxes */
+    .icon-box {
+      width: 44px;
+      height: 44px;
+      border-radius: var(--radius-sm);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+
+    .icon-box i {
+      width: 22px;
+      height: 22px;
+      stroke-width: 2.2;
+    }
+
+    .icon-purple { background: #f3e8ff; border: 1px solid #d8b4fe; color: #7e22ce; }
+    .icon-amber { background: #fef3c7; border: 1px solid #fde047; color: #b45309; }
+    .icon-red { background: #ffe4e6; border: 1px solid #fecdd3; color: #be123c; }
+    .icon-cyan { background: #e0f2fe; border: 1px solid #bae6fd; color: #0369a1; }
+    .icon-emerald { background: #dcfce7; border: 1px solid #86efac; color: #15803d; }
+    .icon-fuchsia { background: #fae8ff; border: 1px solid #f5d0fe; color: #a21caf; }
+
+    .feature-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-head);
+      margin-bottom: 8px;
+    }
+
+    .feature-card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Release Notes Cards */
+    .release-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-line);
+      border-radius: var(--radius-lg);
+      padding: 32px;
+      box-shadow: 0 4px 20px var(--shadow-ambient);
+      margin-top: 20px;
+      text-align: left;
+    }
+
+    .release-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-line);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .release-badge {
+      background: rgba(255, 125, 56, 0.12);
+      border: 1px solid rgba(255, 125, 56, 0.3);
+      color: var(--brand-orange);
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .release-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+    }
+
+    .release-item h4 {
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--text-head);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .release-item ul {
+      list-style-type: disc;
+      padding-left: 20px;
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    .release-item li {
+      margin-bottom: 6px;
+    }
+
+    /* Condensed release summary shown on Home (links out to full notes) */
+    .release-summary-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-line);
+      border-radius: var(--radius-lg);
+      padding: 28px 32px;
+      box-shadow: 0 4px 20px var(--shadow-ambient);
+      margin-top: 20px;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .release-summary-card ul {
+      list-style-type: disc;
+      padding-left: 20px;
+      font-size: 13.5px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      margin-top: 10px;
+    }
+
+    /* OpenOmni High-Contrast Crisp Badge */
+    .openomni-badge {
+      font-family: var(--font-body);
+      font-size: 12px;
+      font-weight: 600;
+      background: #e0f2fe;
+      color: #0284c7;
+      border: 1px solid #7dd3fc;
+      padding: 4px 14px;
+      border-radius: var(--radius-pill);
+      display: inline-block;
+      margin-bottom: 14px;
+      letter-spacing: 0.01em;
+    }
+
+    .demo-disclaimer-badge {
+      font-family: var(--font-mono);
+      font-size: 11.5px;
+      font-weight: 600;
+      background: #fef3c7;
+      color: #92400e;
+      border: 1px solid #fde047;
+      padding: 5px 12px;
+      border-radius: var(--radius-pill);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin: 14px auto 0;
+      width: fit-content;
+    }
+
+    /* ==========================================================================
+       OPEN NAMI LIVE APP PREVIEW (DESKTOP SHELL MIRROR)
+       ========================================================================== */
+    .oo-shell {
+      position: relative;
+      max-width: 920px;
+      margin: 0 auto 40px;
+      width: 100%;
+      text-align: left;
+      background: var(--bg-card);
+      border: 1px solid var(--border-line);
+      border-radius: 20px;
+      box-shadow: 0 20px 48px -16px rgba(15, 23, 42, 0.08), 0 1px 3px rgba(15, 23, 42, 0.04);
+      display: grid;
+      grid-template-columns: 210px minmax(0, 1fr);
+      min-height: 520px;
+      overflow: hidden;
+      box-sizing: border-box;
+    }
+
+    .oo-sidebar {
+      background: #f8fafc;
+      border-right: 1px solid var(--border-line);
+      padding: 24px 14px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .oo-sidebar-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 8px 14px;
+      border-bottom: 1px solid var(--border-line);
+    }
+
+    .oo-sidebar-brand img {
+      width: 26px;
+      height: 26px;
+      object-fit: contain;
+    }
+
+    .oo-sidebar-brand span {
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--text-head);
+      letter-spacing: -0.01em;
+    }
+
+    .oo-nav {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .oo-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-height: 42px;
+      padding: 8px 12px;
+      border-radius: 10px;
+      font-family: var(--font-body);
+      font-size: 13.5px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-align: left;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      transition: background 0.15s ease, color 0.15s ease;
+      width: 100%;
+    }
+
+    .oo-nav-item:hover:not(.active) {
+      background: #edf2f7;
+      color: var(--text-head);
+    }
+
+    .oo-nav-item.active {
+      background: var(--brand-blue);
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 2px 8px -1px rgba(2, 132, 199, 0.35);
+    }
+
+    .oo-nav-icon {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .oo-nav-item.active .oo-nav-icon {
+      filter: brightness(0) invert(1);
+    }
+
+    .oo-content {
+      padding: 32px 36px;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      background: #ffffff;
+    }
+
+    .oo-header {
+      margin-bottom: 4px;
+    }
+
+    .oo-kicker {
+      margin: 0 0 4px;
+      color: var(--brand-orange);
+      font-size: 11.5px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+
+    .oo-title {
+      font-family: var(--font-display);
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: var(--text-head);
+      margin: 0;
+    }
+
+    .oo-description {
+      margin: 6px 0 0;
+      color: var(--text-muted);
+      font-size: 13.5px;
+      line-height: 1.5;
+    }
+
+    .oo-field-label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-head);
+      margin-bottom: 8px;
+    }
+
+    .oo-input-shell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: #f8fafc;
+      border: 1px solid var(--border-line);
+      border-radius: var(--radius-sm);
+      padding: 0 14px;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .oo-input-shell:focus-within {
+      border-color: var(--brand-blue);
+      box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
+      background: #ffffff;
+    }
+
+    .oo-input-shell input {
+      flex: 1;
+      padding: 11px 0;
+      background: transparent;
+      border: none;
+      color: var(--text-head);
+      font-size: 13.5px;
+      outline: none;
+      font-family: inherit;
+    }
+
+    .oo-chip-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .oo-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 999px;
+      border: 1px solid var(--border-line);
+      background: #f8fafc;
+      color: var(--text-head);
+      font-size: 12px;
+      cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease;
+      font-family: inherit;
+    }
+
+    .oo-chip:hover {
+      border-color: var(--brand-blue);
+      background: #ffffff;
+    }
+
+    .oo-chip.selected {
+      background: var(--brand-blue);
+      border-color: var(--brand-blue);
+      color: #ffffff;
+      font-weight: 600;
+      box-shadow: 0 2px 8px -1px rgba(2, 132, 199, 0.35);
+    }
+
+    .oo-chip-platform {
+      font-size: 10.5px;
+      opacity: 0.8;
+    }
+
+    .oo-pill-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .oo-pill-btn {
+      padding: 7px 15px;
+      border-radius: 999px;
+      border: 1px solid var(--border-line);
+      background: #f8fafc;
+      color: var(--text-body);
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: border-color 0.15s ease, background 0.15s ease;
+      font-family: inherit;
+    }
+
+    .oo-pill-btn:hover {
+      border-color: var(--brand-blue);
+      background: #ffffff;
+    }
+
+    .oo-pill-btn.active {
+      background: var(--brand-blue);
+      border-color: var(--brand-blue);
+      color: #ffffff;
+      box-shadow: 0 2px 8px -1px rgba(2, 132, 199, 0.35);
+      font-weight: 600;
+    }
+
+    .oo-primary-btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-weight: 600;
+      font-size: 13.5px;
+      cursor: pointer;
+      background: var(--brand-blue);
+      color: #ffffff;
+      box-shadow: 0 4px 14px -3px rgba(2, 132, 199, 0.4);
+      transition: transform 0.12s ease, box-shadow 0.12s ease, background 0.15s ease;
+      font-family: inherit;
+    }
+
+    .oo-primary-btn:hover {
+      background: #0274b3;
+      box-shadow: 0 6px 20px -4px rgba(2, 132, 199, 0.5);
+    }
+
+    .oo-primary-btn:active {
+      transform: scale(0.99);
+    }
+
+    .oo-profile-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #f8fafc;
+      border: 1px solid var(--border-line);
+      padding: 11px 16px;
+      border-radius: 12px;
+      transition: border-color 0.15s ease;
+    }
+
+    .oo-profile-card:hover {
+      border-color: #cbd5e1;
+    }
+
+    /* Live Progress Ring Widget (Mirror of DownloadManager.svelte SVG Ring) */
+    .oo-ring-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 10px;
+    }
+
+    .oo-ring-track {
+      fill: none;
+      stroke: #f1f5f9;
+      stroke-width: 8;
+    }
+
+    .oo-ring-progress {
+      fill: none;
+      stroke: var(--brand-blue);
+      stroke-width: 8;
+      stroke-linecap: round;
+      transform: rotate(-90deg);
+      transform-origin: 60px 60px;
+      transition: stroke-dashoffset 0.35s ease;
+    }
+
+    .oo-ring-count {
+      font-size: 17px;
+      font-weight: 700;
+      fill: var(--text-head);
+    }
+
+    .oo-ring-label {
+      font-size: 11px;
+      fill: var(--text-muted);
+    }
+
+    @media (max-width: 768px) {
+      .oo-shell {
+        grid-template-columns: 1fr;
+        min-height: auto;
+      }
+      .oo-sidebar {
+        border-right: none;
+        border-bottom: 1px solid var(--border-line);
+        padding: 12px;
+      }
+      .oo-sidebar-brand {
+        display: none;
+      }
+      .oo-nav {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+      }
+      .oo-nav-item {
+        justify-content: center;
+        padding: 8px 6px;
+        font-size: 12px;
+      }
+      .oo-content {
+        padding: 24px 18px;
+      }
+    }
+
+    /* Downloads Page */
+    .download-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      margin-top: 30px;
+    }
+
+    .dl-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-line);
+      border-radius: var(--radius-md);
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      text-align: center;
+      box-shadow: 0 4px 16px var(--shadow-ambient);
+      transition: var(--transition-fast);
+    }
+
+    .dl-card:hover {
+      border-color: var(--brand-orange);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px var(--shadow-ambient);
+    }
+
+    .dl-card-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+    }
+
+    .dl-card h3 {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--text-head);
+      margin-bottom: 6px;
+    }
+
+    .dl-card p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+    }
+
+    .dl-os-icon {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px auto;
+      background: none;
+      border: none;
+      box-shadow: none;
+    }
+
+    /* FAQ Accordion */
+    .faq-wrap {
+      max-width: 780px;
+      margin: 30px auto 0;
+    }
+
+    .faq-box {
+      background: var(--faq-bg);
+      border: 1px solid var(--border-line);
+      border-radius: var(--radius-sm);
+      margin-bottom: 12px;
+      overflow: hidden;
+      transition: var(--transition-fast);
+      box-shadow: 0 2px 8px var(--shadow-ambient);
+    }
+
+    .faq-box:hover {
+      background: var(--faq-hover);
+      border-color: var(--brand-orange);
+    }
+
+    .faq-question {
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 18px 22px;
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-head);
+      cursor: pointer;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      user-select: none;
+      text-align: left;
+    }
+
+    .faq-icon-chevron {
+      color: var(--brand-orange);
+      transition: transform var(--transition-fast);
+      font-size: 12px;
+      flex-shrink: 0;
+    }
+
+    .faq-box.active .faq-icon-chevron {
+      transform: rotate(180deg);
+    }
+
+    .faq-answer {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.25s ease;
+      background: var(--faq-ans-bg);
+    }
+
+    .faq-answer-inner {
+      padding: 0 22px 18px;
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .faq-box.active .faq-answer {
+      max-height: 200px;
+    }
+
+    /* Footer */
+    .footer {
+      border-top: 1px solid var(--border-line);
+      padding: 40px 0;
+      text-align: center;
+      font-size: 13.5px;
+      color: var(--text-dim);
+      margin-top: auto;
+    }
+
+    .author-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .author-row img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+    }
+
+    /* Lightbox Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: rgba(0, 0, 0, 0.8);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-backdrop.active {
+      display: flex;
+    }
+
+    .modal-backdrop img {
+      max-width: 90vw;
+      max-height: 85vh;
+      border-radius: var(--radius-md);
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+
+    @media (max-width: 768px) {
+      .hero-headline { font-size: 2.2rem; }
+      .nav-links { display: none; }
+      .mobile-menu-toggle { display: inline-flex; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Pill Navbar Header -->
+  <header class="header-nav">
+    <div class="nav-inner">
+      <a class="nav-brand" href="#home" onclick="switchPageTab('home')" aria-label="OmniGet home">
+        <img src="./static/loop.png" alt="OmniGet Logo" />
+        <span>OmniGet</span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a class="nav-link active" id="nav-home" href="#home" onclick="switchPageTab('home')">Home</a></li>
+        <li><a class="nav-link" id="nav-opennami" href="#opennami" onclick="switchPageTab('opennami')">OpenNami</a></li>
+        <li><a class="nav-link" id="nav-downloads" href="#downloads" onclick="switchPageTab('downloads')">Downloads</a></li>
+        <li><a class="nav-link" id="nav-releasenotes" href="#releasenotes" onclick="switchPageTab('releasenotes')">Release Notes</a></li>
+        <li><a class="nav-link" id="nav-faq" href="#faq" onclick="switchPageTab('faq')">FAQ</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <!-- Official GitHub Octocat SVG Icon -->
+        <a href="https://github.com/OpenSelena/omniget" target="_blank" rel="noopener" class="btn btn-secondary">
+          <svg width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style="display: inline-block; vertical-align: middle; flex-shrink: 0; margin-right: 4px;"><path d="M8 0c4.42 0 8 3.58 8 8a8.013 8.013 0 0 1-5.45 7.59c-.4.08-.55-.17-.55-.38 0-.27.01-1.13.01-2.2 0-.75-.25-1.23-.54-1.48 1.78-.2 3.65-.88 3.65-3.95 0-.88-.31-1.59-.82-2.15.08-.2.36-1.02-.08-2.12 0 0-.67-.22-2.2.82-.64-.18-1.32-.27-2-.27-.68 0-1.36.09-2 .27-1.53-1.03-2.2-.82-2.2-.82-.44 1.1-.16 1.92-.08 2.12-.51.56-.82 1.28-.82 2.15 0 3.06 1.86 3.75 3.64 3.95-.23.2-.44.55-.51 1.07-.46.21-1.61.55-2.33-.66-.15-.24-.6-.83-1.23-.82-.67.01-.27.38.01.53.34.19.73.9.82 1.13.16.45.68 1.31 2.69.94 0 .67.01 1.3.01 1.49 0 .21-.15.45-.55.38A7.995 7.995 0 0 1 0 8c0-4.42 3.58-8 8-8Z"/></svg>
+          GitHub
+        </a>
+
+        <!-- Direct OS Download CTA / View Downloads -->
+        <a id="nav-download-btn" href="https://github.com/OpenSelena/omniget/releases/latest/download/omniget_0.10.5_x64-setup.exe" class="btn btn-primary">
+          Download
+        </a>
+
+        <!-- Mobile hamburger toggle -->
+        <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Open navigation menu" aria-expanded="false" onclick="toggleMobileNav()">
+          <i data-lucide="menu" style="width: 18px; height: 18px;"></i>
+        </button>
+      </div>
+
+      <!-- Mobile dropdown nav -->
+      <div class="mobile-nav-panel" id="mobileNavPanel">
+        <a class="nav-link" href="#home" onclick="switchPageTab('home'); toggleMobileNav()">Home</a>
+        <a class="nav-link" href="#opennami" onclick="switchPageTab('opennami'); toggleMobileNav()">OpenNami</a>
+        <a class="nav-link" href="#downloads" onclick="switchPageTab('downloads'); toggleMobileNav()">Downloads</a>
+        <a class="nav-link" href="#releasenotes" onclick="switchPageTab('releasenotes'); toggleMobileNav()">Release Notes</a>
+        <a class="nav-link" href="#faq" onclick="switchPageTab('faq'); toggleMobileNav()">FAQ</a>
+      </div>
+    </div>
+  </header>
+
+  <main style="flex: 1;">
+
+    <!-- ==================== HOME TAB PAGE ==================== -->
+    <div class="page-tab-content active" id="page-home">
+      <!-- HERO SECTION -->
+      <section class="hero-section text-center">
+        <div class="container">
+          <div class="hero-pill-badge">
+            <span>GPL-3.0 Open Source Desktop App</span>
+          </div>
+
+          <h1 class="hero-headline">
+            Download <span>Udemy courses, YouTube, music & books</span> in one app.
+          </h1>
+
+          <p class="hero-subhead">
+            Universal open-source downloader for Windows, macOS, and Linux. No setup, no Python, and all your files stay local on your computer.
+          </p>
+
+          <div class="hero-cta-group">
+            <a id="hero-primary-download-btn" href="https://github.com/OpenSelena/omniget/releases/latest/download/omniget_0.10.5_x64-setup.exe" class="btn btn-primary" style="height: 46px; padding: 0 28px; font-size: 15px;">
+              <i data-lucide="download" style="width: 18px; height: 18px;"></i>
+              <span id="hero-download-text">Download for Windows</span>
+            </a>
+            <a href="https://github.com/OpenSelena/omniget" target="_blank" rel="noopener" class="btn btn-secondary" style="height: 46px; padding: 0 22px;">
+              Source Code
+            </a>
+          </div>
+
+          <p class="hero-platform-sub">Available on Windows, macOS, and Linux • <a onclick="switchPageTab('downloads')" style="color: var(--brand-orange); text-decoration: underline; cursor: pointer;">Browse all download formats</a></p>
+
+          <!-- Interactive Demo Segment Switcher -->
+          <div class="demo-tab-bar">
+            <button class="demo-tab-btn active" onclick="switchDemoPane('home', this)">Home Omnibox</button>
+            <button class="demo-tab-btn" onclick="switchDemoPane('downloads', this)">Downloads</button>
+            <button class="demo-tab-btn" onclick="switchDemoPane('tools', this)">158 Tools Hub</button>
+            <button class="demo-tab-btn" onclick="switchDemoPane('opennami', this)">OpenNami Archiver</button>
+            <button class="demo-tab-btn" onclick="switchDemoPane('settings', this)">Settings</button>
+          </div>
+
+          <!-- App Showcase Frame -->
+          <div class="demo-showcase-frame">
+            <div class="demo-frame-bar">
+              <div class="dot" style="background: #ff5f56;"></div>
+              <div class="dot" style="background: #ffbd2e;"></div>
+              <div class="dot" style="background: #27c93f;"></div>
+            </div>
+
+            <div class="demo-pane active" id="pane-home">
+              <img src="./assets/readme/home.png" alt="OmniGet Home Omnibox" onclick="viewModal(this.src)" />
+            </div>
+            <div class="demo-pane" id="pane-downloads">
+              <img src="./assets/readme/downloads.png" alt="Active Downloads & Queue Manager" onclick="viewModal(this.src)" />
+            </div>
+            <div class="demo-pane" id="pane-tools">
+              <img src="./assets/readme/tools.png" alt="158 Specialized Tools Hub" onclick="viewModal(this.src)" />
+            </div>
+            <div class="demo-pane" id="pane-opennami">
+              <img src="./assets/readme/tools-instagram.png" alt="OpenNami Social Archiver" onclick="viewModal(this.src)" />
+            </div>
+            <div class="demo-pane" id="pane-settings">
+              <img src="./assets/readme/settings.png" alt="OmniGet Engine & App Settings" onclick="viewModal(this.src)" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CORE CAPABILITIES SECTION -->
+      <section class="section-wrap">
+        <div class="container">
+          <div class="section-header">
+            <h2 class="section-title">Core Capabilities</h2>
+            <p class="section-desc">Designed to unify offline media extraction and study tools into one app.</p>
+          </div>
+
+          <div class="grid-3">
+            <div class="feature-card">
+              <div class="icon-box icon-purple">
+                <i data-lucide="graduation-cap"></i>
+              </div>
+              <h3>Course Downloader & Player</h3>
+              <p>Extract structured courses from Hotmart, Udemy, Kiwify, Gumroad, Teachable, Kajabi, Skool, Wondrium, Thinkific, and Rocketseat. Watch offline with timestamped notes and attached PDFs.</p>
+            </div>
+
+            <div class="feature-card">
+              <div class="icon-box icon-amber">
+                <i data-lucide="keyboard"></i>
+              </div>
+              <h3>Global Hotkey Grabber</h3>
+              <p>Copy any URL to your clipboard and press <code>Ctrl+Shift+D</code> (or <code>Cmd+Shift+D</code> on macOS). OmniGet fetches metadata and downloads silently in the background.</p>
+            </div>
+
+            <div class="feature-card">
+              <div class="icon-box icon-red">
+                <i data-lucide="video"></i>
+              </div>
+              <h3>1,800+ Media Extractor & Quality Picker</h3>
+              <p>Powered by yt-dlp. Extract video/audio with real resolution selection (4K 2160p, 2K, 1080p, audio-only), SponsorBlock skipping, and auto-generated Whisper subtitles.</p>
+            </div>
+
+            <div class="feature-card">
+              <div class="icon-box icon-emerald">
+                <i data-lucide="share-2"></i>
+              </div>
+              <h3>OpenNami Social Archiver</h3>
+              <p>Bulk extract posts, reels, stories, and galleries from Instagram, TikTok, Reddit subreddits/profiles, and Twitter/X profiles with integrated gallery-dl engine.</p>
+            </div>
+
+            <div class="feature-card">
+              <div class="icon-box icon-cyan">
+                <i data-lucide="send"></i>
+              </div>
+              <h3>Telegram Direct Uploader & Bot</h3>
+              <p>Upload media directly to Telegram via User Session or Bot Token with custom thumbnails, filename editing, 2GB/4GB auto-chunking, and Video/Doc/Audio modes.</p>
+            </div>
+
+            <div class="feature-card">
+              <div class="icon-box icon-fuchsia">
+                <i data-lucide="tv"></i>
+              </div>
+              <h3>Deep Bilibili VIP 4K Support</h3>
+              <p>Sign in to unlock official Bilibili premium streams: 4K, HDR, Dolby Vision, Hi-Res Lossless Audio, Danmaku subtitles (XML/ASS), and Kodi/Jellyfin NFOs.</p>
+            </div>
+
+            <div class="feature-card">
+              <div class="icon-box icon-purple">
+                <i data-lucide="book-open"></i>
+              </div>
+              <h3>Built-in Reader Module</h3>
+              <p>Organize and read your EPUB, PDF, CBZ comics, TXT, and HTML collection with cover fetching, paper themes, bookmarks, and highlights.</p>
+            </div>
+
+            <div class="feature-card">
+              <div class="icon-box icon-amber">
+                <i data-lucide="headphones"></i>
+              </div>
+              <h3>Hi-Fi Music Player & Lyrics</h3>
+              <p>Local audio library player with scrolling synced lyrics. Integrates local tracks with Spotify, SoundCloud, YouTube Music, Qobuz, Last.fm, and Discord RPC.</p>
+            </div>
+
+            <div class="feature-card">
+              <div class="icon-box icon-emerald">
+                <i data-lucide="hard-drive"></i>
+              </div>
+              <h3>Portable Mode & Zero Setup</h3>
+              <p>Run directly from USB drives with <code>portable.txt</code>. System dependency detector auto-manages yt-dlp, FFmpeg, and PDFium binaries securely.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CONDENSED RELEASE SUMMARY (full notes live only on the Release Notes tab) -->
+      <section class="section-wrap">
+        <div class="container">
+          <div class="section-header">
+            <h2 class="section-title">Latest Release</h2>
+            <p class="section-desc">Headline changes in the newest build — full changelog on the Release Notes tab.</p>
+          </div>
+
+          <div class="release-summary-card">
+            <div>
+              <span class="release-badge">v0.10.5 Stable</span>
+              <ul id="release-summary-list">
+                <li>Automatic Telegram media organization into OmniGram/{channel_name} subfolders</li>
+                <li>Statically embedded core plugins (Convert, Courses, Telegram) with zero setup</li>
+                <li>Comprehensive support for 38 online course platforms with in-app streaming</li>
+                <li>Added AI model selection table in Settings and improved WebKitGTK Linux playback</li>
+              </ul>
+            </div>
+            <button class="btn btn-secondary" onclick="switchPageTab('releasenotes')" style="white-space: nowrap;">
+              View Full Changelog
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ==================== OPENNAMI TAB PAGE (DESKTOP SHELL MIRROR) ==================== -->
+    <div class="page-tab-content" id="page-opennami">
+      <section class="hero-section text-center" style="padding-bottom: 40px;">
+        <div class="container">
+          <div class="section-header">
+            <h2 class="section-title">Open Nami Social Archiver</h2>
+            <p class="section-desc">Standalone batch extractor for Instagram, TikTok, Facebook, and X built directly into OmniGet.</p>
+          </div>
+
+          <!-- DESKTOP APP SHELL MIRROR -->
+          <div class="oo-shell">
+            <!-- Sidebar Navigation -->
+            <aside class="oo-sidebar" aria-label="Open Nami sections">
+              <div class="oo-sidebar-brand">
+                <img src="./static/loop.png" alt="OpenNami Logo" />
+                <span>Open Nami</span>
+              </div>
+              <nav class="oo-nav" role="tablist">
+                <button type="button" class="oo-nav-item active" id="oo-tab-download" onclick="switchOoPanel('download')">
+                  <img src="./static/icons/open-nami-download.png" alt="" class="oo-nav-icon" />
+                  <span>Download</span>
+                </button>
+                <button type="button" class="oo-nav-item" id="oo-tab-profiles" onclick="switchOoPanel('profiles')">
+                  <img src="./static/icons/open-nami-profiles.png" alt="" class="oo-nav-icon" />
+                  <span>Profiles</span>
+                </button>
+                <button type="button" class="oo-nav-item" id="oo-tab-settings" onclick="switchOoPanel('settings')">
+                  <img src="./static/icons/open-nami-settings.png" alt="" class="oo-nav-icon" />
+                  <span>Settings</span>
+                </button>
+              </nav>
+            </aside>
+
+            <!-- Main Content Area -->
+            <div class="oo-content">
+              <header class="oo-header">
+                <p class="oo-kicker">Open Nami</p>
+                <h3 class="oo-title" id="oo-content-title">Download</h3>
+                <p class="oo-description" id="oo-content-desc">Save posts and media from your connected social profiles.</p>
+              </header>
+
+              <!-- PANEL 1: DOWNLOAD MANAGER -->
+              <div id="oo-panel-download" style="display: flex; flex-direction: column; gap: 18px;">
+                <!-- Profile URL Field -->
+                <div>
+                  <label class="oo-field-label">Profile URL or Handle</label>
+                  <div class="oo-input-shell">
+                    <i data-lucide="link" style="width: 16px; height: 16px; color: var(--text-muted); flex-shrink: 0;"></i>
+                    <input type="text" id="oo-url-input" value="https://instagram.com/creative_studio" placeholder="https://instagram.com/username" spellcheck="false" autocomplete="off" />
+                  </div>
+                  
+                  <!-- Saved Profiles Chip List -->
+                  <div class="oo-chip-list">
+                    <button type="button" class="oo-chip selected" onclick="selectOoChip(this, 'https://instagram.com/creative_studio')">
+                      <span>@creative_studio</span> <span class="oo-chip-platform">Instagram</span>
+                    </button>
+                    <button type="button" class="oo-chip" onclick="selectOoChip(this, 'https://tiktok.com/@tech_daily')">
+                      <span>@tech_daily</span> <span class="oo-chip-platform">TikTok</span>
+                    </button>
+                    <button type="button" class="oo-chip" onclick="selectOoChip(this, 'https://x.com/design_feed')">
+                      <span>@design_feed</span> <span class="oo-chip-platform">X</span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Content Type Segment -->
+                <div>
+                  <label class="oo-field-label">Content Type</label>
+                  <div class="oo-pill-group">
+                    <button type="button" class="oo-pill-btn active" onclick="setOoContentType(this)">All</button>
+                    <button type="button" class="oo-pill-btn" onclick="setOoContentType(this)">Photos</button>
+                    <button type="button" class="oo-pill-btn" onclick="setOoContentType(this)">Videos</button>
+                    <button type="button" class="oo-pill-btn" onclick="setOoContentType(this)">Stories</button>
+                    <button type="button" class="oo-pill-btn" onclick="setOoContentType(this)">Highlights</button>
+                  </div>
+                </div>
+
+                <!-- Primary Download Button -->
+                <button type="button" class="oo-primary-btn" id="oo-download-btn" onclick="runOoLiveDownload()">Start Download</button>
+
+                <!-- Live Circular Progress Ring (Matches DownloadManager.svelte) -->
+                <div class="oo-ring-wrap" id="oo-ring-widget" style="display: none;">
+                  <svg width="120" height="120" viewBox="0 0 120 120">
+                    <circle class="oo-ring-track" cx="60" cy="60" r="50" />
+                    <circle class="oo-ring-progress" id="oo-ring-circle" cx="60" cy="60" r="50" stroke-dasharray="314.16" stroke-dashoffset="314.16" />
+                    <text class="oo-ring-count" x="60" y="56" text-anchor="middle" dominant-baseline="middle" id="oo-ring-count">0 / 42</text>
+                    <text class="oo-ring-label" x="60" y="76" text-anchor="middle" dominant-baseline="middle">Files Downloaded</text>
+                  </svg>
+                  <div style="font-size: 13px; font-weight: 600; color: var(--text-head); margin-top: 10px;" id="oo-ring-stage">Connecting to profile...</div>
+                  <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;" id="oo-ring-message">Fetching metadata & media streams...</div>
+                </div>
+              </div>
+
+              <!-- PANEL 2: PROFILES MANAGER -->
+              <div id="oo-panel-profiles" style="display: none; flex-direction: column; gap: 16px;">
+                <div class="oo-pill-group">
+                  <button type="button" class="oo-pill-btn active" onclick="switchOoPlatformTab('Instagram', this)">Instagram</button>
+                  <button type="button" class="oo-pill-btn" onclick="switchOoPlatformTab('TikTok', this)">TikTok</button>
+                  <button type="button" class="oo-pill-btn" onclick="switchOoPlatformTab('Facebook', this)">Facebook</button>
+                  <button type="button" class="oo-pill-btn" onclick="switchOoPlatformTab('X', this)">X</button>
+                </div>
+
+                <div class="oo-input-shell" style="padding-right: 6px;">
+                  <input type="text" id="oo-new-profile-input" placeholder="Enter Instagram profile URL or username" />
+                  <button type="button" class="btn btn-primary" style="height: 34px; font-size: 12px; padding: 0 14px; border-radius: 8px;" onclick="addOoProfile()">Add</button>
+                </div>
+
+                <div id="oo-profiles-list" style="display: flex; flex-direction: column; gap: 10px;">
+                  <div class="oo-profile-card">
+                    <div>
+                      <strong style="color: var(--text-head); font-size: 13.5px;">@creative_studio</strong>
+                      <div style="font-size: 11.5px; color: var(--text-muted);">Monitored • 42 posts downloaded</div>
+                    </div>
+                    <button type="button" class="btn btn-secondary" style="height: 32px; font-size: 12px; padding: 0 12px; border-radius: 8px;" onclick="quickOoDownload('@creative_studio')">Fetch Latest</button>
+                  </div>
+                  <div class="oo-profile-card">
+                    <div>
+                      <strong style="color: var(--text-head); font-size: 13.5px;">@tech_daily</strong>
+                      <div style="font-size: 11.5px; color: var(--text-muted);">Monitored • 18 videos downloaded</div>
+                    </div>
+                    <button type="button" class="btn btn-secondary" style="height: 32px; font-size: 12px; padding: 0 12px; border-radius: 8px;" onclick="quickOoDownload('@tech_daily')">Fetch Latest</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- PANEL 3: SETTINGS MANAGER -->
+              <div id="oo-panel-settings" style="display: none; flex-direction: column; gap: 16px;">
+                <div>
+                  <label class="oo-field-label">Output Directory</label>
+                  <div class="oo-input-shell" style="padding-right: 6px;">
+                    <input type="text" id="oo-settings-dir" value="C:/Downloads/OpenNami" />
+                    <button type="button" class="btn btn-secondary" style="height: 32px; font-size: 12px; padding: 0 12px; border-radius: 8px;" onclick="alert('Destination folder set to C:/Downloads/OpenNami')">Browse</button>
+                  </div>
+                  <span style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px; display: block;">Media is saved in organized subfolders by platform and username.</span>
+                </div>
+
+                <div>
+                  <label class="oo-field-label">Cookies File (Optional)</label>
+                  <div class="oo-input-shell" style="padding-right: 6px;">
+                    <input type="text" id="oo-settings-cookies" value="cookies.txt" placeholder="cookies.txt" />
+                    <button type="button" class="btn btn-secondary" style="height: 32px; font-size: 12px; padding: 0 12px; border-radius: 8px;" onclick="alert('Loaded cookies.txt for private stories and highlights.')">Browse</button>
+                  </div>
+                  <span style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px; display: block;">Required for private accounts, stories, and highlights. Export cookies with the browser extension.</span>
+                </div>
+
+                <button type="button" class="oo-primary-btn" onclick="alert('Open Nami configuration settings saved!')">Save Settings</button>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- REAL APP SHOWCASE & ARCHITECTURE -->
+          <div style="margin: 48px auto 0; max-width: 920px; text-align: left;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px;">
+              <div>
+                <h3 style="font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--text-head); margin: 0;">Comprehensive Social Media Tools</h3>
+                <p style="color: var(--text-muted); font-size: 13.5px; margin: 4px 0 0;">Native suite for post downloads, story extraction, high-res avatars, and profile analytics.</p>
+              </div>
+              <span style="background: rgba(2, 132, 199, 0.08); color: var(--brand-blue); border: 1px solid rgba(2, 132, 199, 0.2); font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 999px;">23 Instagram &amp; Social Tools</span>
+            </div>
+
+            <div class="demo-showcase-frame" style="border-radius: 16px; overflow: hidden; cursor: pointer;" onclick="viewModal('./assets/readme/tools-instagram.png')">
+              <div class="demo-frame-bar">
+                <div class="dot" style="background: #ff5f56;"></div>
+                <div class="dot" style="background: #ffbd2e;"></div>
+                <div class="dot" style="background: #27c93f;"></div>
+                <span style="font-size: 11.5px; color: #94a3b8; font-family: var(--font-mono); margin-left: 8px;">omniget // tools // instagram</span>
+              </div>
+              <img src="./assets/readme/tools-instagram.png" alt="OmniGet Instagram and Social Tools" style="width: 100%; display: block; border-radius: 0 0 16px 16px;" />
+            </div>
+
+            <div class="grid-3" style="margin-top: 32px;">
+              <div class="feature-card">
+                <div class="icon-box icon-purple">
+                  <i data-lucide="cpu"></i>
+                </div>
+                <h3>Standalone Rust Engine</h3>
+                <p>Native architecture executing directly within OmniGet. Zero Python, Node.js, or external CLI runtime dependencies required.</p>
+              </div>
+
+              <div class="feature-card">
+                <div class="icon-box icon-amber">
+                  <i data-lucide="refresh-cw"></i>
+                </div>
+                <h3>Dual-Engine Fallback</h3>
+                <p>Automatic stream and extractor switching prevents broken downloads when platform endpoints rate-limit or change layouts.</p>
+              </div>
+
+              <div class="feature-card">
+                <div class="icon-box icon-emerald">
+                  <i data-lucide="shield-check"></i>
+                </div>
+                <h3>Anti-Bot Hardening</h3>
+                <p>Built-in session challenge handling, checkpoint detection, and user-agent rotation preserve steady downloads without account flags.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </div>
+
+    <!-- ==================== DOWNLOADS TAB PAGE ==================== -->
+    <div class="page-tab-content" id="page-downloads">
+      <section class="downloads-section">
+        <div class="container">
+          <div class="section-header text-center">
+            <h2 class="section-title">Download OmniGet</h2>
+            <p class="section-desc">Standalone, offline-first installers for Windows, macOS, and Linux.</p>
+          </div>
+
+          <div class="downloads-grid">
+            <!-- Windows Card -->
+            <div class="dl-card">
+              <div class="dl-card-content">
+                <div class="dl-os-icon" title="Windows">
+                  <img src="./static/logo-windows.svg" alt="Windows logo" style="width: 44px; height: 44px; object-fit: contain;" />
+                </div>
+                <h3>Windows Setup</h3>
+                <p>Direct standalone installer for Windows 10 and 11 (64-bit).</p>
+              </div>
+              <a id="dl-win-btn" href="https://github.com/OpenSelena/omniget/releases/latest/download/omniget_0.10.5_x64-setup.exe" class="btn btn-primary" style="width: 100%;">
+                <img src="./static/logo-windows.svg" alt="" style="width: 16px; height: 16px; margin-right: 6px; filter: brightness(0) invert(1);" /> Download for Windows
+              </a>
+            </div>
+
+            <!-- macOS Card -->
+            <div class="dl-card">
+              <div class="dl-card-content">
+                <div class="dl-os-icon" title="Mac">
+                  <img src="./static/logo-macos.png" alt="macOS Finder logo" style="width: 48px; height: 48px; object-fit: contain;" />
+                </div>
+                <h3>macOS Universal</h3>
+                <p>Universal binary for Apple Silicon (M1-M3) and Intel Macs.</p>
+              </div>
+              <a id="dl-mac-btn" href="https://github.com/OpenSelena/omniget/releases/latest/download/omniget_0.10.5_aarch64.dmg" class="btn btn-primary" style="width: 100%;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 6px;"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.32c.67-.82 1.12-1.96.99-3.1-.97.04-2.14.65-2.84 1.47-.63.73-1.18 1.89-1.03 3.01 1.08.08 2.21-.56 2.88-1.38z"/></svg> Download for Mac
+              </a>
+            </div>
+
+            <!-- Linux Card -->
+            <div class="dl-card">
+              <div class="dl-card-content">
+                <div class="dl-os-icon" title="Linux">
+                  <img src="./static/logo-linux.svg" alt="Linux Tux logo" style="width: 44px; height: 50px; object-fit: contain;" />
+                </div>
+                <h3>Linux</h3>
+                <p>Flathub package or direct release tarball for Linux distributions.</p>
+              </div>
+              <a id="dl-linux-btn" href="https://github.com/OpenSelena/omniget/releases/latest/download/omniget_0.10.5_amd64.AppImage" class="btn btn-secondary" style="width: 100%;">
+                <i data-lucide="terminal" style="width: 16px; height: 16px; margin-right: 4px;"></i> View Linux Releases
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ==================== RELEASE NOTES TAB PAGE (single source of truth) ==================== -->
+    <div class="page-tab-content" id="page-releasenotes">
+      <section class="hero-section text-center" style="padding-bottom: 20px;">
+        <div class="container">
+          <div class="section-header">
+            <h2 class="section-title">Release Notes &amp; Changelog</h2>
+            <p class="section-desc">Detailed release logs and feature changes for OmniGet.</p>
+          </div>
+
+          <div class="release-card">
+            <div class="release-header">
+              <div>
+                <span class="release-badge">v0.10.5 Stable</span>
+                <h3 id="release-card-title" style="font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--text-head); margin-top: 6px;">OmniGet v0.10.5 Release Notes</h3>
+              </div>
+              <a id="release-tag-link" href="https://github.com/OpenSelena/omniget/releases/tag/v0.10.5" target="_blank" rel="noopener" class="btn btn-secondary">
+                View Tag on GitHub
+              </a>
+            </div>
+
+            <div class="release-grid" id="release-full-grid">
+              <div class="release-item">
+                <h4><i data-lucide="send" style="width: 18px; height: 18px; color: var(--brand-orange);"></i> Telegram &amp; OmniGram Folders</h4>
+                <ul>
+                  <li>Downloads now save into OmniGram/{channel_name}/ subfolders automatically</li>
+                  <li>OS-safe directory name sanitization for Windows, Linux, and macOS</li>
+                  <li>Automatic folder reuse on subsequent downloads</li>
+                  <li>Fixed DC_ID_INVALID errors when downloading media from home datacenters</li>
+                </ul>
+              </div>
+
+              <div class="release-item">
+                <h4><i data-lucide="box" style="width: 18px; height: 18px; color: var(--brand-orange);"></i> Statically Embedded Plugins</h4>
+                <ul>
+                  <li>Convert, Courses, and Telegram plugins are now statically embedded in binary</li>
+                  <li>Eliminates dynamic library loading errors and duplicate symbol collisions</li>
+                  <li>Plugin registry URLs updated to official OpenSelena endpoints</li>
+                  <li>Fixed Kajabi login token handling and Windows WebView2 COM compatibility</li>
+                </ul>
+              </div>
+
+              <div class="release-item">
+                <h4><i data-lucide="cpu" style="width: 18px; height: 18px; color: var(--brand-orange);"></i> AI, Media Bridge &amp; Translations</h4>
+                <ul>
+                  <li>Added AI provider picker in Settings &gt; AI</li>
+                  <li>Fixed WebKitGTK local media streaming and token pre-authentication on Linux</li>
+                  <li>Configured system GStreamer plugin paths in AppImage builds</li>
+                  <li>Completed Russian (Русский) translation across the entire interface</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- ==================== FAQ TAB PAGE ==================== -->
+    <div class="page-tab-content" id="page-faq">
+      <section class="hero-section text-center" style="padding-bottom: 20px;">
+        <div class="container">
+          <div class="section-header">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            <p class="section-desc">Common questions regarding installation, licensing, and usage.</p>
+          </div>
+
+          <div class="faq-wrap">
+            <div class="faq-box">
+              <button class="faq-question" onclick="toggleFaq(this.parentElement)" aria-expanded="false">
+                <span>Is OmniGet free and open source?</span>
+                <i data-lucide="chevron-down" class="faq-icon-chevron" style="width: 16px; height: 16px;"></i>
+              </button>
+              <div class="faq-answer">
+                <div class="faq-answer-inner">
+                  Yes. OmniGet is published under the GPL-3.0 license. It contains no advertisements, no tracking telemetry, and no paid subscriptions.
+                </div>
+              </div>
+            </div>
+
+            <div class="faq-box">
+              <button class="faq-question" onclick="toggleFaq(this.parentElement)" aria-expanded="false">
+                <span>Do I need to install Python or use terminal commands?</span>
+                <i data-lucide="chevron-down" class="faq-icon-chevron" style="width: 16px; height: 16px;"></i>
+              </button>
+              <div class="faq-answer">
+                <div class="faq-answer-inner">
+                  No. OmniGet operates as a self-contained desktop application. Required tools (yt-dlp and FFmpeg) are bundled, verified via SHA256, and update automatically.
+                </div>
+              </div>
+            </div>
+
+            <div class="faq-box">
+              <button class="faq-question" onclick="toggleFaq(this.parentElement)" aria-expanded="false">
+                <span>How does full course downloading work?</span>
+                <i data-lucide="chevron-down" class="faq-icon-chevron" style="width: 16px; height: 16px;"></i>
+              </button>
+              <div class="faq-answer">
+                <div class="faq-answer-inner">
+                  Log into your course account within OmniGet's embedded browser session. The app extracts modules, videos, subtitles, and PDF worksheets for offline study in the built-in course player.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="container">
+      <div class="author-row">
+        <img src="./static/loop.png" alt="Mascot" />
+        <span style="color: var(--text-head); font-weight: 600;">OmniGet for the open-source community</span>
+      </div>
+      <p>© 2026 OmniGet Project • Maintained & Developed by <a href="https://github.com/OpenSelena/omniget" target="_blank" rel="noopener" style="color: var(--brand-orange); font-weight: 600;">igect</a> • Released under GPL-3.0 License.</p>
+    </div>
+  </footer>
+
+  <!-- MODAL BACKDROP -->
+  <div class="modal-backdrop" id="modalView" onclick="closeModal(event)">
+    <img id="modalImg" src="" alt="Preview" />
+  </div>
+
+  <script>
+    /* Multi-Tab Page View Controller with Hash Routing */
+    function switchPageTab(tabId, updateHash = true) {
+      document.querySelectorAll('.page-tab-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+
+      const targetPage = document.getElementById('page-' + tabId);
+      const navLink = document.getElementById('nav-' + tabId);
+
+      if (targetPage) targetPage.classList.add('active');
+      if (navLink) navLink.classList.add('active');
+
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+
+      if (updateHash && history.pushState) {
+        history.pushState(null, null, '#' + tabId);
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function handleHashChange() {
+      const hash = window.location.hash.replace('#', '').trim();
+      const validTabs = ['home', 'opennami', 'downloads', 'releasenotes', 'faq'];
+      if (hash && validTabs.includes(hash)) {
+        switchPageTab(hash, false);
+      }
+    }
+
+    window.addEventListener('hashchange', handleHashChange);
+
+    /* Mobile nav dropdown toggle */
+    function toggleMobileNav() {
+      const panel = document.getElementById('mobileNavPanel');
+      const toggle = document.getElementById('mobileMenuToggle');
+      const isOpen = panel.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    }
+
+    /* Demo Pane Switcher for Main App Showcase */
+    function switchDemoPane(paneId, btn) {
+      document.querySelectorAll('.demo-pane').forEach(p => p.classList.remove('active'));
+      document.querySelectorAll('.demo-tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const pane = document.getElementById('pane-' + paneId);
+      if (pane) pane.classList.add('active');
+    }
+
+    /* Open Nami App Shell Demo Controller (Mirrors Svelte App Components) */
+    const OO_PANEL_META = {
+      download: {
+        title: 'Download',
+        desc: 'Save posts and media from your connected social profiles.'
+      },
+      profiles: {
+        title: 'Profiles',
+        desc: 'Manage the profiles you use most often.'
+      },
+      settings: {
+        title: 'Settings',
+        desc: 'Choose where Open Nami saves downloaded media and configure cookies.'
+      }
+    };
+
+    function switchOoPanel(panel) {
+      const dlTab = document.getElementById('oo-tab-download');
+      const prTab = document.getElementById('oo-tab-profiles');
+      const stTab = document.getElementById('oo-tab-settings');
+      if (dlTab) dlTab.classList.toggle('active', panel === 'download');
+      if (prTab) prTab.classList.toggle('active', panel === 'profiles');
+      if (stTab) stTab.classList.toggle('active', panel === 'settings');
+
+      const dlPan = document.getElementById('oo-panel-download');
+      const prPan = document.getElementById('oo-panel-profiles');
+      const stPan = document.getElementById('oo-panel-settings');
+      if (dlPan) dlPan.style.display = (panel === 'download') ? 'flex' : 'none';
+      if (prPan) prPan.style.display = (panel === 'profiles') ? 'flex' : 'none';
+      if (stPan) stPan.style.display = (panel === 'settings') ? 'flex' : 'none';
+
+      const meta = OO_PANEL_META[panel];
+      if (meta) {
+        const titleEl = document.getElementById('oo-content-title');
+        const descEl = document.getElementById('oo-content-desc');
+        if (titleEl) titleEl.textContent = meta.title;
+        if (descEl) descEl.textContent = meta.desc;
+      }
+    }
+
+    function selectOoChip(chipEl, targetUrl) {
+      document.querySelectorAll('.oo-chip').forEach(c => c.classList.remove('selected'));
+      chipEl.classList.add('selected');
+      const input = document.getElementById('oo-url-input');
+      if (input) input.value = targetUrl;
+    }
+
+    function setOoContentType(btn) {
+      document.querySelectorAll('.oo-pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function switchOoPlatformTab(platform, btn) {
+      btn.parentElement.querySelectorAll('.oo-pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const input = document.getElementById('oo-new-profile-input');
+      if (input) input.placeholder = 'Enter ' + platform + ' profile URL or username';
+    }
+
+    let ooIsDownloading = false;
+    function runOoLiveDownload() {
+      if (ooIsDownloading) return;
+      ooIsDownloading = true;
+      const widget = document.getElementById('oo-ring-widget');
+      const countText = document.getElementById('oo-ring-count');
+      const circle = document.getElementById('oo-ring-circle');
+      const stageText = document.getElementById('oo-ring-stage');
+      const msgText = document.getElementById('oo-ring-message');
+      const btn = document.getElementById('oo-download-btn');
+
+      const maxFiles = 42;
+      const ringCircumference = 314.16;
+
+      widget.style.display = 'flex';
+      btn.innerText = 'Extracting Profile Media...';
+
+      let current = 0;
+      const interval = setInterval(() => {
+        current += 3;
+        if (current > maxFiles) current = maxFiles;
+        const fraction = current / maxFiles;
+        const offset = ringCircumference * (1 - fraction);
+        
+        circle.style.strokeDashoffset = offset;
+        countText.textContent = `${current} / ${maxFiles}`;
+        stageText.textContent = current < maxFiles ? `Downloading media... ${current}/${maxFiles}` : 'Download Complete!';
+        msgText.textContent = current < maxFiles ? 'Extracting high-resolution posts & stories' : 'All 42 files saved to C:/Downloads/OpenNami';
+
+        if (current >= maxFiles) {
+          clearInterval(interval);
+          btn.innerText = 'Start Download';
+          ooIsDownloading = false;
+        }
+      }, 150);
+    }
+
+    function addOoProfile() {
+      const input = document.getElementById('oo-new-profile-input');
+      const val = input.value.trim() || '@new_account';
+      const list = document.getElementById('oo-profiles-list');
+
+      const item = document.createElement('div');
+      item.className = 'oo-profile-card';
+      item.innerHTML = `
+        <div>
+          <strong style="color: var(--text-head); font-size: 13.5px;">${val}</strong>
+          <div style="font-size: 11.5px; color: var(--text-muted);">Monitored • Just added</div>
+        </div>
+        <button type="button" class="btn btn-secondary" style="height: 32px; font-size: 12px; padding: 0 12px; border-radius: 8px;" onclick="quickOoDownload('${val}')">Fetch Latest</button>
+      `;
+      list.prepend(item);
+      input.value = '';
+    }
+
+    function quickOoDownload(handle) {
+      switchOoPanel('download');
+      const input = document.getElementById('oo-url-input');
+      if (input) input.value = 'https://instagram.com/' + handle.replace('@', '');
+      runOoLiveDownload();
+    }
+
+    /* FAQ Toggle */
+    function toggleFaq(box) {
+      const isActive = box.classList.toggle('active');
+      box.querySelector('.faq-question').setAttribute('aria-expanded', isActive ? 'true' : 'false');
+    }
+
+    /* Lightbox Modal */
+    function viewModal(src) {
+      document.getElementById('modalImg').src = src;
+      document.getElementById('modalView').classList.add('active');
+    }
+
+    function closeModal(e) {
+      if (e.target.id === 'modalView' || e.target.classList.contains('modal-backdrop')) {
+        document.querySelectorAll('.modal-backdrop').forEach(m => m.classList.remove('active'));
+      }
+    }
+
+    /* ==========================================================================
+       GITHUB RELEASES API AUTO-FETCHER & DIRECT DOWNLOAD LINK INJECTOR
+       ========================================================================== */
+    const GITHUB_REPO = "OpenSelena/omniget";
+    const API_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
+
+    function formatBytes(bytes) {
+      if (!bytes || isNaN(bytes)) return '';
+      const mb = bytes / (1024 * 1024);
+      return ` (${mb.toFixed(1)} MB)`;
+    }
+
+    function detectOS() {
+      const ua = navigator.userAgent || '';
+      const platform = navigator.platform || '';
+      if (/Win/i.test(platform) || /Windows/i.test(ua)) return 'win';
+      if (/Mac/i.test(platform) || /Macintosh/i.test(ua)) return 'mac';
+      if (/Linux/i.test(platform) || /X11/i.test(ua)) return 'linux';
+      return 'win';
+    }
+
+    async function fetchLatestRelease() {
+      const os = detectOS();
+      const heroText = document.getElementById('hero-download-text');
+      const heroBtn = document.getElementById('hero-primary-download-btn');
+      const navBtn = document.getElementById('nav-download-btn');
+
+      if (heroText) {
+        if (os === 'mac') heroText.textContent = 'Download for Mac';
+        else if (os === 'linux') heroText.textContent = 'Download for Linux';
+        else heroText.textContent = 'Download for Windows';
+      }
+
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) throw new Error(`GitHub API HTTP ${response.status}`);
+        const data = await response.json();
+
+        const versionTag = data.tag_name || 'Latest';
+        const assets = data.assets || [];
+
+        // Update release badges on page
+        document.querySelectorAll('.release-badge').forEach(el => {
+          el.textContent = `${versionTag} Stable`;
+        });
+
+        const releaseCardTitle = document.getElementById('release-card-title');
+        if (releaseCardTitle && data.name) {
+          releaseCardTitle.textContent = `${data.name} Release Notes`;
+        }
+
+        // Find platform specific assets
+        const winAsset = assets.find(a => a.name.endsWith('.exe') || a.name.endsWith('.msi'));
+        const macAsset = assets.find(a => a.name.endsWith('.dmg'));
+        const linuxAsset = assets.find(a => a.name.endsWith('.AppImage') || a.name.endsWith('.deb') || a.name.endsWith('.tar.gz'));
+
+        // Inject Windows Download
+        const winBtn = document.getElementById('dl-win-btn');
+        if (winBtn && winAsset) {
+          winBtn.href = winAsset.browser_download_url;
+        }
+
+        // Inject macOS Download
+        const macBtn = document.getElementById('dl-mac-btn');
+        if (macBtn && macAsset) {
+          macBtn.href = macAsset.browser_download_url;
+        }
+
+        // Inject Linux Download
+        const linuxBtn = document.getElementById('dl-linux-btn');
+        if (linuxBtn && linuxAsset) {
+          linuxBtn.href = linuxAsset.browser_download_url;
+        }
+
+        // Target primary CTA to user's OS
+        let targetAsset = winAsset;
+        if (os === 'mac' && macAsset) targetAsset = macAsset;
+        if (os === 'linux' && linuxAsset) targetAsset = linuxAsset;
+
+        if (targetAsset) {
+          if (heroBtn) heroBtn.href = targetAsset.browser_download_url;
+          if (navBtn) navBtn.href = targetAsset.browser_download_url;
+        } else {
+          const fallbackUrl = data.html_url || `https://github.com/${GITHUB_REPO}/releases/latest`;
+          if (heroBtn) heroBtn.href = fallbackUrl;
+          if (navBtn) navBtn.href = fallbackUrl;
+        }
+
+        // Update Release Notes tag link
+        const releaseTagLink = document.getElementById('release-tag-link');
+        if (releaseTagLink && data.html_url) {
+          releaseTagLink.href = data.html_url;
+          releaseTagLink.textContent = `View ${versionTag} on GitHub`;
+        }
+
+      } catch (err) {
+        console.warn('GitHub API fetch fallback:', err);
+        const fallbackUrl = `https://github.com/${GITHUB_REPO}/releases/latest`;
+        ['dl-win-btn', 'dl-mac-btn', 'dl-linux-btn', 'hero-primary-download-btn', 'nav-download-btn', 'release-tag-link'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el && (el.getAttribute('href') === '#' || el.getAttribute('href') === fallbackUrl)) {
+            el.href = fallbackUrl;
+          }
+        });
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) {
+        lucide.createIcons();
+      }
+      handleHashChange();
+      fetchLatestRelease();
+    });
+  </script>
+</body>
+</html>
