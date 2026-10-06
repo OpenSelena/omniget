@@ -4533,11 +4533,11 @@
   "about": {
     "tab": {
       "overview": "Обзор",
-      "terms": "условия",
-      "project": "проект",
-      "roadmap": "план",
-      "changelog": "история изменений",
-      "debug": "отладочная информация"
+      "terms": "Условия и этика",
+      "project": "Проект",
+      "roadmap": "План развития",
+      "changelog": "История изменений",
+      "debug": "Отладочная информация"
     },
     "debug": {
       "title": "Отладочная информация",
@@ -4585,7 +4585,7 @@
     "roadmap_community_discord": "свяжитесь с нами в Discord:",
     "roadmap_community_issue": "или откройте задачу в репозитории:",
     "tagline": "Скачивайте что угодно, откуда угодно.",
-    "credit": "Сделано с любовью OpenSelena IGECT"
+    "credit": "Сделано с любовью OpenSelena"
   },
   "marketplace": {
     "title": "Маркетплейс",

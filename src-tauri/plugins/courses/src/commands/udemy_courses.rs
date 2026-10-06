@@ -52,7 +52,7 @@ fn parse_courses_from_results(results: &[serde_json::Value]) -> Vec<UdemyCourse>
         .collect()
 }
 
-async fn fetch_courses_via_api(
+pub async fn fetch_courses_via_api(
     state: &tauri::State<'_, CoursesState>,
 ) -> Result<Vec<UdemyCourse>, String> {
     let (client, portal) = {
@@ -216,16 +216,20 @@ async fn fetch_courses(
 ) -> Result<Vec<UdemyCourse>, String> {
     let portal = get_portal(state).await;
 
-    if portal != "www" {
-        match fetch_courses_via_api(state).await {
-            Ok(courses) => return Ok(courses),
-            Err(e) => {
-                tracing::warn!(
-                    "[udemy-api] direct API failed for portal={}, falling back to webview: {}",
-                    portal,
-                    e
-                );
-            }
+    match fetch_courses_via_api(state).await {
+        Ok(courses) if !courses.is_empty() => return Ok(courses),
+        Ok(_) => {
+            tracing::info!(
+                "[udemy-api] direct API returned 0 courses for portal={}, trying webview",
+                portal
+            );
+        }
+        Err(e) => {
+            tracing::warn!(
+                "[udemy-api] direct API failed for portal={}, falling back to webview: {}",
+                portal,
+                e
+            );
         }
     }
 

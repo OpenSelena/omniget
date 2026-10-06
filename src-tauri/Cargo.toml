@@ -18,7 +18,7 @@ resolver = "2"
 name = "omniget"
 version = "0.10.5"
 description = "OmniGet — Universal Downloader & Media Player"
-authors = ["OpenSelena", "igect"]
+authors = ["OpenSelena"]
 edition = "2021"
 
 [lib]

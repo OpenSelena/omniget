@@ -4533,11 +4533,11 @@
   "about": {
     "tab": {
       "overview": "Overview",
-      "terms": "conditions",
-      "project": "projet",
-      "roadmap": "roadmap",
-      "changelog": "changelog",
-      "debug": "infos debug"
+      "terms": "Conditions & Éthique",
+      "project": "Projet",
+      "roadmap": "Feuille de Route",
+      "changelog": "Changelog",
+      "debug": "Infos Debug"
     },
     "debug": {
       "title": "Infos de debug",
@@ -4585,7 +4585,7 @@
     "roadmap_community_discord": "contactez-nous sur discord :",
     "roadmap_community_issue": "ou ouvrez une issue sur le dépôt :",
     "tagline": "Téléchargez tout, de partout.",
-    "credit": "Fait avec amour par OpenSelena IGECT"
+    "credit": "Fait avec amour par OpenSelena"
   },
   "marketplace": {
     "title": "Marketplace",

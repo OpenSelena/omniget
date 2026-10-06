@@ -43,6 +43,47 @@ pub async fn hotmart_login(
 }
 
 #[tauri::command]
+pub async fn hotmart_login_token(
+    state: tauri::State<'_, CoursesState>,
+    token: String,
+) -> Result<String, String> {
+    let _ = delete_saved_session().await;
+    {
+        let mut map = state.active_downloads.lock().await;
+        for token in map.values() {
+            token.cancel();
+        }
+        map.clear();
+    }
+    state.hotmart_session.lock().await.take();
+    *state.session_validated_at.lock().await = None;
+    *state.courses_cache.lock().await = None;
+
+    let saved = crate::platforms::hotmart::auth::SavedSession {
+        token: token.trim().to_string(),
+        email: "Token User".to_string(),
+        cookies: vec![],
+        saved_at: std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs(),
+    };
+    let client = crate::platforms::hotmart::auth::build_client_from_saved(&saved)
+        .map_err(|e| e.to_string())?;
+    let session = crate::platforms::hotmart::auth::HotmartSession {
+        token: saved.token.clone(),
+        email: saved.email.clone(),
+        cookies: saved.cookies.clone(),
+        client,
+    };
+    let _ = save_session(&session).await;
+    let mut guard = state.hotmart_session.lock().await;
+    *guard = Some(session);
+    *state.session_validated_at.lock().await = Some(Instant::now());
+    Ok("Token User".to_string())
+}
+
+#[tauri::command]
 pub async fn hotmart_check_session(
     state: tauri::State<'_, CoursesState>,
 ) -> Result<String, String> {

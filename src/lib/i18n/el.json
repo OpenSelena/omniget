@@ -4533,11 +4533,11 @@
   "about": {
     "tab": {
       "overview": "Overview",
-      "terms": "όροι",
-      "project": "σχέδιο",
-      "roadmap": "πλάνο",
-      "changelog": "αρχείο καταγραφής",
-      "debug": "πληροφορίες debug"
+      "terms": "Όροι & Δεοντολογία",
+      "project": "Σχέδιο",
+      "roadmap": "Πλάνο",
+      "changelog": "Αρχείο καταγραφής",
+      "debug": "Πληροφορίες debug"
     },
     "debug": {
       "title": "Πληροφορίες Debug",
@@ -4585,7 +4585,7 @@
     "roadmap_community_discord": "βρείτε μας στο discord:",
     "roadmap_community_issue": "ή ανοίξτε ένα θέμα (issue) στο αποθετήριο:",
     "tagline": "Κατεβάστε οτιδήποτε, από οπουδήποτε.",
-    "credit": "Φτιαγμένο με αγάπη από OpenSelena IGECT"
+    "credit": "Φτιαγμένο με αγάπη από OpenSelena"
   },
   "marketplace": {
     "title": "Marketplace",
