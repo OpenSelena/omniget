@@ -492,4 +492,3 @@ mod tests {
         assert_eq!(format_token_identity("short"), "Token User");
     }
 }
-

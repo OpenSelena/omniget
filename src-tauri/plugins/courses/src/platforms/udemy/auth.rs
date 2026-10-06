@@ -697,4 +697,3 @@ mod tests {
         assert!(!secret.is_empty());
     }
 }
-

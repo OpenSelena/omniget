@@ -280,9 +280,10 @@ mod tests {
         let courses_ok: Result<Vec<UdemyCourse>, String> = Ok(vec![UdemyCourse {
             id: 1,
             title: "Rust".into(),
-            url: "/course/rust".into(),
-            image_240x135: None,
-            completion_ratio: None,
+            published_title: "rust".into(),
+            url: Some("/course/rust".into()),
+            image_url: None,
+            num_published_lectures: Some(10),
         }]);
         assert!(!should_fallback_to_webview(&courses_ok));
     }
