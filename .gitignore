@@ -264,6 +264,7 @@ remake/shots/
 # skills e os comandos do Claude Code *sao* arquivos .md por formato, entao a
 # regra acima os apagaria da arvore (PR #316).
 !claude-plugin/**/*.md
+!AGENTS.md
 /remake/
 /mobbin/
 /.visual-audit/

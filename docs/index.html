@@ -1450,7 +1450,7 @@
           <li>
             <a href="./courses/" class="sidebar-link">
               <span>38 Course Platforms</span>
-              <span class="sidebar-tag">v0.10.5</span>
+              <span class="sidebar-tag">v0.11.0</span>
             </a>
           </li>
         </ul>
@@ -1567,8 +1567,8 @@
   <path d="M12 16v-4" />
   <path d="M12 8h.01" /></svg>
         <div>
-          <strong>Version 0.10.5 Release Update:</strong>
-          The 38-platform Courses engine is now statically embedded into the native Rust desktop binary. This eliminates runtime Python dependency errors, dynamic link mismatches, and external downloader breakages on Windows 11 and Linux.
+          <strong>Version 0.11.0 Release Update:</strong>
+          All 36 course platforms are now fully wired to the native download dispatcher, paired with strict webview Content Security Policies (CSP) and protocol isolation across all desktop platforms.
         </div>
       </div>
 
@@ -1873,7 +1873,7 @@
             <tr>
               <td><strong>GitHub API</strong><br /><code>api.github.com/repos/OpenSelena/...</code></td>
               <td>Check for newer releases and security patches.</td>
-              <td>Standard HTTP User-Agent and client architecture (e.g. <code>OmniGet/0.10.5 x86_64</code>).</td>
+              <td>Standard HTTP User-Agent and client architecture (e.g. <code>OmniGet/0.11.0 x86_64</code>).</td>
               <td>On startup (can be disabled in Settings).</td>
             </tr>
             <tr>
@@ -1981,12 +1981,71 @@ omniget-cli doctor</code></pre>
         Track every update, new engine integration, and bugfix shipped in OmniGet. OmniGet adheres to Semantic Versioning and publishes signed artifacts with SHA-256 validation for every desktop release.
       </p>
 
+      <!-- v0.11.0 Release -->
+      <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="sidebar-tag" style="background: var(--primary); color: var(--text-inverse); font-weight: 600; padding: 3px 8px; border-radius: 6px;">v0.11.0 Stable</span>
+              <span style="font-size: 13px; color: var(--text-subtle);">Released October 2026</span>
+            </div>
+            <h3 style="font-size: 18px; font-weight: 700; color: var(--text); margin-top: 6px;">36 Course Platforms Wired &amp; Security Protocol Hardening</h3>
+          </div>
+          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.11.0" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+            <span>View Release on GitHub</span>
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+
+        <div style="display: grid; gap: 18px;">
+          <div>
+            <h4 style="font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+              36 Course Platforms Wired &amp; Platform Dispatcher
+            </h4>
+            <ul style="margin-left: 20px; color: var(--text-muted); font-size: 14px; line-height: 1.6; display: grid; gap: 4px;">
+              <li>Connected all 36 supported platforms directly to the <code>download_course_platform</code> dispatcher.</li>
+              <li>Added native authentication and Udemy course listing handlers inside the embedded <code>CoursesPlugin</code>.</li>
+              <li>Injected Tauri <code>AppHandle</code> into the embedded plugin for background downloads, queue sync, and notifications.</li>
+              <li>Resolved zero-course listing fallback and improved session handling for Udemy and Hotmart.</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 style="font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Security Hardening &amp; Protocol Isolation
+            </h4>
+            <ul style="margin-left: 20px; color: var(--text-muted); font-size: 14px; line-height: 1.6; display: grid; gap: 4px;">
+              <li>Enforced strict non-null Content Security Policy (CSP) across all Tauri webview windows.</li>
+              <li>Restricted custom asset protocol (<code>asset://</code>) access strictly to app data, user download, and system temp directories.</li>
+              <li>Scoped <code>shell:allow-open</code> permissions to safe web and email protocols (<code>https:</code>, <code>http:</code>, <code>mailto:</code>).</li>
+              <li>Enforced strict <code>0600</code> POSIX file permissions on cached authentication tokens and credentials on disk.</li>
+              <li>Sanitized cookie and authorization headers against CRLF and control character injection attacks.</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 style="font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              UI Polish &amp; Metadata Standardization
+            </h4>
+            <ul style="margin-left: 20px; color: var(--text-muted); font-size: 14px; line-height: 1.6; display: grid; gap: 4px;">
+              <li>Standardized Windows executable and installer metadata: product name is <strong>OmniGet</strong> and publisher is <strong>OpenSelena</strong>.</li>
+              <li>Dynamic version resolution in the About dialog directly from the Tauri runtime.</li>
+              <li>Cleaned footer credits and standardized tab titles and terminology across all 12 localized languages.</li>
+              <li>Prevented heap out-of-memory errors during frontend bundling by allocating 4GB memory to the build process.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
       <!-- v0.10.5 Release -->
       <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
           <div>
             <div style="display: flex; align-items: center; gap: 10px;">
-              <span class="sidebar-tag" style="background: var(--primary); color: var(--text-inverse); font-weight: 600; padding: 3px 8px; border-radius: 6px;">v0.10.5 Stable</span>
+              <span class="sidebar-tag" style="background: var(--bg-muted); color: var(--text); font-weight: 600; padding: 3px 8px; border-radius: 6px;">v0.10.5</span>
               <span style="font-size: 13px; color: var(--text-subtle);">Latest Release &bull; October 2026</span>
             </div>
             <h3 style="font-size: 18px; font-weight: 700; color: var(--text); margin-top: 6px;">Telegram OmniGram Isolation &amp; Static Plugins</h3>
@@ -2177,7 +2236,7 @@ omniget-cli doctor</code></pre>
         </li>
         <li class="search-result-item" onclick="location.href='./changelog/'">
           <span class="search-result-title">Release Notes &amp; Changelog</span>
-          <span class="search-result-desc">Version v0.10.5 updates, static plugins, and recent fixes</span>
+          <span class="search-result-desc">Version v0.11.0 updates, course platforms, security hardening</span>
         </li>
       </ul>
     </div>

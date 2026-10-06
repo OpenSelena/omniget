@@ -152,6 +152,55 @@ if (fs.existsSync(aboutProjectPath)) {
   );
 }
 
+// Update landing pages (index.html, preview.html)
+function updateLandingPageContent(content) {
+  return content
+    .replace(/"softwareVersion":\s*"[^"]+"/, `"softwareVersion": "${version}"`)
+    .replace(/(releases\/latest\/download\/)(?:omniget|OmniGet)_[^/]+_(x64-setup\.exe)/g, `$1OmniGet_${version}_$2`)
+    .replace(/(releases\/latest\/download\/)(?:omniget|OmniGet)_[^/]+_(x64-portable\.exe)/g, `$1omniget_${version}_$2`)
+    .replace(/(releases\/latest\/download\/)(?:omniget|OmniGet)_[^/]+_(aarch64\.dmg)/g, `$1OmniGet_${version}_$2`)
+    .replace(/(releases\/latest\/download\/)(?:omniget|OmniGet)_[^/]+_(x64\.dmg)/g, `$1OmniGet_${version}_$2`)
+    .replace(/(releases\/latest\/download\/)(?:omniget|OmniGet)_[^/]+_(amd64\.AppImage)/g, `$1OmniGet_${version}_$2`)
+    .replace(/(releases\/latest\/download\/)(?:omniget|OmniGet)_[^/]+_(amd64\.deb)/g, `$1OmniGet_${version}_$2`)
+    .replace(/OmniGet v\d+\.\d+\.\d+\. Free and open source/g, `OmniGet v${version}. Free and open source`)
+    .replace(/releases\/tag\/v\d+\.\d+\.\d+/g, `releases/tag/v${version}`)
+    .replace(/Get OmniGet v\d+\.\d+\.\d+/g, `Get OmniGet v${version}`);
+}
+
+const indexPath = path.join(root, "index.html");
+if (fs.existsSync(indexPath)) {
+  writeText(indexPath, updateLandingPageContent);
+}
+
+const previewPath = path.join(root, "preview.html");
+if (fs.existsSync(previewPath)) {
+  writeText(previewPath, updateLandingPageContent);
+}
+
+const legacyIndexPath = path.join(root, "index.legacy.html");
+if (fs.existsSync(legacyIndexPath)) {
+  writeText(legacyIndexPath, (content) => {
+    return content
+      .replace(/(releases\/latest\/download\/)(?:omniget|OmniGet)_[^/]+_(x64-setup\.exe)/g, `$1OmniGet_${version}_$2`)
+      .replace(/(releases\/latest\/download\/)(?:omniget|OmniGet)_[^/]+_(aarch64\.dmg)/g, `$1OmniGet_${version}_$2`)
+      .replace(/(releases\/latest\/download\/)(?:omniget|OmniGet)_[^/]+_(amd64\.AppImage)/g, `$1OmniGet_${version}_$2`)
+      .replace(/v\d+\.\d+\.\d+ Stable/g, `v${version} Stable`)
+      .replace(/OmniGet v\d+\.\d+\.\d+ Release Notes/g, `OmniGet v${version} Release Notes`)
+      .replace(/releases\/tag\/v\d+\.\d+\.\d+/g, `releases/tag/v${version}`);
+  });
+}
+
+// Update docs sidebar version pills
+const docsDirs = ["docs", "docs/changelog", "docs/courses", "docs/installation", "docs/mcp", "docs/opennami", "docs/troubleshooting"];
+for (const d of docsDirs) {
+  const docFile = path.join(root, d, "index.html");
+  if (fs.existsSync(docFile)) {
+    writeText(docFile, (content) => {
+      return content.replace(/<span class="sidebar-tag">v\d+\.\d+\.\d+<\/span>/g, `<span class="sidebar-tag">v${version}</span>`);
+    });
+  }
+}
+
 if (changed.length === 0) {
   console.error("No files changed — aborting.");
   process.exit(1);

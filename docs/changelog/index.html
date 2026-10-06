@@ -1450,7 +1450,7 @@
           <li>
             <a href="../courses/" class="sidebar-link">
               <span>38 Course Platforms</span>
-              <span class="sidebar-tag">v0.10.5</span>
+              <span class="sidebar-tag">v0.11.0</span>
             </a>
           </li>
         </ul>
@@ -1537,12 +1537,69 @@
         Release notes, feature changes, and system patches for OmniGet. All desktop releases are signed, reproducible, and published with SHA-256 binary validation.
       </p>
 
+      <!-- v0.11.0 Release -->
+      <article class="release-box" id="v0-11-0">
+        <div class="release-header">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="release-tag-pill">v0.11.0 Stable</span>
+              <span class="release-date">Released October 2026</span>
+            </div>
+            <h2 class="release-title">36 Course Platforms Wired, Security Hardening &amp; Metadata Polish</h2>
+          </div>
+          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.11.0" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+            <span>GitHub Tag</span>
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+
+        <div class="release-section">
+          <h3 class="release-section-title">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+            36 Course Platforms Wired &amp; Platform Dispatcher
+          </h3>
+          <ul class="release-list">
+            <li>Connected all 36 learning platforms to the primary <code>download_course_platform</code> dispatcher for end-to-end course extraction.</li>
+            <li>Added native authentication and Udemy course listing handlers inside the embedded <code>CoursesPlugin</code>.</li>
+            <li>Injected Tauri <code>AppHandle</code> into the embedded plugin for background downloads, queue sync, and notifications.</li>
+            <li>Resolved zero-course listing fallback and improved session handling for Udemy and Hotmart.</li>
+          </ul>
+        </div>
+
+        <div class="release-section">
+          <h3 class="release-section-title">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Security Hardening &amp; Protocol Isolation
+          </h3>
+          <ul class="release-list">
+            <li>Enforced strict non-null Content Security Policy (CSP) across all Tauri webview windows.</li>
+            <li>Restricted custom asset protocol (<code>asset://</code>) access strictly to app data, user download, and system temp directories.</li>
+            <li>Scoped <code>shell:allow-open</code> permissions to safe web and email protocols (<code>https:</code>, <code>http:</code>, <code>mailto:</code>).</li>
+            <li>Enforced strict <code>0600</code> POSIX file permissions on cached authentication tokens and credentials on disk.</li>
+            <li>Sanitized cookie and authorization headers against CRLF and control character injection attacks.</li>
+          </ul>
+        </div>
+
+        <div class="release-section">
+          <h3 class="release-section-title">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            UI Polish &amp; Metadata Standardization
+          </h3>
+          <ul class="release-list">
+            <li>Standardized Windows executable and installer metadata: product name is <strong>OmniGet</strong> and publisher is <strong>OpenSelena</strong>.</li>
+            <li>Dynamic version resolution in the About dialog directly from the Tauri runtime.</li>
+            <li>Cleaned footer credits and standardized tab titles and terminology across all 12 localized languages.</li>
+            <li>Prevented heap out-of-memory errors during frontend bundling by allocating 4GB memory to the build process.</li>
+          </ul>
+        </div>
+      </article>
+
       <!-- v0.10.5 Release -->
       <article class="release-box" id="v0-10-5">
         <div class="release-header">
           <div>
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span class="release-tag-pill">v0.10.5 Stable</span>
+              <span class="sidebar-tag" style="background: var(--bg-muted); color: var(--text); font-weight: 700; padding: 3px 8px; border-radius: 6px;">v0.10.5</span>
               <span class="release-date">Released October 2026</span>
             </div>
             <h2 class="release-title">Telegram OmniGram Directory Isolation &amp; Statically Embedded Plugins</h2>
@@ -1727,7 +1784,8 @@
         <span>On this page</span>
       </div>
       <ul class="toc-list" id="tocList">
-        <li><a href="#v0-10-5" class="toc-link">v0.10.5 (Latest Stable)</a></li>
+        <li><a href="#v0-11-0" class="toc-link">v0.11.0 (Latest Stable)</a></li>
+        <li><a href="#v0-10-5" class="toc-link">v0.10.5</a></li>
         <li><a href="#v0-10-4" class="toc-link">v0.10.4</a></li>
         <li><a href="#v0-10-3" class="toc-link">v0.10.3</a></li>
         <li><a href="#v0-10-2" class="toc-link">v0.10.2</a></li>
@@ -1787,7 +1845,7 @@
         </li>
         <li class="search-result-item" onclick="location.href='../changelog/'">
           <span class="search-result-title">Release Notes &amp; Changelog</span>
-          <span class="search-result-desc">Version v0.10.5 updates, static plugins, and recent fixes</span>
+          <span class="search-result-desc">Version v0.11.0 updates, course platforms, security hardening</span>
         </li>
       </ul>
     </div>
