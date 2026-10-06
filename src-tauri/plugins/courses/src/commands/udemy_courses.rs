@@ -210,27 +210,27 @@ async fn fetch_courses_via_webview(
     Ok(courses)
 }
 
+pub fn should_fallback_to_webview(api_res: &Result<Vec<UdemyCourse>, String>) -> bool {
+    api_res.is_err()
+}
+
 async fn fetch_courses(
     app: &tauri::AppHandle,
     state: &tauri::State<'_, CoursesState>,
 ) -> Result<Vec<UdemyCourse>, String> {
     let portal = get_portal(state).await;
 
-    match fetch_courses_via_api(state).await {
-        Ok(courses) if !courses.is_empty() => return Ok(courses),
-        Ok(_) => {
-            tracing::info!(
-                "[udemy-api] direct API returned 0 courses for portal={}, trying webview",
-                portal
-            );
-        }
-        Err(e) => {
-            tracing::warn!(
-                "[udemy-api] direct API failed for portal={}, falling back to webview: {}",
-                portal,
-                e
-            );
-        }
+    let api_res = fetch_courses_via_api(state).await;
+    if !should_fallback_to_webview(&api_res) {
+        return api_res;
+    }
+
+    if let Err(ref e) = api_res {
+        tracing::warn!(
+            "[udemy-api] direct API failed for portal={}, falling back to webview: {}",
+            portal,
+            e
+        );
     }
 
     fetch_courses_via_webview(app, state).await
@@ -263,4 +263,33 @@ pub async fn udemy_refresh_courses(
         *cache = None;
     }
     fetch_courses(&app, &state).await
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_should_not_fallback_when_api_returns_empty_courses() {
+        let empty_ok: Result<Vec<UdemyCourse>, String> = Ok(vec![]);
+        assert!(!should_fallback_to_webview(&empty_ok));
+    }
+
+    #[test]
+    fn test_should_not_fallback_when_api_returns_courses() {
+        let courses_ok: Result<Vec<UdemyCourse>, String> = Ok(vec![UdemyCourse {
+            id: 1,
+            title: "Rust".into(),
+            url: "/course/rust".into(),
+            image_240x135: None,
+            completion_ratio: None,
+        }]);
+        assert!(!should_fallback_to_webview(&courses_ok));
+    }
+
+    #[test]
+    fn test_should_fallback_when_api_fails() {
+        let err: Result<Vec<UdemyCourse>, String> = Err("401 Unauthorized".into());
+        assert!(should_fallback_to_webview(&err));
+    }
 }

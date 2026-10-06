@@ -37,8 +37,19 @@ fn session_file_path() -> anyhow::Result<PathBuf> {
     Ok(data_dir.join("omniget").join("udemy_session.json"))
 }
 
-const UDEMY_CLIENT_ID: &str = "TH96Ov3Ebo3OtgoSH5mOYzYolcowM3ycedWQDDce";
-const UDEMY_CLIENT_SECRET: &str = "f2lgDUDxjFiOlVHUpwQNFUfCQPyMO0tJQMaud53PF01UKueW8enYjeEYoyVeP0bb2XVEDkJ5GLJaVTfM5QgMVz6yyXyydZdA5QhzgvG9UmCPUYaCrIVf7VpmiilfbLJc";
+pub fn resolve_client_credentials() -> (String, String) {
+    let client_id = std::env::var("UDEMY_CLIENT_ID")
+        .unwrap_or_else(|_| "TH96Ov3Ebo3OtgoSH5mOYzYolcowM3ycedWQDDce".to_string());
+    let client_secret = std::env::var("UDEMY_CLIENT_SECRET")
+        .unwrap_or_else(|_| "f2lgDUDxjFiOlVHUpwQNFUfCQPyMO0tJQMaud53PF01UKueW8enYjeEYoyVeP0bb2XVEDkJ5GLJaVTfM5QgMVz6yyXyydZdA5QhzgvG9UmCPUYaCrIVf7VpmiilfbLJc".to_string());
+    (client_id, client_secret)
+}
+
+pub fn sanitize_cookie_string(raw: &str) -> String {
+    raw.chars()
+        .filter(|c| !c.is_control() && *c != '\r' && *c != '\n')
+        .collect()
+}
 
 pub fn build_client_from_saved(saved: &SavedSession) -> anyhow::Result<reqwest::Client> {
     if saved.portal_name != "www" {
@@ -56,30 +67,39 @@ pub fn build_client_from_saved(saved: &SavedSession) -> anyhow::Result<reqwest::
     let cookie_header = saved
         .cookies
         .iter()
-        .map(|(name, value)| format!("{}={}", name, value))
+        .map(|(name, value)| {
+            let clean_name = sanitize_cookie_string(name);
+            let clean_val = sanitize_cookie_string(value);
+            format!("{}={}", clean_name, clean_val)
+        })
         .collect::<Vec<_>>()
         .join("; ");
 
     if !cookie_header.is_empty() {
-        default_headers.insert("Cookie", HeaderValue::from_str(&cookie_header)?);
+        if let Ok(hdr) = HeaderValue::from_str(&cookie_header) {
+            default_headers.insert("Cookie", hdr);
+        }
     }
 
     if let Some(csrf) = saved.cookies.iter().find(|(n, _)| n == "csrftoken") {
-        default_headers.insert("X-CSRFToken", HeaderValue::from_str(&csrf.1)?);
+        let clean_csrf = sanitize_cookie_string(&csrf.1);
+        if let Ok(hdr) = HeaderValue::from_str(&clean_csrf) {
+            default_headers.insert("X-CSRFToken", hdr);
+        }
     }
 
     default_headers.insert(
         "Accept",
         HeaderValue::from_static("application/json, text/plain, */*"),
     );
-    default_headers.insert(
-        "x-udemy-client-id",
-        HeaderValue::from_static(UDEMY_CLIENT_ID),
-    );
-    default_headers.insert(
-        "x-udemy-client-secret",
-        HeaderValue::from_static(UDEMY_CLIENT_SECRET),
-    );
+
+    let (client_id, client_secret) = resolve_client_credentials();
+    if let Ok(val) = HeaderValue::from_str(&client_id) {
+        default_headers.insert("x-udemy-client-id", val);
+    }
+    if let Ok(val) = HeaderValue::from_str(&client_secret) {
+        default_headers.insert("x-udemy-client-secret", val);
+    }
     default_headers.insert("accept-language", HeaderValue::from_static("en_US"));
 
     let user_agent = if !saved.cookies.is_empty() {
@@ -105,16 +125,25 @@ fn build_enterprise_client(saved: &SavedSession) -> anyhow::Result<reqwest::Clie
     let cookie_header = saved
         .cookies
         .iter()
-        .map(|(name, value)| format!("{}={}", name, value))
+        .map(|(name, value)| {
+            let clean_name = sanitize_cookie_string(name);
+            let clean_val = sanitize_cookie_string(value);
+            format!("{}={}", clean_name, clean_val)
+        })
         .collect::<Vec<_>>()
         .join("; ");
 
     if !cookie_header.is_empty() {
-        default_headers.insert("Cookie", HeaderValue::from_str(&cookie_header)?);
+        if let Ok(hdr) = HeaderValue::from_str(&cookie_header) {
+            default_headers.insert("Cookie", hdr);
+        }
     }
 
     if let Some(csrf) = saved.cookies.iter().find(|(n, _)| n == "csrftoken") {
-        default_headers.insert("X-CSRFToken", HeaderValue::from_str(&csrf.1)?);
+        let clean_csrf = sanitize_cookie_string(&csrf.1);
+        if let Ok(hdr) = HeaderValue::from_str(&clean_csrf) {
+            default_headers.insert("X-CSRFToken", hdr);
+        }
     }
 
     let origin = format!("https://{}.udemy.com", saved.portal_name);
@@ -160,6 +189,15 @@ pub async fn save_session(session: &UdemySession) -> anyhow::Result<()> {
 
     let json = serde_json::to_string_pretty(&saved)?;
     tokio::fs::write(&path, json).await?;
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        if let Ok(meta) = tokio::fs::metadata(&path).await {
+            let mut perms = meta.permissions();
+            perms.set_mode(0o600);
+            let _ = tokio::fs::set_permissions(&path, perms).await;
+        }
+    }
     tracing::info!(
         "[udemy] session saved for {}, {} cookies",
         session.email,
@@ -637,3 +675,26 @@ fn decode_jwt_email(jwt: &str) -> Option<String> {
         .and_then(|v| v.as_str())
         .map(|s| s.to_string())
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_sanitize_cookie_string_strips_crlf_and_controls() {
+        let dirty = "session=abc\r\nX-Bad: 1\x00\t";
+        let clean = sanitize_cookie_string(dirty);
+        assert!(!clean.contains('\r'));
+        assert!(!clean.contains('\n'));
+        assert!(!clean.contains('\0'));
+        assert_eq!(clean, "session=abcX-Bad: 1");
+    }
+
+    #[test]
+    fn test_resolve_client_credentials_provides_values() {
+        let (id, secret) = resolve_client_credentials();
+        assert!(!id.is_empty());
+        assert!(!secret.is_empty());
+    }
+}
+

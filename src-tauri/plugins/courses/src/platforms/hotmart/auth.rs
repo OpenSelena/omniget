@@ -80,6 +80,17 @@ pub fn build_client_from_saved(saved: &SavedSession) -> anyhow::Result<reqwest::
     Ok(client)
 }
 
+pub fn format_token_identity(token: &str) -> String {
+    let trimmed = token.trim();
+    if trimmed.contains('@') {
+        trimmed.to_string()
+    } else if trimmed.len() >= 8 {
+        format!("Token User ({})", &trimmed[..6])
+    } else {
+        "Token User".to_string()
+    }
+}
+
 pub async fn save_session(session: &HotmartSession) -> anyhow::Result<()> {
     let path = session_file_path()?;
     if let Some(parent) = path.parent() {
@@ -98,6 +109,15 @@ pub async fn save_session(session: &HotmartSession) -> anyhow::Result<()> {
 
     let json = serde_json::to_string_pretty(&saved)?;
     tokio::fs::write(&path, json).await?;
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        if let Ok(meta) = tokio::fs::metadata(&path).await {
+            let mut perms = meta.permissions();
+            perms.set_mode(0o600);
+            let _ = tokio::fs::set_permissions(&path, perms).await;
+        }
+    }
     tracing::info!(
         "[session] saved for {}, {} cookies",
         session.email,
@@ -460,3 +480,16 @@ pub async fn authenticate(
         tokio::time::sleep(Duration::from_millis(sleep_ms)).await;
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_format_token_identity_email_and_hash() {
+        assert_eq!(format_token_identity("user@domain.com"), "user@domain.com");
+        assert_eq!(format_token_identity("abcdef123456"), "Token User (abcdef)");
+        assert_eq!(format_token_identity("short"), "Token User");
+    }
+}
+

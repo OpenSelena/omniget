@@ -5,7 +5,14 @@
   "windows": ["main"],
   "permissions": [
     "core:default",
-    "shell:default",
+    {
+      "identifier": "shell:allow-open",
+      "allow": [
+        { "url": "https://**" },
+        { "url": "http://**" },
+        { "url": "mailto:**" }
+      ]
+    },
     "store:default",
     "dialog:default",
     "notification:default",
