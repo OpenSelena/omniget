@@ -1905,9 +1905,8 @@ impl OmnigetPlugin for CoursesPlugin {
                             .ok_or_else(|| "missing 'site_id'".to_string())?,
                     )
                     .map_err(|e| e.to_string())?;
-                    let res =
-                        commands::kajabi::kajabi_set_site(wrap_state(&state), site_id).await?;
-                    serde_json::to_value(res).map_err(|e| e.to_string())
+                    commands::kajabi::kajabi_set_site(wrap_state(&state), site_id).await?;
+                    serde_json::to_value(()).map_err(|e| e.to_string())
                 }
                 "kajabi_verify_login" => {
                     let email: String = serde_json::from_value(
@@ -1951,8 +1950,8 @@ impl OmnigetPlugin for CoursesPlugin {
                             .ok_or_else(|| "missing 'email'".to_string())?,
                     )
                     .map_err(|e| e.to_string())?;
-                    let res = commands::teachable::teachable_request_otp(email).await?;
-                    serde_json::to_value(res).map_err(|e| e.to_string())
+                    commands::teachable::teachable_request_otp(email).await?;
+                    serde_json::to_value(()).map_err(|e| e.to_string())
                 }
                 "teachable_set_school" => {
                     let school_id: String = serde_json::from_value(
@@ -1962,10 +1961,9 @@ impl OmnigetPlugin for CoursesPlugin {
                             .ok_or_else(|| "missing 'school_id'".to_string())?,
                     )
                     .map_err(|e| e.to_string())?;
-                    let res =
-                        commands::teachable::teachable_set_school(wrap_state(&state), school_id)
-                            .await?;
-                    serde_json::to_value(res).map_err(|e| e.to_string())
+                    commands::teachable::teachable_set_school(wrap_state(&state), school_id)
+                        .await?;
+                    serde_json::to_value(()).map_err(|e| e.to_string())
                 }
                 "teachable_verify_otp" => {
                     let email: String = serde_json::from_value(
