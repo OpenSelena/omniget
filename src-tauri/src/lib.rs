@@ -750,7 +750,10 @@ pub fn run() {
                             );
                             let _ = mgr.register_builtin(
                                 omniget_plugin_courses::manifest(),
-                                Box::new(omniget_plugin_courses::CoursesPlugin::new()),
+                                Box::new(
+                                    omniget_plugin_courses::CoursesPlugin::new()
+                                        .with_app(app_emit.clone()),
+                                ),
                                 std::sync::Arc::clone(&host),
                             );
                             mgr.load_all(std::sync::Arc::clone(&host));

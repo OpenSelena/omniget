@@ -19,9 +19,37 @@ fn wrap_state<'a>(state: &'a CoursesState) -> tauri::State<'a, CoursesState> {
     unsafe { std::mem::transmute(state) }
 }
 
+fn extract_payload(args: &serde_json::Value) -> Result<String, String> {
+    if let Some(v) = args
+        .get("course_json")
+        .or(args.get("courseJson"))
+        .or(args.get("product_json"))
+        .or(args.get("productJson"))
+        .or(args.get("course"))
+        .or(args.get("product"))
+    {
+        if let Some(s) = v.as_str() {
+            Ok(s.to_string())
+        } else {
+            serde_json::to_string(v).map_err(|e| e.to_string())
+        }
+    } else {
+        Err("missing 'course_json'".to_string())
+    }
+}
+
+fn extract_output_dir(args: &serde_json::Value) -> String {
+    args.get("output_dir")
+        .or(args.get("outputDir"))
+        .and_then(|v| v.as_str())
+        .unwrap_or("")
+        .to_string()
+}
+
 pub struct CoursesPlugin {
     host: Option<Arc<dyn PluginHost>>,
     state: Arc<CoursesState>,
+    pub app: Option<tauri::AppHandle>,
 }
 
 impl CoursesPlugin {
@@ -29,7 +57,17 @@ impl CoursesPlugin {
         Self {
             host: None,
             state: Arc::new(CoursesState::default()),
+            app: None,
         }
+    }
+
+    pub fn with_app(mut self, app: tauri::AppHandle) -> Self {
+        self.app = Some(app);
+        self
+    }
+
+    pub fn supported_commands(&self) -> Vec<String> {
+        self.commands()
     }
 }
 
@@ -64,7 +102,19 @@ impl OmnigetPlugin for CoursesPlugin {
     > {
         let _host = self.host.clone();
         let state = self.state.clone();
+        let app = self.app.clone();
         Box::pin(async move {
+            macro_rules! dispatch_download {
+                ($cmd_fn:expr) => {{
+                    let course_json = extract_payload(&args)?;
+                    let output_dir = extract_output_dir(&args);
+                    let app_handle = app
+                        .ok_or_else(|| "Tauri AppHandle not available on CoursesPlugin".to_string())?;
+                    let res = $cmd_fn(app_handle, wrap_state(&state), course_json, output_dir).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }};
+            }
+
             match command.as_str() {
                 "get_platforms" => {
                     let res = catalog::all_platforms();
@@ -1128,6 +1178,378 @@ impl OmnigetPlugin for CoursesPlugin {
                         commands::astronmembers::astron_refresh_courses(wrap_state(&state)).await?;
                     serde_json::to_value(res).map_err(|e| e.to_string())
                 }
+
+                // --- Downloads (36 platforms) ---
+                "start_course_download" => dispatch_download!(commands::downloads::start_course_download),
+                "start_gumroad_download" => dispatch_download!(commands::gumroad::start_gumroad_download),
+                "start_udemy_course_download" => dispatch_download!(commands::udemy_downloads::start_udemy_course_download),
+                "start_kiwify_course_download" => dispatch_download!(commands::kiwify::start_kiwify_course_download),
+                "start_skool_course_download" => dispatch_download!(commands::skool::start_skool_course_download),
+                "start_rocketseat_course_download" => dispatch_download!(commands::rocketseat::start_rocketseat_course_download),
+                "start_teachable_course_download" => dispatch_download!(commands::teachable::start_teachable_course_download),
+                "start_kajabi_course_download" => dispatch_download!(commands::kajabi::start_kajabi_course_download),
+                "start_thinkific_course_download" => dispatch_download!(commands::thinkific::start_thinkific_course_download),
+                "start_pluralsight_course_download" => dispatch_download!(commands::pluralsight::start_pluralsight_course_download),
+                "start_wondrium_course_download" => dispatch_download!(commands::greatcourses::start_wondrium_course_download),
+                "start_masterclass_course_download" => dispatch_download!(commands::masterclass::start_masterclass_course_download),
+                "start_greenn_course_download" => dispatch_download!(commands::greenn::start_greenn_course_download),
+                "start_kirvano_course_download" => dispatch_download!(commands::kirvano::start_kirvano_course_download),
+                "start_cademi_course_download" => dispatch_download!(commands::cademi_cmd::start_cademi_course_download),
+                "start_memberkit_course_download" => dispatch_download!(commands::memberkit_cmd::start_memberkit_course_download),
+                "start_cakto_course_download" => dispatch_download!(commands::cakto::start_cakto_course_download),
+                "start_caktomembers_course_download" => dispatch_download!(commands::caktomembers::start_caktomembers_course_download),
+                "start_curseduca_course_download" => dispatch_download!(commands::curseduca::start_curseduca_course_download),
+                "start_dsa_course_download" => dispatch_download!(commands::dsa::start_dsa_course_download),
+                "start_entregadigital_course_download" => dispatch_download!(commands::entregadigital::start_entregadigital_course_download),
+                "start_estrategia_concursos_course_download" => dispatch_download!(commands::estrategia_concursos::start_estrategia_concursos_course_download),
+                "start_estrategia_ldi_course_download" => dispatch_download!(commands::estrategia_ldi::start_estrategia_ldi_course_download),
+                "start_estrategia_militares_course_download" => dispatch_download!(commands::estrategia_militares::start_estrategia_militares_course_download),
+                "start_fluency_course_download" => dispatch_download!(commands::fluencyacademy::start_fluency_course_download),
+                "start_grancursos_course_download" => dispatch_download!(commands::grancursos::start_grancursos_course_download),
+                "start_medcel_course_download" => dispatch_download!(commands::medcel::start_medcel_course_download),
+                "start_medcof_course_download" => dispatch_download!(commands::medcof::start_medcof_course_download),
+                "start_medway_course_download" => dispatch_download!(commands::medway::start_medway_course_download),
+                "start_nutror_course_download" => dispatch_download!(commands::nutror::start_nutror_course_download),
+                "start_themembers_course_download" => dispatch_download!(commands::themembers::start_themembers_course_download),
+                "start_voomp_course_download" => dispatch_download!(commands::voomp::start_voomp_course_download),
+                "start_afya_course_download" => dispatch_download!(commands::afya::start_afya_course_download),
+                "start_alpaclass_course_download" => dispatch_download!(commands::alpaclass::start_alpaclass_course_download),
+                "start_areademembros_course_download" => dispatch_download!(commands::areademembros::start_areademembros_course_download),
+                "start_astron_course_download" => dispatch_download!(commands::astronmembers::start_astron_course_download),
+
+                // --- Udemy Listing & Auth ---
+                "udemy_list_courses" => {
+                    let res = if let Some(app_handle) = app {
+                        commands::udemy_courses::udemy_list_courses(app_handle, wrap_state(&state)).await?
+                    } else {
+                        commands::udemy_courses::fetch_courses_via_api(&wrap_state(&state)).await?
+                    };
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "udemy_refresh_courses" => {
+                    let res = if let Some(app_handle) = app {
+                        commands::udemy_courses::udemy_refresh_courses(app_handle, wrap_state(&state)).await?
+                    } else {
+                        commands::udemy_courses::fetch_courses_via_api(&wrap_state(&state)).await?
+                    };
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "udemy_login" => {
+                    let email: String = serde_json::from_value(
+                        args.get("email").cloned().unwrap_or(serde_json::Value::String(String::new()))
+                    ).unwrap_or_default();
+                    let app_handle = app.ok_or_else(|| "Tauri AppHandle not available on CoursesPlugin".to_string())?;
+                    commands::udemy_auth::udemy_login(app_handle, wrap_state(&state), email).await?;
+                    Ok(serde_json::Value::Null)
+                }
+
+                // --- Search Commands ---
+                "estrategia_militares_search_courses" => {
+                    let query: String = serde_json::from_value(
+                        args.get("query").cloned().unwrap_or(serde_json::Value::String(String::new()))
+                    ).unwrap_or_default();
+                    let res = commands::estrategia_militares::estrategia_militares_search_courses(wrap_state(&state), query).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "rocketseat_search_courses" => {
+                    let query: String = serde_json::from_value(
+                        args.get("query").cloned().unwrap_or(serde_json::Value::String(String::new()))
+                    ).unwrap_or_default();
+                    let res = commands::rocketseat::rocketseat_search_courses(wrap_state(&state), query).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+
+                // --- Login Methods ---
+                "hotmart_login" => {
+                    let email: String = serde_json::from_value(
+                        args.get("email").cloned().ok_or_else(|| "missing 'email'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let password: String = serde_json::from_value(
+                        args.get("password").cloned().ok_or_else(|| "missing 'password'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let app_handle = app.ok_or_else(|| "Tauri AppHandle not available on CoursesPlugin".to_string())?;
+                    let res = commands::auth::hotmart_login(app_handle, wrap_state(&state), email, password).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "hotmart_login_token" => {
+                    let token: String = serde_json::from_value(
+                        args.get("token").cloned().ok_or_else(|| "missing 'token'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let res = commands::auth::hotmart_login_token(wrap_state(&state), token).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "cademi_login" => {
+                    let email: String = serde_json::from_value(
+                        args.get("email").cloned().ok_or_else(|| "missing 'email'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let password: String = serde_json::from_value(
+                        args.get("password").cloned().ok_or_else(|| "missing 'password'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let site_url: String = args.get("site_url").or(args.get("url")).and_then(|v| v.as_str()).unwrap_or("").to_string();
+                    let res = commands::cademi_cmd::cademi_login(wrap_state(&state), email, password, site_url).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "cademi_login_cookie" => {
+                    let cookie: String = serde_json::from_value(
+                        args.get("cookie").or(args.get("cookies")).cloned().ok_or_else(|| "missing 'cookie'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let site_url: String = args.get("site_url").or(args.get("url")).and_then(|v| v.as_str()).unwrap_or("").to_string();
+                    let res = commands::cademi_cmd::cademi_login_cookie(wrap_state(&state), cookie, site_url).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "memberkit_login" => {
+                    let email: String = serde_json::from_value(
+                        args.get("email").cloned().ok_or_else(|| "missing 'email'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let password: String = serde_json::from_value(
+                        args.get("password").cloned().ok_or_else(|| "missing 'password'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let site_url: String = args.get("site_url").or(args.get("url")).and_then(|v| v.as_str()).unwrap_or("").to_string();
+                    let res = commands::memberkit_cmd::memberkit_login(wrap_state(&state), email, password, site_url).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "memberkit_login_cookie" => {
+                    let cookie: String = serde_json::from_value(
+                        args.get("cookie").or(args.get("cookies")).cloned().ok_or_else(|| "missing 'cookie'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let site_url: String = args.get("site_url").or(args.get("url")).and_then(|v| v.as_str()).unwrap_or("").to_string();
+                    let res = commands::memberkit_cmd::memberkit_login_cookie(wrap_state(&state), cookie, site_url).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "cakto_login" => {
+                    let email: String = serde_json::from_value(
+                        args.get("email").cloned().ok_or_else(|| "missing 'email'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let password: String = serde_json::from_value(
+                        args.get("password").cloned().ok_or_else(|| "missing 'password'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let res = commands::cakto::cakto_login(wrap_state(&state), email, password).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "cakto_login_token" => {
+                    let cookie: String = serde_json::from_value(
+                        args.get("cookie").or(args.get("cookies")).or(args.get("token")).cloned().ok_or_else(|| "missing 'cookie'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let res = commands::cakto::cakto_login_token(wrap_state(&state), cookie).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "curseduca_login" => {
+                    let site_url: String = args.get("site_url").or(args.get("url")).and_then(|v| v.as_str()).unwrap_or("").to_string();
+                    let username: String = serde_json::from_value(
+                        args.get("username").or(args.get("email")).cloned().ok_or_else(|| "missing 'username'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let password: String = serde_json::from_value(
+                        args.get("password").cloned().ok_or_else(|| "missing 'password'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let res = commands::curseduca::curseduca_login(wrap_state(&state), site_url, username, password).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "curseduca_login_token" => {
+                    let token: String = serde_json::from_value(
+                        args.get("token").cloned().ok_or_else(|| "missing 'token'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let api_key: String = args.get("api_key").or(args.get("apiKey")).and_then(|v| v.as_str()).unwrap_or("").to_string();
+                    let site_url: String = args.get("site_url").or(args.get("url")).and_then(|v| v.as_str()).unwrap_or("").to_string();
+                    let res = commands::curseduca::curseduca_login_token(wrap_state(&state), token, api_key, site_url).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "fluency_login" => {
+                    let email: String = serde_json::from_value(
+                        args.get("email").cloned().ok_or_else(|| "missing 'email'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let password: String = serde_json::from_value(
+                        args.get("password").cloned().ok_or_else(|| "missing 'password'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let res = commands::fluencyacademy::fluency_login(wrap_state(&state), email, password).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "fluency_login_token" => {
+                    let token: String = serde_json::from_value(
+                        args.get("token").cloned().ok_or_else(|| "missing 'token'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let res = commands::fluencyacademy::fluency_login_token(wrap_state(&state), token).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "wondrium_login" => {
+                    let email: String = serde_json::from_value(
+                        args.get("email").cloned().ok_or_else(|| "missing 'email'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let password: String = serde_json::from_value(
+                        args.get("password").cloned().ok_or_else(|| "missing 'password'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let res = commands::greatcourses::wondrium_login(wrap_state(&state), email, password).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "wondrium_login_token" => {
+                    let token: String = serde_json::from_value(
+                        args.get("token").cloned().ok_or_else(|| "missing 'token'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let res = commands::greatcourses::wondrium_login_token(wrap_state(&state), token).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "kirvano_login" => {
+                    let email: String = serde_json::from_value(
+                        args.get("email").cloned().ok_or_else(|| "missing 'email'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let password: String = serde_json::from_value(
+                        args.get("password").cloned().ok_or_else(|| "missing 'password'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let res = commands::kirvano::kirvano_login(wrap_state(&state), email, password).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "kirvano_login_token" => {
+                    let token: String = serde_json::from_value(
+                        args.get("token").cloned().ok_or_else(|| "missing 'token'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let res = commands::kirvano::kirvano_login_token(wrap_state(&state), token).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "medcel_login" => {
+                    let email: String = serde_json::from_value(
+                        args.get("email").cloned().ok_or_else(|| "missing 'email'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let password: String = serde_json::from_value(
+                        args.get("password").cloned().ok_or_else(|| "missing 'password'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let api_key: String = args.get("api_key").or(args.get("apiKey")).and_then(|v| v.as_str()).unwrap_or("").to_string();
+                    let res = commands::medcel::medcel_login(wrap_state(&state), email, password, api_key).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "medcel_login_token" => {
+                    let token: String = serde_json::from_value(
+                        args.get("token").cloned().ok_or_else(|| "missing 'token'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let api_key: String = args.get("api_key").or(args.get("apiKey")).and_then(|v| v.as_str()).unwrap_or("").to_string();
+                    let res = commands::medcel::medcel_login_token(wrap_state(&state), token, api_key).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "themembers_login" => {
+                    let email: String = serde_json::from_value(
+                        args.get("email").cloned().ok_or_else(|| "missing 'email'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let password: String = serde_json::from_value(
+                        args.get("password").cloned().ok_or_else(|| "missing 'password'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let domain: String = args.get("domain").or(args.get("subdomain")).and_then(|v| v.as_str()).unwrap_or("").to_string();
+                    let res = commands::themembers::themembers_login(wrap_state(&state), email, password, domain).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "themembers_login_token" => {
+                    let token: String = serde_json::from_value(
+                        args.get("token").cloned().ok_or_else(|| "missing 'token'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let domain: String = args.get("domain").or(args.get("subdomain")).and_then(|v| v.as_str()).unwrap_or("").to_string();
+                    let res = commands::themembers::themembers_login_token(wrap_state(&state), token, domain).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "afya_login" => {
+                    let email: String = serde_json::from_value(
+                        args.get("email").cloned().ok_or_else(|| "missing 'email'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let password: String = serde_json::from_value(
+                        args.get("password").cloned().ok_or_else(|| "missing 'password'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let api_key: String = args.get("api_key").or(args.get("apiKey")).and_then(|v| v.as_str()).unwrap_or("").to_string();
+                    let res = commands::afya::afya_login(wrap_state(&state), email, password, api_key).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "afya_login_token" => {
+                    let token: String = serde_json::from_value(
+                        args.get("token").cloned().ok_or_else(|| "missing 'token'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let api_key: String = args.get("api_key").or(args.get("apiKey")).and_then(|v| v.as_str()).unwrap_or("").to_string();
+                    let res = commands::afya::afya_login_token(wrap_state(&state), token, api_key).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "alpaclass_login" => {
+                    let token: String = serde_json::from_value(
+                        args.get("token").cloned().ok_or_else(|| "missing 'token'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let platform_url: String = args.get("platform_url").or(args.get("url")).and_then(|v| v.as_str()).unwrap_or("").to_string();
+                    let res = commands::alpaclass::alpaclass_login(wrap_state(&state), token, platform_url).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "astron_login" => {
+                    let site_url: String = args.get("site_url").or(args.get("url")).and_then(|v| v.as_str()).unwrap_or("").to_string();
+                    let login: String = serde_json::from_value(
+                        args.get("login").or(args.get("email")).or(args.get("username")).cloned().ok_or_else(|| "missing 'login'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let password: String = serde_json::from_value(
+                        args.get("password").cloned().ok_or_else(|| "missing 'password'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let res = commands::astronmembers::astron_login(wrap_state(&state), site_url, login, password).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "astron_login_token" => {
+                    let cookies: String = serde_json::from_value(
+                        args.get("cookies").or(args.get("cookie")).or(args.get("token")).cloned().ok_or_else(|| "missing 'cookies'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let site_url: String = args.get("site_url").or(args.get("url")).and_then(|v| v.as_str()).unwrap_or("").to_string();
+                    let res = commands::astronmembers::astron_login_token(wrap_state(&state), cookies, site_url).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+
+                // --- Kajabi & Teachable helpers ---
+                "kajabi_list_sites" => {
+                    let res = commands::kajabi::kajabi_list_sites(wrap_state(&state)).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "kajabi_request_login_link" => {
+                    let email: String = serde_json::from_value(
+                        args.get("email").cloned().ok_or_else(|| "missing 'email'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let res = commands::kajabi::kajabi_request_login_link(email).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "kajabi_set_site" => {
+                    let site_id: String = serde_json::from_value(
+                        args.get("site_id").or(args.get("siteId")).cloned().ok_or_else(|| "missing 'site_id'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let res = commands::kajabi::kajabi_set_site(wrap_state(&state), site_id).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "kajabi_verify_login" => {
+                    let email: String = serde_json::from_value(
+                        args.get("email").cloned().ok_or_else(|| "missing 'email'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let confirmation_code: String = serde_json::from_value(
+                        args.get("confirmation_code").or(args.get("confirmationCode")).cloned().ok_or_else(|| "missing 'confirmation_code'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let login_token: String = serde_json::from_value(
+                        args.get("login_token").or(args.get("loginToken")).cloned().ok_or_else(|| "missing 'login_token'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let res = commands::kajabi::kajabi_verify_login(wrap_state(&state), email, confirmation_code, login_token).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "teachable_list_schools" => {
+                    let res = commands::teachable::teachable_list_schools(wrap_state(&state)).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "teachable_request_otp" => {
+                    let email: String = serde_json::from_value(
+                        args.get("email").cloned().ok_or_else(|| "missing 'email'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let res = commands::teachable::teachable_request_otp(email).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "teachable_set_school" => {
+                    let school_id: String = serde_json::from_value(
+                        args.get("school_id").or(args.get("schoolId")).cloned().ok_or_else(|| "missing 'school_id'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let res = commands::teachable::teachable_set_school(wrap_state(&state), school_id).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+                "teachable_verify_otp" => {
+                    let email: String = serde_json::from_value(
+                        args.get("email").cloned().ok_or_else(|| "missing 'email'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let otp_code: String = serde_json::from_value(
+                        args.get("otp_code").or(args.get("otpCode")).cloned().ok_or_else(|| "missing 'otp_code'".to_string())?
+                    ).map_err(|e| e.to_string())?;
+                    let res = commands::teachable::teachable_verify_otp(wrap_state(&state), email, otp_code).await?;
+                    serde_json::to_value(res).map_err(|e| e.to_string())
+                }
+
                 _ => Err(format!("Unknown command: {}", command)),
             }
         })
@@ -1310,6 +1732,162 @@ impl OmnigetPlugin for CoursesPlugin {
             "wondrium_list_courses".into(),
             "wondrium_logout".into(),
             "wondrium_refresh_courses".into(),
+            "udemy_list_courses".into(),
+            "udemy_refresh_courses".into(),
+            "udemy_login".into(),
+            "estrategia_militares_search_courses".into(),
+            "rocketseat_search_courses".into(),
+            "hotmart_login".into(),
+            "hotmart_login_token".into(),
+            "cademi_login".into(),
+            "cademi_login_cookie".into(),
+            "memberkit_login".into(),
+            "memberkit_login_cookie".into(),
+            "cakto_login".into(),
+            "cakto_login_token".into(),
+            "curseduca_login".into(),
+            "curseduca_login_token".into(),
+            "fluency_login".into(),
+            "fluency_login_token".into(),
+            "wondrium_login".into(),
+            "wondrium_login_token".into(),
+            "kirvano_login".into(),
+            "kirvano_login_token".into(),
+            "medcel_login".into(),
+            "medcel_login_token".into(),
+            "themembers_login".into(),
+            "themembers_login_token".into(),
+            "afya_login".into(),
+            "afya_login_token".into(),
+            "alpaclass_login".into(),
+            "astron_login".into(),
+            "astron_login_token".into(),
+            "kajabi_list_sites".into(),
+            "kajabi_request_login_link".into(),
+            "kajabi_set_site".into(),
+            "kajabi_verify_login".into(),
+            "teachable_list_schools".into(),
+            "teachable_request_otp".into(),
+            "teachable_set_school".into(),
+            "teachable_verify_otp".into(),
+            "start_course_download".into(),
+            "start_gumroad_download".into(),
+            "start_udemy_course_download".into(),
+            "start_kiwify_course_download".into(),
+            "start_skool_course_download".into(),
+            "start_rocketseat_course_download".into(),
+            "start_teachable_course_download".into(),
+            "start_kajabi_course_download".into(),
+            "start_thinkific_course_download".into(),
+            "start_pluralsight_course_download".into(),
+            "start_wondrium_course_download".into(),
+            "start_masterclass_course_download".into(),
+            "start_greenn_course_download".into(),
+            "start_kirvano_course_download".into(),
+            "start_cademi_course_download".into(),
+            "start_memberkit_course_download".into(),
+            "start_cakto_course_download".into(),
+            "start_caktomembers_course_download".into(),
+            "start_curseduca_course_download".into(),
+            "start_dsa_course_download".into(),
+            "start_entregadigital_course_download".into(),
+            "start_estrategia_concursos_course_download".into(),
+            "start_estrategia_ldi_course_download".into(),
+            "start_estrategia_militares_course_download".into(),
+            "start_fluency_course_download".into(),
+            "start_grancursos_course_download".into(),
+            "start_medcel_course_download".into(),
+            "start_medcof_course_download".into(),
+            "start_medway_course_download".into(),
+            "start_nutror_course_download".into(),
+            "start_themembers_course_download".into(),
+            "start_voomp_course_download".into(),
+            "start_afya_course_download".into(),
+            "start_alpaclass_course_download".into(),
+            "start_areademembros_course_download".into(),
+            "start_astron_course_download".into(),
         ]
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_all_catalog_commands_supported() {
+        let plugin = CoursesPlugin::new();
+        let supported: std::collections::HashSet<String> = plugin.supported_commands().into_iter().collect();
+        let platforms = catalog::all_platforms();
+
+        let mut missing = Vec::new();
+        for p in &platforms {
+            for m in &p.login_methods {
+                if !supported.contains(&m.command) {
+                    missing.push(format!("[{}] login method '{}'", p.id, m.command));
+                }
+            }
+            let cmds = [
+                ("check_session", Some(&p.commands.check_session)),
+                ("logout", Some(&p.commands.logout)),
+                ("list", Some(&p.commands.list)),
+                ("refresh", Some(&p.commands.refresh)),
+                ("download", Some(&p.commands.download)),
+                ("cancel", p.commands.cancel.as_ref()),
+                ("search", p.commands.search.as_ref()),
+                ("curriculum", p.commands.curriculum.as_ref()),
+            ];
+            for (kind, cmd_opt) in cmds {
+                if let Some(cmd) = cmd_opt {
+                    if !supported.contains(cmd) {
+                        missing.push(format!("[{}] {} '{}'", p.id, kind, cmd));
+                    }
+                }
+            }
+        }
+
+        assert!(
+            missing.is_empty(),
+            "Catalog commands missing from supported_commands:\n{}",
+            missing.join("\n")
+        );
+    }
+
+    #[tokio::test]
+    async fn test_all_catalog_commands_dispatched_without_unknown_command() {
+        let plugin = CoursesPlugin::new();
+        let platforms = catalog::all_platforms();
+
+        let mut unknown_cmds = Vec::new();
+
+        for p in &platforms {
+            let mut all_cmds = Vec::new();
+            for m in &p.login_methods {
+                all_cmds.push(m.command.clone());
+            }
+            all_cmds.push(p.commands.check_session.clone());
+            all_cmds.push(p.commands.logout.clone());
+            all_cmds.push(p.commands.list.clone());
+            all_cmds.push(p.commands.refresh.clone());
+            all_cmds.push(p.commands.download.clone());
+            if let Some(ref c) = p.commands.cancel { all_cmds.push(c.clone()); }
+            if let Some(ref s) = p.commands.search { all_cmds.push(s.clone()); }
+            if let Some(ref cu) = p.commands.curriculum { all_cmds.push(cu.clone()); }
+
+            for cmd in all_cmds {
+                let res = plugin.handle_command(cmd.clone(), serde_json::json!({})).await;
+                if let Err(ref e) = res {
+                    if e.contains("Unknown command") {
+                        unknown_cmds.push(format!("[{}] {}", p.id, cmd));
+                    }
+                }
+            }
+        }
+
+        assert!(
+            unknown_cmds.is_empty(),
+            "Catalog commands not dispatched in handle_command (returned Unknown command):\n{}",
+            unknown_cmds.join("\n")
+        );
     }
 }

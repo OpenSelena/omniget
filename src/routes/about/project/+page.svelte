@@ -1,9 +1,14 @@
 <script lang="ts">
   import { open } from "@tauri-apps/plugin-shell";
+  import { getVersion } from "@tauri-apps/api/app";
   import { t } from "$lib/i18n";
 
   const GITHUB_URL = "https://github.com/OpenSelena/omniget";
-  const APP_VERSION = "0.10.5";
+  let appVersion = $state("");
+
+  $effect(() => {
+    getVersion().then((v) => { appVersion = v; }).catch(() => {});
+  });
 
   async function openGitHub() {
     await open(GITHUB_URL);
@@ -22,12 +27,6 @@
       title="GitHub Stars"
     ></iframe>
   </div>
-  <button class="star-button" onclick={openGitHub}>
-    <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor" stroke="none">
-      <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-    </svg>
-    {$t('about.star_button')}
-  </button>
 </section>
 
 <section class="project-header">
@@ -48,7 +47,9 @@
   </div>
 </section>
 
-<p class="version">{$t('about.version')} {APP_VERSION}</p>
+{#if appVersion}
+  <p class="version">{$t('about.version')} {appVersion}</p>
+{/if}
 
 <style>
   .star-section {
