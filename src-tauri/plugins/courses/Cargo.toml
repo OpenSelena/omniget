@@ -33,3 +33,7 @@ sha2 = "0.10"
 filetime = "0.2.27"
 omniget-core = { path = "../../omniget-core", features = ["desktop"] }
 omniget-plugin-sdk = { path = "../../omniget-plugin-sdk" }
+
+[target.'cfg(windows)'.dependencies]
+webview2-com = "0.38"
+windows-core = "0.61"
