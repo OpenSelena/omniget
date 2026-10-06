@@ -59,9 +59,10 @@ pub async fn hotmart_login_token(
     *state.session_validated_at.lock().await = None;
     *state.courses_cache.lock().await = None;
 
+    let identity = crate::platforms::hotmart::auth::format_token_identity(&token);
     let saved = crate::platforms::hotmart::auth::SavedSession {
         token: token.trim().to_string(),
-        email: "Token User".to_string(),
+        email: identity.clone(),
         cookies: vec![],
         saved_at: std::time::SystemTime::now()
             .duration_since(std::time::UNIX_EPOCH)
@@ -80,7 +81,7 @@ pub async fn hotmart_login_token(
     let mut guard = state.hotmart_session.lock().await;
     *guard = Some(session);
     *state.session_validated_at.lock().await = Some(Instant::now());
-    Ok("Token User".to_string())
+    Ok(identity)
 }
 
 #[tauri::command]

@@ -25,15 +25,21 @@
       }
     ],
     "security": {
-      "csp": null,
+      "csp": "default-src 'self' ipc:; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' https: ipc:; img-src 'self' asset: data: blob: https:; media-src 'self' asset: blob: https:; font-src 'self' data:;",
       "assetProtocol": {
         "enable": true,
         "scope": {
           "allow": [
-            "**"
+            "$APPDATA/omniget/**",
+            "$DOWNLOAD/**",
+            "$TEMP/**"
           ],
-          "deny": [],
-          "requireLiteralLeadingDot": false
+          "deny": [
+            "**/.ssh/**",
+            "**/.aws/**",
+            "**/.git/**"
+          ],
+          "requireLiteralLeadingDot": true
         }
       }
     },
