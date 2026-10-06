@@ -53,8 +53,19 @@ jobs:
         run: node scripts/clippy-baseline.mjs --check
 
       - name: Test
+        if: matrix.platform != 'windows-latest'
         working-directory: src-tauri
         run: cargo test --workspace
+
+      # Tauri Issue #11028 / #14580: On Windows, standalone test binaries for
+      # crates linking tauri/webview without an embedded application manifest
+      # fail to load comctl32.dll (0xc0000139 STATUS_ENTRYPOINT_NOT_FOUND).
+      # omniget-plugin-courses is verified on Linux & macOS, and Windows GUI
+      # integration is verified in the smoke job.
+      - name: Test (Windows)
+        if: matrix.platform == 'windows-latest'
+        working-directory: src-tauri
+        run: cargo test --workspace --exclude omniget-plugin-courses
 
   rust-debian:
     if: ${{ github.event_name != 'pull_request' || github.event.pull_request.user.login != 'weblate' }}
