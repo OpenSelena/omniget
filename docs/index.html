@@ -895,6 +895,11 @@
       padding: 0 12px;
       height: 40px;
     }
+    .oo-input-shell:focus-within {
+      border-color: var(--border-focus);
+      outline: 2px solid var(--border-focus);
+      outline-offset: 1px;
+    }
     .oo-input-shell input {
       background: transparent;
       border: none;
@@ -1116,6 +1121,14 @@
       font-family: var(--font-sans);
       font-size: 16px;
       color: var(--text);
+    }
+    .search-modal-header:focus-within {
+      border-bottom-color: var(--border-focus);
+    }
+    .search-modal-input:focus-visible {
+      outline: 2px solid var(--border-focus);
+      outline-offset: 4px;
+      border-radius: 4px;
     }
     .search-results-list {
       max-height: 340px;
@@ -1568,7 +1581,7 @@
   <path d="M12 8h.01" /></svg>
         <div>
           <strong>Version 0.11.0 Release Update:</strong>
-          All 36 course platforms are now fully wired to the native download dispatcher, paired with strict webview Content Security Policies (CSP) and protocol isolation across all desktop platforms.
+          All 38 course platforms are now fully wired to the native download dispatcher, paired with strict webview Content Security Policies (CSP) and protocol isolation across all desktop platforms.
         </div>
       </div>
 
@@ -1583,7 +1596,7 @@
           <strong>Automatic Engine Verification:</strong> On initial launch, OmniGet asks for your preferred language and theme, then verifies or fetches <code>yt-dlp</code> and <code>FFmpeg</code> against strict cryptographic SHA-256 checksums before anything executes. If Python 3.10+ is detected on your system, yt-dlp runs as a zipapp, starting in under one second.
         </li>
         <li>
-          <strong>Paste Any Link:</strong> Copy any media URL to your clipboard&mdash;a YouTube video, Instagram reel, TikTok post, X thread, Pinterest board, Bilibili series, magnet link, or .torrent file. Paste it into the main input box. (For enrolled e-learning courses, navigate to the dedicated <strong>Courses</strong> workspace with your active login session).
+          <strong>Paste Any Link:</strong> Copy any media URL to your clipboard (a YouTube video, Instagram reel, TikTok post, X thread, Pinterest board, Bilibili series, magnet link, or .torrent file). Paste it into the main input box. (For enrolled e-learning courses, navigate to the dedicated <strong>Courses</strong> workspace with your active login session).
         </li>
         <li>
           <strong>Inspect Streams & Choose Quality:</strong> OmniGet probes the destination server and renders available streams: choose from <strong>4K HDR</strong>, <strong>1080p60</strong>, <strong>AV1/VP9/H.264</strong>, or extract pure audio directly as <strong>MP3</strong>, <strong>M4A</strong>, <strong>Opus</strong>, or lossless <strong>FLAC</strong>.
@@ -1719,7 +1732,7 @@
 
       <div class="doc-media-card">
         <img src="../assets/readme/workflow.png" alt="OmniGet Architectural Workflow" />
-        <div class="doc-media-caption">How OmniGet works: Intelligent URL routing to native extractors or yt-dlp, local stream muxing, and automatic study library cataloging.</div>
+        <div class="doc-media-caption">How OmniGet works: Deterministic URL routing to native extractors or yt-dlp, local stream muxing, and automatic study library cataloging.</div>
       </div>
 
       <!-- SECTION 5 -->
