@@ -4,14 +4,14 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Model Context Protocol (MCP) Server · OmniGet Documentation</title>
-  <meta name="description" content="Connect Claude Code, Cursor, and VS Code over local loopback (127.0.0.1:47720) to drive 37 media automation tools." />
+  <meta name="description" content="OmniGet's built-in MCP server exposes 37 tools over Streamable HTTP at POST /mcp on 127.0.0.1 for Claude Code, Claude Desktop, Cursor, VS Code, Goose, and Codex." />
   <link rel="canonical" href="https://omniget.nav.bd/docs/mcp/" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="OmniGet Documentation" />
   <meta property="og:title" content="Model Context Protocol (MCP) Server" />
-  <meta property="og:description" content="Connect Claude Code, Cursor, and VS Code over local loopback (127.0.0.1:47720) to drive 37 media automation tools." />
+  <meta property="og:description" content="OmniGet's built-in MCP server exposes 37 tools over Streamable HTTP at POST /mcp on 127.0.0.1 for Claude Code, Claude Desktop, Cursor, VS Code, Goose, and Codex." />
   <meta property="og:url" content="https://omniget.nav.bd/docs/mcp/" />
   <meta property="og:image" content="https://omniget.nav.bd/assets/readme/home.png" />
   <meta property="og:image:width" content="1200" />
@@ -1390,7 +1390,7 @@
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z" />
   <path d="M22 10v6" />
   <path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5" /></svg>
-          <span>38 Course Platforms</span>
+          <span>36 Course Platforms</span>
         </a>
         <a href="../opennami/" class="subtab-item">
           <svg class="icon icon-fill" viewBox="0 0 24 24" fill="currentColor"><title>Instagram</title><path d="M7.0301.084c-1.2768.0602-2.1487.264-2.911.5634-.7888.3075-1.4575.72-2.1228 1.3877-.6652.6677-1.075 1.3368-1.3802 2.127-.2954.7638-.4956 1.6365-.552 2.914-.0564 1.2775-.0689 1.6882-.0626 4.947.0062 3.2586.0206 3.6671.0825 4.9473.061 1.2765.264 2.1482.5635 2.9107.308.7889.72 1.4573 1.388 2.1228.6679.6655 1.3365 1.0743 2.1285 1.38.7632.295 1.6361.4961 2.9134.552 1.2773.056 1.6884.069 4.9462.0627 3.2578-.0062 3.668-.0207 4.9478-.0814 1.28-.0607 2.147-.2652 2.9098-.5633.7889-.3086 1.4578-.72 2.1228-1.3881.665-.6682 1.0745-1.3378 1.3795-2.1284.2957-.7632.4966-1.636.552-2.9124.056-1.2809.0692-1.6898.063-4.948-.0063-3.2583-.021-3.6668-.0817-4.9465-.0607-1.2797-.264-2.1487-.5633-2.9117-.3084-.7889-.72-1.4568-1.3876-2.1228C21.2982 1.33 20.628.9208 19.8378.6165 19.074.321 18.2017.1197 16.9244.0645 15.6471.0093 15.236-.005 11.977.0014 8.718.0076 8.31.0215 7.0301.0839m.1402 21.6932c-1.17-.0509-1.8053-.2453-2.2287-.408-.5606-.216-.96-.4771-1.3819-.895-.422-.4178-.6811-.8186-.9-1.378-.1644-.4234-.3624-1.058-.4171-2.228-.0595-1.2645-.072-1.6442-.079-4.848-.007-3.2037.0053-3.583.0607-4.848.05-1.169.2456-1.805.408-2.2282.216-.5613.4762-.96.895-1.3816.4188-.4217.8184-.6814 1.3783-.9003.423-.1651 1.0575-.3614 2.227-.4171 1.2655-.06 1.6447-.072 4.848-.079 3.2033-.007 3.5835.005 4.8495.0608 1.169.0508 1.8053.2445 2.228.408.5608.216.96.4754 1.3816.895.4217.4194.6816.8176.9005 1.3787.1653.4217.3617 1.056.4169 2.2263.0602 1.2655.0739 1.645.0796 4.848.0058 3.203-.0055 3.5834-.061 4.848-.051 1.17-.245 1.8055-.408 2.2294-.216.5604-.4763.96-.8954 1.3814-.419.4215-.8181.6811-1.3783.9-.4224.1649-1.0577.3617-2.2262.4174-1.2656.0595-1.6448.072-4.8493.079-3.2045.007-3.5825-.006-4.848-.0608M16.953 5.5864A1.44 1.44 0 1 0 18.39 4.144a1.44 1.44 0 0 0-1.437 1.4424M5.8385 12.012c.0067 3.4032 2.7706 6.1557 6.173 6.1493 3.4026-.0065 6.157-2.7701 6.1506-6.1733-.0065-3.4032-2.771-6.1565-6.174-6.1498-3.403.0067-6.156 2.771-6.1496 6.1738M8 12.0077a4 4 0 1 1 4.008 3.9921A3.9996 3.9996 0 0 1 8 12.0077"/></svg>
@@ -1457,7 +1457,7 @@
         <ul class="sidebar-nav-list">
           <li>
             <a href="../courses/" class="sidebar-link">
-              <span>38 Course Platforms</span>
+              <span>36 Course Platforms</span>
               <span class="sidebar-tag">v0.11.0</span>
             </a>
           </li>
@@ -1540,22 +1540,22 @@
       </div>
 
       <h1 class="doc-h1">Model Context Protocol (MCP) Server</h1>
-      <p class="doc-lead">Bridge OmniGet's media downloader, whisper.cpp transcription, FFmpeg converters, and 37 native tools to AI developer agents over a secure local loopback connection.</p>
+      <p class="doc-lead">OmniGet runs a built-in MCP server on 127.0.0.1. It exposes 37 tools over Streamable HTTP at <code>POST /mcp</code>, protected by a per-install bearer token.</p>
 
 
       <div class="doc-media-card">
         <img src="../../assets/readme/illustration-agents.png" alt="OmniGet AI Agent Bridge" />
-        <div class="doc-media-caption">OmniGet MCP Server: Local loopback Model Context Protocol bridge enabling AI agents with 37 media automation tools.</div>
+        <div class="doc-media-caption">The OmniGet MCP server: 37 tools over Streamable HTTP on 127.0.0.1.</div>
       </div>
 
       <p class="doc-p">
-        OmniGet includes a native <strong>Model Context Protocol (MCP)</strong> server that exposes 37 specialized media and system tools directly to AI coding assistants like <strong>Claude Code</strong>, <strong>Claude Desktop</strong>, <strong>Cursor</strong>, <strong>VS Code</strong>, <strong>Goose</strong>, and <strong>Codex</strong>.
+        OmniGet includes a built-in <strong>Model Context Protocol (MCP)</strong> server. It exposes 37 tools to <strong>Claude Code</strong>, <strong>Claude Desktop</strong>, <strong>Cursor</strong>, <strong>VS Code</strong>, <strong>Goose</strong>, and <strong>Codex</strong>.
       </p>
 
       <!-- SECTION 1 -->
       <h2 class="doc-h2" id="overview">1. OmniGet MCP Server Architecture</h2>
       <p class="doc-p">
-        Instead of asking an AI model to write fragile python scraping scripts or juggle terminal flags, your agent can call OmniGet's tested Rust toolchain directly. The MCP server runs over local loopback at <code>http://127.0.0.1:47720/mcp</code> (binding dynamically between ports 47720 and 47729).
+        Your agent calls OmniGet's tools directly instead of writing scraping scripts or juggling terminal flags. The MCP server runs on local loopback at <code>http://127.0.0.1:47720/mcp</code> (it binds the first free port between 47720 and 47729).
       </p>
 
       <div class="callout">
@@ -1571,7 +1571,7 @@
       <!-- SECTION 2 -->
       <h2 class="doc-h2" id="configs">2. AI Assistant Configuration Snippets</h2>
       <p class="doc-p">
-        Copy and paste the configuration snippet matching your preferred AI development environment:
+        OmniGet prints all of these snippets with your real token on its MCP server settings page, ready to paste for Claude Code, Claude Desktop, Cursor, VS Code, Goose, and Codex. The three most common clients:
       </p>
 
       <div class="code-container">
@@ -1584,8 +1584,14 @@
 <pre><code>{
   "mcpServers": {
     "omniget": {
-      "command": "omniget-cli",
-      "args": ["mcp", "--token", "YOUR_LOCAL_TOKEN"]
+      "command": "npx",
+      "args": [
+        "-y",
+        "mcp-remote",
+        "http://127.0.0.1:47720/mcp",
+        "--header",
+        "Authorization: Bearer YOUR_LOCAL_TOKEN"
+      ]
     }
   }
 }</code></pre>
@@ -1599,27 +1605,30 @@
   <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg><span>Copy</span></button>
         </div>
         <div class="code-body">
-<pre><code># Add new MCP server:
-Name: OmniGet
-Type: command
-Command: omniget-cli mcp --token YOUR_LOCAL_TOKEN</code></pre>
+<pre><code>{
+  "mcpServers": {
+    "omniget": {
+      "url": "http://127.0.0.1:47720/mcp",
+      "headers": { "Authorization": "Bearer YOUR_LOCAL_TOKEN" }
+    }
+  }
+}</code></pre>
         </div>
       </div>
 
       <div class="code-container">
         <div class="code-header">
-          <span style="font-size: 13px; font-weight: 600; color: #a1a1aa;">VS Code Cline / Continue (.vscode/settings.json)</span>
+          <span style="font-size: 13px; font-weight: 600; color: #a1a1aa;">VS Code (.vscode/mcp.json)</span>
           <button class="btn-copy" onclick="copyCodeSnippet(this)"><svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" />
   <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg><span>Copy</span></button>
         </div>
         <div class="code-body">
 <pre><code>{
-  "mcp": {
-    "servers": {
-      "omniget": {
-        "command": "omniget-cli",
-        "args": ["mcp", "--token", "YOUR_LOCAL_TOKEN"]
-      }
+  "servers": {
+    "omniget": {
+      "type": "http",
+      "url": "http://127.0.0.1:47720/mcp",
+      "headers": { "Authorization": "Bearer YOUR_LOCAL_TOKEN" }
     }
   }
 }</code></pre>
@@ -1683,7 +1692,7 @@ Command: omniget-cli mcp --token YOUR_LOCAL_TOKEN</code></pre>
       <!-- SECTION 4 -->
       <h2 class="doc-h2" id="tools-catalog">4. 37 Exposed MCP Tools Catalog</h2>
       <p class="doc-p">
-        When connected over <code>POST /mcp</code>, AI models can invoke all 37 deterministic tools exposed by the desktop core:
+        When connected over <code>POST /mcp</code>, AI models can call all 37 tools exposed by the desktop app:
       </p>
 
       <div class="doc-table-wrap">
@@ -1888,7 +1897,7 @@ Command: omniget-cli mcp --token YOUR_LOCAL_TOKEN</code></pre>
       <!-- SECTION 5 -->
       <h2 class="doc-h2" id="cli-verification">5. CLI Verification & Headless Testing</h2>
       <p class="doc-p">
-        Verify that your MCP bridge and CLI utilities are functioning correctly from your terminal:
+        Check the local bridge and the CLI from your terminal:
       </p>
 
       <div class="code-container">
@@ -1898,14 +1907,14 @@ Command: omniget-cli mcp --token YOUR_LOCAL_TOKEN</code></pre>
   <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg><span>Copy</span></button>
         </div>
         <div class="code-body">
-<pre><code># 1. Test local MCP server connectivity:
-omniget-cli mcp --test
+<pre><code># 1. Check the local bridge (it answers with {"ok":true,...}):
+curl http://127.0.0.1:47720/v1/health
 
-# 2. Transcribe an audio lecture offline with local whisper.cpp:
-omniget-cli tools whisper run ./lecture.mp3 --model base.en
+# 2. Preview what a URL offers without downloading:
+omniget-cli info "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 
-# 3. Pull video information without downloading:
-omniget-cli info "https://www.youtube.com/watch?v=dQw4w9WgXcQ"</code></pre>
+# 3. Download audio only:
+omniget-cli download "https://www.youtube.com/watch?v=dQw4w9WgXcQ" --audio-only</code></pre>
         </div>
       </div>
 
@@ -1920,7 +1929,7 @@ omniget-cli info "https://www.youtube.com/watch?v=dQw4w9WgXcQ"</code></pre>
         <a href="../courses/" class="page-nav-card" style="text-align: right;">
           <span class="page-nav-sub">Next Guide</span>
           <span class="page-nav-title" style="justify-content: flex-end; gap: 8px;">
-            <span>38 Course Platforms &rarr;</span>
+            <span>36 Course Platforms &rarr;</span>
           </span>
         </a>
       </div>
@@ -1980,7 +1989,7 @@ omniget-cli info "https://www.youtube.com/watch?v=dQw4w9WgXcQ"</code></pre>
           <span class="search-result-desc">Local AI agent tools for Claude Code, Cursor, and VS Code</span>
         </li>
         <li class="search-result-item" onclick="location.href='../courses/'">
-          <span class="search-result-title">38 Online Course Platforms</span>
+          <span class="search-result-title">36 Online Course Platforms</span>
           <span class="search-result-desc">Hotmart, Udemy, Rocketseat, Kajabi, and Kiwify integration</span>
         </li>
         <li class="search-result-item" onclick="location.href='../opennami/'">
@@ -1992,7 +2001,7 @@ omniget-cli info "https://www.youtube.com/watch?v=dQw4w9WgXcQ"</code></pre>
           <span class="search-result-desc">macOS Gatekeeper, Linux WebKitGTK, and diagnostic logs</span>
         </li>
         <li class="search-result-item" onclick="location.href='../#privacy'">
-          <span class="search-result-title">Privacy Policy &amp; Zero Telemetry</span>
+          <span class="search-result-title">Privacy Policy &amp; No Tracking</span>
           <span class="search-result-desc">Local SQLite storage, loopback security, and DRM non-circumvention</span>
         </li>
         <li class="search-result-item" onclick="location.href='../changelog/'">
