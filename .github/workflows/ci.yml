@@ -15,7 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [ubuntu-latest, windows-latest, macos-latest]
+        platform: [blacksmith-4vcpu-ubuntu-2404, blacksmith-4vcpu-windows-2025, blacksmith-6vcpu-macos-15]
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
@@ -69,7 +69,7 @@ jobs:
 
   rust-debian:
     if: ${{ github.event_name != 'pull_request' || github.event.pull_request.user.login != 'weblate' }}
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     container: debian:bookworm
     steps:
       - name: Install base tools
@@ -79,7 +79,7 @@ jobs:
             ca-certificates curl wget git build-essential pkg-config \
             libssl-dev file unzip xz-utils
 
-      - uses: actions/checkout@v4
+      - uses: useblacksmith/checkout@v1
 
       - name: Install Debian system dependencies
         run: |
@@ -100,9 +100,9 @@ jobs:
         run: cargo check --workspace --all-targets
 
   frontend:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
-      - uses: actions/checkout@v4
+      - uses: useblacksmith/checkout@v1
 
       - uses: actions/setup-node@v4
         with:
@@ -139,7 +139,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platform: [windows-latest, ubuntu-latest]
+        platform: [blacksmith-4vcpu-windows-2025, blacksmith-4vcpu-ubuntu-2404]
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
@@ -199,9 +199,9 @@ jobs:
 
   metainfo:
     if: ${{ github.event_name != 'pull_request' || github.event.pull_request.user.login != 'weblate' }}
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
-      - uses: actions/checkout@v4
+      - uses: useblacksmith/checkout@v1
 
       - name: Install appstreamcli
         run: |

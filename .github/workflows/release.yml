@@ -13,9 +13,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: 'macos-latest'
+          - platform: 'blacksmith-6vcpu-macos-15'
             args: '--target aarch64-apple-darwin'
-          - platform: 'macos-latest'
+          - platform: 'blacksmith-6vcpu-macos-15'
             args: '--target x86_64-apple-darwin'
           # Ubuntu 22.04 keeps the x86_64 build on glibc 2.35, which is what
           # lets the AppImage run on older distros. Its PipeWire headers
@@ -25,11 +25,11 @@ jobs:
           # cargo, and rejects the flag otherwise. Only the app's default
           # feature (`linux-capture`) is dropped; `rnnoise` stays because the
           # dependency declaration asks for it by name.
-          - platform: 'ubuntu-22.04'
+          - platform: 'blacksmith-4vcpu-ubuntu-2204'
             args: '-- --no-default-features'
-          - platform: 'ubuntu-24.04-arm'
+          - platform: 'blacksmith-4vcpu-ubuntu-2404-arm'
             args: ''
-          - platform: 'windows-latest'
+          - platform: 'blacksmith-4vcpu-windows-2025'
             args: ''
 
     runs-on: ${{ matrix.platform }}
@@ -164,13 +164,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-22.04
+          - os: blacksmith-4vcpu-ubuntu-2204
             target: x86_64-unknown-linux-gnu
-          - os: macos-latest
+          - os: blacksmith-6vcpu-macos-15
             target: aarch64-apple-darwin
-          - os: macos-latest
+          - os: blacksmith-6vcpu-macos-15
             target: x86_64-apple-darwin
-          - os: windows-latest
+          - os: blacksmith-4vcpu-windows-2025
             target: x86_64-pc-windows-msvc
     runs-on: ${{ matrix.os }}
     permissions:
@@ -230,11 +230,11 @@ jobs:
 
   package-chrome-extension:
     needs: publish-tauri
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: useblacksmith/checkout@v1
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -253,7 +253,7 @@ jobs:
 
   upload-updater-json:
     needs: publish-tauri
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     permissions:
       contents: write
     steps:

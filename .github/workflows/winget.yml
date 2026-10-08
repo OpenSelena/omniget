@@ -16,7 +16,7 @@ on:
 
 jobs:
   winget:
-    runs-on: windows-latest
+    runs-on: blacksmith-4vcpu-windows-2025
     steps:
       - name: Submit manifest update
         shell: pwsh
