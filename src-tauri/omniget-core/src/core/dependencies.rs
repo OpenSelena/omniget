@@ -534,7 +534,7 @@ async fn download_ffmpeg() -> anyhow::Result<PathBuf> {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-enum ArchiveType {
+pub(crate) enum ArchiveType {
     Zip,
     TarXz,
 }
