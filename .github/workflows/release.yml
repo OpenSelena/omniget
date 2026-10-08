@@ -82,6 +82,13 @@ jobs:
         with:
           workspaces: './src-tauri -> target'
 
+      - name: Seed patched linuxdeploy-plugin-gtk (Ubuntu only)
+        if: contains(matrix.platform, 'ubuntu')
+        run: |
+          mkdir -p ~/.cache/tauri
+          cp scripts/linux/linuxdeploy-plugin-gtk.sh ~/.cache/tauri/linuxdeploy-plugin-gtk.sh
+          chmod +x ~/.cache/tauri/linuxdeploy-plugin-gtk.sh
+
       - uses: tauri-apps/tauri-action@v0
         id: tauri-build
         env:
