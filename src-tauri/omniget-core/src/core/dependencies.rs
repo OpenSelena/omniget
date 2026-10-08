@@ -533,18 +533,37 @@ async fn download_ffmpeg() -> anyhow::Result<PathBuf> {
     Ok(ffmpeg_target)
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 enum ArchiveType {
     Zip,
     TarXz,
 }
 
 fn ffmpeg_download_urls() -> Vec<(&'static str, ArchiveType)> {
-    if cfg!(target_os = "windows") {
+    ffmpeg_download_urls_for(std::env::consts::OS, std::env::consts::ARCH)
+}
+
+pub(crate) fn ffmpeg_download_urls_for(
+    target_os: &str,
+    target_arch: &str,
+) -> Vec<(&'static str, ArchiveType)> {
+    if target_os == "windows" {
         vec![(
             "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip",
             ArchiveType::Zip,
         )]
-    } else if cfg!(target_os = "macos") {
+    } else if target_os == "macos" && target_arch == "aarch64" {
+        vec![
+            (
+                "https://ffmpeg.martin-riedl.de/redirect/latest/macos/arm64/release/ffmpeg.zip",
+                ArchiveType::Zip,
+            ),
+            (
+                "https://ffmpeg.martin-riedl.de/redirect/latest/macos/arm64/release/ffprobe.zip",
+                ArchiveType::Zip,
+            ),
+        ]
+    } else if target_os == "macos" {
         vec![
             (
                 "https://evermeet.cx/ffmpeg/getrelease/zip",
@@ -555,7 +574,7 @@ fn ffmpeg_download_urls() -> Vec<(&'static str, ArchiveType)> {
                 ArchiveType::Zip,
             ),
         ]
-    } else if cfg!(target_arch = "aarch64") {
+    } else if target_arch == "aarch64" {
         vec![(
             "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linuxarm64-gpl.tar.xz",
             ArchiveType::TarXz,
@@ -996,5 +1015,35 @@ mod integrity_tests {
         );
         assert_eq!(parse_github_digest(VAZIO), None);
         assert_eq!(parse_github_digest("sha512:abc"), None);
+    }
+
+    #[test]
+    fn ffmpeg_download_urls_per_target_architecture() {
+        use super::*;
+
+        let mac_arm = ffmpeg_download_urls_for("macos", "aarch64");
+        assert_eq!(mac_arm.len(), 2);
+        assert!(mac_arm[0].0.contains("arm64") && mac_arm[0].0.ends_with("ffmpeg.zip"));
+        assert!(mac_arm[1].0.contains("arm64") && mac_arm[1].0.ends_with("ffprobe.zip"));
+        assert_eq!(mac_arm[0].1, ArchiveType::Zip);
+
+        let mac_intel = ffmpeg_download_urls_for("macos", "x86_64");
+        assert_eq!(mac_intel.len(), 2);
+        assert!(mac_intel[0].0.contains("evermeet.cx"));
+
+        let win = ffmpeg_download_urls_for("windows", "x86_64");
+        assert_eq!(win.len(), 1);
+        assert!(win[0].0.contains("win64"));
+        assert_eq!(win[0].1, ArchiveType::Zip);
+
+        let linux_arm = ffmpeg_download_urls_for("linux", "aarch64");
+        assert_eq!(linux_arm.len(), 1);
+        assert!(linux_arm[0].0.contains("linuxarm64"));
+        assert_eq!(linux_arm[0].1, ArchiveType::TarXz);
+
+        let linux_x64 = ffmpeg_download_urls_for("linux", "x86_64");
+        assert_eq!(linux_x64.len(), 1);
+        assert!(linux_x64[0].0.contains("linux64"));
+        assert_eq!(linux_x64[0].1, ArchiveType::TarXz);
     }
 }

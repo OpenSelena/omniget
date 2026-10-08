@@ -228,6 +228,13 @@ export GTK_THEME="$APPIMAGE_GTK_THEME" # Custom themes are broken
 export GDK_BACKEND=x11 # Crash with Wayland backend on Wayland - We tested it without it and ended up with this: https://github.com/tauri-apps/tauri/issues/8541
 export XDG_DATA_DIRS="$APPDIR/usr/share:/usr/share:$XDG_DATA_DIRS" # g_get_system_data_dirs() from GLib
 
+if [ -z "${WEBKIT_DISABLE_DMABUF_RENDERER:-}" ]; then
+    export WEBKIT_DISABLE_DMABUF_RENDERER=1
+fi
+if [ -z "${WEBKIT_DISABLE_COMPOSITING_MODE:-}" ]; then
+    export WEBKIT_DISABLE_COMPOSITING_MODE=1
+fi
+
 # WebKitGTK plays media through GStreamer, and the bundled core libraries come
 # without plugins or the plugin-scanner helper — so the default scan finds no
 # appsink/autoaudiosink/decodebin and the first media pipeline dies (blank page
