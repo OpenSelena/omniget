@@ -9,13 +9,16 @@ jobs:
   publish-tauri:
     permissions:
       contents: write
+      actions: write
     strategy:
       fail-fast: false
       matrix:
         include:
           - platform: 'macos-latest'
+            cli_target: 'aarch64-apple-darwin'
             args: '--target aarch64-apple-darwin'
           - platform: 'macos-latest'
+            cli_target: 'x86_64-apple-darwin'
             args: '--target x86_64-apple-darwin'
           # Ubuntu 22.04 keeps the x86_64 build on glibc 2.35, which is what
           # lets the AppImage run on older distros. Its PipeWire headers
@@ -26,10 +29,13 @@ jobs:
           # feature (`linux-capture`) is dropped; `rnnoise` stays because the
           # dependency declaration asks for it by name.
           - platform: 'ubuntu-22.04'
+            cli_target: 'x86_64-unknown-linux-gnu'
             args: '-- --no-default-features'
           - platform: 'ubuntu-24.04-arm'
+            cli_target: ''
             args: ''
           - platform: 'windows-latest'
+            cli_target: 'x86_64-pc-windows-msvc'
             args: ''
 
     runs-on: ${{ matrix.platform }}
@@ -43,15 +49,16 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev libasound2-dev libpipewire-0.3-dev clang libclang-dev patchelf xdg-utils
 
+      - uses: pnpm/action-setup@v5
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: lts/*
-
-      - uses: pnpm/action-setup@v5
+          cache: 'pnpm'
 
       - name: Install frontend dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       # Pinned via rust-toolchain.toml: the plugin ABI depends on the exact
       # rustc version, so this must match what the plugin repos build with.
@@ -60,6 +67,15 @@ jobs:
         with:
           toolchain: 1.97.0
           targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@v0.0.11
+
+      - name: Configure sccache
+        shell: bash
+        run: |
+          echo "SCCACHE_GHA_ENABLED=true" >> $GITHUB_ENV
+          echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
@@ -150,80 +166,40 @@ jobs:
           }
         shell: pwsh
 
-  build-cli:
-    # O omniget-cli existe no workspace desde sempre mas nunca saiu numa
-    # release, entao a unica forma de usar era compilar da fonte (issue #202).
-    #
-    # `needs: publish-tauri` porque o upload precisa da release existir — quem a
-    # cria e o publish-tauri. A *compilacao* e independente (o CLI nao precisa de
-    # webkit/gtk: a arvore nao tem openssl-sys), e foi essa independencia que me
-    # fez omitir o needs na #221. O resultado foi `release not found` na v0.8.0,
-    # com o binario compilado e jogado fora.
-    needs: publish-tauri
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: ubuntu-22.04
-            target: x86_64-unknown-linux-gnu
-          - os: macos-latest
-            target: aarch64-apple-darwin
-          - os: macos-latest
-            target: x86_64-apple-darwin
-          - os: windows-latest
-            target: x86_64-pc-windows-msvc
-    runs-on: ${{ matrix.os }}
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v6
-
-      # `@master` com a versao fixada, e nao `@stable`: o rust-toolchain.toml da
-      # raiz forca 1.97.0, entao instalar o alvo no `stable` deixa a build usando
-      # um toolchain que nao tem o alvo — `can't find crate for core` na primeira
-      # release. O publish-tauri ja fazia assim; este job nao seguiu o padrao.
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: 1.97.0
-          targets: ${{ matrix.target }}
-
-      - uses: Swatinem/rust-cache@v2
-        with:
-          workspaces: src-tauri
-
-      - name: Build CLI
-        working-directory: src-tauri
-        run: cargo build -p omniget-cli --release --target ${{ matrix.target }}
-
-      - name: Package and upload (unix)
-        if: matrix.os != 'windows-latest'
+      - name: Package and upload CLI (Unix)
+        if: matrix.platform != 'windows-latest' && matrix.cli_target != ''
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           TAG="${GITHUB_REF#refs/tags/}"
           VERSION="${TAG#v}"
-          BIN="src-tauri/target/${{ matrix.target }}/release/omniget-cli"
-          # Falha alto se o binario nao existe: subir uma release sem o
-          # artefato e pior do que o job ficar vermelho.
+          if [ "${{ matrix.platform }}" = "macos-latest" ]; then
+            cargo build -p omniget-cli --release --target ${{ matrix.cli_target }} --manifest-path src-tauri/Cargo.toml
+            BIN="src-tauri/target/${{ matrix.cli_target }}/release/omniget-cli"
+          else
+            cargo build -p omniget-cli --release --manifest-path src-tauri/Cargo.toml
+            BIN="src-tauri/target/release/omniget-cli"
+          fi
           test -x "$BIN"
           "$BIN" --version
-          OUT="omniget-cli-${VERSION}-${{ matrix.target }}.tar.gz"
+          OUT="omniget-cli-${VERSION}-${{ matrix.cli_target }}.tar.gz"
           tar -czf "$OUT" -C "$(dirname "$BIN")" omniget-cli
           gh release upload "$TAG" "$OUT" --repo "${{ github.repository }}" --clobber
 
-      - name: Package and upload (windows)
-        if: matrix.os == 'windows-latest'
+      - name: Package and upload CLI (Windows)
+        if: matrix.platform == 'windows-latest' && matrix.cli_target != ''
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           $ErrorActionPreference = "Stop"
           $TAG = "${{ github.ref_name }}"
           $VERSION = $TAG -replace '^v', ''
-          $BIN = "src-tauri/target/${{ matrix.target }}/release/omniget-cli.exe"
-          if (-not (Test-Path $BIN)) { throw "binario nao encontrado: $BIN" }
+          cargo build -p omniget-cli --release --manifest-path src-tauri/Cargo.toml
+          $BIN = "src-tauri/target/release/omniget-cli.exe"
+          if (-not (Test-Path $BIN)) { throw "Binary not found: $BIN" }
           & $BIN --version
-          $OUT = "omniget-cli-${VERSION}-${{ matrix.target }}.zip"
+          $OUT = "omniget-cli-${VERSION}-${{ matrix.cli_target }}.zip"
           Compress-Archive -Path $BIN -DestinationPath $OUT -Force
           gh release upload $TAG $OUT --repo ${{ github.repository }} --clobber
         shell: pwsh
