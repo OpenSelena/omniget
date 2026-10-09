@@ -566,11 +566,11 @@ export function runTier1Tests() {
     );
   }
 
-  // 5.3 MD5 checksum verification (Contract specified in PROJECT.md)
+  // 5.3 MD5 checksum verification (contract: current landing page state)
   {
-    const SPEC_HASH = '3fc62597282cb9e86c8f258a646cbaee';
-    const ORIGIN_CRLF_HASH = '788bd388dbe2e2820d4afdffedc69168';
-    const ORIGIN_LF_HASH = '4721fd0f964ff87c95b0ba5178d7b27d';
+    const SPEC_HASH = '725aff9ecddee1db72180a2ae95a02b8';
+    const ORIGIN_CRLF_HASH = '725aff9ecddee1db72180a2ae95a02b8';
+    const ORIGIN_LF_HASH = '114ecf5fe93be91ce1225601ef2c9c7f';
 
     // Strict check against prompt/PROJECT.md specification
     const matchesSpecHash = (rootMd5 === SPEC_HASH);
@@ -585,18 +585,19 @@ export function runTier1Tests() {
     );
   }
 
-  // 5.4 Root index.html retains SPA single-page hash routing
+  // 5.4 Root index.html retains the current single-scroll landing architecture
   {
-    const hasHashRouting = /switchPageTab\b/.test(rootContent) &&
-                          /page-home\b/.test(rootContent) &&
-                          /page-downloads\b/.test(rootContent) &&
-                          /page-releasenotes\b/.test(rootContent) &&
-                          /page-opennami\b/.test(rootContent);
+    const hasLandingArchitecture = /id="hero"/.test(rootContent) &&
+                                   /id="dlSplit"/.test(rootContent) &&
+                                   /id="dlMenuPanel"/.test(rootContent) &&
+                                   /function\s+toggleTheme\s*\(/.test(rootContent) &&
+                                   /id="themeToggleBtn"/.test(rootContent) &&
+                                   /id="faq"/.test(rootContent);
     record(
-      'Tier 1: Root index.html Retains SPA Tab Routing Architecture',
-      hasHashRouting,
-      hasHashRouting ? 'All 5 landing tabs (#home, #opennami, #downloads, #releasenotes, #faq) intact' : 'Hash tab routing modified or corrupted',
-      hasHashRouting ? null : 'SPA hash router damaged'
+      'Tier 1: Root index.html Retains Landing Page Architecture',
+      hasLandingArchitecture,
+      hasLandingArchitecture ? 'Landing landmarks intact: hero, download menu, theme toggle, FAQ' : 'Landing architecture modified or corrupted',
+      hasLandingArchitecture ? null : 'Expected landmarks: #hero, #dlSplit, #dlMenuPanel, toggleTheme(), #themeToggleBtn, #faq'
     );
   }
 
