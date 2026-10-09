@@ -42,7 +42,7 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
   <a href="https://github.com/OpenSelena/omniget/stargazers"><img src="https://img.shields.io/github/stars/OpenSelena/omniget?style=for-the-badge&color=FFD426" alt="Звёзды на GitHub" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-2AA845?style=for-the-badge" alt="Лицензия GPL-3.0" /></a>
   <a href="https://t.me/OpenSelena"><img src="https://img.shields.io/badge/Telegram-channel-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white" alt="Канал в Telegram" /></a>
-  <a href="https://hosted.weblate.org/engage/omniget/"><img src="https://hosted.weblate.org/widget/omniget/frontend-json/svg-badge.svg" alt="Статус перевода" /></a>
+  <a href="https://hosted.weblate.org/engage/omniget-openselena/"><img src="https://hosted.weblate.org/widget/omniget-openselena/frontend/svg-badge.svg" alt="Статус перевода" /></a>
 </p>
 
 <p align="center">
@@ -739,7 +739,7 @@ pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'
 
 Сообщения об ошибках и pull request'ы — в [Issues](https://github.com/OpenSelena/omniget/issues) и [Pull requests](https://github.com/OpenSelena/omniget/pulls). Вопросы и быстрая помощь — в [Telegram](https://t.me/OpenSelena). Вопросы безопасности и сообщения об уязвимостях: [SECURITY.md](SECURITY.md) или [igect@vk.com](mailto:igect@vk.com).
 
-Переводы ведутся на [Weblate](https://hosted.weblate.org/engage/omniget/). Выберите свой язык и переводите в браузере. Новые строки появляются там через несколько часов после попадания в `main`.
+Переводы ведутся на [Weblate](https://hosted.weblate.org/engage/omniget-openselena/). Выберите свой язык и переводите в браузере. Новые строки появляются там через несколько часов после попадания в `main`.
 
 OmniGet построен на [yt-dlp](https://github.com/yt-dlp/yt-dlp), [FFmpeg](https://ffmpeg.org/), [gallery-dl](https://github.com/mikf/gallery-dl), [whisper.cpp](https://github.com/ggerganov/whisper.cpp), [aria2](https://aria2.github.io/), [SponsorBlock](https://sponsor.ajay.app/), [Return YouTube Dislike](https://returnyoutubedislike.com/), [FxTwitter](https://github.com/FixTweet/FxTwitter), [Spicetify](https://spicetify.app/), [cat-catch](https://github.com/xifangczy/cat-catch) (части перехватчика медиа из расширения) и [Tauri](https://tauri.app/). Спасибо всем, кто их поддерживает.
 
