@@ -1415,7 +1415,7 @@
           <li>
             <a href="../courses/" class="sidebar-link">
               <span>36 Course Platforms</span>
-              <span class="sidebar-tag">v0.11.0</span>
+              <span class="sidebar-tag">v0.12.0</span>
             </a>
           </li>
         </ul>
@@ -1502,12 +1502,64 @@
         Release notes, feature changes, and system patches for OmniGet. All desktop releases are signed, reproducible, and published with SHA-256 binary validation.
       </p>
 
+      <!-- v0.12.0 Release -->
+      <article class="release-box" id="v0-12-0">
+        <div class="release-header">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="release-tag-pill">v0.12.0 Stable</span>
+              <span class="release-date">Released October 2026</span>
+            </div>
+            <h2 class="release-title">Telegram API Credentials, Official Community Migration &amp; CSP Star Badge Fix</h2>
+          </div>
+          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.12.0" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+            <span>GitHub Tag</span>
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+
+        <div class="release-section">
+          <h3 class="release-section-title">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
+            Telegram Client API Credentials &amp; Handshake
+          </h3>
+          <ul class="release-list">
+            <li>Updated embedded Telegram downloader plugin to official Open Selena credentials: App API ID <code>35888717</code> and App API Hash.</li>
+            <li>Replaced legacy credentials across MTProto sender pool connection, QR login authorization, and SMS code verification flows.</li>
+            <li>Enhanced authentication reliability for multi-datacenter media fetching and channel archive synchronization.</li>
+          </ul>
+        </div>
+
+        <div class="release-section">
+          <h3 class="release-section-title">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Official Community Migration &amp; UI Polish
+          </h3>
+          <ul class="release-list">
+            <li>Migrated community links on About Overview from Discord to official Telegram community channel (<code>https://t.me/OpenSelena</code>).</li>
+            <li>Added dedicated Telegram paper-plane vector glyph with theme-consistent fill and stroke.</li>
+            <li>Wired external link activations through Tauri shell plugin handler for desktop system browser execution.</li>
+          </ul>
+        </div>
+
+        <div class="release-section">
+          <h3 class="release-section-title">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Content Security Policy &amp; Star Badge Restoration
+          </h3>
+          <ul class="release-list">
+            <li>Extended webview Content Security Policy with <code>frame-src 'self' https://ghbtns.com;</code> to unblock GitHub star badge widgets.</li>
+            <li>Eliminated placeholder gray box on About Project view while preserving strict script and asset security directives.</li>
+          </ul>
+        </div>
+      </article>
+
       <!-- v0.11.0 Release -->
       <article class="release-box" id="v0-11-0">
         <div class="release-header">
           <div>
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span class="release-tag-pill">v0.11.0 Stable</span>
+              <span class="sidebar-tag">v0.11.0</span>
               <span class="release-date">Released October 2026</span>
             </div>
             <h2 class="release-title">36 Course Platforms Wired, Security Hardening &amp; Metadata Polish</h2>
@@ -1749,7 +1801,8 @@
         <span>On this page</span>
       </div>
       <ul class="toc-list" id="tocList">
-        <li><a href="#v0-11-0" class="toc-link">v0.11.0 (Latest Stable)</a></li>
+        <li><a href="#v0-12-0" class="toc-link">v0.12.0 (Latest Stable)</a></li>
+        <li><a href="#v0-11-0" class="toc-link">v0.11.0</a></li>
         <li><a href="#v0-10-5" class="toc-link">v0.10.5</a></li>
         <li><a href="#v0-10-4" class="toc-link">v0.10.4</a></li>
         <li><a href="#v0-10-3" class="toc-link">v0.10.3</a></li>
@@ -1810,7 +1863,7 @@
         </li>
         <li class="search-result-item" onclick="location.href='../changelog/'">
           <span class="search-result-title">Release Notes &amp; Changelog</span>
-          <span class="search-result-desc">Version v0.11.0 updates, course platforms, security hardening</span>
+          <span class="search-result-desc">Version v0.12.0 updates, Telegram API credentials, CSP star fix</span>
         </li>
       </ul>
     </div>

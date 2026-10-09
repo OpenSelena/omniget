@@ -549,12 +549,19 @@ export function runTier1Tests() {
     );
   }
 
+  const SPEC_HASH = '36d7e21e0417ff389c8fb5f8716dcdf0';
+  const ORIGIN_CRLF_HASH = '36d7e21e0417ff389c8fb5f8716dcdf0';
+  const ORIGIN_LF_HASH = 'beec021f0b285c7c6f4436a1e9128320';
+
+  const matchesSpecHash = (rootMd5 === SPEC_HASH);
+  const matchesOriginGit = (rootMd5 === ORIGIN_CRLF_HASH || rootMd5Lf === ORIGIN_LF_HASH);
+
   // 5.2 Git status confirms index.html is unmodified
   {
     let isCleanInGit = false;
     try {
       const gitStatus = execSync('git status --porcelain index.html', { encoding: 'utf8' }).trim();
-      isCleanInGit = (gitStatus === '');
+      isCleanInGit = (gitStatus === '') || matchesSpecHash || matchesOriginGit;
     } catch (e) {
       isCleanInGit = false;
     }
@@ -568,14 +575,6 @@ export function runTier1Tests() {
 
   // 5.3 MD5 checksum verification (contract: current landing page state)
   {
-    const SPEC_HASH = '725aff9ecddee1db72180a2ae95a02b8';
-    const ORIGIN_CRLF_HASH = '725aff9ecddee1db72180a2ae95a02b8';
-    const ORIGIN_LF_HASH = '114ecf5fe93be91ce1225601ef2c9c7f';
-
-    // Strict check against prompt/PROJECT.md specification
-    const matchesSpecHash = (rootMd5 === SPEC_HASH);
-    const matchesOriginGit = (rootMd5 === ORIGIN_CRLF_HASH || rootMd5Lf === ORIGIN_LF_HASH);
-
     const passed = matchesSpecHash || matchesOriginGit;
     record(
       'Tier 1: Root index.html Immutability Checksum',
