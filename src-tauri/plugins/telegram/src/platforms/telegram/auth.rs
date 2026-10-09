@@ -15,8 +15,8 @@ use qrcode::render::svg;
 use qrcode::QrCode;
 use tokio::sync::{mpsc, Mutex};
 
-const API_ID: i32 = 15055931;
-const API_HASH: &str = "021d433426cbb920eeb95164498fe3d3";
+const API_ID: i32 = 35888717;
+const API_HASH: &str = "16869ec2471d85a6bc4fe08aad088e67";
 
 pub type TelegramSessionHandle = Arc<Mutex<TelegramState>>;
 
