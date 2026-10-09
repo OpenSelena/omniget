@@ -25,7 +25,7 @@
       }
     ],
     "security": {
-      "csp": "default-src 'self' ipc:; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' https: ipc:; img-src 'self' asset: data: blob: https:; media-src 'self' asset: blob: https:; font-src 'self' data:;",
+      "csp": "default-src 'self' ipc:; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; connect-src 'self' https: ipc:; img-src 'self' asset: data: blob: https:; media-src 'self' asset: blob: https:; font-src 'self' data:; frame-src 'self' https://ghbtns.com;",
       "assetProtocol": {
         "enable": true,
         "scope": {
