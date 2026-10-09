@@ -156,12 +156,11 @@ if (fs.existsSync(aboutProjectPath)) {
 function updateLandingPageContent(content) {
   return content
     .replace(/"softwareVersion":\s*"[^"]+"/, `"softwareVersion": "${version}"`)
-    .replace(/(releases\/latest\/download\/)(?:omniget|OmniGet)_[^/]+_(x64-setup\.exe)/g, `$1OmniGet_${version}_$2`)
-    .replace(/(releases\/latest\/download\/)(?:omniget|OmniGet)_[^/]+_(x64-portable\.exe)/g, `$1omniget_${version}_$2`)
-    .replace(/(releases\/latest\/download\/)(?:omniget|OmniGet)_[^/]+_(aarch64\.dmg)/g, `$1OmniGet_${version}_$2`)
-    .replace(/(releases\/latest\/download\/)(?:omniget|OmniGet)_[^/]+_(x64\.dmg)/g, `$1OmniGet_${version}_$2`)
-    .replace(/(releases\/latest\/download\/)(?:omniget|OmniGet)_[^/]+_(amd64\.AppImage)/g, `$1OmniGet_${version}_$2`)
-    .replace(/(releases\/latest\/download\/)(?:omniget|OmniGet)_[^/]+_(amd64\.deb)/g, `$1OmniGet_${version}_$2`)
+    // Asset download links are pinned to the release tag: rewrite the tag and
+    // every version number inside the asset name in a single pass.
+    .replace(/releases\/tag\/v\d+\.\d+\.\d+\/download\/[^\s"'<>\\]+/g, (m) =>
+      m.replace(/v\d+\.\d+\.\d+(?=\/download)/, `v${version}`).replace(/\d+\.\d+\.\d+/g, version)
+    )
     .replace(/OmniGet v\d+\.\d+\.\d+\. Free and open source/g, `OmniGet v${version}. Free and open source`)
     .replace(/releases\/tag\/v\d+\.\d+\.\d+/g, `releases/tag/v${version}`)
     .replace(/Get OmniGet v\d+\.\d+\.\d+/g, `Get OmniGet v${version}`);
