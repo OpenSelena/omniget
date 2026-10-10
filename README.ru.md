@@ -52,9 +52,11 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 </p>
 
 <p align="center">
-  <sub>Бесплатно. Открытый код под GPL-3.0. Без аккаунта, без рекламы, без телеметрии о том, что вы скачиваете. Файлы остаются на вашем компьютере.</sub><br/>
-  <sub>Более 9 500 звёзд на GitHub. Самый звёздный репозиторий в топиках <a href="https://github.com/topics/udemy-downloader">udemy-downloader</a>, <a href="https://github.com/topics/hotmart-downloader">hotmart-downloader</a> и <a href="https://github.com/topics/course-downloader">course-downloader</a>.</sub>
+  <sub>Бесплатно. Открытый код под GPL-3.0. Без аккаунта, без рекламы, без телеметрии о том, что вы скачиваете. Файлы остаются на вашем компьютере.</sub>
 </p>
+
+> [!NOTE]
+> `OpenSelena/omniget` это форк оригинального OmniGet (`tonhowtf/omniget`). Мы поддерживаем его как альтернативу, пока оригинальные репозитории и загрузки недоступны, и переносим сюда будущие обновления из основного OmniGet. Проект не связан с [@tonhowtf](https://github.com/tonhowtf) (tonho).
 
 <p align="center">
   <img src="assets/readme/home.png" alt="Главный экран OmniGet: вставьте URL, magnet-ссылку или .torrent, и файл окажется в вашей папке" width="900" />
@@ -729,7 +731,7 @@ pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'
 
 Релизы подписывают артефакты обновления приватным ключом, который есть только у мейнтейнера, поэтому обычный `pnpm tauri build` останавливается с ошибкой «A public key has been found, but no private key». Флаг выше отключает эти артефакты для локальной сборки и ничего больше не меняет.
 
-Плагины живут в своих репозиториях: [omniget-plugin-courses](https://github.com/OpenSelena/omniget-plugin-courses), [omniget-plugin-telegram](https://github.com/OpenSelena/omniget-plugin-telegram) и [omniget-plugin-convert](https://github.com/OpenSelena/omniget-plugin-convert) (Study встроен нативно). Реестр — [omniget-plugins](https://github.com/OpenSelena/omniget-plugins). `pnpm plugins:deploy` собирает соседние чекауты плагинов и копирует их в вашу локальную папку данных.
+Плагины `courses`, `telegram`, `convert` и `study` лежат внутри `src-tauri/plugins/` и собираются в основной бинарник. Реестр плагинов: [omniget-plugins](https://github.com/OpenSelena/omniget-plugins).
 
 Стек: Tauri 2, Rust, SvelteKit на Svelte 5, SQLite, yt-dlp, FFmpeg, librqbit для торрентов, whisper.cpp, aria2, gallery-dl.
 

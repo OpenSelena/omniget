@@ -22,14 +22,11 @@ leitor pdf, flashcards anki, repetição espaçada, player de música, spicetify
 </p>
 
 <p align="center">
-  <sub>Tradução para o português do Brasil iniciada por <a href="https://github.com/alvarorichard">@alvarorichard</a> (<a href="https://github.com/OpenSelena/omniget/pull/280">PR #280</a>). Obrigado.</sub>
-</p>
-
-<p align="center">
   <b>Baixe cursos da Udemy e da Hotmart, YouTube, Instagram, X, Pinterest, TikTok e mais de 1.800 outros sites.<br/>Depois transcreva, converta, leia e estude o que salvou. Um único app de desktop, gratuito, sem terminal.</b>
 </p>
 
 <p align="center">
+  <a href="https://omniget.nav.bd/"><img src="https://img.shields.io/badge/Website-omniget.nav.bd-FF7D38?style=for-the-badge" alt="Site oficial" /></a>
   <a href="https://github.com/OpenSelena/omniget/releases/latest"><img src="https://img.shields.io/github/v/release/OpenSelena/omniget?style=for-the-badge&label=release&color=F28500" alt="Última versão" /></a>
   <a href="https://github.com/OpenSelena/omniget/releases"><img src="https://img.shields.io/github/downloads/OpenSelena/omniget/total?style=for-the-badge&label=downloads&color=1E6FE8" alt="Total de downloads" /></a>
   <a href="https://github.com/OpenSelena/omniget/stargazers"><img src="https://img.shields.io/github/stars/OpenSelena/omniget?style=for-the-badge&color=FFD426" alt="Estrelas no GitHub" /></a>
@@ -45,9 +42,11 @@ leitor pdf, flashcards anki, repetição espaçada, player de música, spicetify
 </p>
 
 <p align="center">
-  <sub>Gratuito. Open source sob GPL-3.0. Sem conta, sem anúncios, sem telemetria do que você baixa. Seus arquivos ficam no seu computador.</sub><br/>
-  <sub>Mais de 9.500 estrelas no GitHub. O repositório mais estrelado nos tópicos <a href="https://github.com/topics/udemy-downloader">udemy-downloader</a>, <a href="https://github.com/topics/hotmart-downloader">hotmart-downloader</a> e <a href="https://github.com/topics/course-downloader">course-downloader</a>.</sub>
+  <sub>Gratuito. Open source sob GPL-3.0. Sem conta, sem anúncios, sem telemetria do que você baixa. Seus arquivos ficam no seu computador.</sub>
 </p>
+
+> [!NOTE]
+> `OpenSelena/omniget` é um fork do OmniGet original (`tonhowtf/omniget`). Mantemos este repositório como alternativa enquanto os repositórios e downloads originais estão indisponíveis, e aplicamos aqui as atualizações futuras do OmniGet principal. Não temos afiliação com [@tonhowtf](https://github.com/tonhowtf) (tonho).
 
 <p align="center">
   <img src="assets/readme/home.png" alt="Tela inicial do OmniGet: cole uma URL, um magnet ou um .torrent e o arquivo cai na sua pasta" width="900" />
@@ -572,7 +571,7 @@ pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'
 
 As releases assinam os artefatos do atualizador com uma chave privada que só o mantenedor tem, então um `pnpm tauri build` puro para com "A public key has been found, but no private key". A flag acima desliga esses artefatos numa build local e não muda mais nada.
 
-Os plugins ficam em repositórios próprios: [omniget-plugin-courses](https://github.com/OpenSelena/omniget-plugin-courses), [omniget-plugin-telegram](https://github.com/OpenSelena/omniget-plugin-telegram) e [omniget-plugin-convert](https://github.com/OpenSelena/omniget-plugin-convert) (o Study é integrado nativamente). O registro é o [omniget-plugins](https://github.com/OpenSelena/omniget-plugins). `pnpm plugins:deploy` compila os checkouts vizinhos dos plugins e copia para a sua pasta de dados local.
+Os plugins `courses`, `telegram`, `convert` e `study` ficam dentro de `src-tauri/plugins/` e compilam junto com o binário principal. O registro de plugins é o [omniget-plugins](https://github.com/OpenSelena/omniget-plugins).
 
 Stack: Tauri 2, Rust, SvelteKit com Svelte 5, SQLite, yt-dlp, FFmpeg, librqbit para torrents, whisper.cpp, aria2, gallery-dl.
 
