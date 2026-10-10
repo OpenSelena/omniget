@@ -52,9 +52,11 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 </p>
 
 <p align="center">
-  <sub>Free. Open source under GPL-3.0. No account, no ads, no telemetry on what you download. Your files stay on your computer.</sub><br/>
-  <sub>9,500+ GitHub stars. The most starred repository in the <a href="https://github.com/topics/udemy-downloader">udemy-downloader</a>, <a href="https://github.com/topics/hotmart-downloader">hotmart-downloader</a> and <a href="https://github.com/topics/course-downloader">course-downloader</a> topics.</sub>
+  <sub>Free. Open source under GPL-3.0. No account, no ads, no telemetry on what you download. Your files stay on your computer.</sub>
 </p>
+
+> [!NOTE]
+> `OpenSelena/omniget` is a fork of the original OmniGet (`tonhowtf/omniget`). We maintain it as an alternative while the original repositories and downloads are unavailable, and we apply future updates from the main OmniGet here. We are not affiliated with [@tonhowtf](https://github.com/tonhowtf) (tonho).
 
 <p align="center">
   <img src="assets/readme/home.png" alt="OmniGet home screen: paste a URL, magnet link or .torrent and the file lands in your folder" width="900" />
@@ -589,7 +591,7 @@ FFmpeg conversions with GPU acceleration where the machine has it: container, co
 
 ## Built-in chat, off by default
 
-OmniGet includes an optional Discord-style chat called OmniDisc. It connects out of the box to the public default instance (`https://chat.tonho.wtf`) or private servers hosted with `omnidisc-server`. Features include text channels, direct messages, friends, roles, voice, video, and screen sharing with hardware encoding. Direct messages and calls use MLS end-to-end encryption. Files sent through chat are encrypted at rest and deleted from the server after thirty minutes.
+OmniGet includes an optional Discord-style chat called OmniDisc for servers you self-host with `omnidisc-server`. Features include text channels, direct messages, friends, roles, voice, video, and screen sharing with hardware encoding. Direct messages and calls use MLS end-to-end encryption. Files sent through chat are encrypted at rest and deleted from the server after thirty minutes.
 
 OmniDisc is disabled by default. Turn it on in **Settings → Advanced → OmniDisc** or type `/omnidisc` into the command palette (**Ctrl+K**).
 
@@ -729,7 +731,7 @@ pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'
 
 Releases sign their updater artifacts with a private key only the maintainer holds, so a plain `pnpm tauri build` stops with "A public key has been found, but no private key". The flag above turns those artifacts off for a local build and changes nothing else.
 
-The plugins live in their own repositories: [omniget-plugin-courses](https://github.com/OpenSelena/omniget-plugin-courses), [omniget-plugin-telegram](https://github.com/OpenSelena/omniget-plugin-telegram), and [omniget-plugin-convert](https://github.com/OpenSelena/omniget-plugin-convert) (Study is integrated natively). The registry is [omniget-plugins](https://github.com/OpenSelena/omniget-plugins). `pnpm plugins:deploy` builds the sibling plugin checkouts and copies them into your local data folder.
+The `courses`, `telegram`, `convert` and `study` plugins live inside `src-tauri/plugins/` and compile into the main binary. The plugin registry is [omniget-plugins](https://github.com/OpenSelena/omniget-plugins).
 
 Stack: Tauri 2, Rust, SvelteKit with Svelte 5, SQLite, yt-dlp, FFmpeg, librqbit for torrents, whisper.cpp, aria2, gallery-dl.
 

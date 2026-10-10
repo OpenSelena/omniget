@@ -22,14 +22,11 @@ spicetify, 下载管理器, tauri, rust, svelte.
 </p>
 
 <p align="center">
-  <sub>简体中文版由维护者创建，文字由 <a href="https://github.com/Tan665565">@Tan665565</a> 润色（<a href="https://github.com/OpenSelena/omniget/pull/154">PR #154</a>）。感谢。</sub>
-</p>
-
-<p align="center">
   <b>下载 Udemy 和 Hotmart 课程、YouTube、Instagram、X、Pinterest、TikTok 以及 1,800 多个其他网站。<br/>然后对保存的内容进行转写、转换、阅读和学习。一个免费的桌面应用，不用命令行。</b>
 </p>
 
 <p align="center">
+  <a href="https://omniget.nav.bd/"><img src="https://img.shields.io/badge/Website-omniget.nav.bd-FF7D38?style=for-the-badge" alt="官方网站" /></a>
   <a href="https://github.com/OpenSelena/omniget/releases/latest"><img src="https://img.shields.io/github/v/release/OpenSelena/omniget?style=for-the-badge&label=release&color=F28500" alt="最新版本" /></a>
   <a href="https://github.com/OpenSelena/omniget/releases"><img src="https://img.shields.io/github/downloads/OpenSelena/omniget/total?style=for-the-badge&label=downloads&color=1E6FE8" alt="总下载量" /></a>
   <a href="https://github.com/OpenSelena/omniget/stargazers"><img src="https://img.shields.io/github/stars/OpenSelena/omniget?style=for-the-badge&color=FFD426" alt="GitHub Star 数" /></a>
@@ -45,9 +42,11 @@ spicetify, 下载管理器, tauri, rust, svelte.
 </p>
 
 <p align="center">
-  <sub>免费。GPL-3.0 开源。不用注册账号，没有广告，不会上报你下载了什么。文件只留在你的电脑上。</sub><br/>
-  <sub>GitHub 上超过 9,500 个 Star。在 <a href="https://github.com/topics/udemy-downloader">udemy-downloader</a>、<a href="https://github.com/topics/hotmart-downloader">hotmart-downloader</a> 和 <a href="https://github.com/topics/course-downloader">course-downloader</a> 主题下 Star 数最多的仓库。</sub>
+  <sub>免费。GPL-3.0 开源。不用注册账号，没有广告，不会上报你下载了什么。文件只留在你的电脑上。</sub>
 </p>
+
+> [!NOTE]
+> `OpenSelena/omniget` 是原版 OmniGet（`tonhowtf/omniget`）的分支（Fork）。由于原版仓库与下载目前已无法访问，我们维护此仓库作为替代方案，并会同步应用主项目 OmniGet 未来的更新。本项目与 [@tonhowtf](https://github.com/tonhowtf)（tonho）无关。
 
 <p align="center">
   <img src="assets/readme/home.png" alt="OmniGet 主界面：粘贴 URL、磁力链接或 .torrent，文件直接落到你的文件夹" width="900" />
@@ -572,7 +571,7 @@ pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'
 
 正式版本用只有维护者持有的私钥签名更新包，所以直接 `pnpm tauri build` 会停在 "A public key has been found, but no private key"。上面的参数在本地构建时关掉这些更新包，其他一切不变。
 
-插件在各自的仓库里：[omniget-plugin-courses](https://github.com/OpenSelena/omniget-plugin-courses)、[omniget-plugin-telegram](https://github.com/OpenSelena/omniget-plugin-telegram) 和 [omniget-plugin-convert](https://github.com/OpenSelena/omniget-plugin-convert)（Study 已内置原生支持）。注册表是 [omniget-plugins](https://github.com/OpenSelena/omniget-plugins)。`pnpm plugins:deploy` 会构建旁边目录里的插件仓库并复制到你的本地数据文件夹。
+核心插件（`courses`、`telegram`、`convert`）以及 `study` 均作为内置模块静态链接在 `src-tauri/plugins/` 目录中，随主程序一起编译。插件注册表为 [omniget-plugins](https://github.com/OpenSelena/omniget-plugins)。
 
 技术栈：Tauri 2、Rust、SvelteKit（Svelte 5）、SQLite、yt-dlp、FFmpeg、librqbit（种子）、whisper.cpp、aria2、gallery-dl。
 
