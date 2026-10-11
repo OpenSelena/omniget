@@ -112,7 +112,7 @@ jobs:
 
             ---
 
-            ### Debian/Ubuntu users — AppImage compatibility
+            ### Debian/Ubuntu users: AppImage compatibility
 
             **Debian 12+ ships without FUSE 2 by default**, which AppImage requires.
             If `./omniget.AppImage` fails with a libfuse error, run:
@@ -121,14 +121,14 @@ jobs:
             sudo apt install libfuse2
             ```
 
-            …or use `./omniget.AppImage --appimage-extract-and-run`.
+            ...or use `./omniget.AppImage --appimage-extract-and-run`.
 
-            **Easier alternative**: download the `.deb` instead — works out of the
+            **Easier alternative**: download the `.deb` instead, which works out of the
             box on Debian 12+ and Ubuntu 22.04+.
 
             ---
 
-            ### macOS users — "OmniGet is damaged and can't be opened"
+            ### macOS users: "OmniGet is damaged and can't be opened"
 
             The app is not notarized with Apple yet, so Gatekeeper quarantines it.
             After moving the app to `/Applications`, run:
@@ -139,6 +139,12 @@ jobs:
 
             Then open it normally. If it still refuses, allow it under
             **System Settings → Privacy & Security**.
+
+            ---
+
+            ### Code signing policy
+
+            Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org). Code changes and signed releases are reviewed and approved by the OpenSelena maintainers. See our [Privacy Policy](https://omniget.nav.bd/docs/#privacy).
           releaseDraft: true
           prerelease: false
           includeUpdaterJson: false

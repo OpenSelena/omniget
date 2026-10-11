@@ -78,6 +78,7 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 - [For League of Legends players](#for-league-of-legends-players)
 - [Everything else in the box](#everything-else-in-the-box)
 - [Privacy and what OmniGet refuses to do](#privacy-and-what-omniget-refuses-to-do)
+- [Code signing policy](#code-signing-policy)
 - [Frequently asked questions](#frequently-asked-questions)
 - [Command line](#command-line)
 - [Build from source](#build-from-source)
@@ -636,6 +637,14 @@ New and marked beta or experimental: a **Profile** tab that edits what other pla
 Everything runs on your computer. There is no account, no server of ours in the middle, and no telemetry about what you download. Cookies and API keys live in your local profile. The only network calls OmniGet makes on its own are to the sites you asked it to download from, to GitHub for updates and plugins, and to the AI provider you configured, when you use an AI tool.
 
 OmniGet downloads what your own logged-in session can already open. It does not bypass DRM, break paywalls, or share credentials, and DRM-protected lectures are skipped and reported. You are responsible for respecting copyright and each platform's terms of service. The full text is in the app under **About → Terms and ethics**.
+
+---
+
+## Code signing policy
+
+Free code signing on Windows provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org).
+
+Code changes and signed releases are reviewed and approved by the OpenSelena maintainers. See [Privacy and what OmniGet refuses to do](#privacy-and-what-omniget-refuses-to-do) and the [privacy documentation](https://omniget.nav.bd/docs/#privacy) for how OmniGet handles data.
 
 ---
 
