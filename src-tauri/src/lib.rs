@@ -580,6 +580,11 @@ pub fn run() {
                     Some(t.to_string())
                 }
             });
+            core::ytdlp::set_extra_ytdlp_flags_fn(|| {
+                storage::config::load_settings_standalone()
+                    .download
+                    .extra_ytdlp_flags
+            });
             {
                 let app_handle = app.handle().clone();
                 omniget_core::core::log_hook::set_log_sink(std::sync::Arc::new(move |id, line| {
@@ -1075,6 +1080,7 @@ pub fn run() {
             cookies::commands::cookies_import_file,
             cookies::commands::cookies_export_to,
             cookies::commands::cookies_add_account,
+            cookies::commands::cookies_set_bucket_enabled,
             cookies::commands::cookies_health,
             cookies::commands::cookies_test,
             commands::clip::clip_video,

@@ -684,6 +684,7 @@ pub async fn ensure_js_runtime() -> Option<PathBuf> {
     // Check system-installed runtimes first.
     for tool in &["deno", "node", "bun"] {
         if let Some(path) = find_tool(tool).await {
+            tracing::info!("[dependencies] JS runtime detected: {}", path.display());
             return Some(path);
         }
     }
@@ -691,15 +692,9 @@ pub async fn ensure_js_runtime() -> Option<PathBuf> {
     // Check well-known install locations on Windows.
     #[cfg(target_os = "windows")]
     {
-        let candidates = [
-            r"C:\Program Files\nodejs\node.exe",
-            r"C:\Program Files (x86)\nodejs\node.exe",
-        ];
-        for path in &candidates {
-            let p = PathBuf::from(path);
-            if p.exists() {
-                return Some(p);
-            }
+        if let Some((_runtime, path)) = crate::core::ytdlp::find_windows_js_runtime() {
+            tracing::info!("[dependencies] JS runtime detected: {}", path.display());
+            return Some(path);
         }
     }
 
@@ -707,6 +702,7 @@ pub async fn ensure_js_runtime() -> Option<PathBuf> {
     match download_deno().await {
         Ok(path) => {
             crate::core::ytdlp::reset_js_runtime_cache();
+            tracing::info!("[dependencies] Deno JS runtime installed: {}", path.display());
             Some(path)
         }
         Err(e) => {

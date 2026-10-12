@@ -37,6 +37,7 @@ type SponsorBlockModeFn = Box<dyn Fn() -> String + Send + Sync>;
 type SponsorBlockCategoriesFn = Box<dyn Fn() -> Vec<String> + Send + Sync>;
 type PerDomainCookieFn = Box<dyn Fn(&str) -> Option<PathBuf> + Send + Sync>;
 type ManagedCookiesOnlyFn = Box<dyn Fn() -> bool + Send + Sync>;
+type ExtraYtdlpFlagsFn = Box<dyn Fn() -> Vec<String> + Send + Sync>;
 
 static EXT_COOKIE_PATH_FN: OnceLock<ExtCookiePathFn> = OnceLock::new();
 static GLOBAL_COOKIE_FILE_FN: OnceLock<GlobalCookieFileFn> = OnceLock::new();
@@ -48,6 +49,7 @@ static CAPTION_LOCALE_FN: OnceLock<CaptionLocaleFn> = OnceLock::new();
 static KEEP_VTT_FN: OnceLock<KeepVttFn> = OnceLock::new();
 static PER_DOMAIN_COOKIE_FN: OnceLock<PerDomainCookieFn> = OnceLock::new();
 static MANAGED_COOKIES_ONLY_FN: OnceLock<ManagedCookiesOnlyFn> = OnceLock::new();
+static EXTRA_YTDLP_FLAGS_FN: OnceLock<ExtraYtdlpFlagsFn> = OnceLock::new();
 static TRANSLATE_METADATA_FN: OnceLock<TranslateMetadataFn> = OnceLock::new();
 static SPONSORBLOCK_FN: OnceLock<SponsorBlockFn> = OnceLock::new();
 static SPLIT_CHAPTERS_FN: OnceLock<SplitChaptersFn> = OnceLock::new();
@@ -84,12 +86,57 @@ pub(crate) const SABR_CLIENT_CASCADE: [&str; 4] = ["tv_downgraded", "ios", "andr
 /// Separado do laco de retry de proposito: e o unico jeito de testar a decisao
 /// com stderr real capturado como fixture, sem subir um download.
 pub(crate) fn sabr_fallback_client(stderr_lower: &str, attempt: usize) -> Option<String> {
+    if is_youtube_reload_error(stderr_lower) {
+        return match attempt {
+            0 => Some("youtube:player_client=web_safari".to_string()),
+            _ => None,
+        };
+    }
     if !stderr_lower.contains("sabr") {
         return None;
     }
     SABR_CLIENT_CASCADE
         .get(attempt)
         .map(|client| format!("youtube:player_client={client}"))
+}
+
+pub(crate) fn is_youtube_reload_error(stderr_lower: &str) -> bool {
+    stderr_lower.contains("the page needs to be reloaded")
+}
+
+pub(crate) fn strip_cookies_from_base_args(base_args: &mut Vec<String>) {
+    if let Some(pos) = base_args.iter().position(|a| a == "--cookies") {
+        if pos + 1 < base_args.len() {
+            base_args.remove(pos + 1);
+        }
+        base_args.remove(pos);
+    }
+}
+
+pub(crate) fn should_retry_info_fetch(stderr_lower: &str) -> bool {
+    stderr_lower.contains("requested format")
+        || stderr_lower.contains("not available")
+        || stderr_lower.contains("http error 403")
+        || stderr_lower.contains("nsig")
+        || stderr_lower.contains("http error 429")
+        || stderr_lower.contains("sabr")
+        || is_youtube_reload_error(stderr_lower)
+}
+
+pub(crate) fn is_degraded_youtube_360p(formats: &[FormatInfo]) -> bool {
+    let mut has_any_video = false;
+    let mut max_video_height = 0u32;
+    for f in formats {
+        if f.has_video {
+            has_any_video = true;
+            if let Some(h) = f.height {
+                if h > max_video_height {
+                    max_video_height = h;
+                }
+            }
+        }
+    }
+    has_any_video && max_video_height > 0 && max_video_height <= 360
 }
 
 /// Piso de versão do yt-dlp. 2026.06.09 é a release que corrigiu
@@ -721,6 +768,67 @@ fn user_agent_setting() -> Option<String> {
     USER_AGENT_FN.get().and_then(|f| f())
 }
 
+pub fn set_extra_ytdlp_flags_fn(f: impl Fn() -> Vec<String> + Send + Sync + 'static) {
+    let _ = EXTRA_YTDLP_FLAGS_FN.set(Box::new(f));
+}
+
+fn extra_ytdlp_flags_setting() -> Vec<String> {
+    EXTRA_YTDLP_FLAGS_FN.get().map(|f| f()).unwrap_or_default()
+}
+
+pub(crate) fn merge_extra_flags(configured: &[String], explicit: &[String]) -> Vec<String> {
+    let mut out: Vec<String> = configured
+        .iter()
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty())
+        .map(String::from)
+        .collect();
+    for flag in explicit {
+        let trimmed = flag.trim();
+        if !trimmed.is_empty() {
+            out.push(trimmed.to_string());
+        }
+    }
+    out
+}
+
+pub(crate) fn configured_extra_flags(explicit: &[String]) -> Vec<String> {
+    let configured = extra_ytdlp_flags_setting();
+    merge_extra_flags(&configured, explicit)
+}
+
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn build_attempt_args(
+    base_args: &[String],
+    is_youtube: bool,
+    yt_args: &YoutubeExtractorArgs,
+    subtitle_args: &[String],
+    cfb_arg: Option<&str>,
+    aria2c_args: Option<Vec<String>>,
+    retry_extra_args: &[String],
+    user_extra_flags: &[String],
+    url: &str,
+) -> Vec<String> {
+    let mut args = base_args.to_vec();
+    if is_youtube {
+        args.extend(yt_args.to_flags());
+    }
+    if !subtitle_args.is_empty() {
+        args.extend(subtitle_args.iter().cloned());
+    }
+    if let Some(cfb) = cfb_arg {
+        args.push("--cookies-from-browser".to_string());
+        args.push(cfb.to_string());
+    }
+    if let Some(a2) = aria2c_args {
+        args.extend(a2);
+    }
+    args.extend(retry_extra_args.iter().cloned());
+    args.extend(user_extra_flags.iter().cloned());
+    args.push(url.to_string());
+    args
+}
+
 static EXT_UA_MAP: OnceLock<Mutex<HashMap<String, String>>> = OnceLock::new();
 
 fn ext_ua_map() -> &'static Mutex<HashMap<String, String>> {
@@ -851,7 +959,7 @@ static YTDLP_UPDATE_CHECKED: AtomicBool = AtomicBool::new(false);
 static YTDLP_PATH_CACHE: std::sync::RwLock<Option<Option<PathBuf>>> = std::sync::RwLock::new(None);
 static FFMPEG_LOCATION_CACHE: std::sync::RwLock<Option<Option<String>>> =
     std::sync::RwLock::new(None);
-static JS_RUNTIME_CACHE: std::sync::RwLock<Option<Option<String>>> = std::sync::RwLock::new(None);
+static JS_RUNTIME_CACHE: std::sync::RwLock<Option<String>> = std::sync::RwLock::new(None);
 static RATE_LIMIT_429_COUNT: AtomicU64 = AtomicU64::new(0);
 static RATE_LIMIT_429_LAST_TS: AtomicU64 = AtomicU64::new(0);
 static COOKIE_ERROR_FLAG: AtomicBool = AtomicBool::new(false);
@@ -2080,6 +2188,9 @@ async fn find_ffmpeg_location_cached() -> Option<String> {
 }
 
 fn per_domain_cookie_file(url: &str) -> Option<std::path::PathBuf> {
+    if !managed_cookies_only() {
+        return None;
+    }
     let source = PER_DOMAIN_COOKIE_FN.get()?(url)?;
     if !source.exists() {
         return None;
@@ -2169,36 +2280,87 @@ fn detect_js_runtime() -> Option<String> {
     // Fallback: well-known install locations on Windows.
     #[cfg(target_os = "windows")]
     {
-        let candidates = [
-            ("node", r"C:\Program Files\nodejs\node.exe"),
-            ("node", r"C:\Program Files (x86)\nodejs\node.exe"),
-        ];
-        for (runtime, path) in &candidates {
-            if std::path::Path::new(path).exists() {
-                return Some(format!("{}:{}", runtime, path));
-            }
+        if let Some((runtime, path)) = find_windows_js_runtime() {
+            return Some(format!("{}:{}", runtime, path.display()));
         }
     }
 
     None
 }
 
-fn js_runtime_args() -> Vec<String> {
-    let cached = {
-        if let Ok(cache) = JS_RUNTIME_CACHE.read() {
-            cache.clone()
-        } else {
-            None
+pub(crate) fn find_windows_js_runtime() -> Option<(&'static str, PathBuf)> {
+    let local_app_data = std::env::var("LOCALAPPDATA").ok();
+    let user_profile = std::env::var("USERPROFILE").ok();
+    windows_js_runtime_candidates(local_app_data.as_deref(), user_profile.as_deref())
+        .into_iter()
+        .find(|(_, path)| path.exists())
+}
+
+pub(crate) fn windows_js_runtime_candidates(
+    local_app_data: Option<&str>,
+    user_profile: Option<&str>,
+) -> Vec<(&'static str, PathBuf)> {
+    let mut out = Vec::new();
+    if let Some(lad) = local_app_data.map(str::trim).filter(|s| !s.is_empty()) {
+        out.push((
+            "node",
+            PathBuf::from(format!(r"{}\Programs\nodejs\node.exe", lad)),
+        ));
+        out.push((
+            "node",
+            PathBuf::from(format!(r"{}\Volta\bin\node.exe", lad)),
+        ));
+        out.push((
+            "node",
+            PathBuf::from(format!(r"{}\fnm_multishells\default\node.exe", lad)),
+        ));
+        out.push((
+            "node",
+            PathBuf::from(format!(r"{}\nvm\default\node.exe", lad)),
+        ));
+    }
+    if let Ok(nvm_symlink) = std::env::var("NVM_SYMLINK") {
+        let trimmed = nvm_symlink.trim();
+        if !trimmed.is_empty() {
+            out.push(("node", PathBuf::from(trimmed).join("node.exe")));
         }
-    };
+    }
+    if let Some(up) = user_profile.map(str::trim).filter(|s| !s.is_empty()) {
+        out.push((
+            "node",
+            PathBuf::from(format!(r"{}\AppData\Roaming\nvm\node.exe", up)),
+        ));
+        out.push((
+            "deno",
+            PathBuf::from(format!(r"{}\.deno\bin\deno.exe", up)),
+        ));
+        out.push(("bun", PathBuf::from(format!(r"{}\.bun\bin\bun.exe", up))));
+    }
+    out.push(("node", PathBuf::from(r"C:\Program Files\nodejs\node.exe")));
+    out.push((
+        "node",
+        PathBuf::from(r"C:\Program Files (x86)\nodejs\node.exe"),
+    ));
+    out
+}
+
+pub(crate) fn cache_js_runtime_result(val: Option<String>) {
+    if let Some(rt) = val {
+        tracing::info!("[yt-dlp] detected JS runtime: {}", rt);
+        if let Ok(mut cache) = JS_RUNTIME_CACHE.write() {
+            *cache = Some(rt);
+        }
+    }
+}
+
+fn js_runtime_args() -> Vec<String> {
+    let cached = JS_RUNTIME_CACHE.read().ok().and_then(|cache| cache.clone());
 
     let runtime = match cached {
-        Some(val) => val,
+        Some(val) => Some(val),
         None => {
             let val = detect_js_runtime();
-            if let Ok(mut cache) = JS_RUNTIME_CACHE.write() {
-                *cache = Some(val.clone());
-            }
+            cache_js_runtime_result(val.clone());
             val
         }
     };
@@ -2244,25 +2406,31 @@ pub async fn get_video_info(
     extra_flags: &[String],
 ) -> anyhow::Result<serde_json::Value> {
     let _timer_start = std::time::Instant::now();
+    let effective_extra_flags = configured_extra_flags(extra_flags);
 
     if is_youtube_url(url) {
         yt_rate_limiter().acquire().await;
     }
 
     let is_yt = is_youtube_url(url);
-    let clients: &[Option<&str>] = if is_yt {
-        &[None, Some("youtube:player_client=default,mweb")]
+    let attempts: &[(Option<&str>, bool)] = if is_yt {
+        &[
+            (None, true),
+            (Some("youtube:player_client=default,web_safari,mweb"), true),
+            (None, false),
+        ]
     } else {
-        &[None]
+        &[(None, true)]
     };
 
     let mut last_error = String::new();
+    let mut fallback_degraded_json: Option<serde_json::Value> = None;
 
-    for (attempt, client) in clients.iter().enumerate() {
+    for (attempt, &(client, use_cookies)) in attempts.iter().enumerate() {
         tracing::info!(
             "[yt-dlp] info fetch attempt {}/{} for URL",
             attempt + 1,
-            clients.len()
+            attempts.len()
         );
 
         let mut args = vec![
@@ -2290,7 +2458,9 @@ pub async fn get_video_info(
             args.push(extractor_args.to_string());
         }
 
-        append_metadata_cookie_args(&mut args, url, extra_flags, "video info");
+        if use_cookies {
+            append_metadata_cookie_args(&mut args, url, &effective_extra_flags, "video info");
+        }
 
         let proxy = crate::core::http_client::proxy_url();
         if attempt == 0 {
@@ -2306,7 +2476,7 @@ pub async fn get_video_info(
             args.push("--proxy".to_string());
             args.push(proxy_url);
         }
-        args.extend(extra_flags.iter().cloned());
+        args.extend(effective_extra_flags.iter().cloned());
         args.push(url.to_string());
 
         let _slot = acquire_ytdlp_slot("video info").await;
@@ -2349,6 +2519,19 @@ pub async fn get_video_info(
         if result.status.success() {
             let json: serde_json::Value = serde_json::from_slice(&result.stdout)
                 .map_err(|e| anyhow!("yt-dlp returned invalid JSON: {}", e))?;
+            let used_cookies = use_cookies && args.iter().any(|a| a == "--cookies" || a == "--cookies-from-browser");
+            if is_yt
+                && used_cookies
+                && attempt < attempts.len() - 1
+                && is_degraded_youtube_360p(&parse_formats(&json))
+            {
+                tracing::warn!(
+                    "[yt-dlp] YouTube info fetch attempt {} with cookies returned only <=360p formats; retrying fallback",
+                    attempt + 1
+                );
+                fallback_degraded_json = Some(json);
+                continue;
+            }
             tracing::debug!("[perf] get_video_info took {:?}", _timer_start.elapsed());
             return Ok(json);
         }
@@ -2367,17 +2550,13 @@ pub async fn get_video_info(
                 "[yt-429] rate limit in get_video_info: url={} attempt={}/{}",
                 sanitized_url,
                 attempt + 1,
-                clients.len()
+                attempts.len()
             );
         }
 
         let is_retryable = is_yt
-            && attempt < clients.len() - 1
-            && (stderr_lower.contains("requested format")
-                || stderr_lower.contains("not available")
-                || stderr_lower.contains("http error 403")
-                || stderr_lower.contains("nsig")
-                || stderr_lower.contains("http error 429"));
+            && attempt < attempts.len() - 1
+            && should_retry_info_fetch(&stderr_lower);
 
         if is_retryable {
             tracing::warn!(
@@ -2392,10 +2571,16 @@ pub async fn get_video_info(
             continue;
         }
 
+        if let Some(degraded) = fallback_degraded_json {
+            return Ok(degraded);
+        }
         tracing::debug!("[perf] get_video_info took {:?}", _timer_start.elapsed());
         return Err(translate_ytdlp_error(&stderr));
     }
 
+    if let Some(degraded) = fallback_degraded_json {
+        return Ok(degraded);
+    }
     tracing::debug!("[perf] get_video_info took {:?}", _timer_start.elapsed());
     Err(translate_ytdlp_error(&last_error))
 }
@@ -2539,6 +2724,7 @@ pub async fn get_playlist_info(
     url: &str,
     extra_flags: &[String],
 ) -> anyhow::Result<(String, Vec<PlaylistEntry>)> {
+    let effective_extra_flags = configured_extra_flags(extra_flags);
     if is_youtube_url(url) {
         yt_rate_limiter().acquire().await;
     }
@@ -2567,10 +2753,10 @@ pub async fn get_playlist_info(
         args.push("youtube:player_client=default".to_string());
     }
 
-    append_metadata_cookie_args(&mut args, url, extra_flags, "playlist info");
+    append_metadata_cookie_args(&mut args, url, &effective_extra_flags, "playlist info");
 
     args.extend(proxy_args());
-    args.extend(extra_flags.iter().cloned());
+    args.extend(effective_extra_flags.iter().cloned());
     args.push(url.to_string());
 
     let _slot = acquire_ytdlp_slot("playlist info").await;
@@ -2772,6 +2958,7 @@ pub async fn get_playlist_info_incremental(
         args.push("youtube:player_client=default".to_string());
     }
     args.extend(proxy_args());
+    args.extend(configured_extra_flags(&[]));
     args.push(url.to_string());
 
     let _slot = acquire_ytdlp_slot("playlist info").await;
@@ -2991,7 +3178,8 @@ pub async fn download_video(
 
     std::fs::create_dir_all(output_dir)?;
 
-    let explicit_cookie_header = has_explicit_cookie_header(extra_flags);
+    let effective_extra_flags = configured_extra_flags(extra_flags);
+    let explicit_cookie_header = has_explicit_cookie_header(&effective_extra_flags);
     let per_domain_cookies = if explicit_cookie_header || cookie_file.is_some() {
         None
     } else {
@@ -3189,7 +3377,11 @@ pub async fn download_video(
     let is_youtube = is_youtube_url(url);
     let mut yt_args = YoutubeExtractorArgs::default();
     if is_youtube {
-        yt_args.player_client = Some("default".to_string());
+        yt_args.player_client = Some(if effective_cookie_file.is_some() {
+            "default,web_safari".to_string()
+        } else {
+            "default".to_string()
+        });
         yt_args.formats_dashy = effective_fragments > 1;
         yt_args.lang = translate_metadata_lang().map(|l| normalize_youtube_lang(&l));
 
@@ -3261,7 +3453,6 @@ pub async fn download_video(
     ]);
 
     base_args.extend(proxy_args());
-    base_args.extend(extra_flags.iter().cloned());
 
     if sponsorblock_enabled() && is_youtube_url(url) {
         let cats = sponsorblock_categories();
@@ -3311,7 +3502,9 @@ pub async fn download_video(
     let mut selected_subtitle_lang: Option<String> = None;
     let mut should_download_subs = download_subtitles && rate_limit_429_count() < 2;
     if should_download_subs {
-        match select_available_subtitle_lang(ytdlp, url, extra_flags, include_auto_subs).await {
+        match select_available_subtitle_lang(ytdlp, url, &effective_extra_flags, include_auto_subs)
+            .await
+        {
             Ok(Some(lang)) => {
                 if let Some(dl_id) = log_hook::current_download_id() {
                     log_hook::emit_log(
@@ -3393,22 +3586,8 @@ pub async fn download_video(
             cleanup_part_files(output_dir).await;
         }
 
-        let mut args = base_args.clone();
-        if is_youtube {
-            args.extend(yt_args.to_flags());
-        }
-
-        if use_subtitles {
-            args.extend(subtitle_args.iter().cloned());
-        }
-
-        if use_cfb {
-            args.push("--cookies-from-browser".to_string());
-            args.push(cfb_setting.clone());
-        }
-
-        if use_aria2c && !use_cfb {
-            if let Some(ref a2_path) = aria2c_path {
+        let aria2c_args = if use_aria2c && !use_cfb {
+            aria2c_path.as_ref().map(|a2_path| {
                 let conns = if is_youtube_url(url) {
                     effective_fragments.max(1)
                 } else {
@@ -3418,16 +3597,27 @@ pub async fn download_video(
                 // permite escrita arbitrária de arquivo. O yt-dlp 2026.06.09
                 // removeu o suporte; aqui o downloader externo fica restrito a
                 // http/ftp e fragmento vai pelo nativo com `-N`.
-                args.extend(aria2c_downloader_args(
+                aria2c_downloader_args(
                     &a2_path.to_string_lossy(),
                     conns,
                     crate::core::http_client::proxy_url().as_deref(),
-                ));
-            }
-        }
+                )
+            })
+        } else {
+            None
+        };
 
-        args.extend(extra_args.iter().cloned());
-        args.push(url.to_string());
+        let args = build_attempt_args(
+            &base_args,
+            is_youtube,
+            &yt_args,
+            if use_subtitles { &subtitle_args } else { &[] },
+            if use_cfb { Some(cfb_setting.as_str()) } else { None },
+            aria2c_args,
+            &extra_args,
+            &effective_extra_flags,
+            url,
+        );
 
         let engine = if use_aria2c && !use_cfb && aria2c_path.is_some() {
             "aria2c"
@@ -3472,6 +3662,19 @@ pub async fn download_video(
 
         let lines = BufReader::new(stdout).lines();
 
+        let wants_above_360p = is_youtube
+            && !is_audio_only
+            && quality_height.map(|h| h > 360).unwrap_or(true)
+            && format_id != Some("18");
+        let has_cookie_args =
+            base_args.iter().any(|a| a == "--cookies") || use_cfb || explicit_cookie_header;
+        let degraded_360p = Arc::new(AtomicBool::new(false));
+        let degraded_360p_detector = if wants_above_360p && has_cookie_args {
+            Some(degraded_360p.clone())
+        } else {
+            None
+        };
+
         let captured_path: Arc<Mutex<Option<PathBuf>>> = Arc::new(Mutex::new(None));
         let line_reader = spawn_stdout_reader(
             lines,
@@ -3481,6 +3684,7 @@ pub async fn download_video(
             is_audio_only,
             _timer_start,
             Some(boot_slot.clone()),
+            degraded_360p_detector,
         );
 
         let stderr_log_id = log_hook::current_download_id();
@@ -3528,6 +3732,23 @@ pub async fn download_video(
         let stderr_content = stderr_reader.await.unwrap_or_default();
 
         if status.success() {
+            if degraded_360p.load(Ordering::Relaxed)
+                && attempt < max_attempts - 1
+                && (base_args.iter().any(|a| a == "--cookies") || use_cfb)
+            {
+                if let Some(p) = captured_path.lock().ok().and_then(|g| g.clone()) {
+                    let _ = std::fs::remove_file(&p);
+                }
+                strip_cookies_from_base_args(&mut base_args);
+                use_cfb = false;
+                yt_args.set_client_from_flag("default");
+                tracing::warn!(
+                    "[yt-dlp] authenticated YouTube download degraded to <=360p (format 18) on attempt {}; retrying without cookies",
+                    attempt + 1
+                );
+                continue;
+            }
+
             let _ = progress.send(ProgressUpdate::percent(100.0)).await;
 
             let file_path = {
@@ -3700,8 +3921,15 @@ pub async fn download_video(
                 if let Some(client) = sabr_fallback_client(&stderr_lower, attempt) {
                     yt_args.set_client_from_flag(&client);
                     tracing::warn!(
-                        "[yt-dlp] SABR-only formats detected, switching player_client to {}",
+                        "[yt-dlp] SABR/reload fallback triggered, switching player_client to {}",
                         client
+                    );
+                } else if is_youtube_reload_error(&stderr_lower) {
+                    strip_cookies_from_base_args(&mut base_args);
+                    use_cfb = false;
+                    yt_args.set_client_from_flag("default");
+                    tracing::warn!(
+                        "[yt-dlp] YouTube reload error persisted, retrying without cookies"
                     );
                 }
             }
@@ -3882,6 +4110,7 @@ fn spawn_stdout_reader(
     is_audio_only: bool,
     _timer_start: std::time::Instant,
     boot_slot: Option<BootSlot>,
+    degraded_360p_detector: Option<Arc<AtomicBool>>,
 ) -> tokio::task::JoinHandle<()> {
     tokio::spawn(async move {
         let mut boot_slot = boot_slot;
@@ -3911,6 +4140,17 @@ fn spawn_stdout_reader(
             }
             if let Some(plan) = parse_planned_formats(&line) {
                 planned_count = plan.len();
+                if !is_audio_only && plan.len() == 1 && plan[0] == "18" {
+                    if let Some(ref flag) = degraded_360p_detector {
+                        if !flag.swap(true, Ordering::Relaxed) {
+                            let warn_line = "[yt-dlp] warning: YouTube resolved only 360p (format 18); login cookies or missing JS runtime may be restricting HD formats";
+                            tracing::warn!("{}", warn_line);
+                            if let Some(id) = log_id {
+                                log_hook::emit_log(id, warn_line);
+                            }
+                        }
+                    }
+                }
                 let _ = progress_tx
                     .send(ProgressUpdate {
                         percent: max_reported,
@@ -3985,6 +4225,21 @@ fn spawn_stdout_reader(
                     record_eta(id, e);
                 }
                 let stream = parse_stream_info(&line);
+                if let (Some(ref flag), Some(ref s)) = (&degraded_360p_detector, &stream) {
+                    if !is_audio_only
+                        && s.has_video()
+                        && (s.format_id == "18"
+                            || (planned_count <= 1
+                                && s.height.map(|h| h <= 360).unwrap_or(false)))
+                        && !flag.swap(true, Ordering::Relaxed)
+                    {
+                        let warn_line = "[yt-dlp] warning: YouTube resolved only 360p (format 18); login cookies or missing JS runtime may be restricting HD formats";
+                        tracing::warn!("{}", warn_line);
+                        if let Some(id) = log_id {
+                            log_hook::emit_log(id, warn_line);
+                        }
+                    }
+                }
                 let fragment = parse_fragment_progress(&line);
                 let stream_id = stream.as_ref().map(|s| s.format_id.clone());
                 let stream_changed = stream_id.is_some() && stream_id != last_stream_id;
@@ -4102,6 +4357,7 @@ async fn run_override_command(
         is_audio_only,
         timer_start,
         Some(boot_slot.clone()),
+        None,
     );
     let stderr_boot_slot = boot_slot.clone();
     let stderr_reader = tokio::spawn(async move {
@@ -5802,6 +6058,180 @@ ERROR: [youtube] abc123: Requested format is not available";
             super::super::pot_provider::extractor_args(&health, "http://127.0.0.1:1").is_empty(),
             "provedor inalcancavel nao pode virar --extractor-args"
         );
+    }
+
+    #[test]
+    fn extra_flags_merge_global_and_appear_after_youtube_extractor_args() {
+        let merged = merge_extra_flags(
+            &[
+                "--js-runtimes".to_string(),
+                "node:C:\\node.exe".to_string(),
+                "--extractor-args".to_string(),
+                "youtube:player_client=web_safari".to_string(),
+            ],
+            &["--no-overwrites".to_string()],
+        );
+        assert_eq!(
+            merged,
+            vec![
+                "--js-runtimes".to_string(),
+                "node:C:\\node.exe".to_string(),
+                "--extractor-args".to_string(),
+                "youtube:player_client=web_safari".to_string(),
+                "--no-overwrites".to_string(),
+            ]
+        );
+
+        let base_args = vec!["--ignore-config".to_string(), "-f".to_string(), "bv*+ba/b".to_string()];
+        let yt_args = YoutubeExtractorArgs {
+            player_client: Some("default".to_string()),
+            formats_dashy: true,
+            lang: None,
+        };
+        let url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+        let attempt_args = build_attempt_args(
+            &base_args,
+            true,
+            &yt_args,
+            &[],
+            None,
+            None,
+            &[],
+            &merged,
+            url,
+        );
+
+        let default_idx = attempt_args
+            .iter()
+            .position(|a| a == "youtube:player_client=default;formats=dashy")
+            .expect("built-in youtube extractor args present");
+        let user_idx = attempt_args
+            .iter()
+            .position(|a| a == "youtube:player_client=web_safari")
+            .expect("user extractor args present");
+        assert!(
+            user_idx > default_idx,
+            "user extra_flags must come AFTER built-in yt_args so user --extractor-args wins"
+        );
+        assert_eq!(attempt_args.last().map(String::as_str), Some(url));
+    }
+
+    #[test]
+    fn youtube_reload_error_and_360p_degradation_are_detected() {
+        let reload_err = "warning: [youtube] dqw4w9wgxcq: youtube is forcing sabr streaming\nerror: [youtube] dqw4w9wgxcq: the page needs to be reloaded.";
+        assert!(should_retry_info_fetch(reload_err));
+        assert!(is_youtube_reload_error(reload_err));
+        assert_eq!(
+            sabr_fallback_client(reload_err, 0).as_deref(),
+            Some("youtube:player_client=web_safari"),
+            "reload error must select web_safari on attempt 0 even when SABR warning is present"
+        );
+        assert_eq!(
+            sabr_fallback_client(reload_err, 1),
+            None,
+            "reload error on attempt >= 1 must return None so download_video falls back to cookie-less retry"
+        );
+        assert!(!is_youtube_reload_error("error: video unavailable"));
+
+        let mut sample_args = vec![
+            "-f".to_string(),
+            "bv*+ba/b".to_string(),
+            "--cookies".to_string(),
+            "C:\\cookies.txt".to_string(),
+            "--no-playlist".to_string(),
+        ];
+        strip_cookies_from_base_args(&mut sample_args);
+        assert!(!sample_args.contains(&"--cookies".to_string()));
+        assert!(!sample_args.contains(&"C:\\cookies.txt".to_string()));
+
+        let only_360p = serde_json::json!({
+            "formats": [
+                {
+                    "format_id": "18",
+                    "ext": "mp4",
+                    "width": 640,
+                    "height": 360,
+                    "vcodec": "avc1.42001E",
+                    "acodec": "mp4a.40.2"
+                },
+                {
+                    "format_id": "140",
+                    "ext": "m4a",
+                    "vcodec": "none",
+                    "acodec": "mp4a.40.2"
+                }
+            ]
+        });
+        assert!(is_degraded_youtube_360p(&parse_formats(&only_360p)));
+
+        let with_1080p = serde_json::json!({
+            "formats": [
+                {
+                    "format_id": "18",
+                    "ext": "mp4",
+                    "width": 640,
+                    "height": 360,
+                    "vcodec": "avc1.42001E",
+                    "acodec": "mp4a.40.2"
+                },
+                {
+                    "format_id": "399",
+                    "ext": "mp4",
+                    "width": 1920,
+                    "height": 1080,
+                    "vcodec": "av01.0.08M.08",
+                    "acodec": "none"
+                }
+            ]
+        });
+        assert!(!is_degraded_youtube_360p(&parse_formats(&with_1080p)));
+    }
+
+    #[test]
+    fn windows_js_runtime_candidates_include_localappdata_nodejs_and_user_tools() {
+        let candidates = windows_js_runtime_candidates(
+            Some(r"C:\Users\alice\AppData\Local"),
+            Some(r"C:\Users\alice"),
+        );
+        assert!(
+            candidates.iter().any(|(rt, p)| *rt == "node"
+                && p == &PathBuf::from(r"C:\Users\alice\AppData\Local\Programs\nodejs\node.exe")),
+            "must include %LOCALAPPDATA%\\Programs\\nodejs\\node.exe: {:?}",
+            candidates
+        );
+        assert!(
+            candidates.iter().any(|(rt, p)| *rt == "node"
+                && p == &PathBuf::from(r"C:\Users\alice\AppData\Roaming\nvm\node.exe")),
+            "must include %USERPROFILE%\\AppData\\Roaming\\nvm\\node.exe"
+        );
+        assert!(
+            candidates.iter().any(|(rt, p)| *rt == "deno"
+                && p == &PathBuf::from(r"C:\Users\alice\.deno\bin\deno.exe")),
+            "must include %USERPROFILE%\\.deno\\bin\\deno.exe"
+        );
+        assert!(
+            candidates.iter().any(|(rt, p)| *rt == "bun"
+                && p == &PathBuf::from(r"C:\Users\alice\.bun\bin\bun.exe")),
+            "must include %USERPROFILE%\\.bun\\bin\\bun.exe"
+        );
+        assert!(
+            candidates.iter().any(|(rt, p)| *rt == "node"
+                && p == &PathBuf::from(r"C:\Program Files\nodejs\node.exe")),
+            "must include C:\\Program Files\\nodejs\\node.exe"
+        );
+
+        reset_js_runtime_cache();
+        cache_js_runtime_result(None);
+        assert!(
+            JS_RUNTIME_CACHE.read().unwrap().is_none(),
+            "None must not be cached permanently in JS_RUNTIME_CACHE"
+        );
+        cache_js_runtime_result(Some("node:C:\\node.exe".to_string()));
+        assert_eq!(
+            JS_RUNTIME_CACHE.read().unwrap().clone(),
+            Some("node:C:\\node.exe".to_string())
+        );
+        reset_js_runtime_cache();
     }
 }
 
