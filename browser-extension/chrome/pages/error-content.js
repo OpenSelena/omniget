@@ -70,3 +70,20 @@ export function resolveErrorPageContent({
     code: resolvedCode,
   };
 }
+
+export const DEFAULT_INSTALL_URL = "https://github.com/OpenSelena/omniget/releases/latest";
+
+export function sanitizeInstallUrl(candidate) {
+  if (!candidate || typeof candidate !== "string") {
+    return DEFAULT_INSTALL_URL;
+  }
+  try {
+    const parsed = new URL(candidate.trim());
+    if (parsed.protocol === "https:" && (parsed.hostname === "github.com" || parsed.hostname === "omniget.org")) {
+      return parsed.href;
+    }
+  } catch {
+    // Malformed URL.
+  }
+  return DEFAULT_INSTALL_URL;
+}
