@@ -265,6 +265,8 @@ remake/shots/
 # regra acima os apagaria da arvore (PR #316).
 !claude-plugin/**/*.md
 !AGENTS.md
+!SECURITY.md
+!.github/**/*.md
 /remake/
 /mobbin/
 /.visual-audit/
