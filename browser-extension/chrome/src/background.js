@@ -20,6 +20,7 @@ import {
   sendCookiesViaBridge,
   autoPair,
   loadBridgeConfig,
+  loadAutoCaptureCookies,
   AUTOPAIR_ALARM_NAME,
   STORAGE_KEY_TOKEN,
 } from "./bridge-client.js";
@@ -626,6 +627,10 @@ function debounceCookieCapture(platform) {
 }
 
 async function capturePlatformCookies(platform, force = false) {
+  if (!(await loadAutoCaptureCookies())) {
+    console.debug("[OmniGet] cookie auto-capture disabled", platform);
+    return { ok: false, reason: "disabled" };
+  }
   const lastSent = cookieLastSentAt.get(platform) || 0;
   if (!force && Date.now() - lastSent < COOKIE_AUTO_CAPTURE_MIN_INTERVAL_MS) {
     console.debug("[OmniGet] cookie capture throttled", platform);

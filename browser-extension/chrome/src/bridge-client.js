@@ -15,6 +15,7 @@
 
 export const STORAGE_KEY_ENDPOINT = "bridge_endpoint";
 export const STORAGE_KEY_TOKEN = "bridge_token";
+export const STORAGE_KEY_AUTO_CAPTURE_COOKIES = "auto_capture_cookies";
 // Name of the low-frequency autopair alarm owned by background.js. Exported
 // so the 401 recovery path below can re-arm it without duplicating the name.
 export const AUTOPAIR_ALARM_NAME = "omniget-autopair";
@@ -64,6 +65,25 @@ export async function saveBridgeConfig(
       },
       () => resolve(true)
     );
+  });
+}
+
+export async function loadAutoCaptureCookies({ storage = globalThis.chrome?.storage?.local } = {}) {
+  if (!storage?.get) return true;
+  return new Promise((resolve) => {
+    storage.get([STORAGE_KEY_AUTO_CAPTURE_COOKIES], (items) => {
+      resolve(items?.[STORAGE_KEY_AUTO_CAPTURE_COOKIES] !== false);
+    });
+  });
+}
+
+export async function saveAutoCaptureCookies(
+  enabled,
+  { storage = globalThis.chrome?.storage?.local } = {}
+) {
+  if (!storage?.set) return false;
+  return new Promise((resolve) => {
+    storage.set({ [STORAGE_KEY_AUTO_CAPTURE_COOKIES]: Boolean(enabled) }, () => resolve(true));
   });
 }
 

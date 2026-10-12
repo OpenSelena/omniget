@@ -16,6 +16,7 @@
   type Bucket = {
     domain: string;
     platform_kind: string;
+    enabled?: boolean;
     accounts: Account[];
   };
 
@@ -31,6 +32,7 @@
     onClear: (domain: string, slug: string) => void;
     onAddAccount?: (domain: string) => void;
     onTest?: (domain: string, slug: string) => void;
+    onToggleEnabled?: (domain: string, enabled: boolean) => void;
     selected?: Record<string, boolean>;
     onToggleSelection?: (domain: string, slug: string, checked: boolean) => void;
   };
@@ -45,9 +47,11 @@
     onClear,
     onAddAccount,
     onTest,
+    onToggleEnabled,
     selected = {},
     onToggleSelection,
   }: Props = $props();
+  let bucketEnabled = $derived(bucket.enabled !== false);
 
   let primaryAccount = $derived(bucket.accounts.find((a) => a.slug === "_default") ?? bucket.accounts[0]);
   let extraAccounts = $derived(bucket.accounts.filter((a) => a !== primaryAccount));
@@ -219,6 +223,7 @@
 
 <article
   class="bucket-card"
+  class:disabled-bucket={!bucketEnabled}
   class:selectable={!!onToggleSelection && !!primaryAccount}
   class:selected={!!primaryAccount && !!selected[keyFor(primaryAccount.slug)]}
   data-status={status}
@@ -253,6 +258,16 @@
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
           </svg>
         </button>
+      {/if}
+      {#if onToggleEnabled}
+        <label class="bucket-enabled-toggle" title={bucketEnabled ? "Use cookies for this domain" : "Cookies disabled for this domain"}>
+          <input
+            type="checkbox"
+            checked={bucketEnabled}
+            onchange={(e) => onToggleEnabled?.(bucket.domain, e.currentTarget.checked)}
+          />
+          <span>{bucketEnabled ? "Enabled" : "Disabled"}</span>
+        </label>
       {/if}
     </div>
 
@@ -412,10 +427,29 @@
     flex-direction: column;
     gap: 4px;
   }
+  .bucket-card.disabled-bucket {
+    opacity: 0.62;
+  }
   .top-row {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    gap: 10px;
     min-height: 24px;
+  }
+  .bucket-enabled-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--tertiary);
+    cursor: pointer;
+    user-select: none;
+    flex-shrink: 0;
+  }
+  .bucket-enabled-toggle input {
+    accent-color: var(--accent);
+    cursor: pointer;
   }
   .alias-display {
     display: inline-flex;

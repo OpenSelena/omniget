@@ -1,6 +1,8 @@
 import {
   loadBridgeConfig,
   saveBridgeConfig,
+  loadAutoCaptureCookies,
+  saveAutoCaptureCookies,
   checkBridgeHealth,
   discoverBridgeEndpoint,
   trimEndpoint,
@@ -234,6 +236,7 @@ if (typeof document !== "undefined") {
   const discoveryMessage = document.getElementById("discovery-message");
   const endpointHint = document.getElementById("endpoint-hint");
   const advancedDetails = document.getElementById("advanced");
+  const autoCaptureCookiesInput = document.getElementById("auto-capture-cookies");
 
   const FALLBACK_ENDPOINT = "http://127.0.0.1:47720";
 
@@ -332,6 +335,9 @@ if (typeof document !== "undefined") {
 
     endpointInput.value = endpoint || "";
     tokenInput.value = token || "";
+    if (autoCaptureCookiesInput) {
+      autoCaptureCookiesInput.checked = await loadAutoCaptureCookies();
+    }
 
     // Skip auto-discovery if the user is already paired AND we have a stored
     // endpoint that responds — they're probably here to change the token, no
@@ -377,6 +383,18 @@ if (typeof document !== "undefined") {
     revealBtn.textContent = next === "password" ? "Show" : "Hide";
     revealBtn.setAttribute("aria-pressed", String(next !== "password"));
   });
+
+  if (autoCaptureCookiesInput) {
+    autoCaptureCookiesInput.addEventListener("change", async () => {
+      await saveAutoCaptureCookies(autoCaptureCookiesInput.checked);
+      setStatus(
+        autoCaptureCookiesInput.checked
+          ? "Automatic cookie sync enabled."
+          : "Automatic cookie sync disabled.",
+        "ok"
+      );
+    });
+  }
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
