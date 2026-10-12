@@ -29,7 +29,7 @@ tokio-util = { version = "0.7", features = ["rt"] }
 url = "2"
 urlencoding = "2"
 base64 = "0.22.1"
-sha2 = "0.10"
+sha2 = "0.11"
 filetime = "0.2.27"
 omniget-core = { path = "../../omniget-core", features = ["desktop"] }
 omniget-plugin-sdk = { path = "../../omniget-plugin-sdk" }
