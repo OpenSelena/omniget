@@ -1,0 +1,101 @@
+{
+  "fonts": [
+    "OmniGet Lao",
+    "-apple-system",
+    "BlinkMacSystemFont",
+    "SF Pro Text",
+    "SF Pro Display",
+    "SF Pro",
+    "system-ui",
+    "Segoe UI Variable Display",
+    "Segoe UI Variable Text",
+    "Segoe UI",
+    "sans-serif",
+    "ui-monospace",
+    "SF Mono",
+    "Menlo",
+    "Cascadia Mono",
+    "Consolas",
+    "DejaVu Sans Mono",
+    "monospace",
+    "Bricolage Grotesque Variable",
+    "Bricolage Grotesque",
+    "DM Sans",
+    "Inter",
+    "IBM Plex Mono"
+  ],
+  "fontSizes": [10, 11, 12, 13, 15, 17, 22, 26, 32, 40],
+  "typeRules": [],
+  "minControlSize": 28,
+  "controlSizeRules": [],
+  "minControlGap": 4,
+  "minControlInset": 4,
+  "controlContainers": ["[data-ui-container]"],
+  "minLayoutGap": 4,
+  "bannedCopy": [
+    "seamlessly",
+    "seamless",
+    "comprehensive",
+    "empowering",
+    "half the battle",
+    "revolutionize",
+    "delve",
+    "testament",
+    "elevate",
+    "comprehensive suite",
+    "robust powerhouse",
+    "powerhouse",
+    "supercharge",
+    "cutting-edge",
+    "game-changer",
+    "unleash",
+    "tapestry",
+    "multifaceted",
+    "unparalleled"
+  ],
+  "viewports": [
+    { "width": 1100, "height": 720 },
+    { "width": 800, "height": 560 }
+  ],
+  "colorSchemes": ["dark", "light"],
+  "exceptions": [
+    {
+      "selector": ".ProseMirror, .ProseMirror *, .tiptap, .tiptap *",
+      "rules": [
+        "font-family",
+        "font-size",
+        "control-size",
+        "target-size",
+        "accessible-name",
+        "icon-button-tooltip"
+      ],
+      "reason": "TipTap rich-text editor internal DOM"
+    },
+    {
+      "selector": ".mermaid, .mermaid *, [data-cy], canvas",
+      "rules": [
+        "font-family",
+        "font-size",
+        "text-contrast",
+        "accessible-name"
+      ],
+      "reason": "Third-party diagram and graph canvas internals (Mermaid, Cytoscape)"
+    },
+    {
+      "selector": "media-player, media-player *, .vds-player, .vds-player *",
+      "rules": [
+        "font-family",
+        "font-size",
+        "control-size",
+        "target-size",
+        "icon-button-tooltip"
+      ],
+      "reason": "Vidstack media player internal controls"
+    },
+    {
+      "selector": "button[aria-label], button[title], a[aria-label], a[title], [role=button][aria-label], [role=button][title]",
+      "rules": ["icon-button-tooltip"],
+      "reason": "OmniGet uses native aria-label and title attributes on icon buttons; accessible-name rule enforces labeling"
+    }
+  ]
+}

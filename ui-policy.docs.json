@@ -1,0 +1,73 @@
+{
+  "fonts": [
+    "Geist",
+    "Geist Mono",
+    "-apple-system",
+    "BlinkMacSystemFont",
+    "Segoe UI Variable Text",
+    "Segoe UI Variable Display",
+    "Segoe UI",
+    "system-ui",
+    "sans-serif",
+    "ui-monospace",
+    "SF Mono",
+    "Menlo",
+    "Consolas",
+    "monospace"
+  ],
+  "fontSizes": [
+    9, 9.5, 10, 10.5, 11, 11.5, 12, 12.5, 13, 13.5, 14, 14.5, 15, 15.5, 16,
+    16.5, 17, 17.5, 18, 19, 20, 21, 22, 24, 26, 28, 30, 32, 34, 36, 38, 40,
+    42, 44, 48, 52, 56, 60, 64, 67.2
+  ],
+  "typeRules": [],
+  "minControlSize": 24,
+  "controlSizeRules": [],
+  "minControlGap": 4,
+  "minControlInset": 4,
+  "controlContainers": ["[data-ui-container]"],
+  "minLayoutGap": 4,
+  "bannedCopy": [
+    "seamlessly",
+    "seamless",
+    "comprehensive",
+    "empowering",
+    "half the battle",
+    "revolutionize",
+    "delve",
+    "testament",
+    "elevate",
+    "comprehensive suite",
+    "robust powerhouse",
+    "powerhouse",
+    "supercharge",
+    "cutting-edge",
+    "game-changer",
+    "unleash",
+    "tapestry",
+    "multifaceted",
+    "unparalleled"
+  ],
+  "viewports": [
+    { "width": 1280, "height": 800 },
+    { "width": 375, "height": 812 }
+  ],
+  "colorSchemes": ["dark", "light"],
+  "exceptions": [
+    {
+      "selector": "html",
+      "rules": ["root-background"],
+      "reason": "Docs and landing pages set the active theme background color on body"
+    },
+    {
+      "selector": "aside, .sidebar, .mobile-menu",
+      "rules": ["viewport-bounds"],
+      "reason": "Off-canvas navigation drawer is translated outside the horizontal viewport when closed on mobile"
+    },
+    {
+      "selector": "button[aria-label], button[title], a[aria-label], a[title], [role=button][aria-label], [role=button][title]",
+      "rules": ["icon-button-tooltip"],
+      "reason": "Docs and landing pages use aria-label and title on icon controls; accessible-name enforces labeling"
+    }
+  ]
+}

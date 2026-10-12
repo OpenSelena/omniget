@@ -1,0 +1,87 @@
+{
+  "updated_at": "2026-10-12",
+  "targets": {
+    "/": {
+      "control-gap": 6,
+      "control-size": 16,
+      "label-consistency": 5,
+      "text-contrast": 27
+    },
+    "/about": {
+      "control-size": 2,
+      "label-consistency": 3,
+      "text-contrast": 2
+    },
+    "/convert": {
+      "control-size": 2,
+      "font-size": 4,
+      "label-consistency": 3,
+      "text-contrast": 2
+    },
+    "/courses": {
+      "control-size": 2,
+      "font-size": 4,
+      "label-consistency": 3,
+      "text-contrast": 2
+    },
+    "/downloads": {
+      "control-gap": 2,
+      "control-size": 9,
+      "label-consistency": 3,
+      "text-contrast": 2
+    },
+    "/league": {
+      "control-size": 2,
+      "font-size": 6,
+      "label-consistency": 3,
+      "text-contrast": 2
+    },
+    "/marketplace": {
+      "control-gap": 1,
+      "control-size": 20,
+      "label-consistency": 3,
+      "text-contrast": 20
+    },
+    "/omnidisc": {
+      "control-gap": 2,
+      "control-size": 2,
+      "label-consistency": 3,
+      "text-contrast": 2
+    },
+    "/open-nami": {
+      "aria-reference": 4,
+      "control-gap": 8,
+      "control-size": 6,
+      "font-size": 10,
+      "label-consistency": 3,
+      "text-contrast": 6
+    },
+    "/settings": {
+      "control-gap": 18,
+      "control-size": 2,
+      "font-size": 10,
+      "label-consistency": 3,
+      "text-contrast": 6
+    },
+    "/study": {
+      "control-gap": 4,
+      "control-size": 7,
+      "font-size": 4,
+      "label-consistency": 3,
+      "text-contrast": 3
+    },
+    "/telegram": {
+      "control-size": 2,
+      "font-size": 4,
+      "label-consistency": 3,
+      "text-contrast": 2
+    },
+    "/tools": {
+      "content-clipping": 2,
+      "control-gap": 8,
+      "control-size": 12,
+      "label-consistency": 17,
+      "text-contrast": 6
+    }
+  }
+}
