@@ -75,7 +75,7 @@
   },
   "devDependencies": {
     "@sveltejs/adapter-static": "^3.0.6",
-    "@sveltejs/kit": "^2.9.0",
+    "@sveltejs/kit": "^2.70.2",
     "@sveltejs/vite-plugin-svelte": "^5.0.0",
     "@tauri-apps/cli": "^2.11.4",
     "@types/katex": "^0.16.7",
@@ -83,13 +83,13 @@
     "@types/node": "^25.6.0",
     "lintapple": "^0.1.20",
     "playwright": "^1.62.0",
-    "svelte": "^5.0.0",
+    "svelte": "^5.55.7",
     "svelte-check": "^4.0.0",
     "typescript": "~5.6.2",
-    "vite": "^6.0.3",
+    "vite": "^6.4.3",
     "vite-plugin-top-level-await": "^1.5.0",
     "vite-plugin-wasm": "^3.4.1",
-    "vitest": "^4.1.4"
+    "vitest": "^5.0.4"
   },
   "pnpm": {
     "overrides": {
