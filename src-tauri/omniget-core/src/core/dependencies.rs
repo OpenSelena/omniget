@@ -702,7 +702,10 @@ pub async fn ensure_js_runtime() -> Option<PathBuf> {
     match download_deno().await {
         Ok(path) => {
             crate::core::ytdlp::reset_js_runtime_cache();
-            tracing::info!("[dependencies] Deno JS runtime installed: {}", path.display());
+            tracing::info!(
+                "[dependencies] Deno JS runtime installed: {}",
+                path.display()
+            );
             Some(path)
         }
         Err(e) => {

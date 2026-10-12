@@ -120,6 +120,7 @@ pub fn persist_account(
         .entry("bilibili.com".to_string())
         .or_insert_with(|| crate::cookies::storage::BucketEntry {
             platform_kind: "bilibili".to_string(),
+            enabled: true,
             accounts: Vec::new(),
         });
     bucket.platform_kind = "bilibili".to_string();
