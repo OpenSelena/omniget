@@ -3531,7 +3531,7 @@ dependencies = [
 name = "grammers-session"
 version = "0.8.0"
 dependencies = [
- "grammers-tl-gen",
+ "grammers-tl-gen 0.10.0",
  "grammers-tl-parser",
  "grammers-tl-types",
  "log",
@@ -3552,6 +3552,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "grammers-tl-gen"
+version = "0.10.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1a37dda68c9e775dfbffb85b99826b5ac8144e9da40be3327e77cbcd8618fc30"
+dependencies = [
+ "grammers-tl-parser",
+]
+
+[[package]]
 name = "grammers-tl-parser"
 version = "1.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3566,7 +3575,7 @@ version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e430e1834164323635d67f10bd8754eab2d97b16693a1b0532befd373d83d5bb"
 dependencies = [
- "grammers-tl-gen",
+ "grammers-tl-gen 0.8.0",
  "grammers-tl-parser",
 ]
 

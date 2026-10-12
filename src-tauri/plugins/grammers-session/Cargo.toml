@@ -73,7 +73,7 @@ features = ["bundled"]
 version = "0.9.8"
 
 [build-dependencies.grammers-tl-gen]
-version = "0.8.0"
+version = "0.10.0"
 
 [build-dependencies.grammers-tl-parser]
 version = "1.2.0"
