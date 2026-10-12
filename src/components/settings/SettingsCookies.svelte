@@ -21,7 +21,7 @@
     cookie_count: number;
     last_used_at_ms: number | null;
   };
-  type BucketEntry = { platform_kind: string; accounts: Account[] };
+  type BucketEntry = { platform_kind: string; enabled?: boolean; accounts: Account[] };
   type Registry = { buckets: Record<string, BucketEntry> };
   type ListResponse = { registry: Registry; cookies_dir: string };
   type ImportResponse = {
@@ -253,6 +253,15 @@
   async function handleRename(domain: string, slug: string, newAlias: string) {
     try {
       await invoke("cookies_rename", { request: { domain, slug, new_alias: newAlias } });
+      await reload();
+    } catch (e) {
+      showToast("error", String(e));
+    }
+  }
+
+  async function handleToggleBucketEnabled(domain: string, enabled: boolean) {
+    try {
+      await invoke("cookies_set_bucket_enabled", { request: { domain, enabled } });
       await reload();
     } catch (e) {
       showToast("error", String(e));
@@ -582,6 +591,7 @@
           onClear={askClear}
           onAddAccount={openAddAccount}
           onTest={handleTest}
+          onToggleEnabled={handleToggleBucketEnabled}
           selected={selectedCookies}
           onToggleSelection={toggleCookieSelection}
         />

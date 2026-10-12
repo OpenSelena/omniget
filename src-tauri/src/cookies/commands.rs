@@ -225,6 +225,20 @@ pub async fn cookies_read_as_json(
         .collect())
 }
 
+#[derive(Debug, Deserialize)]
+pub struct SetBucketEnabledRequest {
+    pub domain: String,
+    pub enabled: bool,
+}
+
+#[tauri::command]
+pub async fn cookies_set_bucket_enabled(
+    request: SetBucketEnabledRequest,
+) -> Result<OkResponse, String> {
+    storage::set_bucket_enabled(&request.domain, request.enabled).map_err(|e| e.to_string())?;
+    Ok(OkResponse { ok: true })
+}
+
 #[tauri::command]
 pub async fn cookies_accounts_for_url(url: String) -> Result<AccountsForUrlResponse, String> {
     let parsed = url::Url::parse(&url).map_err(|e| e.to_string())?;
@@ -237,6 +251,12 @@ pub async fn cookies_accounts_for_url(url: String) -> Result<AccountsForUrlRespo
         });
     }
     let registry = storage::load_registry();
+    if !storage::is_domain_enabled(&registry, &root) {
+        return Ok(AccountsForUrlResponse {
+            domain: root,
+            accounts: Vec::new(),
+        });
+    }
     let accounts = registry
         .buckets
         .get(&root)

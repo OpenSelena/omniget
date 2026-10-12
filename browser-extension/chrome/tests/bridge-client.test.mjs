@@ -5,11 +5,14 @@ import {
   trimEndpoint,
   loadBridgeConfig,
   saveBridgeConfig,
+  loadAutoCaptureCookies,
+  saveAutoCaptureCookies,
   checkBridgeHealth,
   discoverBridgeEndpoint,
   sendViaBridge,
   STORAGE_KEY_ENDPOINT,
   STORAGE_KEY_TOKEN,
+  STORAGE_KEY_AUTO_CAPTURE_COOKIES,
   DEFAULT_PORT_RANGE,
 } from "../src/bridge-client.js";
 
@@ -231,3 +234,14 @@ test("sendViaBridge bubbles up app-level error code on a 4xx response", async ()
   assert.equal(result.code, "INVALID_URL");
   assert.equal(result.message, "bad URL");
 });
+
+test("loadAutoCaptureCookies defaults to true and saveAutoCaptureCookies persists false", async () => {
+  const storage = fakeStorage();
+  assert.equal(await loadAutoCaptureCookies({ storage }), true);
+  await saveAutoCaptureCookies(false, { storage });
+  assert.equal(storage.data[STORAGE_KEY_AUTO_CAPTURE_COOKIES], false);
+  assert.equal(await loadAutoCaptureCookies({ storage }), false);
+  await saveAutoCaptureCookies(true, { storage });
+  assert.equal(await loadAutoCaptureCookies({ storage }), true);
+});
+

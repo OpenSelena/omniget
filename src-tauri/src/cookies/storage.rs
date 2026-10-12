@@ -13,7 +13,7 @@
 //! The format inside each file is Netscape — same as the legacy
 //! `chrome-extension-cookies.txt` so yt-dlp consumes it unchanged.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -24,6 +24,10 @@ use crate::extension_storage::ExtensionCookie;
 
 const META_FILE: &str = "_meta.json";
 const DEFAULT_SLUG: &str = "_default";
+
+fn default_true() -> bool {
+    true
+}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct AccountEntry {
@@ -39,16 +43,30 @@ pub struct AccountEntry {
     pub last_used_at_ms: Option<i64>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BucketEntry {
     pub platform_kind: String,
     pub accounts: Vec<AccountEntry>,
+    #[serde(default = "default_true")]
+    pub enabled: bool,
+}
+
+impl Default for BucketEntry {
+    fn default() -> Self {
+        Self {
+            platform_kind: String::new(),
+            accounts: Vec::new(),
+            enabled: true,
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
 pub struct CookieRegistry {
     #[serde(default)]
     pub buckets: BTreeMap<String, BucketEntry>,
+    #[serde(default)]
+    pub disabled_domains: BTreeSet<String>,
 }
 
 pub fn cookies_root() -> PathBuf {
@@ -230,6 +248,96 @@ pub fn write_account_file(
     Ok(cookies.len())
 }
 
+pub(crate) fn upsert_bucket_account_in_registry(
+    registry: &mut CookieRegistry,
+    root: &str,
+    slug: &str,
+    count: usize,
+    now: i64,
+    source: &IngestSource,
+) {
+    let platform = PlatformKind::from_domain(root);
+    let source_url = normalize_source_url(source.source_url.as_deref(), root);
+    let is_disabled = registry.disabled_domains.contains(root);
+    let bucket = registry
+        .buckets
+        .entry(root.to_string())
+        .or_insert_with(|| BucketEntry {
+            platform_kind: platform.as_str().to_string(),
+            accounts: Vec::new(),
+            enabled: !is_disabled,
+        });
+    bucket.platform_kind = platform.as_str().to_string();
+    if is_disabled {
+        bucket.enabled = false;
+    }
+
+    let alias_default = format!("{} · {}", platform_display(platform), human_date(now),);
+    let new_alias = source.alias_hint.clone().unwrap_or(alias_default);
+
+    if let Some(existing) = bucket.accounts.iter_mut().find(|a| a.slug == slug) {
+        existing.captured_at_ms = now;
+        existing.cookie_count = count;
+        if let Some(ref u) = source_url {
+            existing.source_url = Some(u.clone());
+        }
+        existing.source_label = Some(source.source_label.clone());
+        if source.alias_hint.is_some() {
+            existing.alias = new_alias;
+        }
+    } else {
+        bucket.accounts.push(AccountEntry {
+            slug: slug.to_string(),
+            alias: new_alias,
+            source_url,
+            source_label: Some(source.source_label.clone()),
+            captured_at_ms: now,
+            cookie_count: count,
+            last_used_at_ms: None,
+        });
+    }
+}
+
+fn normalize_domain_key(domain: &str) -> String {
+    let r = root_domain_of(domain);
+    if r.is_empty() {
+        domain.trim_start_matches('.').to_lowercase()
+    } else {
+        r
+    }
+}
+
+pub fn is_domain_enabled(registry: &CookieRegistry, domain: &str) -> bool {
+    let root = normalize_domain_key(domain);
+    if registry.disabled_domains.contains(&root) {
+        return false;
+    }
+    registry
+        .buckets
+        .get(&root)
+        .map(|b| b.enabled)
+        .unwrap_or(true)
+}
+
+pub fn apply_bucket_enabled(registry: &mut CookieRegistry, domain: &str, enabled: bool) {
+    let root = normalize_domain_key(domain);
+    if enabled {
+        registry.disabled_domains.remove(&root);
+    } else {
+        registry.disabled_domains.insert(root.clone());
+    }
+    if let Some(bucket) = registry.buckets.get_mut(&root) {
+        bucket.enabled = enabled;
+    }
+}
+
+pub fn set_bucket_enabled(domain: &str, enabled: bool) -> anyhow::Result<()> {
+    let mut registry = load_registry();
+    apply_bucket_enabled(&mut registry, domain, enabled);
+    save_registry(&registry)?;
+    Ok(())
+}
+
 pub fn ingest_batch(
     cookies: &[ExtensionCookie],
     source: IngestSource,
@@ -249,42 +357,7 @@ pub fn ingest_batch(
 
     for (root, group) in by_root.iter() {
         let count = write_account_file(root, DEFAULT_SLUG, group)?;
-        let platform = PlatformKind::from_domain(root);
-        let source_url = normalize_source_url(source.source_url.as_deref(), root);
-        let bucket = registry
-            .buckets
-            .entry(root.clone())
-            .or_insert_with(|| BucketEntry {
-                platform_kind: platform.as_str().to_string(),
-                accounts: Vec::new(),
-            });
-        bucket.platform_kind = platform.as_str().to_string();
-
-        let alias_default = format!("{} · {}", platform_display(platform), human_date(now),);
-        let new_alias = source.alias_hint.clone().unwrap_or(alias_default);
-
-        if let Some(existing) = bucket.accounts.iter_mut().find(|a| a.slug == DEFAULT_SLUG) {
-            existing.captured_at_ms = now;
-            existing.cookie_count = count;
-            if let Some(ref u) = source_url {
-                existing.source_url = Some(u.clone());
-            }
-            existing.source_label = Some(source.source_label.clone());
-            if source.alias_hint.is_some() {
-                existing.alias = new_alias;
-            }
-        } else {
-            bucket.accounts.push(AccountEntry {
-                slug: DEFAULT_SLUG.to_string(),
-                alias: new_alias,
-                source_url,
-                source_label: Some(source.source_label.clone()),
-                captured_at_ms: now,
-                cookie_count: count,
-                last_used_at_ms: None,
-            });
-        }
-
+        upsert_bucket_account_in_registry(&mut registry, root, DEFAULT_SLUG, count, now, &source);
         written.push((root.clone(), count));
     }
 
@@ -410,13 +483,11 @@ pub fn ingest_to_account(
     }
 
     let mut registry = load_registry();
-    let bucket = registry.buckets.entry(root.clone()).or_insert_with(|| {
-        let platform = PlatformKind::from_domain(&root);
-        BucketEntry {
-            platform_kind: platform.as_str().to_string(),
-            accounts: Vec::new(),
-        }
-    });
+    let existing_slugs: BTreeSet<String> = registry
+        .buckets
+        .get(&root)
+        .map(|b| b.accounts.iter().map(|a| a.slug.clone()).collect())
+        .unwrap_or_default();
 
     let mut slug = if requested_slug.trim().is_empty() {
         slugify_alias(source.alias_hint.as_deref().unwrap_or(""))
@@ -428,7 +499,7 @@ pub fn ingest_to_account(
     }
     let mut candidate = slug.clone();
     let mut suffix = 2;
-    while bucket.accounts.iter().any(|a| a.slug == candidate) {
+    while existing_slugs.contains(&candidate) {
         candidate = format!("{}-{}", slug, suffix);
         suffix += 1;
     }
@@ -436,24 +507,7 @@ pub fn ingest_to_account(
 
     let count = write_account_file(&root, &final_slug, &scoped)?;
     let now = current_unix_ms();
-    let source_url = normalize_source_url(source.source_url.as_deref(), &root);
-    let alias = source.alias_hint.clone().unwrap_or_else(|| {
-        format!(
-            "{} · {}",
-            platform_display(PlatformKind::from_domain(&root)),
-            human_date(now)
-        )
-    });
-
-    bucket.accounts.push(AccountEntry {
-        slug: final_slug.clone(),
-        alias,
-        source_url,
-        source_label: Some(source.source_label.clone()),
-        captured_at_ms: now,
-        cookie_count: count,
-        last_used_at_ms: None,
-    });
+    upsert_bucket_account_in_registry(&mut registry, &root, &final_slug, count, now, &source);
 
     save_registry(&registry)?;
     Ok((final_slug, count))
@@ -476,6 +530,10 @@ pub fn rename_account(domain: &str, slug: &str, new_alias: &str) -> anyhow::Resu
 }
 
 pub fn account_path_for_consumer(domain: &str, slug: Option<&str>) -> Option<PathBuf> {
+    let registry = load_registry();
+    if !is_domain_enabled(&registry, domain) {
+        return None;
+    }
     let slug = slug.unwrap_or(DEFAULT_SLUG);
     let path = account_file(domain, slug);
     if path.exists() {
@@ -599,5 +657,37 @@ mod tests {
             normalize_source_url(Some("not a url"), ".youtube.com"),
             Some("https://youtube.com/".to_string())
         );
+    }
+
+    #[test]
+    fn disabled_bucket_blocks_consumer_and_survives_reingest() {
+        let mut reg = CookieRegistry::default();
+        assert!(is_domain_enabled(&reg, "youtube.com"));
+
+        apply_bucket_enabled(&mut reg, "youtube.com", false);
+        assert!(!is_domain_enabled(&reg, "youtube.com"));
+
+        // Simulate extension auto-capture upserting into registry for a disabled domain:
+        upsert_bucket_account_in_registry(
+            &mut reg,
+            "youtube.com",
+            DEFAULT_SLUG,
+            5,
+            1700000000000,
+            &IngestSource {
+                source_url: Some("https://www.youtube.com/".to_string()),
+                source_label: "Browser extension (auto-capture)".to_string(),
+                alias_hint: None,
+            },
+        );
+        assert!(
+            !is_domain_enabled(&reg, "youtube.com"),
+            "auto-capture re-ingest must not re-enable a disabled bucket"
+        );
+        assert_eq!(reg.buckets.get("youtube.com").unwrap().enabled, false);
+
+        apply_bucket_enabled(&mut reg, "youtube.com", true);
+        assert!(is_domain_enabled(&reg, "youtube.com"));
+        assert_eq!(reg.buckets.get("youtube.com").unwrap().enabled, true);
     }
 }
