@@ -28,7 +28,7 @@ Welcome to OmniGet. This file serves as the definitive reference and operating m
 1. **Version Bump**:
    - Run: `pnpm version:set <major|minor|patch|X.Y.Z>`
    - This automatically updates:
-     - `package.json` & `package-lock.json`
+     - `package.json`
      - `src-tauri/Cargo.toml` & `src-tauri/Cargo.lock`
      - `src-tauri/tauri.conf.json`
      - `src/lib/stores/changelog-store.svelte.ts`

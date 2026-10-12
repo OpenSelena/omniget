@@ -9,6 +9,9 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   rust:
     if: ${{ github.event_name != 'pull_request' || github.event.pull_request.user.login != 'weblate' }}

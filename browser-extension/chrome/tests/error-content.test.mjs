@@ -61,3 +61,23 @@ test("falls back to LAUNCH_FAILED content for unknown error codes", () => {
   assert.equal(content.code, "LAUNCH_FAILED");
   assert.equal(content.title, "OmniGet could not be launched from your browser");
 });
+
+test("sanitizeInstallUrl rejects malicious and foreign URLs and allows official URLs", async () => {
+  const { sanitizeInstallUrl, DEFAULT_INSTALL_URL } = await import("../pages/error-content.js");
+
+  assert.equal(sanitizeInstallUrl(null), DEFAULT_INSTALL_URL);
+  assert.equal(sanitizeInstallUrl(""), DEFAULT_INSTALL_URL);
+  assert.equal(sanitizeInstallUrl("javascript:alert(1)"), DEFAULT_INSTALL_URL);
+  assert.equal(sanitizeInstallUrl("data:text/html,evil"), DEFAULT_INSTALL_URL);
+  assert.equal(sanitizeInstallUrl("http://github.com/OpenSelena/omniget"), DEFAULT_INSTALL_URL);
+  assert.equal(sanitizeInstallUrl("https://evil.com/fake-update"), DEFAULT_INSTALL_URL);
+  assert.equal(
+    sanitizeInstallUrl("https://github.com/OpenSelena/omniget/releases/tag/v0.12.0"),
+    "https://github.com/OpenSelena/omniget/releases/tag/v0.12.0"
+  );
+  assert.equal(
+    sanitizeInstallUrl("https://omniget.org/download"),
+    "https://omniget.org/download"
+  );
+});
+

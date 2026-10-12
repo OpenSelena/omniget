@@ -16,7 +16,7 @@ use serde::{Deserialize, Serialize};
 use super::{report, ProgressFn};
 
 const ID: &str = "ai-arxiv-md";
-const API: &str = "http://export.arxiv.org/api/query?id_list=";
+const API: &str = "https://export.arxiv.org/api/query?id_list=";
 
 // ── Identificador ──────────────────────────────────────────────────────
 

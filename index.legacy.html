@@ -1998,16 +1998,30 @@
 
       const item = document.createElement('div');
       item.className = 'oo-profile-card';
-      item.innerHTML = `
-        <div>
-          <strong style="color: var(--text-head); font-size: 13.5px;">${val}</strong>
-          <div style="font-size: 11.5px; color: var(--text-muted);">Monitored • Just added</div>
-        </div>
-        <button type="button" class="btn btn-secondary" style="height: 32px; font-size: 12px; padding: 0 12px; border-radius: 8px;" onclick="quickOoDownload('${val}')">Fetch Latest</button>
-      `;
+
+      const info = document.createElement('div');
+      const strong = document.createElement('strong');
+      strong.style.cssText = 'color: var(--text-head); font-size: 13.5px;';
+      strong.textContent = val;
+      const subtitle = document.createElement('div');
+      subtitle.style.cssText = 'font-size: 11.5px; color: var(--text-muted);';
+      subtitle.textContent = 'Monitored • Just added';
+      info.appendChild(strong);
+      info.appendChild(subtitle);
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'btn btn-secondary';
+      btn.style.cssText = 'height: 32px; font-size: 12px; padding: 0 12px; border-radius: 8px;';
+      btn.textContent = 'Fetch Latest';
+      btn.addEventListener('click', () => quickOoDownload(val));
+
+      item.appendChild(info);
+      item.appendChild(btn);
       list.prepend(item);
       input.value = '';
     }
+
 
     function quickOoDownload(handle) {
       switchOoPanel('download');
