@@ -2288,6 +2288,7 @@ fn detect_js_runtime() -> Option<String> {
     None
 }
 
+#[cfg(target_os = "windows")]
 pub(crate) fn find_windows_js_runtime() -> Option<(&'static str, PathBuf)> {
     let local_app_data = std::env::var("LOCALAPPDATA").ok();
     let user_profile = std::env::var("USERPROFILE").ok();
@@ -2296,6 +2297,7 @@ pub(crate) fn find_windows_js_runtime() -> Option<(&'static str, PathBuf)> {
         .find(|(_, path)| path.exists())
 }
 
+#[cfg(any(target_os = "windows", test))]
 pub(crate) fn windows_js_runtime_candidates(
     local_app_data: Option<&str>,
     user_profile: Option<&str>,
@@ -2330,10 +2332,7 @@ pub(crate) fn windows_js_runtime_candidates(
             "node",
             PathBuf::from(format!(r"{}\AppData\Roaming\nvm\node.exe", up)),
         ));
-        out.push((
-            "deno",
-            PathBuf::from(format!(r"{}\.deno\bin\deno.exe", up)),
-        ));
+        out.push(("deno", PathBuf::from(format!(r"{}\.deno\bin\deno.exe", up))));
         out.push(("bun", PathBuf::from(format!(r"{}\.bun\bin\bun.exe", up))));
     }
     out.push(("node", PathBuf::from(r"C:\Program Files\nodejs\node.exe")));
@@ -2519,7 +2518,10 @@ pub async fn get_video_info(
         if result.status.success() {
             let json: serde_json::Value = serde_json::from_slice(&result.stdout)
                 .map_err(|e| anyhow!("yt-dlp returned invalid JSON: {}", e))?;
-            let used_cookies = use_cookies && args.iter().any(|a| a == "--cookies" || a == "--cookies-from-browser");
+            let used_cookies = use_cookies
+                && args
+                    .iter()
+                    .any(|a| a == "--cookies" || a == "--cookies-from-browser");
             if is_yt
                 && used_cookies
                 && attempt < attempts.len() - 1
@@ -2554,9 +2556,8 @@ pub async fn get_video_info(
             );
         }
 
-        let is_retryable = is_yt
-            && attempt < attempts.len() - 1
-            && should_retry_info_fetch(&stderr_lower);
+        let is_retryable =
+            is_yt && attempt < attempts.len() - 1 && should_retry_info_fetch(&stderr_lower);
 
         if is_retryable {
             tracing::warn!(
@@ -3612,7 +3613,11 @@ pub async fn download_video(
             is_youtube,
             &yt_args,
             if use_subtitles { &subtitle_args } else { &[] },
-            if use_cfb { Some(cfb_setting.as_str()) } else { None },
+            if use_cfb {
+                Some(cfb_setting.as_str())
+            } else {
+                None
+            },
             aria2c_args,
             &extra_args,
             &effective_extra_flags,
@@ -4229,8 +4234,7 @@ fn spawn_stdout_reader(
                     if !is_audio_only
                         && s.has_video()
                         && (s.format_id == "18"
-                            || (planned_count <= 1
-                                && s.height.map(|h| h <= 360).unwrap_or(false)))
+                            || (planned_count <= 1 && s.height.map(|h| h <= 360).unwrap_or(false)))
                         && !flag.swap(true, Ordering::Relaxed)
                     {
                         let warn_line = "[yt-dlp] warning: YouTube resolved only 360p (format 18); login cookies or missing JS runtime may be restricting HD formats";
@@ -6082,7 +6086,11 @@ ERROR: [youtube] abc123: Requested format is not available";
             ]
         );
 
-        let base_args = vec!["--ignore-config".to_string(), "-f".to_string(), "bv*+ba/b".to_string()];
+        let base_args = vec![
+            "--ignore-config".to_string(),
+            "-f".to_string(),
+            "bv*+ba/b".to_string(),
+        ];
         let yt_args = YoutubeExtractorArgs {
             player_client: Some("default".to_string()),
             formats_dashy: true,
@@ -6210,13 +6218,17 @@ ERROR: [youtube] abc123: Requested format is not available";
             "must include %USERPROFILE%\\.deno\\bin\\deno.exe"
         );
         assert!(
-            candidates.iter().any(|(rt, p)| *rt == "bun"
-                && p == &PathBuf::from(r"C:\Users\alice\.bun\bin\bun.exe")),
+            candidates
+                .iter()
+                .any(|(rt, p)| *rt == "bun"
+                    && p == &PathBuf::from(r"C:\Users\alice\.bun\bin\bun.exe")),
             "must include %USERPROFILE%\\.bun\\bin\\bun.exe"
         );
         assert!(
-            candidates.iter().any(|(rt, p)| *rt == "node"
-                && p == &PathBuf::from(r"C:\Program Files\nodejs\node.exe")),
+            candidates
+                .iter()
+                .any(|(rt, p)| *rt == "node"
+                    && p == &PathBuf::from(r"C:\Program Files\nodejs\node.exe")),
             "must include C:\\Program Files\\nodejs\\node.exe"
         );
 
