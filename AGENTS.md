@@ -77,3 +77,5 @@ Welcome to OmniGet. This file serves as the definitive reference and operating m
 Before finishing any task or committing changes:
 - `pnpm test` : Runs full Vitest suite (must pass 100%).
 - `node scripts/e2e_verify.mjs` : Validates documentation suite routes, links, and accessibility.
+- `pnpm lint:ui <target>` : Required whenever modifying Svelte routes, UI components, stylesheets, `index.html`, or `docs/` — see [.agents/skills/ui-lint/SKILL.md](.agents/skills/ui-lint/SKILL.md).
+
