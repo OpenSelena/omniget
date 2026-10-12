@@ -684,10 +684,10 @@ mod tests {
             !is_domain_enabled(&reg, "youtube.com"),
             "auto-capture re-ingest must not re-enable a disabled bucket"
         );
-        assert_eq!(reg.buckets.get("youtube.com").unwrap().enabled, false);
+        assert!(!reg.buckets.get("youtube.com").unwrap().enabled);
 
         apply_bucket_enabled(&mut reg, "youtube.com", true);
         assert!(is_domain_enabled(&reg, "youtube.com"));
-        assert_eq!(reg.buckets.get("youtube.com").unwrap().enabled, true);
+        assert!(reg.buckets.get("youtube.com").unwrap().enabled);
     }
 }
