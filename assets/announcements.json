@@ -1,19 +1,13 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "id": "announcement-openselena-telegram",
+  "id": "announcement-openselena-telegram-v2",
   "active": true,
-  "badge": "Community",
-  "title": "Join OpenSelena on Telegram",
+  "title": "Open Selena Telegram",
   "thumbnail": "https://raw.githubusercontent.com/OpenSelena/omniget/main/assets/announcement-poster.png",
-  "body": "Connect with the official OpenSelena community on Telegram. Stay up to date with new OmniGet releases, preview builds, feature discussions, and direct support.",
-  "highlights": [
-    "Instant Release Alerts: Direct download links and changelogs for OmniGet updates",
-    "Development Updates: Early access to experimental builds and roadmap discussions",
-    "Community Support: Troubleshooting, bug reporting, and feature discussions"
-  ],
+  "body": "Join the official Telegram channel of OpenSelena, where we share beta updates of OmniGet, new feature announcements, bug fixes, and the latest AI news and leaks.",
   "cta": {
     "label": "Join Telegram Channel",
-    "url": "https://t.me/OpenSelena/"
+    "url": "https://t.me/openselena"
   },
   "expires_at": null
 }

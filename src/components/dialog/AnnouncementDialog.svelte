@@ -41,9 +41,6 @@
             class="banner-img"
             loading="lazy"
           />
-          {#if item.badge}
-            <span class="badge-pill">{item.badge}</span>
-          {/if}
           <button
             type="button"
             class="close-btn"
@@ -56,7 +53,10 @@
       {:else}
         <div class="header-no-thumb">
           {#if item.badge}
-            <span class="badge-pill-inline">{item.badge}</span>
+            <span class="badge-chip">
+              <span class="badge-dot"></span>
+              {item.badge}
+            </span>
           {/if}
           <button
             type="button"
@@ -74,12 +74,9 @@
         <p class="description">{item.body}</p>
 
         {#if item.highlights && item.highlights.length > 0}
-          <div class="highlights-box">
+          <div class="topic-chips">
             {#each item.highlights as highlight}
-              <div class="highlight-item">
-                <span class="highlight-bullet">•</span>
-                <span class="highlight-text">{highlight}</span>
-              </div>
+              <span class="chip">{highlight}</span>
             {/each}
           </div>
         {/if}
@@ -113,7 +110,7 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    overflow: hidden;
+    padding: 14px 14px 16px 14px;
   }
 
   .banner-wrapper {
@@ -121,6 +118,8 @@
     width: 100%;
     height: 180px;
     background: var(--surface-2, rgba(255, 255, 255, 0.05));
+    border-radius: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
     overflow: hidden;
     display: flex;
     align-items: center;
@@ -133,158 +132,131 @@
     object-fit: cover;
   }
 
-  .badge-pill {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    background: var(--accent, #6366f1);
-    color: #ffffff;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 3px 10px;
-    border-radius: var(--radius-full, 9999px);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-  }
-
   .close-btn {
     position: absolute;
     top: 10px;
     right: 10px;
-    width: 28px;
-    height: 28px;
+    width: 32px;
+    height: 32px;
     border-radius: var(--radius-full, 9999px);
-    background: rgba(0, 0, 0, 0.55);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    color: #ffffff;
+    background: rgba(18, 19, 22, 0.7);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: var(--text-muted, #9aa0a6);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: 13px;
     cursor: pointer;
-    transition: background 0.15s ease;
+    transition: background 0.15s ease, color 0.15s ease;
   }
 
   .close-btn:hover {
-    background: rgba(0, 0, 0, 0.8);
+    background: rgba(18, 19, 22, 0.95);
+    color: #ffffff;
   }
 
   .header-no-thumb {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 16px 20px 0 20px;
-  }
-
-  .badge-pill-inline {
-    background: var(--accent, #6366f1);
-    color: #ffffff;
-    font-size: 11px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    padding: 3px 10px;
-    border-radius: var(--radius-full, 9999px);
+    justify-content: flex-end;
+    padding: 4px 6px 0 6px;
   }
 
   .close-btn-inline {
     background: transparent;
     border: none;
-    color: var(--text-muted, #94a3b8);
+    color: var(--text-muted, #9aa0a6);
     font-size: 14px;
     cursor: pointer;
-    padding: 4px;
+    padding: 6px;
+    border-radius: var(--radius-full, 9999px);
+    transition: color 0.15s ease, background 0.15s ease;
   }
 
   .close-btn-inline:hover {
-    color: var(--text, #ffffff);
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.06);
   }
 
   .content-body {
-    padding: 18px 22px 20px 22px;
+    padding: 18px 8px 0 8px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
   }
 
   .title {
     margin: 0;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text, #ffffff);
-    line-height: 1.3;
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text, #f1f3f4);
+    line-height: 1.25;
+    letter-spacing: -0.01em;
   }
 
   .description {
     margin: 0;
-    font-size: 13.5px;
-    line-height: 1.5;
-    color: var(--text-muted, #94a3b8);
-  }
-
-  .highlights-box {
-    background: var(--surface-1, rgba(255, 255, 255, 0.03));
-    border: 1px solid var(--border, rgba(255, 255, 255, 0.08));
-    border-radius: var(--radius-md, 8px);
-    padding: 10px 14px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .highlight-item {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-    font-size: 13px;
-    color: var(--text, #e2e8f0);
-  }
-
-  .highlight-bullet {
-    color: var(--accent, #6366f1);
     font-size: 14px;
-    font-weight: bold;
+    line-height: 1.55;
+    color: var(--text-muted, #bdc1c6);
+  }
+
+  .topic-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 2px;
+  }
+
+  .chip {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    color: var(--text-muted, #a8aaad);
+    font-size: 12px;
+    font-weight: 400;
+    padding: 4px 10px;
+    border-radius: 8px;
   }
 
   .footer-actions {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 10px;
-    margin-top: 6px;
+    gap: 12px;
+    margin-top: 8px;
   }
 
   .btn-dismiss {
-    background: var(--surface-2, rgba(255, 255, 255, 0.08));
-    border: 1px solid var(--border, rgba(255, 255, 255, 0.1));
-    color: var(--text, #ffffff);
-    padding: 8px 16px;
-    border-radius: var(--radius-md, 8px);
-    font-size: 13px;
+    background: transparent;
+    border: none;
+    color: #9aa0a6;
+    padding: 9px 18px;
+    border-radius: var(--radius-full, 9999px);
+    font-size: 13.5px;
     font-weight: 500;
     cursor: pointer;
-    transition: background 0.15s ease;
+    transition: background 0.15s ease, color 0.15s ease;
   }
 
   .btn-dismiss:hover {
-    background: var(--surface-3, rgba(255, 255, 255, 0.12));
+    color: #e8eaed;
+    background: rgba(255, 255, 255, 0.06);
   }
 
   .btn-cta {
-    background: var(--accent, #6366f1);
+    background: #8ab4f8;
     border: none;
-    color: #ffffff;
-    padding: 8px 18px;
-    border-radius: var(--radius-md, 8px);
-    font-size: 13px;
+    color: #041e49;
+    padding: 9px 24px;
+    border-radius: var(--radius-full, 9999px);
+    font-size: 13.5px;
     font-weight: 600;
     cursor: pointer;
-    transition: filter 0.15s ease, opacity 0.15s ease;
-    box-shadow: 0 2px 6px rgba(99, 102, 241, 0.3);
+    transition: background 0.15s ease, opacity 0.15s ease;
   }
 
   .btn-cta:hover {
-    filter: brightness(1.1);
+    background: #a8c7fa;
   }
 </style>
