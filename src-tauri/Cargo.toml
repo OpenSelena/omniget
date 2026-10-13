@@ -91,7 +91,7 @@ omnidisc-proto = { path = "omnidisc-proto" }
 omnidisc-media = { path = "omnidisc-media", default-features = false, features = ["rnnoise"] }
 omnidisc-mls = { path = "omnidisc-mls" }
 libloading = "0.8"
-which = "7"
+which = "8"
 librqbit = "8.1.1"
 keepawake = "0.5"
 discord-rich-presence = "0.2"
