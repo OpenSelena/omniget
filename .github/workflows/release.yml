@@ -39,6 +39,8 @@ jobs:
             args: ''
 
     runs-on: ${{ matrix.platform }}
+    env:
+      SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
 
     steps:
       - uses: actions/checkout@v6
@@ -164,6 +166,78 @@ jobs:
             fi
           done
 
+      - name: Upload unsigned Windows NSIS installer
+        if: matrix.platform == 'windows-latest' && env.SIGNPATH_API_TOKEN != ''
+        id: upload-unsigned-setup
+        uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-windows-setup
+          path: src-tauri/target/release/bundle/nsis/*-setup.exe
+          if-no-files-found: warn
+
+      - name: Sign Windows NSIS installer via SignPath
+        if: matrix.platform == 'windows-latest' && env.SIGNPATH_API_TOKEN != '' && steps.upload-unsigned-setup.outputs.artifact-id != ''
+        continue-on-error: true
+        uses: SignPath/github-action-submit-signing-request@v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: '773e0b25-f263-45c9-8f29-c7a6a1aed6db'
+          project-slug: 'omniget'
+          signing-policy-slug: 'release-signing'
+          github-artifact-id: ${{ steps.upload-unsigned-setup.outputs.artifact-id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 3600
+          output-artifact-directory: 'src-tauri/target/release/bundle/nsis-signed'
+
+      - name: Publish signed Windows installer to release
+        if: matrix.platform == 'windows-latest' && env.SIGNPATH_API_TOKEN != ''
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          $TAG = "${{ github.ref_name }}"
+          $SIGNED_SETUP = Get-ChildItem "src-tauri/target/release/bundle/nsis-signed" -Filter "*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($SIGNED_SETUP) {
+            Write-Host "Found SignPath-signed setup installer: $($SIGNED_SETUP.FullName)"
+            if ($env:TAURI_SIGNING_PRIVATE_KEY) {
+              Write-Host "Re-signing updater signature for signed installer..."
+              pnpm tauri signer sign $SIGNED_SETUP.FullName
+              $SIG_FILE = "$($SIGNED_SETUP.FullName).sig"
+              if (Test-Path $SIG_FILE) {
+                gh release upload $TAG $SIG_FILE --repo ${{ github.repository }} --clobber
+              }
+            }
+            gh release upload $TAG $SIGNED_SETUP.FullName --repo ${{ github.repository }} --clobber
+            Write-Host "Successfully published signed installer to release $TAG"
+          } else {
+            Write-Host "No signed installer found in nsis-signed directory; keeping draft installer."
+          }
+        shell: pwsh
+
+      - name: Upload unsigned Windows portable binary
+        if: matrix.platform == 'windows-latest' && env.SIGNPATH_API_TOKEN != ''
+        id: upload-unsigned-portable
+        uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-windows-portable
+          path: src-tauri/target/release/omniget.exe
+          if-no-files-found: warn
+
+      - name: Sign Windows portable binary via SignPath
+        if: matrix.platform == 'windows-latest' && env.SIGNPATH_API_TOKEN != '' && steps.upload-unsigned-portable.outputs.artifact-id != ''
+        continue-on-error: true
+        uses: SignPath/github-action-submit-signing-request@v3
+        with:
+          api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
+          organization-id: '773e0b25-f263-45c9-8f29-c7a6a1aed6db'
+          project-slug: 'omniget'
+          signing-policy-slug: 'release-signing'
+          github-artifact-id: ${{ steps.upload-unsigned-portable.outputs.artifact-id }}
+          wait-for-completion: true
+          wait-for-completion-timeout-in-seconds: 3600
+          output-artifact-directory: 'src-tauri/target/release/portable-signed'
+
       - name: Upload Windows portable binary
         if: matrix.platform == 'windows-latest'
         env:
@@ -171,10 +245,12 @@ jobs:
         run: |
           $TAG = "${{ github.ref_name }}"
           $VERSION = $TAG -replace '^v', ''
-          $EXE = "src-tauri/target/release/omniget.exe"
+          $SIGNED_PORTABLE = Get-ChildItem "src-tauri/target/release/portable-signed" -Filter "*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+          $SRC = if ($SIGNED_PORTABLE) { $SIGNED_PORTABLE.FullName } else { "src-tauri/target/release/omniget.exe" }
           $DEST = "omniget_${VERSION}_x64-portable.exe"
-          if (Test-Path $EXE) {
-            Copy-Item $EXE $DEST
+          if (Test-Path $SRC) {
+            Write-Host "Uploading portable binary from $SRC to $DEST..."
+            Copy-Item $SRC $DEST
             gh release upload $TAG $DEST --repo ${{ github.repository }} --clobber
           }
         shell: pwsh
