@@ -267,6 +267,7 @@ remake/shots/
 !claude-plugin/**/*.md
 !AGENTS.md
 !SECURITY.md
+!DESIGN.md
 !.github/**/*.md
 /remake/
 /mobbin/
