@@ -68,7 +68,7 @@ tokio-util = { version = "0.7", features = ["io", "rt"] }
 url = "2"
 urlencoding = "2"
 rand = "0.10.0"
-rusqlite = { version = "0.32", features = ["bundled"] }
+rusqlite = { version = "0.40", features = ["bundled"] }
 base64 = "0.22.1"
 filetime = "0.2.27"
 zip = { version = "2", default-features = false, features = ["deflate"] }
