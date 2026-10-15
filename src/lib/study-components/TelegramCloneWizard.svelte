@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { t } from "$lib/i18n";
   import { listen, type UnlistenFn } from "@tauri-apps/api/event";
   import { showToast } from "$lib/stores/toast-store.svelte";
   import {
@@ -89,7 +90,7 @@
     try {
       sessions = await telegramCloneList();
     } catch (e: any) {
-      error = typeof e === "string" ? e : (e?.message ?? "Erro");
+      error = typeof e === "string" ? e : (e?.message ?? $t("common.error"));
     } finally {
       loading = false;
     }
@@ -111,7 +112,7 @@
   async function startClone() {
     const source = chatById(sourceId);
     if (!source) {
-      showToast("error", "Selecione uma origem");
+      showToast("error", $t("telegram.cloner.toast_select_source"));
       return;
     }
     starting = true;
@@ -135,11 +136,11 @@
           drop_captions: dropCaptions,
         },
       });
-      showToast("info", `Clone iniciado: ${result.dest_title}`);
+      showToast("info", $t("telegram.cloner.toast_started", { title: result.dest_title }));
       view = "list";
       await refreshSessions();
     } catch (e: any) {
-      showToast("error", typeof e === "string" ? e : (e?.message ?? "Erro"));
+      showToast("error", typeof e === "string" ? e : (e?.message ?? $t("common.error")));
     } finally {
       starting = false;
     }
@@ -150,7 +151,7 @@
       await telegramClonePause({ sessionId: s.id });
       await refreshSessions();
     } catch (e: any) {
-      showToast("error", typeof e === "string" ? e : (e?.message ?? "Erro"));
+      showToast("error", typeof e === "string" ? e : (e?.message ?? $t("common.error")));
     }
   }
 
@@ -174,7 +175,7 @@
       });
       await refreshSessions();
     } catch (e: any) {
-      showToast("error", typeof e === "string" ? e : (e?.message ?? "Erro"));
+      showToast("error", typeof e === "string" ? e : (e?.message ?? $t("common.error")));
     }
   }
 
@@ -183,7 +184,7 @@
       await telegramCloneCancel({ sessionId: s.id });
       await refreshSessions();
     } catch (e: any) {
-      showToast("error", typeof e === "string" ? e : (e?.message ?? "Erro"));
+      showToast("error", typeof e === "string" ? e : (e?.message ?? $t("common.error")));
     }
   }
 
@@ -192,7 +193,7 @@
       await telegramCloneDelete({ sessionId: s.id });
       await refreshSessions();
     } catch (e: any) {
-      showToast("error", typeof e === "string" ? e : (e?.message ?? "Erro"));
+      showToast("error", typeof e === "string" ? e : (e?.message ?? $t("common.error")));
     }
   }
 
@@ -203,11 +204,11 @@
 
   function statusLabel(status: string): string {
     switch (status) {
-      case "running": return "Em andamento";
-      case "paused": return "Pausado";
-      case "completed": return "Concluído";
-      case "error": return "Erro";
-      case "cancelled": return "Cancelado";
+      case "running": return $t("telegram.cloner.status_running");
+      case "paused": return $t("telegram.cloner.status_paused");
+      case "completed": return $t("telegram.cloner.status_completed");
+      case "error": return $t("telegram.cloner.status_error");
+      case "cancelled": return $t("telegram.cloner.status_cancelled");
       default: return status;
     }
   }
@@ -220,13 +221,13 @@
     onclick={(e) => { if (e.target === e.currentTarget) close(); }}
     onkeydown={(e) => { if (e.key === "Escape") close(); }}
   >
-    <aside class="panel" role="dialog" aria-modal="true" aria-label="Clonar canais">
+    <aside class="panel" role="dialog" aria-modal="true" aria-label={$t("telegram.cloner.title")}>
       <header class="panel-header">
         <div>
-          <h2>Clonar canais</h2>
-          <p class="subtitle">Copie todas as mensagens de um canal para outro via forward.</p>
+          <h2>{$t("telegram.cloner.title")}</h2>
+          <p class="subtitle">{$t("telegram.cloner.subtitle")}</p>
         </div>
-        <button type="button" class="icon-btn" onclick={close} aria-label="Fechar">
+        <button type="button" class="icon-btn" onclick={close} aria-label={$t("common.close")}>
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 6L6 18" />
             <path d="M6 6l12 12" />
@@ -243,7 +244,7 @@
           aria-selected={view === "list"}
           onclick={() => (view = "list")}
         >
-          Sessões {sessions.length > 0 ? `(${sessions.length})` : ""}
+          {$t("telegram.cloner.tab_sessions", { count: sessions.length > 0 ? `(${sessions.length})` : "" })}
         </button>
         <button
           type="button"
@@ -253,7 +254,7 @@
           aria-selected={view === "new"}
           onclick={() => (view = "new")}
         >
-          Nova
+          {$t("telegram.cloner.tab_new")}
         </button>
       </nav>
 
@@ -261,9 +262,9 @@
         {#if view === "new"}
           <section class="form-section">
             <label class="field">
-              <span class="field-label">Origem</span>
+              <span class="field-label">{$t("telegram.cloner.field_source")}</span>
               <select class="input" bind:value={sourceId}>
-                <option value={null}>— Selecione um canal —</option>
+                <option value={null}>{$t("telegram.cloner.select_source_placeholder")}</option>
                 {#each selectableChats() as c (c.id)}
                   <option value={c.id}>{c.title}</option>
                 {/each}
@@ -271,32 +272,32 @@
             </label>
 
             <fieldset class="dest-fieldset">
-              <legend class="field-label">Destino</legend>
+              <legend class="field-label">{$t("telegram.cloner.field_dest")}</legend>
               <label class="radio-row">
                 <input type="radio" bind:group={destMode} value="auto" />
                 <div>
-                  <span class="radio-title">Criar novo canal</span>
-                  <span class="radio-desc">Cria automaticamente. Você fica como dono.</span>
+                  <span class="radio-title">{$t("telegram.cloner.dest_create_new")}</span>
+                  <span class="radio-desc">{$t("telegram.cloner.dest_create_new_desc")}</span>
                 </div>
               </label>
               {#if destMode === "auto"}
                 <input
                   type="text"
                   class="input dest-title"
-                  placeholder="Nome do novo canal (opcional)"
+                  placeholder={$t("telegram.cloner.dest_name_placeholder")}
                   bind:value={destTitle}
                 />
               {/if}
               <label class="radio-row">
                 <input type="radio" bind:group={destMode} value="existing" />
                 <div>
-                  <span class="radio-title">Canal existente</span>
-                  <span class="radio-desc">Use um canal/grupo seu.</span>
+                  <span class="radio-title">{$t("telegram.cloner.dest_existing")}</span>
+                  <span class="radio-desc">{$t("telegram.cloner.dest_existing_desc")}</span>
                 </div>
               </label>
               {#if destMode === "existing"}
                 <select class="input dest-title" bind:value={destId}>
-                  <option value={null}>— Selecione —</option>
+                  <option value={null}>{$t("telegram.cloner.dest_select_placeholder")}</option>
                   {#each selectableChats().filter((c) => c.id !== sourceId) as c (c.id)}
                     <option value={c.id}>{c.title}</option>
                   {/each}
@@ -305,46 +306,46 @@
             </fieldset>
 
             <details class="advanced">
-              <summary>Opções avançadas</summary>
+              <summary>{$t("telegram.cloner.advanced_options")}</summary>
               <div class="advanced-grid">
                 <label class="field">
-                  <span class="field-label">Delay entre lotes (ms)</span>
+                  <span class="field-label">{$t("telegram.cloner.delay_label")}</span>
                   <input type="number" class="input" min="0" max="60000" bind:value={delayMs} />
                 </label>
                 <label class="field">
-                  <span class="field-label">Tamanho do lote</span>
+                  <span class="field-label">{$t("telegram.cloner.batch_size_label")}</span>
                   <input type="number" class="input" min="1" max="100" bind:value={batchSize} />
                 </label>
                 <label class="checkbox-row">
                   <input type="checkbox" bind:checked={limitEnabled} />
-                  <span>Limitar quantidade</span>
+                  <span>{$t("telegram.cloner.limit_enable")}</span>
                 </label>
                 {#if limitEnabled}
                   <label class="field">
-                    <span class="field-label">Máximo de mensagens</span>
+                    <span class="field-label">{$t("telegram.cloner.limit_max")}</span>
                     <input type="number" class="input" min="1" bind:value={limit} />
                   </label>
                 {/if}
                 <label class="checkbox-row">
                   <input type="checkbox" bind:checked={dropAuthor} />
-                  <span>Remover autor original</span>
+                  <span>{$t("telegram.cloner.drop_author")}</span>
                 </label>
                 <label class="checkbox-row">
                   <input type="checkbox" bind:checked={dropCaptions} />
-                  <span>Remover legendas</span>
+                  <span>{$t("telegram.cloner.drop_captions")}</span>
                 </label>
               </div>
             </details>
 
             <div class="actions">
-              <button type="button" class="button" onclick={close} disabled={starting}>Cancelar</button>
+              <button type="button" class="button" onclick={close} disabled={starting}>{$t("common.cancel")}</button>
               <button
                 type="button"
                 class="button primary"
                 onclick={startClone}
                 disabled={starting || sourceId == null}
               >
-                {starting ? "Iniciando..." : "Iniciar clone"}
+                {starting ? $t("telegram.cloner.starting") : $t("telegram.cloner.start_btn")}
               </button>
             </div>
           </section>
@@ -356,8 +357,8 @@
               <div class="status status-error">{error}</div>
             {:else if sessions.length === 0}
               <div class="status">
-                <p>Nenhuma sessão de clone ainda.</p>
-                <button type="button" class="button primary" onclick={() => (view = "new")}>Criar nova</button>
+                <p>{$t("telegram.cloner.no_sessions")}</p>
+                <button type="button" class="button primary" onclick={() => (view = "new")}>{$t("telegram.cloner.create_new_btn")}</button>
               </div>
             {:else}
               <ul class="session-list">
@@ -382,24 +383,24 @@
                       ></div>
                     </div>
                     <div class="session-meta">
-                      <span>{s.cloned_count} / {s.total_collected || "?"} mensagens</span>
-                      {#if s.failed_count > 0}<span class="failed">· {s.failed_count} falhas</span>{/if}
-                      <span>· delay {s.options.delay_ms}ms</span>
+                      <span>{$t("telegram.cloner.meta_messages", { cloned: s.cloned_count, total: s.total_collected || "?" })}</span>
+                      {#if s.failed_count > 0}<span class="failed">{$t("telegram.cloner.meta_failed", { count: s.failed_count })}</span>{/if}
+                      <span>{$t("telegram.cloner.meta_delay", { delay: s.options.delay_ms })}</span>
                     </div>
                     {#if s.error}
                       <p class="session-error">{s.error}</p>
                     {/if}
                     <div class="session-actions">
                       {#if s.status === "running"}
-                        <button type="button" class="button" onclick={() => pauseSession(s)}>Pausar</button>
+                        <button type="button" class="button" onclick={() => pauseSession(s)}>{$t("telegram.cloner.btn_pause")}</button>
                       {:else if s.status === "paused" || s.status === "error"}
-                        <button type="button" class="button primary" onclick={() => resumeSession(s)}>Retomar</button>
+                        <button type="button" class="button primary" onclick={() => resumeSession(s)}>{$t("telegram.cloner.btn_resume")}</button>
                       {/if}
                       {#if s.status === "running" || s.status === "paused"}
-                        <button type="button" class="button danger" onclick={() => cancelSession(s)}>Cancelar</button>
+                        <button type="button" class="button danger" onclick={() => cancelSession(s)}>{$t("telegram.cloner.btn_cancel")}</button>
                       {/if}
                       {#if s.status !== "running"}
-                        <button type="button" class="button ghost" onclick={() => deleteSession(s)}>Remover</button>
+                        <button type="button" class="button ghost" onclick={() => deleteSession(s)}>{$t("telegram.cloner.btn_remove")}</button>
                       {/if}
                     </div>
                   </li>

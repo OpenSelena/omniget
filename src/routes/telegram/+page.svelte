@@ -235,7 +235,7 @@
       createFolderOpen = false;
       createFolderName = "";
     } catch (e: any) {
-      createFolderError = typeof e === "string" ? e : (e?.message ?? "Erro ao criar pasta");
+      createFolderError = typeof e === "string" ? e : (e?.message ?? $t("telegram.nav.error_create_folder"));
     } finally {
       createFolderBusy = false;
     }
@@ -1154,8 +1154,8 @@
         <button
           class="button account-btn"
           onclick={() => (accountPanelOpen = true)}
-          aria-label="Gerenciar contas"
-          title="Gerenciar contas"
+          aria-label={$t("telegram.nav.manage_accounts")}
+          title={$t("telegram.nav.manage_accounts")}
         >
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
@@ -1165,8 +1165,8 @@
         <button
           class="button"
           onclick={() => (cloneWizardOpen = true)}
-          aria-label="Clonar canais"
-          title="Clonar canais"
+          aria-label={$t("telegram.nav.clone_channels")}
+          title={$t("telegram.nav.clone_channels")}
         >
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <rect x="9" y="9" width="13" height="13" rx="2" />
@@ -1176,8 +1176,8 @@
         <button
           class="button transfers-btn"
           onclick={() => (transferPanelOpen = true)}
-          aria-label="Transferências"
-          title="Transferências"
+          aria-label={$t("telegram.nav.transfers")}
+          title={$t("telegram.nav.transfers")}
         >
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 5v14M19 12l-7 7-7-7" />
@@ -1189,8 +1189,8 @@
         <button
           class="button"
           onclick={() => (globalSearchOpen = true)}
-          aria-label="Busca global"
-          title="Busca global (Ctrl+K)"
+          aria-label={$t("telegram.nav.global_search")}
+          title={$t("telegram.nav.global_search_tip")}
         >
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="11" cy="11" r="8" />
@@ -1200,8 +1200,8 @@
         <button
           class="button"
           onclick={() => (perfPanelOpen = true)}
-          aria-label="Performance"
-          title="Performance de download"
+          aria-label={$t("telegram.nav.perf_settings")}
+          title={$t("telegram.nav.perf_settings_tip")}
         >
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <circle cx="12" cy="12" r="3" />
@@ -1212,7 +1212,8 @@
           class="button"
           onclick={loadChats}
           disabled={loadingChats}
-          aria-label={$t("hotmart.refresh")}
+          aria-label={$t("telegram.nav.refresh_chats")}
+          title={$t("telegram.nav.refresh_chats")}
         >
           <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class:spinning={loadingChats}>
             <path d="M21 2v6h-6" />
@@ -1257,7 +1258,7 @@
             aria-selected={chatViewMode === "all"}
             onclick={() => (chatViewMode = "all")}
           >
-            Todos
+            {$t("telegram.nav.tab_all")}
           </button>
           <button
             type="button"
@@ -1267,7 +1268,7 @@
             aria-selected={chatViewMode === "drive"}
             onclick={() => (chatViewMode = "drive")}
           >
-            Drive
+            {$t("telegram.nav.tab_drive")}
             <span class="view-tab-count">{chats.filter((c) => isOmnigetFolder(c as any)).length}</span>
           </button>
         </div>
@@ -1276,7 +1277,7 @@
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M12 5v14M5 12h14" />
             </svg>
-            Nova pasta
+            {$t("telegram.nav.new_folder")}
           </button>
         {/if}
       </div>
@@ -1284,7 +1285,7 @@
       <input
         type="text"
         class="input search-input"
-        placeholder={chatViewMode === "drive" ? "Buscar pasta..." : "Search..."}
+        placeholder={chatViewMode === "drive" ? $t("telegram.nav.search_folders_placeholder") : $t("telegram.nav.search_chats_placeholder")}
         bind:value={chatSearch}
       />
 
@@ -1579,13 +1580,13 @@
     onkeydown={(e) => { if (e.key === "Escape" && !createFolderBusy) createFolderOpen = false; }}
   >
     <div class="create-folder-dialog" role="dialog" aria-modal="true">
-      <h3>Nova pasta Drive</h3>
-      <p class="dialog-hint">Cria um canal Telegram com sufixo <code>[og]</code> para você usar como pasta privada de mídias.</p>
+      <h3>{$t("telegram.nav.new_folder_modal_title")}</h3>
+      <p class="dialog-hint">{$t("telegram.nav.new_folder_modal_desc")}</p>
       <form onsubmit={(e) => { e.preventDefault(); commitCreateFolder(); }}>
         <input
           type="text"
           class="input"
-          placeholder="Nome da pasta"
+          placeholder={$t("telegram.nav.folder_name_placeholder")}
           bind:value={createFolderName}
           disabled={createFolderBusy}
           autofocus
@@ -1595,9 +1596,9 @@
           <p class="dialog-error">{createFolderError}</p>
         {/if}
         <div class="dialog-actions">
-          <button type="button" class="button" onclick={() => (createFolderOpen = false)} disabled={createFolderBusy}>Cancelar</button>
+          <button type="button" class="button" onclick={() => (createFolderOpen = false)} disabled={createFolderBusy}>{$t("common.cancel")}</button>
           <button type="submit" class="button primary" disabled={createFolderBusy || !createFolderName.trim()}>
-            {createFolderBusy ? "Criando..." : "Criar"}
+            {createFolderBusy ? $t("telegram.nav.creating") : $t("telegram.nav.create_btn")}
           </button>
         </div>
       </form>

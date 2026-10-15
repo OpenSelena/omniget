@@ -79,3 +79,39 @@ Before finishing any task or committing changes:
 - `node scripts/e2e_verify.mjs` : Validates documentation suite routes, links, and accessibility.
 - `pnpm lint:ui <target>` : Required whenever modifying Svelte routes, UI components, stylesheets, `index.html`, or `docs/` — see [.agents/skills/ui-lint/SKILL.md](.agents/skills/ui-lint/SKILL.md).
 
+---
+
+## 4. Mandatory Obsidian Second Brain Protocol
+
+Vault Location: `C:\Users\mint\OneDrive\MD NAHIDUR RAHMAN\OBSIDIAN 1.0\AntiGravity\`
+
+Before concluding any conversation, task, or Git operation in OmniGet, the agent MUST update the vault according to these strict category routing rules:
+
+1. **Sessions (`AntiGravity/Sessions/YYYY-MM-DD-HH-MM.md`)**:
+   - Required for every conversation.
+   - Logs: topic discussed, decisions made, files inspected or modified, and pending action items for next time.
+
+2. **Architecture (`AntiGravity/Projects/OmniGet/Architecture/<component>.md`)**:
+   - Required when a subsystem, data flow, plugin interface, or schema is created or changed.
+   - Logs: module boundaries, public contracts, and design rationale.
+
+3. **Features (`AntiGravity/Projects/OmniGet/Features/<feature-name>.md`)**:
+   - Required when a new capability, user flow, or API endpoint is added.
+   - Logs: feature description, arguments, UI entry point, and test cases.
+
+4. **Bugs (`AntiGravity/Projects/OmniGet/Bugs/YYYY-MM-DD-<bug-slug>.md`)**:
+   - Required when a bug or regression is diagnosed and fixed.
+   - Logs: symptom, root cause, files and lines touched, solution, and regression warnings.
+   - Action: Update `AntiGravity/Projects/OmniGet/Issues/Active_Issues.md` to mark the issue resolved.
+
+5. **History (`AntiGravity/Projects/OmniGet/History/Changelog.md`)**:
+   - Required when commits are made, pushed, or a release is cut.
+   - Logs: commit hash, commit message, files changed, and release notes.
+
+6. **Overview (`AntiGravity/Projects/OmniGet/Overview.md`)**:
+   - Required when high-level project structure, dependencies, or core invariants change.
+   - Updates the master Map of Content (MOC).
+
+7. **Shared Knowledge (`AntiGravity/Shared_Knowledge/<topic>.md`)**:
+   - Required when an OS quirk, language trap, or framework bug (Tauri v2, Rust async, Svelte 5 runes, Windows process handles) is solved that applies to other projects.
+
