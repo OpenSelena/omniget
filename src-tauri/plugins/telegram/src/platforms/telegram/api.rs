@@ -353,7 +353,7 @@ pub async fn list_chats(handle: &TelegramSessionHandle) -> anyhow::Result<Vec<Te
 
     let (chats, peer_hashes) = tokio::time::timeout(Duration::from_secs(30), fetch_dialogs)
         .await
-        .map_err(|_| anyhow::anyhow!("Loading chats timed out — please try again"))??;
+        .map_err(|_| anyhow::anyhow!("Loading chats timed out, please try again"))??;
 
     tracing::info!(
         "[tg-perf] list_chats completed in {:?}, loaded {} chats",

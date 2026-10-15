@@ -48,6 +48,9 @@
       const r = await telegramSyncNow();
       showToast("info", $t("telegram.sync.updated_channels", { count: r.updated }));
       await refresh();
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("telegram:chats:refresh"));
+      }
     } catch (e: any) {
       showToast("error", typeof e === "string" ? e : (e?.message ?? $t("telegram.sync.sync_error")));
     } finally {

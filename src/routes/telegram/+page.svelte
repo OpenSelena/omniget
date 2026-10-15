@@ -197,6 +197,9 @@
     e.stopPropagation();
     drawerChat = chat;
     drawerOpen = true;
+    if (chat && !chatPhotos.has(chat.id)) {
+      getChatPhoto(chat.id, chat.chat_type);
+    }
   }
 
   function onChatRemoved(removedId: number) {
@@ -300,10 +303,18 @@
       }
     });
 
+    const handleSyncRefresh = () => {
+      if (view === "chats" && !loadingChats) {
+        loadChats();
+      }
+    };
+    window.addEventListener("telegram:chats:refresh", handleSyncRefresh);
+
     return () => {
       destroyed = true;
       pluginsUnlisten?.();
       pluginsUnlisten = null;
+      window.removeEventListener("telegram:chats:refresh", handleSyncRefresh);
     };
   });
 
@@ -1551,6 +1562,7 @@
 <TelegramChannelDrawer
   bind:open={drawerOpen}
   chat={drawerChat}
+  photo={drawerChat ? chatPhotos.get(drawerChat.id) : undefined}
   onChatRemoved={onChatRemoved}
 />
 

@@ -44,14 +44,17 @@
     try {
       const [selfInfo, list, bks] = await Promise.all([
         telegramGetSelf().catch(() => null),
-        telegramAccountsList(),
-        telegramAccountsListBackups(),
+        telegramAccountsList().catch(() => []),
+        telegramAccountsListBackups().catch(() => []),
       ]);
       me = selfInfo;
-      profiles = list;
-      backups = bks;
+      profiles = Array.isArray(list) ? list : [];
+      backups = Array.isArray(bks) ? bks : [];
     } catch (e: any) {
-      error = typeof e === "string" ? e : (e?.message ?? $t("common.error"));
+      const msg = typeof e === "string" ? e : (e?.message ?? "");
+      if (!msg.includes("ERR_PLUGIN_OUTDATED")) {
+        error = msg || $t("common.error");
+      }
     } finally {
       loading = false;
     }

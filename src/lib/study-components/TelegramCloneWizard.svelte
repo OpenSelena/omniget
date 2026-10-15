@@ -88,9 +88,14 @@
     loading = true;
     error = "";
     try {
-      sessions = await telegramCloneList();
+      const list = await telegramCloneList();
+      sessions = Array.isArray(list) ? list : [];
     } catch (e: any) {
-      error = typeof e === "string" ? e : (e?.message ?? $t("common.error"));
+      sessions = [];
+      const msg = typeof e === "string" ? e : (e?.message ?? "");
+      if (!msg.includes("ERR_PLUGIN_OUTDATED")) {
+        error = msg || $t("common.error");
+      }
     } finally {
       loading = false;
     }
