@@ -22,7 +22,14 @@
   import AppToolbar from "$components/shell/AppToolbar.svelte";
   import CommandPalette from "$components/shell/CommandPalette.svelte";
   import { setCommandPaletteItems } from "$lib/stores/command-palette-store.svelte";
-  import { refreshUpdateInfo } from "$lib/stores/update-store.svelte";
+  import {
+    refreshUpdateInfo,
+    getUpdateInfo,
+    isUpdateDismissed,
+    dismissUpdate,
+    getIsUpdating,
+    performUpdate,
+  } from "$lib/stores/update-store.svelte";
   import { startClipboardMonitor, stopClipboardMonitor, onClipboardUrl } from "$lib/stores/clipboard-monitor";
   import { readText } from "@tauri-apps/plugin-clipboard-manager";
   import { initChangelog } from "$lib/stores/changelog-store.svelte";
@@ -63,6 +70,10 @@
   let ytdlpDismissed = $state(false);
   let ytdlpMissing = $derived(isDepsChecked() && !isYtdlpAvailable());
   let showOnboarding = $derived(needsOnboarding());
+
+  let updateInfo = $derived(getUpdateInfo());
+  let updateDismissed = $derived(isUpdateDismissed());
+  let isUpdating = $derived(getIsUpdating());
 
   let counts = $derived(getCounts());
   let badgeLabel = $derived(counts.badge > 99 ? "99+" : String(counts.badge));
@@ -365,6 +376,40 @@
   <div class="shell-body">
     <AppToolbar />
 
+    {#if updateInfo.available && !updateDismissed}
+      <div class="global-update-banner" role="alert">
+        <span class="global-update-text">
+          {#if isUpdating}
+            {$t("settings.update_downloading")}
+          {:else}
+            {$t("settings.update_available", { version: updateInfo.version })}
+          {/if}
+        </span>
+        <div class="global-update-actions">
+          <button
+            type="button"
+            class="global-update-btn"
+            onclick={performUpdate}
+            disabled={isUpdating}
+          >
+            {#if isUpdating}
+              <span class="global-update-spinner"></span>
+            {:else}
+              {$t("settings.update_button")}
+            {/if}
+          </button>
+          <button
+            type="button"
+            class="global-update-close"
+            onclick={dismissUpdate}
+            aria-label={$t("ytdlp_missing_banner.dismiss") as string}
+          >
+            ✕
+          </button>
+        </div>
+      </div>
+    {/if}
+
     {#if ytdlpMissing && !ytdlpDismissed}
       <div class="ytdlp-banner" role="alert">
         <span class="ytdlp-banner-text">
@@ -496,6 +541,93 @@
     height: 100vh;
     overflow: hidden;
     background: var(--bg);
+  }
+
+  .global-update-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    margin: 0 var(--pane-inset) var(--space-2) 0;
+    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+    background: var(--accent);
+    color: var(--on-accent);
+    border-radius: var(--radius-lg);
+    font-size: var(--text-base);
+  }
+
+  .global-update-text {
+    flex: 1;
+    font-weight: 500;
+  }
+
+  .global-update-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .global-update-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    height: 24px;
+    font-size: var(--text-sm);
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--on-accent) 18%, transparent);
+    color: var(--on-accent);
+    border: none;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  .global-update-btn:disabled {
+    cursor: default;
+    opacity: 0.7;
+  }
+
+  @media (hover: hover) {
+    .global-update-btn:not(:disabled):hover {
+      background: color-mix(in srgb, var(--on-accent) 26%, transparent);
+    }
+  }
+
+  .global-update-btn:focus-visible {
+    outline: 2px solid var(--on-accent);
+    outline-offset: 2px;
+  }
+
+  .global-update-close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    background: none;
+    border: none;
+    border-radius: var(--radius-sm);
+    color: color-mix(in srgb, var(--on-accent) 80%, transparent);
+    cursor: pointer;
+    padding: 0;
+  }
+
+  @media (hover: hover) {
+    .global-update-close:hover {
+      background: color-mix(in srgb, var(--on-accent) 18%, transparent);
+      color: var(--on-accent);
+    }
+  }
+
+  .global-update-spinner {
+    width: 12px;
+    height: 12px;
+    border: 2px solid color-mix(in srgb, var(--on-accent) 30%, transparent);
+    border-top-color: var(--on-accent);
+    border-radius: var(--radius-full);
+    animation: spin var(--duration-slow) linear infinite;
+    flex-shrink: 0;
   }
 
   .ytdlp-banner {
