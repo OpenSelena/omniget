@@ -23,10 +23,12 @@
   let {
     open = $bindable(false),
     chat,
+    photo,
     onChatRemoved,
   } = $props<{
     open: boolean;
     chat: ChatLite | null;
+    photo?: string;
     onChatRemoved?: (chatId: number) => void;
   }>();
 
@@ -106,10 +108,17 @@
         limit: 100,
         search: participantsSearch.trim() || undefined,
       });
-      participants = page.users;
-      participantsCount = page.count;
+      participants = page?.users ?? [];
+      participantsCount = page?.count ?? 0;
     } catch (e: any) {
-      participantsError = typeof e === "string" ? e : (e?.message ?? $t("telegram.channel_drawer.error_loading_members"));
+      participants = [];
+      participantsCount = 0;
+      const msg = typeof e === "string" ? e : (e?.message ?? "");
+      if (msg.includes("ERR_PLUGIN_OUTDATED") || msg.includes("ADMIN_REQUIRED") || msg.includes("CHAT_ADMIN_REQUIRED")) {
+        participantsError = "";
+      } else {
+        participantsError = msg || $t("telegram.channel_drawer.error_loading_members");
+      }
     } finally {
       participantsLoading = false;
     }
@@ -278,7 +287,11 @@
     <aside class="drawer" role="dialog" aria-modal="true" aria-label={$t("telegram.channel_drawer.aria_label", { title: chat.title })}>
       <header class="drawer-header">
         <div class="header-info">
-          <div class="header-avatar">{chat.title.charAt(0).toUpperCase()}</div>
+          {#if photo}
+            <img src={photo.startsWith("data:") ? photo : `data:image/jpeg;base64,${photo}`} alt={chat.title} class="header-avatar-img" />
+          {:else}
+            <div class="header-avatar">{chat.title.charAt(0).toUpperCase()}</div>
+          {/if}
           <div class="header-text">
             <h2>{chat.title}</h2>
             <span class="header-meta">
@@ -619,6 +632,14 @@
     justify-content: center;
     font-size: 18px;
     font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .header-avatar-img {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
     flex-shrink: 0;
   }
 

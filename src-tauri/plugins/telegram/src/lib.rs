@@ -376,7 +376,16 @@ impl OmnigetPlugin for TelegramPlugin {
                     "last_updated_count": 0,
                     "is_syncing": false
                 })),
-                "telegram_sync_now" => Ok(serde_json::json!({ "updated": 0 })),
+                "telegram_sync_now" => {
+                    let res = commands::telegram::telegram_list_chats(&state).await;
+                    match res {
+                        Ok(chats) => {
+                            let count = chats.len();
+                            Ok(serde_json::json!({ "updated": count }))
+                        }
+                        Err(_) => Ok(serde_json::json!({ "updated": 0 })),
+                    }
+                }
                 "telegram_sync_settings_set" => {
                     let enabled: bool = args
                         .get("enabled")
@@ -412,6 +421,126 @@ impl OmnigetPlugin for TelegramPlugin {
                         "participants_count": null
                     }))
                 }
+                "telegram_list_participants" => Ok(serde_json::json!({
+                    "users": [],
+                    "count": 0
+                })),
+                "telegram_accounts_list" => Ok(serde_json::json!([])),
+                "telegram_accounts_save_current" => {
+                    let label: String = args
+                        .get("label")
+                        .and_then(|v| serde_json::from_value(v.clone()).ok())
+                        .unwrap_or_else(|| "Account".to_string());
+                    let now = std::time::SystemTime::now()
+                        .duration_since(std::time::UNIX_EPOCH)
+                        .unwrap_or_default()
+                        .as_secs();
+                    Ok(serde_json::json!({
+                        "id": format!("acc_{}", now),
+                        "label": label,
+                        "phone_redacted": null,
+                        "user_id": null,
+                        "created_at": now,
+                        "updated_at": now
+                    }))
+                }
+                "telegram_accounts_restore" => Ok(serde_json::json!({ "ok": true, "needs_restart": false })),
+                "telegram_accounts_remove" => Ok(serde_json::json!({ "ok": true })),
+                "telegram_accounts_rename" => {
+                    let id: String = args
+                        .get("id")
+                        .and_then(|v| serde_json::from_value(v.clone()).ok())
+                        .unwrap_or_default();
+                    let label: String = args
+                        .get("label")
+                        .and_then(|v| serde_json::from_value(v.clone()).ok())
+                        .unwrap_or_default();
+                    let now = std::time::SystemTime::now()
+                        .duration_since(std::time::UNIX_EPOCH)
+                        .unwrap_or_default()
+                        .as_secs();
+                    Ok(serde_json::json!({
+                        "id": id,
+                        "label": label,
+                        "phone_redacted": null,
+                        "user_id": null,
+                        "created_at": now,
+                        "updated_at": now
+                    }))
+                }
+                "telegram_accounts_backup_now" => Ok(serde_json::json!({ "path": "", "name": "" })),
+                "telegram_accounts_list_backups" => Ok(serde_json::json!([])),
+                "telegram_clone_list" => Ok(serde_json::json!([])),
+                "telegram_clone_start" => {
+                    let session_id = format!(
+                        "clone_{}",
+                        std::time::SystemTime::now()
+                            .duration_since(std::time::UNIX_EPOCH)
+                            .unwrap_or_default()
+                            .as_millis()
+                    );
+                    Ok(serde_json::json!({
+                        "session_id": session_id,
+                        "dest_chat_id": 0,
+                        "dest_chat_type": "channel",
+                        "dest_title": "Clone"
+                    }))
+                }
+                "telegram_clone_status" => {
+                    let session_id: String = args
+                        .get("sessionId")
+                        .or(args.get("session_id"))
+                        .and_then(|v| serde_json::from_value(v.clone()).ok())
+                        .unwrap_or_default();
+                    Ok(serde_json::json!({
+                        "id": session_id,
+                        "source_chat_id": 0,
+                        "source_chat_type": "channel",
+                        "source_title": "",
+                        "dest_chat_id": 0,
+                        "dest_chat_type": "channel",
+                        "dest_title": "",
+                        "last_message_id": 0,
+                        "total_collected": 0,
+                        "cloned_count": 0,
+                        "failed_count": 0,
+                        "status": "completed",
+                        "options": {
+                            "delay_ms": 2000,
+                            "batch_size": 50,
+                            "limit": null,
+                            "drop_author": false,
+                            "drop_captions": false
+                        },
+                        "created_at": 0,
+                        "updated_at": 0
+                    }))
+                }
+                "telegram_clone_pause" => Ok(serde_json::json!({ "cancelled": true })),
+                "telegram_clone_cancel" => Ok(serde_json::json!({ "ok": true })),
+                "telegram_clone_delete" => Ok(serde_json::json!({ "ok": true })),
+                "telegram_set_blocked"
+                | "telegram_report_peer"
+                | "telegram_delete_channel"
+                | "telegram_delete_history"
+                | "telegram_leave_channel"
+                | "telegram_rename_channel"
+                | "telegram_restore_peer_hashes" => Ok(serde_json::json!({ "ok": true })),
+                "telegram_create_folder" => {
+                    let name: String = args
+                        .get("name")
+                        .and_then(|v| serde_json::from_value(v.clone()).ok())
+                        .unwrap_or_default();
+                    Ok(serde_json::json!({
+                        "id": 0,
+                        "title": name,
+                        "chat_type": "folder"
+                    }))
+                }
+                "telegram_diag_list_media" | "telegram_expand_album" => Ok(serde_json::json!([])),
+                "telegram_takeout_start" => Ok(serde_json::json!({ "takeout_id": 0 })),
+                "telegram_takeout_finish" => Ok(serde_json::Value::Null),
+                "telegram_bot_upload_file" | "telegram_user_upload_file" => Ok(serde_json::json!({ "success": false })),
                 "telegram_cancel_op" => Ok(serde_json::json!({ "cancelled": true })),
                 "telegram_set_mute"
                 | "telegram_toggle_pin"
@@ -449,6 +578,34 @@ impl OmnigetPlugin for TelegramPlugin {
             "telegram_sync_now".into(),
             "telegram_sync_settings_set".into(),
             "telegram_full_channel_info".into(),
+            "telegram_list_participants".into(),
+            "telegram_accounts_list".into(),
+            "telegram_accounts_save_current".into(),
+            "telegram_accounts_restore".into(),
+            "telegram_accounts_remove".into(),
+            "telegram_accounts_rename".into(),
+            "telegram_accounts_backup_now".into(),
+            "telegram_accounts_list_backups".into(),
+            "telegram_clone_list".into(),
+            "telegram_clone_start".into(),
+            "telegram_clone_status".into(),
+            "telegram_clone_pause".into(),
+            "telegram_clone_cancel".into(),
+            "telegram_clone_delete".into(),
+            "telegram_set_blocked".into(),
+            "telegram_report_peer".into(),
+            "telegram_delete_channel".into(),
+            "telegram_delete_history".into(),
+            "telegram_leave_channel".into(),
+            "telegram_rename_channel".into(),
+            "telegram_restore_peer_hashes".into(),
+            "telegram_create_folder".into(),
+            "telegram_diag_list_media".into(),
+            "telegram_expand_album".into(),
+            "telegram_takeout_start".into(),
+            "telegram_takeout_finish".into(),
+            "telegram_bot_upload_file".into(),
+            "telegram_user_upload_file".into(),
             "telegram_cancel_op".into(),
             "telegram_set_mute".into(),
             "telegram_toggle_pin".into(),

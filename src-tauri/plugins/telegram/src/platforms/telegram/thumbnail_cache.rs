@@ -185,47 +185,28 @@ fn extract_thumbnail_location(
     }
 }
 
+struct RawLocation(tl::enums::InputFileLocation);
+
+impl grammers_client::types::Downloadable for RawLocation {
+    fn to_raw_input_location(&self) -> Option<tl::enums::InputFileLocation> {
+        Some(self.0.clone())
+    }
+}
+
 async fn download_to_memory(
     client: &Client,
     location: tl::enums::InputFileLocation,
     total_size: u64,
 ) -> anyhow::Result<Vec<u8>> {
-    const PART_SIZE: i32 = 512 * 1024;
     let mut data = Vec::with_capacity(total_size as usize);
-    let mut offset: i64 = 0;
+    let mut iter = client.iter_download(&RawLocation(location));
 
-    loop {
-        let request = tl::functions::upload::GetFile {
-            precise: true,
-            cdn_supported: false,
-            location: location.clone(),
-            offset,
-            limit: PART_SIZE,
-        };
-
-        let response = client
-            .invoke(&request)
-            .await
-            .map_err(|e| anyhow::anyhow!("upload.GetFile thumbnail: {}", e))?;
-
-        let bytes = match response {
-            tl::enums::upload::File::File(f) => f.bytes,
-            tl::enums::upload::File::CdnRedirect(_) => {
-                return Err(anyhow::anyhow!("CDN redirect not supported"));
-            }
-        };
-
-        if bytes.is_empty() {
-            break;
-        }
-
-        let len = bytes.len();
-        data.extend_from_slice(&bytes);
-        offset += len as i64;
-
-        if (len as i32) < PART_SIZE {
-            break;
-        }
+    while let Some(chunk) = iter
+        .next()
+        .await
+        .map_err(|e| anyhow::anyhow!("iter_download thumbnail: {}", e))?
+    {
+        data.extend_from_slice(&chunk);
     }
 
     Ok(data)
@@ -287,19 +268,40 @@ async fn fetch_chat_photo_id(
                     access_hash,
                 })],
             };
-            let users = client
-                .invoke(&request)
-                .await
-                .map_err(|e| anyhow::anyhow!("users.GetUsers: {}", e))?;
-            for user in users {
-                if let tl::enums::User::User(u) = user {
-                    if u.id == chat_id {
-                        if let Some(tl::enums::UserProfilePhoto::Photo(photo)) = u.photo {
-                            return Ok(photo.photo_id);
+            if let Ok(users) = client.invoke(&request).await {
+                for user in users {
+                    if let tl::enums::User::User(u) = user {
+                        if u.id == chat_id {
+                            if let Some(tl::enums::UserProfilePhoto::Photo(photo)) = u.photo {
+                                return Ok(photo.photo_id);
+                            }
                         }
                     }
                 }
             }
+
+            // Fallback for bots/users where GetUsers does not return photo
+            let full_request = tl::functions::users::GetFullUser {
+                id: tl::enums::InputUser::User(tl::types::InputUser {
+                    user_id: chat_id,
+                    access_hash,
+                }),
+            };
+            if let Ok(user_full) = client.invoke(&full_request).await {
+                for user in user_full.users {
+                    if let tl::enums::User::User(u) = user {
+                        if u.id == chat_id {
+                            if let Some(tl::enums::UserProfilePhoto::Photo(photo)) = u.photo {
+                                return Ok(photo.photo_id);
+                            }
+                        }
+                    }
+                }
+                if let Some(tl::enums::Photo::Photo(photo)) = user_full.full_user.profile_photo {
+                    return Ok(photo.id);
+                }
+            }
+
             Err(anyhow::anyhow!("User has no photo"))
         }
         _ => {
