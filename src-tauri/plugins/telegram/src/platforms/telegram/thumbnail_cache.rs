@@ -287,18 +287,22 @@ async fn fetch_chat_photo_id(
                     access_hash,
                 }),
             };
-            if let Ok(user_full) = client.invoke(&full_request).await {
-                for user in user_full.users {
+            if let Ok(tl::enums::users::UserFull::Full(user_full)) =
+                client.invoke(&full_request).await
+            {
+                for user in &user_full.users {
                     if let tl::enums::User::User(u) = user {
                         if u.id == chat_id {
-                            if let Some(tl::enums::UserProfilePhoto::Photo(photo)) = u.photo {
+                            if let Some(tl::enums::UserProfilePhoto::Photo(photo)) = &u.photo {
                                 return Ok(photo.photo_id);
                             }
                         }
                     }
                 }
-                if let Some(tl::enums::Photo::Photo(photo)) = user_full.full_user.profile_photo {
-                    return Ok(photo.id);
+                if let tl::enums::UserFull::Full(full_info) = &user_full.full_user {
+                    if let Some(tl::enums::Photo::Photo(photo)) = &full_info.profile_photo {
+                        return Ok(photo.id);
+                    }
                 }
             }
 

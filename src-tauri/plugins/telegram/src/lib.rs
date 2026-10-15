@@ -444,7 +444,9 @@ impl OmnigetPlugin for TelegramPlugin {
                         "updated_at": now
                     }))
                 }
-                "telegram_accounts_restore" => Ok(serde_json::json!({ "ok": true, "needs_restart": false })),
+                "telegram_accounts_restore" => {
+                    Ok(serde_json::json!({ "ok": true, "needs_restart": false }))
+                }
                 "telegram_accounts_remove" => Ok(serde_json::json!({ "ok": true })),
                 "telegram_accounts_rename" => {
                     let id: String = args
@@ -540,7 +542,9 @@ impl OmnigetPlugin for TelegramPlugin {
                 "telegram_diag_list_media" | "telegram_expand_album" => Ok(serde_json::json!([])),
                 "telegram_takeout_start" => Ok(serde_json::json!({ "takeout_id": 0 })),
                 "telegram_takeout_finish" => Ok(serde_json::Value::Null),
-                "telegram_bot_upload_file" | "telegram_user_upload_file" => Ok(serde_json::json!({ "success": false })),
+                "telegram_bot_upload_file" | "telegram_user_upload_file" => {
+                    Ok(serde_json::json!({ "success": false }))
+                }
                 "telegram_cancel_op" => Ok(serde_json::json!({ "cancelled": true })),
                 "telegram_set_mute"
                 | "telegram_toggle_pin"
