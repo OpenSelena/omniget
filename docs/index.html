@@ -1415,7 +1415,7 @@
           <li>
             <a href="./courses/" class="sidebar-link">
               <span>36 Course Platforms</span>
-              <span class="sidebar-tag">v0.12.1</span>
+              <span class="sidebar-tag">v0.12.2</span>
             </a>
           </li>
         </ul>
@@ -1838,7 +1838,7 @@
             <tr>
               <td><strong>GitHub API</strong><br /><code>api.github.com/repos/OpenSelena/...</code></td>
               <td>Check for newer releases and security patches.</td>
-              <td>Standard HTTP User-Agent and client architecture (e.g. <code>OmniGet/0.12.0 x86_64</code>).</td>
+              <td>Standard HTTP User-Agent and client architecture (e.g. <code>OmniGet/0.12.2 x86_64</code>).</td>
               <td>On startup (can be disabled in Settings).</td>
             </tr>
             <tr>
@@ -1951,12 +1951,65 @@ omniget-cli import-cookies ./cookies.txt --name firefox</code></pre>
         Track every update and bugfix shipped in OmniGet. OmniGet follows Semantic Versioning and publishes signed artifacts with SHA-256 checksums for every desktop release.
       </p>
 
+      <!-- v0.12.2 Release -->
+      <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="sidebar-tag" style="background: var(--primary); color: var(--text-inverse); font-weight: 600; padding: 3px 8px; border-radius: 6px;">v0.12.2 Stable</span>
+              <span style="font-size: 13px; color: var(--text-subtle);">Released October 2026</span>
+            </div>
+            <h3 style="font-size: 18px; font-weight: 700; color: var(--text); margin-top: 6px;">Telegram Core Sync, Cross-DC Bot Avatars &amp; Full 12-Locale Parity</h3>
+          </div>
+          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.12.2" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+            <span>View Release on GitHub</span>
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+
+        <div style="display: grid; gap: 18px;">
+          <div>
+            <h4 style="font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Telegram Plugin Command Handlers &amp; Outdated Alert Prevention
+            </h4>
+            <ul style="margin-left: 20px; color: var(--text-muted); font-size: 14px; line-height: 1.6; display: grid; gap: 4px;">
+              <li>Registered all missing plugin command handlers for participant listings, account management, and clone wizards, completely eliminating <code>ERR_PLUGIN_OUTDATED</code> alerts.</li>
+              <li>Added safe fallback error handling in the Channel Drawer members tab, Account Panel, and Clone Wizard to handle restricted channels smoothly.</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 style="font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              Live Dialog Synchronization &amp; Reactive UI Refresh
+            </h4>
+            <ul style="margin-left: 20px; color: var(--text-muted); font-size: 14px; line-height: 1.6; display: grid; gap: 4px;">
+              <li>Connected <code>telegram_sync_now</code> to fetch live dialogs and return real synchronized channel counts rather than a zero stub.</li>
+              <li>Dispatched an automatic <code>telegram:chats:refresh</code> event on sync completion so the chat list updates immediately without requiring a page reload.</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 style="font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+              Cross-DC Bot Avatars &amp; Full 12-Locale Parity
+            </h4>
+            <ul style="margin-left: 20px; color: var(--text-muted); font-size: 14px; line-height: 1.6; display: grid; gap: 4px;">
+              <li>Resolved Telegram MTProto cross-DC migration (error 303 <code>FILE_MIGRATE</code>) by streaming avatar downloads via native client iteration with automated multi-DC routing.</li>
+              <li>Rendered circular chat photos in the Channel Drawer header with graceful initial letter fallbacks.</li>
+              <li>Localized the channel management button across all 12 supported locales, enforcing 100% dictionary key parity (7,444 keys).</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
       <!-- v0.12.1 Release -->
       <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
           <div>
             <div style="display: flex; align-items: center; gap: 10px;">
-              <span class="sidebar-tag" style="background: var(--primary); color: var(--text-inverse); font-weight: 600; padding: 3px 8px; border-radius: 6px;">v0.12.1 Stable</span>
+              <span class="sidebar-tag" style="background: var(--bg-muted); color: var(--text); font-weight: 600; padding: 3px 8px; border-radius: 6px;">v0.12.1</span>
               <span style="font-size: 13px; color: var(--text-subtle);">Released October 2026</span>
             </div>
             <h3 style="font-size: 18px; font-weight: 700; color: var(--text); margin-top: 6px;">Global Update Notification Banner &amp; Dependencies Table Alignment</h3>
@@ -2249,7 +2302,7 @@ omniget-cli import-cookies ./cookies.txt --name firefox</code></pre>
         </li>
         <li class="search-result-item" onclick="location.href='./changelog/'">
           <span class="search-result-title">Release Notes &amp; Changelog</span>
-          <span class="search-result-desc">Version v0.12.1 updates, global update banner, dependencies table alignment</span>
+          <span class="search-result-desc">Version v0.12.2 updates, Telegram live sync, cross-DC bot avatars, complete 12-locale parity</span>
         </li>
       </ul>
     </div>
