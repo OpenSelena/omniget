@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { t } from "$lib/i18n";
   import { showToast } from "$lib/stores/toast-store.svelte";
   import {
     telegramFullChannelInfo,
@@ -87,7 +88,7 @@
         chatType,
       });
     } catch (e: any) {
-      infoError = typeof e === "string" ? e : (e?.message ?? "Erro ao carregar info");
+      infoError = typeof e === "string" ? e : (e?.message ?? $t("telegram.channel_drawer.error_loading_info"));
     } finally {
       infoLoading = false;
     }
@@ -108,7 +109,7 @@
       participants = page.users;
       participantsCount = page.count;
     } catch (e: any) {
-      participantsError = typeof e === "string" ? e : (e?.message ?? "Erro ao carregar membros");
+      participantsError = typeof e === "string" ? e : (e?.message ?? $t("telegram.channel_drawer.error_loading_members"));
     } finally {
       participantsLoading = false;
     }
@@ -147,9 +148,9 @@
         muteUntil: next ? 0 : -1,
       });
       muted = next;
-      showToast("info", next ? "Silenciado" : "Reativado");
+      showToast("info", next ? $t("telegram.channel_drawer.toast_muted") : $t("telegram.channel_drawer.toast_unmuted"));
     } catch (e: any) {
-      showToast("error", typeof e === "string" ? e : (e?.message ?? "Erro"));
+      showToast("error", typeof e === "string" ? e : (e?.message ?? $t("common.error")));
     }
   }
 
@@ -159,9 +160,9 @@
     try {
       await telegramTogglePin({ chatId: chat.id, chatType, pinned: next });
       pinned = next;
-      showToast("info", next ? "Fixado" : "Desfixado");
+      showToast("info", next ? $t("telegram.channel_drawer.toast_pinned") : $t("telegram.channel_drawer.toast_unpinned"));
     } catch (e: any) {
-      showToast("error", typeof e === "string" ? e : (e?.message ?? "Erro"));
+      showToast("error", typeof e === "string" ? e : (e?.message ?? $t("common.error")));
     }
   }
 
@@ -171,9 +172,9 @@
     try {
       await telegramSetArchived({ chatId: chat.id, chatType, archived: next });
       archived = next;
-      showToast("info", next ? "Arquivado" : "Desarquivado");
+      showToast("info", next ? $t("telegram.channel_drawer.toast_archived") : $t("telegram.channel_drawer.toast_unarchived"));
     } catch (e: any) {
-      showToast("error", typeof e === "string" ? e : (e?.message ?? "Erro"));
+      showToast("error", typeof e === "string" ? e : (e?.message ?? $t("common.error")));
     }
   }
 
@@ -183,9 +184,9 @@
     try {
       await telegramSetBlocked({ chatId: chat.id, chatType, blocked: next });
       blocked = next;
-      showToast("info", next ? "Bloqueado" : "Desbloqueado");
+      showToast("info", next ? $t("telegram.channel_drawer.toast_blocked") : $t("telegram.channel_drawer.toast_unblocked"));
     } catch (e: any) {
-      showToast("error", typeof e === "string" ? e : (e?.message ?? "Erro"));
+      showToast("error", typeof e === "string" ? e : (e?.message ?? $t("common.error")));
     }
   }
 
@@ -196,20 +197,20 @@
     try {
       if (confirm.kind === "leave") {
         await telegramLeaveChannel({ chatId: id, chatType });
-        showToast("info", "Você saiu do canal");
+        showToast("info", $t("telegram.channel_drawer.toast_left_channel"));
         confirm.kind = null;
         open = false;
         onChatRemoved?.(id);
       } else if (confirm.kind === "delete-channel") {
         await telegramDeleteChannel(id);
-        showToast("info", "Canal deletado");
+        showToast("info", $t("telegram.channel_drawer.toast_deleted"));
         confirm.kind = null;
         open = false;
         onChatRemoved?.(id);
       } else if (confirm.kind === "clear-history") {
         if (clearMode === "leave") {
           await telegramLeaveChannel({ chatId: id, chatType });
-          showToast("info", "Você saiu do chat");
+          showToast("info", $t("telegram.channel_drawer.toast_left_chat"));
           onChatRemoved?.(id);
           open = false;
         } else {
@@ -219,7 +220,7 @@
             justClear: true,
             revoke: clearMode === "delete-all",
           });
-          showToast("info", clearMode === "delete-all" ? "Histórico apagado pra todos" : "Histórico limpo");
+          showToast("info", clearMode === "delete-all" ? $t("telegram.channel_drawer.toast_history_cleared_all") : $t("telegram.channel_drawer.toast_history_cleared"));
         }
         confirm.kind = null;
       } else if (confirm.kind === "report") {
@@ -230,12 +231,12 @@
           option: [0],
           message: reportMessage.trim(),
         });
-        showToast("info", "Denúncia enviada");
+        showToast("info", $t("telegram.channel_drawer.toast_reported"));
         reportMessage = "";
         confirm.kind = null;
       }
     } catch (e: any) {
-      showToast("error", typeof e === "string" ? e : (e?.message ?? "Erro"));
+      showToast("error", typeof e === "string" ? e : (e?.message ?? $t("common.error")));
     } finally {
       confirm.busy = false;
     }
@@ -249,12 +250,12 @@
 
   function roleLabel(role: string): string {
     switch (role) {
-      case "creator": return "Criador";
-      case "admin": return "Admin";
-      case "member": return "Membro";
-      case "banned": return "Banido";
-      case "left": return "Saiu";
-      case "self": return "Você";
+      case "creator": return $t("telegram.channel_drawer.role_creator");
+      case "admin": return $t("telegram.channel_drawer.role_admin");
+      case "member": return $t("telegram.channel_drawer.role_member");
+      case "banned": return $t("telegram.channel_drawer.role_banned");
+      case "left": return $t("telegram.channel_drawer.role_left");
+      case "self": return $t("telegram.channel_drawer.role_self");
       default: return role;
     }
   }
@@ -274,16 +275,16 @@
     onclick={(e) => { if (e.target === e.currentTarget) close(); }}
     onkeydown={(e) => { if (e.key === "Escape") close(); }}
   >
-    <aside class="drawer" role="dialog" aria-modal="true" aria-label="Canal: {chat.title}">
+    <aside class="drawer" role="dialog" aria-modal="true" aria-label={$t("telegram.channel_drawer.aria_label", { title: chat.title })}>
       <header class="drawer-header">
         <div class="header-info">
           <div class="header-avatar">{chat.title.charAt(0).toUpperCase()}</div>
           <div class="header-text">
             <h2>{chat.title}</h2>
             <span class="header-meta">
-              {isChannel ? "Canal" : isGroup ? "Grupo" : "Privado"}
+              {isChannel ? $t("telegram.channel_drawer.type_channel") : isGroup ? $t("telegram.channel_drawer.type_group") : $t("telegram.channel_drawer.type_private")}
               {#if info?.participants_count}
-                · {info.participants_count.toLocaleString()} membros
+                · {$t("telegram.channel_drawer.members_count", { count: info.participants_count.toLocaleString() })}
               {/if}
               {#if info?.username}
                 · @{info.username}
@@ -291,7 +292,7 @@
             </span>
           </div>
         </div>
-        <button type="button" class="icon-btn close-btn" onclick={close} aria-label="Fechar">
+        <button type="button" class="icon-btn close-btn" onclick={close} aria-label={$t("common.close")}>
           <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <path d="M18 6L6 18" />
             <path d="M6 6l12 12" />
@@ -309,7 +310,7 @@
             aria-selected={tab === "info"}
             onclick={() => selectTab("info")}
           >
-            Info
+            {$t("telegram.channel_drawer.tab_info")}
           </button>
           <button
             type="button"
@@ -319,7 +320,7 @@
             aria-selected={tab === "members"}
             onclick={() => selectTab("members")}
           >
-            Membros
+            {$t("telegram.channel_drawer.tab_members")}
           </button>
         </nav>
       {/if}
@@ -331,12 +332,12 @@
           {:else if infoError}
             <div class="error-section">
               <p class="error-msg">{infoError}</p>
-              <button type="button" class="button" onclick={loadInfo}>Tentar novamente</button>
+              <button type="button" class="button" onclick={loadInfo}>{$t("common.retry")}</button>
             </div>
           {:else if info}
             {#if info.about}
               <section class="info-block">
-                <span class="info-label">Sobre</span>
+                <span class="info-label">{$t("telegram.channel_drawer.about")}</span>
                 <p class="info-text">{info.about}</p>
               </section>
             {/if}
@@ -344,33 +345,33 @@
             <section class="actions-grid">
               <button type="button" class="action-row" onclick={toggleMute}>
                 <span class="action-icon">{muted ? "🔔" : "🔕"}</span>
-                <span class="action-label">{muted ? "Reativar notificações" : "Silenciar"}</span>
+                <span class="action-label">{muted ? $t("telegram.channel_drawer.unmute") : $t("telegram.channel_drawer.mute")}</span>
               </button>
               <button type="button" class="action-row" onclick={togglePin}>
                 <span class="action-icon">{pinned ? "📌" : "📍"}</span>
-                <span class="action-label">{pinned ? "Desfixar" : "Fixar no topo"}</span>
+                <span class="action-label">{pinned ? $t("telegram.channel_drawer.unpin") : $t("telegram.channel_drawer.pin")}</span>
               </button>
               <button type="button" class="action-row" onclick={toggleArchive}>
                 <span class="action-icon">{archived ? "📂" : "📁"}</span>
-                <span class="action-label">{archived ? "Desarquivar" : "Arquivar"}</span>
+                <span class="action-label">{archived ? $t("telegram.channel_drawer.unarchive") : $t("telegram.channel_drawer.archive")}</span>
               </button>
               {#if isPrivate}
                 <button type="button" class="action-row" onclick={toggleBlock}>
                   <span class="action-icon">{blocked ? "✓" : "🚫"}</span>
-                  <span class="action-label">{blocked ? "Desbloquear" : "Bloquear"}</span>
+                  <span class="action-label">{blocked ? $t("telegram.channel_drawer.unblock") : $t("telegram.channel_drawer.block")}</span>
                 </button>
               {/if}
             </section>
 
             <section class="danger-zone">
-              <span class="info-label">Ações</span>
+              <span class="info-label">{$t("telegram.channel_drawer.actions")}</span>
               <button
                 type="button"
                 class="action-row danger"
                 onclick={() => { clearMode = "clear-me"; confirm.kind = "clear-history"; }}
               >
                 <span class="action-icon">🧹</span>
-                <span class="action-label">Limpar histórico</span>
+                <span class="action-label">{$t("telegram.channel_drawer.clear_history")}</span>
               </button>
               <button
                 type="button"
@@ -378,7 +379,7 @@
                 onclick={() => { confirm.kind = "report"; }}
               >
                 <span class="action-icon">⚠️</span>
-                <span class="action-label">Denunciar</span>
+                <span class="action-label">{$t("telegram.channel_drawer.report")}</span>
               </button>
               {#if !isPrivate}
                 <button
@@ -387,7 +388,7 @@
                   onclick={() => { confirm.kind = "leave"; }}
                 >
                   <span class="action-icon">🚪</span>
-                  <span class="action-label">Sair {isChannel ? "do canal" : "do grupo"}</span>
+                  <span class="action-label">{isChannel ? $t("telegram.channel_drawer.leave_channel") : $t("telegram.channel_drawer.leave_group")}</span>
                 </button>
                 <button
                   type="button"
@@ -395,7 +396,7 @@
                   onclick={() => { confirm.kind = "delete-channel"; }}
                 >
                   <span class="action-icon">🗑️</span>
-                  <span class="action-label">Deletar {isChannel ? "canal" : "grupo"} (apenas dono)</span>
+                  <span class="action-label">{isChannel ? $t("telegram.channel_drawer.delete_channel") : $t("telegram.channel_drawer.delete_group")}</span>
                 </button>
               {/if}
             </section>
@@ -404,10 +405,10 @@
           <section class="members-section">
             <div class="members-filters">
               {#each [
-                { key: "recent", label: "Todos" },
-                { key: "admins", label: "Admins" },
-                { key: "bots", label: "Bots" },
-                { key: "banned", label: "Banidos" },
+                { key: "recent", label: $t("telegram.channel_drawer.filter_all") },
+                { key: "admins", label: $t("telegram.channel_drawer.filter_admins") },
+                { key: "bots", label: $t("telegram.channel_drawer.filter_bots") },
+                { key: "banned", label: $t("telegram.channel_drawer.filter_banned") },
               ] as f}
                 <button
                   type="button"
@@ -422,7 +423,7 @@
             <input
               type="text"
               class="input"
-              placeholder="Buscar membro..."
+              placeholder={$t("telegram.channel_drawer.search_member_placeholder")}
               bind:value={participantsSearch}
               oninput={onSearchInput}
             />
@@ -431,13 +432,13 @@
             {:else if participantsError}
               <div class="error-section">
                 <p class="error-msg">{participantsError}</p>
-                <button type="button" class="button" onclick={loadParticipants}>Tentar novamente</button>
+                <button type="button" class="button" onclick={loadParticipants}>{$t("common.retry")}</button>
               </div>
             {:else if participants.length === 0}
-              <p class="empty-text">Nenhum membro encontrado.</p>
+              <p class="empty-text">{$t("telegram.channel_drawer.no_members")}</p>
             {:else}
               <div class="members-meta">
-                {participantsCount.toLocaleString()} no total
+                {$t("telegram.channel_drawer.members_total", { count: participantsCount.toLocaleString() })}
               </div>
               <ul class="members-list">
                 {#each participants as p (p.user_id)}
@@ -469,12 +470,12 @@
 {#if confirm.kind === "leave"}
   <div class="dialog-overlay" role="presentation" onclick={(e) => { if (e.target === e.currentTarget && !confirm.busy) confirm.kind = null; }} onkeydown={() => {}}>
     <div class="dialog" role="dialog" aria-modal="true">
-      <h3>Sair {isChannel ? "do canal" : "do grupo"}?</h3>
-      <p>Você não receberá mais mensagens de <strong>{chat?.title}</strong>.</p>
+      <h3>{isChannel ? $t("telegram.channel_drawer.leave_title_channel") : $t("telegram.channel_drawer.leave_title_group")}</h3>
+      <p>{$t("telegram.channel_drawer.leave_desc", { title: chat?.title ?? "" })}</p>
       <div class="dialog-actions">
-        <button type="button" class="button" onclick={() => (confirm.kind = null)} disabled={confirm.busy}>Cancelar</button>
+        <button type="button" class="button" onclick={() => (confirm.kind = null)} disabled={confirm.busy}>{$t("common.cancel")}</button>
         <button type="button" class="button danger-btn" onclick={commitConfirm} disabled={confirm.busy}>
-          {confirm.busy ? "Saindo..." : "Sair"}
+          {confirm.busy ? $t("telegram.channel_drawer.leaving") : $t("telegram.channel_drawer.leave_btn")}
         </button>
       </div>
     </div>
@@ -484,13 +485,13 @@
 {#if confirm.kind === "delete-channel"}
   <div class="dialog-overlay" role="presentation" onclick={(e) => { if (e.target === e.currentTarget && !confirm.busy) confirm.kind = null; }} onkeydown={() => {}}>
     <div class="dialog" role="dialog" aria-modal="true">
-      <h3>Deletar {isChannel ? "canal" : "grupo"}?</h3>
-      <p class="warn">⚠️ Irreversível. Todos os membros perdem acesso ao conteúdo.</p>
-      <p>Confirme deletando <strong>{chat?.title}</strong>.</p>
+      <h3>{isChannel ? $t("telegram.channel_drawer.delete_title_channel") : $t("telegram.channel_drawer.delete_title_group")}</h3>
+      <p class="warn">⚠️ {$t("telegram.channel_drawer.delete_warn")}</p>
+      <p>{$t("telegram.channel_drawer.delete_confirm", { title: chat?.title ?? "" })}</p>
       <div class="dialog-actions">
-        <button type="button" class="button" onclick={() => (confirm.kind = null)} disabled={confirm.busy}>Cancelar</button>
+        <button type="button" class="button" onclick={() => (confirm.kind = null)} disabled={confirm.busy}>{$t("common.cancel")}</button>
         <button type="button" class="button danger-btn" onclick={commitConfirm} disabled={confirm.busy}>
-          {confirm.busy ? "Deletando..." : "Deletar"}
+          {confirm.busy ? $t("telegram.channel_drawer.deleting") : $t("telegram.channel_drawer.delete_btn")}
         </button>
       </div>
     </div>
@@ -500,22 +501,22 @@
 {#if confirm.kind === "clear-history"}
   <div class="dialog-overlay" role="presentation" onclick={(e) => { if (e.target === e.currentTarget && !confirm.busy) confirm.kind = null; }} onkeydown={() => {}}>
     <div class="dialog" role="dialog" aria-modal="true">
-      <h3>Limpar conversa</h3>
-      <p>Como você quer limpar <strong>{chat?.title}</strong>?</p>
+      <h3>{$t("telegram.channel_drawer.clear_title")}</h3>
+      <p>{$t("telegram.channel_drawer.clear_prompt", { title: chat?.title ?? "" })}</p>
       <div class="radio-group">
         <label class="radio-row">
           <input type="radio" bind:group={clearMode} value="clear-me" />
           <div>
-            <span class="radio-title">Limpar pra mim</span>
-            <span class="radio-desc">Some do seu lado. Outros continuam vendo.</span>
+            <span class="radio-title">{$t("telegram.channel_drawer.clear_me")}</span>
+            <span class="radio-desc">{$t("telegram.channel_drawer.clear_me_desc")}</span>
           </div>
         </label>
         {#if isPrivate || isGroup}
           <label class="radio-row">
             <input type="radio" bind:group={clearMode} value="delete-all" />
             <div>
-              <span class="radio-title">Apagar pra todos</span>
-              <span class="radio-desc">Remove a conversa de todos os participantes.</span>
+              <span class="radio-title">{$t("telegram.channel_drawer.clear_all")}</span>
+              <span class="radio-desc">{$t("telegram.channel_drawer.clear_all_desc")}</span>
             </div>
           </label>
         {/if}
@@ -523,16 +524,16 @@
           <label class="radio-row">
             <input type="radio" bind:group={clearMode} value="leave" />
             <div>
-              <span class="radio-title">Sair {isChannel ? "do canal" : "do grupo"}</span>
-              <span class="radio-desc">Deixa o {isChannel ? "canal" : "grupo"} e remove da lista.</span>
+              <span class="radio-title">{isChannel ? $t("telegram.channel_drawer.clear_leave_channel") : $t("telegram.channel_drawer.clear_leave_group")}</span>
+              <span class="radio-desc">{isChannel ? $t("telegram.channel_drawer.clear_leave_channel_desc") : $t("telegram.channel_drawer.clear_leave_group_desc")}</span>
             </div>
           </label>
         {/if}
       </div>
       <div class="dialog-actions">
-        <button type="button" class="button" onclick={() => (confirm.kind = null)} disabled={confirm.busy}>Cancelar</button>
+        <button type="button" class="button" onclick={() => (confirm.kind = null)} disabled={confirm.busy}>{$t("common.cancel")}</button>
         <button type="button" class="button danger-btn" onclick={commitConfirm} disabled={confirm.busy}>
-          {confirm.busy ? "Aplicando..." : "Confirmar"}
+          {confirm.busy ? $t("telegram.channel_drawer.clear_applying") : $t("telegram.channel_drawer.clear_confirm_btn")}
         </button>
       </div>
     </div>
@@ -542,18 +543,18 @@
 {#if confirm.kind === "report"}
   <div class="dialog-overlay" role="presentation" onclick={(e) => { if (e.target === e.currentTarget && !confirm.busy) confirm.kind = null; }} onkeydown={() => {}}>
     <div class="dialog" role="dialog" aria-modal="true">
-      <h3>Denunciar {chat?.title}</h3>
-      <p>Telegram revisará a denúncia.</p>
+      <h3>{$t("telegram.channel_drawer.report_title", { title: chat?.title ?? "" })}</h3>
+      <p>{$t("telegram.channel_drawer.report_desc")}</p>
       <textarea
         class="input textarea"
-        placeholder="Detalhes (opcional)"
+        placeholder={$t("telegram.channel_drawer.report_placeholder")}
         bind:value={reportMessage}
         rows="3"
       ></textarea>
       <div class="dialog-actions">
-        <button type="button" class="button" onclick={() => (confirm.kind = null)} disabled={confirm.busy}>Cancelar</button>
+        <button type="button" class="button" onclick={() => (confirm.kind = null)} disabled={confirm.busy}>{$t("common.cancel")}</button>
         <button type="button" class="button danger-btn" onclick={commitConfirm} disabled={confirm.busy}>
-          {confirm.busy ? "Enviando..." : "Enviar denúncia"}
+          {confirm.busy ? $t("telegram.channel_drawer.report_sending") : $t("telegram.channel_drawer.report_btn")}
         </button>
       </div>
     </div>
