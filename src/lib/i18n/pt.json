@@ -4054,7 +4054,10 @@
       "folder_name_placeholder": "Nome da pasta",
       "create_btn": "Criar",
       "creating": "Criando...",
-      "error_create_folder": "Erro ao criar pasta"
+      "error_create_folder": "Erro ao criar pasta",
+      "manage": "Gerenciar",
+      "manage_channel": "Gerenciar canal",
+      "manage_chat": "Gerenciar {{title}}"
     }
   },
   "settings": {

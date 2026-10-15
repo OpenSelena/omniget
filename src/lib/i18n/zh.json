@@ -4054,7 +4054,10 @@
       "folder_name_placeholder": "文件夹名称",
       "create_btn": "创建",
       "creating": "正在创建...",
-      "error_create_folder": "创建文件夹失败"
+      "error_create_folder": "创建文件夹失败",
+      "manage": "管理",
+      "manage_channel": "管理频道",
+      "manage_chat": "管理 {{title}}"
     }
   },
   "settings": {

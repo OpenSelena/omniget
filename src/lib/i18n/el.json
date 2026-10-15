@@ -4054,7 +4054,10 @@
       "folder_name_placeholder": "Όνομα φακέλου",
       "create_btn": "Δημιουργία",
       "creating": "Δημιουργία...",
-      "error_create_folder": "Σφάλμα κατά τη δημιουργία φακέλου"
+      "error_create_folder": "Σφάλμα κατά τη δημιουργία φακέλου",
+      "manage": "Διαχείριση",
+      "manage_channel": "Διαχείριση καναλιού",
+      "manage_chat": "Διαχείριση {{title}}"
     }
   },
   "settings": {

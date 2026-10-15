@@ -19,6 +19,8 @@ const LOCALES = [
 
 const BANNED_HARDCODED_PORTUGUESE_STRINGS = [
   "Gerenciar contas",
+  "Gerenciar canal",
+  "Gerenciar",
   "Clonar canais",
   "Transferências",
   "Performance de download",

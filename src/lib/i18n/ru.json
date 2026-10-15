@@ -4054,7 +4054,10 @@
       "folder_name_placeholder": "Название папки",
       "create_btn": "Создать",
       "creating": "Создание...",
-      "error_create_folder": "Ошибка при создании папки"
+      "error_create_folder": "Ошибка при создании папки",
+      "manage": "Управление",
+      "manage_channel": "Управление каналом",
+      "manage_chat": "Управление: {{title}}"
     }
   },
   "settings": {

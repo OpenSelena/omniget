@@ -1316,8 +1316,8 @@
               type="button"
               class="chat-info-btn"
               onclick={(e) => openDrawer(chat, e)}
-              aria-label="Gerenciar {chat.title}"
-              title="Gerenciar"
+              aria-label={$t("telegram.nav.manage_chat", { title: chat.title }) as string}
+              title={$t("telegram.nav.manage") as string}
             >
               <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="5" r="1.5" />
@@ -1344,14 +1344,14 @@
         type="button"
         class="button manage-btn"
         onclick={(e) => openDrawer(selectedChat!, e)}
-        aria-label="Gerenciar canal"
+        aria-label={$t("telegram.nav.manage_channel") as string}
       >
         <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="5" r="1.5" />
           <circle cx="12" cy="12" r="1.5" />
           <circle cx="12" cy="19" r="1.5" />
         </svg>
-        Gerenciar
+        {$t("telegram.nav.manage")}
       </button>
     </div>
 

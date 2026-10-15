@@ -4054,7 +4054,10 @@
       "folder_name_placeholder": "Nom du dossier",
       "create_btn": "Créer",
       "creating": "Création en cours...",
-      "error_create_folder": "Erreur lors de la création du dossier"
+      "error_create_folder": "Erreur lors de la création du dossier",
+      "manage": "Gérer",
+      "manage_channel": "Gérer le canal",
+      "manage_chat": "Gérer {{title}}"
     }
   },
   "settings": {

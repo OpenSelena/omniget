@@ -4054,7 +4054,10 @@
       "folder_name_placeholder": "Folder name",
       "create_btn": "Create",
       "creating": "Creating...",
-      "error_create_folder": "Error creating folder"
+      "error_create_folder": "Error creating folder",
+      "manage": "Manage",
+      "manage_channel": "Manage channel",
+      "manage_chat": "Manage {{title}}"
     }
   },
   "settings": {

@@ -4054,7 +4054,10 @@
       "folder_name_placeholder": "ຊື່ໂຟນເດີ",
       "create_btn": "ສ້າງ",
       "creating": "ກຳລັງສ້າງ...",
-      "error_create_folder": "ເກີດຂໍ້ຜິດພາດໃນການສ້າງໂຟນເດີ"
+      "error_create_folder": "ເກີດຂໍ້ຜິດພາດໃນການສ້າງໂຟນເດີ",
+      "manage": "ຈັດການ",
+      "manage_channel": "ຈັດການຊ່ອງ",
+      "manage_chat": "ຈັດການ {{title}}"
     }
   },
   "settings": {
