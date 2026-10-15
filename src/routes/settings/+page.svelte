@@ -4,8 +4,7 @@
   import { open } from "@tauri-apps/plugin-dialog";
   import { t, locale, loadTranslations } from "$lib/i18n";
   import { getSettings, updateSettings, resetSettings } from "$lib/stores/settings-store.svelte";
-  import { getUpdateInfo } from "$lib/stores/update-store.svelte";
-  import { installUpdate } from "$lib/updater";
+  import { getUpdateInfo, getIsUpdating, performUpdate } from "$lib/stores/update-store.svelte";
   import { showToast } from "$lib/stores/toast-store.svelte";
   import { refreshYtdlpStatus } from "$lib/stores/dependency-store.svelte";
   import { isDebugEnabled, setDebugEnabled, setDebugPanelOpen } from "$lib/stores/debug-store.svelte";
@@ -37,7 +36,7 @@
   let updateInfo = $derived(getUpdateInfo());
   let isWindows = typeof navigator !== "undefined" && navigator.userAgent.includes("Windows");
   let resetting = $state(false);
-  let updating = $state(false);
+  let updating = $derived(getIsUpdating());
   let deps = $state<DependencyStatus[]>([]);
   let installingDep = $state<string | null>(null);
 
@@ -86,12 +85,7 @@
   });
 
   async function handleUpdate() {
-    updating = true;
-    try {
-      await installUpdate();
-    } catch {
-      updating = false;
-    }
+    await performUpdate();
   }
 
   async function changeTheme(value: string) {

@@ -339,6 +339,13 @@
   background: var(--accent);
 }
 
+.mac-nav-badge.update-badge {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0 6px;
+}
+
 .mac-plugins-toggle {
   display: flex;
   align-items: center;

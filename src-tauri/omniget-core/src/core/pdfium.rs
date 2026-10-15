@@ -143,14 +143,48 @@ pub fn is_installed() -> bool {
     resolve_with_source().is_some()
 }
 
+pub fn parse_pdfium_version(raw: &str) -> Option<String> {
+    for line in raw.lines() {
+        let line = line.trim();
+        if let Some(build) = line.strip_prefix("BUILD=") {
+            let build = build.trim();
+            if !build.is_empty() {
+                return Some(build.to_string());
+            }
+        }
+    }
+    None
+}
+
+pub fn clean_version_marker(raw: &str) -> String {
+    if let Some(parsed) = parse_pdfium_version(raw) {
+        return parsed;
+    }
+    if let Some(pos) = raw.find("BUILD=") {
+        let slice = &raw[pos + 6..];
+        let digits: String = slice.chars().take_while(|c| c.is_ascii_digit()).collect();
+        if !digits.is_empty() {
+            return digits;
+        }
+    }
+    let trimmed = raw.trim();
+    if let Some((base, _)) = trimmed.split_once('(') {
+        let base = base.trim();
+        if !base.is_empty() {
+            return base.to_string();
+        }
+    }
+    trimmed.to_string()
+}
+
 pub fn read_version_marker() -> Option<String> {
     let p = pdfium_version_marker_path()?;
     let s = std::fs::read_to_string(&p).ok()?;
-    let trimmed = s.trim().to_string();
-    if trimmed.is_empty() {
+    let cleaned = clean_version_marker(&s);
+    if cleaned.is_empty() {
         None
     } else {
-        Some(trimmed)
+        Some(cleaned)
     }
 }
 
@@ -203,7 +237,8 @@ pub async fn ensure_pdfium_with_variant(variant: Option<String>) -> anyhow::Resu
 
     if let Some(version_marker) = pdfium_version_marker_path() {
         let base = extracted_version.unwrap_or_else(|| "latest".to_string());
-        let value = format!("{} ({})", base, archive_name);
+        let clean = clean_version_marker(&base);
+        let value = format!("{} ({})", clean, archive_name);
         let _ = std::fs::write(&version_marker, value);
     }
 
@@ -291,7 +326,14 @@ fn extract_pdfium_archive(
         } else if file_name == "VERSION" {
             let mut buf = String::new();
             entry.read_to_string(&mut buf)?;
-            version = Some(buf.trim().to_string());
+            version = parse_pdfium_version(&buf).or_else(|| {
+                let trimmed = buf.trim();
+                if trimmed.is_empty() {
+                    None
+                } else {
+                    Some(trimmed.to_string())
+                }
+            });
         }
     }
 
@@ -300,4 +342,24 @@ fn extract_pdfium_archive(
     }
 
     Ok(version)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_pdfium_version_string() {
+        let raw_version_file = "MAJOR=156\nMINOR=0\nBUILD=8076\nPATCH=0\n";
+        assert_eq!(parse_pdfium_version(raw_version_file), Some("8076".to_string()));
+
+        let legacy_marker = "MAJOR=156\nMINOR=0\nBUILD=8076\nPATCH=0 (pdfium-win-x64.tgz)";
+        assert_eq!(clean_version_marker(legacy_marker), "8076");
+
+        let clean_marker = "8076";
+        assert_eq!(clean_version_marker(clean_marker), "8076");
+
+        let archive_marker = "8076 (pdfium-win-x64.tgz)";
+        assert_eq!(clean_version_marker(archive_marker), "8076");
+    }
 }

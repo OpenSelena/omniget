@@ -807,6 +807,7 @@
   width: 100%;
   border-collapse: collapse;
   font-size: var(--text-base);
+  table-layout: fixed;
 }
 
 .deps-table thead {
@@ -824,8 +825,31 @@
   border-bottom: var(--hairline) solid var(--separator);
 }
 
-.deps-table th.deps-col-action {
+.deps-table th:first-child,
+.deps-table :global(.deps-cell-name) {
+  width: 18%;
+}
+
+.deps-table th:nth-child(2),
+.deps-table :global(.deps-cell-version) {
+  width: 22%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+.deps-table th:nth-child(3),
+.deps-table :global(.deps-cell-status) {
+  width: 18%;
+}
+
+.deps-table th.deps-col-action,
+.deps-table :global(.deps-cell-action) {
+  width: 42%;
   text-align: right;
+  white-space: nowrap;
 }
 
 .deps-table :global(.deps-table-row) {
@@ -840,17 +864,6 @@
   padding: var(--space-2) var(--space-3);
   vertical-align: middle;
   min-height: var(--row-base);
-}
-
-.deps-table :global(.deps-cell-action) {
-  text-align: right;
-  width: 42%;
-}
-
-.deps-table :global(.deps-cell-version) {
-  white-space: nowrap;
-  color: var(--text-dim);
-  font-variant-numeric: tabular-nums;
 }
 
 .dep-ok {

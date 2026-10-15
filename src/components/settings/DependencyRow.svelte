@@ -4,6 +4,7 @@
   import { open as openDialog } from "@tauri-apps/plugin-dialog";
   import { showToast } from "$lib/stores/toast-store.svelte";
   import { t } from "$lib/i18n";
+  import { formatDepVersion } from "$lib/utils/dep-version";
 
   type DependencyVariantInfo = {
     id: string;
@@ -26,6 +27,8 @@
 
   let { name, installed, version, source = "missing", path = null, outdated = false, busy, onInstall, onAfterCustomFile }: Props =
     $props();
+
+  let vInfo = $derived(formatDepVersion(installed ? version : null));
 
   let variants = $state<DependencyVariantInfo[]>([]);
   let selectedVariant = $state<string | null>(null);
@@ -202,11 +205,13 @@
     <span class="deps-name">{name}</span>
   </td>
   <td class="deps-cell-version">
-    {#if installed && version}
-      <span class="deps-version">v{version}</span>
-    {:else}
-      <span class="deps-version deps-version-missing">—</span>
-    {/if}
+    <span
+      class="deps-version"
+      class:deps-version-missing={!installed || !version}
+      title={vInfo.tooltip ?? (installed && version ? `v${version}` : undefined)}
+    >
+      {vInfo.display}
+    </span>
   </td>
   <td class="deps-cell-status">
     <div class="deps-status-group">
@@ -337,6 +342,11 @@
     font-size: 12px;
     font-family: var(--font-mono, ui-monospace, monospace);
     color: var(--text-dim, var(--gray));
+    display: inline-block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
   .deps-version-missing {
     opacity: 0.5;
@@ -390,18 +400,23 @@
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 6px;
-    flex-wrap: wrap;
+    gap: 8px;
+    flex-wrap: nowrap;
   }
   .variant-select {
-    padding: 5px 8px;
+    padding: 5px 6px;
     border: none;
     border-radius: var(--radius-sm, 6px);
     background: var(--surface);
     color: var(--text);
     font: inherit;
-    font-size: 12px;
-    max-width: 160px;
+    font-size: 11px;
+    min-width: 60px;
+    max-width: 140px;
+    flex: 0 1 auto;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
   }
   .variant-select:disabled {
     opacity: 0.5;
@@ -418,6 +433,7 @@
     font-weight: 500;
     cursor: pointer;
     white-space: nowrap;
+    flex-shrink: 0;
   }
   @media (hover: hover) {
     .button.dep-btn:hover {
@@ -426,6 +442,7 @@
   }
   .menu-wrap {
     position: relative;
+    flex-shrink: 0;
   }
   .menu-sep {
     height: 1px;

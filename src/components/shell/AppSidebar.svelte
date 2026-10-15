@@ -2,6 +2,7 @@
   import { page } from "$app/state";
   import { t } from "$lib/i18n";
   import NavIcon from "$components/shell/NavIcon.svelte";
+  import { getUpdateInfo } from "$lib/stores/update-store.svelte";
   import type { NavItem } from "$lib/nav-config";
 
   interface Props {
@@ -22,6 +23,7 @@
     chatBadgeCount = 0,
   }: Props = $props();
 
+  let updateInfo = $derived(getUpdateInfo());
   let chatBadgeLabel = $derived(chatBadgeCount > 99 ? "99+" : String(chatBadgeCount));
 
   const PLUGINS_KEY = "omniget.sidebar.plugins_expanded";
@@ -62,6 +64,8 @@
       <span class="mac-nav-badge live">{badgeLabel}</span>
     {:else if item.badge === "omnidisc" && chatBadgeCount > 0}
       <span class="mac-nav-badge live">{chatBadgeLabel}</span>
+    {:else if item.href === "/settings" && updateInfo.available}
+      <span class="mac-nav-badge live update-badge">UPDATE</span>
     {/if}
   </a>
 {/snippet}
