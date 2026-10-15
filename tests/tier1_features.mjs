@@ -549,9 +549,9 @@ export function runTier1Tests() {
     );
   }
 
-  const SPEC_HASH = 'f46e923172f91d48af558032de343397';
-  const ORIGIN_CRLF_HASH = 'f46e923172f91d48af558032de343397';
-  const ORIGIN_LF_HASH = '607b5424c10fec9ab53f1a9b3417ef25';
+  const SPEC_HASH = 'e1028289185b19d17eae6355c77074ff';
+  const ORIGIN_CRLF_HASH = 'e1028289185b19d17eae6355c77074ff';
+  const ORIGIN_LF_HASH = '84aacef8ef1cae5ab90d85610afb0d6d';
 
   const matchesSpecHash = (rootMd5 === SPEC_HASH);
   const matchesOriginGit = (rootMd5 === ORIGIN_CRLF_HASH || rootMd5Lf === ORIGIN_LF_HASH);

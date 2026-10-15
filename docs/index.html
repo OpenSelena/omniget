@@ -1415,7 +1415,7 @@
           <li>
             <a href="./courses/" class="sidebar-link">
               <span>36 Course Platforms</span>
-              <span class="sidebar-tag">v0.12.0</span>
+              <span class="sidebar-tag">v0.12.1</span>
             </a>
           </li>
         </ul>
@@ -1951,17 +1951,17 @@ omniget-cli import-cookies ./cookies.txt --name firefox</code></pre>
         Track every update and bugfix shipped in OmniGet. OmniGet follows Semantic Versioning and publishes signed artifacts with SHA-256 checksums for every desktop release.
       </p>
 
-      <!-- v0.12.0 Release -->
+      <!-- v0.12.1 Release -->
       <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
           <div>
             <div style="display: flex; align-items: center; gap: 10px;">
-              <span class="sidebar-tag" style="background: var(--primary); color: var(--text-inverse); font-weight: 600; padding: 3px 8px; border-radius: 6px;">v0.12.0 Stable</span>
+              <span class="sidebar-tag" style="background: var(--primary); color: var(--text-inverse); font-weight: 600; padding: 3px 8px; border-radius: 6px;">v0.12.1 Stable</span>
               <span style="font-size: 13px; color: var(--text-subtle);">Released October 2026</span>
             </div>
-            <h3 style="font-size: 18px; font-weight: 700; color: var(--text); margin-top: 6px;">Telegram API Credentials, Official Community Migration &amp; CSP Star Badge Fix</h3>
+            <h3 style="font-size: 18px; font-weight: 700; color: var(--text); margin-top: 6px;">Global Update Notification Banner &amp; Dependencies Table Alignment</h3>
           </div>
-          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.12.0" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.12.1" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>View Release on GitHub</span>
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -1971,35 +1971,24 @@ omniget-cli import-cookies ./cookies.txt --name firefox</code></pre>
           <div>
             <h4 style="font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
               <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
-              Telegram Client API Credentials &amp; Handshake
+              Global App Update Notification System
             </h4>
             <ul style="margin-left: 20px; color: var(--text-muted); font-size: 14px; line-height: 1.6; display: grid; gap: 4px;">
-              <li>Updated embedded Telegram downloader plugin to official Open Selena application credentials.</li>
-              <li>Replaced legacy credentials across MTProto sender pool connection, QR login authorization, and SMS code verification flows.</li>
-              <li>Enhanced authentication reliability for multi-datacenter media fetching and channel archive synchronization.</li>
-            </ul>
-          </div>
-
-          <div>
-            <h4 style="font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
-              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-              Official Community Migration &amp; UI Polish
-            </h4>
-            <ul style="margin-left: 20px; color: var(--text-muted); font-size: 14px; line-height: 1.6; display: grid; gap: 4px;">
-              <li>Migrated community links on About Overview from Discord to official Telegram community channel (<code>https://t.me/OpenSelena</code>).</li>
-              <li>Added dedicated Telegram paper-plane vector glyph with theme-consistent fill and stroke.</li>
-              <li>Wired external link activations through Tauri shell plugin handler for desktop system browser execution.</li>
+              <li>Added a persistent yet dismissible top update banner across all views, ensuring newly available releases are immediately noticeable without opening Settings.</li>
+              <li>Added a live accent-colored <code>UPDATE</code> indicator badge on the Settings sidebar navigation item.</li>
+              <li>Centralized update state and action orchestration across the entire desktop application shell.</li>
             </ul>
           </div>
 
           <div>
             <h4 style="font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
               <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-              Content Security Policy &amp; Star Badge Restoration
+              Dependencies Management UI &amp; Version Sanitization
             </h4>
             <ul style="margin-left: 20px; color: var(--text-muted); font-size: 14px; line-height: 1.6; display: grid; gap: 4px;">
-              <li>Extended webview Content Security Policy with <code>frame-src 'self' https://ghbtns.com;</code> to unblock GitHub star badge widgets.</li>
-              <li>Eliminated placeholder gray box on About Project view while preserving strict script and asset security directives.</li>
+              <li>Resolved PDFium version marker parsing defect in the core engine, extracting clean build numbers (e.g. <code>v8076</code>) from upstream key-value lines.</li>
+              <li>Eliminated action button line wrapping on dependency rows with fixed table layouts and compact dropdown selections.</li>
+              <li>Ensured consistent vertical and horizontal alignment across PDFium, yt-dlp, and FFmpeg rows.</li>
             </ul>
           </div>
         </div>
@@ -2260,7 +2249,7 @@ omniget-cli import-cookies ./cookies.txt --name firefox</code></pre>
         </li>
         <li class="search-result-item" onclick="location.href='./changelog/'">
           <span class="search-result-title">Release Notes &amp; Changelog</span>
-          <span class="search-result-desc">Version v0.12.0 updates, Telegram API credentials, CSP star fix</span>
+          <span class="search-result-desc">Version v0.12.1 updates, global update banner, dependencies table alignment</span>
         </li>
       </ul>
     </div>
