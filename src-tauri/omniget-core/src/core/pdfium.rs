@@ -351,7 +351,10 @@ mod tests {
     #[test]
     fn test_parse_pdfium_version_string() {
         let raw_version_file = "MAJOR=156\nMINOR=0\nBUILD=8076\nPATCH=0\n";
-        assert_eq!(parse_pdfium_version(raw_version_file), Some("8076".to_string()));
+        assert_eq!(
+            parse_pdfium_version(raw_version_file),
+            Some("8076".to_string())
+        );
 
         let legacy_marker = "MAJOR=156\nMINOR=0\nBUILD=8076\nPATCH=0 (pdfium-win-x64.tgz)";
         assert_eq!(clean_version_marker(legacy_marker), "8076");
