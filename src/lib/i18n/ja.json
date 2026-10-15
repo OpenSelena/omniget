@@ -4054,7 +4054,10 @@
       "folder_name_placeholder": "フォルダー名",
       "create_btn": "作成",
       "creating": "作成中...",
-      "error_create_folder": "フォルダーの作成に失敗しました"
+      "error_create_folder": "フォルダーの作成に失敗しました",
+      "manage": "管理",
+      "manage_channel": "チャンネルを管理",
+      "manage_chat": "{{title}} を管理"
     }
   },
   "settings": {

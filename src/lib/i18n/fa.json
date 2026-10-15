@@ -4054,7 +4054,10 @@
       "folder_name_placeholder": "نام پوشه",
       "create_btn": "ایجاد",
       "creating": "در حال ایجاد...",
-      "error_create_folder": "خطا در ایجاد پوشه"
+      "error_create_folder": "خطا در ایجاد پوشه",
+      "manage": "مدیریت",
+      "manage_channel": "مدیریت کانال",
+      "manage_chat": "مدیریت {{title}}"
     }
   },
   "settings": {

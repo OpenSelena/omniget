@@ -4054,7 +4054,10 @@
       "folder_name_placeholder": "資料夾名稱",
       "create_btn": "建立",
       "creating": "正在建立...",
-      "error_create_folder": "建立資料夾失敗"
+      "error_create_folder": "建立資料夾失敗",
+      "manage": "管理",
+      "manage_channel": "管理頻道",
+      "manage_chat": "管理 {{title}}"
     }
   },
   "settings": {

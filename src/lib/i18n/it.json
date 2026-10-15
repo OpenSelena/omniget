@@ -4054,7 +4054,10 @@
       "folder_name_placeholder": "Nome cartella",
       "create_btn": "Crea",
       "creating": "Creazione in corso...",
-      "error_create_folder": "Errore durante la creazione della cartella"
+      "error_create_folder": "Errore durante la creazione della cartella",
+      "manage": "Gestisci",
+      "manage_channel": "Gestisci canale",
+      "manage_chat": "Gestisci {{title}}"
     }
   },
   "settings": {
