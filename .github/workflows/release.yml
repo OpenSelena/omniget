@@ -197,7 +197,7 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: |
           $TAG = "${{ github.ref_name }}"
-          $SIGNED_SETUP = Get-ChildItem "src-tauri/target/release/bundle/nsis-signed" -Filter "*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+          $SIGNED_SETUP = Get-ChildItem "src-tauri/target/release/bundle/nsis-signed" -Filter "*.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
           if ($SIGNED_SETUP) {
             Write-Host "Found SignPath-signed setup installer: $($SIGNED_SETUP.FullName)"
             if ($env:TAURI_SIGNING_PRIVATE_KEY) {
@@ -245,7 +245,7 @@ jobs:
         run: |
           $TAG = "${{ github.ref_name }}"
           $VERSION = $TAG -replace '^v', ''
-          $SIGNED_PORTABLE = Get-ChildItem "src-tauri/target/release/portable-signed" -Filter "*.exe" -ErrorAction SilentlyContinue | Select-Object -First 1
+          $SIGNED_PORTABLE = Get-ChildItem "src-tauri/target/release/portable-signed" -Filter "*.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
           $SRC = if ($SIGNED_PORTABLE) { $SIGNED_PORTABLE.FullName } else { "src-tauri/target/release/omniget.exe" }
           $DEST = "omniget_${VERSION}_x64-portable.exe"
           if (Test-Path $SRC) {
