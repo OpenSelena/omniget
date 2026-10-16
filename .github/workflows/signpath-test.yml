@@ -75,7 +75,7 @@ jobs:
       - name: Verify Authenticode Signature
         shell: pwsh
         run: |
-          $signed = Get-ChildItem "signed-output" -Filter "*.exe" | Select-Object -First 1
+          $signed = Get-ChildItem "signed-output" -Filter "*.exe" -Recurse | Select-Object -First 1
           if (-not $signed) {
             throw "No signed binary found in signed-output"
           }
@@ -93,4 +93,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: signed-omniget-test-binary
-          path: signed-output/*.exe
+          path: signed-output/**
+
