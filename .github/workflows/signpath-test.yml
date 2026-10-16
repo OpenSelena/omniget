@@ -53,7 +53,7 @@ jobs:
 
       - name: Upload unsigned executable for SignPath
         id: upload-unsigned
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: unsigned-omniget-binary
           path: src-tauri/target/release/omniget.exe
@@ -90,7 +90,7 @@ jobs:
           Write-Host "=========================================="
 
       - name: Upload signed test artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: signed-omniget-test-binary
           path: signed-output/**
