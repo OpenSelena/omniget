@@ -70,7 +70,7 @@ version = "0.32"
 features = ["bundled"]
 
 [dev-dependencies.toml]
-version = "0.9.8"
+version = "1.0.6"
 
 [build-dependencies.grammers-tl-gen]
 version = "0.10.0"
