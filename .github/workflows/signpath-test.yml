@@ -46,7 +46,10 @@ jobs:
           workspaces: './src-tauri -> target'
 
       - name: Build OmniGet Windows application
-        run: pnpm tauri build
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: pnpm tauri build --no-bundle
 
       - name: Upload unsigned executable for SignPath
         id: upload-unsigned
