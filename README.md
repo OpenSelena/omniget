@@ -36,7 +36,7 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 </p>
 
 <p align="center">
-  <a href="https://omniget.nav.bd/"><img src="https://img.shields.io/badge/Website-omniget.nav.bd-FF7D38?style=for-the-badge" alt="Official Website" /></a>
+  <a href="https://omniget.nav.bd/"><img src="https://img.shields.io/badge/Website-omniget.nav.bd-FF7D38?style=for-the-badge" alt="Community Website" /></a>
   <a href="https://github.com/OpenSelena/omniget/releases/latest"><img src="https://img.shields.io/github/v/release/OpenSelena/omniget?style=for-the-badge&label=release&color=F28500" alt="Latest release" /></a>
   <a href="https://github.com/OpenSelena/omniget/releases"><img src="https://img.shields.io/github/downloads/OpenSelena/omniget/total?style=for-the-badge&label=downloads&color=1E6FE8" alt="Total downloads" /></a>
   <a href="https://github.com/OpenSelena/omniget/stargazers"><img src="https://img.shields.io/github/stars/OpenSelena/omniget?style=for-the-badge&color=FFD426" alt="GitHub stars" /></a>
@@ -55,8 +55,10 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
   <sub>Free. Open source under GPL-3.0. No account, no ads, no telemetry on what you download. Your files stay on your computer.</sub>
 </p>
 
-> [!NOTE]
-> `OpenSelena/omniget` is a fork of the original OmniGet (`tonhowtf/omniget`). We maintain it as an alternative while the original repositories and downloads are unavailable, and we apply future updates from the main OmniGet here. We are not affiliated with [@tonhowtf](https://github.com/tonhowtf) (tonho).
+<p align="center">
+  <img src="https://img.shields.io/badge/Disclaimer-FF7D38" alt="Disclaimer" height="20" /><br/>
+  <sub>Maintained by <a href="https://github.com/igect">Igect</a> under GPL-3.0 · Based on original architecture by <a href="https://github.com/tonhowtf">tonhowtf</a></sub>
+</p>
 
 <p align="center">
   <img src="assets/readme/home.png" alt="OmniGet home screen: paste a URL, magnet link or .torrent and the file lands in your folder" width="900" />
@@ -197,13 +199,13 @@ OmniGet has native extractors for the platforms people use most, and hands every
 
 | Category | Sites and formats |
 |---|---|
-| Online courses | 38 supported platforms (Hotmart, Udemy, Kiwify, Rocketseat, Coursera, Domestika, Skillshare, and more) through the embedded Courses plugin. Every lesson, section selection, attachments, resume where you stopped. |
-| Video and audio | YouTube (videos, playlists, channels, live from start, chapters, SponsorBlock), Instagram, TikTok, X/Twitter, Reddit, Twitch (VODs, clips, live), Vimeo, Bluesky, Threads, Pinterest, Douyin |
-| Bilibili, signed in | 4K, HDR, Dolby Vision, Hi-Res lossless and Dolby Atmos according to your subscription. Danmaku comments as XML, ASS or JSON, NFO files for Kodi and Jellyfin, custom naming templates, 11 URL types including bangumi, courses, favorites, watch later and history |
-| Image galleries | Whole galleries and profiles from 250+ sites through gallery-dl (DeviantArt, Pixiv, ArtStation, Flickr, Tumblr, Imgur, Kemono and more) |
-| Bulk | Paste many links or load a `.txt`, download whole subreddits, Reddit and X profiles, Instagram and Pinterest profiles, Facebook albums |
-| Files and transfer | `.torrent` files and magnet links with a built-in BitTorrent client, direct HTTP files, HLS and DASH manifests, and person-to-person transfer between two OmniGet installs with a short word code |
-| Telegram | Photos, videos, files and audio from any channel or group you belong to, saved into organized channel folders (`OmniGram/<channel>/`), through the embedded Telegram plugin |
+| <img src="https://api.iconify.design/ph:graduation-cap.svg?color=%23F28500" width="18" height="18" align="center" alt="Online courses" /> Online courses | 38 supported platforms (Hotmart, Udemy, Kiwify, Rocketseat, Coursera, Domestika, Skillshare, and more) through the embedded Courses plugin. Every lesson, section selection, attachments, resume where you stopped. |
+| <img src="https://api.iconify.design/ph:film-slate.svg?color=%238E3FD8" width="18" height="18" align="center" alt="Video and audio" /> Video and audio | YouTube (videos, playlists, channels, live from start, chapters, SponsorBlock), Instagram, TikTok, X/Twitter, Reddit, Twitch (VODs, clips, live), Vimeo, Bluesky, Threads, Pinterest, Douyin |
+| <img src="https://cdn.simpleicons.org/bilibili/00A1D6" width="18" height="18" align="center" alt="Bilibili" /> Bilibili, signed in | 4K, HDR, Dolby Vision, Hi-Res lossless and Dolby Atmos according to your subscription. Danmaku comments as XML, ASS or JSON, NFO files for Kodi and Jellyfin, custom naming templates, 11 URL types including bangumi, courses, favorites, watch later and history |
+| <img src="https://api.iconify.design/ph:images.svg?color=%23E0A800" width="18" height="18" align="center" alt="Image galleries" /> Image galleries | Whole galleries and profiles from 250+ sites through gallery-dl (DeviantArt, Pixiv, ArtStation, Flickr, Tumblr, Imgur, Kemono and more) |
+| <img src="https://api.iconify.design/ph:stack.svg?color=%23FFB340" width="18" height="18" align="center" alt="Bulk" /> Bulk | Paste many links or load a `.txt`, download whole subreddits, Reddit and X profiles, Instagram and Pinterest profiles, Facebook albums |
+| <img src="https://api.iconify.design/ph:folder-simple.svg?color=%23A66A24" width="18" height="18" align="center" alt="Files and transfer" /> Files and transfer | `.torrent` files and magnet links with a built-in BitTorrent client, direct HTTP files, HLS and DASH manifests, and person-to-person transfer between two OmniGet installs with a short word code |
+| <img src="https://cdn.simpleicons.org/telegram/2CA5E0" width="18" height="18" align="center" alt="Telegram" /> Telegram | Photos, videos, files and audio from any channel or group you belong to, saved into organized channel folders (`OmniGram/<channel>/`), through the embedded Telegram plugin |
 
 Options you set once and forget: default quality, audio-only format (MP3, M4A, Opus, FLAC or WAV), subtitle languages and format (SRT, VTT, ASS, embedded or sidecar), thumbnail and metadata embedding, filename template, organize by platform, skip existing files, split by chapters, speed limit, concurrent downloads, proxy. Rules send a given channel or host to a folder and quality of your choice without asking again. Followed channels are checked in the background and can download new uploads automatically with a tray notification.
 
@@ -280,7 +282,7 @@ Status legend: no mark means ready, **beta** means it works but has not been tes
   </tr>
 </table>
 
-### YouTube (11)
+### <img src="https://cdn.simpleicons.org/youtube/FF0000" width="20" height="20" align="center" alt="YouTube" /> YouTube (11)
 
 - **Download video.** Paste a link and pick quality, format and subtitles. Same engine as the home screen.
 - **Metadata.** Save the info, description and thumbnail without the video.
@@ -294,7 +296,7 @@ Status legend: no mark means ready, **beta** means it works but has not been tes
 - **Real thumbnail.** The frames the CDN already has at 25, 50 and 75 percent, instead of the clickbait cover.
 - **Force H.264.** A switch in the browser extension that keeps YouTube on H.264 instead of VP9 and AV1, for machines that stutter on newer codecs.
 
-### Speech and subtitles (8)
+### <img src="https://api.iconify.design/ph:waveform.svg?color=%23FF5E7A" width="20" height="20" align="center" alt="Speech and subtitles" /> Speech and subtitles (8)
 
 - **Transcribe.** Audio or video to subtitles with whisper.cpp, offline. Models download on demand, Metal acceleration on macOS.
 - **Text to speech.** Natural voices from Microsoft Edge, free, with a synced subtitle file.
@@ -303,7 +305,7 @@ Status legend: no mark means ready, **beta** means it works but has not been tes
 - **Clone a voice**, **Design a voice** and **Isolate vocals** through a VoiceStudio install running on your machine. *beta*
 - **Dictation.** Press a global shortcut, speak, and whisper types the text where your cursor is. *beta*
 
-### Video editing (14)
+### <img src="https://api.iconify.design/ph:film-slate.svg?color=%238E3FD8" width="20" height="20" align="center" alt="Video editing" /> Video editing (14)
 
 - **Cut a clip.** Pick a video on disk and cut out a section. The result lands in the downloads queue.
 - **Convert.** Change container, codec or resolution, or compress, through the Convert plugin.
@@ -319,12 +321,12 @@ Status legend: no mark means ready, **beta** means it works but has not been tes
 - **Record screen.** Screen and system audio through FFmpeg, with a replay buffer that saves what just happened. *beta*
 - **Timeline editor.** *planned*
 
-### Audio (2)
+### <img src="https://api.iconify.design/ph:speaker-high.svg?color=%23E0203F" width="20" height="20" align="center" alt="Audio" /> Audio (2)
 
 - **Normalize loudness.** Two-pass EBU R128, so the audio lands where streaming, podcast or broadcast expects it.
 - **Remove noise.** Hiss, fan and room noise taken out of a recording, with nothing to download.
 
-### Instagram (24)
+### <img src="https://cdn.simpleicons.org/instagram/E4405F" width="20" height="20" align="center" alt="Instagram" /> Instagram (24)
 
 All of these run on your own Instagram session captured by the browser extension, so stories, close friends and your own lists work. Reads are paced and write actions stop on the first sign of a rate limit.
 
@@ -353,7 +355,7 @@ All of these run on your own Instagram session captured by the browser extension
 - **Publish.** Photo, carousel, reel, video or story through your session or the official Graph API. *beta*
 - **Schedule posts.** Queue posts for a date and time. OmniGet publishes them while it is open. *beta*
 
-### X / Twitter (10)
+### <img src="https://cdn.simpleicons.org/x/000000/ffffff" width="20" height="20" align="center" alt="X" /> X / Twitter (10)
 
 Public data comes through the FxTwitter API without login. Anything private (bookmarks, your follows, Grok on X) uses your X session from the cookie manager.
 
@@ -368,18 +370,18 @@ Public data comes through the FxTwitter API without login. Anything private (boo
 - **Your X archive.** Open the data zip offline: stats, top posts, likes and follow lists.
 - **Grok.** Ask Grok with live X search or summarize a thread, through the xAI API or your X session. *beta*
 
-### Facebook (2)
+### <img src="https://cdn.simpleicons.org/facebook/1877F2" width="20" height="20" align="center" alt="Facebook" /> Facebook (2)
 
 - **Album download.** Paste an album link and every photo and video inside it lands in one folder.
 - **Download video.** A single video or reel, straight from the link box.
 
-### Reddit (3)
+### <img src="https://cdn.simpleicons.org/reddit/FF4500" width="20" height="20" align="center" alt="Reddit" /> Reddit (3)
 
 - **Download post.** Video with sound from v.redd.it, galleries, single images and outside links.
 - **Archive thread.** The post and every comment as Markdown, a browsable HTML page and raw JSON, while they are still there.
 - **Read my data export.** The official Reddit data zip turned into a summary you can actually read.
 
-### Pinterest (10)
+### <img src="https://cdn.simpleicons.org/pinterest/BD081C" width="20" height="20" align="center" alt="Pinterest" /> Pinterest (10)
 
 Works without login for anything public. Cookies are only needed for secret boards and for unsaving.
 
@@ -394,30 +396,30 @@ Works without login for anything public. Cookies are only needed for secret boar
 - **Offline gallery, PDF, CSV.** A board as a searchable HTML gallery, a PDF moodboard or a spreadsheet.
 - **Keyword ideas.** Search suggestions, refinements and the words top pins use.
 
-### Twitch (2)
+### <img src="https://cdn.simpleicons.org/twitch/9146FF" width="20" height="20" align="center" alt="Twitch" /> Twitch (2)
 
 - **Emote pack.** Every emote and badge of a channel, from Twitch, BTTV, FFZ and 7TV, sorted by provider.
 - **VOD chat.** The whole chat replay of a VOD or clip as JSON, CSV and subtitles, with the busiest minutes marked.
 
-### Bilibili (2)
+### <img src="https://cdn.simpleicons.org/bilibili/00A1D6" width="20" height="20" align="center" alt="Bilibili" /> Bilibili (2)
 
 Video downloads from Bilibili live on the home screen. These two are about the floating comments.
 
 - **Danmaku export.** A video's danmaku as XML, ASS or JSON without downloading the video.
 - **Burn danmaku.** Paint the comment track onto a local clip and get a shareable MP4.
 
-### Spotify (2)
+### <img src="https://cdn.simpleicons.org/spotify/1DB954" width="20" height="20" align="center" alt="Spotify" /> Spotify (2)
 
 - **Themes and colors.** Customize the Spotify client with Spicetify themes. *beta*
 - **Extensions.** Install Spicetify extensions and custom apps from its Marketplace. *beta*
 
-### Music (3)
+### <img src="https://api.iconify.design/ph:music-notes.svg?color=%23FF5E7A" width="20" height="20" align="center" alt="Music" /> Music (3)
 
 - **Playlist to M3U.** Match an exported playlist with the audio files you own and write `.m3u8` and `.pls` for any local player.
 - **Synced lyrics.** Fetch lyrics from LRCLIB and save an `.lrc` next to each track.
 - **Spotify history.** Open your full data export and see everything Wrapped leaves out.
 
-### LinkedIn (4)
+### <img src="https://api.iconify.design/simple-icons:linkedin.svg?color=%230A66C2" width="20" height="20" align="center" alt="LinkedIn" /> LinkedIn (4)
 
 All four read the official data export LinkedIn lets you request, on your own machine. Nothing logs in.
 
@@ -426,13 +428,13 @@ All four read the official data export LinkedIn lets you request, on your own ma
 - **Messages.** Browse your chat history and save it as a local page.
 - **Profile score.** An offline completeness check with what is missing.
 
-### Games (3)
+### <img src="https://api.iconify.design/ph:game-controller.svg?color=%233D5BF0" width="20" height="20" align="center" alt="Games" /> Games (3)
 
 - **Switch album.** Import screenshots and clips from the Switch SD card, named by game and date.
 - **Clip organizer.** Sort Game Bar, ShadowPlay, OBS and Steam captures into folders by game.
 - **Runs on Linux?** The ProtonDB tier for one game or your whole Steam library.
 
-### PDF (13)
+### <img src="https://api.iconify.design/ph:file-pdf.svg?color=%23E0303A" width="20" height="20" align="center" alt="PDF" /> PDF (13)
 
 - **Merge.** Join several PDFs into one, in the order you choose.
 - **Split.** Extract pages or break a PDF into parts.
@@ -448,7 +450,7 @@ All four read the official data export LinkedIn lets you request, on your own ma
 - **Safe PDF.** Rebuild a PDF from pixels to strip scripts and forms.
 - **PDF to Markdown.** Clean Markdown with headings, lists and tables, ready to paste into an LLM.
 
-### Documents (5)
+### <img src="https://api.iconify.design/ph:file-text.svg?color=%231E6FE8" width="20" height="20" align="center" alt="Documents" /> Documents (5)
 
 - **SlideShare to PDF.** Every slide at the largest size, assembled into one PDF.
 - **Google Docs export.** Public Docs, Slides and Sheets as PDF, DOCX, PPTX or XLSX.
@@ -456,7 +458,7 @@ All four read the official data export LinkedIn lets you request, on your own ma
 - **Image galleries.** Whole galleries and profiles from 250+ sites with gallery-dl.
 - **Scribd.** Save readable books as PDF using your own session. *planned*
 
-### Images (9)
+### <img src="https://api.iconify.design/ph:images.svg?color=%23E0A800" width="20" height="20" align="center" alt="Images" /> Images (9)
 
 - **Upscale.** Real-ESRGAN on any Vulkan GPU, 2x, 3x or 4x. *beta*
 - **Resize images.** Batch resize by width, height, fit or percent, converting the format if you want.
@@ -468,7 +470,7 @@ All four read the official data export LinkedIn lets you request, on your own ma
 - **Spritesheet.** Slice a sheet into frames, pack frames back with an atlas, or resize a folder by rule.
 - **OCR.** Copy the text out of images and slides. *beta*
 
-### System (10, Windows-only items marked)
+### <img src="https://api.iconify.design/ph:broom.svg?color=%231A9EB5" width="20" height="20" align="center" alt="System" /> System (10, Windows-only items marked)
 
 - **Clean caches.** Temp files, logs and app caches with rules per operating system. You review the list before anything is deleted.
 - **Disk analyzer.** What takes space, as a treemap plus the largest files, with a send-to-trash button.
@@ -481,7 +483,7 @@ All four read the official data export LinkedIn lets you request, on your own ma
 - **Registry cleaner.** Orphaned entries, with a `.reg` backup before removal. Windows. *beta*
 - **Software updater.** Update programs in bulk through winget, Chocolatey and Scoop. Windows. *beta*
 
-### Files (5)
+### <img src="https://api.iconify.design/ph:folder-simple.svg?color=%23A66A24" width="20" height="20" align="center" alt="Files" /> Files (5)
 
 - **Duplicates.** Find identical files by hash and free space safely.
 - **Bulk rename.** Regex, counters and case changes with a preview before applying.
@@ -489,20 +491,20 @@ All four read the official data export LinkedIn lets you request, on your own ma
 - **Find files.** Instant search with Everything on Windows, Spotlight on macOS or fd on Linux.
 - **Keep awake.** Stop the computer from sleeping during long jobs.
 
-### Downloads (2)
+### <img src="https://api.iconify.design/ph:cloud-arrow-down.svg?color=%231E6FE8" width="20" height="20" align="center" alt="Downloads" /> Downloads (2)
 
 - **Accelerated download.** Big files with 16 connections, resume and checksum via aria2.
 - **HLS / DASH manifest.** Paste a `.m3u8` or `.mpd` with Referer and cookie. FFmpeg saves an MP4.
 
-### Automation (1)
+### <img src="https://api.iconify.design/ph:cursor-click.svg?color=%23F28500" width="20" height="20" align="center" alt="Automation" /> Automation (1)
 
 - **Auto clicker.** Click at the exact speed you set, with a global hotkey, limits and random ranges. Windows, macOS and Linux. *beta*
 
-### Phone (1)
+### <img src="https://api.iconify.design/ph:device-mobile.svg?color=%232AA845" width="20" height="20" align="center" alt="Phone" /> Phone (1)
 
 - **Send to phone.** Files, links and text to a paired KDE Connect device.
 
-### AI (6)
+### <img src="https://api.iconify.design/ph:sparkle.svg?color=%233D5BF0" width="20" height="20" align="center" alt="AI" /> AI (6)
 
 - **Compare prices.** The cost of the same model across providers, with prices from LiteLLM and models.dev.
 - **AI spending.** How much OmniGet spent on AI, by day, model and task, from a local ledger.
@@ -511,7 +513,7 @@ All four read the official data export LinkedIn lets you request, on your own ma
 - **API keys.** A local vault for keys and accounts, with a connection test, balance for OpenRouter, DeepSeek, SiliconFlow and New API, and export to Claude Code, Codex, Cherry Studio, opencode or a `.env` file.
 - **MCP server.** OmniGet's tools exposed over the Model Context Protocol on the local bridge, 37 tools behind the same token the extension uses, with ready-made config snippets for Claude Code, Claude Desktop, Cursor, VS Code, Goose and Codex. See [OmniGet for AI agents](#omniget-for-ai-agents-mcp-server-and-claude-code-plugin). *beta*
 
-### CTF and analysis (6)
+### <img src="https://api.iconify.design/ph:sword.svg?color=%236F6F75" width="20" height="20" align="center" alt="CTF and analysis" /> CTF and analysis (6)
 
 Six small offline utilities for capture-the-flag puzzles, forensics homework and "what is this file" moments.
 
@@ -560,11 +562,11 @@ Core plugins are embedded directly into the application binary, eliminating runt
   <img src="assets/readme/marketplace.png" alt="OmniGet Marketplace listing the Courses, Study, Telegram and Convert plugins with version, author, permissions and enable switches" width="900" />
 </p>
 
-### Courses
+### <img src="https://api.iconify.design/ph:graduation-cap.svg?color=%23F28500" width="20" height="20" align="center" alt="Courses" /> Courses
 
 The embedded Courses plugin supports 38 learning platforms, including **Hotmart**, **Udemy**, **Kiwify**, **Rocketseat**, **Coursera**, **Domestika**, **Skillshare**, **Alura**, and **Ebac**. Sign in through a webview inside the app, with saved cookies from the extension, or with account credentials where available. OmniGet lists your purchases, opens the course outline so you can select the sections you want (DRM-protected lectures are skipped and reported), and downloads lessons and attachments with optional continuous numbering. Downloaded courses index into Study automatically.
 
-### Study
+### <img src="https://api.iconify.design/ph:book-open.svg?color=%233D5BF0" width="20" height="20" align="center" alt="Study" /> Study
 
 Study turns the folder of files you downloaded into something you can actually finish.
 
@@ -580,11 +582,11 @@ Study turns the folder of files you downloaded into something you can actually f
 - Progress and achievements. Streaks, daily goals, a year heatmap and local XP with no leaderboard.
 - Music. Your local library with covers, artists and albums, synced lyrics, favorites, history, playlists, genres, transcoding, and browsers for Spotify, SoundCloud and YouTube Music so playlists and likes sit next to your files.
 
-### Telegram
+### <img src="https://cdn.simpleicons.org/telegram/2CA5E0" width="20" height="20" align="center" alt="Telegram" /> Telegram
 
 Sign in with a QR code or your phone number. Browse every channel and group you belong to, filter by photo, video, document or audio, search files, and download individual media or entire chat archives with a progress list. Media downloads are organized into `{download_dir}/OmniGram/{channel_name}/` with sanitized folder names. Videos from channels can be imported straight into the Study library.
 
-### Convert
+### <img src="https://api.iconify.design/ph:arrows-clockwise.svg?color=%232AA845" width="20" height="20" align="center" alt="Convert" /> Convert
 
 FFmpeg conversions with GPU acceleration where the machine has it: container, codec, resolution, bitrate and compression for video and audio, no internet required.
 

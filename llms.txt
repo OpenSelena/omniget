@@ -10,10 +10,10 @@ Plugins: Courses, Study (course player with timestamped notes, PDF/EPUB/CBZ read
 
 ## Key facts
 
-- Name: OmniGet
-- Official Website: https://omniget.nav.bd/
-- Official Repository: https://github.com/OpenSelena/omniget (maintained by OpenSelena; legacy references to tonhowtf/omniget are discontinued and 404)
-- Organization: OpenSelena
+- Name: OmniGet (Community Edition)
+- Community Website: https://omniget.nav.bd/
+- Repository: https://github.com/OpenSelena/omniget (Maintained by Igect under GPL-3.0 · Based on original architecture by tonhowtf)
+- Maintainer: Igect
 - License: GPL-3.0
 - Platforms: Windows, macOS (Apple Silicon and Intel), Linux (x86_64 and ARM64)
 - Cost: free, no account, no ads, no paid tier, no telemetry on what is downloaded
