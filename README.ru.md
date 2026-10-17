@@ -36,7 +36,7 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 </p>
 
 <p align="center">
-  <a href="https://omniget.nav.bd/"><img src="https://img.shields.io/badge/Website-omniget.nav.bd-FF7D38?style=for-the-badge" alt="Официальный сайт" /></a>
+  <a href="https://omniget.nav.bd/"><img src="https://img.shields.io/badge/Website-omniget.nav.bd-FF7D38?style=for-the-badge" alt="Сайт сообщества" /></a>
   <a href="https://github.com/OpenSelena/omniget/releases/latest"><img src="https://img.shields.io/github/v/release/OpenSelena/omniget?style=for-the-badge&label=release&color=F28500" alt="Последний релиз" /></a>
   <a href="https://github.com/OpenSelena/omniget/releases"><img src="https://img.shields.io/github/downloads/OpenSelena/omniget/total?style=for-the-badge&label=downloads&color=1E6FE8" alt="Всего загрузок" /></a>
   <a href="https://github.com/OpenSelena/omniget/stargazers"><img src="https://img.shields.io/github/stars/OpenSelena/omniget?style=for-the-badge&color=FFD426" alt="Звёзды на GitHub" /></a>
@@ -55,8 +55,10 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
   <sub>Бесплатно. Открытый код под GPL-3.0. Без аккаунта, без рекламы, без телеметрии о том, что вы скачиваете. Файлы остаются на вашем компьютере.</sub>
 </p>
 
-> [!NOTE]
-> `OpenSelena/omniget` это форк оригинального OmniGet (`tonhowtf/omniget`). Мы поддерживаем его как альтернативу, пока оригинальные репозитории и загрузки недоступны, и переносим сюда будущие обновления из основного OmniGet. Проект не связан с [@tonhowtf](https://github.com/tonhowtf) (tonho).
+<p align="center">
+  <img src="https://img.shields.io/badge/Дисклеймер-FF7D38" alt="Дисклеймер" height="20" /><br/>
+  <sub>Поддерживается <a href="https://github.com/igect">Igect</a> под GPL-3.0 · На основе оригинальной архитектуры <a href="https://github.com/tonhowtf">tonhowtf</a></sub>
+</p>
 
 <p align="center">
   <img src="assets/readme/home.png" alt="Главный экран OmniGet: вставьте URL, magnet-ссылку или .torrent, и файл окажется в вашей папке" width="900" />
@@ -196,13 +198,13 @@ sudo pacman -S gst-plugins-good gst-plugins-bad gst-libav   # Arch
 
 | Категория | Сайты и форматы |
 |---|---|
-| Онлайн-курсы | Hotmart, Udemy, Kiwify, Rocketseat и Meta-Analysis Academy через плагин Courses. Каждый урок, выбор разделов, вложения, продолжение с места остановки. |
-| Видео и аудио | YouTube (видео, плейлисты, каналы, трансляции с начала, главы, SponsorBlock), Instagram, TikTok, X/Twitter, Reddit, Twitch (VOD, клипы, трансляции), Vimeo, Bluesky, Threads, Pinterest, Douyin |
-| Bilibili, с входом в аккаунт | 4K, HDR, Dolby Vision, Hi-Res без потерь и Dolby Atmos в соответствии с вашей подпиской. Комментарии данмаку в виде XML, ASS или JSON, файлы NFO для Kodi и Jellyfin, свои шаблоны имён, 11 типов URL, включая bangumi, курсы, избранное, «посмотреть позже» и историю |
-| Галереи изображений | Целые галереи и профили с 250+ сайтов через gallery-dl (DeviantArt, Pixiv, ArtStation, Flickr, Tumblr, Imgur, Kemono и другие) |
-| Массово | Вставьте много ссылок или загрузите `.txt`, скачивайте целые сабреддиты, профили Reddit и X, профили Instagram и Pinterest, альбомы Facebook |
-| Файлы и передача | Файлы `.torrent` и magnet-ссылки со встроенным BitTorrent-клиентом, прямые файлы по HTTP, манифесты HLS и DASH и передача от человека к человеку между двумя установками OmniGet по короткому коду-слову |
-| Telegram | Фото, видео, файлы и аудио из любого канала или группы, где вы состоите, через плагин Telegram |
+| <img src="https://api.iconify.design/ph:graduation-cap.svg?color=%23F28500" width="18" height="18" align="center" alt="Онлайн-курсы" /> Онлайн-курсы | Hotmart, Udemy, Kiwify, Rocketseat и Meta-Analysis Academy через плагин Courses. Каждый урок, выбор разделов, вложения, продолжение с места остановки. |
+| <img src="https://api.iconify.design/ph:film-slate.svg?color=%238E3FD8" width="18" height="18" align="center" alt="Видео и аудио" /> Видео и аудио | YouTube (видео, плейлисты, каналы, трансляции с начала, главы, SponsorBlock), Instagram, TikTok, X/Twitter, Reddit, Twitch (VOD, клипы, трансляции), Vimeo, Bluesky, Threads, Pinterest, Douyin |
+| <img src="https://cdn.simpleicons.org/bilibili/00A1D6" width="18" height="18" align="center" alt="Bilibili" /> Bilibili, с входом в аккаунт | 4K, HDR, Dolby Vision, Hi-Res без потерь и Dolby Atmos в соответствии с вашей подпиской. Комментарии данмаку в виде XML, ASS или JSON, файлы NFO для Kodi и Jellyfin, свои шаблоны имён, 11 типов URL, включая bangumi, курсы, избранное, «посмотреть позже» и историю |
+| <img src="https://api.iconify.design/ph:images.svg?color=%23E0A800" width="18" height="18" align="center" alt="Галереи изображений" /> Галереи изображений | Целые галереи и профили с 250+ сайтов через gallery-dl (DeviantArt, Pixiv, ArtStation, Flickr, Tumblr, Imgur, Kemono и другие) |
+| <img src="https://api.iconify.design/ph:stack.svg?color=%23FFB340" width="18" height="18" align="center" alt="Массово" /> Массово | Вставьте много ссылок или загрузите `.txt`, скачивайте целые сабреддиты, профили Reddit и X, профили Instagram и Pinterest, альбомы Facebook |
+| <img src="https://api.iconify.design/ph:folder-simple.svg?color=%23A66A24" width="18" height="18" align="center" alt="Файлы и передача" /> Файлы и передача | Файлы `.torrent` и magnet-ссылки со встроенным BitTorrent-клиентом, прямые файлы по HTTP, манифесты HLS и DASH и передача от человека к человеку между двумя установками OmniGet по короткому коду-слову |
+| <img src="https://cdn.simpleicons.org/telegram/2CA5E0" width="18" height="18" align="center" alt="Telegram" /> Telegram | Фото, видео, файлы и аудио из любого канала или группы, где вы состоите, через плагин Telegram |
 
 Настройки, которые задаются один раз: качество по умолчанию, формат только аудио (MP3, M4A, Opus, FLAC или WAV), языки и формат субтитров (SRT, VTT, ASS, встроенные или отдельным файлом), встраивание обложки и метаданных, шаблон имени файла, папки по платформам, пропуск существующих файлов, разбиение по главам, ограничение скорости, число одновременных загрузок, прокси. Правила отправляют канал или хост в выбранную папку и качество, не спрашивая снова. Отслеживаемые каналы проверяются в фоне и могут скачивать новые ролики автоматически с уведомлением в трее.
 
@@ -279,7 +281,7 @@ Firefox: **Настройки → Плагины → Расширение для
   </tr>
 </table>
 
-### YouTube (11)
+### <img src="https://cdn.simpleicons.org/youtube/FF0000" width="20" height="20" align="center" alt="YouTube" /> YouTube (11)
 
 - **Скачать видео.** Вставьте ссылку и выберите качество, формат и субтитры. Тот же движок, что и на главном экране.
 - **Метаданные.** Сохраните информацию, описание и обложку без самого видео.
@@ -293,7 +295,7 @@ Firefox: **Настройки → Плагины → Расширение для
 - **Настоящая обложка.** Кадры на отметках 25, 50 и 75 %, которые уже есть на CDN, вместо кликбейтной обложки.
 - **Принудительно H.264.** Переключатель в расширении для браузера, который держит YouTube на H.264 вместо VP9 и AV1, — для машин, которые тормозят на новых кодеках.
 
-### Речь и субтитры (8)
+### <img src="https://api.iconify.design/ph:waveform.svg?color=%23FF5E7A" width="20" height="20" align="center" alt="Речь и субтитры" /> Речь и субтитры (8)
 
 - **Распознать речь.** Аудио или видео в субтитры через whisper.cpp, офлайн. Модели скачиваются по запросу, ускорение Metal на macOS.
 - **Текст в речь.** Естественные голоса из Microsoft Edge, бесплатно, с синхронизированным файлом субтитров.
@@ -302,7 +304,7 @@ Firefox: **Настройки → Плагины → Расширение для
 - **Клонирование голоса**, **Проектирование голоса** и **Выделение вокала** через установленный на вашей машине VoiceStudio. *бета*
 - **Диктовка.** Нажмите глобальную комбинацию, говорите — и whisper напечатает текст там, где стоит курсор. *бета*
 
-### Видеомонтаж (14)
+### <img src="https://api.iconify.design/ph:film-slate.svg?color=%238E3FD8" width="20" height="20" align="center" alt="Видеомонтаж" /> Видеомонтаж (14)
 
 - **Вырезать клип.** Выберите видео на диске и вырежьте фрагмент. Результат попадёт в очередь загрузок.
 - **Конвертировать.** Смените контейнер, кодек или разрешение либо сожмите файл через плагин Convert.
@@ -318,12 +320,12 @@ Firefox: **Настройки → Плагины → Расширение для
 - **Запись экрана.** Экран и системный звук через FFmpeg, плюс буфер повтора, сохраняющий то, что только что произошло. *бета*
 - **Редактор таймлайна.** *в планах*
 
-### Аудио (2)
+### <img src="https://api.iconify.design/ph:speaker-high.svg?color=%23E0203F" width="20" height="20" align="center" alt="Аудио" /> Аудио (2)
 
 - **Нормализация громкости.** Двухпроходный EBU R128 — звук попадёт на уровень, которого ждут стриминг, подкасты или вещание.
 - **Подавление шума.** Шипение, шум вентилятора и комнаты убираются из записи — ничего скачивать не нужно.
 
-### Instagram (24)
+### <img src="https://cdn.simpleicons.org/instagram/E4405F" width="20" height="20" align="center" alt="Instagram" /> Instagram (24)
 
 Всё это работает на вашей собственной сессии Instagram, которую захватывает расширение для браузера, поэтому истории, близкие друзья и ваши списки доступны. Чтение идёт с паузами, а действия записи останавливаются при первом признаке ограничения.
 
@@ -352,7 +354,7 @@ Firefox: **Настройки → Плагины → Расширение для
 - **Публикация.** Фото, карусель, рилс, видео или история через вашу сессию или официальный Graph API. *бета*
 - **Планирование постов.** Поставьте посты в очередь на дату и время. OmniGet публикует их, пока открыт. *бета*
 
-### X / Twitter (10)
+### <img src="https://cdn.simpleicons.org/x/000000/ffffff" width="20" height="20" align="center" alt="X" /> X / Twitter (10)
 
 Публичные данные приходят через API FxTwitter без входа. Всё приватное (закладки, ваши подписки, Grok в X) использует вашу сессию X из менеджера cookies.
 
@@ -367,18 +369,18 @@ Firefox: **Настройки → Плагины → Расширение для
 - **Ваш архив X.** Откройте ZIP-архив данных офлайн: статистика, топ-посты, лайки и списки подписок.
 - **Grok.** Спросите Grok с поиском по X в реальном времени или получите резюме треда через xAI API или вашу сессию X. *бета*
 
-### Facebook (2)
+### <img src="https://cdn.simpleicons.org/facebook/1877F2" width="20" height="20" align="center" alt="Facebook" /> Facebook (2)
 
 - **Загрузка альбома.** Вставьте ссылку на альбом — и каждое фото и видео из него окажется в одной папке.
 - **Скачать видео.** Одно видео или рилс прямо из поля для ссылки.
 
-### Reddit (3)
+### <img src="https://cdn.simpleicons.org/reddit/FF4500" width="20" height="20" align="center" alt="Reddit" /> Reddit (3)
 
 - **Скачивание поста.** Видео со звуком из v.redd.it, галереи, одиночные изображения и внешние ссылки.
 - **Архивация треда.** Пост и каждый комментарий в виде Markdown, просматриваемой HTML-страницы и исходного JSON — пока они ещё на месте.
 - **Чтение экспорта данных.** Официальный ZIP-архив данных Reddit превращается в сводку, которую действительно можно прочитать.
 
-### Pinterest (10)
+### <img src="https://cdn.simpleicons.org/pinterest/BD081C" width="20" height="20" align="center" alt="Pinterest" /> Pinterest (10)
 
 Работает без входа для всего публичного. Cookies нужны только для секретных досок и для удаления из сохранённого.
 
@@ -393,30 +395,30 @@ Firefox: **Настройки → Плагины → Расширение для
 - **Офлайн-галерея, PDF, CSV.** Доска как HTML-галерея с поиском, PDF-мудборд или таблица.
 - **Идеи ключевых слов.** Подсказки поиска, уточнения и слова, которые используют топ-пины.
 
-### Twitch (2)
+### <img src="https://cdn.simpleicons.org/twitch/9146FF" width="20" height="20" align="center" alt="Twitch" /> Twitch (2)
 
 - **Пакет эмоутов.** Все эмоуты и значки канала из Twitch, BTTV, FFZ и 7TV, с сортировкой по провайдеру.
 - **Чат VOD.** Вся запись чата VOD или клипа в JSON, CSV и субтитрах, с отмеченными самыми оживлёнными минутами.
 
-### Bilibili (2)
+### <img src="https://cdn.simpleicons.org/bilibili/00A1D6" width="20" height="20" align="center" alt="Bilibili" /> Bilibili (2)
 
 Загрузка видео с Bilibili живёт на главном экране. Эти два инструмента — про плавающие комментарии.
 
 - **Экспорт данмаку.** Данмаку видео в XML, ASS или JSON без скачивания самого видео.
 - **Вшивание данмаку.** Нанесите дорожку комментариев на локальный клип и получите MP4, которым можно поделиться.
 
-### Spotify (2)
+### <img src="https://cdn.simpleicons.org/spotify/1DB954" width="20" height="20" align="center" alt="Spotify" /> Spotify (2)
 
 - **Темы и цвета.** Настройте клиент Spotify темами Spicetify. *бета*
 - **Расширения.** Устанавливайте расширения Spicetify и пользовательские приложения из его Marketplace. *бета*
 
-### Музыка (3)
+### <img src="https://api.iconify.design/ph:music-notes.svg?color=%23FF5E7A" width="20" height="20" align="center" alt="Музыка" /> Музыка (3)
 
 - **Плейлист в M3U.** Сопоставьте экспортированный плейлист со своими аудиофайлами и запишите `.m3u8` и `.pls` для любого локального плеера.
 - **Синхронизированные тексты.** Загрузите тексты песен из LRCLIB и сохраните `.lrc` рядом с каждым треком.
 - **История Spotify.** Откройте полный экспорт своих данных и посмотрите всё, что Wrapped оставляет за кадром.
 
-### LinkedIn (4)
+### <img src="https://api.iconify.design/simple-icons:linkedin.svg?color=%230A66C2" width="20" height="20" align="center" alt="LinkedIn" /> LinkedIn (4)
 
 Все четыре читают официальный экспорт данных, который LinkedIn даёт запросить, на вашем компьютере. Никакого входа.
 
@@ -425,13 +427,13 @@ Firefox: **Настройки → Плагины → Расширение для
 - **Сообщения.** Просмотрите историю переписки и сохраните её как локальную страницу.
 - **Оценка профиля.** Офлайн-проверка полноты профиля со списком того, чего не хватает.
 
-### Игры (3)
+### <img src="https://api.iconify.design/ph:game-controller.svg?color=%233D5BF0" width="20" height="20" align="center" alt="Игры" /> Игры (3)
 
 - **Альбом Switch.** Импортируйте скриншоты и клипы с SD-карты Switch — с именами по игре и дате.
 - **Организатор клипов.** Разложите записи Game Bar, ShadowPlay, OBS и Steam по папкам для каждой игры.
 - **Запустится на Linux?** Уровень ProtonDB для одной игры или всей вашей библиотеки Steam.
 
-### PDF (13)
+### <img src="https://api.iconify.design/ph:file-pdf.svg?color=%23E0303A" width="20" height="20" align="center" alt="PDF" /> PDF (13)
 
 - **Объединить.** Соедините несколько PDF в один в нужном вам порядке.
 - **Разделить.** Извлеките страницы или разбейте PDF на части.
@@ -447,7 +449,7 @@ Firefox: **Настройки → Плагины → Расширение для
 - **Безопасный PDF.** Пересоберите PDF из пикселей, удалив скрипты и формы.
 - **PDF в Markdown.** Чистый Markdown с заголовками, списками и таблицами — готовый к вставке в LLM.
 
-### Документы (5)
+### <img src="https://api.iconify.design/ph:file-text.svg?color=%231E6FE8" width="20" height="20" align="center" alt="Документы" /> Документы (5)
 
 - **SlideShare в PDF.** Каждый слайд в максимальном размере, собранный в один PDF.
 - **Экспорт Google Docs.** Публичные Docs, Slides и Sheets в формате PDF, DOCX, PPTX или XLSX.
@@ -455,7 +457,7 @@ Firefox: **Настройки → Плагины → Расширение для
 - **Галереи изображений.** Целые галереи и профили с 250+ сайтов с помощью gallery-dl.
 - **Scribd.** Сохраняйте читаемые книги как PDF через вашу сессию. *в планах*
 
-### Изображения (9)
+### <img src="https://api.iconify.design/ph:images.svg?color=%23E0A800" width="20" height="20" align="center" alt="Изображения" /> Изображения (9)
 
 - **Увеличение.** Real-ESRGAN на любом GPU с поддержкой Vulkan, 2x, 3x или 4x. *бета*
 - **Изменение размера.** Пакетно по ширине, высоте, вписыванию или процентам, при желании со сменой формата.
@@ -467,7 +469,7 @@ Firefox: **Настройки → Плагины → Расширение для
 - **Спрайт-лист.** Нарежьте лист на кадры, соберите кадры обратно вместе с атласом или измените размер папки по правилу.
 - **OCR.** Скопируйте текст из изображений и слайдов. *бета*
 
-### Система (10, пункты только для Windows отмечены)
+### <img src="https://api.iconify.design/ph:broom.svg?color=%231A9EB5" width="20" height="20" align="center" alt="Система" /> Система (10, пункты только для Windows отмечены)
 
 - **Очистка кэшей.** Временные файлы, логи и кэши приложений по правилам для каждой операционной системы. Вы просматриваете список, прежде чем что-то удалится.
 - **Анализ диска.** Что занимает место: карта-дерево и самые большие файлы, с кнопкой отправки в корзину.
@@ -480,7 +482,7 @@ Firefox: **Настройки → Плагины → Расширение для
 - **Очистка реестра.** Осиротевшие записи, с резервной копией `.reg` перед удалением. Windows. *бета*
 - **Обновление ПО.** Обновляйте программы пакетно через winget, Chocolatey и Scoop. Windows. *бета*
 
-### Файлы (5)
+### <img src="https://api.iconify.design/ph:folder-simple.svg?color=%23A66A24" width="20" height="20" align="center" alt="Файлы" /> Файлы (5)
 
 - **Дубликаты.** Найдите одинаковые файлы по хешу и безопасно освободите место.
 - **Массовое переименование.** Регулярные выражения, счётчики и смена регистра с предпросмотром перед применением.
@@ -488,20 +490,20 @@ Firefox: **Настройки → Плагины → Расширение для
 - **Поиск файлов.** Мгновенный поиск через Everything на Windows, Spotlight на macOS или fd на Linux.
 - **Предотвращение сна.** Не давайте компьютеру уснуть во время долгих задач.
 
-### Загрузки (2)
+### <img src="https://api.iconify.design/ph:cloud-arrow-down.svg?color=%231E6FE8" width="20" height="20" align="center" alt="Загрузки" /> Загрузки (2)
 
 - **Ускоренная загрузка.** Большие файлы в 16 соединений, докачка и контрольная сумма через aria2.
 - **Манифест HLS / DASH.** Вставьте `.m3u8` или `.mpd` с Referer и cookie. FFmpeg сохранит MP4.
 
-### Автоматизация (1)
+### <img src="https://api.iconify.design/ph:cursor-click.svg?color=%23F28500" width="20" height="20" align="center" alt="Автоматизация" /> Автоматизация (1)
 
 - **Авто-кликер.** Кликайте с точно заданной скоростью, с глобальной горячей клавишей, лимитами и случайными диапазонами. Windows, macOS и Linux. *бета*
 
-### Телефон (1)
+### <img src="https://api.iconify.design/ph:device-mobile.svg?color=%232AA845" width="20" height="20" align="center" alt="Телефон" /> Телефон (1)
 
 - **Отправить на телефон.** Файлы, ссылки и текст на сопряжённое устройство KDE Connect.
 
-### ИИ (6)
+### <img src="https://api.iconify.design/ph:sparkle.svg?color=%233D5BF0" width="20" height="20" align="center" alt="ИИ" /> ИИ (6)
 
 - **Сравнение цен.** Стоимость одной и той же модели у разных провайдеров, с ценами из LiteLLM и models.dev.
 - **Расходы на ИИ.** Сколько OmniGet потратил на ИИ — по дням, моделям и задачам, из локального журнала.
@@ -510,7 +512,7 @@ Firefox: **Настройки → Плагины → Расширение для
 - **API-ключи.** Локальное хранилище ключей и аккаунтов с проверкой соединения, балансом для OpenRouter, DeepSeek, SiliconFlow и New API и экспортом в Claude Code, Codex, Cherry Studio, opencode или файл `.env`.
 - **MCP-сервер.** Инструменты OmniGet, открытые по Model Context Protocol через локальный мост: 37 инструментов за тем же токеном, что использует расширение, с готовыми фрагментами конфигурации для Claude Code, Claude Desktop, Cursor, VS Code, Goose и Codex. Смотрите [OmniGet для ИИ-агентов](#omniget-для-ии-агентов-mcp-сервер-и-плагин-для-claude-code). *бета*
 
-### CTF и анализ (6)
+### <img src="https://api.iconify.design/ph:sword.svg?color=%236F6F75" width="20" height="20" align="center" alt="CTF и анализ" /> CTF и анализ (6)
 
 Шесть небольших офлайн-утилит для задач capture-the-flag, домашних работ по форензике и моментов «что это за файл».
 
@@ -559,11 +561,11 @@ Firefox: **Настройки → Плагины → Расширение для
   <img src="assets/readme/marketplace.png" alt="Marketplace OmniGet со списком плагинов Courses, Study, Telegram и Convert: версия, автор, разрешения и переключатели" width="900" />
 </p>
 
-### Courses
+### <img src="https://api.iconify.design/ph:graduation-cap.svg?color=%23F28500" width="20" height="20" align="center" alt="Courses" /> Courses
 
 Войдите в **Hotmart**, **Udemy**, **Kiwify**, **Rocketseat** или **Meta-Analysis Academy** через окно браузера внутри приложения, с cookies, сохранёнными расширением, или по email и паролю там, где платформа это позволяет. OmniGet покажет ваши покупки, откроет оглавление курса, чтобы отметить нужные разделы (с подсказкой, сколько уроков защищено DRM и будет пропущено), и скачает все уроки и вложения, при желании со сквозной нумерацией. Hotmart использует актуальный вход через OIDC, так что всё работает после смены авторизации в 2026 году; бесплатные курсы и курсы, выдаваемые вне Hotmart Club, тоже показываются в списке. Скачанные курсы автоматически появляются в Study.
 
-### Study
+### <img src="https://api.iconify.design/ph:book-open.svg?color=%233D5BF0" width="20" height="20" align="center" alt="Study" /> Study
 
 Study превращает папку скачанных файлов в то, что действительно можно закончить.
 
@@ -579,11 +581,11 @@ Study превращает папку скачанных файлов в то, �
 - Прогресс и достижения. Серии, дневные цели, годовая тепловая карта и локальный XP без таблицы лидеров.
 - Музыка. Локальная библиотека с обложками, исполнителями и альбомами, синхронизированные тексты, избранное, история, плейлисты, жанры, транскодирование и браузеры Spotify, SoundCloud и YouTube Music, чтобы плейлисты и лайки лежали рядом с вашими файлами.
 
-### Telegram
+### <img src="https://cdn.simpleicons.org/telegram/2CA5E0" width="20" height="20" align="center" alt="Telegram" /> Telegram
 
 Войдите по QR-коду или номеру телефона. Просматривайте все каналы и группы, где вы состоите, фильтруйте по фото, видео, документам или аудио, ищите файлы и скачивайте один элемент или весь чат со списком прогресса. Видео из каналов можно импортировать прямо в библиотеку Study.
 
-### Convert
+### <img src="https://api.iconify.design/ph:arrows-clockwise.svg?color=%232AA845" width="20" height="20" align="center" alt="Convert" /> Convert
 
 Конвертация через FFmpeg с GPU-ускорением, если оно есть: контейнер, кодек, разрешение, битрейт и сжатие видео и аудио, без интернета.
 

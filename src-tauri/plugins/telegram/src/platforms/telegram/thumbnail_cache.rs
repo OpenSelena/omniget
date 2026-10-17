@@ -299,10 +299,9 @@ async fn fetch_chat_photo_id(
                         }
                     }
                 }
-                if let tl::enums::UserFull::Full(full_info) = &user_full.full_user {
-                    if let Some(tl::enums::Photo::Photo(photo)) = &full_info.profile_photo {
-                        return Ok(photo.id);
-                    }
+                let tl::enums::UserFull::Full(full_info) = &user_full.full_user;
+                if let Some(tl::enums::Photo::Photo(photo)) = &full_info.profile_photo {
+                    return Ok(photo.id);
                 }
             }
 

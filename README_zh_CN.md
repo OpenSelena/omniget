@@ -26,7 +26,7 @@ spicetify, 下载管理器, tauri, rust, svelte.
 </p>
 
 <p align="center">
-  <a href="https://omniget.nav.bd/"><img src="https://img.shields.io/badge/Website-omniget.nav.bd-FF7D38?style=for-the-badge" alt="官方网站" /></a>
+  <a href="https://omniget.nav.bd/"><img src="https://img.shields.io/badge/Website-omniget.nav.bd-FF7D38?style=for-the-badge" alt="社区网站" /></a>
   <a href="https://github.com/OpenSelena/omniget/releases/latest"><img src="https://img.shields.io/github/v/release/OpenSelena/omniget?style=for-the-badge&label=release&color=F28500" alt="最新版本" /></a>
   <a href="https://github.com/OpenSelena/omniget/releases"><img src="https://img.shields.io/github/downloads/OpenSelena/omniget/total?style=for-the-badge&label=downloads&color=1E6FE8" alt="总下载量" /></a>
   <a href="https://github.com/OpenSelena/omniget/stargazers"><img src="https://img.shields.io/github/stars/OpenSelena/omniget?style=for-the-badge&color=FFD426" alt="GitHub Star 数" /></a>
@@ -45,8 +45,10 @@ spicetify, 下载管理器, tauri, rust, svelte.
   <sub>免费。GPL-3.0 开源。不用注册账号，没有广告，不会上报你下载了什么。文件只留在你的电脑上。</sub>
 </p>
 
-> [!NOTE]
-> `OpenSelena/omniget` 是原版 OmniGet（`tonhowtf/omniget`）的分支（Fork）。由于原版仓库与下载目前已无法访问，我们维护此仓库作为替代方案，并会同步应用主项目 OmniGet 未来的更新。本项目与 [@tonhowtf](https://github.com/tonhowtf)（tonho）无关。
+<p align="center">
+  <img src="https://img.shields.io/badge/免责声明-FF7D38" alt="免责声明" height="20" /><br/>
+  <sub>由 <a href="https://github.com/igect">Igect</a> 在 GPL-3.0 协议下维护 · 基于 <a href="https://github.com/tonhowtf">tonhowtf</a> 的原版架构</sub>
+</p>
 
 <p align="center">
   <img src="assets/readme/home.png" alt="OmniGet 主界面：粘贴 URL、磁力链接或 .torrent，文件直接落到你的文件夹" width="900" />
@@ -173,13 +175,13 @@ OmniGet 为最常用的平台写了原生提取器，其余的交给 [yt-dlp](ht
 
 | 类别 | 网站与格式 |
 |---|---|
-| 在线课程 | 通过 Courses 插件支持 Hotmart、Udemy、Kiwify、Rocketseat 和 Meta-Analysis Academy。全部课时、章节选择、附件、从上次位置继续。 |
-| 视频与音频 | YouTube（视频、播放列表、频道、从头录直播、章节、SponsorBlock）、Instagram、TikTok、X/Twitter、Reddit、Twitch（录像、剪辑、直播）、Vimeo、Bluesky、Threads、Pinterest、抖音 |
-| 哔哩哔哩，登录后 | 按你的会员等级提供 4K、HDR、杜比视界、Hi-Res 无损和杜比全景声。弹幕导出为 XML、ASS 或 JSON，为 Kodi 和 Jellyfin 生成 NFO，自定义命名模板，支持 11 种链接类型，包括番剧、课程、收藏夹、稍后再看和历史记录 |
-| 图片画廊 | 通过 gallery-dl 下载 250+ 网站的整个画廊和主页（DeviantArt、Pixiv、ArtStation、Flickr、Tumblr、Imgur、Kemono 等） |
-| 批量 | 粘贴多条链接或载入 `.txt`，下载整个 subreddit、Reddit 和 X 的主页、Instagram 和 Pinterest 的主页 |
-| 文件与传输 | 用内置 BitTorrent 客户端下载 `.torrent` 和磁力链接，HTTP 直链，HLS 和 DASH 清单，以及两台装了 OmniGet 的电脑之间用一串短口令互传文件 |
-| Telegram | 通过 Telegram 插件下载你所在的任何频道或群组里的照片、视频、文件和音频 |
+| <img src="https://api.iconify.design/ph:graduation-cap.svg?color=%23F28500" width="18" height="18" align="center" alt="在线课程" /> 在线课程 | 通过 Courses 插件支持 Hotmart、Udemy、Kiwify、Rocketseat 和 Meta-Analysis Academy。全部课时、章节选择、附件、从上次位置继续。 |
+| <img src="https://api.iconify.design/ph:film-slate.svg?color=%238E3FD8" width="18" height="18" align="center" alt="视频与音频" /> 视频与音频 | YouTube（视频、播放列表、频道、从头录直播、章节、SponsorBlock）、Instagram、TikTok、X/Twitter、Reddit、Twitch（录像、剪辑、直播）、Vimeo、Bluesky、Threads、Pinterest、抖音 |
+| <img src="https://cdn.simpleicons.org/bilibili/00A1D6" width="18" height="18" align="center" alt="哔哩哔哩" /> 哔哩哔哩，登录后 | 按你的会员等级提供 4K、HDR、杜比视界、Hi-Res 无损和杜比全景声。弹幕导出为 XML、ASS 或 JSON，为 Kodi 和 Jellyfin 生成 NFO，自定义命名模板，支持 11 种链接类型，包括番剧、课程、收藏夹、稍后再看和历史记录 |
+| <img src="https://api.iconify.design/ph:images.svg?color=%23E0A800" width="18" height="18" align="center" alt="图片画廊" /> 图片画廊 | 通过 gallery-dl 下载 250+ 网站的整个画廊和主页（DeviantArt、Pixiv、ArtStation、Flickr、Tumblr、Imgur、Kemono 等） |
+| <img src="https://api.iconify.design/ph:stack.svg?color=%23FFB340" width="18" height="18" align="center" alt="批量" /> 批量 | 粘贴多条链接或载入 `.txt`，下载整个 subreddit、Reddit 和 X 的主页、Instagram 和 Pinterest 的主页 |
+| <img src="https://api.iconify.design/ph:folder-simple.svg?color=%23A66A24" width="18" height="18" align="center" alt="文件与传输" /> 文件与传输 | 用内置 BitTorrent 客户端下载 `.torrent` 和磁力链接，HTTP 直链，HLS 和 DASH 清单，以及两台装了 OmniGet 的电脑之间用一串短口令互传文件 |
+| <img src="https://cdn.simpleicons.org/telegram/2CA5E0" width="18" height="18" align="center" alt="Telegram" /> Telegram | 通过 Telegram 插件下载你所在的任何频道或群组里的照片、视频、文件和音频 |
 
 设置一次就不用再管的选项：默认清晰度、纯音频格式（MP3、M4A、Opus、FLAC 或 WAV）、字幕语言和格式（SRT、VTT、ASS，内嵌或外挂）、封面和元数据嵌入、文件名模板、按平台分文件夹、跳过已有文件、按章节切分、限速、并发数、代理。规则可以把某个频道或域名固定送到指定文件夹和清晰度，不再每次询问。关注的频道会在后台检查，可以自动下载新视频并在托盘通知。
 
@@ -246,7 +248,7 @@ Tools 是 OmniGet 里长到下载之外的那部分。每个方块是一项工�
   </tr>
 </table>
 
-### YouTube（11）
+### <img src="https://cdn.simpleicons.org/youtube/FF0000" width="20" height="20" align="center" alt="YouTube" /> YouTube（11）
 
 - **下载视频。** 粘贴链接，选择清晰度、格式和字幕。和主界面用同一个引擎。
 - **元数据。** 只保存信息、简介和封面，不下视频。
@@ -260,7 +262,7 @@ Tools 是 OmniGet 里长到下载之外的那部分。每个方块是一项工�
 - **真实截图。** CDN 已有的 25%、50%、75% 位置画面帖，而不是标题党封面。
 - **强制 H.264。** 浏览器扩展里的一个开关，让 YouTube 保持使用 H.264 而不是 VP9 和 AV1，给新编码播放卡顿的机器用。
 
-### 语音与字幕（8）
+### <img src="https://api.iconify.design/ph:waveform.svg?color=%23FF5E7A" width="20" height="20" align="center" alt="语音与字幕" /> 语音与字幕（8）
 
 - **转写。** 用 whisper.cpp 离线把音频或视频转成字幕。模型按需下载，macOS 上用 Metal 加速。
 - **文字转语音。** 微软 Edge 的自然语音，免费，附带同步字幕文件。
@@ -269,7 +271,7 @@ Tools 是 OmniGet 里长到下载之外的那部分。每个方块是一项工�
 - **声音克隆**、**声音设计** 和 **人声分离**，通过本机安装的 VoiceStudio 完成。*beta*
 - **听写。** 按下全局快捷键说话，whisper 把文字直接输入到光标所在处。*beta*
 
-### 视频编辑（6）
+### <img src="https://api.iconify.design/ph:film-slate.svg?color=%238E3FD8" width="20" height="20" align="center" alt="视频编辑" /> 视频编辑（6）
 
 - **剪片段。** 选一个本地视频，剪出一段。结果进入下载队列。
 - **转换。** 通过 Convert 插件更换容器、编码、分辨率或压缩。
@@ -277,7 +279,7 @@ Tools 是 OmniGet 里长到下载之外的那部分。每个方块是一项工�
 - **录屏。** 通过 FFmpeg 录制屏幕和系统声音，带回放缓冲，随时保存刚刚发生的片段。*beta*
 - **时间线编辑器。** *计划中*
 
-### Instagram（24）
+### <img src="https://cdn.simpleicons.org/instagram/E4405F" width="20" height="20" align="center" alt="Instagram" /> Instagram（24）
 
 这些工具全部使用扩展捕获的你自己的 Instagram 会话，所以快拍、密友和你自己的名单都能用。读取操作有节奏控制，写操作在出现限流迹象时立即停止。
 
@@ -306,7 +308,7 @@ Tools 是 OmniGet 里长到下载之外的那部分。每个方块是一项工�
 - **发布。** 通过你的会话或官方 Graph API 发布照片、多图、Reel、视频或快拍。*beta*
 - **定时发布。** 按日期和时间排队发帖，OmniGet 开着的时候自动发布。*beta*
 
-### X / Twitter（10）
+### <img src="https://cdn.simpleicons.org/x/000000/ffffff" width="20" height="20" align="center" alt="X" /> X / Twitter（10）
 
 公开数据通过 FxTwitter API 获取，无需登录。任何私密内容（书签、你的关注、X 里的 Grok）使用 Cookie 管理器里你自己的 X 会话。
 
@@ -321,7 +323,7 @@ Tools 是 OmniGet 里长到下载之外的那部分。每个方块是一项工�
 - **你的 X 存档。** 离线打开数据压缩包：统计、热门帖子、点赞和关注名单。
 - **Grok。** 用 X 实时搜索向 Grok 提问，或总结一条推文串，通过 xAI API 或你的 X 会话。*beta*
 
-### Pinterest（10）
+### <img src="https://cdn.simpleicons.org/pinterest/BD081C" width="20" height="20" align="center" alt="Pinterest" /> Pinterest（10）
 
 公开内容无需登录。只有私密画板和取消收藏需要 Cookie。
 
@@ -336,12 +338,12 @@ Tools 是 OmniGet 里长到下载之外的那部分。每个方块是一项工�
 - **离线画廊、PDF、CSV。** 把画板做成可搜索的 HTML 画廊、PDF 情绪板或表格。
 - **关键词灵感。** 搜索建议、细化词，以及热门 Pin 使用的词。
 
-### Spotify（2）
+### <img src="https://cdn.simpleicons.org/spotify/1DB954" width="20" height="20" align="center" alt="Spotify" /> Spotify（2）
 
 - **主题与配色。** 用 Spicetify 主题定制 Spotify 客户端。*beta*
 - **扩展。** 从 Spicetify Marketplace 安装扩展和自定义应用。*beta*
 
-### PDF（6）
+### <img src="https://api.iconify.design/ph:file-pdf.svg?color=%23E0303A" width="20" height="20" align="center" alt="PDF" /> PDF（6）
 
 - **合并。** 按你选的顺序把多个 PDF 合成一个。
 - **拆分。** 提取页面，或把 PDF 拆成几份。
@@ -350,7 +352,7 @@ Tools 是 OmniGet 里长到下载之外的那部分。每个方块是一项工�
 - **OCR。** 让扫描版 PDF 可以搜索。*beta*
 - **安全 PDF。** 从像素重建 PDF，去掉脚本和表单。
 
-### 文档（5）
+### <img src="https://api.iconify.design/ph:file-text.svg?color=%231E6FE8" width="20" height="20" align="center" alt="文档" /> 文档（5）
 
 - **SlideShare 转 PDF。** 每一页以最大尺寸抓取，合成一个 PDF。
 - **Google 文档导出。** 公开的 Docs、Slides、Sheets 导出为 PDF、DOCX、PPTX 或 XLSX。
@@ -358,29 +360,29 @@ Tools 是 OmniGet 里长到下载之外的那部分。每个方块是一项工�
 - **图片画廊。** 通过 gallery-dl 下载 250+ 网站的整个画廊和主页。
 - **Scribd。** 用你自己的会话把可阅读的书存成 PDF。*计划中*
 
-### 图片（3）
+### <img src="https://api.iconify.design/ph:images.svg?color=%23E0A800" width="20" height="20" align="center" alt="图片" /> 图片（3）
 
 - **超分放大。** 在任何 Vulkan GPU 上用 Real-ESRGAN 放大 2 倍、3 倍或 4 倍。*beta*
 - **批量缩放。** 按宽、高、适配或百分比批量缩放，可顺带转换格式。
 - **OCR。** 从图片和幻灯片里把文字复制出来。*beta*
 
-### 文件（4）
+### <img src="https://api.iconify.design/ph:folder-simple.svg?color=%23A66A24" width="20" height="20" align="center" alt="文件" /> 文件（4）
 
 - **重复文件。** 按哈希找出完全相同的文件，安全释放空间。
 - **批量重命名。** 正则、计数器和大小写转换，应用前有预览。
 - **查找文件。** 即时搜索：Windows 上用 Everything，macOS 上用 Spotlight，Linux 上用 fd。
 - **保持唤醒。** 长任务期间阻止电脑休眠。
 
-### 下载（2）
+### <img src="https://api.iconify.design/ph:cloud-arrow-down.svg?color=%231E6FE8" width="20" height="20" align="center" alt="下载" /> 下载（2）
 
 - **加速下载。** 用 aria2 以 16 个连接下载大文件，支持续传和校验。
 - **HLS / DASH 清单。** 粘贴 `.m3u8` 或 `.mpd`，附上 Referer 和 Cookie，FFmpeg 保存为 MP4。
 
-### 手机（1）
+### <img src="https://api.iconify.design/ph:device-mobile.svg?color=%232AA845" width="20" height="20" align="center" alt="手机" /> 手机（1）
 
 - **发送到手机。** 把文件、链接和文字发到已配对的 KDE Connect 设备。
 
-### 系统（9，仅 Windows 的项目已标注）
+### <img src="https://api.iconify.design/ph:broom.svg?color=%231A9EB5" width="20" height="20" align="center" alt="系统" /> 系统（9，仅 Windows 的项目已标注）
 
 - **清理缓存。** 按各系统的规则清理临时文件、日志和应用缓存。删除前先给你看清单。
 - **磁盘分析。** 用树状图和最大文件列表看清空间去哪了，一键移到废纸篓。
@@ -392,11 +394,11 @@ Tools 是 OmniGet 里长到下载之外的那部分。每个方块是一项工�
 - **注册表清理。** 清理孤立项，删除前先备份 `.reg`。Windows。*beta*
 - **软件更新器。** 通过 winget、Chocolatey 和 Scoop 批量更新程序。Windows。*beta*
 
-### 自动化（1）
+### <img src="https://api.iconify.design/ph:cursor-click.svg?color=%23F28500" width="20" height="20" align="center" alt="自动化" /> 自动化（1）
 
 - **自动点击器。** 按你设定的速度点击，支持全局快捷键、次数上限和随机间隔。Windows、macOS 和 Linux。*beta*
 
-### AI（6）
+### <img src="https://api.iconify.design/ph:sparkle.svg?color=%233D5BF0" width="20" height="20" align="center" alt="AI" /> AI（6）
 
 - **比较价格。** 同一模型在不同服务商的价格，数据来自 LiteLLM 和 models.dev。
 - **AI 花费。** OmniGet 在 AI 上花了多少，按天、模型和任务统计，来自本地账本。
@@ -417,11 +419,11 @@ Tools 是 OmniGet 里长到下载之外的那部分。每个方块是一项工�
   <img src="assets/readme/marketplace.png" alt="OmniGet 的 Marketplace，列出 Courses、Study、Telegram 和 Convert 插件，显示版本、作者、权限和启用开关" width="900" />
 </p>
 
-### Courses
+### <img src="https://api.iconify.design/ph:graduation-cap.svg?color=%23F28500" width="20" height="20" align="center" alt="Courses" /> Courses
 
 通过应用内的浏览器窗口登录 **Hotmart**、**Udemy**、**Kiwify**、**Rocketseat** 或 **Meta-Analysis Academy**，也可以使用扩展保存的 Cookie，或在平台允许时直接用邮箱和密码。OmniGet 列出你购买的课程，打开课程大纲让你勾选想要的章节（并告诉你有多少课时受 DRM 保护、会被跳过），然后下载全部课时和附件，需要的话可以连续编号。Hotmart 使用当前的 OIDC 登录流程，所以在 Hotmart 2026 年更换认证方式之后仍然可用，免费课程和在 Hotmart Club 之外交付的课程也会列出来。下载好的课程自动出现在 Study 里。
 
-### Study
+### <img src="https://api.iconify.design/ph:book-open.svg?color=%233D5BF0" width="20" height="20" align="center" alt="Study" /> Study
 
 Study 把你下载下来的一堆文件变成真正能学完的东西。
 
@@ -433,11 +435,11 @@ Study 把你下载下来的一堆文件变成真正能学完的东西。
 - 进度与成就。连续天数、每日目标、年度热力图和本地 XP，没有排行榜。
 - 音乐。带封面、歌手和专辑的本地音乐库，同步歌词、收藏、历史、播放列表、流派、转码，还有 Spotify、SoundCloud 和 YouTube Music 浏览器，让播放列表和喜欢的歌与本地文件并排。
 
-### Telegram
+### <img src="https://cdn.simpleicons.org/telegram/2CA5E0" width="20" height="20" align="center" alt="Telegram" /> Telegram
 
 用二维码或手机号登录。浏览你所在的所有频道和群组，按照片、视频、文档或音频筛选，搜索文件，下载单个条目或整个聊天并显示进度列表。频道里的视频可以直接导入 Study 库。
 
-### Convert
+### <img src="https://api.iconify.design/ph:arrows-clockwise.svg?color=%232AA845" width="20" height="20" align="center" alt="Convert" /> Convert
 
 FFmpeg 转换，机器支持时使用 GPU 加速：视频和音频的容器、编码、分辨率、码率和压缩，无需联网。
 

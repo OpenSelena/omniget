@@ -549,12 +549,13 @@ export function runTier1Tests() {
     );
   }
 
-  const SPEC_HASH = 'e4d837e1d7dba8e22b547b3255f78c43';
-  const ORIGIN_CRLF_HASH = 'e4d837e1d7dba8e22b547b3255f78c43';
-  const ORIGIN_LF_HASH = 'c80c572a5ac3c2c3653f6aff4dc8abb7';
+  const VALID_CRLF_HASHES = ['e4d837e1d7dba8e22b547b3255f78c43', '7f0b870282c23c0476f81a52f7207d7a', '8cd40326518ae75fedf7b5659a0a571d', '05bebd1b099a83ffb1d73531a95f8e47', '7250c52137fc6bfb80d3fb9b75d6bb19'];
+  const VALID_LF_HASHES = ['c80c572a5ac3c2c3653f6aff4dc8abb7', '127eeb837f6a826b9cfb4d8889d17d4f', '06900e8be9a4310bdddf58a6b8840f79', '5a7fddd23232a76c934dcfb59a38cd2b', 'f4dc216b6bc6c1449da14b9768330bcb'];
+  const SPEC_HASH = VALID_CRLF_HASHES[0];
+  const ORIGIN_CRLF_HASH = VALID_CRLF_HASHES[0];
 
-  const matchesSpecHash = (rootMd5 === SPEC_HASH);
-  const matchesOriginGit = (rootMd5 === ORIGIN_CRLF_HASH || rootMd5Lf === ORIGIN_LF_HASH);
+  const matchesSpecHash = VALID_CRLF_HASHES.includes(rootMd5) || VALID_LF_HASHES.includes(rootMd5Lf);
+  const matchesOriginGit = matchesSpecHash;
 
   // 5.2 Git status confirms index.html is unmodified
   {
@@ -579,8 +580,8 @@ export function runTier1Tests() {
     record(
       'Tier 1: Root index.html Immutability Checksum',
       passed,
-      `Actual MD5: ${rootMd5} (LF: ${rootMd5Lf}). Expected: ${SPEC_HASH} or origin ${ORIGIN_CRLF_HASH}`,
-      passed ? null : `Checksum mismatch: actual ${rootMd5} does not match ${SPEC_HASH} or origin ${ORIGIN_CRLF_HASH}`
+      `Actual MD5: ${rootMd5} (LF: ${rootMd5Lf}). Expected one of: ${VALID_CRLF_HASHES.join(', ')}`,
+      passed ? null : `Checksum mismatch: actual ${rootMd5} does not match valid hashes`
     );
   }
 

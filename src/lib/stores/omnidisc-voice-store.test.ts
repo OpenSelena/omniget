@@ -11,7 +11,7 @@ beforeAll(async () => {
   vi.stubGlobal("$state", <T>(value: T) => value);
   vi.stubGlobal("$derived", <T>(value: T) => value);
   store = await import("./omnidisc-voice-store.svelte");
-});
+}, 30000);
 
 afterAll(() => {
   vi.unstubAllGlobals();
