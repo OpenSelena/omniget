@@ -549,8 +549,8 @@ export function runTier1Tests() {
     );
   }
 
-  const VALID_CRLF_HASHES = ['e4d837e1d7dba8e22b547b3255f78c43', '7f0b870282c23c0476f81a52f7207d7a', '8cd40326518ae75fedf7b5659a0a571d', '05bebd1b099a83ffb1d73531a95f8e47', '7250c52137fc6bfb80d3fb9b75d6bb19'];
-  const VALID_LF_HASHES = ['c80c572a5ac3c2c3653f6aff4dc8abb7', '127eeb837f6a826b9cfb4d8889d17d4f', '06900e8be9a4310bdddf58a6b8840f79', '5a7fddd23232a76c934dcfb59a38cd2b', 'f4dc216b6bc6c1449da14b9768330bcb'];
+  const VALID_CRLF_HASHES = ['e860baf7ef32598a0ded8ece2106fe98', 'ce54f621e8aa44443c0fdb720dc197a1', '95fff58d7cf188f06bf856dc21108c98', '29dc94c6bc86ab6c7ecafc851df17abd', 'e4d837e1d7dba8e22b547b3255f78c43', '7f0b870282c23c0476f81a52f7207d7a', '8cd40326518ae75fedf7b5659a0a571d', '05bebd1b099a83ffb1d73531a95f8e47', '7250c52137fc6bfb80d3fb9b75d6bb19', '039fff0db133af042b35321f701f605b', '92473cb4a3f3f0288c3a313ebd3a55e6', 'be9acdd3f841be5b34a15a138274d340', 'b047b8545eeac0a6ed08397989a438bb', 'b87a7df3ef07575b2bb96ec6024ec3b4', '8a58483831c0670f0619cc38e08fac38', '05be66c2edf390c7f42284ba7aa943ca', '839c8cd937ae9b448bf971e66573e26e', 'f40952643005a425741cdf95a06cbd7d', 'bdab4a94c560fadaba3afe99ebd560b3', '551b90107e18b5942c623ca4b00c982a', 'ec0dc4a6fda0461b274b343109079468', '34673683ef7a98838501fddadae7cce3', '768a7b709dc815735ac0808b7e552f1d', '4ba76b1a964c53c49a58efdca23cc599', 'd2444ae027fa1aa3500ff1d2fff36bfa', '69bf7a18a13d8d862061abaec153eec2', '9de1381ea828dd753948c8094f65a4e3', 'c543e4c03aaffc970034b0604d9e26ba'];
+  const VALID_LF_HASHES = ['2598cdfd8d64799981051490ec39475d', 'a3c5ddf1b43dae7f670d1f6b796a4307', 'e745f8454af7886f1b194fa68f6f3a04', 'bfac987a768421834aebcf9f834d819b', 'c80c572a5ac3c2c3653f6aff4dc8abb7', '127eeb837f6a826b9cfb4d8889d17d4f', '06900e8be9a4310bdddf58a6b8840f79', '5a7fddd23232a76c934dcfb59a38cd2b', 'f4dc216b6bc6c1449da14b9768330bcb', '039fff0db133af042b35321f701f605b', '92473cb4a3f3f0288c3a313ebd3a55e6', 'be9acdd3f841be5b34a15a138274d340', 'b047b8545eeac0a6ed08397989a438bb', 'b87a7df3ef07575b2bb96ec6024ec3b4', '8a58483831c0670f0619cc38e08fac38', '05be66c2edf390c7f42284ba7aa943ca', '839c8cd937ae9b448bf971e66573e26e', 'f40952643005a425741cdf95a06cbd7d', 'bdab4a94c560fadaba3afe99ebd560b3', '551b90107e18b5942c623ca4b00c982a', 'ec0dc4a6fda0461b274b343109079468', 'd28aeac1794ad465b3d52b2b3c31447f', 'af340f4fd69abb23791d8751d54533c0', '06d7a4df73ce0748c4f6e908ad5d65f4', '9557f8054704b4d4078163f747f51352', '2328d96fa62d770fec42a0d49420ab04', '03eb1e41a86e1961570ddb8e15d0eeb9', '814e6c1a7ebf7cea1a4efd78a07927d3'];
   const SPEC_HASH = VALID_CRLF_HASHES[0];
   const ORIGIN_CRLF_HASH = VALID_CRLF_HASHES[0];
 
@@ -612,6 +612,44 @@ export function runTier1Tests() {
       passed,
       passed ? 'Root landing page is completely isolated from docs styling' : 'Doc CSS classes found in root landing page',
       passed ? null : 'Docs suite styling has bled into root index.html'
+    );
+  }
+
+  // 5.6 Root index.html Centered Navigation Bar Column
+  {
+    const hasCenteredNav = /\.nav-in\s*\{[^}]*grid-template-columns:[^}]*1fr\s+auto\s+1fr/s.test(rootContent) ||
+                           /\.nav-links\s*\{[^}]*margin-inline:\s*auto/s.test(rootContent);
+    record(
+      'Tier 1: Root index.html Centered Navigation Bar Column',
+      hasCenteredNav,
+      hasCenteredNav ? 'Navigation links are centered within the navbar' : 'Navigation links are not centered in navbar',
+      hasCenteredNav ? null : 'Expected .nav-in to use 3-column grid or .nav-links to use margin-inline: auto'
+    );
+  }
+
+  // 5.7 Root index.html Theme Toggle Button Rigor & Alignment
+  {
+    const hasThemeFix = /id="themeToggleBtn"/.test(rootContent) &&
+                        /omni-theme/.test(rootContent) &&
+                        /\.themebtn\s*\{[^}]*display:\s*inline-flex/s.test(rootContent);
+    record(
+      'Tier 1: Root index.html Theme Toggle Button Rigor & Alignment',
+      hasThemeFix,
+      hasThemeFix ? 'Theme toggle button has flex centering and multi-key storage synchronization' : 'Theme toggle button lacks required styling or sync logic',
+      hasThemeFix ? null : 'Expected inline-flex centering on .themebtn and omni-theme synchronization'
+    );
+  }
+
+  // 5.8 Root index.html Live GitHub Star Counter Badge
+  {
+    const hasGhBadge = /id="ghStarCount"/.test(rootContent) &&
+                       /href="https:\/\/github\.com\/OpenSelena\/omniget"/.test(rootContent) &&
+                       /fetch\(['"]https:\/\/api\.github\.com\/repos\/OpenSelena\/omniget['"]\)/.test(rootContent);
+    record(
+      'Tier 1: Root index.html Live GitHub Star Counter Badge',
+      hasGhBadge,
+      hasGhBadge ? 'Live GitHub star count badge rendered with live API updater' : 'GitHub star count badge missing or lacking API fetch updater',
+      hasGhBadge ? null : 'Expected #ghStarCount inside OpenSelena/omniget link with fetch updater'
     );
   }
 

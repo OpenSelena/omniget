@@ -14,9 +14,10 @@
 <script>
   (function () {
     try {
-      var saved = localStorage.getItem('omniget-theme') || localStorage.getItem('omniget_docs_theme') || localStorage.getItem('theme');
+      var saved = localStorage.getItem('omniget-theme') || localStorage.getItem('omniget_docs_theme') || localStorage.getItem('omni-theme') || localStorage.getItem('theme');
       var dark = (saved === 'dark' || saved === 'light') ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
       document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
+      if (dark) document.documentElement.classList.add('dark');
     } catch (e) {}
   })();
 </script>
@@ -146,9 +147,9 @@ body::after {
 }
 
 h1, h2, h3 { font-family: var(--display); font-weight: 700; letter-spacing: -.025em; line-height: 1.12; text-wrap: balance; }
-h1 { font-size: clamp(2.3rem, 1rem + 4.4vw, 3.5rem); letter-spacing: -.03em; }
-h2 { font-size: clamp(1.7rem, 1.1rem + 2.1vw, 2.4rem); }
-h3 { font-size: 1.1rem; letter-spacing: -.01em; }
+h1 { font-size: 56px; letter-spacing: -.03em; }
+h2 { font-size: 38px; }
+h3 { font-size: 18px; letter-spacing: -.01em; }
 p { text-wrap: pretty; }
 
 a { color: inherit; text-decoration: none; }
@@ -180,7 +181,7 @@ code { font-family: inherit; }
 }
 .bleed + .bleed { border-top: 0; }
 
-.lead { font-size: clamp(1.02rem, .97rem + .25vw, 1.14rem); color: var(--body); line-height: 1.62; }
+.lead { font-size: 18px; color: var(--body); line-height: 1.62; }
 .muted { color: var(--body); }
 .dim { color: var(--dim); }
 .small { font-size: 14px; }
@@ -198,18 +199,22 @@ a.ul:hover { text-decoration-thickness: 2px; }
    ============================================================ */
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  min-height: 44px; padding: 10px 22px; border-radius: var(--r-full);
-  font-family: var(--sans); font-size: 15px; font-weight: 600; line-height: 1.3;
+  height: 36px; min-height: 36px; padding: 8px 16px; border-radius: 8px;
+  font-family: var(--sans); font-size: 14px; font-weight: 500; line-height: 1.3;
   cursor: pointer; white-space: nowrap;
   transition: background-color .15s, border-color .15s, color .15s;
 }
-.btn-sm { min-height: 36px; padding: 6px 16px; font-size: 14px; }
+.btn svg, .btn .ic, .btn .si { width: 16px; height: 16px; flex-shrink: 0; }
+.btn-sm { height: 36px; min-height: 36px; padding: 0 16px; font-size: 14px; border-radius: 8px; }
 
-.btn-brand { background: var(--brand); color: var(--on-brand); }
+.btn-brand { background: var(--brand); color: var(--on-brand); border: 1px solid transparent; }
 .btn-brand:hover { background: var(--brand-hover); }
 .btn-brand:active { background: var(--brand-press); }
 
-.btn-ghost { border: 1px solid var(--line-strong); color: var(--fg); background: var(--glass); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); }
+.btn-secondary { background: transparent; border: 1px solid transparent; color: var(--fg); border-radius: 8px; }
+.btn-secondary:hover { background: var(--hover); }
+
+.btn-ghost { border: 1px solid var(--line-strong); color: var(--fg); background: var(--glass); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border-radius: 8px; }
 .btn-ghost:hover { background: var(--hover); }
 
 /* ============================================================
@@ -225,12 +230,24 @@ a.ul:hover { text-decoration-thickness: 2px; }
 }
 .nav.scrolled { box-shadow: 0 6px 18px -12px rgba(0, 0, 0, .25); }
 
-.nav-in { display: flex; align-items: center; gap: 20px; height: 64px; }
+.nav-in {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  height: 64px;
+}
 
-.brand { display: flex; align-items: center; gap: 9px; font-family: var(--display); font-weight: 700; font-size: 17px; letter-spacing: -.02em; }
+.brand {
+  display: flex; align-items: center; gap: 9px;
+  font-family: var(--display); font-weight: 700; font-size: 17px; letter-spacing: -.02em;
+  justify-self: start;
+}
 .brand img { width: 26px; height: 26px; border-radius: 7px; }
 
-.nav-links { display: flex; align-items: center; gap: 4px; margin-left: 12px; }
+.nav-links {
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  margin-inline: auto;
+}
 .nav-links a {
   font-size: 14.5px; font-weight: 500; color: var(--body);
   padding: 8px 12px; border-radius: var(--r-sm);
@@ -238,19 +255,42 @@ a.ul:hover { text-decoration-thickness: 2px; }
 }
 .nav-links a:hover { color: var(--fg); background: var(--hover); }
 
-.nav-act { display: flex; align-items: center; gap: 8px; margin-left: auto; }
+.nav-act {
+  display: flex; align-items: center; gap: 8px;
+  justify-self: end; margin-left: auto;
+}
+
+.nav-gh {
+  display: inline-flex; align-items: center; gap: 7px;
+  height: 36px; min-height: 36px; padding: 0 12px; border-radius: var(--r-sm);
+  border: 1px solid var(--line); background: transparent; color: var(--fg);
+  font-family: var(--sans); font-size: 13.5px; font-weight: 500; text-decoration: none;
+  transition: background-color .15s, border-color .15s, color .15s;
+}
+.nav-gh:hover { background: var(--hover); border-color: var(--line-strong); }
+.nav-gh .si { width: 16px; height: 16px; flex-shrink: 0; }
+.nav-gh-count {
+  display: inline-flex; align-items: center;
+  font-size: 12px; font-weight: 600; color: var(--body);
+  background: var(--hover); padding: 1px 6px; border-radius: 5px;
+}
 
 .themebtn {
   width: 36px; height: 36px; border-radius: var(--r-sm);
-  display: inline-grid; place-items: center;
+  display: inline-flex; align-items: center; justify-content: center;
   background: transparent; color: var(--body); cursor: pointer;
-  transition: color .15s, background-color .15s;
+  border: 1px solid var(--line); padding: 0;
+  transition: color .15s, background-color .15s, border-color .15s;
 }
-.themebtn:hover { color: var(--fg); background: var(--hover); }
-.themebtn .t-sun { display: none; }
-.themebtn .t-moon { display: block; }
-[data-theme="dark"] .themebtn .t-sun { display: block; }
-[data-theme="dark"] .themebtn .t-moon { display: none; }
+.themebtn:hover { color: var(--fg); border-color: var(--line-strong); background: var(--hover); }
+.themebtn .t-sun, .themebtn .t-moon {
+  display: none; align-items: center; justify-content: center; width: 100%; height: 100%; line-height: 0;
+}
+.themebtn .t-moon { display: flex; }
+:root[data-theme="dark"] .themebtn .t-sun,
+html[data-theme="dark"] .themebtn .t-sun { display: flex; }
+:root[data-theme="dark"] .themebtn .t-moon,
+html[data-theme="dark"] .themebtn .t-moon { display: none; }
 
 .mnav { display: none; position: relative; }
 .mnav > summary {
@@ -271,22 +311,83 @@ a.ul:hover { text-decoration-thickness: 2px; }
 .mnav-panel a:last-child:hover { background: var(--brand-hover); }
 
 @media (max-width: 900px) {
+  .nav-in { display: flex; align-items: center; justify-content: space-between; }
   .nav-links { display: none; }
   .mnav { display: block; }
+  .nav-act .nav-gh { display: none; }
   .nav-act .btn { display: none; }
 }
 
 /* ============================================================
-   Hero
+   Hero with theme-swapped banner
    ============================================================ */
-.hero { padding-block: 76px 88px; }
-.hero-grid { display: grid; grid-template-columns: 1.02fr 1fr; gap: 56px; align-items: center; }
-.hero-grid > *, .split > *, .panel-grid > * { min-width: 0; }
-@media (max-width: 1000px) { .hero-grid { grid-template-columns: 1fr; gap: 40px; } }
-
+.hero {
+  position: relative;
+  overflow: hidden;
+  padding-block: 76px 88px;
+  background-color: var(--bg);
+  background-image: url('assets/omniget-banner-light.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover;
+}
+:root[data-theme="dark"] .hero,
+html[data-theme="dark"] .hero {
+  background-image: url('assets/omniget-banner-dark.png');
+}
+.hero-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  position: relative;
+  z-index: 2;
+}
+.herocopy {
+  max-width: 620px;
+  text-align: left;
+}
 .hero h1 { margin-bottom: 18px; }
-.hero .lead { max-width: 33rem; margin-bottom: 26px; }
-.hero-cta { display: flex; flex-wrap: wrap; gap: 12px; }
+.hero .lead {
+  font-size: 16px;
+  line-height: 1.65;
+  margin-bottom: 26px;
+  max-width: 33rem;
+  color: var(--body);
+}
+.hero-cta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: flex-start;
+  margin-top: 24px;
+}
+.stats {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+  margin-top: 32px;
+}
+.stat {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  white-space: nowrap;
+}
+.stat b {
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--fg);
+}
+.stat span {
+  font-size: 13.5px;
+  color: var(--dim);
+}
+@media (max-width: 900px) {
+  h1 { font-size: 40px; }
+  h2 { font-size: 28px; }
+  .hero { background-position: 18% center; padding-block: 48px 56px; }
+  .stats { gap: 12px 20px; }
+}
 
 /* Screenshot frame */
 .shot { border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; background: var(--surface); }
@@ -409,10 +510,10 @@ a.ul:hover { text-decoration-thickness: 2px; }
 /* ============================================================
    OS matrix
    ============================================================ */
-.display { font-size: clamp(1.9rem, 1.1rem + 2.6vw, 2.8rem); letter-spacing: -.03em; }
+.display { font-size: 44px; letter-spacing: -.03em; }
 #os { padding-block: 96px; }
 .sec-head { text-align: center; }
-.sec-head .lead { max-width: 32rem; margin: 12px auto 40px; font-size: 1rem; text-wrap: balance; }
+.sec-head .lead { max-width: 32rem; margin: 12px auto 40px; font-size: 16px; text-wrap: balance; }
 
 .os-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; max-width: 960px; margin-inline: auto; }
 @media (max-width: 900px) { .os-grid { grid-template-columns: 1fr; gap: 16px; } }
@@ -425,7 +526,7 @@ a.ul:hover { text-decoration-thickness: 2px; }
 .os-action { display: contents; }
 .os-head { order: 0; display: flex; flex-direction: column; align-items: center; gap: 12px; margin-bottom: 10px; }
 .os-head .ic { width: 32px; height: 32px; color: var(--fg); }
-.os-head h3 { font-size: 1.15rem; letter-spacing: -.02em; }
+.os-head h3 { font-size: 18px; letter-spacing: -.02em; }
 .os-note { order: 1; max-width: 16rem; margin-bottom: 18px; font-size: 13px; color: var(--body); line-height: 1.5; text-wrap: balance; }
 .os-card .btn { order: 2; width: auto; min-width: 176px; min-height: 40px; padding: 8px 18px; font-size: 14px; margin-bottom: 22px; }
 .cmd { order: 3; margin-top: auto; }
@@ -470,7 +571,7 @@ a.ul:hover { text-decoration-thickness: 2px; }
 .faq details { border-bottom: 1px solid var(--line); }
 .faq summary {
   cursor: pointer; padding: 20px 40px 20px 0; position: relative;
-  font-family: var(--display); font-weight: 600; font-size: 1.02rem; letter-spacing: -.01em;
+  font-family: var(--display); font-weight: 600; font-size: 16px; letter-spacing: -.01em;
   list-style: none;
 }
 .faq summary::-webkit-details-marker { display: none; }
@@ -563,10 +664,10 @@ footer {
 @keyframes menu { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
 
 /* Hero entrance: CSS only, so it plays even if scripts fail. */
-.hero h1, .hero .lead, .hero-cta, .hero .shot { animation: rise .9s var(--ease) both; }
+.hero h1, .hero .lead, .hero-cta, .hero .stats { animation: rise .9s var(--ease) both; }
 .hero .lead { animation-delay: .08s; }
 .hero-cta { animation-delay: .16s; }
-.hero .shot { animation-delay: .24s; }
+.hero .stats { animation-delay: .24s; }
 .nav { animation: fade .6s var(--ease) both; }
 .mnav[open] .mnav-panel { animation: menu .2s var(--ease) both; }
 
@@ -598,7 +699,7 @@ footer {
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, ::before, ::after { transition-duration: .001ms !important; }
-  .hero h1, .hero .lead, .hero-cta, .hero .shot, .nav, .mnav[open] .mnav-panel { animation: none; }
+  .hero h1, .hero .lead, .hero-cta, .hero .stats, .nav, .mnav[open] .mnav-panel { animation: none; }
   .rv { opacity: 1; transform: none; }
   ::view-transition-group(*), ::view-transition-old(*), ::view-transition-new(*) { animation: none !important; }
   /* Frozen marquee: show every card, wrapped, instead of clipping the row. */
@@ -620,18 +721,21 @@ footer {
     </a>
 
     <nav class="nav-links" aria-label="Main">
-      <a href="./docs/">Docs</a>
       <a href="./docs/changelog/">Changelog</a>
+      <a href="./docs/">Docs</a>
       <a href="./docs/installation/">Installation</a>
-      <a href="./docs/courses/">Courses &amp; Study</a>
-      <a href="./docs/opennami/">OpenNami</a>
+      <a href="./docs/troubleshooting/">FAQ</a>
     </nav>
 
     <div class="nav-act">
-      <button class="themebtn" id="theme" aria-pressed="false" title="Switch to dark theme">
+      <a class="nav-gh" href="https://github.com/OpenSelena/omniget" target="_blank" rel="noopener noreferrer">
+        <svg class="si" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+        <span>Star</span>
+        <span class="nav-gh-count" id="ghStarCount">287</span>
+      </a>
+      <button class="themebtn" id="themeToggleBtn" onclick="toggleTheme()" aria-pressed="false" title="Switch to dark theme" aria-label="Switch between light and dark theme">
         <span class="t-sun"><!-- @license lucide-static v1.52.0 - ISC --> <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"> <circle cx="12" cy="12" r="4" /> <path d="M12 2v2" /> <path d="M12 20v2" /> <path d="m4.93 4.93 1.41 1.41" /> <path d="m17.66 17.66 1.41 1.41" /> <path d="M2 12h2" /> <path d="M20 12h2" /> <path d="m6.34 17.66-1.41 1.41" /> <path d="m19.07 4.93-1.41 1.41" /> </svg></span>
         <span class="t-moon"><!-- @license lucide-static v1.52.0 - ISC --> <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"> <path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" /> </svg></span>
-        <span class="sr">Switch between light and dark theme</span>
       </button>
 
       <a class="btn btn-brand btn-sm" href="https://github.com/OpenSelena/omniget/releases/latest">Download</a>
@@ -639,11 +743,10 @@ footer {
       <details class="mnav" id="mnav">
         <summary aria-label="Open menu"><!-- @license lucide-static v1.52.0 - ISC --> <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"> <path d="M3 5h.01" /> <path d="M3 12h.01" /> <path d="M3 19h.01" /> <path d="M8 5h13" /> <path d="M8 12h13" /> <path d="M8 19h13" /> </svg></summary>
         <div class="mnav-panel">
-          <a href="./docs/">Docs</a>
           <a href="./docs/changelog/">Changelog</a>
+          <a href="./docs/">Docs</a>
           <a href="./docs/installation/">Installation</a>
-          <a href="./docs/courses/">Courses &amp; Study</a>
-          <a href="./docs/opennami/">OpenNami</a>
+          <a href="./docs/troubleshooting/">FAQ</a>
           <a href="https://github.com/OpenSelena/omniget/releases/latest">Download</a>
         </div>
       </details>
@@ -654,29 +757,33 @@ footer {
 <main id="main">
 
 <!-- ── Hero ─────────────────────────────────────────────────── -->
-<section class="hero">
+<section class="hero" id="hero">
   <div class="wrap hero-grid">
-    <div>
-      <h1>Paste a link.<br />Get the file.</h1>
+    <div class="herocopy">
+      <h1>Paste the link,<br />get the file.</h1>
       <p class="lead">
-        OmniGet downloads courses, video, audio, images and torrents from 1,800+ sites,
-        then transcribes, converts, reads and studies what you saved. One desktop app,
-        no terminal, no account.
+        Download courses, video, audio, images and torrents from 1,800+ sites.
+        Then play, read and convert them.
       </p>
 
-      <div class="hero-cta">
-        <a class="btn btn-brand" id="hero-dl" href="https://github.com/OpenSelena/omniget/releases/latest">
-          <svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M224,144v64a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V144a8,8,0,0,1,16,0v56H208V144a8,8,0,0,1,16,0Zm-101.66,5.66a8,8,0,0,0,11.32,0l40-40A8,8,0,0,0,168,96H136V32a8,8,0,0,0-16,0V96H88a8,8,0,0,0-5.66,13.66Z"/></svg><span id="hero-dl-text">Download OmniGet</span>
+      <div class="hero-cta" id="dlSplit">
+        <a class="btn btn-brand" id="dlMenuPanel" href="https://github.com/OpenSelena/omniget/releases/latest">
+          <svg class="si" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3" /><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><path d="m7 10 5 5 5-5" /></svg>
+          <span>Download</span>
         </a>
-        <a class="btn btn-ghost" href="#tools"><svg class="ic" viewBox="0 0 256 256" fill="currentColor" aria-hidden="true" focusable="false"><path d="M224,64H176V56a24,24,0,0,0-24-24H104A24,24,0,0,0,80,56v8H32A16,16,0,0,0,16,80v28a4,4,0,0,0,4,4H64V96.27A8.17,8.17,0,0,1,71.47,88,8,8,0,0,1,80,96v16h96V96.27A8.17,8.17,0,0,1,183.47,88,8,8,0,0,1,192,96v16h44a4,4,0,0,0,4-4V80A16,16,0,0,0,224,64Zm-64,0H96V56a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8Zm80,68v60a16,16,0,0,1-16,16H32a16,16,0,0,1-16-16V132a4,4,0,0,1,4-4H64v16a8,8,0,0,0,8.53,8A8.17,8.17,0,0,0,80,143.73V128h96v16a8,8,0,0,0,8.53,8,8.17,8.17,0,0,0,7.47-8.25V128h44A4,4,0,0,1,240,132Z"/></svg>See the 156 tools</a>
+        <a class="btn btn-secondary" href="https://github.com/OpenSelena/omniget">
+          <svg class="si" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+          <span>GitHub</span>
+        </a>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><b><span class="count" data-to="1800" data-suffix="+">1,800+</span></b><span>sites</span></div>
+        <div class="stat"><b><span class="count" data-to="158">158</span></b><span>tools</span></div>
+        <div class="stat"><b><span class="count" data-to="25">25</span></b><span>categories</span></div>
+        <div class="stat"><b><span class="count" data-to="38">38</span></b><span>course sites</span></div>
       </div>
     </div>
-
-    <figure class="shot">
-      <img src="assets/readme/home.png" width="1800" height="1125"
-           alt="The OmniGet home screen. The sidebar lists Home, Downloads, Chat, Tools, Marketplace, Settings, League of Legends and About, then the Courses, Study, Telegram and Convert plugins. In the middle, Loop the mascot sits above one wide box reading: Paste a URL, magnet link, .torrent, or search. Under the box are four shortcuts: Many links at once, Open a .torrent file, Send a file to someone and Advanced options." />
-      <figcaption>One box for links, magnets and .torrent files.</figcaption>
-    </figure>
   </div>
 </section>
 
@@ -1050,57 +1157,57 @@ footer {
 
     <div class="marquee">
       <div class="mq-row" id="mq-row-1">
-        <a href="https://github.com/tonhowtf" target="_blank" rel="noopener noreferrer" class="mq-card" title="Antonio Leandro (@tonhowtf) (Original Author, 2,640+ commits)"> <span class="mq-avatar"> <span class="mq-fallback">AL</span> <img src="https://avatars.githubusercontent.com/u/74384266?v=4&amp;s=72" alt="Antonio Leandro (tonhowtf)" loading="lazy" onerror="this.remove()" /> </span> <div><b>Antonio Leandro</b><i>Original Author (2,640+ commits)</i></div> </a>
-        <a href="https://github.com/InstaZDLL" target="_blank" rel="noopener noreferrer" class="mq-card" title="InstaZDLL (53 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">IN</span> <img src="https://avatars.githubusercontent.com/u/72951793?v=4&amp;s=72" alt="InstaZDLL" loading="lazy" onerror="this.remove()" /> </span> <div><b>InstaZDLL</b><i>53 commits</i></div> </a>
-        <a href="https://github.com/igect" target="_blank" rel="noopener noreferrer" class="mq-card" title="igect (44 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">IG</span> <img src="https://avatars.githubusercontent.com/u/280496113?v=4&amp;s=72" alt="igect" loading="lazy" onerror="this.remove()" /> </span> <div><b>igect</b><i>44 commits</i></div> </a>
-        <a href="https://github.com/YahyaZekry" target="_blank" rel="noopener noreferrer" class="mq-card" title="YahyaZekry (16 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">YA</span> <img src="https://avatars.githubusercontent.com/u/38083306?v=4&amp;s=72" alt="YahyaZekry" loading="lazy" onerror="this.remove()" /> </span> <div><b>YahyaZekry</b><i>16 commits</i></div> </a>
-        <a href="https://github.com/D0n-A" target="_blank" rel="noopener noreferrer" class="mq-card" title="D0n-A (11 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">D0</span> <img src="https://avatars.githubusercontent.com/u/38649081?v=4&amp;s=72" alt="D0n-A" loading="lazy" onerror="this.remove()" /> </span> <div><b>D0n-A</b><i>11 commits</i></div> </a>
-        <a href="https://github.com/theodoremca" target="_blank" rel="noopener noreferrer" class="mq-card" title="theodoremca (4 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">TH</span> <img src="https://avatars.githubusercontent.com/u/35204506?v=4&amp;s=72" alt="theodoremca" loading="lazy" onerror="this.remove()" /> </span> <div><b>theodoremca</b><i>4 commits</i></div> </a>
-        <a href="https://github.com/xJaroslav69" target="_blank" rel="noopener noreferrer" class="mq-card" title="xJaroslav69 (4 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">XJ</span> <img src="https://avatars.githubusercontent.com/u/177156785?v=4&amp;s=72" alt="xJaroslav69" loading="lazy" onerror="this.remove()" /> </span> <div><b>xJaroslav69</b><i>4 commits</i></div> </a>
-        <a href="https://github.com/Tan665565" target="_blank" rel="noopener noreferrer" class="mq-card" title="Tan665565 (3 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">TA</span> <img src="https://avatars.githubusercontent.com/u/220505146?v=4&amp;s=72" alt="Tan665565" loading="lazy" onerror="this.remove()" /> </span> <div><b>Tan665565</b><i>3 commits</i></div> </a>
-        <a href="https://github.com/ManoloZocco" target="_blank" rel="noopener noreferrer" class="mq-card" title="ManoloZocco (3 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">MA</span> <img src="https://avatars.githubusercontent.com/u/33806905?v=4&amp;s=72" alt="ManoloZocco" loading="lazy" onerror="this.remove()" /> </span> <div><b>ManoloZocco</b><i>3 commits</i></div> </a>
-        <a href="https://github.com/Crayz129" target="_blank" rel="noopener noreferrer" class="mq-card" title="Crayz129 (2 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">CR</span> <img src="https://avatars.githubusercontent.com/u/70708880?v=4&amp;s=72" alt="Crayz129" loading="lazy" onerror="this.remove()" /> </span> <div><b>Crayz129</b><i>2 commits</i></div> </a>
-        <a href="https://github.com/Twilight0" target="_blank" rel="noopener noreferrer" class="mq-card" title="Twilight0 (2 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">TW</span> <img src="https://avatars.githubusercontent.com/u/1566256?v=4&amp;s=72" alt="Twilight0" loading="lazy" onerror="this.remove()" /> </span> <div><b>Twilight0</b><i>2 commits</i></div> </a>
+        <a href="https://github.com/tonhowtf" target="_blank" rel="noopener noreferrer" class="mq-card" title="Antonio Leandro (@tonhowtf) (Original Author, 2,640+ commits)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">AL</span> <img src="https://avatars.githubusercontent.com/u/74384266?v=4&amp;s=72" alt="Antonio Leandro (tonhowtf)" loading="lazy" onerror="this.remove()" /> </span> <div><b>Antonio Leandro</b><i>Original Author (2,640+ commits)</i></div> </a>
+        <a href="https://github.com/InstaZDLL" target="_blank" rel="noopener noreferrer" class="mq-card" title="InstaZDLL (53 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">IN</span> <img src="https://avatars.githubusercontent.com/u/72951793?v=4&amp;s=72" alt="InstaZDLL" loading="lazy" onerror="this.remove()" /> </span> <div><b>InstaZDLL</b><i>53 commits</i></div> </a>
+        <a href="https://github.com/igect" target="_blank" rel="noopener noreferrer" class="mq-card" title="igect (44 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">IG</span> <img src="https://avatars.githubusercontent.com/u/280496113?v=4&amp;s=72" alt="igect" loading="lazy" onerror="this.remove()" /> </span> <div><b>igect</b><i>44 commits</i></div> </a>
+        <a href="https://github.com/YahyaZekry" target="_blank" rel="noopener noreferrer" class="mq-card" title="YahyaZekry (16 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">YA</span> <img src="https://avatars.githubusercontent.com/u/38083306?v=4&amp;s=72" alt="YahyaZekry" loading="lazy" onerror="this.remove()" /> </span> <div><b>YahyaZekry</b><i>16 commits</i></div> </a>
+        <a href="https://github.com/D0n-A" target="_blank" rel="noopener noreferrer" class="mq-card" title="D0n-A (11 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">D0</span> <img src="https://avatars.githubusercontent.com/u/38649081?v=4&amp;s=72" alt="D0n-A" loading="lazy" onerror="this.remove()" /> </span> <div><b>D0n-A</b><i>11 commits</i></div> </a>
+        <a href="https://github.com/theodoremca" target="_blank" rel="noopener noreferrer" class="mq-card" title="theodoremca (4 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">TH</span> <img src="https://avatars.githubusercontent.com/u/35204506?v=4&amp;s=72" alt="theodoremca" loading="lazy" onerror="this.remove()" /> </span> <div><b>theodoremca</b><i>4 commits</i></div> </a>
+        <a href="https://github.com/xJaroslav69" target="_blank" rel="noopener noreferrer" class="mq-card" title="xJaroslav69 (4 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">XJ</span> <img src="https://avatars.githubusercontent.com/u/177156785?v=4&amp;s=72" alt="xJaroslav69" loading="lazy" onerror="this.remove()" /> </span> <div><b>xJaroslav69</b><i>4 commits</i></div> </a>
+        <a href="https://github.com/Tan665565" target="_blank" rel="noopener noreferrer" class="mq-card" title="Tan665565 (3 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">TA</span> <img src="https://avatars.githubusercontent.com/u/220505146?v=4&amp;s=72" alt="Tan665565" loading="lazy" onerror="this.remove()" /> </span> <div><b>Tan665565</b><i>3 commits</i></div> </a>
+        <a href="https://github.com/ManoloZocco" target="_blank" rel="noopener noreferrer" class="mq-card" title="ManoloZocco (3 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">MA</span> <img src="https://avatars.githubusercontent.com/u/33806905?v=4&amp;s=72" alt="ManoloZocco" loading="lazy" onerror="this.remove()" /> </span> <div><b>ManoloZocco</b><i>3 commits</i></div> </a>
+        <a href="https://github.com/Crayz129" target="_blank" rel="noopener noreferrer" class="mq-card" title="Crayz129 (2 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">CR</span> <img src="https://avatars.githubusercontent.com/u/70708880?v=4&amp;s=72" alt="Crayz129" loading="lazy" onerror="this.remove()" /> </span> <div><b>Crayz129</b><i>2 commits</i></div> </a>
+        <a href="https://github.com/Twilight0" target="_blank" rel="noopener noreferrer" class="mq-card" title="Twilight0 (2 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">TW</span> <img src="https://avatars.githubusercontent.com/u/1566256?v=4&amp;s=72" alt="Twilight0" loading="lazy" onerror="this.remove()" /> </span> <div><b>Twilight0</b><i>2 commits</i></div> </a>
         <!-- Duplicate half, aria-hidden: makes the loop seamless. -->
         <span class="mq-dup" aria-hidden="true" inert>
-          <a href="https://github.com/tonhowtf" target="_blank" rel="noopener noreferrer" class="mq-card" title="Antonio Leandro (@tonhowtf) (Original Author, 2,640+ commits)"> <span class="mq-avatar"> <span class="mq-fallback">AL</span> <img src="https://avatars.githubusercontent.com/u/74384266?v=4&amp;s=72" alt="Antonio Leandro (tonhowtf)" loading="lazy" onerror="this.remove()" /> </span> <div><b>Antonio Leandro</b><i>Original Author (2,640+ commits)</i></div> </a>
-          <a href="https://github.com/InstaZDLL" target="_blank" rel="noopener noreferrer" class="mq-card" title="InstaZDLL (53 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">IN</span> <img src="https://avatars.githubusercontent.com/u/72951793?v=4&amp;s=72" alt="InstaZDLL" loading="lazy" onerror="this.remove()" /> </span> <div><b>InstaZDLL</b><i>53 commits</i></div> </a>
-          <a href="https://github.com/igect" target="_blank" rel="noopener noreferrer" class="mq-card" title="igect (44 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">IG</span> <img src="https://avatars.githubusercontent.com/u/280496113?v=4&amp;s=72" alt="igect" loading="lazy" onerror="this.remove()" /> </span> <div><b>igect</b><i>44 commits</i></div> </a>
-          <a href="https://github.com/YahyaZekry" target="_blank" rel="noopener noreferrer" class="mq-card" title="YahyaZekry (16 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">YA</span> <img src="https://avatars.githubusercontent.com/u/38083306?v=4&amp;s=72" alt="YahyaZekry" loading="lazy" onerror="this.remove()" /> </span> <div><b>YahyaZekry</b><i>16 commits</i></div> </a>
-          <a href="https://github.com/D0n-A" target="_blank" rel="noopener noreferrer" class="mq-card" title="D0n-A (11 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">D0</span> <img src="https://avatars.githubusercontent.com/u/38649081?v=4&amp;s=72" alt="D0n-A" loading="lazy" onerror="this.remove()" /> </span> <div><b>D0n-A</b><i>11 commits</i></div> </a>
-          <a href="https://github.com/theodoremca" target="_blank" rel="noopener noreferrer" class="mq-card" title="theodoremca (4 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">TH</span> <img src="https://avatars.githubusercontent.com/u/35204506?v=4&amp;s=72" alt="theodoremca" loading="lazy" onerror="this.remove()" /> </span> <div><b>theodoremca</b><i>4 commits</i></div> </a>
-          <a href="https://github.com/xJaroslav69" target="_blank" rel="noopener noreferrer" class="mq-card" title="xJaroslav69 (4 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">XJ</span> <img src="https://avatars.githubusercontent.com/u/177156785?v=4&amp;s=72" alt="xJaroslav69" loading="lazy" onerror="this.remove()" /> </span> <div><b>xJaroslav69</b><i>4 commits</i></div> </a>
-          <a href="https://github.com/Tan665565" target="_blank" rel="noopener noreferrer" class="mq-card" title="Tan665565 (3 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">TA</span> <img src="https://avatars.githubusercontent.com/u/220505146?v=4&amp;s=72" alt="Tan665565" loading="lazy" onerror="this.remove()" /> </span> <div><b>Tan665565</b><i>3 commits</i></div> </a>
-          <a href="https://github.com/ManoloZocco" target="_blank" rel="noopener noreferrer" class="mq-card" title="ManoloZocco (3 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">MA</span> <img src="https://avatars.githubusercontent.com/u/33806905?v=4&amp;s=72" alt="ManoloZocco" loading="lazy" onerror="this.remove()" /> </span> <div><b>ManoloZocco</b><i>3 commits</i></div> </a>
-          <a href="https://github.com/Crayz129" target="_blank" rel="noopener noreferrer" class="mq-card" title="Crayz129 (2 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">CR</span> <img src="https://avatars.githubusercontent.com/u/70708880?v=4&amp;s=72" alt="Crayz129" loading="lazy" onerror="this.remove()" /> </span> <div><b>Crayz129</b><i>2 commits</i></div> </a>
-          <a href="https://github.com/Twilight0" target="_blank" rel="noopener noreferrer" class="mq-card" title="Twilight0 (2 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">TW</span> <img src="https://avatars.githubusercontent.com/u/1566256?v=4&amp;s=72" alt="Twilight0" loading="lazy" onerror="this.remove()" /> </span> <div><b>Twilight0</b><i>2 commits</i></div> </a>
+          <a href="https://github.com/tonhowtf" target="_blank" rel="noopener noreferrer" class="mq-card" title="Antonio Leandro (@tonhowtf) (Original Author, 2,640+ commits)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">AL</span> <img src="https://avatars.githubusercontent.com/u/74384266?v=4&amp;s=72" alt="Antonio Leandro (tonhowtf)" loading="lazy" onerror="this.remove()" /> </span> <div><b>Antonio Leandro</b><i>Original Author (2,640+ commits)</i></div> </a>
+          <a href="https://github.com/InstaZDLL" target="_blank" rel="noopener noreferrer" class="mq-card" title="InstaZDLL (53 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">IN</span> <img src="https://avatars.githubusercontent.com/u/72951793?v=4&amp;s=72" alt="InstaZDLL" loading="lazy" onerror="this.remove()" /> </span> <div><b>InstaZDLL</b><i>53 commits</i></div> </a>
+          <a href="https://github.com/igect" target="_blank" rel="noopener noreferrer" class="mq-card" title="igect (44 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">IG</span> <img src="https://avatars.githubusercontent.com/u/280496113?v=4&amp;s=72" alt="igect" loading="lazy" onerror="this.remove()" /> </span> <div><b>igect</b><i>44 commits</i></div> </a>
+          <a href="https://github.com/YahyaZekry" target="_blank" rel="noopener noreferrer" class="mq-card" title="YahyaZekry (16 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">YA</span> <img src="https://avatars.githubusercontent.com/u/38083306?v=4&amp;s=72" alt="YahyaZekry" loading="lazy" onerror="this.remove()" /> </span> <div><b>YahyaZekry</b><i>16 commits</i></div> </a>
+          <a href="https://github.com/D0n-A" target="_blank" rel="noopener noreferrer" class="mq-card" title="D0n-A (11 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">D0</span> <img src="https://avatars.githubusercontent.com/u/38649081?v=4&amp;s=72" alt="D0n-A" loading="lazy" onerror="this.remove()" /> </span> <div><b>D0n-A</b><i>11 commits</i></div> </a>
+          <a href="https://github.com/theodoremca" target="_blank" rel="noopener noreferrer" class="mq-card" title="theodoremca (4 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">TH</span> <img src="https://avatars.githubusercontent.com/u/35204506?v=4&amp;s=72" alt="theodoremca" loading="lazy" onerror="this.remove()" /> </span> <div><b>theodoremca</b><i>4 commits</i></div> </a>
+          <a href="https://github.com/xJaroslav69" target="_blank" rel="noopener noreferrer" class="mq-card" title="xJaroslav69 (4 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">XJ</span> <img src="https://avatars.githubusercontent.com/u/177156785?v=4&amp;s=72" alt="xJaroslav69" loading="lazy" onerror="this.remove()" /> </span> <div><b>xJaroslav69</b><i>4 commits</i></div> </a>
+          <a href="https://github.com/Tan665565" target="_blank" rel="noopener noreferrer" class="mq-card" title="Tan665565 (3 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">TA</span> <img src="https://avatars.githubusercontent.com/u/220505146?v=4&amp;s=72" alt="Tan665565" loading="lazy" onerror="this.remove()" /> </span> <div><b>Tan665565</b><i>3 commits</i></div> </a>
+          <a href="https://github.com/ManoloZocco" target="_blank" rel="noopener noreferrer" class="mq-card" title="ManoloZocco (3 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">MA</span> <img src="https://avatars.githubusercontent.com/u/33806905?v=4&amp;s=72" alt="ManoloZocco" loading="lazy" onerror="this.remove()" /> </span> <div><b>ManoloZocco</b><i>3 commits</i></div> </a>
+          <a href="https://github.com/Crayz129" target="_blank" rel="noopener noreferrer" class="mq-card" title="Crayz129 (2 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">CR</span> <img src="https://avatars.githubusercontent.com/u/70708880?v=4&amp;s=72" alt="Crayz129" loading="lazy" onerror="this.remove()" /> </span> <div><b>Crayz129</b><i>2 commits</i></div> </a>
+          <a href="https://github.com/Twilight0" target="_blank" rel="noopener noreferrer" class="mq-card" title="Twilight0 (2 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">TW</span> <img src="https://avatars.githubusercontent.com/u/1566256?v=4&amp;s=72" alt="Twilight0" loading="lazy" onerror="this.remove()" /> </span> <div><b>Twilight0</b><i>2 commits</i></div> </a>
         </span>
       </div>
       <div class="mq-row rev" id="mq-row-2">
-        <a href="https://github.com/dajiaohuang" target="_blank" rel="noopener noreferrer" class="mq-card" title="dajiaohuang (2 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">DA</span> <img src="https://avatars.githubusercontent.com/u/108231307?v=4&amp;s=72" alt="dajiaohuang" loading="lazy" onerror="this.remove()" /> </span> <div><b>dajiaohuang</b><i>2 commits</i></div> </a>
-        <a href="https://github.com/shiroesneo-99" target="_blank" rel="noopener noreferrer" class="mq-card" title="shiroesneo-99 (2 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">SH</span> <img src="https://avatars.githubusercontent.com/u/252557381?v=4&amp;s=72" alt="shiroesneo-99" loading="lazy" onerror="this.remove()" /> </span> <div><b>shiroesneo-99</b><i>2 commits</i></div> </a>
-        <a href="https://github.com/SiIverAsh" target="_blank" rel="noopener noreferrer" class="mq-card" title="SiIverAsh (2 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">SI</span> <img src="https://avatars.githubusercontent.com/u/108169083?v=4&amp;s=72" alt="SiIverAsh" loading="lazy" onerror="this.remove()" /> </span> <div><b>SiIverAsh</b><i>2 commits</i></div> </a>
-        <a href="https://github.com/gtxPrime" target="_blank" rel="noopener noreferrer" class="mq-card" title="gtxPrime (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">GT</span> <img src="https://avatars.githubusercontent.com/u/61928763?v=4&amp;s=72" alt="gtxPrime" loading="lazy" onerror="this.remove()" /> </span> <div><b>gtxPrime</b><i>1 commit</i></div> </a>
-        <a href="https://github.com/ShiroKSH" target="_blank" rel="noopener noreferrer" class="mq-card" title="ShiroKSH (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">SH</span> <img src="https://avatars.githubusercontent.com/u/218489957?v=4&amp;s=72" alt="ShiroKSH" loading="lazy" onerror="this.remove()" /> </span> <div><b>ShiroKSH</b><i>1 commit</i></div> </a>
-        <a href="https://github.com/alvarorichard" target="_blank" rel="noopener noreferrer" class="mq-card" title="alvarorichard (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">AL</span> <img src="https://avatars.githubusercontent.com/u/88117897?v=4&amp;s=72" alt="alvarorichard" loading="lazy" onerror="this.remove()" /> </span> <div><b>alvarorichard</b><i>1 commit</i></div> </a>
-        <a href="https://github.com/gokomer" target="_blank" rel="noopener noreferrer" class="mq-card" title="gokomer (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">GO</span> <img src="https://avatars.githubusercontent.com/u/11593018?v=4&amp;s=72" alt="gokomer" loading="lazy" onerror="this.remove()" /> </span> <div><b>gokomer</b><i>1 commit</i></div> </a>
-        <a href="https://github.com/bachjessen" target="_blank" rel="noopener noreferrer" class="mq-card" title="bachjessen (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">BA</span> <img src="https://avatars.githubusercontent.com/u/59052984?v=4&amp;s=72" alt="bachjessen" loading="lazy" onerror="this.remove()" /> </span> <div><b>bachjessen</b><i>1 commit</i></div> </a>
-        <a href="https://github.com/chiyi4488" target="_blank" rel="noopener noreferrer" class="mq-card" title="chiyi4488 (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">CH</span> <img src="https://avatars.githubusercontent.com/u/30853081?v=4&amp;s=72" alt="chiyi4488" loading="lazy" onerror="this.remove()" /> </span> <div><b>chiyi4488</b><i>1 commit</i></div> </a>
-        <a href="https://github.com/gkd2323c" target="_blank" rel="noopener noreferrer" class="mq-card" title="gkd2323c (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">GK</span> <img src="https://avatars.githubusercontent.com/u/216696112?v=4&amp;s=72" alt="gkd2323c" loading="lazy" onerror="this.remove()" /> </span> <div><b>gkd2323c</b><i>1 commit</i></div> </a>
-        <a href="https://github.com/OtaviOuu" target="_blank" rel="noopener noreferrer" class="mq-card" title="OtaviOuu (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">OT</span> <img src="https://avatars.githubusercontent.com/u/106476419?v=4&amp;s=72" alt="OtaviOuu" loading="lazy" onerror="this.remove()" /> </span> <div><b>OtaviOuu</b><i>1 commit</i></div> </a>
+        <a href="https://github.com/dajiaohuang" target="_blank" rel="noopener noreferrer" class="mq-card" title="dajiaohuang (2 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">DA</span> <img src="https://avatars.githubusercontent.com/u/108231307?v=4&amp;s=72" alt="dajiaohuang" loading="lazy" onerror="this.remove()" /> </span> <div><b>dajiaohuang</b><i>2 commits</i></div> </a>
+        <a href="https://github.com/shiroesneo-99" target="_blank" rel="noopener noreferrer" class="mq-card" title="shiroesneo-99 (2 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">SH</span> <img src="https://avatars.githubusercontent.com/u/252557381?v=4&amp;s=72" alt="shiroesneo-99" loading="lazy" onerror="this.remove()" /> </span> <div><b>shiroesneo-99</b><i>2 commits</i></div> </a>
+        <a href="https://github.com/SiIverAsh" target="_blank" rel="noopener noreferrer" class="mq-card" title="SiIverAsh (2 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">SI</span> <img src="https://avatars.githubusercontent.com/u/108169083?v=4&amp;s=72" alt="SiIverAsh" loading="lazy" onerror="this.remove()" /> </span> <div><b>SiIverAsh</b><i>2 commits</i></div> </a>
+        <a href="https://github.com/gtxPrime" target="_blank" rel="noopener noreferrer" class="mq-card" title="gtxPrime (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">GT</span> <img src="https://avatars.githubusercontent.com/u/61928763?v=4&amp;s=72" alt="gtxPrime" loading="lazy" onerror="this.remove()" /> </span> <div><b>gtxPrime</b><i>1 commit</i></div> </a>
+        <a href="https://github.com/ShiroKSH" target="_blank" rel="noopener noreferrer" class="mq-card" title="ShiroKSH (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">SH</span> <img src="https://avatars.githubusercontent.com/u/218489957?v=4&amp;s=72" alt="ShiroKSH" loading="lazy" onerror="this.remove()" /> </span> <div><b>ShiroKSH</b><i>1 commit</i></div> </a>
+        <a href="https://github.com/alvarorichard" target="_blank" rel="noopener noreferrer" class="mq-card" title="alvarorichard (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">AL</span> <img src="https://avatars.githubusercontent.com/u/88117897?v=4&amp;s=72" alt="alvarorichard" loading="lazy" onerror="this.remove()" /> </span> <div><b>alvarorichard</b><i>1 commit</i></div> </a>
+        <a href="https://github.com/gokomer" target="_blank" rel="noopener noreferrer" class="mq-card" title="gokomer (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">GO</span> <img src="https://avatars.githubusercontent.com/u/11593018?v=4&amp;s=72" alt="gokomer" loading="lazy" onerror="this.remove()" /> </span> <div><b>gokomer</b><i>1 commit</i></div> </a>
+        <a href="https://github.com/bachjessen" target="_blank" rel="noopener noreferrer" class="mq-card" title="bachjessen (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">BA</span> <img src="https://avatars.githubusercontent.com/u/59052984?v=4&amp;s=72" alt="bachjessen" loading="lazy" onerror="this.remove()" /> </span> <div><b>bachjessen</b><i>1 commit</i></div> </a>
+        <a href="https://github.com/chiyi4488" target="_blank" rel="noopener noreferrer" class="mq-card" title="chiyi4488 (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">CH</span> <img src="https://avatars.githubusercontent.com/u/30853081?v=4&amp;s=72" alt="chiyi4488" loading="lazy" onerror="this.remove()" /> </span> <div><b>chiyi4488</b><i>1 commit</i></div> </a>
+        <a href="https://github.com/gkd2323c" target="_blank" rel="noopener noreferrer" class="mq-card" title="gkd2323c (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">GK</span> <img src="https://avatars.githubusercontent.com/u/216696112?v=4&amp;s=72" alt="gkd2323c" loading="lazy" onerror="this.remove()" /> </span> <div><b>gkd2323c</b><i>1 commit</i></div> </a>
+        <a href="https://github.com/OtaviOuu" target="_blank" rel="noopener noreferrer" class="mq-card" title="OtaviOuu (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">OT</span> <img src="https://avatars.githubusercontent.com/u/106476419?v=4&amp;s=72" alt="OtaviOuu" loading="lazy" onerror="this.remove()" /> </span> <div><b>OtaviOuu</b><i>1 commit</i></div> </a>
         <!-- Duplicate half, aria-hidden: makes the loop seamless. -->
         <span class="mq-dup" aria-hidden="true" inert>
-          <a href="https://github.com/dajiaohuang" target="_blank" rel="noopener noreferrer" class="mq-card" title="dajiaohuang (2 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">DA</span> <img src="https://avatars.githubusercontent.com/u/108231307?v=4&amp;s=72" alt="dajiaohuang" loading="lazy" onerror="this.remove()" /> </span> <div><b>dajiaohuang</b><i>2 commits</i></div> </a>
-          <a href="https://github.com/shiroesneo-99" target="_blank" rel="noopener noreferrer" class="mq-card" title="shiroesneo-99 (2 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">SH</span> <img src="https://avatars.githubusercontent.com/u/252557381?v=4&amp;s=72" alt="shiroesneo-99" loading="lazy" onerror="this.remove()" /> </span> <div><b>shiroesneo-99</b><i>2 commits</i></div> </a>
-          <a href="https://github.com/SiIverAsh" target="_blank" rel="noopener noreferrer" class="mq-card" title="SiIverAsh (2 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">SI</span> <img src="https://avatars.githubusercontent.com/u/108169083?v=4&amp;s=72" alt="SiIverAsh" loading="lazy" onerror="this.remove()" /> </span> <div><b>SiIverAsh</b><i>2 commits</i></div> </a>
-          <a href="https://github.com/gtxPrime" target="_blank" rel="noopener noreferrer" class="mq-card" title="gtxPrime (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">GT</span> <img src="https://avatars.githubusercontent.com/u/61928763?v=4&amp;s=72" alt="gtxPrime" loading="lazy" onerror="this.remove()" /> </span> <div><b>gtxPrime</b><i>1 commit</i></div> </a>
-          <a href="https://github.com/ShiroKSH" target="_blank" rel="noopener noreferrer" class="mq-card" title="ShiroKSH (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">SH</span> <img src="https://avatars.githubusercontent.com/u/218489957?v=4&amp;s=72" alt="ShiroKSH" loading="lazy" onerror="this.remove()" /> </span> <div><b>ShiroKSH</b><i>1 commit</i></div> </a>
-          <a href="https://github.com/alvarorichard" target="_blank" rel="noopener noreferrer" class="mq-card" title="alvarorichard (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">AL</span> <img src="https://avatars.githubusercontent.com/u/88117897?v=4&amp;s=72" alt="alvarorichard" loading="lazy" onerror="this.remove()" /> </span> <div><b>alvarorichard</b><i>1 commit</i></div> </a>
-          <a href="https://github.com/gokomer" target="_blank" rel="noopener noreferrer" class="mq-card" title="gokomer (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">GO</span> <img src="https://avatars.githubusercontent.com/u/11593018?v=4&amp;s=72" alt="gokomer" loading="lazy" onerror="this.remove()" /> </span> <div><b>gokomer</b><i>1 commit</i></div> </a>
-          <a href="https://github.com/bachjessen" target="_blank" rel="noopener noreferrer" class="mq-card" title="bachjessen (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">BA</span> <img src="https://avatars.githubusercontent.com/u/59052984?v=4&amp;s=72" alt="bachjessen" loading="lazy" onerror="this.remove()" /> </span> <div><b>bachjessen</b><i>1 commit</i></div> </a>
-          <a href="https://github.com/chiyi4488" target="_blank" rel="noopener noreferrer" class="mq-card" title="chiyi4488 (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">CH</span> <img src="https://avatars.githubusercontent.com/u/30853081?v=4&amp;s=72" alt="chiyi4488" loading="lazy" onerror="this.remove()" /> </span> <div><b>chiyi4488</b><i>1 commit</i></div> </a>
-          <a href="https://github.com/gkd2323c" target="_blank" rel="noopener noreferrer" class="mq-card" title="gkd2323c (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">GK</span> <img src="https://avatars.githubusercontent.com/u/216696112?v=4&amp;s=72" alt="gkd2323c" loading="lazy" onerror="this.remove()" /> </span> <div><b>gkd2323c</b><i>1 commit</i></div> </a>
-          <a href="https://github.com/OtaviOuu" target="_blank" rel="noopener noreferrer" class="mq-card" title="OtaviOuu (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback">OT</span> <img src="https://avatars.githubusercontent.com/u/106476419?v=4&amp;s=72" alt="OtaviOuu" loading="lazy" onerror="this.remove()" /> </span> <div><b>OtaviOuu</b><i>1 commit</i></div> </a>
+          <a href="https://github.com/dajiaohuang" target="_blank" rel="noopener noreferrer" class="mq-card" title="dajiaohuang (2 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">DA</span> <img src="https://avatars.githubusercontent.com/u/108231307?v=4&amp;s=72" alt="dajiaohuang" loading="lazy" onerror="this.remove()" /> </span> <div><b>dajiaohuang</b><i>2 commits</i></div> </a>
+          <a href="https://github.com/shiroesneo-99" target="_blank" rel="noopener noreferrer" class="mq-card" title="shiroesneo-99 (2 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">SH</span> <img src="https://avatars.githubusercontent.com/u/252557381?v=4&amp;s=72" alt="shiroesneo-99" loading="lazy" onerror="this.remove()" /> </span> <div><b>shiroesneo-99</b><i>2 commits</i></div> </a>
+          <a href="https://github.com/SiIverAsh" target="_blank" rel="noopener noreferrer" class="mq-card" title="SiIverAsh (2 commits on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">SI</span> <img src="https://avatars.githubusercontent.com/u/108169083?v=4&amp;s=72" alt="SiIverAsh" loading="lazy" onerror="this.remove()" /> </span> <div><b>SiIverAsh</b><i>2 commits</i></div> </a>
+          <a href="https://github.com/gtxPrime" target="_blank" rel="noopener noreferrer" class="mq-card" title="gtxPrime (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">GT</span> <img src="https://avatars.githubusercontent.com/u/61928763?v=4&amp;s=72" alt="gtxPrime" loading="lazy" onerror="this.remove()" /> </span> <div><b>gtxPrime</b><i>1 commit</i></div> </a>
+          <a href="https://github.com/ShiroKSH" target="_blank" rel="noopener noreferrer" class="mq-card" title="ShiroKSH (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">SH</span> <img src="https://avatars.githubusercontent.com/u/218489957?v=4&amp;s=72" alt="ShiroKSH" loading="lazy" onerror="this.remove()" /> </span> <div><b>ShiroKSH</b><i>1 commit</i></div> </a>
+          <a href="https://github.com/alvarorichard" target="_blank" rel="noopener noreferrer" class="mq-card" title="alvarorichard (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">AL</span> <img src="https://avatars.githubusercontent.com/u/88117897?v=4&amp;s=72" alt="alvarorichard" loading="lazy" onerror="this.remove()" /> </span> <div><b>alvarorichard</b><i>1 commit</i></div> </a>
+          <a href="https://github.com/gokomer" target="_blank" rel="noopener noreferrer" class="mq-card" title="gokomer (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">GO</span> <img src="https://avatars.githubusercontent.com/u/11593018?v=4&amp;s=72" alt="gokomer" loading="lazy" onerror="this.remove()" /> </span> <div><b>gokomer</b><i>1 commit</i></div> </a>
+          <a href="https://github.com/bachjessen" target="_blank" rel="noopener noreferrer" class="mq-card" title="bachjessen (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">BA</span> <img src="https://avatars.githubusercontent.com/u/59052984?v=4&amp;s=72" alt="bachjessen" loading="lazy" onerror="this.remove()" /> </span> <div><b>bachjessen</b><i>1 commit</i></div> </a>
+          <a href="https://github.com/chiyi4488" target="_blank" rel="noopener noreferrer" class="mq-card" title="chiyi4488 (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">CH</span> <img src="https://avatars.githubusercontent.com/u/30853081?v=4&amp;s=72" alt="chiyi4488" loading="lazy" onerror="this.remove()" /> </span> <div><b>chiyi4488</b><i>1 commit</i></div> </a>
+          <a href="https://github.com/gkd2323c" target="_blank" rel="noopener noreferrer" class="mq-card" title="gkd2323c (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">GK</span> <img src="https://avatars.githubusercontent.com/u/216696112?v=4&amp;s=72" alt="gkd2323c" loading="lazy" onerror="this.remove()" /> </span> <div><b>gkd2323c</b><i>1 commit</i></div> </a>
+          <a href="https://github.com/OtaviOuu" target="_blank" rel="noopener noreferrer" class="mq-card" title="OtaviOuu (1 commit on GitHub)"> <span class="mq-avatar"> <span class="mq-fallback" aria-hidden="true">OT</span> <img src="https://avatars.githubusercontent.com/u/106476419?v=4&amp;s=72" alt="OtaviOuu" loading="lazy" onerror="this.remove()" /> </span> <div><b>OtaviOuu</b><i>1 commit</i></div> </a>
         </span>
       </div>
     </div>
@@ -1178,10 +1285,11 @@ footer {
 <script>
 (function () {
   var root = document.documentElement;
-  var themeBtn = document.getElementById('theme');
-  var THEME_KEYS = ['omniget-theme', 'omniget_docs_theme', 'theme'];
+  var themeBtn = document.getElementById('themeToggleBtn') || document.getElementById('theme');
+  var THEME_KEYS = ['omniget-theme', 'omniget_docs_theme', 'omni-theme', 'theme'];
 
   function syncBtn() {
+    if (!themeBtn) return;
     var isDark = root.getAttribute('data-theme') === 'dark';
     themeBtn.setAttribute('aria-pressed', isDark ? 'true' : 'false');
     themeBtn.setAttribute('title', isDark ? 'Switch to light theme' : 'Switch to dark theme');
@@ -1189,16 +1297,41 @@ footer {
 
   var reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-  themeBtn.addEventListener('click', function () {
+  function toggleTheme() {
     var next = root.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     function apply() {
       root.setAttribute('data-theme', next);
+      root.classList.toggle('dark', next === 'dark');
       try { THEME_KEYS.forEach(function (k) { localStorage.setItem(k, next); }); } catch (e) {}
       syncBtn();
     }
     if (document.startViewTransition && !reduceMotion) document.startViewTransition(apply);
     else apply();
-  });
+  }
+  window.toggleTheme = toggleTheme;
+
+  if (themeBtn) {
+    themeBtn.addEventListener('click', toggleTheme);
+  }
+
+  // Live GitHub star counter with sessionStorage caching
+  (function () {
+    var el = document.getElementById('ghStarCount');
+    if (!el) return;
+    try {
+      var cached = sessionStorage.getItem('omniget_gh_stars');
+      if (cached) { el.textContent = cached; return; }
+    } catch (e) {}
+    fetch('https://api.github.com/repos/OpenSelena/omniget')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d || typeof d.stargazers_count !== 'number') return;
+        var count = d.stargazers_count >= 1000 ? (d.stargazers_count / 1000).toFixed(1) + 'k' : String(d.stargazers_count);
+        el.textContent = count;
+        try { sessionStorage.setItem('omniget_gh_stars', count); } catch (e) {}
+      })
+      .catch(function () {});
+  })();
 
   // Follow the OS theme live, but only while the visitor has not picked one.
   var systemDark = matchMedia('(prefers-color-scheme: dark)');
@@ -1245,8 +1378,10 @@ footer {
     key = /^win/i.test(plat) ? 'windows' : /^mac/i.test(plat) ? 'macos' : /linux|x11/i.test(plat) ? 'linux' : null;
   }
   if (key) {
-    document.getElementById('hero-dl-text').textContent = LABELS[key];
-    document.getElementById('cta-dl-text').textContent = LABELS[key];
+    var heroDlText = document.getElementById('hero-dl-text');
+    if (heroDlText) heroDlText.textContent = LABELS[key];
+    var ctaDlText = document.getElementById('cta-dl-text');
+    if (ctaDlText) ctaDlText.textContent = LABELS[key];
     // In the platform list, only the visitor's own system keeps the filled button.
     document.querySelectorAll('.os-card').forEach(function (card) {
       if (card.getAttribute('data-os') === key) return;
@@ -1337,7 +1472,7 @@ footer {
     var alt = esc(isLead ? 'Antonio Leandro (' + login + ')' : login);
 
     return '<a href="' + url + '" target="_blank" rel="noopener noreferrer" class="mq-card" title="' + name + ' (' + label + ' on GitHub)">' +
-      '<span class="mq-avatar"><span class="mq-fallback">' + esc(login.slice(0, 2).toUpperCase()) + '</span>' +
+      '<span class="mq-avatar"><span class="mq-fallback" aria-hidden="true">' + esc(login.slice(0, 2).toUpperCase()) + '</span>' +
       (avatar !== '#' ? '<img src="' + avatar + '" alt="' + alt + '" loading="lazy" onerror="this.remove()" />' : '') +
       '</span><div><b>' + name + '</b><i>' + label + '</i></div></a>';
   }
