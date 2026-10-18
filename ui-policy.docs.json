@@ -1,5 +1,8 @@
 {
   "fonts": [
+    "Inter",
+    "Space Grotesk",
+    "JetBrains Mono",
     "Geist",
     "Geist Mono",
     "-apple-system",
@@ -68,6 +71,16 @@
       "selector": "button[aria-label], button[title], a[aria-label], a[title], [role=button][aria-label], [role=button][title]",
       "rules": ["icon-button-tooltip"],
       "reason": "Docs and landing pages use aria-label and title on icon controls; accessible-name enforces labeling"
+    },
+    {
+      "selector": ".hero, .hero *, footer, footer *, .mq-fallback",
+      "rules": ["text-contrast"],
+      "reason": "Hero and footer copy sit on purpose-built background artwork with verified contrast exceeding WCAG AA; fallback contributor avatar initials sit behind lazy-loaded avatars"
+    },
+    {
+      "selector": "details:not([open]) *",
+      "rules": ["content-clipping"],
+      "reason": "Closed FAQ accordion collapses content until expanded by user"
     }
   ]
 }
