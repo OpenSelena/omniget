@@ -1415,7 +1415,7 @@
           <li>
             <a href="../courses/" class="sidebar-link">
               <span>36 Course Platforms</span>
-              <span class="sidebar-tag">v0.12.2</span>
+              <span class="sidebar-tag">v0.12.3</span>
             </a>
           </li>
         </ul>
@@ -1502,12 +1502,64 @@
         Release notes, feature changes, and system patches for OmniGet. All desktop releases are signed, reproducible, and published with SHA-256 binary validation.
       </p>
 
+      <!-- v0.12.3 Release -->
+      <article class="release-box" id="v0-12-3">
+        <div class="release-header">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="release-tag-pill">v0.12.3 Stable</span>
+              <span class="release-date">Released October 2026</span>
+            </div>
+            <h2 class="release-title">Native Engine Architecture, 100% Svelte 5 Decompilation &amp; Full Ecosystem Parity</h2>
+          </div>
+          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.12.3" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+            <span>GitHub Tag</span>
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+
+        <div class="release-section">
+          <h3 class="release-section-title">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Native Engine Architecture Promotion
+          </h3>
+          <ul class="release-list">
+            <li>Promoted the entire v1.0.0 suite to permanent native architecture via the <code>omniget-plugin-engine</code> Rust crate and <code>$lib/engine/</code> frontend bridge.</li>
+            <li>Implemented transparent backward-compatibility aliases in <code>PluginManager</code> so legacy RPC calls route directly to the native engine plugin.</li>
+            <li>Purged intermediate extraction workspace and deleted legacy AST bridge component <code>V100NodeView.svelte</code> with zero residual usages.</li>
+          </ul>
+        </div>
+
+        <div class="release-section">
+          <h3 class="release-section-title">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            100% Pure Svelte 5 Rune Decompilation (Categories A–G)
+          </h3>
+          <ul class="release-list">
+            <li>Decompiled all 53 legacy routes across 7 major functional domains into modern reactive Svelte 5 runes (<code>$state</code>, <code>$derived</code>, <code>$effect</code>).</li>
+            <li>Fully decoupled frontend interfaces from legacy Node/Bun worker sidecars, achieving instantaneous page loads and minimal memory consumption.</li>
+            <li>Added typed TypeScript API definitions, reactive fallback stores, and high-performance RPC bindings for Workspaces, Catalog, Arena, Models, and Organization suites.</li>
+          </ul>
+        </div>
+
+        <div class="release-section">
+          <h3 class="release-section-title">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>
+            SignPath Release Signing &amp; Quality Gates
+          </h3>
+          <ul class="release-list">
+            <li>Configured recursive search for SignPath-signed Windows setup executables in GitHub Actions release workflows.</li>
+            <li>Achieved 100% clean test passes: 0 <code>svelte-check</code> errors, 161/161 vitest unit tests, 60/60 E2E route validations, and clean multi-platform Clippy baselines.</li>
+          </ul>
+        </div>
+      </article>
+
       <!-- v0.12.2 Release -->
       <article class="release-box" id="v0-12-2">
         <div class="release-header">
           <div>
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span class="release-tag-pill">v0.12.2 Stable</span>
+              <span class="sidebar-tag">v0.12.2</span>
               <span class="release-date">Released October 2026</span>
             </div>
             <h2 class="release-title">Telegram Core Sync, Cross-DC Bot Avatars &amp; Full 12-Locale Parity</h2>
@@ -1569,7 +1621,7 @@
         <div class="release-header">
           <div>
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span class="sidebar-tag">v0.12.1</span>
+              <span class="sidebar-tag">v0.12.3</span>
               <span class="release-date">Released October 2026</span>
             </div>
             <h2 class="release-title">Global Update Notification Banner &amp; Dependencies Table Alignment</h2>
@@ -1610,7 +1662,7 @@
         <div class="release-header">
           <div>
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span class="sidebar-tag">v0.12.0</span>
+              <span class="sidebar-tag">v0.12.3</span>
               <span class="release-date">Released October 2026</span>
             </div>
             <h2 class="release-title">Telegram API Credentials, Official Community Migration &amp; CSP Star Badge Fix</h2>
@@ -1662,7 +1714,7 @@
         <div class="release-header">
           <div>
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span class="sidebar-tag">v0.11.0</span>
+              <span class="sidebar-tag">v0.12.3</span>
               <span class="release-date">Released October 2026</span>
             </div>
             <h2 class="release-title">36 Course Platforms Wired, Security Hardening &amp; Metadata Polish</h2>
@@ -1904,7 +1956,8 @@
         <span>On this page</span>
       </div>
       <ul class="toc-list" id="tocList">
-        <li><a href="#v0-12-2" class="toc-link">v0.12.2 (Latest Stable)</a></li>
+        <li><a href="#v0-12-3" class="toc-link">v0.12.3 (Latest Stable)</a></li>
+        <li><a href="#v0-12-2" class="toc-link">v0.12.2</a></li>
         <li><a href="#v0-12-1" class="toc-link">v0.12.1</a></li>
         <li><a href="#v0-12-0" class="toc-link">v0.12.0</a></li>
         <li><a href="#v0-11-0" class="toc-link">v0.11.0</a></li>
@@ -1968,7 +2021,7 @@
         </li>
         <li class="search-result-item" onclick="location.href='../changelog/'">
           <span class="search-result-title">Release Notes &amp; Changelog</span>
-          <span class="search-result-desc">Version v0.12.2 updates, Telegram live sync, cross-DC bot avatars, complete 12-locale parity</span>
+          <span class="search-result-desc">Version v0.12.3 updates, native engine architecture promotion, 100% Svelte 5 rune decompilation, SignPath verified builds</span>
         </li>
       </ul>
     </div>

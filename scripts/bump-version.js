@@ -121,7 +121,7 @@ const cargoLockPath = path.join(root, "src-tauri", "Cargo.lock");
 if (fs.existsSync(cargoLockPath)) {
   writeText(cargoLockPath, (content) => {
     return content.replace(
-      /(name = "omniget"\nversion = ")([^"]+)(")/,
+      /(name = "omniget"\r?\nversion = ")([^"]+)(")/,
       (_, a, _b, c) => `${a}${version}${c}`
     );
   });
