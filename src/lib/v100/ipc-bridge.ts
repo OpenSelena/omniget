@@ -78,7 +78,7 @@ function getDefaultResponseForCommand(cmd: string, args: any): any {
   return null;
 }
 
-export async function dispatchBridgeCommand(cmd: string, args: any): Promise<any> {
+export async function dispatchBridgeCommand(cmd: string, args: any = {}): Promise<any> {
   // Check if a developer-registered custom handler exists
   if (customHandlers.has(cmd)) {
     try {
@@ -123,6 +123,8 @@ export async function dispatchBridgeCommand(cmd: string, args: any): Promise<any
   // Return schema-valid default response
   return getDefaultResponseForCommand(cmd, args);
 }
+
+export const invokeV100 = dispatchBridgeCommand;
 
 let isInitialized = false;
 
