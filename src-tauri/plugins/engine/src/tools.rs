@@ -2,7 +2,7 @@ use serde_json::{json, Value};
 use tracing::info;
 
 pub async fn handle_tools_command(command: &str, args: Value) -> Result<Value, String> {
-    info!("[v100-tools] Executing command: {}", command);
+    info!("[engine-tools] Executing command: {}", command);
 
     match command {
         "tool_keys_balance" => {
@@ -78,7 +78,7 @@ pub async fn handle_tools_command(command: &str, args: Value) -> Result<Value, S
         _ => Ok(json!({
             "status": "success",
             "command": command,
-            "handled_by": "omniget-v100-tools"
+            "handled_by": "omniget-engine-tools"
         })),
     }
 }

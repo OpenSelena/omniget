@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t, workspaceRpc } from "$lib/v100/workspace-api";
+  import { t, workspaceRpc } from "$lib/engine/workspace-api";
   import {
     ChevronLeft,
     Wand2,

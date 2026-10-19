@@ -9,7 +9,7 @@
     formatRelativeTime,
     type Issue,
     type Staff,
-  } from "$lib/v100/company-api";
+  } from "$lib/engine/company-api";
   import {
     Kanban,
     List,
@@ -543,7 +543,7 @@
             <input
               id="iss-tags"
               type="text"
-              placeholder="e.g. core, downloader, v100"
+              placeholder="e.g. core, downloader, engine"
               bind:value={newTags}
             />
           </div>

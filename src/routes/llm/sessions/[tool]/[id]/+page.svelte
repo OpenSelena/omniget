@@ -6,7 +6,7 @@
     t,
     type SessionItem,
     type SessionTurn,
-  } from "$lib/v100/workspace-api";
+  } from "$lib/engine/workspace-api";
   import {
     ChevronLeft,
     Send,

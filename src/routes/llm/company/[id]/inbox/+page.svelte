@@ -12,7 +12,7 @@
     type ApprovalItem,
     type IncidentItem,
     type InboxTaskItem,
-  } from "$lib/v100/company-api";
+  } from "$lib/engine/company-api";
   import {
     Inbox,
     CheckCircle2,

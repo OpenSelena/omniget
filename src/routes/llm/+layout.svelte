@@ -2,8 +2,8 @@
   import type { Snippet } from "svelte";
   import { page } from "$app/stores";
   import { onMount } from "svelte";
-  import { t } from "$lib/v100/workspace-api";
-  import { llmRpc } from "$lib/v100/llm-engine-api";
+  import { t } from "$lib/engine/workspace-api";
+  import { llmRpc } from "$lib/engine/llm-engine-api";
   import {
     Activity,
     Sliders,

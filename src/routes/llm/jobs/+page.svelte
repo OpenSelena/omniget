@@ -7,7 +7,7 @@
     formatDuration,
     statusColor,
     type InferenceJob,
-  } from "$lib/v100/llm-engine-api";
+  } from "$lib/engine/llm-engine-api";
   import {
     Layers,
     Search,

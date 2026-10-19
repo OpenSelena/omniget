@@ -11,7 +11,7 @@
     formatUsd,
     cleanError,
     t,
-  } from "$lib/v100/company-api";
+  } from "$lib/engine/company-api";
 
   const companyId = $derived(page.params.id ?? "");
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { initIpcBridge } from "$lib/v100/ipc-bridge";
+  import { initIpcBridge } from "$lib/engine/ipc-bridge";
   initIpcBridge();
 
   import "../app.css";
@@ -65,12 +65,12 @@
     CORE_NAV_ITEMS.filter((item) => item.href !== "/omnidisc" || (getSettings()?.omnidisc?.enabled ?? true))
   );
 
-  let v100NavItems = $derived<NavItem[]>([
+  let engineNavItems = $derived<NavItem[]>([
     { href: "/superpowers", label: "Superpowers", icon: "superpowers", group: "app", order: 32 },
     { href: "/llm", label: "LLM & Canvas", icon: "llm", group: "app", order: 34 },
   ]);
 
-  let allNav = $derived([...coreNavItems, ...leagueNavItems, ...v100NavItems, ...pluginNavItems].sort((a, b) => (a.order ?? 50) - (b.order ?? 50)));
+  let allNav = $derived([...coreNavItems, ...leagueNavItems, ...engineNavItems, ...pluginNavItems].sort((a, b) => (a.order ?? 50) - (b.order ?? 50)));
   let primaryNav = $derived(allNav.filter((item) => item.group === "primary"));
   let appNav = $derived(allNav.filter((item) => item.group === "app"));
   let pluginNav = $derived(allNav.filter((item) => item.group === "plugins"));

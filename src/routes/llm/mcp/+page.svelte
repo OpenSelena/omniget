@@ -4,7 +4,7 @@
     llmRpc,
     t,
     type McpServer,
-  } from "$lib/v100/llm-engine-api";
+  } from "$lib/engine/llm-engine-api";
   import {
     Network,
     Plus,

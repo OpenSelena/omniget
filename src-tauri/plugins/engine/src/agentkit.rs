@@ -131,12 +131,12 @@ async fn handle_workspace_rpc(method: &str, _args: Value) -> Result<Value, Strin
         ])),
         "missions.list" => Ok(json!([
             {
-                "id": "mis-v100-audit",
-                "title": "OmniGet v1.0.0 Native Integration Audit",
-                "objective": "Decompile all legacy AST bridge routes into pure Svelte 5 runes and achieve 100% native Rust ownership.",
-                "status": "active",
+                "id": "mis-engine-integration",
+                "title": "OmniGet Native Engine Architecture Integration",
+                "objective": "Decompile all legacy bridge routes into pure Svelte 5 runes and achieve 100% native Rust ownership.",
+                "status": "completed",
                 "priority": "critical",
-                "progress_pct": 85,
+                "progress_pct": 100,
                 "assigned_agents": ["Lead Engineer", "MosCat Sentinel"],
                 "tasks": [
                     { "id": "t1", "title": "Decompile Category A Media Routes", "done": true },
@@ -186,9 +186,9 @@ async fn handle_workspace_rpc(method: &str, _args: Value) -> Result<Value, Strin
         ])),
         "sessions.list" => Ok(json!([
             {
-                "id": "sess-v100",
+                "id": "sess-engine",
                 "tool": "chat",
-                "title": "V100 Native Decompilation Strategy",
+                "title": "Native Engine Architecture Strategy",
                 "model": "claude-3-7-sonnet",
                 "turns_count": 8,
                 "token_count": 14200,
@@ -259,14 +259,14 @@ async fn handle_company_rpc(method: &str, args: Value) -> Result<Value, String> 
                 "id": "issue-1",
                 "company_id": "omniget-core",
                 "identifier": "OMNI-1",
-                "title": "Complete v1.0.0 Company & Organization Suite Decompilation",
-                "description": "Fully decompile all 12 company routes into pure Svelte 5 runes with 100% test coverage.",
-                "status": "in_progress",
+                "title": "Complete Engine Architecture & Suite Integration",
+                "description": "Fully integrate all engine routes into pure Svelte 5 runes with 100% test coverage.",
+                "status": "completed",
                 "priority": "urgent",
                 "assignee_id": "staff-lead",
                 "creator": "User",
                 "created_at": 1700000000000_i64,
-                "tags": ["core", "v100", "svelte5"]
+                "tags": ["core", "engine", "svelte5"]
             }
         ])),
         "company.dashboard" => Ok(json!({

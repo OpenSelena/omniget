@@ -6959,9 +6959,9 @@ dependencies = [
  "omniget-core",
  "omniget-plugin-convert",
  "omniget-plugin-courses",
+ "omniget-plugin-engine",
  "omniget-plugin-sdk",
  "omniget-plugin-telegram",
- "omniget-plugin-v100",
  "once_cell",
  "open",
  "qrcode",
@@ -7133,6 +7133,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "omniget-plugin-engine"
+version = "1.0.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "dirs 6.0.0",
+ "omniget-core",
+ "omniget-plugin-sdk",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tokio-util",
+ "tracing",
+]
+
+[[package]]
 name = "omniget-plugin-sdk"
 version = "0.2.0"
 dependencies = [
@@ -7167,22 +7183,6 @@ dependencies = [
  "tokio-util",
  "tracing",
  "url",
-]
-
-[[package]]
-name = "omniget-plugin-v100"
-version = "1.0.0"
-dependencies = [
- "anyhow",
- "chrono",
- "dirs 6.0.0",
- "omniget-core",
- "omniget-plugin-sdk",
- "serde",
- "serde_json",
- "tokio",
- "tokio-util",
- "tracing",
 ]
 
 [[package]]

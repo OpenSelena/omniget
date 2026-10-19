@@ -5,7 +5,7 @@
     workspaceRpc,
     t,
     type CatalogItem,
-  } from "$lib/v100/workspace-api";
+  } from "$lib/engine/workspace-api";
   import {
     ChevronLeft,
     Star,

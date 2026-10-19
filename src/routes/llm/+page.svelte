@@ -2,7 +2,7 @@
   import { onMount, tick } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
   import { t } from "$lib/i18n";
-  import { registerBridgeHandler } from "$lib/v100/ipc-bridge";
+  import { registerBridgeHandler } from "$lib/engine/ipc-bridge";
 
   // Domain types
   interface Agent {

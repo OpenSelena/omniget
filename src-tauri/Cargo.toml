@@ -11,7 +11,7 @@ members = [
     "plugins/telegram",
     "plugins/courses",
     "plugins/grammers-session",
-    "plugins/v100",
+    "plugins/engine",
 ]
 resolver = "2"
 
@@ -88,7 +88,7 @@ omniget-plugin-sdk = { path = "omniget-plugin-sdk" }
 omniget-plugin-convert = { path = "plugins/convert" }
 omniget-plugin-telegram = { path = "plugins/telegram" }
 omniget-plugin-courses = { path = "plugins/courses" }
-omniget-plugin-v100 = { path = "plugins/v100" }
+omniget-plugin-engine = { path = "plugins/engine" }
 omnidisc-proto = { path = "omnidisc-proto" }
 omnidisc-media = { path = "omnidisc-media", default-features = false, features = ["rnnoise"] }
 omnidisc-mls = { path = "omnidisc-mls" }

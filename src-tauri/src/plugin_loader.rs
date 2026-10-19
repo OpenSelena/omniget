@@ -201,6 +201,13 @@ impl PluginManager {
         let loaded = self
             .loaded
             .get(plugin_id)
+            .or_else(|| {
+                if plugin_id == "v100" {
+                    self.loaded.get("engine")
+                } else {
+                    None
+                }
+            })
             .ok_or_else(|| format!("Plugin '{}' not loaded", plugin_id))?;
 
         loaded

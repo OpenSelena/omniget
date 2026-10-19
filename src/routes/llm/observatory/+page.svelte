@@ -4,7 +4,7 @@
     llmRpc,
     t,
     type ObservatoryStats,
-  } from "$lib/v100/llm-engine-api";
+  } from "$lib/engine/llm-engine-api";
   import {
     Activity,
     Zap,

@@ -89,12 +89,12 @@ export async function dispatchBridgeCommand(cmd: string, args: any = {}): Promis
     }
   }
 
-  // 2. Try native v100 Rust plugin in Tauri
+  // 2. Try native engine Rust plugin in Tauri
   const w = typeof window !== "undefined" ? (window as any) : null;
   if (w?.__TAURI_INTERNALS__?.invoke) {
     try {
       const res = await w.__TAURI_INTERNALS__.invoke("plugin_command", {
-        pluginId: "v100",
+        pluginId: "engine",
         command: cmd,
         args: args ?? {},
       });
@@ -124,6 +124,7 @@ export async function dispatchBridgeCommand(cmd: string, args: any = {}): Promis
   return getDefaultResponseForCommand(cmd, args);
 }
 
+export const invokeEngine = dispatchBridgeCommand;
 export const invokeV100 = dispatchBridgeCommand;
 
 let isInitialized = false;

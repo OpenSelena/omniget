@@ -2,7 +2,7 @@ use serde_json::{json, Value};
 use tracing::info;
 
 pub async fn handle_league_command(command: &str, _args: Value) -> Result<Value, String> {
-    info!("[v100-league] Executing command: {}", command);
+    info!("[engine-league] Executing command: {}", command);
 
     match command {
         "league_status" | "league_detect" => {
@@ -19,7 +19,7 @@ pub async fn handle_league_command(command: &str, _args: Value) -> Result<Value,
         _ => Ok(json!({
             "status": "success",
             "command": command,
-            "handled_by": "omniget-v100-league"
+            "handled_by": "omniget-engine-league"
         })),
     }
 }

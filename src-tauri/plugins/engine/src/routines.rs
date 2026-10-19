@@ -2,7 +2,7 @@ use serde_json::{json, Value};
 use tracing::info;
 
 pub async fn handle_routines_command(command: &str, args: Value) -> Result<Value, String> {
-    info!("[v100-routines] Executing command: {}", command);
+    info!("[engine-routines] Executing command: {}", command);
 
     match command {
         "routine_list" | "routines_list" => {
@@ -46,7 +46,7 @@ pub async fn handle_routines_command(command: &str, args: Value) -> Result<Value
         _ => Ok(json!({
             "status": "success",
             "command": command,
-            "handled_by": "omniget-v100-routines"
+            "handled_by": "omniget-engine-routines"
         })),
     }
 }

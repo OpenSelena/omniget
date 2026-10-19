@@ -10,7 +10,7 @@
     avatarColor,
     cleanError,
     t,
-  } from "$lib/v100/company-api";
+  } from "$lib/engine/company-api";
 
   interface CompanyRowItem {
     company: Company;

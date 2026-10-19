@@ -14,7 +14,7 @@
     statusColor,
     cleanError,
     t,
-  } from "$lib/v100/company-api";
+  } from "$lib/engine/company-api";
 
   const companyId = $derived(page.params.id ?? "");
   const basePath = $derived(`/llm/company/${companyId}`);

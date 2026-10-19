@@ -15,13 +15,13 @@ pub mod spicetify;
 pub mod superpowers;
 pub mod tools;
 
-pub struct V100Plugin {
+pub struct EnginePlugin {
     host: Option<Arc<dyn PluginHost>>,
     workspace_dir: Arc<RwLock<PathBuf>>,
     active_sandbox: Arc<RwLock<bool>>,
 }
 
-impl V100Plugin {
+impl EnginePlugin {
     pub fn new() -> Self {
         let default_workspace = dirs::home_dir().unwrap_or_else(|| PathBuf::from("."));
         Self {
@@ -33,16 +33,16 @@ impl V100Plugin {
 }
 
 pub fn manifest() -> omniget_plugin_sdk::PluginManifest {
-    serde_json::from_str(include_str!("../plugin.json")).expect("valid v100 manifest")
+    serde_json::from_str(include_str!("../plugin.json")).expect("valid engine manifest")
 }
 
-impl OmnigetPlugin for V100Plugin {
+impl OmnigetPlugin for EnginePlugin {
     fn id(&self) -> &str {
-        "v100"
+        "engine"
     }
 
     fn name(&self) -> &str {
-        "OmniGet v1.0.0 Native Engine"
+        "OmniGet Native Engine"
     }
 
     fn version(&self) -> &str {
@@ -51,7 +51,7 @@ impl OmnigetPlugin for V100Plugin {
 
     fn initialize(&mut self, host: Arc<dyn PluginHost>) -> anyhow::Result<()> {
         self.host = Some(host);
-        tracing::info!("[v100-native] Initialized native OmniGet v1.0.0 engine in Rust");
+        tracing::info!("[engine-native] Initialized native OmniGet engine in Rust");
         Ok(())
     }
 
@@ -66,7 +66,7 @@ impl OmnigetPlugin for V100Plugin {
         let sb = Arc::clone(&self.active_sandbox);
 
         Box::pin(async move {
-            tracing::debug!("[v100-native] handle_command: {}", command);
+            tracing::debug!("[engine-native] handle_command: {}", command);
 
             // 1. LLM & Workspace Commands
             if command.starts_with("llm_") || command.starts_with("assist_") {
@@ -121,7 +121,7 @@ impl OmnigetPlugin for V100Plugin {
             // 11. Fallback for unhandled command
             Ok(json!({
                 "status": "success",
-                "handled_by": "omniget-v100-native",
+                "handled_by": "omniget-engine-native",
                 "command": command,
                 "data": {}
             }))

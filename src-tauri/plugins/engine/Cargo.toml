@@ -1,8 +1,8 @@
 [package]
-name = "omniget-plugin-v100"
+name = "omniget-plugin-engine"
 version = "1.0.0"
 edition = "2021"
-description = "Native v1.0.0 worker, canvas, and LLM subsystem for OmniGet"
+description = "Native engine, canvas, and LLM subsystem for OmniGet"
 authors = ["OpenSelena"]
 
 [dependencies]

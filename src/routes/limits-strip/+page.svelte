@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { t } from "$lib/i18n";
-  import { invokeV100 } from "$lib/v100/ipc-bridge";
+  import { invokeV100 } from "$lib/engine/ipc-bridge";
 
   interface WindowLimit {
     id: string;

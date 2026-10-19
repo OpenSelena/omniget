@@ -2,7 +2,7 @@ use serde_json::{json, Value};
 use tracing::info;
 
 pub async fn handle_spicetify_command(command: &str, _args: Value) -> Result<Value, String> {
-    info!("[v100-spicetify] Executing command: {}", command);
+    info!("[engine-spicetify] Executing command: {}", command);
 
     match command {
         "spicetify_install" => {
@@ -23,7 +23,7 @@ pub async fn handle_spicetify_command(command: &str, _args: Value) -> Result<Val
         _ => Ok(json!({
             "status": "success",
             "command": command,
-            "handled_by": "omniget-v100-spicetify"
+            "handled_by": "omniget-engine-spicetify"
         })),
     }
 }

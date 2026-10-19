@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { Snippet } from "svelte";
-  import { t } from "$lib/v100/workspace-api";
+  import { t } from "$lib/engine/workspace-api";
   import { Layers, X, Trash2, Download, Terminal, Plus, Check } from "lucide-svelte";
 
   let { children }: { children?: Snippet } = $props();

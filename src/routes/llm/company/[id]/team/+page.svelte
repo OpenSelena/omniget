@@ -11,7 +11,7 @@
     buildOrgTree,
     type Staff,
     type StaffTreeNode,
-  } from "$lib/v100/company-api";
+  } from "$lib/engine/company-api";
   import {
     Users,
     UserPlus,

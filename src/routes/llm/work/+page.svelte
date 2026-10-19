@@ -4,7 +4,7 @@
     workspaceRpc,
     t,
     type WorkItem,
-  } from "$lib/v100/workspace-api";
+  } from "$lib/engine/workspace-api";
   import {
     Inbox,
     CheckCircle2,

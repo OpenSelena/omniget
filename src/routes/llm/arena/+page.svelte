@@ -5,7 +5,7 @@
     t,
     type ArenaBattle,
     type ArenaLeaderboardEntry,
-  } from "$lib/v100/llm-engine-api";
+  } from "$lib/engine/llm-engine-api";
   import {
     Swords,
     Trophy,

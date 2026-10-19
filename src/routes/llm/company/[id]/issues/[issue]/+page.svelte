@@ -17,7 +17,7 @@
     type Goal,
     type Project,
     type RunRecord,
-  } from "$lib/v100/company-api";
+  } from "$lib/engine/company-api";
   import {
     ArrowLeft,
     CheckCircle2,
