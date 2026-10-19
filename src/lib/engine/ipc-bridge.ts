@@ -8,6 +8,8 @@
  * 3. Extensible Registry: Developers can customize or override any command handler directly.
  */
 
+import { pluginInvoke } from "$lib/plugin-invoke";
+
 type CommandHandler = (args: any) => Promise<any> | any;
 
 const customHandlers = new Map<string, CommandHandler>();
@@ -89,35 +91,12 @@ export async function dispatchBridgeCommand(cmd: string, args: any = {}): Promis
     }
   }
 
-  // 2. Try native engine Rust plugin in Tauri
-  const w = typeof window !== "undefined" ? (window as any) : null;
-  if (w?.__TAURI_INTERNALS__?.invoke) {
-    try {
-      const res = await w.__TAURI_INTERNALS__.invoke("plugin_command", {
-        pluginId: "engine",
-        command: cmd,
-        args: args ?? {},
-      });
-      if (res !== undefined && res !== null) return res;
-    } catch {
-      // Fall through to sidecar or schema defaults
-    }
-  }
-
-  // 3. Check if worker sidecar is reachable over local RPC (port 18482)
+  // Try native engine Rust plugin in Tauri
   try {
-    const res = await fetch("http://127.0.0.1:18482/rpc", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ command: cmd, args }),
-      signal: AbortSignal.timeout(100),
-    });
-    if (res.ok) {
-      const data = await res.json();
-      return data.result;
-    }
+    const res = await pluginInvoke<any>("engine", cmd, args ?? {});
+    if (res !== undefined && res !== null) return res;
   } catch {
-    // Sidecar not actively running in this mode; fallback to schema defaults
+    // Engine command not supported or running outside Tauri; fallback to schema defaults
   }
 
   // Return schema-valid default response
@@ -127,45 +106,6 @@ export async function dispatchBridgeCommand(cmd: string, args: any = {}): Promis
 export const invokeEngine = dispatchBridgeCommand;
 export const invokeV100 = dispatchBridgeCommand;
 
-let isInitialized = false;
-
 export function initIpcBridge() {
-  if (isInitialized) return;
-  isInitialized = true;
-
-  if (typeof window === "undefined") return;
-
-  const w = window as any;
-
-  if (w.__TAURI_INTERNALS__ && typeof w.__TAURI_INTERNALS__.invoke === "function") {
-    const originalInvoke = w.__TAURI_INTERNALS__.invoke.bind(w.__TAURI_INTERNALS__);
-
-    w.__TAURI_INTERNALS__.invoke = async function (cmd: string, args?: any, options?: any) {
-      try {
-        return await originalInvoke(cmd, args, options);
-      } catch (err: any) {
-        const errStr = String(err?.message || err);
-        // Intercept unknown / unhandled commands
-        if (
-          errStr.includes("not found") ||
-          errStr.includes("CommandNotFound") ||
-          errStr.includes("command not found")
-        ) {
-          return await dispatchBridgeCommand(cmd, args);
-        }
-        throw err;
-      }
-    };
-  } else {
-    // Mock environment (Vite browser dev mode outside Tauri)
-    w.__TAURI_INTERNALS__ = {
-      invoke: async (cmd: string, args?: any) => {
-        return await dispatchBridgeCommand(cmd, args);
-      },
-      transformCallback: (fn: any) => fn,
-      unregisterCallback: () => {},
-      convertFileSrc: (p: string) => p,
-    };
-    w.isTauri = false;
-  }
+  // Safe no-op: Global Tauri internals are preserved without monkey-patching
 }

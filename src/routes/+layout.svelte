@@ -1,7 +1,4 @@
 <script lang="ts">
-  import { initIpcBridge } from "$lib/engine/ipc-bridge";
-  initIpcBridge();
-
   import "../app.css";
   import "$lib/style/queue-kinds.css";
   import { page } from "$app/state";
