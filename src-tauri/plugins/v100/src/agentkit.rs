@@ -34,6 +34,11 @@ pub async fn handle_agentkit_command(
             let rpc_args = args.get("args").cloned().unwrap_or(json!({}));
             handle_company_rpc(method, rpc_args).await
         }
+        "llm_rpc" => {
+            let method = args.get("method").and_then(|m| m.as_str()).unwrap_or("");
+            let rpc_args = args.get("args").cloned().unwrap_or(json!({}));
+            handle_llm_rpc(method, rpc_args).await
+        }
         _ => {
             Ok(json!({
                 "status": "ok",
@@ -41,6 +46,45 @@ pub async fn handle_agentkit_command(
                 "data": {}
             }))
         }
+    }
+}
+
+async fn handle_llm_rpc(method: &str, _args: Value) -> Result<Value, String> {
+    match method {
+        "models.list" => Ok(json!([
+            {
+                "id": "claude-3-7-sonnet",
+                "name": "Claude 3.7 Sonnet",
+                "provider": "anthropic",
+                "context_length": 200000,
+                "capabilities": { "vision": true, "tools": true, "json": true, "thinking": true, "streaming": true },
+                "is_local": false,
+                "status": "ready"
+            },
+            {
+                "id": "gpt-4o",
+                "name": "GPT-4o",
+                "provider": "openai",
+                "context_length": 128000,
+                "capabilities": { "vision": true, "tools": true, "json": true, "streaming": true },
+                "is_local": false,
+                "status": "ready"
+            }
+        ])),
+        "providers.list" => Ok(json!([
+            { "id": "p-anthropic", "name": "Anthropic", "type": "anthropic", "has_key": true, "enabled": true },
+            { "id": "p-openai", "name": "OpenAI", "type": "openai", "has_key": true, "enabled": true }
+        ])),
+        "observatory.stats" => Ok(json!({
+            "active_streams": 2,
+            "throughput_tokens_per_sec": 142.8,
+            "p50_latency_ms": 640,
+            "p95_latency_ms": 1850,
+            "error_rate_pct": 0.12,
+            "total_tokens_24h": 1845000,
+            "total_cost_24h_usd": 12.45
+        })),
+        _ => Ok(json!({}))
     }
 }
 
