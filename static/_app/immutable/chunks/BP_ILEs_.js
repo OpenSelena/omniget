@@ -1,0 +1,1 @@
+import{D as T,F as c,m as q,G as x,S as A}from"./CMncJC9q.js";function k(i,r){return i===r||(i==null?void 0:i[A])===r}function D(i={},r,S,h){return T(()=>{var s,f;return c(()=>{s=f,f=(h==null?void 0:h())||[],q(()=>{i!==S(...f)&&(r(i,...f),s&&k(S(...s),i)&&r(null,...s))})}),()=>{x(()=>{f&&k(S(...f),i)&&r(null,...f)})}}),i}export{D as b};

@@ -1,0 +1,10 @@
+{
+  "skin": "omni-default",
+  "atlas": "/world/omni/atlas.json",
+  "poses": {
+    "idle": "omni/idle/S/0",
+    "wave": "omni/wave/S/3",
+    "sleep": "omni/sleep/S/0",
+    "work": "omni/work/S/2"
+  }
+}

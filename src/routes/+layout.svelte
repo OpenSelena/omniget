@@ -1,4 +1,7 @@
 <script lang="ts">
+  import { initIpcBridge } from "$lib/v100/ipc-bridge";
+  initIpcBridge();
+
   import "../app.css";
   import "$lib/style/queue-kinds.css";
   import { page } from "$app/state";
@@ -62,7 +65,12 @@
     CORE_NAV_ITEMS.filter((item) => item.href !== "/omnidisc" || (getSettings()?.omnidisc?.enabled ?? true))
   );
 
-  let allNav = $derived([...coreNavItems, ...leagueNavItems, ...pluginNavItems].sort((a, b) => (a.order ?? 50) - (b.order ?? 50)));
+  let v100NavItems = $derived<NavItem[]>([
+    { href: "/superpowers", label: "Superpowers", icon: "superpowers", group: "app", order: 32 },
+    { href: "/llm", label: "LLM & Canvas", icon: "llm", group: "app", order: 34 },
+  ]);
+
+  let allNav = $derived([...coreNavItems, ...leagueNavItems, ...v100NavItems, ...pluginNavItems].sort((a, b) => (a.order ?? 50) - (b.order ?? 50)));
   let primaryNav = $derived(allNav.filter((item) => item.group === "primary"));
   let appNav = $derived(allNav.filter((item) => item.group === "app"));
   let pluginNav = $derived(allNav.filter((item) => item.group === "plugins"));

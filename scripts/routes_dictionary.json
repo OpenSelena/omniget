@@ -1,0 +1,330 @@
+{
+  "/": [
+    6
+  ],
+  "/_kitchen-sink": [
+    7
+  ],
+  "/about": [
+    8,
+    [
+      2
+    ]
+  ],
+  "/about/changelog": [
+    9,
+    [
+      2
+    ]
+  ],
+  "/about/debug": [
+    10,
+    [
+      2
+    ]
+  ],
+  "/about/project": [
+    11,
+    [
+      2
+    ]
+  ],
+  "/about/terms": [
+    12,
+    [
+      2
+    ]
+  ],
+  "/downloads": [
+    13
+  ],
+  "/global": [
+    14
+  ],
+  "/help": [
+    15
+  ],
+  "/league": [
+    16
+  ],
+  "/limits-strip": [
+    17
+  ],
+  "/llm": [
+    18,
+    [
+      3
+    ]
+  ],
+  "/llm/accounts": [
+    19,
+    [
+      3
+    ]
+  ],
+  "/llm/arena": [
+    20,
+    [
+      3
+    ]
+  ],
+  "/llm/catalog": [
+    21,
+    [
+      3,
+      4
+    ]
+  ],
+  "/llm/catalog/wizard": [
+    23,
+    [
+      3,
+      4
+    ]
+  ],
+  "/llm/catalog/[...id]": [
+    22,
+    [
+      3,
+      4
+    ]
+  ],
+  "/llm/company": [
+    24,
+    [
+      3
+    ]
+  ],
+  "/llm/company/[id]": [
+    25,
+    [
+      3,
+      5
+    ]
+  ],
+  "/llm/company/[id]/activity": [
+    26,
+    [
+      3,
+      5
+    ]
+  ],
+  "/llm/company/[id]/costs": [
+    27,
+    [
+      3,
+      5
+    ]
+  ],
+  "/llm/company/[id]/goals": [
+    28,
+    [
+      3,
+      5
+    ]
+  ],
+  "/llm/company/[id]/inbox": [
+    29,
+    [
+      3,
+      5
+    ]
+  ],
+  "/llm/company/[id]/issues": [
+    30,
+    [
+      3,
+      5
+    ]
+  ],
+  "/llm/company/[id]/issues/[issue]": [
+    31,
+    [
+      3,
+      5
+    ]
+  ],
+  "/llm/company/[id]/routines": [
+    32,
+    [
+      3,
+      5
+    ]
+  ],
+  "/llm/company/[id]/settings": [
+    33,
+    [
+      3,
+      5
+    ]
+  ],
+  "/llm/company/[id]/team": [
+    34,
+    [
+      3,
+      5
+    ]
+  ],
+  "/llm/installed": [
+    35,
+    [
+      3
+    ]
+  ],
+  "/llm/jobs": [
+    36,
+    [
+      3
+    ]
+  ],
+  "/llm/local": [
+    37,
+    [
+      3
+    ]
+  ],
+  "/llm/loops": [
+    38,
+    [
+      3
+    ]
+  ],
+  "/llm/mcp": [
+    39,
+    [
+      3
+    ]
+  ],
+  "/llm/memory": [
+    40,
+    [
+      3
+    ]
+  ],
+  "/llm/missions": [
+    41,
+    [
+      3
+    ]
+  ],
+  "/llm/models": [
+    42,
+    [
+      3
+    ]
+  ],
+  "/llm/observatory": [
+    43,
+    [
+      3
+    ]
+  ],
+  "/llm/reading": [
+    44,
+    [
+      3
+    ]
+  ],
+  "/llm/remote": [
+    45,
+    [
+      3
+    ]
+  ],
+  "/llm/retro": [
+    46,
+    [
+      3
+    ]
+  ],
+  "/llm/roster": [
+    47,
+    [
+      3
+    ]
+  ],
+  "/llm/sessions": [
+    48,
+    [
+      3
+    ]
+  ],
+  "/llm/sessions/[tool]/[id]": [
+    49,
+    [
+      3
+    ]
+  ],
+  "/llm/skills": [
+    50,
+    [
+      3
+    ]
+  ],
+  "/llm/summaries": [
+    51,
+    [
+      3
+    ]
+  ],
+  "/llm/threads": [
+    52,
+    [
+      3
+    ]
+  ],
+  "/llm/tools": [
+    53,
+    [
+      3
+    ]
+  ],
+  "/llm/usage": [
+    54,
+    [
+      3
+    ]
+  ],
+  "/llm/work": [
+    55,
+    [
+      3
+    ]
+  ],
+  "/music": [
+    56
+  ],
+  "/omni": [
+    57
+  ],
+  "/pet": [
+    58
+  ],
+  "/read": [
+    59
+  ],
+  "/settings": [
+    60
+  ],
+  "/superpowers": [
+    61
+  ],
+  "/telegram": [
+    62
+  ],
+  "/usage-panel": [
+    63
+  ],
+  "/video": [
+    64
+  ],
+  "/washmybelly": [
+    65
+  ],
+  "/world": [
+    66
+  ],
+  "/youtube": [
+    67
+  ]
+}

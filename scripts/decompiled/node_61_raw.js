@@ -1,0 +1,236 @@
+import "../chunks/Bzak7iHL.js";
+import {
+  p as W,
+  s as l,
+  t as $,
+  e as o,
+  a as z,
+  b as X,
+  d as s,
+  c as L,
+  r as e,
+  i as d,
+  aH as Y,
+  f as Z,
+} from "../chunks/CMncJC9q.js";
+import { i as ee } from "../chunks/DzuZ9rGm.js";
+import { e as se } from "../chunks/CPiz477Y.js";
+import { a as te, s as A } from "../chunks/Dk9XJCvl.js";
+import { s as ae, a as re } from "../chunks/B8R8mbJx.js";
+import { t as ie } from "../chunks/Byo1Zxp4.js";
+import { g as p } from "../chunks/CncE825d.js";
+import { N as B } from "../chunks/DXOAqkPb.js";
+var le = L('<a class="btn btn-primary power-action svelte-1nwhcie"> </a>'),
+  oe = L(
+    '<p class="power-off svelte-1nwhcie"><span class="power-off-badge svelte-1nwhcie"> </span> </p> <a class="btn btn-secondary power-action svelte-1nwhcie"> </a>',
+    1,
+  ),
+  de = L(
+    '<article><!> <div class="power-copy svelte-1nwhcie"><h2 class="svelte-1nwhcie"> </h2> <p class="svelte-1nwhcie"> </p></div> <!></article>',
+  ),
+  ce = L(
+    '<section class="powers svelte-1nwhcie"><header class="powers-head svelte-1nwhcie"><!> <div><h1 class="svelte-1nwhcie"> </h1> <p class="powers-subtitle svelte-1nwhcie"> </p></div></header> <div class="powers-grid svelte-1nwhcie"></div></section>',
+  );
+function fe(C, D) {
+  W(D, !0);
+  const t = () => ae(ie, "$t", E),
+    [E, F] = re();
+  let G = Y(() => {
+    var i, a, c, b, h, v, u, f, m, g, y, x, K, r;
+    return [
+      {
+        id: "music",
+        icon: "music",
+        title: t()("music.title"),
+        descKey: "superpowers.music_desc",
+        href: "/music",
+        enabled:
+          ((a = (i = p()) == null ? void 0 : i.music) == null
+            ? void 0
+            : a.enabled) ?? !0,
+      },
+      {
+        id: "video",
+        icon: "video",
+        title: t()("video.title"),
+        descKey: "superpowers.video_desc",
+        href: "/video",
+        enabled:
+          ((b = (c = p()) == null ? void 0 : c.video) == null
+            ? void 0
+            : b.enabled) ?? !0,
+      },
+      {
+        id: "global",
+        icon: "global",
+        title: t()("global_dl.title"),
+        descKey: "superpowers.global_desc",
+        href: "/global",
+        enabled: !0,
+      },
+      {
+        id: "tube",
+        icon: "tube",
+        title: t()("tube.title"),
+        descKey: "superpowers.tube_desc",
+        href: "/youtube",
+        enabled:
+          ((v = (h = p()) == null ? void 0 : h.tube) == null
+            ? void 0
+            : v.enabled) ?? !0,
+      },
+      {
+        id: "read",
+        icon: "read",
+        title: t()("read.title"),
+        descKey: "superpowers.read_desc",
+        href: "/read",
+        enabled:
+          ((f = (u = p()) == null ? void 0 : u.read) == null
+            ? void 0
+            : f.enabled) ?? !0,
+      },
+      {
+        id: "league",
+        icon: "league",
+        title: "League of Legends",
+        descKey: "superpowers.league_desc",
+        href: "/league",
+        enabled:
+          ((g = (m = p()) == null ? void 0 : m.league) == null
+            ? void 0
+            : g.enabled) ?? !0,
+      },
+      {
+        id: "telegram",
+        icon: "telegram",
+        title: "Telegram",
+        descKey: "superpowers.telegram_desc",
+        href: "/telegram",
+        enabled:
+          ((x = (y = p()) == null ? void 0 : y.telegram) == null
+            ? void 0
+            : x.enabled) ?? !0,
+      },
+      {
+        id: "washmybelly",
+        icon: "washmybelly",
+        title: "washmybelly",
+        descKey: "superpowers.washmybelly_desc",
+        href: "/washmybelly",
+        enabled:
+          ((r = (K = p()) == null ? void 0 : K.washmybelly) == null
+            ? void 0
+            : r.enabled) ?? !0,
+      },
+    ];
+  });
+  var N = ce(),
+    k = s(N),
+    S = s(k);
+  B(S, { icon: "superpowers", size: 56 });
+  var T = l(S, 2),
+    H = s(T),
+    J = s(H, !0);
+  e(H);
+  var j = l(H, 2),
+    M = s(j, !0);
+  (e(j), e(T), e(k));
+  var q = l(k, 2);
+  (se(
+    q,
+    21,
+    () => d(G),
+    (i) => i.id,
+    (i, a) => {
+      var c = de();
+      let b;
+      var h = s(c);
+      B(h, {
+        get icon() {
+          return d(a).icon;
+        },
+        size: 64,
+      });
+      var v = l(h, 2),
+        u = s(v),
+        f = s(u, !0);
+      e(u);
+      var m = l(u, 2),
+        g = s(m, !0);
+      (e(m), e(v));
+      var y = l(v, 2);
+      {
+        var x = (r) => {
+            var n = le(),
+              w = s(n, !0);
+            (e(n),
+              $(
+                (_) => {
+                  (A(n, "href", d(a).href), o(w, _));
+                },
+                [() => t()("superpowers.open")],
+              ),
+              z(r, n));
+          },
+          K = (r) => {
+            var n = oe(),
+              w = Z(n),
+              _ = s(w),
+              O = s(_, !0);
+            e(_);
+            var P = l(_);
+            e(w);
+            var I = l(w, 2),
+              Q = s(I, !0);
+            (e(I),
+              $(
+                (R, U, V) => {
+                  (o(O, R),
+                    o(P, ` ${U ?? ""}`),
+                    A(
+                      I,
+                      "href",
+                      `/settings?tab=integrations&section=${d(a).id}`,
+                    ),
+                    o(Q, V));
+                },
+                [
+                  () => t()("superpowers.disabled"),
+                  () => t()("superpowers.disabled_hint"),
+                  () => t()("superpowers.open_settings"),
+                ],
+              ),
+              z(r, n));
+          };
+        ee(y, (r) => {
+          d(a).enabled ? r(x) : r(K, !1);
+        });
+      }
+      (e(c),
+        $(
+          (r) => {
+            ((b = te(c, 1, "power-card svelte-1nwhcie", null, b, {
+              off: !d(a).enabled,
+            })),
+              o(f, d(a).title),
+              o(g, r));
+          },
+          [() => t()(d(a).descKey)],
+        ),
+        z(i, c));
+    },
+  ),
+    e(q),
+    e(N),
+    $(
+      (i, a) => {
+        (o(J, i), o(M, a));
+      },
+      [() => t()("nav.superpowers"), () => t()("superpowers.subtitle")],
+    ),
+    z(C, N),
+    X(),
+    F());
+}
+export { fe as component };

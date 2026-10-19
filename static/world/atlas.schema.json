@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "omniget://world/atlas.schema.json",
+  "title": "OmniGet world atlas v1",
+  "description": "Written by `atlas-pack` (crate src-tauri/omniget-atlas). Owner: f6-atlas-tools. Frozen 2026-09-17: changes are additive only. Human summary in static/world/README-format.txt.",
+  "type": "object",
+  "required": ["version", "pages", "frames"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "const": 1 },
+    "pages": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string", "pattern": "^[a-z0-9-]+-[0-9]+\\.png$" },
+      "description": "PNG pages, 2048x2048 max, sRGB, no embedded colour profile (no iCCP/cHRM/gAMA), next to atlas.json"
+    },
+    "page_sizes": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": { "type": "integer", "minimum": 1, "maximum": 2048 },
+        "minItems": 2,
+        "maxItems": 2
+      },
+      "description": "Optional, same length and order as `pages`: [w, h] of each page in pixels, so the renderer can compute UVs before the PNG decodes. Always written by atlas-pack."
+    },
+    "padding": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 2,
+      "description": "Transparent gutter left between packed frames, in pixels. Informational."
+    },
+    "extrude": {
+      "type": "integer",
+      "minimum": 0,
+      "default": 1,
+      "description": "Pixels of edge pixels duplicated around each frame (outside its rect) to stop bleeding under linear filtering. Informational."
+    },
+    "frames": {
+      "type": "object",
+      "description": "Frame id -> rect. Ids are '<sheet>/<anim>/<dir>/<n>' for characters and '<sheet>/<kind>/<name>' for tiles and objects. The rect excludes the extrusion border.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["page", "x", "y", "w", "h", "pivot"],
+        "additionalProperties": false,
+        "properties": {
+          "page": { "type": "integer", "minimum": 0 },
+          "x": { "type": "integer", "minimum": 0 },
+          "y": { "type": "integer", "minimum": 0 },
+          "w": { "type": "integer", "minimum": 1 },
+          "h": { "type": "integer", "minimum": 1 },
+          "pivot": {
+            "type": "array",
+            "items": { "type": "integer" },
+            "minItems": 2,
+            "maxItems": 2,
+            "description": "Pixel offset of the ground contact point (centre of the feet) from the frame's top-left. Default when the source manifest is silent: [floor(w/2), h-1]"
+          },
+          "z_base": {
+            "type": "integer",
+            "default": 0,
+            "description": "Added to the world z when sorting by y + z"
+          }
+        }
+      }
+    },
+    "anims": {
+      "type": "object",
+      "description": "'<sheet>/<anim>' -> clip. Unique directions S, SW, W, NW, N carry frame lists; SE, E, NE must be declared as mirror_of SW, W, NW (horizontal flip around the pivot at draw time).",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["fps", "dirs"],
+        "additionalProperties": false,
+        "properties": {
+          "fps": { "type": "integer", "minimum": 1, "maximum": 30 },
+          "loop": { "type": "boolean", "default": true },
+          "dirs": {
+            "type": "object",
+            "required": ["S", "SW", "W", "NW", "N", "SE", "E", "NE"],
+            "additionalProperties": false,
+            "properties": {
+              "S": { "$ref": "#/$defs/frameList" },
+              "SW": { "$ref": "#/$defs/frameList" },
+              "W": { "$ref": "#/$defs/frameList" },
+              "NW": { "$ref": "#/$defs/frameList" },
+              "N": { "$ref": "#/$defs/frameList" },
+              "SE": { "$ref": "#/$defs/mirrorSW" },
+              "E": { "$ref": "#/$defs/mirrorW" },
+              "NE": { "$ref": "#/$defs/mirrorNW" }
+            }
+          }
+        }
+      }
+    },
+    "tiles": {
+      "type": "object",
+      "description": "'floor/<name>', 'wall/<name>', 'object/<name>' -> tile definition",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["frame", "height"],
+        "additionalProperties": false,
+        "properties": {
+          "frame": { "type": "string", "description": "Key into `frames`" },
+          "height": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Pixels of vertical extent above the floor plane (0 for floors, 32 for casa-v1 walls)"
+          },
+          "occludes": { "type": "boolean", "default": false },
+          "footprint": {
+            "type": "array",
+            "items": { "type": "integer", "minimum": 1 },
+            "minItems": 2,
+            "maxItems": 2,
+            "default": [1, 1],
+            "description": "Tiles occupied on the ground, [w, d]"
+          },
+          "walkable": { "type": "boolean", "default": true }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "frameList": { "type": "array", "minItems": 1, "items": { "type": "string" } },
+    "mirrorSW": {
+      "type": "object",
+      "required": ["mirror_of"],
+      "additionalProperties": false,
+      "properties": { "mirror_of": { "const": "SW" } }
+    },
+    "mirrorW": {
+      "type": "object",
+      "required": ["mirror_of"],
+      "additionalProperties": false,
+      "properties": { "mirror_of": { "const": "W" } }
+    },
+    "mirrorNW": {
+      "type": "object",
+      "required": ["mirror_of"],
+      "additionalProperties": false,
+      "properties": { "mirror_of": { "const": "NW" } }
+    }
+  }
+}

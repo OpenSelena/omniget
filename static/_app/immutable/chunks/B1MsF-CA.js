@@ -1,0 +1,1 @@
+import{D as c,m as o,F as i,ar as d,as as m}from"./CMncJC9q.js";function k(e,n,s){c(()=>{var r=o(()=>n(e,s==null?void 0:s())||{});if(s&&(r!=null&&r.update)){var f=!1,t={};i(()=>{var a=s();d(a),f&&m(t,a)&&(t=a,r.update(a))}),f=!0}if(r!=null&&r.destroy)return()=>r.destroy()})}export{k as a};

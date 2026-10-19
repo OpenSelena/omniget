@@ -1,0 +1,478 @@
+[
+  {
+    "nodeIndex": 0,
+    "nodeFile": "0.DStd3rhF.js",
+    "targetFile": "src/routes/+layout.svelte",
+    "type": "layout",
+    "route": "/"
+  },
+  {
+    "nodeIndex": 1,
+    "nodeFile": "1.8I625FuZ.js",
+    "targetFile": "src/routes/+error.svelte",
+    "type": "error",
+    "route": "/"
+  },
+  {
+    "nodeIndex": 2,
+    "nodeFile": "2.rOGpFxfe.js",
+    "targetFile": "src/routes/about/+layout.svelte",
+    "type": "layout",
+    "route": "/about"
+  },
+  {
+    "nodeIndex": 3,
+    "nodeFile": "3.BpxRnUE8.js",
+    "targetFile": "src/routes/llm/+layout.svelte",
+    "type": "layout",
+    "route": "/llm"
+  },
+  {
+    "nodeIndex": 4,
+    "nodeFile": "4.C2uMo1Gn.js",
+    "targetFile": "src/routes/llm/catalog/+layout.svelte",
+    "type": "layout",
+    "route": "/llm/catalog"
+  },
+  {
+    "nodeIndex": 5,
+    "nodeFile": "5.DGp_VfM_.js",
+    "targetFile": "src/routes/llm/company/[id]/+layout.svelte",
+    "type": "layout",
+    "route": "/llm/company/[id]"
+  },
+  {
+    "nodeIndex": 6,
+    "nodeFile": "6.CtRyDEx6.js",
+    "targetFile": "src/routes/+page.svelte",
+    "type": "page",
+    "route": "/"
+  },
+  {
+    "nodeIndex": 7,
+    "nodeFile": "7.Cx7WNqY6.js",
+    "targetFile": "src/routes/_kitchen-sink/+page.svelte",
+    "type": "page",
+    "route": "/_kitchen-sink"
+  },
+  {
+    "nodeIndex": 8,
+    "nodeFile": "8.BfL2q3aR.js",
+    "targetFile": "src/routes/about/+page.svelte",
+    "type": "page",
+    "route": "/about"
+  },
+  {
+    "nodeIndex": 9,
+    "nodeFile": "9.wHAjhePO.js",
+    "targetFile": "src/routes/about/changelog/+page.svelte",
+    "type": "page",
+    "route": "/about/changelog"
+  },
+  {
+    "nodeIndex": 10,
+    "nodeFile": "10.B1GI-gBr.js",
+    "targetFile": "src/routes/about/debug/+page.svelte",
+    "type": "page",
+    "route": "/about/debug"
+  },
+  {
+    "nodeIndex": 11,
+    "nodeFile": "11.DnsgYXmu.js",
+    "targetFile": "src/routes/about/project/+page.svelte",
+    "type": "page",
+    "route": "/about/project"
+  },
+  {
+    "nodeIndex": 12,
+    "nodeFile": "12.CPp1kJre.js",
+    "targetFile": "src/routes/about/terms/+page.svelte",
+    "type": "page",
+    "route": "/about/terms"
+  },
+  {
+    "nodeIndex": 13,
+    "nodeFile": "13.DqbGzaHf.js",
+    "targetFile": "src/routes/downloads/+page.svelte",
+    "type": "page",
+    "route": "/downloads"
+  },
+  {
+    "nodeIndex": 14,
+    "nodeFile": "14.WcPwNgav.js",
+    "targetFile": "src/routes/global/+page.svelte",
+    "type": "page",
+    "route": "/global"
+  },
+  {
+    "nodeIndex": 15,
+    "nodeFile": "15.CMLFFxtJ.js",
+    "targetFile": "src/routes/help/+page.svelte",
+    "type": "page",
+    "route": "/help"
+  },
+  {
+    "nodeIndex": 16,
+    "nodeFile": "16.B7zWzXFL.js",
+    "targetFile": "src/routes/league/+page.svelte",
+    "type": "page",
+    "route": "/league"
+  },
+  {
+    "nodeIndex": 17,
+    "nodeFile": "17.DlsotH61.js",
+    "targetFile": "src/routes/limits-strip/+page.svelte",
+    "type": "page",
+    "route": "/limits-strip"
+  },
+  {
+    "nodeIndex": 18,
+    "nodeFile": "18.BVzFiLqt.js",
+    "targetFile": "src/routes/llm/+page.svelte",
+    "type": "page",
+    "route": "/llm"
+  },
+  {
+    "nodeIndex": 19,
+    "nodeFile": "19.DlKnBc7H.js",
+    "targetFile": "src/routes/llm/accounts/+page.svelte",
+    "type": "page",
+    "route": "/llm/accounts"
+  },
+  {
+    "nodeIndex": 20,
+    "nodeFile": "20.B8UNofyl.js",
+    "targetFile": "src/routes/llm/arena/+page.svelte",
+    "type": "page",
+    "route": "/llm/arena"
+  },
+  {
+    "nodeIndex": 21,
+    "nodeFile": "21.Bx3TfR25.js",
+    "targetFile": "src/routes/llm/catalog/+page.svelte",
+    "type": "page",
+    "route": "/llm/catalog"
+  },
+  {
+    "nodeIndex": 22,
+    "nodeFile": "22.DKMVfr4J.js",
+    "targetFile": "src/routes/llm/catalog/[...id]/+page.svelte",
+    "type": "page",
+    "route": "/llm/catalog/[...id]"
+  },
+  {
+    "nodeIndex": 23,
+    "nodeFile": "23.B-5lEJ3N.js",
+    "targetFile": "src/routes/llm/catalog/wizard/+page.svelte",
+    "type": "page",
+    "route": "/llm/catalog/wizard"
+  },
+  {
+    "nodeIndex": 24,
+    "nodeFile": "24.CLpy98N9.js",
+    "targetFile": "src/routes/llm/company/+page.svelte",
+    "type": "page",
+    "route": "/llm/company"
+  },
+  {
+    "nodeIndex": 25,
+    "nodeFile": "25.D9bhpM4C.js",
+    "targetFile": "src/routes/llm/company/[id]/+page.svelte",
+    "type": "page",
+    "route": "/llm/company/[id]"
+  },
+  {
+    "nodeIndex": 26,
+    "nodeFile": "26.C8_Jai9m.js",
+    "targetFile": "src/routes/llm/company/[id]/activity/+page.svelte",
+    "type": "page",
+    "route": "/llm/company/[id]/activity"
+  },
+  {
+    "nodeIndex": 27,
+    "nodeFile": "27.pONaQ7LH.js",
+    "targetFile": "src/routes/llm/company/[id]/costs/+page.svelte",
+    "type": "page",
+    "route": "/llm/company/[id]/costs"
+  },
+  {
+    "nodeIndex": 28,
+    "nodeFile": "28.Cf_pyLcN.js",
+    "targetFile": "src/routes/llm/company/[id]/goals/+page.svelte",
+    "type": "page",
+    "route": "/llm/company/[id]/goals"
+  },
+  {
+    "nodeIndex": 29,
+    "nodeFile": "29.xedKP6bL.js",
+    "targetFile": "src/routes/llm/company/[id]/inbox/+page.svelte",
+    "type": "page",
+    "route": "/llm/company/[id]/inbox"
+  },
+  {
+    "nodeIndex": 30,
+    "nodeFile": "30.BzWmrUnx.js",
+    "targetFile": "src/routes/llm/company/[id]/issues/+page.svelte",
+    "type": "page",
+    "route": "/llm/company/[id]/issues"
+  },
+  {
+    "nodeIndex": 31,
+    "nodeFile": "31.B5_5caWl.js",
+    "targetFile": "src/routes/llm/company/[id]/issues/[issue]/+page.svelte",
+    "type": "page",
+    "route": "/llm/company/[id]/issues/[issue]"
+  },
+  {
+    "nodeIndex": 32,
+    "nodeFile": "32.B6CwVZkW.js",
+    "targetFile": "src/routes/llm/company/[id]/routines/+page.svelte",
+    "type": "page",
+    "route": "/llm/company/[id]/routines"
+  },
+  {
+    "nodeIndex": 33,
+    "nodeFile": "33.YFmAEhbc.js",
+    "targetFile": "src/routes/llm/company/[id]/settings/+page.svelte",
+    "type": "page",
+    "route": "/llm/company/[id]/settings"
+  },
+  {
+    "nodeIndex": 34,
+    "nodeFile": "34.C1XuFycO.js",
+    "targetFile": "src/routes/llm/company/[id]/team/+page.svelte",
+    "type": "page",
+    "route": "/llm/company/[id]/team"
+  },
+  {
+    "nodeIndex": 35,
+    "nodeFile": "35.D90QqfkT.js",
+    "targetFile": "src/routes/llm/installed/+page.svelte",
+    "type": "page",
+    "route": "/llm/installed"
+  },
+  {
+    "nodeIndex": 36,
+    "nodeFile": "36.BJ5KCH9u.js",
+    "targetFile": "src/routes/llm/jobs/+page.svelte",
+    "type": "page",
+    "route": "/llm/jobs"
+  },
+  {
+    "nodeIndex": 37,
+    "nodeFile": "37.DMg64lIC.js",
+    "targetFile": "src/routes/llm/local/+page.svelte",
+    "type": "page",
+    "route": "/llm/local"
+  },
+  {
+    "nodeIndex": 38,
+    "nodeFile": "38.C-0--2Kv.js",
+    "targetFile": "src/routes/llm/loops/+page.svelte",
+    "type": "page",
+    "route": "/llm/loops"
+  },
+  {
+    "nodeIndex": 39,
+    "nodeFile": "39.DLGAtroP.js",
+    "targetFile": "src/routes/llm/mcp/+page.svelte",
+    "type": "page",
+    "route": "/llm/mcp"
+  },
+  {
+    "nodeIndex": 40,
+    "nodeFile": "40.BXLPBekl.js",
+    "targetFile": "src/routes/llm/memory/+page.svelte",
+    "type": "page",
+    "route": "/llm/memory"
+  },
+  {
+    "nodeIndex": 41,
+    "nodeFile": "41.BcjU3qy8.js",
+    "targetFile": "src/routes/llm/missions/+page.svelte",
+    "type": "page",
+    "route": "/llm/missions"
+  },
+  {
+    "nodeIndex": 42,
+    "nodeFile": "42.BlkFr1xt.js",
+    "targetFile": "src/routes/llm/models/+page.svelte",
+    "type": "page",
+    "route": "/llm/models"
+  },
+  {
+    "nodeIndex": 43,
+    "nodeFile": "43.D3qYlVJu.js",
+    "targetFile": "src/routes/llm/observatory/+page.svelte",
+    "type": "page",
+    "route": "/llm/observatory"
+  },
+  {
+    "nodeIndex": 44,
+    "nodeFile": "44.BQP95MWM.js",
+    "targetFile": "src/routes/llm/reading/+page.svelte",
+    "type": "page",
+    "route": "/llm/reading"
+  },
+  {
+    "nodeIndex": 45,
+    "nodeFile": "45.CiH0TsXs.js",
+    "targetFile": "src/routes/llm/remote/+page.svelte",
+    "type": "page",
+    "route": "/llm/remote"
+  },
+  {
+    "nodeIndex": 46,
+    "nodeFile": "46.CmCs5ZnC.js",
+    "targetFile": "src/routes/llm/retro/+page.svelte",
+    "type": "page",
+    "route": "/llm/retro"
+  },
+  {
+    "nodeIndex": 47,
+    "nodeFile": "47.DPZT11dU.js",
+    "targetFile": "src/routes/llm/roster/+page.svelte",
+    "type": "page",
+    "route": "/llm/roster"
+  },
+  {
+    "nodeIndex": 48,
+    "nodeFile": "48.Bex_HHMa.js",
+    "targetFile": "src/routes/llm/sessions/+page.svelte",
+    "type": "page",
+    "route": "/llm/sessions"
+  },
+  {
+    "nodeIndex": 49,
+    "nodeFile": "49.uRxrFsl4.js",
+    "targetFile": "src/routes/llm/sessions/[tool]/[id]/+page.svelte",
+    "type": "page",
+    "route": "/llm/sessions/[tool]/[id]"
+  },
+  {
+    "nodeIndex": 50,
+    "nodeFile": "50.CqCP-w_c.js",
+    "targetFile": "src/routes/llm/skills/+page.svelte",
+    "type": "page",
+    "route": "/llm/skills"
+  },
+  {
+    "nodeIndex": 51,
+    "nodeFile": "51.Bc8uFNuZ.js",
+    "targetFile": "src/routes/llm/summaries/+page.svelte",
+    "type": "page",
+    "route": "/llm/summaries"
+  },
+  {
+    "nodeIndex": 52,
+    "nodeFile": "52.CG1OMxEs.js",
+    "targetFile": "src/routes/llm/threads/+page.svelte",
+    "type": "page",
+    "route": "/llm/threads"
+  },
+  {
+    "nodeIndex": 53,
+    "nodeFile": "53.Cdjqqn30.js",
+    "targetFile": "src/routes/llm/tools/+page.svelte",
+    "type": "page",
+    "route": "/llm/tools"
+  },
+  {
+    "nodeIndex": 54,
+    "nodeFile": "54.B5ojhiwc.js",
+    "targetFile": "src/routes/llm/usage/+page.svelte",
+    "type": "page",
+    "route": "/llm/usage"
+  },
+  {
+    "nodeIndex": 55,
+    "nodeFile": "55.4gCGnGpx.js",
+    "targetFile": "src/routes/llm/work/+page.svelte",
+    "type": "page",
+    "route": "/llm/work"
+  },
+  {
+    "nodeIndex": 56,
+    "nodeFile": "56.rhBdbzkn.js",
+    "targetFile": "src/routes/music/+page.svelte",
+    "type": "page",
+    "route": "/music"
+  },
+  {
+    "nodeIndex": 57,
+    "nodeFile": "57.DuIDYXxK.js",
+    "targetFile": "src/routes/omni/+page.svelte",
+    "type": "page",
+    "route": "/omni"
+  },
+  {
+    "nodeIndex": 58,
+    "nodeFile": "58.BwezoCTT.js",
+    "targetFile": "src/routes/pet/+page.svelte",
+    "type": "page",
+    "route": "/pet"
+  },
+  {
+    "nodeIndex": 59,
+    "nodeFile": "59.Bk1tP4cI.js",
+    "targetFile": "src/routes/read/+page.svelte",
+    "type": "page",
+    "route": "/read"
+  },
+  {
+    "nodeIndex": 60,
+    "nodeFile": "60.BS-Pr6Q1.js",
+    "targetFile": "src/routes/settings/+page.svelte",
+    "type": "page",
+    "route": "/settings"
+  },
+  {
+    "nodeIndex": 61,
+    "nodeFile": "61.CFlY57ld.js",
+    "targetFile": "src/routes/superpowers/+page.svelte",
+    "type": "page",
+    "route": "/superpowers"
+  },
+  {
+    "nodeIndex": 62,
+    "nodeFile": "62.B6Ffla-v.js",
+    "targetFile": "src/routes/telegram/+page.svelte",
+    "type": "page",
+    "route": "/telegram"
+  },
+  {
+    "nodeIndex": 63,
+    "nodeFile": "63.qPdjCkg9.js",
+    "targetFile": "src/routes/usage-panel/+page.svelte",
+    "type": "page",
+    "route": "/usage-panel"
+  },
+  {
+    "nodeIndex": 64,
+    "nodeFile": "64.TJpQo1R9.js",
+    "targetFile": "src/routes/video/+page.svelte",
+    "type": "page",
+    "route": "/video"
+  },
+  {
+    "nodeIndex": 65,
+    "nodeFile": "65.DW_8WAQt.js",
+    "targetFile": "src/routes/washmybelly/+page.svelte",
+    "type": "page",
+    "route": "/washmybelly"
+  },
+  {
+    "nodeIndex": 66,
+    "nodeFile": "66.8BxgsMXd.js",
+    "targetFile": "src/routes/world/+page.svelte",
+    "type": "page",
+    "route": "/world"
+  },
+  {
+    "nodeIndex": 67,
+    "nodeFile": "67.BL8YNMrs.js",
+    "targetFile": "src/routes/youtube/+page.svelte",
+    "type": "page",
+    "route": "/youtube"
+  }
+]
