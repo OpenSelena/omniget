@@ -181,6 +181,9 @@ importers:
       lintapple:
         specifier: ^0.1.20
         version: 0.1.20
+      lucide-svelte:
+        specifier: ^1.0.1
+        version: 1.0.1(svelte@5.51.0)
       playwright:
         specifier: ^1.62.0
         version: 1.62.0
@@ -1690,6 +1693,12 @@ packages:
 
   lowlight@3.3.0:
     resolution: {integrity: sha512-0JNhgFoPvP6U6lE/UdVsSq99tn6DhjjpAj5MxG49ewd2mOBVtwWYIT8ClyABhq198aXXODMU6Ox8DrGy/CpTZQ==}
+
+  lucide-svelte@1.0.1:
+    resolution: {integrity: sha512-WvzZgk0pqzgda+AErLvgWxHkfg/+GgUwqKMRHvzt0IqyMdmyEDzDCk3Z+Wo/3y753oIgx8u9Q4eUbWkghFa8Jg==}
+    deprecated: Package deprecated. Please use @lucide/svelte instead.
+    peerDependencies:
+      svelte: ^3 || ^4 || ^5.0.0-next.42
 
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
@@ -3494,6 +3503,10 @@ snapshots:
       '@types/hast': 3.0.4
       devlop: 1.1.0
       highlight.js: 11.11.1
+
+  lucide-svelte@1.0.1(svelte@5.51.0):
+    dependencies:
+      svelte: 5.51.0
 
   magic-string@0.30.21:
     dependencies:
