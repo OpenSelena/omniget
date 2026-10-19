@@ -1,0 +1,18 @@
+[package]
+name = "omniget-plugin-v100"
+version = "1.0.0"
+edition = "2021"
+description = "Native v1.0.0 worker, canvas, and LLM subsystem for OmniGet"
+authors = ["OpenSelena"]
+
+[dependencies]
+tokio = { version = "1", features = ["full"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+anyhow = "1"
+tracing = "0.1"
+tokio-util = { version = "0.7", features = ["rt"] }
+chrono = { version = "0.4", features = ["serde"] }
+dirs = "6"
+omniget-core = { path = "../../omniget-core", features = ["desktop"] }
+omniget-plugin-sdk = { path = "../../omniget-plugin-sdk" }

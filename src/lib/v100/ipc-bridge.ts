@@ -89,7 +89,22 @@ export async function dispatchBridgeCommand(cmd: string, args: any): Promise<any
     }
   }
 
-  // Check if worker sidecar is reachable over local sidecar RPC (port 18482 or standard worker port)
+  // 2. Try native v100 Rust plugin in Tauri
+  const w = typeof window !== "undefined" ? (window as any) : null;
+  if (w?.__TAURI_INTERNALS__?.invoke) {
+    try {
+      const res = await w.__TAURI_INTERNALS__.invoke("plugin_command", {
+        pluginId: "v100",
+        command: cmd,
+        args: args ?? {},
+      });
+      if (res !== undefined && res !== null) return res;
+    } catch {
+      // Fall through to sidecar or schema defaults
+    }
+  }
+
+  // 3. Check if worker sidecar is reachable over local RPC (port 18482)
   try {
     const res = await fetch("http://127.0.0.1:18482/rpc", {
       method: "POST",

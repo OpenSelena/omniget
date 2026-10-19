@@ -6961,6 +6961,7 @@ dependencies = [
  "omniget-plugin-courses",
  "omniget-plugin-sdk",
  "omniget-plugin-telegram",
+ "omniget-plugin-v100",
  "once_cell",
  "open",
  "qrcode",
@@ -7166,6 +7167,22 @@ dependencies = [
  "tokio-util",
  "tracing",
  "url",
+]
+
+[[package]]
+name = "omniget-plugin-v100"
+version = "1.0.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "dirs 6.0.0",
+ "omniget-core",
+ "omniget-plugin-sdk",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tokio-util",
+ "tracing",
 ]
 
 [[package]]
