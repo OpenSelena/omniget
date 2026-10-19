@@ -1,34 +1,23 @@
 use serde_json::{json, Value};
 
-pub async fn handle_agentkit_command(
-    command: &str,
-    args: Value,
-) -> Result<Value, String> {
+pub async fn handle_agentkit_command(command: &str, args: Value) -> Result<Value, String> {
     match command {
-        "agentkit_installed" => {
-            Ok(json!({
-                "installed": true,
-                "version": "1.0.0",
-                "plugins": ["fs", "browser", "shell", "git"]
-            }))
-        }
-        "agentkit_detect" => {
-            Ok(json!({
-                "detected": true,
-                "shims": []
-            }))
-        }
-        "agentkit_plugins_list" => {
-            Ok(json!({
-                "plugins": []
-            }))
-        }
-        "arena_list" => {
-            Ok(json!({
-                "battles": [],
-                "models": []
-            }))
-        }
+        "agentkit_installed" => Ok(json!({
+            "installed": true,
+            "version": "1.0.0",
+            "plugins": ["fs", "browser", "shell", "git"]
+        })),
+        "agentkit_detect" => Ok(json!({
+            "detected": true,
+            "shims": []
+        })),
+        "agentkit_plugins_list" => Ok(json!({
+            "plugins": []
+        })),
+        "arena_list" => Ok(json!({
+            "battles": [],
+            "models": []
+        })),
         "company_rpc" => {
             let method = args.get("method").and_then(|m| m.as_str()).unwrap_or("");
             let rpc_args = args.get("args").cloned().unwrap_or(json!({}));
@@ -44,13 +33,11 @@ pub async fn handle_agentkit_command(
             let rpc_args = args.get("args").cloned().unwrap_or(json!({}));
             handle_workspace_rpc(method, rpc_args).await
         }
-        _ => {
-            Ok(json!({
-                "status": "ok",
-                "command": command,
-                "data": {}
-            }))
-        }
+        _ => Ok(json!({
+            "status": "ok",
+            "command": command,
+            "data": {}
+        })),
     }
 }
 
@@ -89,7 +76,7 @@ async fn handle_llm_rpc(method: &str, _args: Value) -> Result<Value, String> {
             "total_tokens_24h": 1845000,
             "total_cost_24h_usd": 12.45
         })),
-        _ => Ok(json!({}))
+        _ => Ok(json!({})),
     }
 }
 
@@ -200,7 +187,7 @@ async fn handle_workspace_rpc(method: &str, _args: Value) -> Result<Value, Strin
         "summaries.list" => Ok(json!([])),
         "threads.list" => Ok(json!([])),
         "work.list" => Ok(json!([])),
-        _ => Ok(json!({}))
+        _ => Ok(json!({})),
     }
 }
 
@@ -216,7 +203,10 @@ async fn handle_company_rpc(method: &str, args: Value) -> Result<Value, String> 
             "created_at": 1700000000000_i64
         }])),
         "company.get" => {
-            let id = args.get("company").and_then(|v| v.as_str()).unwrap_or("omniget-core");
+            let id = args
+                .get("company")
+                .and_then(|v| v.as_str())
+                .unwrap_or("omniget-core");
             Ok(json!({
                 "id": id,
                 "name": "OmniGet Operations",
@@ -458,10 +448,20 @@ async fn handle_company_rpc(method: &str, args: Value) -> Result<Value, String> 
             }
         })),
         "company.create" => {
-            let name = args.pointer("/company/name").and_then(|v| v.as_str()).unwrap_or("New Company");
-            let mission = args.pointer("/company/mission").and_then(|v| v.as_str()).unwrap_or("");
+            let name = args
+                .pointer("/company/name")
+                .and_then(|v| v.as_str())
+                .unwrap_or("New Company");
+            let mission = args
+                .pointer("/company/mission")
+                .and_then(|v| v.as_str())
+                .unwrap_or("");
             let workspace = args.pointer("/company/workspace").and_then(|v| v.as_str());
-            let prefix = if name.len() >= 4 { name[..4].to_uppercase() } else { "COMP".to_string() };
+            let prefix = if name.len() >= 4 {
+                name[..4].to_uppercase()
+            } else {
+                "COMP".to_string()
+            };
             Ok(json!({
                 "id": format!("c-{}", chrono::Utc::now().timestamp_millis()),
                 "name": name,
@@ -473,7 +473,10 @@ async fn handle_company_rpc(method: &str, args: Value) -> Result<Value, String> 
             }))
         }
         "import.preview" => {
-            let name = args.pointer("/options/name").and_then(|v| v.as_str()).unwrap_or("Imported Organization");
+            let name = args
+                .pointer("/options/name")
+                .and_then(|v| v.as_str())
+                .unwrap_or("Imported Organization");
             Ok(json!({
                 "plan_hash": "rust-preview-hash-98765",
                 "company": name,
@@ -489,7 +492,10 @@ async fn handle_company_rpc(method: &str, args: Value) -> Result<Value, String> 
             }))
         }
         "import.apply" => {
-            let name = args.pointer("/options/name").and_then(|v| v.as_str()).unwrap_or("Imported Organization");
+            let name = args
+                .pointer("/options/name")
+                .and_then(|v| v.as_str())
+                .unwrap_or("Imported Organization");
             Ok(json!({
                 "id": format!("c-imp-{}", chrono::Utc::now().timestamp_millis()),
                 "name": name,

@@ -29,21 +29,20 @@ pub async fn handle_llm_command(
             }
             Ok(json!({ "success": true }))
         }
-        "llm_permission_rules_get" => {
-            Ok(json!({
-                "rules": [
-                    { "tool": "fs:read", "pattern": "*", "action": "allow" },
-                    { "tool": "fs:write", "pattern": "build/**", "action": "allow" },
-                    { "tool": "net:http", "pattern": "http://127.0.0.1:*", "action": "allow" }
-                ]
-            }))
-        }
-        "llm_permission_rules_set" => {
-            Ok(json!({ "success": true }))
-        }
+        "llm_permission_rules_get" => Ok(json!({
+            "rules": [
+                { "tool": "fs:read", "pattern": "*", "action": "allow" },
+                { "tool": "fs:write", "pattern": "build/**", "action": "allow" },
+                { "tool": "net:http", "pattern": "http://127.0.0.1:*", "action": "allow" }
+            ]
+        })),
+        "llm_permission_rules_set" => Ok(json!({ "success": true })),
         "llm_chat_send" => {
             let user_text = args.get("text").and_then(|v| v.as_str()).unwrap_or("");
-            let agent_id = args.get("agentId").and_then(|v| v.as_str()).unwrap_or("assistant");
+            let agent_id = args
+                .get("agentId")
+                .and_then(|v| v.as_str())
+                .unwrap_or("assistant");
 
             // Native response synthesis
             let response = format!(
@@ -57,34 +56,24 @@ pub async fn handle_llm_command(
                 "done": true
             }))
         }
-        "llm_turn_undo" => {
-            Ok(json!({ "success": true }))
-        }
-        "llm_conversation_list" => {
-            Ok(json!({
-                "conversations": []
-            }))
-        }
-        "llm_accounts_list" => {
-            Ok(json!({
-                "accounts": [
-                    { "id": "local", "name": "Local Runner", "provider": "native", "active": true }
-                ]
-            }))
-        }
-        "assist_conversation_context" => {
-            Ok(json!({
-                "total_tokens": 512,
-                "context_window": 128000,
-                "remaining_tokens": 127488
-            }))
-        }
-        _ => {
-            Ok(json!({
-                "status": "ok",
-                "command": command,
-                "data": {}
-            }))
-        }
+        "llm_turn_undo" => Ok(json!({ "success": true })),
+        "llm_conversation_list" => Ok(json!({
+            "conversations": []
+        })),
+        "llm_accounts_list" => Ok(json!({
+            "accounts": [
+                { "id": "local", "name": "Local Runner", "provider": "native", "active": true }
+            ]
+        })),
+        "assist_conversation_context" => Ok(json!({
+            "total_tokens": 512,
+            "context_window": 128000,
+            "remaining_tokens": 127488
+        })),
+        _ => Ok(json!({
+            "status": "ok",
+            "command": command,
+            "data": {}
+        })),
     }
 }

@@ -9,16 +9,12 @@ pub async fn handle_canvas_command(
     workspace_dir: Arc<RwLock<PathBuf>>,
 ) -> Result<Value, String> {
     match command {
-        "canvas_state_get" => {
-            Ok(json!({
-                "nodes": [],
-                "edges": [],
-                "viewport": { "x": 0.0, "y": 0.0, "zoom": 1.0 }
-            }))
-        }
-        "canvas_state_set" => {
-            Ok(json!({ "success": true }))
-        }
+        "canvas_state_get" => Ok(json!({
+            "nodes": [],
+            "edges": [],
+            "viewport": { "x": 0.0, "y": 0.0, "zoom": 1.0 }
+        })),
+        "canvas_state_set" => Ok(json!({ "success": true })),
         "canvas_artifacts_list" => {
             let path = workspace_dir.read().await;
             Ok(json!({
@@ -26,12 +22,10 @@ pub async fn handle_canvas_command(
                 "artifacts": []
             }))
         }
-        _ => {
-            Ok(json!({
-                "status": "ok",
-                "command": command,
-                "data": {}
-            }))
-        }
+        _ => Ok(json!({
+            "status": "ok",
+            "command": command,
+            "data": {}
+        })),
     }
 }

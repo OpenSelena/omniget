@@ -32,6 +32,12 @@ impl EnginePlugin {
     }
 }
 
+impl Default for EnginePlugin {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 pub fn manifest() -> omniget_plugin_sdk::PluginManifest {
     serde_json::from_str(include_str!("../plugin.json")).expect("valid engine manifest")
 }
@@ -59,9 +65,8 @@ impl OmnigetPlugin for EnginePlugin {
         &self,
         command: String,
         args: Value,
-    ) -> std::pin::Pin<
-        Box<dyn std::future::Future<Output = Result<Value, String>> + Send + 'static>,
-    > {
+    ) -> std::pin::Pin<Box<dyn std::future::Future<Output = Result<Value, String>> + Send + 'static>>
+    {
         let ws = Arc::clone(&self.workspace_dir);
         let sb = Arc::clone(&self.active_sandbox);
 
@@ -79,7 +84,10 @@ impl OmnigetPlugin for EnginePlugin {
             }
 
             // 3. AgentKit Commands
-            if command.starts_with("agentkit_") || command.starts_with("arena_") || command.starts_with("company_") {
+            if command.starts_with("agentkit_")
+                || command.starts_with("arena_")
+                || command.starts_with("company_")
+            {
                 return agentkit::handle_agentkit_command(&command, args).await;
             }
 

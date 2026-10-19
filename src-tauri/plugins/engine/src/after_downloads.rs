@@ -5,14 +5,12 @@ pub async fn handle_after_downloads_command(command: &str, args: Value) -> Resul
     info!("[engine-after-downloads] Executing command: {}", command);
 
     match command {
-        "after_downloads_get" => {
-            Ok(json!({
-                "action": null,
-                "command": null,
-                "play_sound": true,
-                "notify": true
-            }))
-        }
+        "after_downloads_get" => Ok(json!({
+            "action": null,
+            "command": null,
+            "play_sound": true,
+            "notify": true
+        })),
         "after_downloads_set" => {
             let action = args.get("action").cloned().unwrap_or(Value::Null);
             Ok(json!({
