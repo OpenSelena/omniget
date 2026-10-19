@@ -39,6 +39,11 @@ pub async fn handle_agentkit_command(
             let rpc_args = args.get("args").cloned().unwrap_or(json!({}));
             handle_llm_rpc(method, rpc_args).await
         }
+        "workspace_rpc" => {
+            let method = args.get("method").and_then(|m| m.as_str()).unwrap_or("");
+            let rpc_args = args.get("args").cloned().unwrap_or(json!({}));
+            handle_workspace_rpc(method, rpc_args).await
+        }
         _ => {
             Ok(json!({
                 "status": "ok",
@@ -84,6 +89,117 @@ async fn handle_llm_rpc(method: &str, _args: Value) -> Result<Value, String> {
             "total_tokens_24h": 1845000,
             "total_cost_24h_usd": 12.45
         })),
+        _ => Ok(json!({}))
+    }
+}
+
+async fn handle_workspace_rpc(method: &str, _args: Value) -> Result<Value, String> {
+    match method {
+        "catalog.list" => Ok(json!([
+            {
+                "id": "tools/web-browser",
+                "name": "Playwright Web Agent",
+                "description": "Headless web browsing, DOM interaction, page screenshot capture and form automation.",
+                "category": "tools",
+                "author": "OmniGet Core Team",
+                "version": "1.2.0",
+                "stars": 342,
+                "downloads": 12840,
+                "license": "MIT",
+                "installed": true,
+                "enabled": true,
+                "tags": ["browser", "web", "scraping", "automation"],
+                "readme": "# Playwright Web Agent\n\nEnables autonomous browser exploration, PDF rendering, and interactive page actions.",
+                "permissions": ["network:http", "network:https", "process:spawn"]
+            },
+            {
+                "id": "tools/git-flow",
+                "name": "Git Worktree Manager",
+                "description": "Automated Git branch isolation, commit verification, and worktree cleaning for safe agent execution.",
+                "category": "tools",
+                "author": "OmniGet Core Team",
+                "version": "2.0.4",
+                "stars": 218,
+                "downloads": 8740,
+                "license": "MIT",
+                "installed": true,
+                "enabled": true,
+                "tags": ["git", "vcs", "worktree", "safe"],
+                "readme": "# Git Worktree Manager\n\nIsolates experimental patches in separate disk branches before merging.",
+                "permissions": ["fs:read", "fs:write", "process:git"]
+            }
+        ])),
+        "missions.list" => Ok(json!([
+            {
+                "id": "mis-v100-audit",
+                "title": "OmniGet v1.0.0 Native Integration Audit",
+                "objective": "Decompile all legacy AST bridge routes into pure Svelte 5 runes and achieve 100% native Rust ownership.",
+                "status": "active",
+                "priority": "critical",
+                "progress_pct": 85,
+                "assigned_agents": ["Lead Engineer", "MosCat Sentinel"],
+                "tasks": [
+                    { "id": "t1", "title": "Decompile Category A Media Routes", "done": true },
+                    { "id": "t2", "title": "Decompile Category B Companion Routes", "done": true },
+                    { "id": "t3", "title": "Decompile Category C Overlays Routes", "done": true },
+                    { "id": "t4", "title": "Decompile Category D Spatial HUD Routes", "done": true },
+                    { "id": "t5", "title": "Decompile Category E Company Suite", "done": true },
+                    { "id": "t6", "title": "Decompile Category F LLM Engines & Arena", "done": true },
+                    { "id": "t7", "title": "Decompile Category G Catalog & Workspaces", "done": false }
+                ],
+                "logs": [
+                    { "ts": 1700000000000_i64, "level": "step", "message": "Decompilation pipeline in progress." }
+                ],
+                "created_at": 1700000000000_i64,
+                "updated_at": 1700000000000_i64
+            }
+        ])),
+        "reading.list" => Ok(json!([
+            {
+                "id": "read-1",
+                "title": "Large Language Model Reasoning Chains & Tree-of-Thought",
+                "source_url": "https://arxiv.org/abs/2305.10601",
+                "source_type": "paper",
+                "status": "analyzed",
+                "key_takeaways": ["Branching reasoning improves complex problem solving"],
+                "summary": "Comprehensive study on multi-step deliberate problem solving.",
+                "tags": ["ai", "reasoning", "agents"],
+                "word_count": 8400,
+                "added_at": 1700000000000_i64
+            }
+        ])),
+        "roster.list" => Ok(json!([
+            {
+                "id": "agent-lead",
+                "name": "Architect & Lead Engineer",
+                "role": "System Architecture & Core Implementation",
+                "avatar_color": "var(--blue)",
+                "primary_model": "claude-3-7-sonnet",
+                "fallback_chain": ["gpt-4o", "gemini-2.0-flash"],
+                "temperature": 0.2,
+                "system_prompt": "Lead Systems Architect.",
+                "active_mcp_servers": ["mcp-filesystem", "mcp-git"],
+                "allowed_tools": ["fs:read", "fs:write"],
+                "policy": { "require_approval_on_write": false, "max_tokens_per_turn": 32000, "budget_limit_usd": 50.0 },
+                "status": "busy"
+            }
+        ])),
+        "sessions.list" => Ok(json!([
+            {
+                "id": "sess-v100",
+                "tool": "chat",
+                "title": "V100 Native Decompilation Strategy",
+                "model": "claude-3-7-sonnet",
+                "turns_count": 8,
+                "token_count": 14200,
+                "status": "active",
+                "updated_at": 1700000000000_i64,
+                "created_at": 1700000000000_i64
+            }
+        ])),
+        "summaries.list" => Ok(json!([])),
+        "threads.list" => Ok(json!([])),
+        "work.list" => Ok(json!([])),
         _ => Ok(json!({}))
     }
 }
