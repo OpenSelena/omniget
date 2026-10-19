@@ -290,4 +290,6 @@ skills-lock.json
 /form_preview.png
 /myform_current.png
 src-tauri/binaries/*.exe
+test_out.log
+app_running_screenshot.png
 
