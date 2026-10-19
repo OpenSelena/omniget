@@ -1415,7 +1415,7 @@
           <li>
             <a href="./courses/" class="sidebar-link">
               <span>36 Course Platforms</span>
-              <span class="sidebar-tag">v0.12.3</span>
+              <span class="sidebar-tag">v0.12.4</span>
             </a>
           </li>
         </ul>
@@ -1838,7 +1838,7 @@
             <tr>
               <td><strong>GitHub API</strong><br /><code>api.github.com/repos/OpenSelena/...</code></td>
               <td>Check for newer releases and security patches.</td>
-              <td>Standard HTTP User-Agent and client architecture (e.g. <code>OmniGet/0.12.3 x86_64</code>).</td>
+              <td>Standard HTTP User-Agent and client architecture (e.g. <code>OmniGet/0.12.4 x86_64</code>).</td>
               <td>On startup (can be disabled in Settings).</td>
             </tr>
             <tr>
@@ -1954,12 +1954,43 @@ omniget-cli import-cookies ./cookies.txt --name firefox</code></pre>
         Track every update and bugfix shipped in OmniGet. OmniGet follows Semantic Versioning and publishes signed artifacts with SHA-256 checksums for every desktop release.
       </p>
 
+      <!-- v0.12.4 Release -->
+      <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="sidebar-tag" style="background: var(--primary); color: var(--text-inverse); font-weight: 600; padding: 3px 8px; border-radius: 6px;">v0.12.4 Stable</span>
+              <span style="font-size: 13px; color: var(--text-subtle);">Released October 2026</span>
+            </div>
+            <h3 style="font-size: 18px; font-weight: 700; color: var(--text); margin-top: 6px;">WebView2 Startup Stabilization &amp; IPC Bridge Resilience</h3>
+          </div>
+          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.12.4" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+            <span>View Release on GitHub</span>
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+
+        <div style="display: grid; gap: 18px;">
+          <div>
+            <h4 style="font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              Desktop Startup &amp; IPC Bridge Stabilization
+            </h4>
+            <ul style="margin-left: 20px; color: var(--text-muted); font-size: 14px; line-height: 1.6; display: grid; gap: 4px;">
+              <li>Fixed startup dark grey/black screen regression on Windows desktop builds caused by global Tauri internals monkey-patching in the engine IPC bridge.</li>
+              <li>Eliminated infinite call stack recursion during initial webview bootstrap, allowing Svelte frontend components to hydrate and mount instantaneously.</li>
+              <li>Hardened engine command dispatching via scoped native plugin invocations while adhering strictly to Content Security Policy.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
       <!-- v0.12.3 Release -->
       <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
           <div>
             <div style="display: flex; align-items: center; gap: 10px;">
-              <span class="sidebar-tag" style="background: var(--primary); color: var(--text-inverse); font-weight: 600; padding: 3px 8px; border-radius: 6px;">v0.12.3 Stable</span>
+              <span class="sidebar-tag" style="background: var(--bg-muted); color: var(--text); font-weight: 600; padding: 3px 8px; border-radius: 6px;">v0.12.3</span>
               <span style="font-size: 13px; color: var(--text-subtle);">Released October 2026</span>
             </div>
             <h3 style="font-size: 18px; font-weight: 700; color: var(--text); margin-top: 6px;">Native Engine Architecture, 100% Svelte 5 Decompilation &amp; Full Ecosystem Parity</h3>
@@ -2359,7 +2390,7 @@ omniget-cli import-cookies ./cookies.txt --name firefox</code></pre>
         </li>
         <li class="search-result-item" onclick="location.href='./changelog/'">
           <span class="search-result-title">Release Notes &amp; Changelog</span>
-          <span class="search-result-desc">Version v0.12.3 updates, native engine architecture promotion, 100% Svelte 5 rune decompilation, SignPath verified builds</span>
+          <span class="search-result-desc">Version v0.12.4 updates, WebView2 desktop startup fix, native engine architecture, 100% Svelte 5 rune decompilation</span>
         </li>
       </ul>
     </div>
