@@ -123,8 +123,20 @@ fn is_media_extension(path: &Path) -> bool {
         .map(|ext| {
             matches!(
                 ext.to_ascii_lowercase().as_str(),
-                "mp4" | "m4v" | "mov" | "mkv" | "webm" | "mp3" | "m4a" | "flac" | "ogg" | "opus"
-                    | "wav" | "vtt" | "srt" | "aac"
+                "mp4"
+                    | "m4v"
+                    | "mov"
+                    | "mkv"
+                    | "webm"
+                    | "mp3"
+                    | "m4a"
+                    | "flac"
+                    | "ogg"
+                    | "opus"
+                    | "wav"
+                    | "vtt"
+                    | "srt"
+                    | "aac"
             )
         })
         .unwrap_or(false)
@@ -139,7 +151,9 @@ fn mint_media_grant(path: &str) -> Result<String, String> {
     if !is_media_extension(p) {
         return Err("media: unauthorized or unsupported file type".to_string());
     }
-    let canonical = p.canonicalize().map_err(|e| format!("media: invalid path: {e}"))?;
+    let canonical = p
+        .canonicalize()
+        .map_err(|e| format!("media: invalid path: {e}"))?;
     let port = BOUND_PORT.load(Ordering::SeqCst);
     if port == 0 {
         return Err("media: the local bridge is not running".to_string());
