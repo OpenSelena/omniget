@@ -156,7 +156,10 @@ mod tests {
         let raw = ".instagram.com\tTRUE\t/\tTRUE\t1799999999\tsessionid\t12345%3Aabc\n#HttpOnly_.instagram.com\tTRUE\t/\tTRUE\t1799999999\tds_user_id\t98765\n";
         let cookies = parse_netscape_cookies(raw, Some("instagram.com"));
         assert_eq!(cookies.len(), 2);
-        assert_eq!(cookies[0], ("sessionid".to_string(), "12345%3Aabc".to_string()));
+        assert_eq!(
+            cookies[0],
+            ("sessionid".to_string(), "12345%3Aabc".to_string())
+        );
         assert_eq!(cookies[1], ("ds_user_id".to_string(), "98765".to_string()));
     }
 }
