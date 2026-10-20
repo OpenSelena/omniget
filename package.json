@@ -30,7 +30,7 @@
     "@fontsource/dm-sans": "^5.2.8",
     "@fontsource/ibm-plex-mono": "^5.2.7",
     "@fontsource/inter": "^5.2.8",
-    "@kookyleo/graphviz-anywhere-web": "^0.1.8",
+    "@kookyleo/graphviz-anywhere-web": "^0.2.1",
     "@kookyleo/plantuml-little-web": "1.2026.2-3",
     "@tauri-apps/api": "^2.12.4",
     "@tauri-apps/plugin-clipboard-manager": "^2.3.2",
