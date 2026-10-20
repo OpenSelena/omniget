@@ -1509,7 +1509,7 @@
       <!-- SECTION 1 -->
       <h2 class="doc-h2" id="what-is-opennami">1. OpenNami Engine</h2>
       <p class="doc-p">
-        <strong>OpenNami</strong> is OmniGet's built-in social media archiver (Rust, under <code>src-tauri/src/commands/open_nami/</code>). It drives <code>gallery-dl</code> and <code>yt-dlp</code> with your browser session, so files keep the quality the site serves, with no re-encoding and no watermark.
+        <strong>OpenNami</strong> is OmniGet's built-in social media archiver (Rust backend and Svelte 5 frontend). It operates on a hybrid architecture: primary native TypeScript extractors for Instagram, TikTok, Facebook, and X communicate directly through a CORS-free Rust HTTP bridge, with automated multi-tier fallback to <code>gallery-dl</code> and <code>yt-dlp</code>. Downloads retain original CDN quality with zero re-encoding.
       </p>
 
       <div class="doc-media-card">
@@ -1518,12 +1518,12 @@
       </div>
 
       <ul style="margin-left: 20px; color: var(--text-muted); display: grid; gap: 10px; margin-bottom: 24px; font-size: 14.5px; line-height: 1.6;">
-        <li><strong>Original files:</strong> Downloads come straight from the platform CDNs, so quality matches what the site serves.</li>
-        <li><strong>Browser-like requests:</strong> Sends a Chrome desktop User-Agent and <code>sec-ch-ua</code> Client Hints, like a normal browser.</li>
-        <li><strong>Archive skip-lists:</strong> Saves downloaded post IDs in <code>archive_gallery-dl.sqlite3</code> and <code>archive_yt-dlp.txt</code> inside each download folder, so re-runs skip what you already have.</li>
-        <li><strong>Per-platform pacing:</strong> Sleeps between requests per platform (TikTok: <code>0.6–1.2s</code>, Facebook: <code>1.5–2.5s</code>, Instagram: <code>2.0–2.8s</code>, others: <code>0.8–1.5s</code>) to stay under rate limits.</li>
+        <li><strong>Hybrid Native Extractors:</strong> Primary extraction runs in-memory TypeScript scrapers using Polaris GraphQL doc IDs (Instagram), 5-tier rehydration parsing (TikTok), and author thread preservation (X).</li>
+        <li><strong>Multi-Tier Failover Cascade:</strong> If a native extractor encounters unknown platform changes or rate limits, execution passes automatically to <code>gallery-dl</code>, and then to <code>yt-dlp</code> for video streams.</li>
+        <li><strong>Bidirectional Archive Deduplication:</strong> Synchronizes <code>archive.txt</code> and <code>archive_yt-dlp.txt</code> bidirectionally across both engines to prevent duplicate downloads.</li>
+        <li><strong>Browser-like requests:</strong> Sends desktop User-Agent, Netscape session cookies, and <code>sec-ch-ua</code> Client Hints matching standard desktop browsers.</li>
+        <li><strong>Per-platform pacing:</strong> Enforces request pacing per platform (TikTok: <code>0.6-1.2s</code>, Facebook: <code>1.5-2.5s</code>, Instagram: <code>2.0-2.8s</code>, others: <code>0.8-1.5s</code>) to stay under rate limits.</li>
       </ul>
-
       <p class="doc-p">
         Manage connected profile sessions or enter any public profile handle to archive feeds with custom filters:
       </p>
