@@ -40,6 +40,26 @@ export async function checkPythonDependencies(): Promise<DependencyStatus> {
   return await invoke<DependencyStatus>('open_nami_check_python_dependencies');
 }
 
+export interface HttpRequestOptions {
+  url: string;
+  method?: string;
+  headers?: Record<string, string>;
+  body?: string | null;
+  cookie_path?: string | null;
+  timeout_ms?: number;
+}
+
+export interface HttpResponsePayload {
+  status: number;
+  ok: boolean;
+  headers: Record<string, string>;
+  body: string;
+}
+
+export async function httpFetch(options: HttpRequestOptions): Promise<HttpResponsePayload> {
+  return await invoke<HttpResponsePayload>('open_nami_http_fetch', { options });
+}
+
 export async function ensureBinaries(): Promise<DependencyStatus> {
   return await invoke<DependencyStatus>('open_nami_ensure_binaries');
 }
@@ -49,14 +69,16 @@ export async function runGalleryDlDownload(
   outputDir: string,
   cookiesFile: string | null,
   contentType: string,
-  downloadId: string
+  downloadId: string,
+  skipReplies?: boolean
 ): Promise<DownloadResult> {
   return await invoke<DownloadResult>('open_nami_run_gallery_dl_download', {
     url,
     outputDir,
     cookiesFile,
     contentType,
-    downloadId
+    downloadId,
+    skipReplies: skipReplies ?? null
   });
 }
 

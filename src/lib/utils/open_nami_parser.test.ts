@@ -36,6 +36,24 @@ describe('open_nami_parser', () => {
     expect(parsed.cleanUrl).toBe('https://x.com/OpenSelena');
   });
 
+  it('parses x/twitter personal likes history URL', () => {
+    const raw = 'https://x.com/i/history/likes';
+    const parsed = parseProfileUrl(raw);
+    expect(parsed.platform).toBe('x');
+    expect(parsed.username).toBe('i_history_likes');
+    expect(parsed.cleanUrl).toBe('https://x.com/i/history/likes');
+    expect(parsed.isSpecificMedia).toBe(false);
+  });
+
+  it('parses x/twitter personal bookmarks URL', () => {
+    const raw = 'https://twitter.com/i/bookmarks';
+    const parsed = parseProfileUrl(raw);
+    expect(parsed.platform).toBe('x');
+    expect(parsed.username).toBe('i_bookmarks');
+    expect(parsed.cleanUrl).toBe('https://twitter.com/i/bookmarks');
+    expect(parsed.isSpecificMedia).toBe(false);
+  });
+
   it('parses facebook profile URL', () => {
     const raw = 'https://www.facebook.com/nami.official';
     const parsed = parseProfileUrl(raw);

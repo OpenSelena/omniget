@@ -174,6 +174,27 @@ export function parseProfileUrl(raw: string): ParsedProfile {
     // 4. X / Twitter
     if (host.includes('x.com') || host.includes('twitter.com')) {
       const firstPart = pathParts[0]?.toLowerCase() || '';
+
+      // Personal likes / bookmarks history
+      if (firstPart === 'i' && pathParts[1]?.toLowerCase() === 'history' && pathParts[2]?.toLowerCase() === 'likes') {
+        return {
+          platform: 'x',
+          username: 'i_history_likes',
+          cleanUrl: `${url.origin}/i/history/likes`,
+          rawInput: raw,
+          isSpecificMedia: false,
+        };
+      }
+      if (firstPart === 'i' && pathParts[1]?.toLowerCase() === 'bookmarks') {
+        return {
+          platform: 'x',
+          username: 'i_bookmarks',
+          cleanUrl: `${url.origin}/i/bookmarks`,
+          rawInput: raw,
+          isSpecificMedia: false,
+        };
+      }
+
       const reserved = ['home', 'explore', 'notifications', 'messages', 'i', 'settings'];
       if (firstPart && !reserved.includes(firstPart)) {
         const username = pathParts[0].replace(/^@/, '');

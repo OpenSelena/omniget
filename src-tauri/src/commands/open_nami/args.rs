@@ -21,6 +21,7 @@ pub struct GalleryDlArgsOptions<'a> {
     pub cookie_path: Option<&'a str>,
     pub custom_ua: Option<&'a str>,
     pub proxy: Option<&'a str>,
+    pub skip_replies: Option<bool>,
 }
 
 #[derive(Debug, Clone)]
@@ -139,6 +140,11 @@ pub fn build_gallery_dl_args(options: &GalleryDlArgsOptions) -> Vec<String> {
         }
     }
 
+    if options.platform.eq_ignore_ascii_case("x") && options.skip_replies == Some(true) {
+        args.push("--filter".to_string());
+        args.push("not reply or in_reply_to_user_id == user_id".to_string());
+    }
+
     // Guard against CLI argument injection
     args.push("--".to_string());
     args.push(target_url);
@@ -209,6 +215,11 @@ pub fn build_yt_dlp_args(options: &YtDlpArgsOptions) -> Vec<String> {
         }
     }
 
+    if options.platform.eq_ignore_ascii_case("x") && options.skip_replies == Some(true) {
+        args.push("--filter".to_string());
+        args.push("not reply or in_reply_to_user_id == user_id".to_string());
+    }
+
     // Guard against CLI argument injection
     args.push("--".to_string());
     args.push(options.clean_url.to_string());
@@ -233,6 +244,7 @@ mod tests {
             cookie_path: Some("C:/cookies/ig.txt"),
             custom_ua: None,
             proxy: None,
+            skip_replies: None,
         };
 
         let args = build_gallery_dl_args(&opts);
@@ -245,6 +257,26 @@ mod tests {
         let dash_dash_pos = args.iter().position(|r| r == "--").unwrap();
         assert_eq!(dash_dash_pos, args.len() - 2);
         assert_eq!(args[args.len() - 1], "https://www.instagram.com/test/");
+    }
+
+    #[test]
+    fn test_gallery_dl_args_x_skip_replies() {
+        let dest = PathBuf::from("C:/downloads/OpenNami/x/test/photos");
+        let opts = GalleryDlArgsOptions {
+            dest_dir: &dest,
+            content_type: "photos",
+            platform: "x",
+            clean_url: "https://x.com/test",
+            username: "test",
+            cookie_path: None,
+            custom_ua: None,
+            proxy: None,
+            skip_replies: Some(true),
+        };
+
+        let args = build_gallery_dl_args(&opts);
+        assert!(args.contains(&"--filter".to_string()));
+        assert!(args.contains(&"not reply or in_reply_to_user_id == user_id".to_string()));
     }
 
     #[test]

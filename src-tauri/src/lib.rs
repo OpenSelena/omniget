@@ -1471,6 +1471,7 @@ pub fn run() {
             commands::tools::linkedin::tool_li_messages,
             commands::tools::linkedin::tool_li_checklist,
             commands::open_nami::open_nami_check_python_dependencies,
+            commands::open_nami::open_nami_http_fetch,
             commands::open_nami::open_nami_run_gallery_dl_download,
             commands::open_nami::open_nami_cancel_download,
             commands::open_nami::open_nami_save_app_settings,

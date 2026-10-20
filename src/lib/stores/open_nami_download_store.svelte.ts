@@ -7,6 +7,7 @@ import {
   type DownloadResult,
 } from "$lib/api/open_nami";
 import { parseProfileUrl } from "$lib/utils/open_nami_parser";
+import { dispatchMultiTierDownload } from "$lib/open_nami/dispatcher";
 
 export type StatusType = "success" | "error" | "info";
 
@@ -155,18 +156,22 @@ export async function startDownload(
 
   try {
     unlisten = await listenToDownloadProgress(id, applyProgress);
-    const result = await runGalleryDlDownload(
-      cleanUrl,
+    const result = await dispatchMultiTierDownload({
+      profile: parsed,
       cleanOutputDir,
-      cleanCookiesFile || null,
+      cookiesFile: cleanCookiesFile || null,
       contentType,
-      id,
-    );
+      downloadId: id,
+      onProgress: (msg) => {
+        status = msg;
+        lastMessage = msg;
+      },
+    });
 
     filesDownloaded = result.files_count;
 
     if (result.cancelled) {
-      status = `Download cancelled — ${result.files_count} file(s) saved before stopping.`;
+      status = `Download cancelled: ${result.files_count} file(s) saved before stopping.`;
       statusType = "info";
       statusDetail = "";
     } else if (result.success) {
