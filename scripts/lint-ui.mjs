@@ -135,7 +135,6 @@ export function resolveTargets(argv = []) {
   const primaryTarget = positional[0].replace(/\\/g, "/");
   const isDocTarget =
     primaryTarget === "index.html" ||
-    primaryTarget === "preview.html" ||
     primaryTarget.startsWith("docs/") ||
     primaryTarget === "docs" ||
     primaryTarget.endsWith(".html");

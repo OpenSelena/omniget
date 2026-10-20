@@ -1,6 +1,6 @@
 ---
 name: ui-lint
-description: Run targeted rendered UI verification with lintapple (`pnpm lint:ui <target>`). Use whenever modifying Svelte routes (`src/routes/`), UI components (`src/components/`), CSS stylesheets (`src/app.css`, `src/lib/style/`), the landing page (`index.html`, `preview.html`), or documentation pages (`docs/`).
+description: Run targeted rendered UI verification with lintapple (`pnpm lint:ui <target>`). Use whenever modifying Svelte routes (`src/routes/`), UI components (`src/components/`), CSS stylesheets (`src/app.css`, `src/lib/style/`), the landing page (`index.html`), or documentation pages (`docs/`).
 ---
 
 # Targeted UI Lint (`lintapple`)
@@ -24,7 +24,7 @@ Verify rendered layout, typography scale, concentric border radii, contrast, and
 | `src/lib/style/notes.css` | `pnpm lint:ui /study` | `ui-policy.app.json` + baseline |
 | `src/routes/+layout.svelte`, `src/components/shell/**`, `src/lib/style/buttons.css`, `src/lib/style/primitives.css` | `pnpm lint:ui --shell` | `ui-policy.app.json` + baseline |
 | `src/app.css` | `pnpm lint:ui /settings --all-themes` | `ui-policy.app.json` across all 14 themes |
-| `index.html`, `preview.html` | `pnpm lint:ui index.html` | `ui-policy.docs.json` (0 findings required) |
+| `index.html` | `pnpm lint:ui index.html` | `ui-policy.docs.json` (0 findings required) |
 | `docs/<section>/index.html` | `pnpm lint:ui docs/<section>/index.html` | `ui-policy.docs.json` (0 findings required) |
 
 ## Policies & Baseline Rules

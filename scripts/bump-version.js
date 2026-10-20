@@ -152,7 +152,7 @@ if (fs.existsSync(aboutProjectPath)) {
   );
 }
 
-// Update landing pages (index.html, preview.html)
+// Update landing page (index.html)
 function updateLandingPageContent(content) {
   return content
     .replace(/"softwareVersion":\s*"[^"]+"/, `"softwareVersion": "${version}"`)
@@ -169,24 +169,6 @@ function updateLandingPageContent(content) {
 const indexPath = path.join(root, "index.html");
 if (fs.existsSync(indexPath)) {
   writeText(indexPath, updateLandingPageContent);
-}
-
-const previewPath = path.join(root, "preview.html");
-if (fs.existsSync(previewPath)) {
-  writeText(previewPath, updateLandingPageContent);
-}
-
-const legacyIndexPath = path.join(root, "index.legacy.html");
-if (fs.existsSync(legacyIndexPath)) {
-  writeText(legacyIndexPath, (content) => {
-    return content
-      .replace(/(releases\/latest\/download\/)(?:omniget|OmniGet)_[^/]+_(x64-setup\.exe)/g, `$1OmniGet_${version}_$2`)
-      .replace(/(releases\/latest\/download\/)(?:omniget|OmniGet)_[^/]+_(aarch64\.dmg)/g, `$1OmniGet_${version}_$2`)
-      .replace(/(releases\/latest\/download\/)(?:omniget|OmniGet)_[^/]+_(amd64\.AppImage)/g, `$1OmniGet_${version}_$2`)
-      .replace(/v\d+\.\d+\.\d+ Stable/g, `v${version} Stable`)
-      .replace(/OmniGet v\d+\.\d+\.\d+ Release Notes/g, `OmniGet v${version} Release Notes`)
-      .replace(/releases\/tag\/v\d+\.\d+\.\d+/g, `releases/tag/v${version}`);
-  });
 }
 
 // Update docs sidebar version pills
