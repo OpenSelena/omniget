@@ -10,8 +10,7 @@ Welcome to OmniGet. This file serves as the definitive reference and operating m
 - **Frontend**: SvelteKit / Svelte 5 (`src/`) powered by Vite.
 - **Embedded Plugins**: Statically linked core plugins (`courses`, `telegram`, `convert`) in `src-tauri/plugins/`.
 - **Public Website & Docs**: GitHub Pages static suite served from repo root:
-  - Root landing page: `index.html` and mirror `preview.html`.
-  - Legacy landing page: `index.legacy.html`.
+  - Root landing page: `index.html`.
   - Documentation suite: `docs/` (`docs/index.html`, `docs/changelog/`, `docs/installation/`, `docs/courses/`, `docs/opennami/`, `docs/mcp/`, `docs/troubleshooting/`).
   - Companion Browser Extension: `browser-extension/chrome/`.
 
@@ -32,8 +31,7 @@ Welcome to OmniGet. This file serves as the definitive reference and operating m
      - `src-tauri/Cargo.toml` & `src-tauri/Cargo.lock`
      - `src-tauri/tauri.conf.json`
      - `src/lib/stores/changelog-store.svelte.ts`
-     - `index.html` & `preview.html` (download links, version meta tags, CTA text)
-     - `index.legacy.html` (download links and release badges)
+     - `index.html` (download links, version meta tags, CTA text)
      - `docs/*/index.html` (sidebar version tags)
 
 2. **Documentation Updates**:
@@ -68,7 +66,7 @@ Welcome to OmniGet. This file serves as the definitive reference and operating m
 5. **Asset Name & Casing Verification**:
    - Check the exact asset filenames uploaded by Tauri (`gh release view vX.Y.Z --json assets`).
    - Notice casing: e.g. `OmniGet_0.11.0_x64-setup.exe` (capitalized `OmniGet`) vs `omniget_0.11.0_x64-portable.exe` (lowercase `omniget`).
-   - Ensure `index.html` and `preview.html` download buttons use the exact asset filenames.
+   - Ensure `index.html` download buttons use the exact asset filenames.
 
 ---
 
