@@ -9,7 +9,7 @@ pub mod http;
 
 use chrono::Utc;
 pub use dispatcher::{DownloadProgress, DownloadResult};
-pub use http::open_nami_http_fetch;
+pub use http::*;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Path, PathBuf};
