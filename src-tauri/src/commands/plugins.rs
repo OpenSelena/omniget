@@ -439,7 +439,11 @@ pub async fn install_plugin_zip_from_repo(
 
     for i in 0..archive.len() {
         let mut file = archive.by_index(i).map_err(|e| e.to_string())?;
-        let outpath = plugin_dir.join(file.mangled_name());
+        let mangled = file.mangled_name();
+        let outpath = plugin_dir.join(&mangled);
+        if !outpath.starts_with(&plugin_dir) {
+            return Err("Malicious zip path traversal detected".to_string());
+        }
         if file.is_dir() {
             std::fs::create_dir_all(&outpath).map_err(|e| e.to_string())?;
         } else {
@@ -595,15 +599,11 @@ pub async fn auto_update_plugins(state: Arc<tokio::sync::RwLock<PluginManager>>)
             continue;
         }
         tracing::info!(
-            "auto-updating plugin '{}' {} -> {}",
+            "plugin update available for '{}': {} -> {} (silent auto-execution disabled for security)",
             plugin.id,
             plugin.version,
             latest
         );
-        match install_plugin_zip_from_repo(&state, plugin.id.clone(), repo).await {
-            Ok(v) => tracing::info!("plugin '{}' updated to {}", plugin.id, v),
-            Err(e) => tracing::warn!("auto-update failed for '{}': {}", plugin.id, e),
-        }
     }
 }
 

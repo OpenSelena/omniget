@@ -632,76 +632,126 @@ pub struct UninstallResult {
     pub failed: Vec<String>,
 }
 
+fn contains_shell_metacharacters(s: &str) -> bool {
+    s.chars().any(|c| matches!(c, '&' | '|' | ';' | '>' | '<' | '^' | '`' | '$' | '\n' | '\r'))
+}
+
+fn is_valid_guid(g: &str) -> bool {
+    !g.is_empty()
+        && g.chars()
+            .all(|c| c.is_ascii_hexdigit() || c == '-' || c == '{' || c == '}')
+}
+
+fn is_valid_linux_package_name(pkg: &str) -> bool {
+    !pkg.is_empty()
+        && pkg
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '.' || c == '_' || c == '+' || c == ':')
+}
+
+fn split_windows_command(cmd: &str) -> Option<(String, Vec<String>)> {
+    let trimmed = cmd.trim();
+    if trimmed.is_empty() {
+        return None;
+    }
+    if let Some(stripped) = trimmed.strip_prefix('"') {
+        let (exe, rest) = stripped.split_once('"')?;
+        let args: Vec<String> = rest
+            .split_whitespace()
+            .map(|s| s.to_string())
+            .collect();
+        Some((exe.to_string(), args))
+    } else {
+        let mut parts = trimmed.split_whitespace();
+        let exe = parts.next()?;
+        let args: Vec<String> = parts.map(|s| s.to_string()).collect();
+        Some((exe.to_string(), args))
+    }
+}
+
 /// Desinstala o app e, se pedido, manda as sobras para a lixeira.
 pub async fn uninstall(app: &App, leftover_paths: &[String]) -> UninstallResult {
     let mut r = UninstallResult::default();
     let res: anyhow::Result<String> = if cfg!(target_os = "macos") {
-        match trash::delete(&app.path) {
-            Ok(_) => Ok("movido para a Lixeira".into()),
-            Err(e) => {
-                // Sem permissão: pede ao Finder (dialogo de senha do sistema)
-                let script = format!(
-                    "tell application \"Finder\" to delete POSIX file \"{}\"",
-                    app.path.replace('"', "\\\"")
-                );
-                run("osascript", &["-e", &script])
-                    .await
-                    .map(|_| "movido para a Lixeira".into())
-                    .map_err(|_| anyhow!("{}", e))
+        if app.path.contains('"') || app.path.contains('\n') || app.path.contains('\r') {
+            Err(anyhow!("Invalid app path for uninstall"))
+        } else {
+            match trash::delete(&app.path) {
+                Ok(_) => Ok("movido para a Lixeira".into()),
+                Err(e) => {
+                    let script = format!(
+                        "tell application \"Finder\" to delete POSIX file \"{}\"",
+                        app.path.replace('\\', "\\\\").replace('"', "\\\"")
+                    );
+                    run("osascript", &["-e", &script])
+                        .await
+                        .map(|_| "movido para a Lixeira".into())
+                        .map_err(|_| anyhow!("{}", e))
+                }
             }
         }
     } else if cfg!(target_os = "windows") {
         let cmd = app.key.trim();
-        let lower = cmd.to_ascii_lowercase();
-        if lower.contains("msiexec") {
-            // MsiExec.exe /I{GUID} → /X{GUID} silencioso
-            let guid = cmd
-                .split(['{', '}'])
-                .nth(1)
-                .map(|g| format!("{{{}}}", g))
-                .unwrap_or_default();
-            if guid.is_empty() {
-                Err(anyhow!("UninstallString sem GUID: {}", cmd))
-            } else {
-                run("msiexec", &["/x", &guid, "/passive", "/norestart"])
-                    .await
-                    .map(|_| "desinstalado".into())
-            }
+        if contains_shell_metacharacters(cmd) {
+            Err(anyhow!("Unsafe uninstaller command line: illegal characters detected"))
         } else {
-            run("cmd", &["/C", cmd])
-                .await
-                .map(|_| "desinstalador executado".into())
+            let lower = cmd.to_ascii_lowercase();
+            if lower.contains("msiexec") {
+                let guid = cmd
+                    .split(['{', '}'])
+                    .nth(1)
+                    .map(|g| format!("{{{}}}", g))
+                    .unwrap_or_default();
+                if guid.is_empty() || !is_valid_guid(&guid) {
+                    Err(anyhow!("UninstallString sem GUID valido: {}", cmd))
+                } else {
+                    run("msiexec", &["/x", &guid, "/passive", "/norestart"])
+                        .await
+                        .map(|_| "desinstalado".into())
+                }
+            } else if let Some((exe, args)) = split_windows_command(cmd) {
+                let arg_refs: Vec<&str> = args.iter().map(|s| s.as_str()).collect();
+                run(&exe, &arg_refs)
+                    .await
+                    .map(|_| "desinstalador executado".into())
+            } else {
+                Err(anyhow!("Invalid uninstaller command line"))
+            }
         }
     } else {
-        match app.kind.as_str() {
-            "flatpak" => run(
-                "flatpak",
-                &[
-                    "uninstall",
-                    "-y",
-                    "--delete-data",
-                    if app.needs_admin {
-                        "--system"
-                    } else {
-                        "--user"
-                    },
-                    &app.key,
-                ],
-            )
-            .await
-            .map(|_| "desinstalado".into()),
-            "snap" => run("pkexec", &["snap", "remove", &app.key])
+        if !is_valid_linux_package_name(&app.key) {
+            Err(anyhow!("Invalid package name: illegal characters detected"))
+        } else {
+            match app.kind.as_str() {
+                "flatpak" => run(
+                    "flatpak",
+                    &[
+                        "uninstall",
+                        "-y",
+                        "--delete-data",
+                        if app.needs_admin {
+                            "--system"
+                        } else {
+                            "--user"
+                        },
+                        &app.key,
+                    ],
+                )
                 .await
                 .map(|_| "desinstalado".into()),
-            "deb" => run("pkexec", &["apt-get", "remove", "-y", &app.key])
-                .await
-                .map(|_| "desinstalado".into()),
-            "rpm" => run("pkexec", &["dnf", "remove", "-y", &app.key])
-                .await
-                .map(|_| "desinstalado".into()),
-            _ => trash::delete(&app.path)
-                .map(|_| "movido para a lixeira".to_string())
-                .map_err(|e| anyhow!("{}", e)),
+                "snap" => run("pkexec", &["snap", "remove", &app.key])
+                    .await
+                    .map(|_| "desinstalado".into()),
+                "deb" => run("pkexec", &["apt-get", "remove", "-y", &app.key])
+                    .await
+                    .map(|_| "desinstalado".into()),
+                "rpm" => run("pkexec", &["dnf", "remove", "-y", &app.key])
+                    .await
+                    .map(|_| "desinstalado".into()),
+                _ => trash::delete(&app.path)
+                    .map(|_| "movido para a lixeira".to_string())
+                    .map_err(|e| anyhow!("{}", e)),
+            }
         }
     };
     match res {

@@ -1026,6 +1026,30 @@ pub async fn download_from_url(
     })
 }
 
+fn validate_custom_ytdlp_args(args: &[String]) -> Result<(), String> {
+    for arg in args {
+        let trimmed = arg.trim();
+        let lower = trimmed.to_ascii_lowercase();
+        let name = lower.split('=').next().unwrap_or(&lower);
+        if matches!(
+            name,
+            "--exec"
+                | "--exec-before-download"
+                | "--external-downloader"
+                | "--downloader"
+                | "--external-downloader-args"
+                | "--downloader-args"
+                | "--config-locations"
+                | "--config-location"
+                | "--alias"
+                | "--print-to-file"
+        ) {
+            return Err(format!("Disallowed yt-dlp argument for security: {name}"));
+        }
+    }
+    Ok(())
+}
+
 #[cfg(not(target_os = "android"))]
 #[tauri::command]
 pub async fn download_with_custom_args(
@@ -1038,6 +1062,9 @@ pub async fn download_with_custom_args(
 ) -> Result<DownloadStarted, String> {
     if url.trim().is_empty() {
         return Err("URL is required".to_string());
+    }
+    if let Err(err) = validate_custom_ytdlp_args(&custom_args) {
+        return Err(err);
     }
     if let Err(err) = crate::core::path_limits::validate_output_dir(&output_dir) {
         return Err(format!(
@@ -1666,31 +1693,5 @@ pub async fn reveal_file(path: String) -> Result<(), String> {
 #[cfg(not(target_os = "android"))]
 #[tauri::command]
 pub async fn open_path_default(path: String) -> Result<(), String> {
-    #[cfg(target_os = "windows")]
-    {
-        use std::os::windows::process::CommandExt;
-        std::process::Command::new("cmd")
-            .args(["/c", "start", "", &path])
-            .creation_flags(0x08000000)
-            .spawn()
-            .map_err(|e| e.to_string())?;
-    }
-
-    #[cfg(target_os = "macos")]
-    {
-        std::process::Command::new("open")
-            .arg(&path)
-            .spawn()
-            .map_err(|e| e.to_string())?;
-    }
-
-    #[cfg(target_os = "linux")]
-    {
-        std::process::Command::new("xdg-open")
-            .arg(&path)
-            .spawn()
-            .map_err(|e| e.to_string())?;
-    }
-
-    Ok(())
+    open::that_detached(&path).map_err(|e| e.to_string())
 }

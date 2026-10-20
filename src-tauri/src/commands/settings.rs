@@ -120,8 +120,10 @@ pub fn get_bridge_info(app: tauri::AppHandle) -> Result<BridgeInfo, String> {
 #[tauri::command]
 pub fn rotate_bridge_token(app: tauri::AppHandle) -> Result<BridgeInfo, String> {
     let mut current = config::load_settings(&app);
-    current.bridge.token = crate::local_bridge::generate_token();
+    let new_token = crate::local_bridge::generate_token();
+    current.bridge.token = new_token.clone();
     config::save_settings(&app, &current).map_err(|e| format!("Save: {}", e))?;
+    crate::local_bridge::update_token(&new_token);
     get_bridge_info(app)
 }
 
