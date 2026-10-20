@@ -31,6 +31,7 @@ pub struct YtDlpArgsOptions<'a> {
     pub clean_url: &'a str,
     pub cookie_path: Option<&'a str>,
     pub proxy: Option<&'a str>,
+    pub skip_replies: Option<bool>,
 }
 
 pub fn get_platform_sleep(platform: &str) -> &'static str {
@@ -288,6 +289,7 @@ mod tests {
             clean_url: "https://www.tiktok.com/@creator",
             cookie_path: None,
             proxy: None,
+            skip_replies: None,
         };
 
         let args = build_yt_dlp_args(&opts);

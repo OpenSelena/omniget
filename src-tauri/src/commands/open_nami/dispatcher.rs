@@ -522,6 +522,7 @@ fn run_single_stage(
                 clean_url: url,
                 cookie_path,
                 proxy: None,
+                skip_replies,
             };
             let yt_args = build_yt_dlp_args(&yt_opts);
 
