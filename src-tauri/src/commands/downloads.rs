@@ -1063,9 +1063,7 @@ pub async fn download_with_custom_args(
     if url.trim().is_empty() {
         return Err("URL is required".to_string());
     }
-    if let Err(err) = validate_custom_ytdlp_args(&custom_args) {
-        return Err(err);
-    }
+    validate_custom_ytdlp_args(&custom_args)?;
     if let Err(err) = crate::core::path_limits::validate_output_dir(&output_dir) {
         return Err(format!(
             "PathTooLong|{}|{}|{}",
