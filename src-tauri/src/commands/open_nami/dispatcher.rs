@@ -186,10 +186,55 @@ pub fn sanitize_path_component(input: &str) -> String {
     trimmed.chars().take(120).collect()
 }
 
+pub fn sync_cross_engine_archives(dest_dir: &Path) {
+    let ytdlp_path = dest_dir.join(super::args::YTDLP_ARCHIVE);
+    let text_path = dest_dir.join("archive.txt");
+
+    let mut ids = std::collections::BTreeSet::new();
+
+    if let Ok(content) = fs::read_to_string(&ytdlp_path) {
+        for line in content.lines() {
+            let trimmed = line.trim();
+            if !trimmed.is_empty() && !trimmed.starts_with('#') {
+                if let Some(id) = trimmed.split_whitespace().last() {
+                    ids.insert(id.to_string());
+                }
+            }
+        }
+    }
+
+    if let Ok(content) = fs::read_to_string(&text_path) {
+        for line in content.lines() {
+            let trimmed = line.trim();
+            if !trimmed.is_empty() && !trimmed.starts_with('#') {
+                if let Some(id) = trimmed.split_whitespace().last() {
+                    ids.insert(id.to_string());
+                }
+            }
+        }
+    }
+
+    if !ids.is_empty() {
+        let synced = ids
+            .into_iter()
+            .map(|id| format!("{}\n", id))
+            .collect::<String>();
+        let _ = fs::write(&ytdlp_path, &synced);
+        let _ = fs::write(&text_path, &synced);
+    }
+}
+
 pub fn extract_username_generic(url: &str) -> Option<String> {
     let trimmed = url.trim().trim_end_matches('/');
     if trimmed.is_empty() {
         return None;
+    }
+
+    if trimmed.contains("/i/history/likes") {
+        return Some("i_history_likes".to_string());
+    }
+    if trimmed.contains("/i/bookmarks") {
+        return Some("i_bookmarks".to_string());
     }
 
     let candidate = if trimmed.contains("://") {
@@ -218,6 +263,7 @@ pub async fn execute_download_workflow(
     content_type: String,
     download_id: String,
     app_data_dir: PathBuf,
+    skip_replies: Option<bool>,
 ) -> Result<DownloadResult, String> {
     let reg = DownloadRegistration::new(&download_id)?;
 
@@ -315,6 +361,7 @@ pub async fn execute_download_workflow(
             total_files,
             stage_index,
             stage_total,
+            skip_replies,
         ) {
             Ok(result) => {
                 total_files += result.files_count;
@@ -386,6 +433,7 @@ fn run_single_stage(
     base_count: u32,
     stage_index: u32,
     stage_total: u32,
+    skip_replies: Option<bool>,
 ) -> Result<DownloadResult, String> {
     if reg.is_cancelled() {
         return Ok(DownloadResult {
@@ -437,6 +485,7 @@ fn run_single_stage(
         cookie_path,
         custom_ua: None,
         proxy: None,
+        skip_replies,
     };
     let gdl_args = build_gallery_dl_args(&gdl_opts);
 
@@ -450,6 +499,8 @@ fn run_single_stage(
         stage_index,
         stage_total,
     )?;
+
+    sync_cross_engine_archives(&final_dest);
 
     // Dual-Engine Fallback for Videos
     if content_type == "videos" && gdl_result.files_count == 0 && !reg.is_cancelled() {
@@ -474,7 +525,7 @@ fn run_single_stage(
             };
             let yt_args = build_yt_dlp_args(&yt_opts);
 
-            return run_process_stream(
+            let yt_result = run_process_stream(
                 app,
                 yt_executable,
                 &yt_args,
@@ -483,7 +534,9 @@ fn run_single_stage(
                 media_type_name,
                 stage_index,
                 stage_total,
-            );
+            )?;
+            sync_cross_engine_archives(&final_dest);
+            return Ok(yt_result);
         }
     }
 

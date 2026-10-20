@@ -5,9 +5,11 @@ pub mod args;
 pub mod cookies;
 pub mod dispatcher;
 pub mod fetcher;
+pub mod http;
 
 use chrono::Utc;
 pub use dispatcher::{DownloadProgress, DownloadResult};
+pub use http::open_nami_http_fetch;
 use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::{Path, PathBuf};
@@ -129,6 +131,15 @@ fn normalize_profile_url(platform: &str, raw_input: &str) -> String {
         return format!("https://www.tiktok.com/@{}", user.to_lowercase());
     }
 
+    if platform == "x" {
+        if path.starts_with("i/history/likes") {
+            return "https://x.com/i/history/likes".to_string();
+        }
+        if path.starts_with("i/bookmarks") {
+            return "https://x.com/i/bookmarks".to_string();
+        }
+    }
+
     format!("https://{}{}", canonical_host, path_part)
 }
 
@@ -170,6 +181,7 @@ pub async fn open_nami_run_gallery_dl_download(
     cookies_file: Option<String>,
     content_type: String,
     download_id: String,
+    skip_replies: Option<bool>,
 ) -> Result<DownloadResult, String> {
     let app_dir = omniget_open_nami_dir()?;
     dispatcher::execute_download_workflow(
@@ -180,6 +192,7 @@ pub async fn open_nami_run_gallery_dl_download(
         content_type,
         download_id,
         app_dir,
+        skip_replies,
     )
     .await
 }
