@@ -57,8 +57,18 @@ fn open_session() -> anyhow::Result<Arc<SqliteSession>> {
     let path = session_file_path()?;
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent)?;
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let _ = std::fs::set_permissions(parent, std::fs::Permissions::from_mode(0o700));
+        }
     }
-    let session = SqliteSession::open(path)?;
+    let session = SqliteSession::open(&path)?;
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let _ = std::fs::set_permissions(&path, std::fs::Permissions::from_mode(0o600));
+    }
     Ok(Arc::new(session))
 }
 

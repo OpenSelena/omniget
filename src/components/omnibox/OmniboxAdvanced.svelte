@@ -5,6 +5,7 @@
   import { t } from "$lib/i18n";
   import { getSettings } from "$lib/stores/settings-store.svelte";
   import { showToast } from "$lib/stores/toast-store.svelte";
+  import { validateYtdlpArgs } from "$lib/utils/ytdlp-args";
 
   type Template = {
     id: string;
@@ -135,12 +136,19 @@
       if (!picked) return;
       outputDir = picked as string;
     }
+    const parsedArgs = parseArgs(argsText);
+    const check = validateYtdlpArgs(parsedArgs);
+    if (!check.valid) {
+      showToast("error", `Security error: disallowed argument "${check.disallowed}"`);
+      return;
+    }
+
     submitting = true;
     try {
       await invoke("download_with_custom_args", {
         url: trimmedUrl,
         outputDir,
-        customArgs: parseArgs(argsText),
+        customArgs: parsedArgs,
         cookieSlug: null,
       });
       showToast("success", $t("omnibox.adv.queued"));

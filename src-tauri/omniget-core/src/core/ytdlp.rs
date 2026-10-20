@@ -776,16 +776,34 @@ fn extra_ytdlp_flags_setting() -> Vec<String> {
     EXTRA_YTDLP_FLAGS_FN.get().map(|f| f()).unwrap_or_default()
 }
 
+pub(crate) fn is_disallowed_ytdlp_flag(flag: &str) -> bool {
+    let lower = flag.trim().to_ascii_lowercase();
+    let name = lower.split('=').next().unwrap_or(&lower);
+    matches!(
+        name,
+        "--exec"
+            | "--exec-before-download"
+            | "--external-downloader"
+            | "--downloader"
+            | "--external-downloader-args"
+            | "--downloader-args"
+            | "--config-locations"
+            | "--config-location"
+            | "--alias"
+            | "--print-to-file"
+    )
+}
+
 pub(crate) fn merge_extra_flags(configured: &[String], explicit: &[String]) -> Vec<String> {
     let mut out: Vec<String> = configured
         .iter()
         .map(|s| s.trim())
-        .filter(|s| !s.is_empty())
+        .filter(|s| !s.is_empty() && !is_disallowed_ytdlp_flag(s))
         .map(String::from)
         .collect();
     for flag in explicit {
         let trimmed = flag.trim();
-        if !trimmed.is_empty() {
+        if !trimmed.is_empty() && !is_disallowed_ytdlp_flag(trimmed) {
             out.push(trimmed.to_string());
         }
     }

@@ -27,7 +27,19 @@ use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicI64, AtomicU16, Ordering};
-use std::sync::{Arc, Mutex, OnceLock};
+use std::sync::{Arc, Mutex, OnceLock, RwLock};
+
+static ACTIVE_TOKEN: RwLock<Option<String>> = RwLock::new(None);
+
+pub fn update_token(new_token: &str) {
+    if let Ok(mut lock) = ACTIVE_TOKEN.write() {
+        *lock = Some(new_token.to_string());
+    }
+}
+
+pub fn active_token() -> Option<String> {
+    ACTIVE_TOKEN.read().ok().and_then(|l| l.clone())
+}
 
 use axum::{
     body::Body,
@@ -105,11 +117,29 @@ fn media_grants_prune(map: &mut HashMap<String, MediaGrant>) {
     }
 }
 
+fn is_media_extension(path: &Path) -> bool {
+    path.extension()
+        .and_then(|ext| ext.to_str())
+        .map(|ext| {
+            matches!(
+                ext.to_ascii_lowercase().as_str(),
+                "mp4" | "m4v" | "mov" | "mkv" | "webm" | "mp3" | "m4a" | "flac" | "ogg" | "opus"
+                    | "wav" | "vtt" | "srt" | "aac"
+            )
+        })
+        .unwrap_or(false)
+}
+
 /// Mints a playback URL for one local media file, for [`media_stream_url`].
 fn mint_media_grant(path: &str) -> Result<String, String> {
-    if !Path::new(path).is_file() {
+    let p = Path::new(path);
+    if !p.is_file() {
         return Err(format!("media: not a file: {path}"));
     }
+    if !is_media_extension(p) {
+        return Err("media: unauthorized or unsupported file type".to_string());
+    }
+    let canonical = p.canonicalize().map_err(|e| format!("media: invalid path: {e}"))?;
     let port = BOUND_PORT.load(Ordering::SeqCst);
     if port == 0 {
         return Err("media: the local bridge is not running".to_string());
@@ -122,7 +152,7 @@ fn mint_media_grant(path: &str) -> Result<String, String> {
     map.insert(
         token.clone(),
         MediaGrant {
-            path: PathBuf::from(path),
+            path: canonical,
             expires_ms: now_ms() + MEDIA_GRANT_TTL_MS,
         },
     );
@@ -438,6 +468,7 @@ pub async fn spawn(app: AppHandle) {
         }
     };
 
+    update_token(&token);
     BOUND_PORT.store(port, Ordering::SeqCst);
 
     let state = BridgeState {
@@ -551,7 +582,32 @@ struct PairResponse {
     token: Option<String>,
 }
 
+fn is_allowed_pair_origin(origin: &str) -> bool {
+    let o = origin.trim();
+    o.starts_with("chrome-extension://")
+        || o.starts_with("moz-extension://")
+        || o.starts_with("safari-web-extension://")
+        || o.starts_with("tauri://")
+        || o.starts_with("http://localhost")
+        || o.starts_with("http://127.0.0.1")
+        || o.starts_with("https://localhost")
+}
+
 async fn pair(State(state): State<BridgeState>, headers: HeaderMap) -> Response {
+    if let Some(origin) = headers.get("origin").and_then(|v| v.to_str().ok()) {
+        if !is_allowed_pair_origin(origin) {
+            tracing::warn!("[bridge] rejected pairing request from untrusted origin: {origin}");
+            return (
+                StatusCode::FORBIDDEN,
+                Json(PairResponse {
+                    ok: false,
+                    token: None,
+                }),
+            )
+                .into_response();
+        }
+    }
+
     if !pairing_open() {
         return (
             StatusCode::FORBIDDEN,
@@ -578,11 +634,12 @@ async fn pair(State(state): State<BridgeState>, headers: HeaderMap) -> Response 
         tracing::warn!("[bridge] failed to emit bridge-paired event: {error}");
     }
 
+    let token_out = active_token().unwrap_or_else(|| (*state.token).clone());
     (
         StatusCode::OK,
         Json(PairResponse {
             ok: true,
-            token: Some((*state.token).clone()),
+            token: Some(token_out),
         }),
     )
         .into_response()
@@ -597,7 +654,7 @@ fn unauthorized() -> Response {
     (StatusCode::UNAUTHORIZED, body).into_response()
 }
 
-fn check_bearer(headers: &HeaderMap, expected: &str) -> bool {
+fn check_bearer(headers: &HeaderMap, fallback: &str) -> bool {
     let header = match headers.get("authorization") {
         Some(v) => v,
         None => return false,
@@ -613,6 +670,8 @@ fn check_bearer(headers: &HeaderMap, expected: &str) -> bool {
         Some(s) => s.trim(),
         None => return false,
     };
+    let current_token = active_token();
+    let expected = current_token.as_deref().unwrap_or(fallback);
     constant_time_eq::constant_time_eq(provided.as_bytes(), expected.as_bytes())
 }
 
