@@ -633,7 +633,12 @@ pub struct UninstallResult {
 }
 
 fn contains_shell_metacharacters(s: &str) -> bool {
-    s.chars().any(|c| matches!(c, '&' | '|' | ';' | '>' | '<' | '^' | '`' | '$' | '\n' | '\r'))
+    s.chars().any(|c| {
+        matches!(
+            c,
+            '&' | '|' | ';' | '>' | '<' | '^' | '`' | '$' | '\n' | '\r'
+        )
+    })
 }
 
 fn is_valid_guid(g: &str) -> bool {
@@ -644,9 +649,9 @@ fn is_valid_guid(g: &str) -> bool {
 
 fn is_valid_linux_package_name(pkg: &str) -> bool {
     !pkg.is_empty()
-        && pkg
-            .chars()
-            .all(|c| c.is_ascii_alphanumeric() || c == '-' || c == '.' || c == '_' || c == '+' || c == ':')
+        && pkg.chars().all(|c| {
+            c.is_ascii_alphanumeric() || c == '-' || c == '.' || c == '_' || c == '+' || c == ':'
+        })
 }
 
 fn split_windows_command(cmd: &str) -> Option<(String, Vec<String>)> {
@@ -656,10 +661,7 @@ fn split_windows_command(cmd: &str) -> Option<(String, Vec<String>)> {
     }
     if let Some(stripped) = trimmed.strip_prefix('"') {
         let (exe, rest) = stripped.split_once('"')?;
-        let args: Vec<String> = rest
-            .split_whitespace()
-            .map(|s| s.to_string())
-            .collect();
+        let args: Vec<String> = rest.split_whitespace().map(|s| s.to_string()).collect();
         Some((exe.to_string(), args))
     } else {
         let mut parts = trimmed.split_whitespace();
@@ -693,7 +695,9 @@ pub async fn uninstall(app: &App, leftover_paths: &[String]) -> UninstallResult 
     } else if cfg!(target_os = "windows") {
         let cmd = app.key.trim();
         if contains_shell_metacharacters(cmd) {
-            Err(anyhow!("Unsafe uninstaller command line: illegal characters detected"))
+            Err(anyhow!(
+                "Unsafe uninstaller command line: illegal characters detected"
+            ))
         } else {
             let lower = cmd.to_ascii_lowercase();
             if lower.contains("msiexec") {
