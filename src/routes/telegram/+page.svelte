@@ -1036,6 +1036,9 @@
 {:else if view === "qr"}
   <div class="page-center">
     <div class="login-card">
+      <div class="telegram-hero-wrap">
+        <img src="/telegram/hero.png" alt="" class="telegram-hero-img" width="130" height="90" />
+      </div>
       <h2>{$t("telegram.title")} <ContextHint text={$t('hints.telegram')} dismissKey="telegram" /></h2>
 
       {#if qrLoading}
@@ -1073,6 +1076,9 @@
 {:else if view === "phone"}
   <div class="page-center">
     <div class="login-card">
+      <div class="telegram-hero-wrap">
+        <img src="/telegram/hero.png" alt="" class="telegram-hero-img" width="130" height="90" />
+      </div>
       <h2>{$t("telegram.title")}</h2>
       <form class="form" onsubmit={(e) => { e.preventDefault(); handleSendCode(); }}>
         <label class="field">
@@ -1702,6 +1708,20 @@
 
   .login-card h2 {
     margin-block: 0;
+  }
+
+  .telegram-hero-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: calc(var(--padding) * -0.5);
+  }
+
+  .telegram-hero-img {
+    width: 130px;
+    height: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.12));
   }
 
   .qr-container {

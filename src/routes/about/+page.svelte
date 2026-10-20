@@ -40,7 +40,7 @@
 
 <div class="about-overview">
     <header class="about-hero">
-        <img src="/favicon.png" alt="" class="about-app-icon" width="64" height="64" draggable="false" />
+        <img src="/icons/about-64.png" alt="" class="about-app-icon" width="64" height="64" draggable="false" />
         <div class="about-identity">
             <div class="about-name-row">
                 <h1>OmniGet</h1>
