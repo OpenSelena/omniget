@@ -97,10 +97,11 @@
       "@tiptap/extension-collaboration": "^3.31.4",
       "@tiptap/y-tiptap": "^3.0.7",
       "dompurify": ">=3.4.16",
-      "markdown-it": ">=14.3.1",
+      "markdown-it": ">=15.0.3",
       "linkify-it": ">=5.0.2",
       "prosemirror-view": ">=1.42.3",
-      "nanoid": ">=3.3.12"
+      "nanoid": ">=3.3.12",
+      "devalue": ">=5.9.4"
     }
   }
 }
