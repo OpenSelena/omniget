@@ -2169,10 +2169,17 @@ async fn check_ytdlp_freshness(path: &Path) {
 async fn find_ffmpeg_location() -> Option<String> {
     let _timer_start = std::time::Instant::now();
     let result = if let Some(path) = crate::core::dependencies::find_tool("ffmpeg").await {
-        path.parent()
-            .and_then(|dir| dir.to_str())
-            .filter(|s| !s.is_empty())
-            .map(|s| s.to_string())
+        if let Some(dir) = path.parent().and_then(|d| d.to_str()).filter(|s| !s.is_empty()) {
+            Some(dir.to_string())
+        } else {
+            let resolved = crate::core::dependencies::resolve_absolute_path(path.to_str().unwrap_or("ffmpeg"));
+            resolved
+                .parent()
+                .and_then(|d| d.to_str())
+                .filter(|s| !s.is_empty())
+                .map(|s| s.to_string())
+                .or_else(|| resolved.to_str().map(|s| s.to_string()))
+        }
     } else {
         None
     };
@@ -3131,11 +3138,12 @@ pub async fn download_video(
         .await;
     }
 
-    let (ffmpeg_available, ffmpeg_location, aria2c_path) = tokio::join!(
-        crate::core::ffmpeg::is_ffmpeg_available(),
-        find_ffmpeg_location_cached(),
+    let (ffmpeg_res, aria2c_path) = tokio::join!(
+        crate::core::dependencies::ensure_ffmpeg(),
         crate::core::dependencies::ensure_aria2c(),
     );
+    let ffmpeg_available = ffmpeg_res.is_ok() || crate::core::ffmpeg::is_ffmpeg_available().await;
+    let ffmpeg_location = find_ffmpeg_location_cached().await;
 
     let format_selector = if let Some(fid) = format_id {
         if let Some(h) = quality_height.filter(|h| *h > 0) {
@@ -3329,7 +3337,7 @@ pub async fn download_video(
         }
     }
 
-    if format_id.is_none() && mode != "audio" && ffmpeg_available {
+    if mode != "audio" && ffmpeg_available {
         base_args.push("--merge-output-format".to_string());
         base_args.push("mp4".to_string());
     }

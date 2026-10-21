@@ -327,6 +327,9 @@ impl PlatformDownloader for YouTubeDownloader {
             ytdlp::ensure_ytdlp().await?
         };
 
+        // Ensure FFmpeg is available to guarantee audio/video muxing
+        let _ = crate::core::dependencies::ensure_ffmpeg().await;
+
         let quality_height = opts
             .quality
             .as_deref()

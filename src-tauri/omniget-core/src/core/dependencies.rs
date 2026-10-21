@@ -218,7 +218,7 @@ pub async fn find_tool_with_source(tool: &str) -> Option<(PathBuf, &'static str)
 
 /// Resolve a bare binary name to its absolute path via `where` (Windows)
 /// or `which` (Unix). Returns the original name as fallback.
-fn resolve_absolute_path(bin_name: &str) -> PathBuf {
+pub(crate) fn resolve_absolute_path(bin_name: &str) -> PathBuf {
     let finder = if cfg!(target_os = "windows") {
         "where"
     } else {
@@ -239,6 +239,27 @@ fn resolve_absolute_path(bin_name: &str) -> PathBuf {
             }
         }
     }
+
+    #[cfg(target_os = "macos")]
+    {
+        for dir in &["/opt/homebrew/bin", "/usr/local/bin", "/usr/bin"] {
+            let candidate = PathBuf::from(dir).join(bin_name);
+            if candidate.is_file() {
+                return candidate;
+            }
+        }
+    }
+
+    #[cfg(target_os = "linux")]
+    {
+        for dir in &["/usr/local/bin", "/usr/bin", "/bin"] {
+            let candidate = PathBuf::from(dir).join(bin_name);
+            if candidate.is_file() {
+                return candidate;
+            }
+        }
+    }
+
     PathBuf::from(bin_name)
 }
 
@@ -373,18 +394,8 @@ pub async fn update_ffmpeg() -> anyhow::Result<PathBuf> {
 }
 
 pub async fn ensure_ffmpeg() -> anyhow::Result<PathBuf> {
-    // Always ensure the managed binary exists — the standalone yt-dlp.exe
-    // cannot discover system FFmpeg from PATH.
-    if !is_flatpak() {
-        let managed = managed_bin_dir().map(|d| d.join(bin_name("ffmpeg")));
-        if managed.as_ref().map_or(true, |p| !p.exists()) {
-            if let Ok(path) = download_ffmpeg().await {
-                crate::core::ytdlp::reset_ffmpeg_location_cache();
-                return Ok(path);
-            }
-        }
-    }
-
+    // If FFmpeg is already available (custom override, managed binary, flatpak, or system PATH),
+    // return it immediately without redundant downloads.
     if let Some(path) = find_tool("ffmpeg").await {
         return Ok(path);
     }
@@ -393,6 +404,7 @@ pub async fn ensure_ffmpeg() -> anyhow::Result<PathBuf> {
     }
     let path = download_ffmpeg().await?;
     crate::core::ytdlp::reset_ffmpeg_location_cache();
+    crate::core::ffmpeg::reset_ffmpeg_available_cache();
     Ok(path)
 }
 
@@ -499,6 +511,24 @@ async fn download_ffmpeg() -> anyhow::Result<PathBuf> {
             {
                 tracing::warn!("Failed to remove quarantine from ffprobe: {}", e);
             }
+        }
+
+        // Apply ad-hoc codesign on macOS (critical for Apple Silicon arm64 execution)
+        let ffmpeg_mac_sign = ffmpeg_target.clone();
+        let _ = tokio::task::spawn_blocking(move || {
+            let _ = crate::core::process::std_command("codesign")
+                .args(["-s", "-", "-f"])
+                .arg(&ffmpeg_mac_sign)
+                .output();
+        }).await;
+        if ffprobe_path.exists() {
+            let ffprobe_mac_sign = ffprobe_path.clone();
+            let _ = tokio::task::spawn_blocking(move || {
+                let _ = crate::core::process::std_command("codesign")
+                    .args(["-s", "-", "-f"])
+                    .arg(&ffprobe_mac_sign)
+                    .output();
+            }).await;
         }
     }
 
