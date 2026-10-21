@@ -177,7 +177,7 @@ for (const d of docsDirs) {
   const docFile = path.join(root, d, "index.html");
   if (fs.existsSync(docFile)) {
     writeText(docFile, (content) => {
-      return content.replace(/<span class="sidebar-tag">v\d+\.\d+\.\d+<\/span>/g, `<span class="sidebar-tag">v${version}</span>`);
+      return content.replace(/<aside class="docs-sidebar">[\s\S]*?<\/aside>/g, (sidebar) => sidebar.replace(/<span class="sidebar-tag">v\d+\.\d+\.\d+<\/span>/g, `<span class="sidebar-tag">v${version}</span>`));
     });
   }
 }
