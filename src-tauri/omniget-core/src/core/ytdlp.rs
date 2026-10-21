@@ -2169,10 +2169,15 @@ async fn check_ytdlp_freshness(path: &Path) {
 async fn find_ffmpeg_location() -> Option<String> {
     let _timer_start = std::time::Instant::now();
     let result = if let Some(path) = crate::core::dependencies::find_tool("ffmpeg").await {
-        if let Some(dir) = path.parent().and_then(|d| d.to_str()).filter(|s| !s.is_empty()) {
+        if let Some(dir) = path
+            .parent()
+            .and_then(|d| d.to_str())
+            .filter(|s| !s.is_empty())
+        {
             Some(dir.to_string())
         } else {
-            let resolved = crate::core::dependencies::resolve_absolute_path(path.to_str().unwrap_or("ffmpeg"));
+            let resolved =
+                crate::core::dependencies::resolve_absolute_path(path.to_str().unwrap_or("ffmpeg"));
             resolved
                 .parent()
                 .and_then(|d| d.to_str())

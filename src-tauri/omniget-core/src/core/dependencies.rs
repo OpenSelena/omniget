@@ -520,7 +520,8 @@ async fn download_ffmpeg() -> anyhow::Result<PathBuf> {
                 .args(["-s", "-", "-f"])
                 .arg(&ffmpeg_mac_sign)
                 .output();
-        }).await;
+        })
+        .await;
         if ffprobe_path.exists() {
             let ffprobe_mac_sign = ffprobe_path.clone();
             let _ = tokio::task::spawn_blocking(move || {
@@ -528,7 +529,8 @@ async fn download_ffmpeg() -> anyhow::Result<PathBuf> {
                     .args(["-s", "-", "-f"])
                     .arg(&ffprobe_mac_sign)
                     .output();
-            }).await;
+            })
+            .await;
         }
     }
 
