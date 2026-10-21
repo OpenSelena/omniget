@@ -4062,6 +4062,7 @@
   },
   "settings": {
     "title": "Settings",
+    "manage_preferences": "Manage app preferences and system configurations",
     "general": {
       "title": "General",
       "start_with_system": "Start with system",
@@ -5166,6 +5167,7 @@
   },
   "courses": {
     "title": "Courses",
+    "subtitle": "Study materials, video lessons, and course platforms",
     "search_placeholder": "Search platforms...",
     "not_connected": "Not connected",
     "connection_failed": "Connection failed",

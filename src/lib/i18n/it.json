@@ -4655,7 +4655,8 @@
         "login_webview_btn": "Accedi tramite pagina Bilibili",
         "login_webview_loading": "Apertura finestra di accesso..."
       }
-    }
+    },
+    "manage_preferences": "Gestisci le preferenze dell'applicazione e le configurazioni di sistema"
   },
   "omnibox": {
     "placeholder": "Incolla un URL o cerca",
@@ -5203,7 +5204,8 @@
     "use_saved_cookies": "Use saved cookies ({{account}})",
     "saved_cookies_empty": "The saved account has no cookies.",
     "cookies_paste_label": "Cookies (JSON or cookies.txt)",
-    "cookies_paste_placeholder": "Paste the cookies JSON or a Netscape cookies.txt export..."
+    "cookies_paste_placeholder": "Paste the cookies JSON or a Netscape cookies.txt export...",
+    "subtitle": "Materiali di studio, lezioni video e piattaforme di corsi"
   },
   "hotmart": {
     "title": "Hotmart",

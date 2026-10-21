@@ -4655,7 +4655,8 @@
         "login_webview_btn": "透過 Bilibili 頁面登入",
         "login_webview_loading": "正在開啟登入視窗..."
       }
-    }
+    },
+    "manage_preferences": "管理應用偏好設定和系統設定"
   },
   "omnibox": {
     "placeholder": "貼上 URL、磁力連結、.torrent，或搜尋",
@@ -5203,7 +5204,8 @@
     "use_saved_cookies": "Use saved cookies ({{account}})",
     "saved_cookies_empty": "The saved account has no cookies.",
     "cookies_paste_label": "Cookies (JSON or cookies.txt)",
-    "cookies_paste_placeholder": "Paste the cookies JSON or a Netscape cookies.txt export..."
+    "cookies_paste_placeholder": "Paste the cookies JSON or a Netscape cookies.txt export...",
+    "subtitle": "學習教材、影片課程和課程平台"
   },
   "hotmart": {
     "title": "Hotmart",

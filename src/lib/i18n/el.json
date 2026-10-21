@@ -4655,7 +4655,8 @@
         "login_webview_btn": "Σύνδεση μέσω σελίδας Bilibili",
         "login_webview_loading": "Άνοιγμα παραθύρου σύνδεσης..."
       }
-    }
+    },
+    "manage_preferences": "Διαχείριση προτιμήσεων εφαρμογής και ρυθμίσεων συστήματος"
   },
   "omnibox": {
     "placeholder": "Επικόλληση διεύθυνσης URL ή αναζήτηση",
@@ -5203,7 +5204,8 @@
     "use_saved_cookies": "Use saved cookies ({{account}})",
     "saved_cookies_empty": "The saved account has no cookies.",
     "cookies_paste_label": "Cookies (JSON or cookies.txt)",
-    "cookies_paste_placeholder": "Paste the cookies JSON or a Netscape cookies.txt export..."
+    "cookies_paste_placeholder": "Paste the cookies JSON or a Netscape cookies.txt export...",
+    "subtitle": "Εκπαιδευτικό υλικό, μαθήματα βίντεο και πλατφόρμες μαθημάτων"
   },
   "hotmart": {
     "title": "Πλατφόρμα Hotmart",

@@ -196,7 +196,13 @@
   </div>
 {:else}
 <div class="courses-page">
-  <h1 class="page-title">{$t("courses.title")}</h1>
+  <header class="courses-head">
+    <img src="/emoji/books.png" alt="" class="courses-hero-icon" width="56" height="56" draggable="false" />
+    <div class="courses-identity">
+      <h1 class="page-title">{$t("courses.title")}</h1>
+      <p class="courses-subtitle">{$t("courses.subtitle")}</p>
+    </div>
+  </header>
 
   {#if usingFallback}
     <div class="fallback-banner">
@@ -258,6 +264,36 @@
     align-items: center;
     gap: calc(var(--padding) * 2);
     width: 100%;
+  }
+
+  .courses-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    width: 100%;
+    max-width: 900px;
+    margin-bottom: var(--space-2);
+  }
+
+  .courses-hero-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  .courses-identity {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .courses-subtitle {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--text-muted);
   }
 
   h1 {

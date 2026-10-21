@@ -4655,7 +4655,8 @@
         "login_webview_btn": "Iniciar sesión vía página de Bilibili",
         "login_webview_loading": "Abriendo ventana de inicio de sesión..."
       }
-    }
+    },
+    "manage_preferences": "Administrar preferencias de la aplicación y configuraciones del sistema"
   },
   "omnibox": {
     "placeholder": "Pega una URL, enlace magnet, .torrent o busca",
@@ -5203,7 +5204,8 @@
     "use_saved_cookies": "Usar cookies guardadas ({{account}})",
     "saved_cookies_empty": "La cuenta guardada no tiene cookies.",
     "cookies_paste_label": "Cookies (JSON o cookies.txt)",
-    "cookies_paste_placeholder": "Pega el JSON de cookies o un export cookies.txt (Netscape)..."
+    "cookies_paste_placeholder": "Pega el JSON de cookies o un export cookies.txt (Netscape)...",
+    "subtitle": "Materiales de estudio, lecciones en video y plataformas de cursos"
   },
   "hotmart": {
     "title": "Hotmart",

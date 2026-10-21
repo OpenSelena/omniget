@@ -30,8 +30,11 @@
 
 <section class="tools-hub">
   <header class="tools-head">
-    <h1>{$t("tools.hub.title")}</h1>
-    <p class="tools-subtitle">{$t("tools.hub.subtitle")}</p>
+    <img src="/icons/explore-64.png" alt="" class="tools-hero-icon" width="56" height="56" draggable="false" />
+    <div class="tools-identity">
+      <h1>{$t("tools.hub.title")}</h1>
+      <p class="tools-subtitle">{$t("tools.hub.subtitle")}</p>
+    </div>
   </header>
 
   <ToolsSearchBar bind:query bind:filter autofocus resultCount={browsing ? undefined : resultCount} />
@@ -116,6 +119,26 @@
     max-width: 1040px;
     margin-inline: auto;
     padding: var(--space-4) var(--space-5) var(--space-9);
+  }
+
+  .tools-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+  }
+
+  .tools-hero-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  .tools-identity {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
   }
 
   .tools-head h1 {

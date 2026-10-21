@@ -30,7 +30,11 @@
     </div>
   {:else}
     <header class="tools-category-head">
-      <ToolIcon icon={category.icon} from={category.from} to={category.to} via={category.via} size={72} />
+      {#if category.id === 'youtube'}
+        <img src="/icons/tube-64.png" alt="" class="tools-cat-hero-img" width="64" height="64" draggable="false" />
+      {:else}
+        <ToolIcon icon={category.icon} from={category.from} to={category.to} via={category.via} size={72} />
+      {/if}
       <div class="tools-category-meta">
         <h1>{$t(`tools.categories.${category.id}.name`)}</h1>
         <p>{$t(`tools.categories.${category.id}.desc`)}</p>
@@ -95,6 +99,14 @@
     display: flex;
     align-items: center;
     gap: var(--space-4);
+  }
+
+  .tools-cat-hero-img {
+    width: 64px;
+    height: 64px;
+    border-radius: 16px;
+    object-fit: contain;
+    flex-shrink: 0;
   }
 
   .tools-category-meta h1 {

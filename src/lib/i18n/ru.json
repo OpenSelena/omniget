@@ -4655,7 +4655,8 @@
         "login_webview_btn": "Войти через страницу Bilibili",
         "login_webview_loading": "Открытие окна входа…"
       }
-    }
+    },
+    "manage_preferences": "Управление настройками приложения и конфигурациями системы"
   },
   "omnibox": {
     "placeholder": "Вставьте URL, magnet-ссылку, .torrent или поисковый запрос",
@@ -5203,7 +5204,8 @@
     "use_saved_cookies": "Использовать сохранённые cookies ({{account}})",
     "saved_cookies_empty": "В сохранённом аккаунте нет cookies.",
     "cookies_paste_label": "Cookies (JSON или cookies.txt)",
-    "cookies_paste_placeholder": "Вставьте JSON с cookies или экспорт Netscape cookies.txt..."
+    "cookies_paste_placeholder": "Вставьте JSON с cookies или экспорт Netscape cookies.txt...",
+    "subtitle": "Учебные материалы, видеоуроки и платформы курсов"
   },
   "hotmart": {
     "title": "Hotmart",

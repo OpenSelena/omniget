@@ -4655,7 +4655,8 @@
         "login_webview_btn": "ເຂົ້າສູ່ລະບົບຜ່ານໜ້າ Bilibili",
         "login_webview_loading": "ກຳລັງເປີດໜ້າຕ່າງເຂົ້າສູ່ລະບົບ..."
       }
-    }
+    },
+    "manage_preferences": "ຈັດການການຕັ້ງຄ່າແອັບ ແລະ ການກຳນົດຄ່າລະບົບ"
   },
   "omnibox": {
     "placeholder": "ວາງ URL, ລິ້ງ magnet, .torrent ຫຼື ຄົ້ນຫາ",
@@ -5203,7 +5204,8 @@
     "use_saved_cookies": "ໃຊ້ຄຸກກີ້ທີ່ບັນທຶກໄວ້ ({{account}})",
     "saved_cookies_empty": "ບັນຊີທີ່ບັນທຶກໄວ້ບໍ່ມີຄຸກກີ້.",
     "cookies_paste_label": "ຄຸກກີ້ (JSON ຫຼື cookies.txt)",
-    "cookies_paste_placeholder": "ວາງ JSON ຄຸກກີ້ ຫຼື ໄຟລ໌ cookies.txt ແບບ Netscape..."
+    "cookies_paste_placeholder": "ວາງ JSON ຄຸກກີ້ ຫຼື ໄຟລ໌ cookies.txt ແບບ Netscape...",
+    "subtitle": "ເອກະສານການຮຽນ, ບົດຮຽນວິດີໂອ ແລະ ແພລດຟອມຄອສຮຽນ"
   },
   "hotmart": {
     "title": "Hotmart",

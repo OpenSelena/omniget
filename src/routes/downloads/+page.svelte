@@ -590,9 +590,12 @@
   <div class="downloads-page downloads-mac">
     {#if viewMode === "active"}
     <div class="downloads-header">
-      {#if dlStats.totalDownloads > 0}
-        <span class="downloads-stats">{$t('downloads.stats_line', { count: String(dlStats.totalDownloads), size: formatBytes(dlStats.totalBytes) })}</span>
-      {/if}
+      <div class="downloads-hero-left">
+        <img src="/icons/downloads-64.png" alt="" class="downloads-head-icon" width="32" height="32" draggable="false" />
+        {#if dlStats.totalDownloads > 0}
+          <span class="downloads-stats">{$t('downloads.stats_line', { count: String(dlStats.totalDownloads), size: formatBytes(dlStats.totalBytes) })}</span>
+        {/if}
+      </div>
       <div class="bulk-actions">
         <label class="speed-limit-field">
           <span class="speed-limit-label">{$t('settings.download.speed_limit')}</span>
@@ -696,11 +699,17 @@
     </div>
     {:else if viewMode === "history"}
       <div class="history-view">
+        <div class="history-hero-head">
+          <img src="/icons/history-64.png" alt="" class="downloads-head-icon" width="32" height="32" draggable="false" />
+          <div class="history-hero-text">
+            <h2 class="history-hero-title">{$t('downloads.view_history')}</h2>
+          </div>
+        </div>
         {#if historyLoading}
           <p class="history-empty">{$t('downloads.history_loading')}</p>
         {:else if historyEntries.length === 0}
           <div class="history-empty-state">
-            <img class="empty-state-art" src="/emoji/hourglass_not_done.png" alt="" width="72" height="72" draggable="false" />
+            <img class="empty-state-art" src="/icons/history-64.png" alt="" width="72" height="72" draggable="false" />
             <p class="history-empty-text">{$t('downloads.history_empty')}</p>
           </div>
         {:else}
@@ -1336,6 +1345,38 @@
     gap: var(--space-3);
     min-height: 28px;
   }
+
+  .downloads-hero-left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .downloads-head-icon {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    object-fit: contain;
+    flex-shrink: 0;
+  }
+
+  .history-hero-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) 0 var(--space-3);
+    margin-bottom: var(--space-2);
+    border-bottom: var(--hairline) solid var(--separator);
+  }
+
+  .history-hero-title {
+    font-family: var(--font-display);
+    font-size: var(--text-lg);
+    font-weight: 700;
+    margin: 0;
+    color: var(--text);
+  }
+
 
   .downloads-stats {
     font-size: var(--text-sm);
