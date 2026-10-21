@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "id": "announcement-openselena-telegram-v2",
-  "active": true,
+  "active": false,
   "title": "Open Selena Telegram",
   "thumbnail": "https://raw.githubusercontent.com/OpenSelena/omniget/main/assets/announcement-poster.png",
   "body": "Join the official Telegram channel of OpenSelena, where we share beta updates of OmniGet, new feature announcements, bug fixes, and the latest AI news and leaks.",
