@@ -4,25 +4,21 @@ import type {ParsedProfile} from '../../utils/open_nami_parser'
 
 export function decodeEscapedUrl(raw: string): string {
   const sanitized = raw.replace(/[\r\n\t]/g, '').trim()
-  try {
-    return JSON.parse(`"${sanitized.replace(/"/g, '\\"')}"`)
-  } catch {
-    return sanitized
-      .replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
-      .replace(/\\(["\\\/bfnrt])/g, (_, ch) => {
-        const escapes: Record<string, string> = {
-          '"': '"',
-          '\\': '\\',
-          '/': '/',
-          b: '\b',
-          f: '\f',
-          n: '\n',
-          r: '\r',
-          t: '\t',
-        }
-        return escapes[ch] || ch
-      })
-  }
+  return sanitized
+    .replace(/\\u([0-9a-fA-F]{4})/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)))
+    .replace(/\\(["\\\/bfnrt])/g, (_, ch) => {
+      const escapes: Record<string, string> = {
+        '"': '"',
+        '\\': '\\',
+        '/': '/',
+        b: '\b',
+        f: '\f',
+        n: '\n',
+        r: '\r',
+        t: '\t',
+      }
+      return escapes[ch] || ch
+    })
 }
 
 export function extractFacebookMediaFromHtml(html: string, username: string): MediaItem[] {

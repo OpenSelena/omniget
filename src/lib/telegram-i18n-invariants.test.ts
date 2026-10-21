@@ -99,9 +99,14 @@ describe("Telegram i18n Invariants & Safety Net", () => {
       const content = fs.readFileSync(fullPath, "utf8");
 
       // Strip <script> and <style> tags to only inspect markup templates
-      const templateOnly = content
-        .replace(/<script[\s\S]*?<\/script>/gi, "")
-        .replace(/<style[\s\S]*?<\/style>/gi, "");
+      let templateOnly = content;
+      let prev: string;
+      do {
+        prev = templateOnly;
+        templateOnly = templateOnly
+          .replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, "")
+          .replace(/<style\b[^>]*>[\s\S]*?<\/style\s*>/gi, "");
+      } while (templateOnly !== prev);
 
       for (const banned of BANNED_HARDCODED_PORTUGUESE_STRINGS) {
         expect(
