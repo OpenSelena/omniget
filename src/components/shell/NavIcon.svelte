@@ -1,9 +1,7 @@
 <script lang="ts">
   /**
-   * Sidebar icon tile in the macOS System Settings idiom: a small rounded
-   * square with a colour of its own and a chunky white glyph (Phosphor Fill,
-   * MIT, shipped in static/icons). Plugins that provide their own SVG path
-   * still get a tile; the path is drawn white inside it.
+   * Sidebar icon tile supporting both custom MosCat character illustrations
+   * and classic macOS System Settings-style gradient tiles for dynamic plugins.
    */
   let {
     icon,
@@ -12,8 +10,19 @@
     active = false,
   }: { icon: string; iconSvg?: string; size?: number; active?: boolean } = $props();
 
-  // glyph file + tile gradient per nav id. Colours follow Apple's system
-  // palette so the column reads like a native sidebar.
+  const MOSCAT_ICONS: Record<string, string> = {
+    home: "/icons/nav/home.svg",
+    downloads: "/icons/nav/downloads.svg",
+    tools: "/icons/nav/tools.svg",
+    "open-nami": "/icons/nav/open-nami.svg",
+    marketplace: "/icons/nav/marketplace.svg",
+    convert: "/icons/nav/convert.svg",
+    settings: "/emoji/gear.png",
+    about: "/icons/about-64.png",
+    courses: "/emoji/books.png",
+    telegram: "/icons/telegram-64.png",
+  };
+
   const TILES: Record<string, { glyph: string; from: string; to: string }> = {
     home: { glyph: "house", from: "#5AA9FF", to: "#1E6FE8" },
     downloads: { glyph: "tray-arrow-down", from: "#FFB340", to: "#F28500" },
@@ -35,28 +44,54 @@
     plugin: { glyph: "puzzle-piece", from: "#8E8E93", to: "#5C5C60" },
   };
 
+  let moscatIcon = $derived(MOSCAT_ICONS[icon]);
   let tile = $derived(TILES[icon] ?? TILES.plugin);
   let glyphSize = $derived(Math.round(size * 0.64));
 </script>
 
-<span
-  class="nav-icon nav-tile"
-  class:nav-icon-active={active}
-  style:--tile-from={tile.from}
-  style:--tile-to={tile.to}
-  style:--tile-size="{size}px"
-  aria-hidden="true"
->
-  {#if iconSvg}
+{#if iconSvg}
+  <span
+    class="nav-icon nav-tile"
+    class:nav-icon-active={active}
+    style:--tile-from={tile.from}
+    style:--tile-to={tile.to}
+    style:--tile-size="{size}px"
+    aria-hidden="true"
+  >
     <svg viewBox="0 0 24 24" width={glyphSize} height={glyphSize} fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
       {#each iconSvg.split(" M").map((d, i) => (i === 0 ? d : "M" + d)) as pathD}
         <path d={pathD} />
       {/each}
     </svg>
-  {:else}
+  </span>
+{:else if moscatIcon}
+  <span
+    class="nav-icon nav-moscat"
+    class:nav-icon-active={active}
+    style:--icon-size="{size}px"
+    aria-hidden="true"
+  >
+    <img
+      src={moscatIcon}
+      alt=""
+      width={size}
+      height={size}
+      class="nav-moscat-img"
+      draggable="false"
+    />
+  </span>
+{:else}
+  <span
+    class="nav-icon nav-tile"
+    class:nav-icon-active={active}
+    style:--tile-from={tile.from}
+    style:--tile-to={tile.to}
+    style:--tile-size="{size}px"
+    aria-hidden="true"
+  >
     <span class="nav-glyph" style:--glyph="url(/icons/{tile.glyph}.svg)" style:width="{glyphSize}px" style:height="{glyphSize}px"></span>
-  {/if}
-</span>
+  </span>
+{/if}
 
 <style>
   .nav-tile {
@@ -81,5 +116,28 @@
     -webkit-mask: var(--glyph) center / contain no-repeat;
     mask: var(--glyph) center / contain no-repeat;
     filter: drop-shadow(0 0.5px 0 rgba(0, 0, 0, 0.18));
+  }
+
+  .nav-moscat {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--icon-size);
+    height: var(--icon-size);
+    flex-shrink: 0;
+  }
+
+  .nav-moscat-img {
+    width: var(--icon-size);
+    height: var(--icon-size);
+    object-fit: contain;
+    display: block;
+    border-radius: 4px;
+    filter: drop-shadow(0 0.5px 1px rgba(0, 0, 0, 0.18));
+    transition: transform 0.15s ease-out;
+  }
+
+  .nav-icon-active .nav-moscat-img {
+    transform: scale(1.08);
   }
 </style>

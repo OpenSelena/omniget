@@ -4656,7 +4656,16 @@
         "login_webview_btn": "Sign in via Bilibili page",
         "login_webview_loading": "Opening sign-in window..."
       }
-    }
+    },
+    "hero_desc_appearance": "Customize application theme, color accents, and window transparency",
+    "hero_desc_typography": "Choose interface fonts, reading scale, and typography presets",
+    "hero_desc_downloads": "Configure destination folder, filename templates, and quality presets",
+    "hero_desc_network": "Pair browser extensions, configure proxy connections, and connection limits",
+    "hero_desc_cookies": "Manage session cookies, authentication tokens, and private credential storage",
+    "hero_desc_channels": "Set up automatic creator subscriptions, RSS feeds, and auto-download rules",
+    "hero_desc_ai": "Connect local Ollama or cloud providers for smart file naming and transcript summaries",
+    "hero_desc_plugins": "Inspect yt-dlp, ffmpeg binaries status, updates, and manage embedded extensions",
+    "hero_desc_advanced": "Hardware acceleration, debug diagnostics, storage paths, and app reset"
   },
   "omnibox": {
     "placeholder": "Paste a URL, magnet link, .torrent, or search",

@@ -4656,7 +4656,16 @@
         "login_webview_loading": "Abrindo janela de login..."
       }
     },
-    "manage_preferences": "Gerenciar preferências do aplicativo e configurações do sistema"
+    "manage_preferences": "Gerenciar preferências do aplicativo e configurações do sistema",
+    "hero_desc_appearance": "Personalize o tema do aplicativo, cores de destaque e transparência da janela",
+    "hero_desc_typography": "Escolha fontes de interface, escala de leitura e predefinições tipográficas",
+    "hero_desc_downloads": "Configure a pasta de destino, modelos de nome de arquivo e predefinições de qualidade",
+    "hero_desc_network": "Emparelhe extensões de navegador, configure conexões proxy e limites de conexão",
+    "hero_desc_cookies": "Gerencie cookies de sessão, tokens de autenticação e armazenamento privado",
+    "hero_desc_channels": "Configure inscrições automáticas em canais, feeds RSS e regras de download",
+    "hero_desc_ai": "Conecte provedores locais ou em nuvem para nomes inteligentes e resumos",
+    "hero_desc_plugins": "Inspecione o status do yt-dlp e ffmpeg, atualizações e extensões integradas",
+    "hero_desc_advanced": "Aceleração de hardware, diagnósticos de depuração e redefinição do aplicativo"
   },
   "omnibox": {
     "placeholder": "Cole uma URL, magnet link, .torrent ou pesquise",

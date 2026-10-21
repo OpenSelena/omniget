@@ -4656,7 +4656,16 @@
         "login_webview_loading": "正在打开登录窗口..."
       }
     },
-    "manage_preferences": "管理应用偏好设置和系统配置"
+    "manage_preferences": "管理应用偏好设置和系统配置",
+    "hero_desc_appearance": "自定义应用程序主题、色彩强调和窗口透明度",
+    "hero_desc_typography": "选择界面字体、阅读缩放比例和排版预设",
+    "hero_desc_downloads": "配置目标下载文件夹、文件名模板和画质预设",
+    "hero_desc_network": "配对浏览器扩展、配置代理服务器和网络连接限制",
+    "hero_desc_cookies": "管理会话 Cookie、身份验证令牌和私密凭证存储",
+    "hero_desc_channels": "设置自动频道订阅、RSS 订阅源和定时下载规则",
+    "hero_desc_ai": "连接本地 Ollama 或云端 AI 提供商以实现智能命名与摘要",
+    "hero_desc_plugins": "检查 yt-dlp、ffmpeg 二进制文件状态、更新和内置扩展",
+    "hero_desc_advanced": "硬件加速、调试诊断、存储路径和应用重置"
   },
   "omnibox": {
     "placeholder": "粘贴链接或搜索",

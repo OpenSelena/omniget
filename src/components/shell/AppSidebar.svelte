@@ -58,7 +58,7 @@
     title={title}
     aria-current={active ? "page" : undefined}
   >
-    <NavIcon icon={item.icon} iconSvg={item.iconSvg} size={18} {active} />
+    <NavIcon icon={item.icon} iconSvg={item.iconSvg} size={22} {active} />
     <span class="mac-nav-label">{title}</span>
     {#if item.badge === "downloads" && badgeCount > 0}
       <span class="mac-nav-badge live">{badgeLabel}</span>

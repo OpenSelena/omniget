@@ -4656,7 +4656,16 @@
         "login_webview_loading": "サインインウィンドウを開いています..."
       }
     },
-    "manage_preferences": "アプリの環境設定とシステム構成を管理します"
+    "manage_preferences": "アプリの環境設定とシステム構成を管理します",
+    "hero_desc_appearance": "アプリのテーマ、アクセントカラー、ウィンドウの透明度をカスタマイズ",
+    "hero_desc_typography": "UIフォント、テキストスケール、タイポグラフィプリセットの設定",
+    "hero_desc_downloads": "保存先フォルダ、ファイル名テンプレート、画質プリセットの設定",
+    "hero_desc_network": "ブラウザ拡張機能の連携、プロキシ接続、ネットワーク制限の設定",
+    "hero_desc_cookies": "セッションCookie、認証トークン、資格情報の管理",
+    "hero_desc_channels": "チャンネル登録、RSSフィード、自動ダウンロードルールの設定",
+    "hero_desc_ai": "スマート命名と要約のためのローカルまたはクラウドAI連携",
+    "hero_desc_plugins": "yt-dlp、ffmpegの状態確認、更新、拡張プラグインの管理",
+    "hero_desc_advanced": "ハードウェアアクセラレーション、デバッグ診断、アプリのリセット"
   },
   "omnibox": {
     "placeholder": "URLを貼り付けるか検索",

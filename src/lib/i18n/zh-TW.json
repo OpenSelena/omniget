@@ -4656,7 +4656,16 @@
         "login_webview_loading": "正在開啟登入視窗..."
       }
     },
-    "manage_preferences": "管理應用偏好設定和系統設定"
+    "manage_preferences": "管理應用偏好設定和系統設定",
+    "hero_desc_appearance": "自訂應用程式主題、色彩強調與視窗透明度",
+    "hero_desc_typography": "選擇介面字型、閱讀縮放比例與排版預設",
+    "hero_desc_downloads": "設定目標下載資料夾、檔案名稱範本與畫質預設",
+    "hero_desc_network": "配對瀏覽器擴充功能、設定 Proxy 伺服器與連線限制",
+    "hero_desc_cookies": "管理工作階段 Cookie、驗證權杖與私密認證儲存",
+    "hero_desc_channels": "設定自動頻道訂閱、RSS 摘要源與排程下載規則",
+    "hero_desc_ai": "連線本機 Ollama 或雲端 AI 提供者以實現智慧命名與摘要",
+    "hero_desc_plugins": "檢查 yt-dlp、ffmpeg 狀態、更新與內建擴充功能",
+    "hero_desc_advanced": "硬體加速、除錯診斷、儲存路徑與應用程式重設"
   },
   "omnibox": {
     "placeholder": "貼上 URL、磁力連結、.torrent，或搜尋",

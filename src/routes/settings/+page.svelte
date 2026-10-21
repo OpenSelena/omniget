@@ -355,6 +355,57 @@
     advanced: "/icons/settings/advanced-system.svg",
   };
 
+  const SETTINGS_CATEGORY_HERO: Record<
+    SettingsCategory,
+    { icon: string; titleKey: string; descKey: string }
+  > = {
+    appearance: {
+      icon: "/icons/settings/appearance.svg",
+      titleKey: "settings.cat_appearance",
+      descKey: "settings.hero_desc_appearance",
+    },
+    typography: {
+      icon: "/icons/settings/typography.svg",
+      titleKey: "settings.cat_typography",
+      descKey: "settings.hero_desc_typography",
+    },
+    downloads: {
+      icon: "/icons/settings/downloads.svg",
+      titleKey: "settings.cat_downloads",
+      descKey: "settings.hero_desc_downloads",
+    },
+    network: {
+      icon: "/icons/settings/network-proxy.svg",
+      titleKey: "settings.cat_network",
+      descKey: "settings.hero_desc_network",
+    },
+    cookies: {
+      icon: "/icons/settings/cookies-auth.svg",
+      titleKey: "settings.cat_cookies",
+      descKey: "settings.hero_desc_cookies",
+    },
+    channels: {
+      icon: "/icons/settings/channels-feeds.svg",
+      titleKey: "settings.cat_channels",
+      descKey: "settings.hero_desc_channels",
+    },
+    ai: {
+      icon: "/icons/settings/ai-integration.svg",
+      titleKey: "settings.cat_ai",
+      descKey: "settings.hero_desc_ai",
+    },
+    plugins: {
+      icon: "/icons/settings/plugins-dependencies.svg",
+      titleKey: "settings.cat_plugins",
+      descKey: "settings.hero_desc_plugins",
+    },
+    advanced: {
+      icon: "/icons/settings/advanced-system.svg",
+      titleKey: "settings.cat_advanced",
+      descKey: "settings.hero_desc_advanced",
+    },
+  };
+
   function groupHasSearchMatch(group: (typeof SETTINGS_NAV_GROUPS)[number]): boolean {
     if (!isSearching) return true;
     return group.items.some(([cat]) => (categoryMatchCounts[cat] ?? 0) > 0);
@@ -540,8 +591,8 @@
                       <img
                         src={SETTINGS_CATEGORY_ICONS[cat]}
                         alt=""
-                        width="20"
-                        height="20"
+                        width="24"
+                        height="24"
                         class="settings-cat-icon-img"
                         draggable="false"
                       />
@@ -560,11 +611,12 @@
 
       <div class="settings-mac-content settings-content">
         {#if !isSearching}
+          {@const hero = SETTINGS_CATEGORY_HERO[activeCategory]}
           <header class="settings-hero">
-            <img src="/emoji/gear.png" alt="" class="settings-app-icon" width="56" height="56" draggable="false" />
+            <img src={hero.icon} alt="" class="settings-app-icon" width="56" height="56" draggable="false" />
             <div class="settings-identity">
-              <h1>{$t('settings.title')}</h1>
-              <p class="settings-subtitle">{$t('settings.manage_preferences')}</p>
+              <h1>{$t(hero.titleKey)}</h1>
+              <p class="settings-subtitle">{$t(hero.descKey)}</p>
             </div>
           </header>
         {/if}

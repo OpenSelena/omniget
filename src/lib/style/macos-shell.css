@@ -401,6 +401,10 @@
   .mac-nav-item :global(.nav-tile) {
     --tile-size: 26px;
   }
+
+  .mac-nav-item :global(.nav-moscat) {
+    --icon-size: 26px;
+  }
 }
 
 /* ---------- Content pane ---------- */
@@ -711,8 +715,8 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 22px;
-  height: 22px;
+  width: 26px;
+  height: 26px;
   border-radius: 6px;
   background: transparent;
   color: var(--text-muted);
@@ -725,8 +729,8 @@
 }
 
 .settings-cat-icon-img {
-  width: 20px;
-  height: 20px;
+  width: 24px;
+  height: 24px;
   object-fit: contain;
   display: block;
   border-radius: 4px;

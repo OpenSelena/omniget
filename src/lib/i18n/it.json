@@ -4656,7 +4656,16 @@
         "login_webview_loading": "Apertura finestra di accesso..."
       }
     },
-    "manage_preferences": "Gestisci le preferenze dell'applicazione e le configurazioni di sistema"
+    "manage_preferences": "Gestisci le preferenze dell'applicazione e le configurazioni di sistema",
+    "hero_desc_appearance": "Personalizza il tema dell'applicazione, colori di accento e trasparenza",
+    "hero_desc_typography": "Scegli i caratteri dell'interfaccia, scala di lettura e preset tipografici",
+    "hero_desc_downloads": "Configura cartella di destinazione, modelli di denominazione e preset di qualità",
+    "hero_desc_network": "Associa estensioni del browser, configura proxy e limiti di connessione",
+    "hero_desc_cookies": "Gestisci i cookie di sessione, token di autenticazione e credenziali private",
+    "hero_desc_channels": "Imposta iscrizioni automatiche ai canali, feed RSS e regole di download",
+    "hero_desc_ai": "Collega provider locali o cloud per denominazioni intelligenti e riassunti",
+    "hero_desc_plugins": "Verifica lo stato di yt-dlp e ffmpeg, aggiornamenti ed estensioni integrate",
+    "hero_desc_advanced": "Accelerazione hardware, diagnostica di debug e ripristino dell'app"
   },
   "omnibox": {
     "placeholder": "Incolla un URL o cerca",
