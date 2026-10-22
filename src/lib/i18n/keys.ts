@@ -7476,6 +7476,13 @@ export type TranslationKeys =
   | 'tracking.toast.status_changed'
   | 'tracking.toast.unarchived'
 
+  | 'tray.active_suffix'
+  | 'tray.decimal_separator'
+  | 'tray.no_active_downloads'
+  | 'tray.quit'
+  | 'tray.speed_unit_kb'
+  | 'tray.speed_unit_mb'
+
   | 'udemy.authenticating'
   | 'udemy.checking_session'
   | 'udemy.choose_folder'
