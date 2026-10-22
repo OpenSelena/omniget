@@ -24,6 +24,7 @@ pub mod settings;
 pub mod smart_speed;
 pub mod subtitle_ws;
 pub mod torrent_playback;
+pub mod tray;
 pub mod video_ops;
 pub mod yt_templates;
 

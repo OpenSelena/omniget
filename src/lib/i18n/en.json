@@ -8375,6 +8375,14 @@
       "tracking_title": "Parcel tracking",
       "tracking_desc": "Follow packages from 8 Brazilian carriers in one place, refreshed automatically."
     }
+  },
+  "tray": {
+    "quit": "Quit",
+    "no_active_downloads": "No active downloads",
+    "active_suffix": " active",
+    "speed_unit_kb": "KB/s",
+    "speed_unit_mb": "MB/s",
+    "decimal_separator": "."
   }
 ,
   "open_nami": {

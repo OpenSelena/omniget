@@ -8451,5 +8451,14 @@
     "cookies_hint": "Cookies are only required for downloading Stories and Highlights.",
     "saving": "Saving...",
     "save_settings": "Save Settings"
+  },
+  "tray": {
+    "quit": "Quit",
+    "no_active_downloads": "No active downloads",
+    "active_suffix": " active",
+    "speed_unit_kb": "KB/s",
+    "speed_unit_mb": "MB/s",
+    "decimal_separator": "."
+
   }
 }

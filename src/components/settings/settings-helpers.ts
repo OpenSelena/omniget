@@ -2,6 +2,7 @@ import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import { updateSettings, getSettings } from "$lib/stores/settings-store.svelte";
 import { loadTranslations, locale, t } from "$lib/i18n";
+import { syncTrayLabels } from "$lib/tray-labels";
 import { showToast } from "$lib/stores/toast-store.svelte";
 import { get } from "svelte/store";
 
@@ -36,6 +37,7 @@ export async function changeLanguage(e: Event) {
   await updateSettings({ appearance: { language: value } });
   await loadTranslations(value, "/settings");
   locale.set(value);
+  await syncTrayLabels();
 }
 
 export async function toggleBool(section: string, key: string, current: boolean) {
