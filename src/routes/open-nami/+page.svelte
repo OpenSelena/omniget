@@ -3,16 +3,23 @@
   import ProfileManager from '$components/open_nami/ProfileManager.svelte';
   import SettingsManager from '$components/open_nami/SettingsManager.svelte';
   import { setDraft } from '$lib/stores/open_nami_download_store.svelte';
+  import { t } from '$lib/i18n';
 
   type TabKey = 'download' | 'profiles' | 'settings';
 
   let activeTab = $state<TabKey>('download');
 
-  const NAV_ITEMS: { key: TabKey; label: string; icon: string }[] = [
-    { key: 'download', label: 'Download', icon: '/icons/open-nami-download.png' },
-    { key: 'profiles', label: 'Profiles', icon: '/icons/open-nami-profiles.png' },
-    { key: 'settings', label: 'Settings', icon: '/icons/open-nami-settings.png' }
+  const NAV_ITEMS: { key: TabKey; labelKey: string; icon: string }[] = [
+    { key: 'download', labelKey: 'open_nami.tab_download', icon: '/icons/open-nami-download.png' },
+    { key: 'profiles', labelKey: 'open_nami.tab_profiles', icon: '/icons/open-nami-profiles.png' },
+    { key: 'settings', labelKey: 'open_nami.tab_settings', icon: '/icons/open-nami-settings.png' }
   ];
+
+  const DESCRIPTION_KEYS: Record<TabKey, string> = {
+    download: 'open_nami.desc_download',
+    profiles: 'open_nami.desc_profiles',
+    settings: 'open_nami.desc_settings'
+  };
 
   function switchTab(tab: TabKey) {
     activeTab = tab;
@@ -20,11 +27,11 @@
 </script>
 
 <svelte:head>
-  <title>Open Nami - Social Media Downloader</title>
+  <title>{$t('open_nami.page_title')}</title>
 </svelte:head>
 
 <div class="oo-shell">
-  <aside class="oo-sidebar" aria-label="Open Nami sections">
+  <aside class="oo-sidebar" aria-label={$t('open_nami.sections_aria')}>
     <nav class="oo-nav" role="tablist" aria-orientation="vertical">
       {#each NAV_ITEMS as item (item.key)}
         <button
@@ -42,7 +49,7 @@
             style="--icon-url: url('{item.icon}')"
             aria-hidden="true"
           ></span>
-          <span>{item.label}</span>
+          <span>{$t(item.labelKey)}</span>
         </button>
       {/each}
     </nav>
@@ -56,13 +63,11 @@
   >
     <header class="oo-header">
       <p class="oo-kicker">Open Nami</p>
-      <h1 class="oo-title">{NAV_ITEMS.find((i) => i.key === activeTab)?.label}</h1>
+      <h1 class="oo-title">
+        {$t(NAV_ITEMS.find((i) => i.key === activeTab)?.labelKey ?? 'open_nami.tab_download')}
+      </h1>
       <p class="oo-description">
-        {activeTab === 'download'
-          ? 'Save posts and media from your connected social profiles.'
-          : activeTab === 'profiles'
-            ? 'Manage the profiles you use most often.'
-            : 'Choose where Open Nami saves downloaded media.'}
+        {$t(DESCRIPTION_KEYS[activeTab])}
       </p>
     </header>
 
