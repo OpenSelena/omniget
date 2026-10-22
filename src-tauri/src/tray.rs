@@ -15,6 +15,8 @@ use tauri::{
 
 static DOWNLOADS_ITEM: OnceLock<MenuItem<Wry>> = OnceLock::new();
 static CHANNELS_SUBMENU: OnceLock<Submenu<Wry>> = OnceLock::new();
+static QUIT_ITEM: OnceLock<MenuItem<Wry>> = OnceLock::new();
+static TRAY_LABELS: OnceLock<Mutex<TrayLabels>> = OnceLock::new();
 static BASE_ICON: OnceLock<(Vec<u8>, u32, u32)> = OnceLock::new();
 static LAST_ACTIVE: AtomicU32 = AtomicU32::new(0);
 static ICON_COUNT: AtomicU32 = AtomicU32::new(0);
@@ -23,6 +25,108 @@ static LAST_SPEED_BUCKET: AtomicU64 = AtomicU64::new(u64::MAX);
 
 const SPEED_TOOLTIP_MIN_INTERVAL_MS: u64 = 2000;
 static BADGE_CACHE: OnceLock<Mutex<BadgeCache>> = OnceLock::new();
+
+/// Labels for the native tray menu and its tooltip.
+///
+/// The tray is built in Rust, where the Svelte `$t` helper is not reachable,
+/// so the webview resolves the strings for the active locale and pushes them
+/// here on boot and on every language switch (`sync_tray_labels`). Defaults
+/// are English so the tray still renders if the webview never reports in.
+#[derive(Clone, Debug, serde::Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TrayLabels {
+    pub quit: String,
+    pub channels: String,
+    pub no_active_downloads: String,
+    pub downloads_label: String,
+    /// Rendered right after the count: `Downloads: 3 active` / `Загрузки: 3 в работе`.
+    pub active_suffix: String,
+    pub speed_unit_kb: String,
+    pub speed_unit_mb: String,
+    pub decimal_separator: String,
+}
+
+impl Default for TrayLabels {
+    fn default() -> Self {
+        Self {
+            quit: "Quit".into(),
+            channels: "Channels".into(),
+            no_active_downloads: "No active downloads".into(),
+            downloads_label: "Downloads".into(),
+            active_suffix: " active".into(),
+            speed_unit_kb: "KB/s".into(),
+            speed_unit_mb: "MB/s".into(),
+            decimal_separator: ".".into(),
+        }
+    }
+}
+
+fn labels() -> TrayLabels {
+    TRAY_LABELS
+        .get_or_init(|| Mutex::new(TrayLabels::default()))
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner())
+        .clone()
+}
+
+fn active_label_for(labels: &TrayLabels, count: u32) -> String {
+    if count == 0 {
+        labels.no_active_downloads.clone()
+    } else {
+        format!(
+            "{}: {}{}",
+            labels.downloads_label, count, labels.active_suffix
+        )
+    }
+}
+
+fn format_speed(bps: f64, labels: &TrayLabels) -> String {
+    if bps < 1024.0 * 1024.0 {
+        format!("{:.0} {}", bps / 1024.0, labels.speed_unit_kb)
+    } else {
+        let value =
+            format!("{:.1}", bps / (1024.0 * 1024.0)).replace('.', &labels.decimal_separator);
+        format!("{} {}", value, labels.speed_unit_mb)
+    }
+}
+
+fn tooltip_for(labels: &TrayLabels, count: u32, speed_bps: Option<f64>) -> String {
+    if count == 0 {
+        return "OmniGet".into();
+    }
+    let mut tooltip = format!("OmniGet — {}{}", count, labels.active_suffix);
+    if let Some(bps) = speed_bps.filter(|bps| *bps > 0.0) {
+        tooltip.push_str(" · ");
+        tooltip.push_str(&format_speed(bps, labels));
+    }
+    tooltip
+}
+
+/// Applies labels resolved by the frontend and refreshes every native string
+/// that is already on screen, so switching language updates the tray without
+/// a restart.
+pub fn apply_labels(app: &AppHandle, new_labels: TrayLabels) {
+    let count = LAST_ACTIVE.load(Ordering::Relaxed);
+
+    if let Some(item) = QUIT_ITEM.get() {
+        let _ = item.set_text(new_labels.quit.as_str());
+    }
+    if let Some(item) = DOWNLOADS_ITEM.get() {
+        let _ = item.set_text(active_label_for(&new_labels, count));
+    }
+    if let Some(submenu) = CHANNELS_SUBMENU.get() {
+        let _ = submenu.set_text(new_labels.channels.as_str());
+    }
+    if let Some(tray) = app.tray_by_id("main-tray") {
+        let _ = tray.set_tooltip(Some(&tooltip_for(&new_labels, count, None)));
+    }
+
+    let mut current = TRAY_LABELS
+        .get_or_init(|| Mutex::new(TrayLabels::default()))
+        .lock()
+        .unwrap_or_else(|poisoned| poisoned.into_inner());
+    *current = new_labels;
+}
 
 struct BadgeCache {
     cache: HashMap<(u32, u32, u32), Vec<u8>>,
@@ -59,16 +163,18 @@ impl BadgeCache {
 }
 
 pub fn setup(app: &AppHandle) -> tauri::Result<()> {
+    let labels = labels();
     let open_item = MenuItemBuilder::with_id("open", "OmniGet").build(app)?;
-    let downloads_item = MenuItemBuilder::with_id("downloads", active_label(0))
+    let downloads_item = MenuItemBuilder::with_id("downloads", active_label_for(&labels, 0))
         .enabled(false)
         .build(app)?;
     DOWNLOADS_ITEM.set(downloads_item.clone()).ok();
-    let quit_item = MenuItemBuilder::with_id("quit", "Quit").build(app)?;
+    let quit_item = MenuItemBuilder::with_id("quit", labels.quit.as_str()).build(app)?;
+    QUIT_ITEM.set(quit_item.clone()).ok();
 
     // Empty, hidden until the frontend pushes localized channel labels via
     // sync_channels_tray (the tray menu is native — $t is not reachable here).
-    let channels_submenu = SubmenuBuilder::new(app, "Channels").build()?;
+    let channels_submenu = SubmenuBuilder::new(app, labels.channels.as_str()).build()?;
     channels_submenu.set_enabled(false).ok();
     CHANNELS_SUBMENU.set(channels_submenu.clone()).ok();
 
@@ -149,8 +255,9 @@ pub fn rebuild_menu(
 }
 
 pub fn update_active_count(app: &AppHandle, count: u32) {
+    let labels = labels();
     if let Some(item) = DOWNLOADS_ITEM.get() {
-        let _ = item.set_text(active_label(count));
+        let _ = item.set_text(active_label_for(&labels, count));
     }
 
     let prev = ICON_COUNT.swap(count, Ordering::Relaxed);
@@ -162,11 +269,7 @@ pub fn update_active_count(app: &AppHandle, count: u32) {
     }
 
     if let Some(tray) = app.tray_by_id("main-tray") {
-        let tooltip = if count > 0 {
-            format!("OmniGet — {} active", count)
-        } else {
-            "OmniGet".into()
-        };
+        let tooltip = tooltip_for(&labels, count, None);
         let _ = tray.set_tooltip(Some(&tooltip));
 
         if let Some((base, w, h)) = BASE_ICON.get() {
@@ -192,14 +295,6 @@ fn now_ms() -> u64 {
         .unwrap_or(0)
 }
 
-fn format_speed(bps: f64) -> String {
-    if bps < 1024.0 * 1024.0 {
-        format!("{:.0} KB/s", bps / 1024.0)
-    } else {
-        format!("{:.1} MB/s", bps / (1024.0 * 1024.0))
-    }
-}
-
 // Speed lives only in the tooltip (the discreet channel) — the icon stays
 // count-gated because icon re-render is expensive. Writes are hard-throttled
 // and deduped so frequent progress ticks can't flood the system tray.
@@ -223,15 +318,7 @@ pub fn update_speed_tooltip(app: &AppHandle, count: u32, total_speed_bps: f64) {
     LAST_TOOLTIP_MS.store(now, Ordering::Relaxed);
 
     if let Some(tray) = app.tray_by_id("main-tray") {
-        let tooltip = if total_speed_bps > 0.0 {
-            format!(
-                "OmniGet — {} active · {}",
-                count,
-                format_speed(total_speed_bps)
-            )
-        } else {
-            format!("OmniGet — {} active", count)
-        };
+        let tooltip = tooltip_for(&labels(), count, Some(total_speed_bps));
         let _ = tray.set_tooltip(Some(&tooltip));
     }
 }
@@ -255,14 +342,6 @@ pub fn compute_total_active(app: &AppHandle) -> u32 {
     let total = queue_count + tg_count;
     LAST_ACTIVE.store(total, Ordering::Relaxed);
     total
-}
-
-fn active_label(count: u32) -> String {
-    if count == 0 {
-        "No active downloads".into()
-    } else {
-        format!("Downloads: {} active", count)
-    }
 }
 
 pub fn show_window(app: &AppHandle) {
@@ -588,5 +667,57 @@ pub fn update_taskbar_badge(app: &AppHandle, active_count: u32, _avg_percent: f6
             };
             let _ = window.set_badge_count(badge_count);
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{active_label_for, format_speed, tooltip_for, TrayLabels};
+
+    fn russian() -> TrayLabels {
+        TrayLabels {
+            quit: "Выход".into(),
+            channels: "Каналы".into(),
+            no_active_downloads: "Нет активных загрузок".into(),
+            downloads_label: "Загрузки".into(),
+            active_suffix: " в работе".into(),
+            speed_unit_kb: "КБ/с".into(),
+            speed_unit_mb: "МБ/с".into(),
+            decimal_separator: ",".into(),
+        }
+    }
+
+    #[test]
+    fn active_label_is_localized() {
+        let labels = russian();
+        assert_eq!(active_label_for(&labels, 0), "Нет активных загрузок");
+        assert_eq!(active_label_for(&labels, 3), "Загрузки: 3 в работе");
+    }
+
+    #[test]
+    fn speed_uses_the_locale_units_and_decimal_separator() {
+        let labels = russian();
+        assert_eq!(format_speed(512.0 * 1024.0, &labels), "512 КБ/с");
+        assert_eq!(format_speed(3.5 * 1024.0 * 1024.0, &labels), "3,5 МБ/с");
+    }
+
+    #[test]
+    fn tooltip_switches_between_count_and_speed() {
+        let labels = TrayLabels::default();
+        assert_eq!(tooltip_for(&labels, 0, Some(1024.0)), "OmniGet");
+        assert_eq!(tooltip_for(&labels, 2, None), "OmniGet — 2 active");
+        assert_eq!(
+            tooltip_for(&labels, 1, Some(2.0 * 1024.0 * 1024.0)),
+            "OmniGet — 1 active · 2.0 MB/s"
+        );
+    }
+
+    #[test]
+    fn labels_deserialize_from_the_frontend_payload() {
+        let labels: TrayLabels = serde_json::from_str(
+            r#"{"quit":"Quit","channels":"Channels","noActiveDownloads":"No active downloads","downloadsLabel":"Downloads","activeSuffix":" active","speedUnitKb":"KB/s","speedUnitMb":"MB/s","decimalSeparator":"."}"#,
+        )
+        .expect("tray labels payload must deserialize");
+        assert_eq!(active_label_for(&labels, 1), "Downloads: 1 active");
     }
 }

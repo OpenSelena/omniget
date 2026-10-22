@@ -8375,5 +8375,13 @@
       "tracking_title": "Отслеживание посылок",
       "tracking_desc": "Следите за посылками 8 бразильских перевозчиков в одном месте — обновления автоматические."
     }
+  },
+  "tray": {
+    "quit": "Выход",
+    "no_active_downloads": "Нет активных загрузок",
+    "active_suffix": " в работе",
+    "speed_unit_kb": "КБ/с",
+    "speed_unit_mb": "МБ/с",
+    "decimal_separator": ","
   }
 }

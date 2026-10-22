@@ -3,6 +3,7 @@
   import { invoke } from "@tauri-apps/api/core";
   import { open } from "@tauri-apps/plugin-dialog";
   import { t, locale, loadTranslations } from "$lib/i18n";
+  import { syncTrayLabels } from "$lib/tray-labels";
   import { getSettings, updateSettings, resetSettings } from "$lib/stores/settings-store.svelte";
   import { getUpdateInfo, getIsUpdating, performUpdate } from "$lib/stores/update-store.svelte";
   import { showToast } from "$lib/stores/toast-store.svelte";
@@ -119,6 +120,7 @@
     await updateSettings({ appearance: { language: value } });
     await loadTranslations(value, "/settings");
     locale.set(value);
+    await syncTrayLabels();
   }
 
   async function chooseFolder() {
