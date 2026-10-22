@@ -2,6 +2,7 @@
   import { open } from '@tauri-apps/plugin-dialog';
   import { getOutputDir, getCookiesFile, loadSettings, saveSettings } from '$lib/stores/open_nami_settings_store.svelte';
   import { onMount } from 'svelte';
+  import { t } from '$lib/i18n';
 
   let outputDir = $state('');
   let cookiesFile = $state('');
@@ -23,7 +24,7 @@
 
   async function browseOutputDir() {
     try {
-      const selected = await open({ directory: true, multiple: false, title: 'Select Output Directory' });
+      const selected = await open({ directory: true, multiple: false, title: $t('open_nami.select_output_dir_title') });
       if (selected && typeof selected === 'string') outputDir = selected;
     } catch (err) {
       console.error('Failed to open directory dialog:', err);
@@ -32,7 +33,7 @@
 
   async function browseCookiesFile() {
     try {
-      const selected = await open({ directory: false, multiple: false, title: 'Select Cookies File' });
+      const selected = await open({ directory: false, multiple: false, title: $t('open_nami.select_cookies_title') });
       if (selected && typeof selected === 'string') cookiesFile = selected;
     } catch (err) {
       console.error('Failed to open file dialog:', err);
@@ -54,15 +55,15 @@
       await saveSettings(outputDir, cookiesFile);
       outputDir = getOutputDir();
       cookiesFile = getCookiesFile();
-      saveStatus = 'Settings saved';
+      saveStatus = 'open_nami.settings_saved';
       saveStatusType = 'success';
       statusTimer = setTimeout(() => {
-        if (saveStatus === 'Settings saved') saveStatus = '';
+        if (saveStatus === 'open_nami.settings_saved') saveStatus = '';
         statusTimer = null;
       }, 2500);
     } catch (error) {
       console.error('Failed to save settings:', error);
-      saveStatus = 'Failed to save settings';
+      saveStatus = 'open_nami.failed_to_save_settings';
       saveStatusType = 'error';
     } finally {
       saving = false;
@@ -79,7 +80,7 @@
       role="status"
       aria-live="polite"
     >
-      <span>{saveStatus}</span>
+      <span>{$t(saveStatus)}</span>
     </div>
   {/if}
 
@@ -88,17 +89,17 @@
       <svg class="sm-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round" aria-hidden="true">
         <path d="M2 4.6a1 1 0 0 1 1-1h2.6l1.1 1.4H13a1 1 0 0 1 1 1V12a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1z" />
       </svg>
-      <span class="sm-label">Output</span>
+      <span class="sm-label">{$t('open_nami.output_label')}</span>
       <input
         id="output-dir"
-        aria-label="Output directory"
+        aria-label={$t('open_nami.output_dir_aria')}
         type="text"
         bind:value={outputDir}
-        placeholder="Choose a folder..."
+        placeholder={$t('open_nami.choose_folder_placeholder')}
         autocomplete="off"
         spellcheck="false"
       />
-      <button type="button" class="sm-choose-btn" onclick={browseOutputDir}>Choose...</button>
+      <button type="button" class="sm-choose-btn" onclick={browseOutputDir}>{$t('open_nami.choose')}</button>
     </div>
 
     <div class="sm-row">
@@ -106,24 +107,24 @@
         <path d="M4.3 2h4.4L12 5.3V13a.7.7 0 0 1-.7.7H4.3a.7.7 0 0 1-.7-.7V2.7A.7.7 0 0 1 4.3 2Z" />
         <path d="M8.7 2v3.3H12" />
       </svg>
-      <span class="sm-label">Cookies</span>
+      <span class="sm-label">{$t('open_nami.cookies_label')}</span>
       <input
         id="cookies-file"
-        aria-label="Cookies file (optional, needed for Stories and Highlights)"
+        aria-label={$t('open_nami.cookies_file_aria')}
         type="text"
         bind:value={cookiesFile}
-        placeholder="Choose a cookies file..."
+        placeholder={$t('open_nami.choose_cookies_placeholder')}
         autocomplete="off"
         spellcheck="false"
       />
       {#if cookiesFile}
-        <button type="button" class="sm-clear-btn" onclick={clearCookies} title="Clear cookies file">×</button>
+        <button type="button" class="sm-clear-btn" onclick={clearCookies} title={$t('open_nami.clear_cookies_file')}>×</button>
       {/if}
-      <button type="button" class="sm-choose-btn" onclick={browseCookiesFile}>Choose...</button>
+      <button type="button" class="sm-choose-btn" onclick={browseCookiesFile}>{$t('open_nami.choose')}</button>
     </div>
   </div>
 
-  <p class="sm-hint">Cookies are only required for downloading Stories and Highlights.</p>
+  <p class="sm-hint">{$t('open_nami.cookies_hint')}</p>
 
   <div class="sm-actions">
     <button
@@ -132,7 +133,7 @@
       onclick={handleSave}
       disabled={saving || !isDirty}
     >
-      {saving ? 'Saving...' : 'Save Settings'}
+      {saving ? $t('open_nami.saving') : $t('open_nami.save_settings')}
     </button>
   </div>
 </div>

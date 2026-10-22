@@ -27,7 +27,9 @@
     getDependencyStatus,
     isCheckingDependencies,
   } from '$lib/stores/open_nami_deps_store.svelte';
+  import { openNamiStageLabel, openNamiStatusMessage, type OpenNamiTranslate } from '$lib/open_nami/i18n';
   import { onMount, onDestroy } from 'svelte';
+  import { t } from '$lib/i18n';
 
   interface Props {
     onSwitchToProfiles?: () => void;
@@ -35,6 +37,8 @@
   }
 
   let { onSwitchToProfiles, onSwitchToSettings }: Props = $props();
+
+  const tr: OpenNamiTranslate = (key, values) => $t(key, values) as string;
 
   const RING_RADIUS = 44;
   const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
@@ -177,19 +181,19 @@
     setDraft({ url, contentType, selectedProfileUrl });
   }
 
-  const CONTENT_TYPES: Array<{ key: string; label: string }> = [
-    { key: 'all', label: 'All' },
-    { key: 'photos', label: 'Photos' },
-    { key: 'videos', label: 'Videos' },
-    { key: 'stories', label: 'Stories' },
-    { key: 'highlights', label: 'Highlights' },
+  const CONTENT_TYPES: Array<{ key: string; labelKey: string }> = [
+    { key: 'all', labelKey: 'open_nami.content_all' },
+    { key: 'photos', labelKey: 'open_nami.content_photos' },
+    { key: 'videos', labelKey: 'open_nami.content_videos' },
+    { key: 'stories', labelKey: 'open_nami.content_stories' },
+    { key: 'highlights', labelKey: 'open_nami.content_highlights' },
   ];
 </script>
 
 <div class="dl">
   {#if depStatus && !depStatus.ok}
     <div class="dl-alert error" role="alert">
-      <span>{depStatus.message}</span>
+      <span>{openNamiStatusMessage(depStatus.message, tr)}</span>
     </div>
   {/if}
 
@@ -203,21 +207,21 @@
         role={statusType === 'error' ? 'alert' : 'status'}
       >
         <div class="dl-alert-body">
-          <span>{status}</span>
+          <span>{openNamiStatusMessage(status, tr)}</span>
           {#if statusDetail}
             <details class="dl-alert-details">
-              <summary>View log</summary>
+              <summary>{$t('open_nami.view_log')}</summary>
               <pre>{statusDetail}</pre>
             </details>
           {/if}
         </div>
-        <button class="dl-alert-close" onclick={clearStatus} aria-label="Dismiss">×</button>
+        <button class="dl-alert-close" onclick={clearStatus} aria-label={$t('common.dismiss')}>×</button>
       </div>
     {/if}
   </div>
 
   {#if !url.trim() && savedProfiles.length > 0}
-    <div class="dl-quicklist" role="group" aria-label="Saved profiles">
+    <div class="dl-quicklist" role="group" aria-label={$t('open_nami.saved_profiles_aria')}>
       {#each savedProfiles as profile (profile.url)}
         <button
           type="button"
@@ -236,8 +240,10 @@
     </div>
   {:else if !url.trim() && savedProfiles.length === 0}
     <p class="dl-hint">
-      No saved profiles —
-      <button type="button" class="dl-link" onclick={() => onSwitchToProfiles?.()}>add one</button>
+      {$t('open_nami.no_saved_profiles')}
+      <button type="button" class="dl-link" onclick={() => onSwitchToProfiles?.()}
+        >{$t('open_nami.add_one')}</button
+      >
     </p>
   {/if}
 
@@ -250,7 +256,7 @@
       </svg>
       <input
         id="profile-url"
-        aria-label="Profile URL or handle"
+        aria-label={$t('open_nami.profile_url_aria')}
         type="text"
         bind:value={url}
         oninput={handleUrlInput}
@@ -262,7 +268,7 @@
     </div>
   </div>
 
-  <div class="dl-segmented" role="group" aria-label="Content type">
+  <div class="dl-segmented" role="group" aria-label={$t('open_nami.content_type_aria')}>
     {#each CONTENT_TYPES as type (type.key)}
       <button
         type="button"
@@ -272,37 +278,39 @@
           setDraft({ contentType: type.key });
         }}
         disabled={downloading || ((type.key === 'stories' || type.key === 'highlights') && !isInstagram)}
-        title={(type.key === 'stories' || type.key === 'highlights') && !isInstagram ? 'Instagram only' : ''}
+        title={(type.key === 'stories' || type.key === 'highlights') && !isInstagram
+          ? $t('open_nami.instagram_only')
+          : ''}
         aria-pressed={contentType === type.key}
       >
-        {type.label}
+        {$t(type.labelKey)}
       </button>
     {/each}
   </div>
 
   {#if missingOutputDir}
     <p class="dl-warning" role="alert">
-      Set an output directory in
-      <button type="button" class="dl-link" onclick={() => onSwitchToSettings?.()}>Settings</button>
-      before downloading.
+      {$t('open_nami.missing_output_dir_prefix')}
+      <button type="button" class="dl-link" onclick={() => onSwitchToSettings?.()}>{$t('nav.settings')}</button>
+      {$t('open_nami.missing_output_dir_suffix')}
     </p>
   {/if}
 
   {#if needsCookiesWarning}
     <p class="dl-warning" role="alert">
-      Stories and Highlights need a cookies file — add one in
-      <button type="button" class="dl-link" onclick={() => onSwitchToSettings?.()}>Settings</button>.
+      {$t('open_nami.cookies_required_prefix')}
+      <button type="button" class="dl-link" onclick={() => onSwitchToSettings?.()}>{$t('nav.settings')}</button>.
     </p>
   {/if}
 
   {#if platformMismatch}
-    <p class="dl-warning" role="alert">Stories and Highlights are only supported for Instagram.</p>
+    <p class="dl-warning" role="alert">{$t('open_nami.stories_instagram_only')}</p>
   {/if}
 
   <div class="dl-actions">
     {#if downloading}
       <button class="dl-btn stop" onclick={handleStop} disabled={cancelling}>
-        {cancelling ? 'Cancelling...' : 'Stop Download'}
+        {cancelling ? $t('open_nami.cancelling') : $t('open_nami.stop_download')}
       </button>
     {:else}
       <button
@@ -310,7 +318,7 @@
         onclick={startDownload}
         disabled={!getDownloadUrl() || missingOutputDir || needsCookiesWarning || platformMismatch || (depStatus !== null && !depStatus.ok)}
       >
-        Start Download
+        {$t('open_nami.start_download')}
       </button>
     {/if}
   </div>
@@ -332,13 +340,19 @@
           />
         {/if}
         <text x="52" y="49" text-anchor="middle" class="dl-ring-count">{filesDownloaded}</text>
-        <text x="52" y="66" text-anchor="middle" class="dl-ring-label">files</text>
+        <text x="52" y="66" text-anchor="middle" class="dl-ring-label">{$t('open_nami.files_label')}</text>
       </svg>
       <p class="dl-progress-stage">
         {#if stageTotal && stageTotal > 1}
-          Stage {stageIndex ?? 1} of {stageTotal} · {stage ?? ''}
+          {$t('open_nami.stage_of', {
+            index: stageIndex ?? 1,
+            total: stageTotal,
+            stage: openNamiStageLabel(stage, tr)
+          })}
         {:else}
-          Downloading{stage ? ` ${stage}` : ''}...
+          {stage
+            ? $t('open_nami.downloading_stage', { stage: openNamiStageLabel(stage, tr) })
+            : $t('open_nami.downloading')}
         {/if}
       </p>
       {#if lastMessage}
