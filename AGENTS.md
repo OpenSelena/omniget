@@ -33,6 +33,7 @@ Welcome to OmniGet. This file serves as the definitive reference and operating m
      - `src/lib/stores/changelog-store.svelte.ts`
      - `index.html` (download links, version meta tags, CTA text)
      - `docs/*/index.html` (sidebar version tags)
+     - `SECURITY.md` & `.github/SECURITY.md` (supported versions table)
 
 2. **Documentation Updates**:
    - **`docs/changelog/index.html`**:

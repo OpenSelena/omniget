@@ -182,6 +182,20 @@ for (const d of docsDirs) {
   }
 }
 
+// Update security policy supported versions
+const [maj, min] = version.split(".");
+const minorVer = `${maj}.${min}`;
+const securityFiles = [path.join(root, "SECURITY.md"), path.join(root, ".github", "SECURITY.md")];
+for (const secFile of securityFiles) {
+  if (fs.existsSync(secFile)) {
+    writeText(secFile, (c) => {
+      return c
+        .replace(/\|\s*\d+\.\d+\.x\s*\|\s*✅\s*\|/g, `| ${minorVer}.x  | ✅        |`)
+        .replace(/\|\s*<\s*\d+\.\d+\s*\|\s*❌\s*\|/g, `| < ${minorVer}  | ❌        |`);
+    });
+  }
+}
+
 if (changed.length === 0) {
   console.error("No files changed — aborting.");
   process.exit(1);
