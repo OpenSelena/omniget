@@ -587,7 +587,9 @@ pub async fn authenticate_with_cookie_json(cookie_json_str: &str) -> anyhow::Res
         export
             .cookies
             .iter()
-            .find(|c| c.name == "access_token" || c.name == "dj_session_id" || c.name == "ud_user_jwt")
+            .find(|c| {
+                c.name == "access_token" || c.name == "dj_session_id" || c.name == "ud_user_jwt"
+            })
             .and_then(|c| c.domain.as_deref())
             .and_then(|d| {
                 let d = d.trim_start_matches('.');
@@ -723,7 +725,10 @@ mod tests {
 
     #[test]
     fn test_udemy_user_agent_is_valid_mobile_string() {
-        assert_eq!(UDEMY_API_USER_AGENT, "okhttp/4.9.2 UdemyAndroid 9.7.0(515) (phone)");
+        assert_eq!(
+            UDEMY_API_USER_AGENT,
+            "okhttp/4.9.2 UdemyAndroid 9.7.0(515) (phone)"
+        );
     }
 
     #[test]
@@ -743,9 +748,18 @@ mod tests {
 
     #[test]
     fn test_detect_portal_from_url() {
-        assert_eq!(detect_portal_from_url("https://www.udemy.com/home/my-courses/"), "www");
-        assert_eq!(detect_portal_from_url("https://trk.udemy.com/api-2.0/"), "www");
-        assert_eq!(detect_portal_from_url("https://acme.udemy.com/organization/home/"), "acme");
+        assert_eq!(
+            detect_portal_from_url("https://www.udemy.com/home/my-courses/"),
+            "www"
+        );
+        assert_eq!(
+            detect_portal_from_url("https://trk.udemy.com/api-2.0/"),
+            "www"
+        );
+        assert_eq!(
+            detect_portal_from_url("https://acme.udemy.com/organization/home/"),
+            "acme"
+        );
         assert_eq!(detect_portal_from_url("invalid-url"), "www");
     }
 
@@ -757,7 +771,9 @@ mod tests {
             {"name": "client_id", "value": "cid123", "domain": ".udemy.com"}
         ]"#;
 
-        let session = authenticate_with_cookie_json(json_with_trk_first).await.expect("Session parse failed");
+        let session = authenticate_with_cookie_json(json_with_trk_first)
+            .await
+            .expect("Session parse failed");
         assert_eq!(session.portal_name, "www");
         assert_eq!(session.access_token, "token123");
 
@@ -766,7 +782,9 @@ mod tests {
             {"name": "access_token", "value": "token456", "domain": ".enterprise-corp.udemy.com"}
         ]"#;
 
-        let ent_session = authenticate_with_cookie_json(enterprise_json).await.expect("Enterprise parse failed");
+        let ent_session = authenticate_with_cookie_json(enterprise_json)
+            .await
+            .expect("Enterprise parse failed");
         assert_eq!(ent_session.portal_name, "enterprise-corp");
     }
 }
