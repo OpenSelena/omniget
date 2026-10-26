@@ -128,8 +128,8 @@ importers:
         specifier: ^11.10.0
         version: 11.11.1
       hls.js:
-        specifier: ^1.6.16
-        version: 1.6.16
+        specifier: ^1.7.3
+        version: 1.7.3
       katex:
         specifier: ^0.19.0
         version: 0.19.0
@@ -1645,8 +1645,8 @@ packages:
     resolution: {integrity: sha512-Xwwo44whKBVCYoliBQwaPvtd/2tYFkRQtXDWj1nackaV2JPXx3L0+Jvd8/qCJ2p+ML0/XVkJ2q+Mr+UVdpJK5w==}
     engines: {node: '>=12.0.0'}
 
-  hls.js@1.6.16:
-    resolution: {integrity: sha512-VSIRpLfRwlAAdGL4wiTucx2ScRipo0ed1FBatWkyt832jC4CReKstga6yIhYVwGu9LOBjuX9wzmRMeQdBJtzEA==}
+  hls.js@1.7.3:
+    resolution: {integrity: sha512-MsPlx6yVW4Qv4C7mEVou4/gk/5cN2dVxOTnrNjPSmyH2f0Ln+/UkG10Ax1PE6OvrmTVPKgQYozTtBaPOuCzq7A==}
 
   htmlparser2@9.1.0:
     resolution: {integrity: sha512-5zfg6mHUoaer/97TxnGpxmbR7zJtPwIYFMZ/H5ucTlPZhKvtum05yiPK3Mgai3a0DyVxv7qYqoweaEd2nrYQzQ==}
@@ -3480,7 +3480,7 @@ snapshots:
 
   highlight.js@11.11.1: {}
 
-  hls.js@1.6.16: {}
+  hls.js@1.7.3: {}
 
   htmlparser2@9.1.0:
     dependencies:
