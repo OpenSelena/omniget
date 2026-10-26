@@ -122,8 +122,8 @@ importers:
         specifier: ^3.33.3
         version: 3.33.3
       flowchart.js:
-        specifier: ^1.18.0
-        version: 1.18.0
+        specifier: ^1.18.1
+        version: 1.18.1
       highlight.js:
         specifier: ^11.10.0
         version: 11.11.1
@@ -1624,8 +1624,8 @@ packages:
       picomatch:
         optional: true
 
-  flowchart.js@1.18.0:
-    resolution: {integrity: sha512-1rZflSLyrj5/+ryzU+qIQr6IGysPIHT4UrgN+6IaVv7pLDSLu7CvC9e0X7FU6ocpRAEtHk5+UaFXv9NZKRoG3g==}
+  flowchart.js@1.18.1:
+    resolution: {integrity: sha512-dBIIRW+h2CZpKXpBUg1DsG2uUcLwcdXuf6FP7F9f7LpaDsSf0UMkRaTW4mt5YJbfEtJDlWkRlcTUnq3r69melg==}
     engines: {node: '>=4.0.0'}
 
   fsevents@2.3.2:
@@ -3466,7 +3466,7 @@ snapshots:
     optionalDependencies:
       picomatch: 4.0.7
 
-  flowchart.js@1.18.0:
+  flowchart.js@1.18.1:
     dependencies:
       raphael: 2.3.0
 
