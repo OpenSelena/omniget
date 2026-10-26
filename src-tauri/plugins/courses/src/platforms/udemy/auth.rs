@@ -9,6 +9,8 @@ use reqwest::header::{HeaderMap, HeaderValue};
 use serde::{Deserialize, Serialize};
 use tauri::Manager;
 
+pub const UDEMY_API_USER_AGENT: &str = "okhttp/4.9.2 UdemyAndroid 9.7.0(515) (phone)";
+
 #[derive(Clone)]
 pub struct UdemySession {
     pub access_token: String,
@@ -102,14 +104,8 @@ pub fn build_client_from_saved(saved: &SavedSession) -> anyhow::Result<reqwest::
     }
     default_headers.insert("accept-language", HeaderValue::from_static("en_US"));
 
-    let user_agent = if !saved.cookies.is_empty() {
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36"
-    } else {
-        "okhttp/4.12.0 UdemyAndroid 9.51.2(594) (phone)"
-    };
-
     let client = omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
-        .user_agent(user_agent)
+        .user_agent(UDEMY_API_USER_AGENT)
         .default_headers(default_headers)
         .redirect(reqwest::redirect::Policy::limited(10))
         .connect_timeout(Duration::from_secs(30))
@@ -160,7 +156,7 @@ fn build_enterprise_client(saved: &SavedSession) -> anyhow::Result<reqwest::Clie
     default_headers.insert("accept-language", HeaderValue::from_static("en_US"));
 
     let client = omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
-        .user_agent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36")
+        .user_agent(UDEMY_API_USER_AGENT)
         .default_headers(default_headers)
         .redirect(reqwest::redirect::Policy::limited(10))
         .connect_timeout(Duration::from_secs(30))
@@ -584,17 +580,34 @@ pub async fn authenticate_with_cookie_json(cookie_json_str: &str) -> anyhow::Res
         return Err(anyhow!("No cookies provided"));
     }
 
-    // Detect portal from URL or cookie domains
+    // Detect portal from URL or cookie domains (prioritizing auth cookies over tracking domains)
     let portal_name = if let Some(ref url) = export.url {
         detect_portal_from_url(url)
     } else {
         export
             .cookies
             .iter()
-            .filter_map(|c| c.domain.as_deref())
-            .find_map(|d| {
+            .find(|c| c.name == "access_token" || c.name == "dj_session_id" || c.name == "ud_user_jwt")
+            .and_then(|c| c.domain.as_deref())
+            .and_then(|d| {
                 let d = d.trim_start_matches('.');
-                d.strip_suffix(".udemy.com").map(|sub| sub.to_string())
+                d.strip_suffix(".udemy.com").map(sanitize_portal_name)
+            })
+            .or_else(|| {
+                export
+                    .cookies
+                    .iter()
+                    .filter_map(|c| c.domain.as_deref())
+                    .find_map(|d| {
+                        let d = d.trim_start_matches('.');
+                        let sub = d.strip_suffix(".udemy.com")?;
+                        let sanitized = sanitize_portal_name(sub);
+                        if sanitized != "www" {
+                            Some(sanitized)
+                        } else {
+                            None
+                        }
+                    })
             })
             .unwrap_or_else(|| "www".into())
     };
@@ -647,11 +660,22 @@ pub async fn authenticate_with_cookie_json(cookie_json_str: &str) -> anyhow::Res
     })
 }
 
+pub fn sanitize_portal_name(sub: &str) -> String {
+    let clean = sub.trim().trim_start_matches('.').to_ascii_lowercase();
+    match clean.as_str() {
+        "" | "www" | "trk" | "support" | "about" | "blog" | "img-c" | "s" => "www".to_string(),
+        enterprise => enterprise.to_string(),
+    }
+}
+
 fn detect_portal_from_url(url: &str) -> String {
     url::Url::parse(url)
         .ok()
         .and_then(|u| u.host_str().map(|h| h.to_string()))
-        .and_then(|host| host.strip_suffix(".udemy.com").map(|sub| sub.to_string()))
+        .and_then(|host| {
+            let h = host.trim_start_matches('.');
+            h.strip_suffix(".udemy.com").map(sanitize_portal_name)
+        })
         .unwrap_or_else(|| "www".into())
 }
 
@@ -695,5 +719,54 @@ mod tests {
         let (id, secret) = resolve_client_credentials();
         assert!(!id.is_empty());
         assert!(!secret.is_empty());
+    }
+
+    #[test]
+    fn test_udemy_user_agent_is_valid_mobile_string() {
+        assert_eq!(UDEMY_API_USER_AGENT, "okhttp/4.9.2 UdemyAndroid 9.7.0(515) (phone)");
+    }
+
+    #[test]
+    fn test_sanitize_portal_name() {
+        assert_eq!(sanitize_portal_name(""), "www");
+        assert_eq!(sanitize_portal_name("www"), "www");
+        assert_eq!(sanitize_portal_name("trk"), "www");
+        assert_eq!(sanitize_portal_name(".trk"), "www");
+        assert_eq!(sanitize_portal_name("support"), "www");
+        assert_eq!(sanitize_portal_name("about"), "www");
+        assert_eq!(sanitize_portal_name("blog"), "www");
+        assert_eq!(sanitize_portal_name("img-c"), "www");
+        assert_eq!(sanitize_portal_name("s"), "www");
+        assert_eq!(sanitize_portal_name("acmewidgets"), "acmewidgets");
+        assert_eq!(sanitize_portal_name(".acmewidgets"), "acmewidgets");
+    }
+
+    #[test]
+    fn test_detect_portal_from_url() {
+        assert_eq!(detect_portal_from_url("https://www.udemy.com/home/my-courses/"), "www");
+        assert_eq!(detect_portal_from_url("https://trk.udemy.com/api-2.0/"), "www");
+        assert_eq!(detect_portal_from_url("https://acme.udemy.com/organization/home/"), "acme");
+        assert_eq!(detect_portal_from_url("invalid-url"), "www");
+    }
+
+    #[tokio::test]
+    async fn test_cookie_import_prioritizes_auth_cookie_and_filters_tracking_domain() {
+        let json_with_trk_first = r#"[
+            {"name": "irld", "value": "xyz", "domain": ".trk.udemy.com"},
+            {"name": "access_token", "value": "token123", "domain": ".udemy.com"},
+            {"name": "client_id", "value": "cid123", "domain": ".udemy.com"}
+        ]"#;
+
+        let session = authenticate_with_cookie_json(json_with_trk_first).await.expect("Session parse failed");
+        assert_eq!(session.portal_name, "www");
+        assert_eq!(session.access_token, "token123");
+
+        let enterprise_json = r#"[
+            {"name": "irld", "value": "xyz", "domain": ".trk.udemy.com"},
+            {"name": "access_token", "value": "token456", "domain": ".enterprise-corp.udemy.com"}
+        ]"#;
+
+        let ent_session = authenticate_with_cookie_json(enterprise_json).await.expect("Enterprise parse failed");
+        assert_eq!(ent_session.portal_name, "enterprise-corp");
     }
 }

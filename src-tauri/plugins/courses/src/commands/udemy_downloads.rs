@@ -57,11 +57,15 @@ async fn fetch_curriculum_via_webview(
     let mut data: serde_json::Value =
         serde_json::from_str(&body).map_err(|e| format!("JSON parse error: {}", e))?;
 
-    let mut all_results = data
-        .get("results")
-        .and_then(|r| r.as_array())
-        .cloned()
-        .unwrap_or_default();
+    let mut all_results = match data.get("results").and_then(|r| r.as_array()) {
+        Some(arr) => arr.clone(),
+        None => {
+            if let Some(detail) = data.get("detail").and_then(|d| d.as_str()) {
+                return Err(format!("Udemy authorization error: {}", detail));
+            }
+            return Err("Invalid API response: missing 'results' array".to_string());
+        }
+    };
 
     loop {
         let next_url = data
@@ -137,11 +141,15 @@ async fn fetch_curriculum_via_api(
     let mut data: serde_json::Value =
         serde_json::from_str(&body).map_err(|e| format!("JSON parse error: {}", e))?;
 
-    let mut all_results = data
-        .get("results")
-        .and_then(|r| r.as_array())
-        .cloned()
-        .unwrap_or_default();
+    let mut all_results = match data.get("results").and_then(|r| r.as_array()) {
+        Some(arr) => arr.clone(),
+        None => {
+            if let Some(detail) = data.get("detail").and_then(|d| d.as_str()) {
+                return Err(format!("Udemy authorization error: {}", detail));
+            }
+            return Err("Invalid API response: missing 'results' array".to_string());
+        }
+    };
 
     loop {
         let next_url = data
@@ -222,40 +230,33 @@ pub async fn start_udemy_course_download(
             .unwrap_or_else(|| "www".into())
     };
 
-    let curriculum = if portal != "www" {
-        match fetch_curriculum_via_api(&state, course_id, &portal).await {
-            Ok(c) => c,
-            Err(e) => {
-                tracing::warn!("[udemy-api] direct API curriculum failed for portal={}, falling back to webview: {}", portal, e);
-                let api_webview = state.udemy_api_webview.clone();
-                let result_store = state.udemy_api_result.clone();
-                match fetch_curriculum_via_webview(
-                    &app,
-                    &api_webview,
-                    &result_store,
-                    course_id,
-                    &portal,
-                )
-                .await
-                {
-                    Ok(c) => c,
-                    Err(e2) => {
-                        active.lock().await.remove(&course_id);
-                        return Err(format!("Failed to fetch curriculum: {}", e2));
-                    }
-                }
-            }
-        }
-    } else {
-        let api_webview = state.udemy_api_webview.clone();
-        let result_store = state.udemy_api_result.clone();
-        match fetch_curriculum_via_webview(&app, &api_webview, &result_store, course_id, &portal)
+    let curriculum = match fetch_curriculum_via_api(&state, course_id, &portal).await {
+        Ok(c) => c,
+        Err(e) => {
+            tracing::warn!(
+                "[udemy-api] direct API curriculum failed for portal={}, falling back to webview: {}",
+                portal,
+                e
+            );
+            let api_webview = state.udemy_api_webview.clone();
+            let result_store = state.udemy_api_result.clone();
+            match fetch_curriculum_via_webview(
+                &app,
+                &api_webview,
+                &result_store,
+                course_id,
+                &portal,
+            )
             .await
-        {
-            Ok(c) => c,
-            Err(e) => {
-                active.lock().await.remove(&course_id);
-                return Err(format!("Failed to fetch curriculum: {}", e));
+            {
+                Ok(c) => c,
+                Err(e2) => {
+                    active.lock().await.remove(&course_id);
+                    return Err(format!(
+                        "Failed to fetch curriculum: {} (direct API error: {})",
+                        e2, e
+                    ));
+                }
             }
         }
     };

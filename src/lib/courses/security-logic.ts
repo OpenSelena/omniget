@@ -37,3 +37,37 @@ export function resolveClientCredentials(): { clientId: string; clientSecret: st
   const clientSecret = process.env.UDEMY_CLIENT_SECRET || "f2lgDUDxjFiOlVHUpwQNFUfCQPyMO0tJQMaud53PF01UKueW8enYjeEYoyVeP0bb2XVEDkJ5GLJaVTfM5QgMVz6yyXyydZdA5QhzgvG9UmCPUYaCrIVf7VpmiilfbLJc";
   return { clientId, clientSecret };
 }
+
+/**
+ * Sanitizes portal name from cookie subdomains, ignoring non-portal subdomains like 'trk'.
+ */
+export function sanitizePortalName(sub: string): string {
+  const clean = sub.trim().replace(/^\.+/, "").toLowerCase();
+  switch (clean) {
+    case "":
+    case "www":
+    case "trk":
+    case "support":
+    case "about":
+    case "blog":
+    case "img-c":
+    case "s":
+      return "www";
+    default:
+      return clean;
+  }
+}
+
+/**
+ * Validates Udemy API response to guarantee an error is thrown instead of swallowing
+ * authorization/challenge failures into an empty list.
+ */
+export function parseUdemyResults(data: Record<string, any>): unknown[] {
+  if (Array.isArray(data.results)) {
+    return data.results;
+  }
+  if (typeof data.detail === "string") {
+    throw new Error(`Udemy authorization error: ${data.detail}`);
+  }
+  throw new Error("Invalid API response: missing 'results' array");
+}

@@ -4,6 +4,8 @@ import {
   shouldFallbackToWebview,
   formatTokenIdentity,
   resolveClientCredentials,
+  sanitizePortalName,
+  parseUdemyResults,
 } from "./security-logic";
 
 describe("Course Security & Platform Logic", () => {
@@ -59,6 +61,45 @@ describe("Course Security & Platform Logic", () => {
       const creds = resolveClientCredentials();
       expect(creds.clientId).toBeTruthy();
       expect(creds.clientSecret).toBeTruthy();
+    });
+  });
+
+  describe("Udemy Portal Sanitization & Error Handling (Issue 72)", () => {
+    it("should sanitize tracking and non-portal subdomains to www", () => {
+      expect(sanitizePortalName("")).toBe("www");
+      expect(sanitizePortalName("www")).toBe("www");
+      expect(sanitizePortalName("trk")).toBe("www");
+      expect(sanitizePortalName(".trk")).toBe("www");
+      expect(sanitizePortalName("support")).toBe("www");
+      expect(sanitizePortalName("blog")).toBe("www");
+      expect(sanitizePortalName("img-c")).toBe("www");
+      expect(sanitizePortalName("s")).toBe("www");
+    });
+
+    it("should preserve enterprise subdomains", () => {
+      expect(sanitizePortalName("acmewidgets")).toBe("acmewidgets");
+      expect(sanitizePortalName(".enterprise-corp")).toBe("enterprise-corp");
+    });
+
+    it("should successfully extract results array when present", () => {
+      const payload = { results: [{ id: 101, title: "Rust Mastery" }] };
+      const parsed = parseUdemyResults(payload);
+      expect(parsed).toHaveLength(1);
+      expect(parsed[0]).toEqual({ id: 101, title: "Rust Mastery" });
+    });
+
+    it("should throw error with details when authorization fails", () => {
+      const unauthorizedPayload = { detail: "You do not have permission to perform this action." };
+      expect(() => parseUdemyResults(unauthorizedPayload)).toThrow(
+        "Udemy authorization error: You do not have permission to perform this action."
+      );
+    });
+
+    it("should throw error when results key is missing from payload", () => {
+      const invalidPayload = { unexpected: true };
+      expect(() => parseUdemyResults(invalidPayload)).toThrow(
+        "Invalid API response: missing 'results' array"
+      );
     });
   });
 });

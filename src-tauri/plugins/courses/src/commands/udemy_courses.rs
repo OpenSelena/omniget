@@ -88,13 +88,17 @@ pub async fn fetch_courses_via_api(
     let data: serde_json::Value =
         serde_json::from_str(&body).map_err(|e| format!("JSON parse error: {}", e))?;
 
-    let results = data
-        .get("results")
-        .and_then(|r| r.as_array())
-        .cloned()
-        .unwrap_or_default();
+    let results = match data.get("results").and_then(|r| r.as_array()) {
+        Some(arr) => arr,
+        None => {
+            if let Some(detail) = data.get("detail").and_then(|d| d.as_str()) {
+                return Err(format!("Udemy API authorization error: {}", detail));
+            }
+            return Err("Invalid API response: missing 'results' array".to_string());
+        }
+    };
 
-    let mut courses = parse_courses_from_results(&results);
+    let mut courses = parse_courses_from_results(results);
 
     let sub_url = format!(
         "https://{}.udemy.com/api-2.0/users/me/subscription-course-enrollments?fields[course]=id,title,published_title,image_240x135,num_published_lectures&page=1&page_size=50",
@@ -169,13 +173,17 @@ async fn fetch_courses_via_webview(
     let data: serde_json::Value =
         serde_json::from_str(&body).map_err(|e| format!("JSON parse error: {}", e))?;
 
-    let results = data
-        .get("results")
-        .and_then(|r| r.as_array())
-        .cloned()
-        .unwrap_or_default();
+    let results = match data.get("results").and_then(|r| r.as_array()) {
+        Some(arr) => arr,
+        None => {
+            if let Some(detail) = data.get("detail").and_then(|d| d.as_str()) {
+                return Err(format!("Udemy API authorization error: {}", detail));
+            }
+            return Err("Invalid API response: missing 'results' array".to_string());
+        }
+    };
 
-    let mut courses = parse_courses_from_results(&results);
+    let mut courses = parse_courses_from_results(results);
 
     let sub_url = format!(
         "https://{}.udemy.com/api-2.0/users/me/subscription-course-enrollments?fields[course]=id,title,published_title,image_240x135,num_published_lectures&page=1&page_size=50",
