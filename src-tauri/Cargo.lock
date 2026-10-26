@@ -5788,7 +5788,7 @@ dependencies = [
  "indexmap 2.14.2",
  "itoa",
  "log",
- "md-5 0.11.0",
+ "md-5",
  "nom 8.0.0",
  "rand 0.10.2",
  "rangemap",
@@ -5946,16 +5946,6 @@ checksum = "3f607c237553f086e7043417a51df26b2eb899d3caff94e6a67592ff992fedc7"
 dependencies = [
  "autocfg",
  "rawpointer",
-]
-
-[[package]]
-name = "md-5"
-version = "0.10.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d89e7ee0cfbedfc4da3340218492196241d89eefb6dab27de5df917a6d2e78cf"
-dependencies = [
- "cfg-if",
- "digest 0.10.7",
 ]
 
 [[package]]
@@ -6947,7 +6937,7 @@ dependencies = [
  "libloading 0.8.9",
  "librqbit",
  "m3u8-rs",
- "md-5 0.10.6",
+ "md-5",
  "murmur3",
  "native-tls",
  "objc2",
@@ -7049,7 +7039,7 @@ dependencies = [
  "lofty",
  "lopdf",
  "m3u8-rs",
- "md-5 0.10.6",
+ "md-5",
  "murmur3",
  "ndarray 0.16.1",
  "once_cell",
