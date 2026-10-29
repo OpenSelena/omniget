@@ -96,9 +96,10 @@ Single-context (`GLOSSARY.md` and `docs/adr/`). See `docs/agents/domain.md`.
 
 ---
 
-## Local Overrides
+## Local Overrides & Session Protocol
 
 If present, private developer environment overrides, local notes, or personal tool paths are read from `AGENTS.local.md` (git-ignored).
+All agents and subagents must strictly adhere to the pre-task retrieval and post-task writeback protocols specified in `AGENTS.local.md` before concluding any task.
 
 
 
