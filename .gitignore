@@ -265,8 +265,14 @@ remake/shots/
 !SECURITY.md
 !DESIGN.md
 !.github/**/*.md
+!docs/agents/**/*.md
+!docs/adr/**/*.md
+!GLOSSARY.md
+!GLOSSARY-MAP.md
 
 # Local developer & agent tooling
+AGENTS.local.md
+*.local.md
 /claude-plugin/
 /.agents/
 /.claude/

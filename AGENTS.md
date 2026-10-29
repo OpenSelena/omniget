@@ -78,3 +78,27 @@ Before finishing any task or committing changes:
 - `node scripts/e2e_verify.mjs` : Validates documentation suite routes, links, and accessibility.
 - `pnpm lint:ui <target>` : Required whenever modifying Svelte routes, UI components, stylesheets, `index.html`, or `docs/` — see [.agents/skills/ui-lint/SKILL.md](.agents/skills/ui-lint/SKILL.md).
 
+---
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues at OpenSelena/omniget via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Canonical triage roles (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context (`GLOSSARY.md` and `docs/adr/`). See `docs/agents/domain.md`.
+
+---
+
+## Local Overrides
+
+If present, private developer environment overrides, local notes, or personal tool paths are read from `AGENTS.local.md` (git-ignored).
+
+
+
