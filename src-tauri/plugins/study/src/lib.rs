@@ -1,13 +1,31 @@
+pub mod db;
+
 use omniget_plugin_sdk::{OmnigetPlugin, PluginHost, PluginManifest};
 use std::sync::Arc;
 
 pub struct StudyPlugin {
     host: Option<Arc<dyn PluginHost>>,
+    db: db::StudyDb,
 }
 
 impl StudyPlugin {
     pub fn new() -> Self {
-        Self { host: None }
+        let db = db::StudyDb::open_default().unwrap_or_else(|e| {
+            tracing::warn!(
+                "[study] failed to open default study.db: {}, falling back to in-memory",
+                e
+            );
+            db::StudyDb::open_in_memory().expect("in-memory db must succeed")
+        });
+        Self { host: None, db }
+    }
+
+    pub fn with_db(db: db::StudyDb) -> Self {
+        Self { host: None, db }
+    }
+
+    pub fn db(&self) -> &db::StudyDb {
+        &self.db
     }
 }
 

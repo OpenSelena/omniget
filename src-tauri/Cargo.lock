@@ -7147,6 +7147,7 @@ name = "omniget-plugin-study"
 version = "0.13.0"
 dependencies = [
  "anyhow",
+ "chrono",
  "omniget-core",
  "omniget-plugin-sdk",
  "rusqlite",
@@ -7154,6 +7155,7 @@ dependencies = [
  "serde_json",
  "tokio",
  "tracing",
+ "walkdir",
 ]
 
 [[package]]
