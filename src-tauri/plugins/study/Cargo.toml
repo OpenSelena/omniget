@@ -11,6 +11,10 @@ anyhow = "1"
 tracing = "0.1"
 rusqlite = { version = "0.32", features = ["bundled"] }
 chrono = { version = "0.4", features = ["serde"] }
+dirs = "6"
 walkdir = "2"
 omniget-core = { path = "../../omniget-core", features = ["desktop"] }
 omniget-plugin-sdk = { path = "../../omniget-plugin-sdk" }
+
+[dev-dependencies]
+tempfile = "3"

@@ -7148,11 +7148,13 @@ version = "0.13.0"
 dependencies = [
  "anyhow",
  "chrono",
+ "dirs 6.0.0",
  "omniget-core",
  "omniget-plugin-sdk",
  "rusqlite",
  "serde",
  "serde_json",
+ "tempfile",
  "tokio",
  "tracing",
  "walkdir",

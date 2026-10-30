@@ -1,4 +1,6 @@
+pub mod commands;
 pub mod db;
+pub mod scanner;
 
 use omniget_plugin_sdk::{OmnigetPlugin, PluginHost, PluginManifest};
 use std::sync::Arc;
@@ -65,23 +67,28 @@ impl OmnigetPlugin for StudyPlugin {
     ) -> std::pin::Pin<
         Box<dyn std::future::Future<Output = Result<serde_json::Value, String>> + Send + 'static>,
     > {
-        Box::pin(async move {
-            match command.as_str() {
-                // Catch-all safety dispatcher: prevents UI unhandled exception crashes
-                other => {
-                    tracing::debug!(
-                        "[study] unhandled command fallback: '{}' with args: {:?}",
-                        other,
-                        args
-                    );
-                    Ok(serde_json::json!({}))
-                }
-            }
-        })
+        let db = self.db.clone();
+        Box::pin(async move { commands::dispatch(&db, &command, args).await })
     }
 
     fn commands(&self) -> Vec<String> {
-        vec![]
+        vec![
+            "study:courses:list".to_string(),
+            "study:courses:get".to_string(),
+            "study:courses:scan".to_string(),
+            "study:rescan".to_string(),
+            "study:courses:toggle_favorite".to_string(),
+            "study:courses:recents:touch".to_string(),
+            "study:courses:recents:list".to_string(),
+            "study:lesson:get".to_string(),
+            "study:player:time_changed".to_string(),
+            "study:player:seek".to_string(),
+            "study:player:speed:get".to_string(),
+            "study:player:speed:set".to_string(),
+            "study:progress:mark_lesson".to_string(),
+            "study:progress:mark_lessons_bulk".to_string(),
+            "study:library:telegram:default_output_dir".to_string(),
+        ]
     }
 }
 
@@ -97,5 +104,18 @@ mod tests {
             .await;
         assert!(res.is_ok());
         assert_eq!(res.unwrap(), serde_json::json!({}));
+    }
+
+    #[tokio::test]
+    async fn test_study_plugin_course_flow() {
+        let db = db::StudyDb::open_in_memory().expect("in-memory db");
+        let plugin = StudyPlugin::with_db(db);
+
+        // List initial (empty)
+        let list = plugin
+            .handle_command("study:courses:list".to_string(), serde_json::json!({}))
+            .await
+            .expect("courses:list");
+        assert_eq!(list, serde_json::json!([]));
     }
 }

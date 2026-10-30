@@ -251,6 +251,7 @@ impl StudyDb {
         }
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn upsert_lesson(
         &self,
         course_id: i64,
