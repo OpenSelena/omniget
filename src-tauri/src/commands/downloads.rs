@@ -1712,23 +1712,24 @@ mod tests {
 
     #[test]
     fn test_validate_custom_ytdlp_args_rejects_dangerous_flags() {
-        let dangerous = vec![
-            "--netrc-cmd".to_string(),
-            "--netrc-cmd=whoami".to_string(),
-            "--ffmpeg-location".to_string(),
-            "--ffmpeg-location=/bin/sh".to_string(),
-            "--postprocessor-args".to_string(),
-            "--postprocessor-args='-v'".to_string(),
-            "--ppa".to_string(),
-            "--ppa='-v'".to_string(),
-            "--batch-file".to_string(),
-            "--batch-file=/etc/passwd".to_string(),
-            "-a".to_string(),
-            "-a=/etc/passwd".to_string(),
+        let dangerous = [
+            "--netrc-cmd",
+            "--netrc-cmd=whoami",
+            "--ffmpeg-location",
+            "--ffmpeg-location=/bin/sh",
+            "--postprocessor-args",
+            "--postprocessor-args='-v'",
+            "--ppa",
+            "--ppa='-v'",
+            "--batch-file",
+            "--batch-file=/etc/passwd",
+            "-a",
+            "-a=/etc/passwd",
         ];
         for flag in dangerous {
+            let arg = vec![flag.to_string()];
             assert!(
-                validate_custom_ytdlp_args(&[flag.clone()]).is_err(),
+                validate_custom_ytdlp_args(&arg).is_err(),
                 "Expected flag {flag} to be rejected"
             );
         }
