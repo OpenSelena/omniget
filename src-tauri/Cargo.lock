@@ -6960,6 +6960,7 @@ dependencies = [
  "omniget-plugin-convert",
  "omniget-plugin-courses",
  "omniget-plugin-sdk",
+ "omniget-plugin-study",
  "omniget-plugin-telegram",
  "once_cell",
  "open",
@@ -7139,6 +7140,20 @@ dependencies = [
  "async-trait",
  "serde",
  "serde_json",
+]
+
+[[package]]
+name = "omniget-plugin-study"
+version = "0.13.0"
+dependencies = [
+ "anyhow",
+ "omniget-core",
+ "omniget-plugin-sdk",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
 ]
 
 [[package]]
