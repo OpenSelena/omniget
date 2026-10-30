@@ -482,7 +482,8 @@
     "section_plugins": "Plugins",
     "expand_plugins": "Expand plugins",
     "collapse_plugins": "Collapse plugins",
-    "tools": "Tools"
+    "tools": "Tools",
+    "study": "Study"
   },
   "command_palette": {
     "open": "Search",
@@ -8383,8 +8384,7 @@
     "speed_unit_kb": "KB/s",
     "speed_unit_mb": "MB/s",
     "decimal_separator": "."
-  }
-,
+  },
   "open_nami": {
     "page_title": "Open Nami - Social Media Downloader",
     "sections_aria": "Open Nami sections",
@@ -8460,4 +8460,5 @@
     "cookies_hint": "Cookies are only required for downloading Stories and Highlights.",
     "saving": "Saving...",
     "save_settings": "Save Settings"
-  }}
+  }
+}

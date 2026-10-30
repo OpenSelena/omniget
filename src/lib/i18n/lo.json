@@ -482,7 +482,8 @@
     "section_plugins": "ປລັກອິນ",
     "expand_plugins": "ຂະຫຍາຍປລັກອິນ",
     "collapse_plugins": "ຫຍໍ້ປລັກອິນ",
-    "tools": "ເຄື່ອງມື"
+    "tools": "ເຄື່ອງມື",
+    "study": "ຮຽນ"
   },
   "command_palette": {
     "open": "ຄົ້ນຫາ",
@@ -8459,6 +8460,5 @@
     "speed_unit_kb": "KB/s",
     "speed_unit_mb": "MB/s",
     "decimal_separator": "."
-
   }
 }

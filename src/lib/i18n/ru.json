@@ -482,7 +482,8 @@
     "section_plugins": "Плагины",
     "expand_plugins": "Развернуть плагины",
     "collapse_plugins": "Свернуть плагины",
-    "tools": "Инструменты"
+    "tools": "Инструменты",
+    "study": "Обучение"
   },
   "command_palette": {
     "open": "Поиск",
@@ -8383,8 +8384,7 @@
     "speed_unit_kb": "КБ/с",
     "speed_unit_mb": "МБ/с",
     "decimal_separator": ","
-  }
-,
+  },
   "open_nami": {
     "page_title": "Open Nami — загрузчик из соцсетей",
     "sections_aria": "Разделы Open Nami",
@@ -8460,4 +8460,5 @@
     "cookies_hint": "Cookies требуются только для скачивания историй и актуального.",
     "saving": "Сохранение...",
     "save_settings": "Сохранить настройки"
-  }}
+  }
+}

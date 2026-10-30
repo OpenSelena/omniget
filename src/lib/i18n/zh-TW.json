@@ -482,7 +482,8 @@
     "section_plugins": "Plugins",
     "expand_plugins": "Expand plugins",
     "collapse_plugins": "Collapse plugins",
-    "tools": "Tools"
+    "tools": "Tools",
+    "study": "學習"
   },
   "command_palette": {
     "open": "Search",
@@ -8459,6 +8460,5 @@
     "speed_unit_kb": "KB/s",
     "speed_unit_mb": "MB/s",
     "decimal_separator": "."
-
   }
 }

@@ -971,6 +971,7 @@ export type TranslationKeys =
   | 'nav.section_plugins'
   | 'nav.section_primary'
   | 'nav.settings'
+  | 'nav.study'
   | 'nav.tools'
 
   | 'notifications.badge_aria'

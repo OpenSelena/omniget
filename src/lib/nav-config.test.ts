@@ -2,8 +2,16 @@ import { describe, it, expect } from "vitest";
 import { CORE_NAV_ITEMS } from "./nav-config";
 
 describe("CORE_NAV_ITEMS", () => {
-  it("has the expected 8 core entries", () => {
-    expect(CORE_NAV_ITEMS).toHaveLength(8);
+  it("has the expected 9 core entries", () => {
+    expect(CORE_NAV_ITEMS).toHaveLength(9);
+  });
+
+  it("Study is in primary group with order 26", () => {
+    const study = CORE_NAV_ITEMS.find((i) => i.href === "/study");
+    expect(study?.group).toBe("primary");
+    expect(study?.icon).toBe("study");
+    expect(study?.labelKey).toBe("nav.study");
+    expect(study?.order).toBe(26);
   });
 
   it("Open Nami is in primary group with order 28", () => {

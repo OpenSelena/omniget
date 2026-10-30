@@ -482,7 +482,8 @@
     "section_plugins": "插件",
     "expand_plugins": "展开插件",
     "collapse_plugins": "收起插件",
-    "tools": "Tools"
+    "tools": "Tools",
+    "study": "学习"
   },
   "command_palette": {
     "open": "搜索",
@@ -8459,6 +8460,5 @@
     "speed_unit_kb": "KB/s",
     "speed_unit_mb": "MB/s",
     "decimal_separator": "."
-
   }
 }
