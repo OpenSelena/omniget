@@ -12,6 +12,18 @@ describe("yt-dlp argument security validation", () => {
     expect(isDisallowedYtdlpFlag("--config-location=/tmp/evil.conf")).toBe(true);
     expect(isDisallowedYtdlpFlag("--alias")).toBe(true);
     expect(isDisallowedYtdlpFlag("--print-to-file")).toBe(true);
+    expect(isDisallowedYtdlpFlag("--netrc-cmd")).toBe(true);
+    expect(isDisallowedYtdlpFlag("--netrc-cmd=whoami")).toBe(true);
+    expect(isDisallowedYtdlpFlag("--ffmpeg-location")).toBe(true);
+    expect(isDisallowedYtdlpFlag("--ffmpeg-location=/bin/sh")).toBe(true);
+    expect(isDisallowedYtdlpFlag("--postprocessor-args")).toBe(true);
+    expect(isDisallowedYtdlpFlag("--postprocessor-args='foo'")).toBe(true);
+    expect(isDisallowedYtdlpFlag("--ppa")).toBe(true);
+    expect(isDisallowedYtdlpFlag("--ppa='foo'")).toBe(true);
+    expect(isDisallowedYtdlpFlag("--batch-file")).toBe(true);
+    expect(isDisallowedYtdlpFlag("--batch-file=/etc/passwd")).toBe(true);
+    expect(isDisallowedYtdlpFlag("-a")).toBe(true);
+    expect(isDisallowedYtdlpFlag("-a=/etc/passwd")).toBe(true);
   });
 
   it("permits safe download arguments", () => {

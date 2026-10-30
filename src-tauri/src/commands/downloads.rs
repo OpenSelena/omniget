@@ -1043,6 +1043,12 @@ fn validate_custom_ytdlp_args(args: &[String]) -> Result<(), String> {
                 | "--config-location"
                 | "--alias"
                 | "--print-to-file"
+                | "--netrc-cmd"
+                | "--ffmpeg-location"
+                | "--postprocessor-args"
+                | "--ppa"
+                | "--batch-file"
+                | "-a"
         ) {
             return Err(format!("Disallowed yt-dlp argument for security: {name}"));
         }
@@ -1569,8 +1575,9 @@ pub async fn reveal_file(path: String) -> Result<(), String> {
     #[cfg(target_os = "windows")]
     {
         use std::os::windows::process::CommandExt;
+        let sanitized = sanitize_explorer_path(&path);
         std::process::Command::new("explorer")
-            .raw_arg(format!("/select,\"{}\"", path))
+            .raw_arg(format!("/select,\"{}\"", sanitized))
             .spawn()
             .map_err(|e| e.to_string())?;
     }
@@ -1692,4 +1699,54 @@ pub async fn reveal_file(path: String) -> Result<(), String> {
 #[tauri::command]
 pub async fn open_path_default(path: String) -> Result<(), String> {
     open::that_detached(&path).map_err(|e| e.to_string())
+}
+
+pub fn sanitize_explorer_path(path: &str) -> String {
+    let without_quotes = path.replace('"', "");
+    without_quotes.trim_end_matches('\\').to_string()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_validate_custom_ytdlp_args_rejects_dangerous_flags() {
+        let dangerous = vec![
+            "--netrc-cmd".to_string(),
+            "--netrc-cmd=whoami".to_string(),
+            "--ffmpeg-location".to_string(),
+            "--ffmpeg-location=/bin/sh".to_string(),
+            "--postprocessor-args".to_string(),
+            "--postprocessor-args='-v'".to_string(),
+            "--ppa".to_string(),
+            "--ppa='-v'".to_string(),
+            "--batch-file".to_string(),
+            "--batch-file=/etc/passwd".to_string(),
+            "-a".to_string(),
+            "-a=/etc/passwd".to_string(),
+        ];
+        for flag in dangerous {
+            assert!(
+                validate_custom_ytdlp_args(&[flag.clone()]).is_err(),
+                "Expected flag {flag} to be rejected"
+            );
+        }
+    }
+
+    #[test]
+    fn test_sanitize_explorer_path_strips_quotes_and_trailing_slashes() {
+        assert_eq!(
+            sanitize_explorer_path(r#"C:\downloads\"malicious" /select"#),
+            r#"C:\downloads\malicious /select"#
+        );
+        assert_eq!(
+            sanitize_explorer_path(r#"C:\downloads\video.mp4\"#),
+            r#"C:\downloads\video.mp4"#
+        );
+        assert_eq!(
+            sanitize_explorer_path(r#"C:\downloads\normal_video.mp4"#),
+            r#"C:\downloads\normal_video.mp4"#
+        );
+    }
 }

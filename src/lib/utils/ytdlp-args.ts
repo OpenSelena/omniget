@@ -9,6 +9,12 @@ const DISALLOWED_FLAGS = new Set([
   "--config-location",
   "--alias",
   "--print-to-file",
+  "--netrc-cmd",
+  "--ffmpeg-location",
+  "--postprocessor-args",
+  "--ppa",
+  "--batch-file",
+  "-a",
 ]);
 
 export function isDisallowedYtdlpFlag(flag: string): boolean {
