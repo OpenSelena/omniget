@@ -1415,7 +1415,7 @@
           <li>
             <a href="../courses/" class="sidebar-link">
               <span>36 Course Platforms</span>
-              <span class="sidebar-tag">v0.13.0</span>
+              <span class="sidebar-tag">v0.14.0</span>
             </a>
           </li>
         </ul>
@@ -1502,12 +1502,89 @@
         Release notes, feature changes, and system patches for OmniGet. All desktop releases are signed, reproducible, and published with SHA-256 binary validation.
       </p>
 
+            <!-- v0.14.0 Release -->
+      <article class="release-box" id="v0-14-0">
+        <div class="release-header">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="release-tag-pill">v0.14.0 Stable</span>
+              <span class="release-date">Released October 2026</span>
+            </div>
+            <h2 class="release-title">Offline Study Module, BitTorrent Telemetry &amp; Course Platform Upgrades</h2>
+          </div>
+          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.14.0" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+            <span>GitHub Tag</span>
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+
+        <div class="release-section">
+          <h3 class="release-section-title">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+            Offline Study Module (omniget-plugin-study)
+          </h3>
+          <ul class="release-list">
+            <li>Introduced the native offline study plugin backed by local SQLite storage for structured learning.</li>
+            <li>Automatic course filesystem scanning and metadata indexing across downloaded curricula.</li>
+            <li>Per-lesson completion progress tracking with durable local database state.</li>
+            <li>Feature-flag controlled frontend views for course navigation and curriculum inspection.</li>
+          </ul>
+        </div>
+
+        <div class="release-section">
+          <h3 class="release-section-title">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            BitTorrent 99% Completion Stall Fix &amp; Telemetry
+          </h3>
+          <ul class="release-list">
+            <li>Fixed BitTorrent downloads hanging indefinitely at 99% during final piece verification and hash checking.</li>
+            <li>Enforced deterministic endgame completion transition to 100% once all verified blocks finish writing.</li>
+            <li>Added dynamic download speed reporting (bps / MB/s) to the torrent progress bar.</li>
+            <li>Added real-time remaining bytes and pending data counters to the torrent telemetry UI.</li>
+          </ul>
+        </div>
+
+        <div class="release-section">
+          <h3 class="release-section-title">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+            Course Platform Extractor Upgrades (Skool &amp; Udemy)
+          </h3>
+          <ul class="release-list">
+            <li>Fixed Skool course lesson extraction failing due to Next.js build ID mismatches and route token changes (#94).</li>
+            <li>Handled empty courses and zero-item module structures gracefully in the Udemy platform extractor (#72).</li>
+            <li>Hardened yt-dlp parameter construction against CLI argument injection vulnerabilities.</li>
+          </ul>
+        </div>
+
+        <div class="release-section">
+          <h3 class="release-section-title">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            System Tray &amp; Open Nami Localization
+          </h3>
+          <ul class="release-list">
+            <li>Added full localization for Open Nami across all supported locale dictionaries (#71).</li>
+            <li>Added system tray context menu translation support and fixed tray tooltip string formatting (#70).</li>
+          </ul>
+        </div>
+
+        <div class="release-section">
+          <h3 class="release-section-title">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Dependency Updates &amp; Toolchain
+          </h3>
+          <ul class="release-list">
+            <li>Upgraded TypeScript to 5.9.3, hls.js to 1.7.3, and Tauri plugins to latest stable releases.</li>
+            <li>Resolved all unit and end-to-end documentation test suites with 100% pass rate.</li>
+          </ul>
+        </div>
+      </article>
+
       <!-- v0.13.0 Release -->
       <article class="release-box" id="v0-13-0">
         <div class="release-header">
           <div>
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span class="release-tag-pill">v0.13.0 Stable</span>
+              <span class="sidebar-tag">v0.13.0</span>
               <span class="release-date">Released October 2026</span>
             </div>
             <h2 class="release-title">YouTube Stream Muxing, FFmpeg Auto-Download &amp; MosCat Navigation</h2>
@@ -1971,7 +2048,8 @@
         <span>On this page</span>
       </div>
       <ul class="toc-list" id="tocList">
-        <li><a href="#v0-13-0" class="toc-link">v0.13.0 (Latest Stable)</a></li>
+        <li><a href="#v0-14-0" class="toc-link">v0.14.0 (Latest Stable)</a></li>
+        <li><a href="#v0-13-0" class="toc-link">v0.13.0</a></li>
         <li><a href="#v0-12-2" class="toc-link">v0.12.2</a></li>
         <li><a href="#v0-12-1" class="toc-link">v0.12.1</a></li>
         <li><a href="#v0-12-0" class="toc-link">v0.12.0</a></li>
@@ -2036,7 +2114,7 @@
         </li>
         <li class="search-result-item" onclick="location.href='../changelog/'">
           <span class="search-result-title">Release Notes &amp; Changelog</span>
-          <span class="search-result-desc">Version v0.13.0 updates, YouTube stream muxing, FFmpeg auto-download, Settings headers, MosCat navigation</span>
+          <span class="search-result-desc">Version v0.14.0 updates, Offline Study module, BitTorrent speed &amp; remaining telemetry, Skool &amp; Udemy fixes</span>
         </li>
       </ul>
     </div>
