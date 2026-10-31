@@ -74,10 +74,7 @@ pub fn build_client(cookie_token: &str) -> anyhow::Result<reqwest::Client> {
         format!("auth_token={}; skooltok={}", trimmed, trimmed)
     };
 
-    headers.insert(
-        "Cookie",
-        HeaderValue::from_str(&cookie_header)?,
-    );
+    headers.insert("Cookie", HeaderValue::from_str(&cookie_header)?);
     headers.insert("Accept", HeaderValue::from_static("application/json"));
     headers.insert(
         "Referer",
@@ -166,7 +163,9 @@ pub async fn authenticate(email: &str, password: &str) -> anyhow::Result<SkoolSe
     }
 
     if cookie_token.is_empty() {
-        return Err(anyhow!("No auth_token or skooltok cookie in login response"));
+        return Err(anyhow!(
+            "No auth_token or skooltok cookie in login response"
+        ));
     }
 
     let client = build_client(&cookie_token)?;
@@ -706,7 +705,10 @@ mod tests {
             lessons[0].detail.video_url.as_deref(),
             Some("https://www.youtube.com/watch?v=dQw4w9WgXcQ")
         );
-        assert_eq!(lessons[0].detail.description.as_deref(), Some("<p>Intro text</p>"));
+        assert_eq!(
+            lessons[0].detail.description.as_deref(),
+            Some("<p>Intro text</p>")
+        );
         assert_eq!(lessons[0].detail.files.len(), 1);
         assert_eq!(lessons[0].detail.files[0].name, "cheatsheet.pdf");
 

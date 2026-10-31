@@ -65,8 +65,8 @@ pub async fn skool_login_token(
         token.trim().to_string()
     };
 
-    let client = api::build_client(&cookie_val)
-        .map_err(|e| format!("Failed to build client: {}", e))?;
+    let client =
+        api::build_client(&cookie_val).map_err(|e| format!("Failed to build client: {}", e))?;
 
     let build_id = api::fetch_build_id(&client)
         .await
