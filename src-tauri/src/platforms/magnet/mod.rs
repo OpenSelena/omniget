@@ -243,19 +243,69 @@ impl PlatformDownloader for MagnetDownloader {
 
                     if total > 0 {
                         let pct = (downloaded as f64 / total as f64) * 100.0;
-                        let _ = progress.send(ProgressUpdate::percent(pct)).await;
+                        let speed_bps = stats
+                            .live
+                            .as_ref()
+                            .map(|l| l.download_speed.mbps * 1_048_576.0);
+                        let eta_seconds = speed_bps.and_then(|bps| {
+                            if bps > 1024.0 && total > downloaded {
+                                Some(((total - downloaded) as f64 / bps) as u64)
+                            } else {
+                                None
+                            }
+                        });
+
+                        let _ = progress
+                            .send(ProgressUpdate::rich(
+                                pct,
+                                Some(downloaded),
+                                Some(total),
+                                speed_bps,
+                                eta_seconds,
+                            ))
+                            .await;
                         tracing::debug!(
-                            "[magnet] progress: {:.1}% ({:.1} MB / {:.1} MB)",
+                            "[magnet] progress: {:.1}% ({:.1} MB / {:.1} MB, speed={:.1} KB/s)",
                             pct,
                             downloaded as f64 / 1_048_576.0,
                             total as f64 / 1_048_576.0,
+                            speed_bps.unwrap_or(0.0) / 1024.0,
                         );
-                        // Fallback: detect completion from stats when
-                        // wait_until_completed() doesn't resolve
-                        if downloaded >= total {
-                            tracing::info!("[magnet] download complete from stats (id={})", torrent_id);
+
+                        if stats.finished || downloaded >= total {
+                            tracing::info!(
+                                "[magnet] download complete from stats (id={}, finished={}, downloaded={}/{})",
+                                torrent_id,
+                                stats.finished,
+                                downloaded,
+                                total
+                            );
+                            let _ = progress
+                                .send(ProgressUpdate::rich(
+                                    100.0,
+                                    Some(total),
+                                    Some(total),
+                                    Some(0.0),
+                                    Some(0),
+                                ))
+                                .await;
                             break;
                         }
+                    } else if stats.finished {
+                        tracing::info!(
+                            "[magnet] download complete from stats with total=0 (id={})",
+                            torrent_id
+                        );
+                        let _ = progress
+                            .send(ProgressUpdate::rich(
+                                100.0,
+                                Some(downloaded),
+                                Some(downloaded),
+                                Some(0.0),
+                                Some(0),
+                            ))
+                            .await;
+                        break;
                     }
                 }
                 _ = cancel_rx.cancelled() => {
@@ -269,7 +319,21 @@ impl PlatformDownloader for MagnetDownloader {
                     if let Err(e) = res {
                         anyhow::bail!("Torrent download failed: {}", e);
                     }
-                    let _ = progress.send(ProgressUpdate::percent(100.0)).await;
+                    let stats = managed_torrent.stats();
+                    let final_bytes = if stats.total_bytes > 0 {
+                        stats.total_bytes
+                    } else {
+                        stats.progress_bytes
+                    };
+                    let _ = progress
+                        .send(ProgressUpdate::rich(
+                            100.0,
+                            Some(final_bytes),
+                            Some(final_bytes),
+                            Some(0.0),
+                            Some(0),
+                        ))
+                        .await;
                     tracing::info!("[magnet] download complete (id={})", torrent_id);
                     break;
                 }
