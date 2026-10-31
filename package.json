@@ -21,6 +21,8 @@
     "lint:ui:update": "node scripts/lint-ui.mjs --update",
     "plugins:deploy": "node scripts/deploy-plugins-local.mjs",
     "extension:sync": "node browser-extension/sync.mjs",
+    "clean:cargo": "cargo sweep -t 3 -r src-tauri",
+    "clean:cargo:all": "cargo sweep -s -r src-tauri",
     "test": "vitest run",
     "test:watch": "vitest"
   },
