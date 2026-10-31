@@ -40,7 +40,7 @@ linux-capture = ["omnidisc-media/linux-capture"]
 tauri = { version = "2", features = ["protocol-asset", "tray-icon", "macos-private-api"] }
 tauri-plugin-shell = "2"
 tauri-plugin-store = "2"
-tauri-plugin-dialog = "2"
+tauri-plugin-dialog = "2.8"
 tauri-plugin-notification = "2"
 tauri-plugin-fs = "2"
 tokio = { version = "1", features = ["full"] }
@@ -123,10 +123,10 @@ block2 = "0.6"
 webkit2gtk = { version = "=2.0.2", features = ["v2_38"] }
 
 [target.'cfg(any(target_os = "macos", windows, target_os = "linux"))'.dependencies]
-tauri-plugin-process = "2.3.1"
+tauri-plugin-process = "2.4"
 tauri-plugin-updater = "2.10.0"
 tauri-plugin-global-shortcut = "2"
-tauri-plugin-clipboard-manager = "2"
+tauri-plugin-clipboard-manager = "2.5"
 tauri-plugin-single-instance = "2"
 tauri-plugin-deep-link = "2"
 tauri-plugin-autostart = "2"
