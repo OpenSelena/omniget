@@ -71,9 +71,15 @@ Welcome to OmniGet. This file serves as the definitive reference and operating m
 
 ---
 
-## 3. Verification & Quality Gates
+## 3. Branch Strategy & Quality Gates
 
-Before finishing any task or committing changes:
+### Branch Workflow
+- **`dev` (Development & Staging)**: All feature development, refactoring, and bug fixes must be committed and pushed to `dev` first.
+- **Continuous Integration (CI) Gate**: Pushing to `dev` automatically triggers GitHub Actions (`.github/workflows/ci.yml`) to test across Linux, Windows, and macOS.
+- **`main` (Production / Stable)**: Code is never pushed directly to `main`. The `dev` branch is only merged into `main` after all GitHub Actions CI checks have completed with a green checkmark (100% passing).
+
+### Local Pre-Commit Verification
+Before pushing to `dev`:
 - `pnpm test` : Runs full Vitest suite (must pass 100%).
 - `node scripts/e2e_verify.mjs` : Validates documentation suite routes, links, and accessibility.
 - `pnpm lint:ui <target>` : Required whenever modifying Svelte routes, UI components, stylesheets, `index.html`, or `docs/` — see [.agents/skills/ui-lint/SKILL.md](.agents/skills/ui-lint/SKILL.md).
