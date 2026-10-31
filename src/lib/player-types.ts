@@ -96,3 +96,23 @@ export type SponsorBlockSegment = {
   uuid: string;
   votes: number;
 };
+
+export type SeekHeatmap = {
+  buckets: number[];
+  bucket_secs: number;
+  total_seeks: number;
+  duration_ms: number;
+};
+
+export async function studyPlayerSeekHeatmap(args: {
+  lessonId: number;
+  bucketSecs: number;
+}): Promise<SeekHeatmap> {
+  return {
+    buckets: [],
+    bucket_secs: args.bucketSecs,
+    total_seeks: 0,
+    duration_ms: 0,
+  };
+}
+
