@@ -94,7 +94,13 @@ pub async fn download_full_course(
             let lesson_dir = format!("{}/{}. {}", mod_dir, li + 1, lesson_name);
             tokio::fs::create_dir_all(&lesson_dir).await?;
 
-            let detail =
+            let detail = if !lesson.detail.id.is_empty()
+                || lesson.detail.video_url.is_some()
+                || !lesson.detail.files.is_empty()
+                || lesson.detail.description.is_some()
+            {
+                lesson.detail.clone()
+            } else {
                 match api::get_lesson_detail(session, &group.slug, &module.id, &lesson.id, &[])
                     .await
                 {
@@ -123,7 +129,8 @@ pub async fn download_full_course(
                         );
                         continue;
                     }
-                };
+                }
+            };
 
             if let Some(ref desc) = detail.description {
                 omniget_core::core::course_utils::save_description(&lesson_dir, desc, "html")

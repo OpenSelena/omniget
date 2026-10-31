@@ -54,28 +54,26 @@ pub async fn skool_login_token(
     *state.skool_session_validated_at.lock().await = None;
     *state.skool_courses_cache.lock().await = None;
 
-    let parsed = omniget_core::core::cookie_parser::parse_cookie_input(&token, "skooltok");
+    let mut parsed = omniget_core::core::cookie_parser::parse_cookie_input(&token, "auth_token");
+    if parsed.token.is_empty() {
+        parsed = omniget_core::core::cookie_parser::parse_cookie_input(&token, "skooltok");
+    }
 
-    let client = omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
-        .user_agent(
-            "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0",
-        )
-        .default_headers({
-            let mut h = reqwest::header::HeaderMap::new();
-            h.insert("Cookie", parsed.cookie_string.parse().unwrap());
-            h.insert("Accept", "application/json".parse().unwrap());
-            h.insert("Referer", "https://www.skool.com/".parse().unwrap());
-            h
-        })
-        .connect_timeout(Duration::from_secs(30))
-        .timeout(Duration::from_secs(120))
-        .build()
+    let cookie_val = if !parsed.token.is_empty() {
+        parsed.token
+    } else {
+        token.trim().to_string()
+    };
+
+    let client = api::build_client(&cookie_val)
         .map_err(|e| format!("Failed to build client: {}", e))?;
 
-    let build_id = String::new();
+    let build_id = api::fetch_build_id(&client)
+        .await
+        .map_err(|e| format!("Failed to fetch Skool build_id: {}", e))?;
 
     let session = SkoolSession {
-        cookie_token: parsed.token,
+        cookie_token: cookie_val,
         build_id,
         client,
     };
