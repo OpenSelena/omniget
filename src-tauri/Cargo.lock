@@ -6906,7 +6906,6 @@ dependencies = [
  "omniget-plugin-convert",
  "omniget-plugin-courses",
  "omniget-plugin-sdk",
- "omniget-plugin-study",
  "omniget-plugin-telegram",
  "once_cell",
  "open",
@@ -7086,24 +7085,6 @@ dependencies = [
  "async-trait",
  "serde",
  "serde_json",
-]
-
-[[package]]
-name = "omniget-plugin-study"
-version = "0.13.0"
-dependencies = [
- "anyhow",
- "chrono",
- "dirs 6.0.0",
- "omniget-core",
- "omniget-plugin-sdk",
- "rusqlite",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
- "tracing",
- "walkdir",
 ]
 
 [[package]]

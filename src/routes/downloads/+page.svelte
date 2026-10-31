@@ -20,7 +20,7 @@
   } from "$lib/stores/download-store.svelte";
   import { getDownloadStats } from "$lib/stores/download-stats.svelte";
   import PlatformIcon from "$components/icons/PlatformIcon.svelte";
-  import QueueKindBadge from "$lib/study-components/QueueKindBadge.svelte";
+  import QueueKindBadge from "$components/common/QueueKindBadge.svelte";
   import Mascot from "$components/mascot/Mascot.svelte";
   import RootCauseHint from "$components/downloads/RootCauseHint.svelte";
   import DownloadSpeedGraph from "$components/download/DownloadSpeedGraph.svelte";
@@ -36,22 +36,7 @@
   import { get } from "svelte/store";
   import timeAgo from "$lib/time-ago";
 
-  let studyAvailable = $state(false);
 
-  onMount(async () => {
-    try {
-      const plugins = await invoke<{
-        id: string;
-        enabled: boolean;
-        loaded: boolean;
-      }[]>("list_plugins");
-      studyAvailable = plugins.some(
-        (p) => p.id === "study" && p.enabled && p.loaded,
-      );
-    } catch {
-      studyAvailable = false;
-    }
-  });
 
   const VIDEO_EXTENSIONS = new Set([
     "mp4", "mkv", "webm", "mov", "avi", "ts", "m4v", "flv", "wmv", "mpg", "mpeg", "3gp", "ogv", "m2ts", "mts",
@@ -153,21 +138,7 @@
     return $t('downloads.detail.elapsed', { time }) as string;
   }
 
-  function canOpenInStudy(item: GenericDownloadItem): boolean {
-    return (
-      studyAvailable &&
-      item.status === "complete" &&
-      !!item.filePath &&
-      (item.queueKind === "video" || item.queueKind === "audio")
-    );
-  }
 
-  function openInStudy(filePath: string) {
-    const parts = filePath.replace(/\\/g, "/").split("/");
-    const name = parts[parts.length - 1] ?? "";
-    const url = `/study/watch?path=${encodeURIComponent(filePath)}&name=${encodeURIComponent(name)}`;
-    goto(url);
-  }
 
   let downloads = $derived(getDownloads());
   let courseList = $derived(
@@ -485,21 +456,7 @@
     return timeAgo(ms, lookup);
   }
 
-  function canPlayInStudyHistory(entry: HistoryEntry): boolean {
-    return (
-      studyAvailable &&
-      entry.success &&
-      !!entry.file_path &&
-      (entry.kind === "video" || entry.kind === "audio")
-    );
-  }
 
-  function openHistoryInStudy(filePath: string) {
-    const parts = filePath.replace(/\\/g, "/").split("/");
-    const name = parts[parts.length - 1] ?? "";
-    const url = `/study/watch?path=${encodeURIComponent(filePath)}&name=${encodeURIComponent(name)}`;
-    goto(url);
-  }
 
   let dragId = $state<number | null>(null);
   let dropTargetId = $state<number | null>(null);
@@ -742,19 +699,7 @@
                   {/if}
                 </div>
                 <div class="history-item-actions">
-                  {#if canPlayInStudyHistory(entry) && entry.file_path}
-                    <button
-                      class="action-icon-btn"
-                      onclick={() => openHistoryInStudy(entry.file_path!)}
-                      aria-label={$t('downloads.open_in_study')}
-                      title={$t('downloads.open_in_study')}
-                    >
-                      <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10" />
-                        <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none" />
-                      </svg>
-                    </button>
-                  {/if}
+
                   {#if entry.success && entry.file_path}
                     <button
                       class="action-icon-btn"
@@ -945,19 +890,7 @@
                 {/if}
               </button>
             {:else if item.status === "complete" && item.filePath}
-              {#if canOpenInStudy(item)}
-                <button
-                  class="action-icon-btn"
-                  onclick={() => openInStudy(item.filePath!)}
-                  aria-label={$t('downloads.open_in_study')}
-                  title={$t('downloads.open_in_study')}
-                >
-                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <circle cx="12" cy="12" r="10" />
-                    <polygon points="10 8 16 12 10 16 10 8" fill="currentColor" stroke="none" />
-                  </svg>
-                </button>
-              {/if}
+
               <button
                 class="action-icon-btn"
                 onclick={() => revealFile(item.filePath!)}

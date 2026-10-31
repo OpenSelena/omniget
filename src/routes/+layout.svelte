@@ -41,12 +41,6 @@
   import { get } from "svelte/store";
   import { CORE_NAV_ITEMS, pluginIconForRoute, type NavItem } from "$lib/nav-config";
   import { TOOLS, toolHref } from "$lib/tools/catalog";
-  import {
-    STUDY_FOCUS_ENABLED,
-    STUDY_PROGRESS_ENABLED,
-    STUDY_ACHIEVEMENTS_ENABLED,
-    STUDY_NOTES_ENABLED,
-  } from "$lib/study-feature-flags";
   import type { Snippet } from "svelte";
   import type { Component } from "svelte";
 
@@ -80,7 +74,6 @@
   let chatBadgeCount = $derived(getChatMentionCount() || getChatUnreadCount());
   let settings = $derived(getSettings());
 
-  let isStudyRoute = $derived(page.url.pathname.startsWith("/study"));
   let isStreamPopout = $derived(page.url.pathname === "/omnidisc/stream");
   let hideAppSidebar = $derived(page.url.pathname.startsWith("/omnidisc") && isImmersive());
   let isCoreRoute = $derived(
@@ -130,10 +123,6 @@
         for (const p of plugins) {
           if (!p.enabled) continue;
           for (const n of p.nav) {
-            if (n.route === "/study/focus" && !STUDY_FOCUS_ENABLED) continue;
-            if (n.route === "/study/progress" && !STUDY_PROGRESS_ENABLED) continue;
-            if (n.route === "/study/achievements" && !STUDY_ACHIEVEMENTS_ENABLED) continue;
-            if (n.route === "/study/notes" && !STUDY_NOTES_ENABLED) continue;
             const icon = pluginIconForRoute(n.route);
             items.push({
               href: n.route,
@@ -343,7 +332,7 @@
 
   let { children }: { children: Snippet } = $props();
 
-  const VACUUM_LAST_RUN_KEY = "study.library.auto_vacuum.last_run";
+  const VACUUM_LAST_RUN_KEY = "omniget.library.auto_vacuum.last_run";
 
   async function checkAutoVacuum() {
     try {
@@ -433,11 +422,7 @@
 
     <main id="main-content" class="content">
       <div class="mac-pane" class:mac-pane--flush={isFlushRoute}>
-        {#if isStudyRoute}
-          <div class="study-shell">
-            {@render children()}
-          </div>
-        {:else if isCoreRoute}
+        {#if isCoreRoute}
           <div class="core-shell" class:core-shell--flush={isFlushRoute}>
             {@render children()}
           </div>
@@ -528,13 +513,7 @@
     overflow: hidden;
   }
 
-  .study-shell {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 0;
-    overflow: hidden;
-  }
+
 
   .stream-popout {
     width: 100vw;

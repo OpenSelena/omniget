@@ -20,10 +20,7 @@
     if (path.startsWith("/courses")) return $t("courses.title");
     if (path.startsWith("/convert")) return $t("convert.title");
     if (path.startsWith("/telegram")) return $t("telegram.title");
-    if (path.startsWith("/study/music")) return $t("study.hub.music");
-    if (path.startsWith("/study")) return $t("study.hub.title");
     if (path.startsWith("/misc/file-clip")) return $t("tools.catalog.video-clip.name");
-    if (path.includes("/library")) return $t("study.hub.library");
     return "";
   });
 </script>

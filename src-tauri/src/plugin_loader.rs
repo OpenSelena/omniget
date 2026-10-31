@@ -274,7 +274,7 @@ impl PluginManager {
 /// componente relativo e id vazio.
 ///
 /// Allowlist e nao blocklist de proposito: o conjunto de ids reais e pequeno e
-/// conhecido (`courses`, `study`, `telegram`, `convert`, `misc`), e uma
+/// conhecido (`courses`, `telegram`, `convert`, `misc`), e uma
 /// blocklist erra por omissao a cada codificacao nova.
 pub fn validate_plugin_id(plugin_id: &str) -> anyhow::Result<()> {
     if plugin_id.is_empty() {
@@ -632,7 +632,6 @@ mod plugin_id_tests {
     fn aceita_os_ids_reais() {
         for id in [
             "courses",
-            "study",
             "telegram",
             "convert",
             "my-plugin_2",

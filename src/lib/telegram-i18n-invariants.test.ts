@@ -34,13 +34,13 @@ const BANNED_HARDCODED_PORTUGUESE_STRINGS = [
 ];
 
 const TELEGRAM_COMPONENTS = [
-  "src/lib/study-components/TelegramPerfPanel.svelte",
-  "src/lib/study-components/TelegramSyncIndicator.svelte",
-  "src/lib/study-components/TelegramAccountPanel.svelte",
-  "src/lib/study-components/TelegramTransferPanel.svelte",
-  "src/lib/study-components/TelegramChannelDrawer.svelte",
-  "src/lib/study-components/TelegramCloneWizard.svelte",
-  "src/lib/study-components/TelegramGlobalSearchModal.svelte",
+  "src/lib/telegram-components/TelegramPerfPanel.svelte",
+  "src/lib/telegram-components/TelegramSyncIndicator.svelte",
+  "src/lib/telegram-components/TelegramAccountPanel.svelte",
+  "src/lib/telegram-components/TelegramTransferPanel.svelte",
+  "src/lib/telegram-components/TelegramChannelDrawer.svelte",
+  "src/lib/telegram-components/TelegramCloneWizard.svelte",
+  "src/lib/telegram-components/TelegramGlobalSearchModal.svelte",
   "src/routes/telegram/+page.svelte",
 ];
 

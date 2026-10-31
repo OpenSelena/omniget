@@ -762,11 +762,6 @@ pub fn run() {
                                 ),
                                 std::sync::Arc::clone(&host),
                             );
-                            let _ = mgr.register_builtin(
-                                omniget_plugin_study::manifest(),
-                                Box::new(omniget_plugin_study::StudyPlugin::new()),
-                                std::sync::Arc::clone(&host),
-                            );
                             mgr.load_all(std::sync::Arc::clone(&host));
                         }
                         let _ = app_emit.emit("plugins-changed", ());

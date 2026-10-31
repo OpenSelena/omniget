@@ -38,7 +38,7 @@
   import { t } from "$lib/i18n";
   import { translateBackendError } from "$lib/error-translate";
   import { platformDisplayName } from "$lib/platform-display-names";
-  import { STUDY_MAINTENANCE_NOTICE } from "$lib/study-feature-flags";
+
 
   type DownloadStarted = {
     id: number;
@@ -114,15 +114,7 @@
   let selectedCookieSlug = $state<string | null>(null);
   let cookieHint = $state<"stale" | "expired" | null>(null);
   let advancedMode = $state(false);
-  const STUDY_NOTICE_DISMISS_KEY = "omniget.study_maintenance_notice_dismissed_v1";
-  let studyNoticeDismissed = $state(
-    typeof localStorage !== "undefined"
-      && localStorage.getItem(STUDY_NOTICE_DISMISS_KEY) === "1"
-  );
-  function dismissStudyNotice() {
-    studyNoticeDismissed = true;
-    try { localStorage.setItem(STUDY_NOTICE_DISMISS_KEY, "1"); } catch {}
-  }
+
   let mediaPreview = $derived(getMediaPreview());
   let dlStats = $derived(getDownloadStats());
   let coursesPluginInstalled = $state<boolean | null>(null);
@@ -964,24 +956,7 @@
 </script>
 
 <div class="home-mac" class:home-mac--stage={isStage}>
-  {#if STUDY_MAINTENANCE_NOTICE && !studyNoticeDismissed}
-    <div class="study-maintenance-banner" role="status">
-      <div class="study-maintenance-text">
-        <strong>{$t("study.maintenance.home_banner_title")}</strong>
-        <span>{$t("study.maintenance.home_banner_body")}</span>
-      </div>
-      <button
-        type="button"
-        class="study-maintenance-dismiss"
-        onclick={dismissStudyNotice}
-        aria-label={$t('common.close')}
-      >
-        <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M18 6L6 18M6 6l12 12" />
-        </svg>
-      </button>
-    </div>
-  {/if}
+
 
   {#if isStage}
     <div class="home-stage">
@@ -1312,60 +1287,7 @@
     width: 100%;
   }
 
-  .study-maintenance-banner {
-    display: flex;
-    align-items: center;
-    gap: var(--space-3);
-    width: 100%;
-    max-width: 640px;
-    margin: var(--space-3) auto 0;
-    padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
-    background: color-mix(in srgb, var(--warning) 9%, transparent);
-    box-shadow: inset 0 0 0 var(--hairline) color-mix(in srgb, var(--warning) 22%, transparent);
-    border-radius: var(--radius-lg);
-    color: var(--text-muted);
-    font-size: var(--text-sm);
-    line-height: 1.4;
-  }
 
-  .study-maintenance-text {
-    display: flex;
-    flex-direction: column;
-    gap: 1px;
-    flex: 1;
-    min-width: 0;
-  }
-
-  .study-maintenance-text strong {
-    font-weight: 600;
-    font-size: var(--text-sm);
-    color: var(--text);
-  }
-
-  .study-maintenance-text span {
-    color: var(--text-dim);
-    font-size: var(--text-sm);
-  }
-
-  .study-maintenance-dismiss {
-    background: transparent;
-    border: none;
-    width: 24px;
-    height: 24px;
-    border-radius: var(--radius-sm);
-    color: var(--text-dim);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    transition: background var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
-  }
-
-  .study-maintenance-dismiss:hover {
-    color: var(--text);
-    background: var(--fill-2);
-  }
 
   .batch-options {
     display: flex;

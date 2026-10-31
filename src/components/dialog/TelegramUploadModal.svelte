@@ -11,7 +11,7 @@
     type TelegramSendAsMode,
     type TelegramChat,
     telegramGetChats,
-  } from "$lib/study-telegram-bridge";
+  } from "$lib/telegram-bridge";
   import { onMount } from "svelte";
 
   let {

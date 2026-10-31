@@ -7,14 +7,14 @@
   import { getSettings } from "$lib/stores/settings-store.svelte";
   import { onBatchFileStatus, type BatchFileStatusPayload } from "$lib/stores/download-listener";
   import ContextHint from "$components/hints/ContextHint.svelte";
-  import TelegramChannelDrawer from "$lib/study-components/TelegramChannelDrawer.svelte";
-  import TelegramPerfPanel from "$lib/study-components/TelegramPerfPanel.svelte";
-  import TelegramGlobalSearchModal from "$lib/study-components/TelegramGlobalSearchModal.svelte";
-  import TelegramTransferPanel from "$lib/study-components/TelegramTransferPanel.svelte";
-  import TelegramCloneWizard from "$lib/study-components/TelegramCloneWizard.svelte";
-  import TelegramAccountPanel from "$lib/study-components/TelegramAccountPanel.svelte";
-  import TelegramSyncIndicator from "$lib/study-components/TelegramSyncIndicator.svelte";
-  import { telegramCreateFolder, isOmnigetFolder, type TelegramGlobalSearchHit } from "$lib/study-telegram-bridge";
+  import TelegramChannelDrawer from "$lib/telegram-components/TelegramChannelDrawer.svelte";
+  import TelegramPerfPanel from "$lib/telegram-components/TelegramPerfPanel.svelte";
+  import TelegramGlobalSearchModal from "$lib/telegram-components/TelegramGlobalSearchModal.svelte";
+  import TelegramTransferPanel from "$lib/telegram-components/TelegramTransferPanel.svelte";
+  import TelegramCloneWizard from "$lib/telegram-components/TelegramCloneWizard.svelte";
+  import TelegramAccountPanel from "$lib/telegram-components/TelegramAccountPanel.svelte";
+  import TelegramSyncIndicator from "$lib/telegram-components/TelegramSyncIndicator.svelte";
+  import { telegramCreateFolder, isOmnigetFolder, type TelegramGlobalSearchHit } from "$lib/telegram-bridge";
   import { onMount } from "svelte";
   import { t } from "$lib/i18n";
 
