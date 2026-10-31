@@ -54,7 +54,7 @@ yuv = { version = "0.8", optional = true }
 
 [target.'cfg(windows)'.dependencies]
 windows-core = "0.61"
-windows = { version = "0.61", features = [
+windows = { version = "0.62", features = [
     "Foundation",
     "Graphics",
     "Graphics_Capture",
