@@ -42,6 +42,19 @@
   </branding>
   <content_rating type="oars-1.1" />
   <releases>
+    <release version="0.14.0" date="2026-10-31">
+      <description>
+        <p>Offline study module, BitTorrent 99% completion stall fix, dynamic download telemetry, course extractor upgrades for Skool and Udemy, and system tray localization.</p>
+        <ul>
+          <li>Introduced native offline study plugin backed by local SQLite storage</li>
+          <li>Fixed BitTorrent downloads stalling at 99% during final piece verification</li>
+          <li>Added real-time speed and remaining bytes telemetry for torrents</li>
+          <li>Fixed Skool course extraction on Next.js build ID mismatches</li>
+          <li>Handled empty modules in Udemy extractor and hardened yt-dlp arguments</li>
+          <li>Added system tray and Open Nami localization</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.9.2" date="2026-09-11">
       <description>
         <p>Tools grows from 108 to 156, with eight new categories: Audio, CTF, Twitch, Music, Reddit, Bilibili, Games and LinkedIn. Video tools compress to a target size in two passes, make GIFs and WebPs, cut out silences, convert, burn and resync subtitles, take out flicker, grain and banding, stabilize shaky footage and turn a clip into a WhatsApp or Telegram sticker that fits the size limit. Audio tools normalize loudness to EBU R128 and remove background noise. PDF tools repair broken files, add a password, a watermark or page numbers, crop margins, build a bookmark outline, export clean Markdown and find text still sitting underneath a black redaction bar. Image tools read and strip EXIF and GPS, build favicon and app icon packs, compress in batches, find near-duplicates, slice and pack spritesheets and stitch scrolled screenshots. Files gains a secure shred, System an ad and telemetry hosts blocker, and CTF brings hashes, magic bytes and entropy, classical ciphers, XOR brute force, encodings and frequency analysis.</p>
