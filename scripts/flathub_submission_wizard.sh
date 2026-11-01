@@ -172,14 +172,14 @@ run_wizard() {
   pr_body=$(cat <<EOF
 ### Please confirm your submission meets all the criteria
 
-[✓] Please describe the application briefly. < OmniGet is an open-source desktop multimedia downloader and study companion supporting YouTube, Torrent, Skool, Udemy, and local playback on Linux. >
-[✓] Please attach a video showcasing the application on Linux using the Flatpak. < $video_url >
-[✓] The Flatpak ID follows all the rules listed in the Application ID requirements https://docs.flathub.org/docs/for-app-authors/requirements#application-id.
-[✓] I have read and followed all the Submission requirements https://docs.flathub.org/docs/for-app-authors/requirements and the Submission guide https://docs.flathub.org/docs/for-app-authors/submission and I agree to them.
-  [✓] The application has a meaningful development history, evidence of real-world use, and a clear commitment to ongoing maintenance, as required by the development history requirements https://docs.flathub.org/docs/for-app-authors/requirements#insufficient-development-history.
-  [✓] I have disclosed any AI-generated material included in the application or its Flathub packaging, as required by the Generative AI policy https://docs.flathub.org/docs/for-app-authors/requirements#generative-ai-policy. Affected parts and approximate extent: < Offline dependency manifests (cargo-sources.json and node-sources.json) were pinned using community generator tools flatpak-cargo-generator and flatpak-node-generator. Application code is written and maintained by the project authors. >
-  [✓] I have not used AI tools or agents to generate or automate this submission pull request or its review interactions.
-[✓] I am an author contributor to the project. If not, I contacted upstream developers about this submission. Link: https://github.com/OpenSelena/omniget
+- [x] Please describe the application briefly. < OmniGet is an open-source desktop multimedia downloader and study companion supporting YouTube, Torrent, Skool, Udemy, and local playback on Linux. >
+- [x] Please attach a video showcasing the application on Linux using the Flatpak. < $video_url >
+- [x] The Flatpak ID follows all the rules listed in the Application ID requirements https://docs.flathub.org/docs/for-app-authors/requirements#application-id.
+- [x] I have read and followed all the Submission requirements https://docs.flathub.org/docs/for-app-authors/requirements and the Submission guide https://docs.flathub.org/docs/for-app-authors/submission and I agree to them.
+  - [x] The application has a meaningful development history, evidence of real-world use, and a clear commitment to ongoing maintenance, as required by the development history requirements https://docs.flathub.org/docs/for-app-authors/requirements#insufficient-development-history.
+  - [x] I have disclosed any AI-generated material included in the application or its Flathub packaging, as required by the Generative AI policy https://docs.flathub.org/docs/for-app-authors/requirements#generative-ai-policy. Affected parts and approximate extent: < Offline dependency manifests (cargo-sources.json and node-sources.json) were pinned using community generator tools flatpak-cargo-generator and flatpak-node-generator. Application code is written and maintained by the project authors. >
+  - [x] I have not used AI tools or agents to generate or automate this submission pull request or its review interactions.
+- [x] I am an author/developer to the project. Link: https://github.com/OpenSelena/omniget
 EOF
 )
 
