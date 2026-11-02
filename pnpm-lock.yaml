@@ -20,8 +20,8 @@ importers:
   .:
     dependencies:
       '@fontsource-variable/bricolage-grotesque':
-        specifier: ^5.2.10
-        version: 5.2.10
+        specifier: ^5.3.0
+        version: 5.3.0
       '@fontsource/dm-sans':
         specifier: ^5.3.0
         version: 5.3.0
@@ -400,8 +400,8 @@ packages:
   '@floating-ui/utils@0.2.12':
     resolution: {integrity: sha512-HpCo8tmWzLVad5s2d19EhAz5zqrrQ6s69qd6moPMQvkOuSwDT1YgRfWSVuc4ennqrgv3OHppiOGMQ7oC13yIww==}
 
-  '@fontsource-variable/bricolage-grotesque@5.2.10':
-    resolution: {integrity: sha512-5EDsCqgGpKVcJWE4sg9ydli+t5WM97mISYw5lla/Ev4z71FwXh1oN0YUU8xjkRW9+wBCGD9R+ntAvI8G4bUFJg==}
+  '@fontsource-variable/bricolage-grotesque@5.3.0':
+    resolution: {integrity: sha512-TLi9Q4hJjS2UvoTMRSS2nHu6c4R56lAw60NR9QYtVRCHn0XtsFpiEhNffZ8Glsoxu6wEEwLKBP8lb94J52PNBA==}
 
   '@fontsource/dm-sans@5.3.0':
     resolution: {integrity: sha512-lYJtMXXO28q1z+yz+z8XKd0s4hXaa9QdkETzkyD760sidCv5heI86weYA0sx0Nc4pAMAQTUuyf4gO44cYKKS9g==}
@@ -2358,7 +2358,7 @@ snapshots:
 
   '@floating-ui/utils@0.2.12': {}
 
-  '@fontsource-variable/bricolage-grotesque@5.2.10': {}
+  '@fontsource-variable/bricolage-grotesque@5.3.0': {}
 
   '@fontsource/dm-sans@5.3.0': {}
 
