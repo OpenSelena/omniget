@@ -135,7 +135,7 @@ modules:
       env:
         npm_config_cache: /run/build/omniget/flatpak-node/npm-cache
     build-commands:
-      - npm install --offline
+      - npm install --offline --legacy-peer-deps
       - npx vite build
       - cargo --offline build --release --manifest-path src-tauri/Cargo.toml
       - install -Dm755 src-tauri/target/release/omniget /app/bin/omniget
