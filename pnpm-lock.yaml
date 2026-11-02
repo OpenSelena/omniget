@@ -180,8 +180,8 @@ importers:
         specifier: ^26.6.6
         version: 26.6.6
       lintapple:
-        specifier: ^0.1.20
-        version: 0.1.20
+        specifier: ^0.1.24
+        version: 0.1.24
       playwright:
         specifier: ^1.62.0
         version: 1.62.0
@@ -1720,8 +1720,8 @@ packages:
   linkifyjs@4.4.0:
     resolution: {integrity: sha512-InTexvtbai+2c+dEVGcc6O6P2DMVIiwD9a/i4zFroazOIYLOS6FSVmAJ7kFeumnCMx6/gQqNAkbUvgMubV4+MA==}
 
-  lintapple@0.1.20:
-    resolution: {integrity: sha512-n5wXJQci3ygYTvTI5eyX4otVVkOzEpkZnH5b+PBtciivnROaH4ZhDmb4nBeJ8Nhbm+SXggRLrccIShmqOSHV8w==}
+  lintapple@0.1.24:
+    resolution: {integrity: sha512-qd5cxiI88cnsOQUwux49wxqzN5i/O7Iwh7lQQka8+WS7XnyCFsCth58HzFYJhuI7V8a5pHZoVCJ4UoNhTvV3zA==}
     engines: {node: '>=22'}
     hasBin: true
 
@@ -3607,7 +3607,7 @@ snapshots:
 
   linkifyjs@4.4.0: {}
 
-  lintapple@0.1.20:
+  lintapple@0.1.24:
     dependencies:
       axe-core: 4.14.0
       playwright: 1.63.0
