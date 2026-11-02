@@ -286,6 +286,7 @@ google*.html
 /.sessao/
 /.varredura/
 /.agents/
+!/.agents/skills/
 /.claude/
 skills-lock.json
 /.shots/
