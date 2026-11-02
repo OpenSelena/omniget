@@ -16,7 +16,7 @@ chromiumoxide = { git = "https://github.com/mattsse/chromiumoxide", rev = "6f239
 scraper = "0.29"
 regex = "1"
 m3u8-rs = "6"
-aes = "0.8"
+aes = "0.9"
 cbc = "0.1"
 anyhow = "1"
 tracing = "0.1"

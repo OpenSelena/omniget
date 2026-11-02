@@ -6810,7 +6810,7 @@ dependencies = [
 name = "omniget"
 version = "0.14.0"
 dependencies = [
- "aes 0.8.4",
+ "aes 0.9.3",
  "anyhow",
  "async-trait",
  "axum",
@@ -6912,7 +6912,7 @@ dependencies = [
 name = "omniget-core"
 version = "0.2.16"
 dependencies = [
- "aes 0.8.4",
+ "aes 0.9.3",
  "anyhow",
  "async-trait",
  "base64 0.22.1",
@@ -6983,7 +6983,7 @@ dependencies = [
 name = "omniget-plugin-courses"
 version = "1.4.1"
 dependencies = [
- "aes 0.8.4",
+ "aes 0.9.3",
  "anyhow",
  "async-trait",
  "base64 0.22.1",
