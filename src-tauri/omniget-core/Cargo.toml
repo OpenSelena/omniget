@@ -74,4 +74,4 @@ rust_xlsxwriter = "0.99"
 # ONNX Runtime: "load-dynamic" NAO linka nada no build; a lib nativa e um
 # binario gerido, baixado sob demanda igual ao PDFium e ao Real-ESRGAN.
 ort = { version = "2.0.0-rc.13", default-features = false, features = ["std", "ndarray", "tracing", "load-dynamic", "api-27"] }
-ndarray = "0.16"
+ndarray = "0.17"
