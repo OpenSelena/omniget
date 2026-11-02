@@ -116,8 +116,8 @@ importers:
         specifier: ^3.31.0
         version: 3.31.0
       abcjs:
-        specifier: ^6.6.3
-        version: 6.6.3
+        specifier: ^6.7.2
+        version: 6.7.2
       cytoscape:
         specifier: ^3.34.4
         version: 3.34.4
@@ -1274,8 +1274,8 @@ packages:
   '@vscode/markdown-it-katex@1.1.2':
     resolution: {integrity: sha512-+4IIv5PgrmhKvW/3LpkpkGg257OViEhXkOOgCyj5KMsjsOfnRXkni8XAuuF9Ui5p3B8WnUovlDXAQNb8RJ/RaQ==}
 
-  abcjs@6.6.3:
-    resolution: {integrity: sha512-BerGJCY8+pvJV1+VxZn1Y/VNcuSAk8BysCbBICY0W8fgE5g4W6sA/zB5pKxcgqzY5/gObh8ugl++4ZoaTqUCkw==}
+  abcjs@6.7.2:
+    resolution: {integrity: sha512-cHCyf8j0hAcxTuwZ9l2QznaSlLK1TD2s5oVw6Ig8Kfss6VfJKoNJ1kAzMBwa6DDWeyNl2JH7mN/U+MJ8MYbC5g==}
 
   acorn@8.15.0:
     resolution: {integrity: sha512-NZyJarBfL7nWwIq+FDL6Zp/yHEhePMNnnJ0y3qfieCrmNvYct8uvtiV41UvlSe6apAfk0fY1FbWx+NwfmpvtTg==}
@@ -3091,7 +3091,7 @@ snapshots:
     dependencies:
       katex: 0.16.47
 
-  abcjs@6.6.3: {}
+  abcjs@6.7.2: {}
 
   acorn@8.15.0: {}
 
