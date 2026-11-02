@@ -7084,9 +7084,9 @@ dependencies = [
 
 [[package]]
 name = "openmls"
-version = "0.8.1"
+version = "0.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dcb512bfe6a55777518853ea535c6241f069cb0e8984678c117151d2a1e7e903"
+checksum = "380199a3bd922198b71a834e8acec831798f1eacf8fa472eb012c35d28ffb3e2"
 dependencies = [
  "log",
  "openmls_traits",
