@@ -150,7 +150,7 @@ importers:
         version: 11.17.2
       sveltekit-i18n:
         specifier: ^2.4.2
-        version: 2.4.2(svelte@5.57.2)
+        version: 2.4.2(svelte@5.57.3)
       tiptap-markdown:
         specifier: ^0.9.0
         version: 0.9.0(@tiptap/core@3.31.4(@tiptap/pm@3.31.4))
@@ -160,13 +160,13 @@ importers:
     devDependencies:
       '@sveltejs/adapter-static':
         specifier: ^3.0.6
-        version: 3.0.10(@sveltejs/kit@2.51.0(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.57.2)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))(svelte@5.57.2)(typescript@5.9.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))
+        version: 3.0.10(@sveltejs/kit@2.51.0(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.57.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))(svelte@5.57.3)(typescript@5.9.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))
       '@sveltejs/kit':
         specifier: ^2.9.0
-        version: 2.51.0(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.57.2)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))(svelte@5.57.2)(typescript@5.9.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4))
+        version: 2.51.0(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.57.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))(svelte@5.57.3)(typescript@5.9.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4))
       '@sveltejs/vite-plugin-svelte':
         specifier: ^5.0.0
-        version: 5.1.1(svelte@5.57.2)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4))
+        version: 5.1.1(svelte@5.57.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4))
       '@tauri-apps/cli':
         specifier: ^2.12.4
         version: 2.12.4
@@ -186,11 +186,11 @@ importers:
         specifier: ^1.62.0
         version: 1.62.0
       svelte:
-        specifier: ^5.57.2
-        version: 5.57.2
+        specifier: ^5.57.3
+        version: 5.57.3
       svelte-check:
         specifier: ^4.0.0
-        version: 4.4.0(picomatch@4.0.3)(svelte@5.57.2)(typescript@5.9.3)
+        version: 4.4.0(picomatch@4.0.3)(svelte@5.57.3)(typescript@5.9.3)
       typescript:
         specifier: ~5.9.3
         version: 5.9.3
@@ -430,9 +430,6 @@ packages:
   '@jridgewell/resolve-uri@3.1.2':
     resolution: {integrity: sha512-bRISgCIjP20/tbWSPWMEi54QVPRZExkuD9lJL+UIxUKtwVJA8wW1Trb1jMs1RFXo1CBTNZ/5hpC9QvmKWdopKw==}
     engines: {node: '>=6.0.0'}
-
-  '@jridgewell/sourcemap-codec@1.5.5':
-    resolution: {integrity: sha512-cYQ9310grqxueWbl+WuIUIaiUaDcj7WOq5fVhEljNVgRfOUhY9fy2zTvfoqWsnebh8Sl70VScFbICvJnLKB0Og==}
 
   '@jridgewell/sourcemap-codec@1.6.0':
     resolution: {integrity: sha512-T7jf+5zgsZHwNJ4lvQ7/aezbyk0nNX+zJVWpmHA7VYsEx7a7qr5Rg5IbtJFqkgze5Y2sruq1RUY8Q837Od7iFw==}
@@ -1216,6 +1213,9 @@ packages:
   '@types/deep-eql@4.0.2':
     resolution: {integrity: sha512-c9h9dVVMigMPc4bwTvC5dxqtqJZwQPePsWjPlpSOnojbor6pGqdk541lfA7AqFQr5pB1BRdq0juY9db81BwyFw==}
 
+  '@types/estree@1.0.10':
+    resolution: {integrity: sha512-lTyOMnOcmRBzdCv6/4zUZCrEhV0xrqQiUZBZtVcbmLHBXKLnN8q89v/wKRF/Q0HbwVsqbIG3o5HDoFl9sduM+g==}
+
   '@types/estree@1.0.9':
     resolution: {integrity: sha512-GhdPgy1el4/ImP05X05Uw4cw2/M93BCUmnEvWZNStlCzEKME4Fkk+YpoA5OiHNQmoS7Cafb8Xa3Pya8m1Qrzeg==}
 
@@ -1561,6 +1561,10 @@ packages:
 
   devalue@5.9.4:
     resolution: {integrity: sha512-sPAT4pztbu6586/hrhOnMKS17IJrvg12mXiSPSS3W5qDeN2RGgvZ0diZCm31dBbnevfVmujNO3IM2wrS4Y2Rhg==}
+
+  devalue@6.0.3:
+    resolution: {integrity: sha512-3woMEITftG1wKeO/4d/QXH1DVKctTSZg3jNGPpjp9hNr5Hos8MCFF5McTML5ZtgKDObm2R591B0spRp2IVernA==}
+    engines: {node: '>=18'}
 
   devlop@1.1.0:
     resolution: {integrity: sha512-RWmIqhcFf1lRYBvNmr7qTNuyCt/7/ns2jbpp1+PalgE/rDQcBT0fioSMUpJ93irlUhC5hrg4cYqe6U+0ImW0rA==}
@@ -2032,8 +2036,8 @@ packages:
       svelte: ^4.0.0 || ^5.0.0-next.0
       typescript: '>=5.0.0'
 
-  svelte@5.57.2:
-    resolution: {integrity: sha512-1YiPCAXT0Ct6g1vOMmSLa0Nsc3QRMvtDF32ihgglGVrugIuIK38RyDiFNXVDhtQ81TJjSO57NdMw6DyYLqSGDQ==}
+  svelte@5.57.3:
+    resolution: {integrity: sha512-5mAftM3SoDV9X0zdF386F9p2pv8iKOwi/KfBS1XnBAkVCKFzVOLHUoa8iGWAt4buoicLmyWVRpuuD5wplXOQsg==}
     engines: {node: '>=18'}
 
   sveltekit-i18n@2.4.2:
@@ -2390,14 +2394,12 @@ snapshots:
 
   '@jridgewell/resolve-uri@3.1.2': {}
 
-  '@jridgewell/sourcemap-codec@1.5.5': {}
-
   '@jridgewell/sourcemap-codec@1.6.0': {}
 
   '@jridgewell/trace-mapping@0.3.31':
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
-      '@jridgewell/sourcemap-codec': 1.5.5
+      '@jridgewell/sourcemap-codec': 1.6.0
 
   '@kookyleo/graphviz-anywhere-web@0.1.8': {}
 
@@ -2503,15 +2505,15 @@ snapshots:
     dependencies:
       acorn: 8.15.0
 
-  '@sveltejs/adapter-static@3.0.10(@sveltejs/kit@2.51.0(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.57.2)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))(svelte@5.57.2)(typescript@5.9.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))':
+  '@sveltejs/adapter-static@3.0.10(@sveltejs/kit@2.51.0(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.57.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))(svelte@5.57.3)(typescript@5.9.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))':
     dependencies:
-      '@sveltejs/kit': 2.51.0(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.57.2)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))(svelte@5.57.2)(typescript@5.9.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4))
+      '@sveltejs/kit': 2.51.0(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.57.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))(svelte@5.57.3)(typescript@5.9.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4))
 
-  '@sveltejs/kit@2.51.0(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.57.2)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))(svelte@5.57.2)(typescript@5.9.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4))':
+  '@sveltejs/kit@2.51.0(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.57.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))(svelte@5.57.3)(typescript@5.9.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4))':
     dependencies:
       '@standard-schema/spec': 1.1.0
       '@sveltejs/acorn-typescript': 1.0.9(acorn@8.15.0)
-      '@sveltejs/vite-plugin-svelte': 5.1.1(svelte@5.57.2)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4))
+      '@sveltejs/vite-plugin-svelte': 5.1.1(svelte@5.57.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4))
       '@types/cookie': 0.6.0
       acorn: 8.15.0
       cookie: 0.6.0
@@ -2523,36 +2525,36 @@ snapshots:
       sade: 1.8.1
       set-cookie-parser: 3.0.1
       sirv: 3.0.2
-      svelte: 5.57.2
+      svelte: 5.57.3
       vite: 6.4.4(@types/node@26.6.6)(yaml@2.8.4)
     optionalDependencies:
       typescript: 5.9.3
 
-  '@sveltejs/vite-plugin-svelte-inspector@4.0.1(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.57.2)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))(svelte@5.57.2)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4))':
+  '@sveltejs/vite-plugin-svelte-inspector@4.0.1(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.57.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))(svelte@5.57.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4))':
     dependencies:
-      '@sveltejs/vite-plugin-svelte': 5.1.1(svelte@5.57.2)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4))
+      '@sveltejs/vite-plugin-svelte': 5.1.1(svelte@5.57.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4))
       debug: 4.4.3
-      svelte: 5.57.2
+      svelte: 5.57.3
       vite: 6.4.4(@types/node@26.6.6)(yaml@2.8.4)
     transitivePeerDependencies:
       - supports-color
 
-  '@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.57.2)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4))':
+  '@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.57.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4))':
     dependencies:
-      '@sveltejs/vite-plugin-svelte-inspector': 4.0.1(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.57.2)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))(svelte@5.57.2)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4))
+      '@sveltejs/vite-plugin-svelte-inspector': 4.0.1(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.57.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))(svelte@5.57.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4))
       debug: 4.4.3
       deepmerge: 4.3.1
       kleur: 4.1.5
       magic-string: 0.30.21
-      svelte: 5.57.2
+      svelte: 5.57.3
       vite: 6.4.4(@types/node@26.6.6)(yaml@2.8.4)
       vitefu: 1.1.1(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4))
     transitivePeerDependencies:
       - supports-color
 
-  '@sveltekit-i18n/base@1.3.7(svelte@5.57.2)':
+  '@sveltekit-i18n/base@1.3.7(svelte@5.57.3)':
     dependencies:
-      svelte: 5.57.2
+      svelte: 5.57.3
 
   '@sveltekit-i18n/parser-default@1.1.1': {}
 
@@ -3094,6 +3096,8 @@ snapshots:
 
   '@types/deep-eql@4.0.2': {}
 
+  '@types/estree@1.0.10': {}
+
   '@types/estree@1.0.9': {}
 
   '@types/geojson@7946.0.16': {}
@@ -3461,6 +3465,8 @@ snapshots:
 
   devalue@5.9.4: {}
 
+  devalue@6.0.3: {}
+
   devlop@1.1.0:
     dependencies:
       dequal: 2.0.3
@@ -3539,7 +3545,7 @@ snapshots:
 
   estree-walker@3.0.3:
     dependencies:
-      '@types/estree': 1.0.9
+      '@types/estree': 1.0.10
 
   eve-raphael@0.5.0: {}
 
@@ -3596,7 +3602,7 @@ snapshots:
 
   is-reference@3.0.3:
     dependencies:
-      '@types/estree': 1.0.9
+      '@types/estree': 1.0.10
 
   isomorphic.js@0.2.5: {}
 
@@ -3649,7 +3655,7 @@ snapshots:
 
   magic-string@0.30.21:
     dependencies:
-      '@jridgewell/sourcemap-codec': 1.5.5
+      '@jridgewell/sourcemap-codec': 1.6.0
 
   markdown-it-ins@4.0.0: {}
 
@@ -4012,29 +4018,29 @@ snapshots:
 
   stylis@4.4.0: {}
 
-  svelte-check@4.4.0(picomatch@4.0.3)(svelte@5.57.2)(typescript@5.9.3):
+  svelte-check@4.4.0(picomatch@4.0.3)(svelte@5.57.3)(typescript@5.9.3):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
       chokidar: 4.0.3
       fdir: 6.5.0(picomatch@4.0.3)
       picocolors: 1.1.1
       sade: 1.8.1
-      svelte: 5.57.2
+      svelte: 5.57.3
       typescript: 5.9.3
     transitivePeerDependencies:
       - picomatch
 
-  svelte@5.57.2:
+  svelte@5.57.3:
     dependencies:
       '@jridgewell/remapping': 2.3.5
       '@jridgewell/sourcemap-codec': 1.6.0
       '@sveltejs/acorn-typescript': 1.0.13(acorn@8.19.0)
-      '@types/estree': 1.0.9
+      '@types/estree': 1.0.10
       acorn: 8.19.0
       aria-query: 5.3.1
       axobject-query: 4.1.0
       clsx: 2.1.1
-      devalue: 5.9.4
+      devalue: 6.0.3
       esm-env: 1.2.2
       esrap: 2.4.0
       is-reference: 3.0.3
@@ -4044,11 +4050,11 @@ snapshots:
     transitivePeerDependencies:
       - '@typescript-eslint/types'
 
-  sveltekit-i18n@2.4.2(svelte@5.57.2):
+  sveltekit-i18n@2.4.2(svelte@5.57.3):
     dependencies:
-      '@sveltekit-i18n/base': 1.3.7(svelte@5.57.2)
+      '@sveltekit-i18n/base': 1.3.7(svelte@5.57.3)
       '@sveltekit-i18n/parser-default': 1.1.1
-      svelte: 5.57.2
+      svelte: 5.57.3
 
   tinybench@2.9.0: {}
 
