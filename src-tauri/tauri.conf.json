@@ -81,6 +81,9 @@
       "minimumSystemVersion": "10.15"
     },
     "linux": {
+      "appimage": {
+        "bundleMediaFramework": true
+      },
       "deb": {
         "depends": [
           "libasound2"
