@@ -16,7 +16,7 @@ base64 = "0.22.1"
 grammers-client = "0.8"
 grammers-session = "0.8"
 grammers-tl-types = "0.8"
-grammers-mtsender = "0.8"
+grammers-mtsender = "0.10"
 qrcode = { version = "0.14", default-features = false, features = ["svg"] }
 dirs = "6"
 sanitize-filename = "0.6"
