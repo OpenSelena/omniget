@@ -93,6 +93,14 @@
       </div>
       <button class="toggle" class:on={settings.download.always_ask_path} onclick={() => toggleBool("download", "always_ask_path", settings.download.always_ask_path)} role="switch" aria-checked={settings.download.always_ask_path} aria-label={$t('settings.download.always_ask_path') as string}><span class="toggle-knob"></span></button>
     </div>
+    <div class="divider"></div>
+    <div class="setting-row">
+      <div class="setting-col">
+        <span class="setting-label">{$t('settings.download.allow_private_network')}</span>
+        <span class="setting-path">{$t('settings.download.allow_private_network_desc')}</span>
+      </div>
+      <button class="toggle" class:on={settings.download.allow_private_network ?? false} onclick={() => toggleBool("download", "allow_private_network", settings.download.allow_private_network ?? false)} role="switch" aria-checked={settings.download.allow_private_network ?? false} aria-label={$t('settings.download.allow_private_network') as string}><span class="toggle-knob"></span></button>
+    </div>
   </div>
 
   <div class="preset-grid">

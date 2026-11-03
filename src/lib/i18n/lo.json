@@ -4227,7 +4227,9 @@
       "copy_to_clipboard_on_hotkey_desc": "ສຳເນົາໄຟລ໌ທີ່ດາວໂຫຼດໄປຄລິບບອດອັດຕະໂນມັດ ເພື່ອວາງໄດ້ງ່າຍ",
       "filename_template": "ແມ່ແບບຊື່ໄຟລ໌",
       "filename_template_desc": "ແມ່ແບບຜົນລັບ yt-dlp ສຳລັບໄຟລ໌ທີ່ດາວໂຫຼດ",
-      "filename_template_preview": "ຕົວຢ່າງ: {{preview}}"
+      "filename_template_preview": "ຕົວຢ່າງ: {{preview}}",
+      "allow_private_network": "Allow local network downloads",
+      "allow_private_network_desc": "Direct links to this computer or your local network (NAS, router) are blocked for safety. Turn on only if you download from your own devices."
     },
     "update_available": "OmniGet {{version}} ພ້ອມໃຫ້ອັບເດດແລ້ວ",
     "update_button": "ອັບເດດດຽວນີ້",
@@ -5119,7 +5121,8 @@
     "drm_protected": "ສະຕຣີມຖືກປ້ອງກັນດ້ວຍ DRM ແລະ ບໍ່ສາມາດລວມໄດ້. ບໍ່ຮອງຮັບເນື້ອຫານີ້.",
     "output_missing": "ດາວໂຫຼດສຳເລັດແລ້ວ, ແຕ່ບໍ່ມີໄຟລ໌ປາກົດໃນໂຟລເດີ (ຫຼື ໄຟລ໌ຫວ່າງເປົ່າ). ກວດສອບພື້ນທີ່ດິສກ໌ ແລະ ການຍົກເວັ້ນຂອງແອນຕິໄວຣັສ, ແລ້ວລອງໃໝ່.",
     "course_platform_url": "ບໍ່ສາມາດດາວໂຫຼດແພລດຟອມຄອສຮຽນຈາກ URL ໄດ້. ເປີດໜ້າຄອສຮຽນ (ຕ້ອງມີປລັກອິນຄອສຮຽນ ແລະ ບັນຊີທີ່ເຂົ້າສູ່ລະບົບແລ້ວ).",
-    "plugin_outdated": "ປລັກອິນນີ້ລ້າສະໄໝ ແລະ ບໍ່ຮອງຮັບການດຳເນີນການນີ້. ອັບເດດໃນ Marketplace, ແລ້ວເປີດ OmniGet ຄືນໃໝ່."
+    "plugin_outdated": "ປລັກອິນນີ້ລ້າສະໄໝ ແລະ ບໍ່ຮອງຮັບການດຳເນີນການນີ້. ອັບເດດໃນ Marketplace, ແລ້ວເປີດ OmniGet ຄືນໃໝ່.",
+    "private_network_blocked": "Blocked: this link points to this computer or your local network. You can allow it in Settings > Downloads."
   },
   "debug": {
     "title": "ບັນທຶກກິດຈະກຳ",

@@ -4226,7 +4226,9 @@
       "copy_to_clipboard_on_hotkey_desc": "Автоматически копировать скачанный файл в буфер обмена для удобной вставки",
       "filename_template": "Шаблон имени файла",
       "filename_template_desc": "Шаблон вывода yt-dlp для скачиваемых файлов",
-      "filename_template_preview": "Предпросмотр: {{preview}}"
+      "filename_template_preview": "Предпросмотр: {{preview}}",
+      "allow_private_network": "Allow local network downloads",
+      "allow_private_network_desc": "Direct links to this computer or your local network (NAS, router) are blocked for safety. Turn on only if you download from your own devices."
     },
     "update_available": "Доступен OmniGet {{version}}",
     "update_button": "обновить сейчас",
@@ -5119,7 +5121,8 @@
     "drm_protected": "Загруженные потоки защищены DRM и не могут быть объединены. Этот контент не поддерживается.",
     "output_missing": "Скачивание завершилось, но файл не появился в папке (или он пуст). Проверьте место на диске и исключения антивируса, затем попробуйте снова.",
     "course_platform_url": "Платформы курсов нельзя скачивать по URL. Откройте страницу «Курсы» (требуется плагин курсов и вход в аккаунт).",
-    "plugin_outdated": "Этот плагин устарел и не поддерживает данное действие. Обновите его в Маркетплейсе, затем перезапустите OmniGet."
+    "plugin_outdated": "Этот плагин устарел и не поддерживает данное действие. Обновите его в Маркетплейсе, затем перезапустите OmniGet.",
+    "private_network_blocked": "Blocked: this link points to this computer or your local network. You can allow it in Settings > Downloads."
   },
   "debug": {
     "title": "Журнал активности",

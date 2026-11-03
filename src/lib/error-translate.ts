@@ -158,6 +158,8 @@ export function translateBackendError(
   }
 
   const lower = stripped.toLowerCase();
+  // Stable code from core::net_guard; it can arrive wrapped in an HTTP error.
+  if (lower.includes("private_network_blocked")) return t("errors.private_network_blocked");
   if (lower.includes("could not copy") && lower.includes("cookie")) return t("errors.cookie_database");
   if (lower.includes("size mismatch")) return t("errors.size_mismatch");
   if (lower.includes("disk full") || lower.includes("write error")) return t("errors.disk_full");

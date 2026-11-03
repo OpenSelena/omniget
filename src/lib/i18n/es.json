@@ -4227,7 +4227,9 @@
       "copy_to_clipboard_on_hotkey_desc": "Copia automáticamente el archivo descargado al portapapeles para pegarlo fácilmente",
       "filename_template": "Plantilla de nombre de archivo",
       "filename_template_desc": "Plantilla de salida yt-dlp para los archivos descargados",
-      "filename_template_preview": "Vista previa: {{preview}}"
+      "filename_template_preview": "Vista previa: {{preview}}",
+      "allow_private_network": "Allow local network downloads",
+      "allow_private_network_desc": "Direct links to this computer or your local network (NAS, router) are blocked for safety. Turn on only if you download from your own devices."
     },
     "update_available": "OmniGet {{version}} está disponible",
     "update_button": "actualizar ahora",
@@ -5119,7 +5121,8 @@
     "drm_protected": "Los streams descargados están protegidos por DRM y no se pueden combinar. Este contenido no es compatible.",
     "output_missing": "La descarga terminó, pero no apareció ningún archivo en la carpeta (o está vacío). Revisa el espacio en disco y el antivirus, y reintenta.",
     "course_platform_url": "Las plataformas de cursos no se pueden descargar desde una URL. Abre la página Cursos (requiere el plugin de Cursos y una cuenta con sesión iniciada).",
-    "plugin_outdated": "This plugin is outdated and doesn't support this action. Update it in the Marketplace, then restart OmniGet."
+    "plugin_outdated": "This plugin is outdated and doesn't support this action. Update it in the Marketplace, then restart OmniGet.",
+    "private_network_blocked": "Blocked: this link points to this computer or your local network. You can allow it in Settings > Downloads."
   },
   "debug": {
     "title": "Registro de actividad",

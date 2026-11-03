@@ -429,6 +429,9 @@ pub fn run() {
             }
             let settings = storage::config::load_settings(app.handle());
             core::http_client::init_proxy(settings.proxy.clone());
+            omniget_core::core::net_guard::set_allow_private_network(
+                settings.download.allow_private_network,
+            );
             core::http_fetcher::set_global_max_concurrent_segments(
                 settings.advanced.max_concurrent_segments as usize,
             );

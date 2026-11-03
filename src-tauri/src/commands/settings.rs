@@ -29,6 +29,9 @@ pub fn update_settings(app: tauri::AppHandle, partial: String) -> Result<AppSett
     config::save_settings(&app, &current).map_err(|e| format!("Save: {}", e))?;
 
     crate::core::http_client::init_proxy(current.proxy.clone());
+    omniget_core::core::net_guard::set_allow_private_network(
+        current.download.allow_private_network,
+    );
     crate::core::http_fetcher::set_global_max_concurrent_segments(
         current.advanced.max_concurrent_segments as usize,
     );

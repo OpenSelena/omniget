@@ -4227,7 +4227,9 @@
       "copy_to_clipboard_on_hotkey_desc": "Αντιγράψτε αυτόματα το ληφθέν αρχείο στο πρόχειρο για εύκολη επικόλληση",
       "filename_template": "Πρότυπο ονόματος αρχείου",
       "filename_template_desc": "Πρότυπο εξόδου του yt-dlp για τα ληφθέντα αρχεία",
-      "filename_template_preview": "Προεπισκόπηση: {{preview}}"
+      "filename_template_preview": "Προεπισκόπηση: {{preview}}",
+      "allow_private_network": "Allow local network downloads",
+      "allow_private_network_desc": "Direct links to this computer or your local network (NAS, router) are blocked for safety. Turn on only if you download from your own devices."
     },
     "update_available": "Η έκδοση {{version}} του OmniGet είναι διαθέσιμη",
     "update_button": "ενημέρωση τώρα",
@@ -5119,7 +5121,8 @@
     "drm_protected": "Οι ροές που κατέβηκαν προστατεύονται από DRM και δεν μπορούν να συγχωνευθούν. Αυτό το περιεχόμενο δεν υποστηρίζεται.",
     "output_missing": "Η λήψη ολοκληρώθηκε, αλλά δεν εμφανίστηκε αρχείο στον φάκελο (ή είναι κενό). Ελέγξτε τον χώρο στον δίσκο και το antivirus και δοκιμάστε ξανά.",
     "course_platform_url": "Οι πλατφόρμες μαθημάτων δεν μπορούν να ληφθούν από URL. Ανοίξτε τη σελίδα «Μαθήματα» (απαιτείται το πρόσθετο μαθημάτων και συνδεδεμένος λογαριασμός).",
-    "plugin_outdated": "This plugin is outdated and doesn't support this action. Update it in the Marketplace, then restart OmniGet."
+    "plugin_outdated": "This plugin is outdated and doesn't support this action. Update it in the Marketplace, then restart OmniGet.",
+    "private_network_blocked": "Blocked: this link points to this computer or your local network. You can allow it in Settings > Downloads."
   },
   "debug": {
     "title": "Αρχείο καταγραφής",

@@ -4227,7 +4227,9 @@
       "copy_to_clipboard_on_hotkey_desc": "Automatically copy the downloaded file to clipboard for easy pasting",
       "filename_template": "Filename template",
       "filename_template_desc": "yt-dlp output template for downloaded files",
-      "filename_template_preview": "Preview: {{preview}}"
+      "filename_template_preview": "Preview: {{preview}}",
+      "allow_private_network": "Allow local network downloads",
+      "allow_private_network_desc": "Direct links to this computer or your local network (NAS, router) are blocked for safety. Turn on only if you download from your own devices."
     },
     "update_available": "OmniGet {{version}} is available",
     "update_button": "update now",
@@ -5119,7 +5121,8 @@
     "drm_protected": "جریان‌ها با DRM محافظت شده‌اند و قابل ادغام نیستند. این محتوا پشتیبانی نمی‌شود.",
     "output_missing": "دانلود تمام شد اما فایلی در پوشه ظاهر نشد (یا خالی است). فضای دیسک و استثناهای آنتی‌ویروس را بررسی کنید و دوباره تلاش کنید.",
     "course_platform_url": "پلتفرم‌های دوره را نمی‌توان از آدرس دانلود کرد. صفحه دوره‌ها را باز کنید (به افزونه دوره‌ها و حساب واردشده نیاز دارد).",
-    "plugin_outdated": "این افزونه قدیمی است و از این عملیات پشتیبانی نمی‌کند. آن را در فروشگاه به‌روزرسانی کنید و سپس OmniGet را دوباره باز کنید."
+    "plugin_outdated": "این افزونه قدیمی است و از این عملیات پشتیبانی نمی‌کند. آن را در فروشگاه به‌روزرسانی کنید و سپس OmniGet را دوباره باز کنید.",
+    "private_network_blocked": "Blocked: this link points to this computer or your local network. You can allow it in Settings > Downloads."
   },
   "debug": {
     "title": "Activity Log",

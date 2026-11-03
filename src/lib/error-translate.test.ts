@@ -73,4 +73,13 @@ describe("translateBackendError", () => {
       ),
     ).toBe("weird backend msg: x=1");
   });
+
+  it("translates the local network block, even when wrapped", () => {
+    expect(
+      translateBackendError(
+        "error sending request for url (http://127.0.0.1/a.zip): private_network_blocked: this link points to this computer",
+        mockT,
+      ),
+    ).toBe("T[errors.private_network_blocked]");
+  });
 });

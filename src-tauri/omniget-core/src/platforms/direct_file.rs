@@ -42,13 +42,14 @@ fn filename_from_url(url: &str) -> String {
 }
 
 async fn probe_client() -> Option<reqwest::Client> {
-    http_client::apply_global_proxy(reqwest::Client::builder())
+    crate::core::net_guard::guard_client(http_client::apply_global_proxy(reqwest::Client::builder()))
         .timeout(std::time::Duration::from_secs(10))
         .build()
         .ok()
 }
 
 async fn probe_file(url: &str) -> Option<crate::core::http_fetcher::RemoteProbe> {
+    crate::core::net_guard::ensure_public_url(url).await.ok()?;
     let client = probe_client().await?;
     crate::core::http_fetcher::probe_remote(&client, url, None, std::time::Duration::from_secs(8))
         .await
@@ -176,6 +177,7 @@ impl PlatformDownloader for DirectFileDownloader {
     }
 
     async fn get_media_info(&self, url: &str) -> anyhow::Result<MediaInfo> {
+        crate::core::net_guard::ensure_public_url(url).await?;
         let probe = probe_file(url).await;
         let title = probe
             .as_ref()
@@ -226,8 +228,11 @@ impl PlatformDownloader for DirectFileDownloader {
         };
         let output_path = opts.output_dir.join(&filename);
 
-        let mut builder = http_client::apply_global_proxy(reqwest::Client::builder())
-            .connect_timeout(std::time::Duration::from_secs(30));
+        crate::core::net_guard::ensure_public_url(file_url).await?;
+        let mut builder = crate::core::net_guard::guard_client(http_client::apply_global_proxy(
+            reqwest::Client::builder(),
+        ))
+        .connect_timeout(std::time::Duration::from_secs(30));
 
         if let Some(ua) = opts.user_agent.as_deref() {
             builder = builder.user_agent(ua);

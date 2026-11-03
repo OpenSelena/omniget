@@ -4227,7 +4227,9 @@
       "copy_to_clipboard_on_hotkey_desc": "Copier automatiquement le fichier téléchargé dans le presse-papiers pour un collage facile",
       "filename_template": "Modèle de nom de fichier",
       "filename_template_desc": "Modèle de sortie yt-dlp pour les fichiers téléchargés",
-      "filename_template_preview": "Aperçu : {{preview}}"
+      "filename_template_preview": "Aperçu : {{preview}}",
+      "allow_private_network": "Autoriser les téléchargements sur le réseau local",
+      "allow_private_network_desc": "Les liens directs vers cet ordinateur ou votre réseau local (NAS, box) sont bloqués par sécurité. À activer seulement si vous téléchargez depuis vos propres appareils."
     },
     "update_available": "OmniGet {{version}} est disponible",
     "update_button": "mettre à jour",
@@ -5119,7 +5121,8 @@
     "drm_protected": "Les flux téléchargés sont protégés par DRM et ne peuvent pas être fusionnés. Ce contenu n'est pas pris en charge.",
     "output_missing": "Le téléchargement est terminé, mais aucun fichier n'est apparu dans le dossier (ou il est vide). Vérifiez l'espace disque et l'antivirus, puis réessayez.",
     "course_platform_url": "Les plateformes de cours ne peuvent pas être téléchargées depuis une URL. Ouvrez la page Cours (nécessite le plugin Cours et un compte connecté).",
-    "plugin_outdated": "This plugin is outdated and doesn't support this action. Update it in the Marketplace, then restart OmniGet."
+    "plugin_outdated": "This plugin is outdated and doesn't support this action. Update it in the Marketplace, then restart OmniGet.",
+    "private_network_blocked": "Bloqué : ce lien pointe vers cet ordinateur ou votre réseau local. Vous pouvez l'autoriser dans Paramètres > Téléchargements."
   },
   "debug": {
     "title": "Journal d'activité",

@@ -9,6 +9,7 @@ export type AppSettings = {
   download: {
     default_output_dir: string;
     always_ask_path: boolean;
+    allow_private_network?: boolean;
     video_quality: string;
     skip_existing: boolean;
     download_attachments: boolean;

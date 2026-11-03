@@ -265,6 +265,10 @@ pub struct DownloadSettings {
     pub clipboard_detection: bool,
     #[serde(default)]
     pub auto_download_on_paste: bool,
+    /// Allow direct links to this computer or the local network (NAS, router).
+    /// Off by default: see `core::net_guard`.
+    #[serde(default)]
+    pub allow_private_network: bool,
     #[serde(default = "default_filename_template")]
     pub filename_template: String,
     #[serde(default)]
@@ -647,6 +651,7 @@ impl Default for AppSettings {
                 write_nfo_sidecar: false,
                 clipboard_detection: false,
                 auto_download_on_paste: false,
+                allow_private_network: false,
                 filename_template: default_filename_template(),
                 organize_by_platform: false,
                 download_subtitles: false,

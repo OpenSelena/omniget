@@ -4227,7 +4227,9 @@
       "copy_to_clipboard_on_hotkey_desc": "ダウンロードしたファイルを自動的にクリップボードにコピーして貼り付けやすくします",
       "filename_template": "ファイル名テンプレート",
       "filename_template_desc": "ダウンロードファイルのyt-dlp出力テンプレート",
-      "filename_template_preview": "プレビュー: {{preview}}"
+      "filename_template_preview": "プレビュー: {{preview}}",
+      "allow_private_network": "Allow local network downloads",
+      "allow_private_network_desc": "Direct links to this computer or your local network (NAS, router) are blocked for safety. Turn on only if you download from your own devices."
     },
     "update_available": "OmniGet {{version}} が利用可能です",
     "update_button": "今すぐ更新",
@@ -5119,7 +5121,8 @@
     "drm_protected": "ダウンロードしたストリームはDRMで保護されているため結合できません。このコンテンツはサポートされていません。",
     "output_missing": "ダウンロードは完了しましたが、フォルダにファイルが見つからないか空です。ディスク容量とウイルス対策ソフトの設定を確認して、もう一度お試しください。",
     "course_platform_url": "コースプラットフォームはURLからダウンロードできません。コースページを開いてください（コースプラグインとログイン済みアカウントが必要です）。",
-    "plugin_outdated": "This plugin is outdated and doesn't support this action. Update it in the Marketplace, then restart OmniGet."
+    "plugin_outdated": "This plugin is outdated and doesn't support this action. Update it in the Marketplace, then restart OmniGet.",
+    "private_network_blocked": "Blocked: this link points to this computer or your local network. You can allow it in Settings > Downloads."
   },
   "debug": {
     "title": "アクティビティログ",
