@@ -240,7 +240,10 @@ pub fn parse_zip(bytes: &[u8], parts: &[String]) -> Result<Vec<(String, Vec<Entr
         if !e.is_file() {
             continue;
         }
-        let name = e.name().to_string();
+        // Skip entries whose name cannot be decoded.
+        let Ok(name) = e.name().map(|n| n.into_owned()) else {
+            continue;
+        };
         let Some((part, label)) = part_of(&name) else {
             continue;
         };

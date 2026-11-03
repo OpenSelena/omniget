@@ -265,10 +265,13 @@ pub fn read_source(path: &Path) -> Result<HashMap<String, String>> {
             Ok(e) => e,
             Err(_) => continue,
         };
-        if !entry.is_file() || !is_csv(entry.name()) {
+        let Ok(entry_name) = entry.name().map(|n| n.into_owned()) else {
+            continue;
+        };
+        if !entry.is_file() || !is_csv(&entry_name) {
             continue;
         }
-        let name = short_name(entry.name());
+        let name = short_name(&entry_name);
         let mut buf = Vec::new();
         if entry.read_to_end(&mut buf).is_ok() {
             out.insert(name, String::from_utf8_lossy(&buf).to_string());
@@ -858,7 +861,7 @@ mod tests {
         {
             let file = std::fs::File::create(&zip_path).expect("zip");
             let mut w = zip::ZipWriter::new(file);
-            let opt: zip::write::FileOptions<'_, ()> = zip::write::FileOptions::default()
+            let opt = zip::write::SimpleFileOptions::default()
                 .compression_method(zip::CompressionMethod::Deflated);
             use std::io::Write;
             w.start_file("export/posts.csv", opt).expect("entrada");

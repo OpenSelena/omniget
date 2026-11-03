@@ -458,8 +458,11 @@ pub async fn install_plugin_zip_from_repo(
 
     for i in 0..archive.len() {
         let mut file = archive.by_index(i).map_err(|e| e.to_string())?;
-        let mangled = file.mangled_name();
-        let outpath = plugin_dir.join(&mangled);
+        // enclosed_name refuses absolute paths and `..` instead of rewriting them.
+        let Some(relative) = file.enclosed_name() else {
+            return Err("Malicious zip path traversal detected".to_string());
+        };
+        let outpath = plugin_dir.join(&relative);
         if !outpath.starts_with(&plugin_dir) {
             return Err("Malicious zip path traversal detected".to_string());
         }

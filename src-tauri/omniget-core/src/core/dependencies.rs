@@ -717,7 +717,10 @@ async fn extract_zip_ffmpeg(
                 .by_index(i)
                 .map_err(|e| anyhow!("Failed to read zip entry: {}", e))?;
 
-            let name = entry.name().to_string();
+            // Skip entries whose name cannot be decoded.
+            let Ok(name) = entry.name().map(|n| n.into_owned()) else {
+                continue;
+            };
             for target in &targets {
                 if name.ends_with(target) {
                     let dest = bin_dir.join(format!("{}.new", target));
@@ -875,7 +878,10 @@ async fn download_deno() -> anyhow::Result<PathBuf> {
                 .by_index(i)
                 .map_err(|e| anyhow!("Failed to read zip entry: {}", e))?;
 
-            let name = file.name().to_string();
+            // Skip entries whose name cannot be decoded.
+            let Ok(name) = file.name().map(|n| n.into_owned()) else {
+                continue;
+            };
             if name.ends_with(&deno_name_clone) || name == "deno" || name == "deno.exe" {
                 let dest = bin_dir_clone.join(&deno_name_clone);
                 let mut buf = Vec::new();
@@ -1040,7 +1046,10 @@ async fn download_aria2c() -> anyhow::Result<PathBuf> {
                 .by_index(i)
                 .map_err(|e| anyhow!("Failed to read zip entry: {}", e))?;
 
-            let name = file.name().to_string();
+            // Skip entries whose name cannot be decoded.
+            let Ok(name) = file.name().map(|n| n.into_owned()) else {
+                continue;
+            };
             if name.ends_with(&aria2c_name_clone) {
                 let dest = bin_dir_clone.join(&aria2c_name_clone);
                 let mut buf = Vec::new();

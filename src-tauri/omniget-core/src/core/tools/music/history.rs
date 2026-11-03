@@ -258,7 +258,10 @@ pub fn collect_sources(inputs: &[String]) -> Result<Vec<(String, String)>> {
             let mut zip = zip::ZipArchive::new(file)?;
             for i in 0..zip.len() {
                 let mut e = zip.by_index(i)?;
-                let name = e.name().to_string();
+                // Skip entries whose name cannot be decoded.
+                let Ok(name) = e.name().map(|n| n.into_owned()) else {
+                    continue;
+                };
                 if !e.is_file() || !looks_like_history(&name) {
                     continue;
                 }

@@ -48,7 +48,7 @@ qrcode = { version = "0.14", default-features = false, features = ["svg"] }
 filetime = "0.2.27"
 # Tools: leitura de EXIF/GPS em img-exif (Rust puro, sem C).
 kamadak-exif = "0.6"
-zip = { version = "2", default-features = false, features = ["deflate"] }
+zip = { version = "9", default-features = false, features = ["deflate"] }
 tar = "0.4"
 flate2 = "1"
 xz2 = { version = "0.1", features = ["static"] }
@@ -70,7 +70,7 @@ lofty = "0.25"
 # HTML -> Markdown para exportar posts (Substack/Medium), mesmo padrao do pdf-to-markdown.
 htmd = "0.5"
 # Planilha .xlsx para a extracao de tabelas de PDF (o CSV nao depende disso).
-rust_xlsxwriter = "0.99"
+rust_xlsxwriter = "0.102"
 # ONNX Runtime: "load-dynamic" NAO linka nada no build; a lib nativa e um
 # binario gerido, baixado sob demanda igual ao PDFium e ao Real-ESRGAN.
 ort = { version = "=2.0.0-rc.13", default-features = false, features = ["std", "ndarray", "tracing", "load-dynamic", "api-27"] }
