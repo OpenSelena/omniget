@@ -181,6 +181,7 @@ impl PlatformDownloader for MagnetDownloader {
                 AddTorrent::from_url(url)
             }
         };
+        let selected_files = opts.torrent_files.clone().filter(|v| !v.is_empty());
         let only_files = opts
             .torrent_files
             .as_ref()
@@ -342,12 +343,13 @@ impl PlatformDownloader for MagnetDownloader {
 
         let (total_size, torrent_name) = managed_torrent
             .with_metadata(|meta| {
-                let size = meta
+                let lengths: Vec<u64> = meta
                     .info
                     .iter_file_lengths()
                     .ok()
-                    .map(|iter| iter.sum::<u64>())
-                    .unwrap_or_else(|| meta.file_infos.iter().map(|f| f.len).sum());
+                    .map(|iter| iter.collect())
+                    .unwrap_or_else(|| meta.file_infos.iter().map(|f| f.len).collect());
+                let size = selected_size(&lengths, selected_files.as_deref());
                 let name = meta
                     .info
                     .name
@@ -370,5 +372,34 @@ impl PlatformDownloader for MagnetDownloader {
             duration_seconds: 0.0,
             torrent_id: Some(torrent_id),
         })
+    }
+}
+
+/// Size of what is actually downloaded: the selected files when the user picked
+/// a subset, the whole torrent otherwise. Out-of-range indices are ignored and
+/// duplicates are counted once.
+fn selected_size(lengths: &[u64], only_files: Option<&[usize]>) -> u64 {
+    match only_files {
+        Some(sel) if !sel.is_empty() => {
+            let mut picked: Vec<usize> = sel.iter().copied().filter(|i| *i < lengths.len()).collect();
+            picked.sort_unstable();
+            picked.dedup();
+            picked.iter().map(|i| lengths[*i]).sum()
+        }
+        _ => lengths.iter().sum(),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::selected_size;
+
+    #[test]
+    fn size_counts_only_selected_files() {
+        let lengths = [100, 2_000, 30_000];
+        assert_eq!(selected_size(&lengths, None), 32_100);
+        assert_eq!(selected_size(&lengths, Some(&[])), 32_100);
+        assert_eq!(selected_size(&lengths, Some(&[1])), 2_000);
+        assert_eq!(selected_size(&lengths, Some(&[0, 2, 2, 9])), 30_100);
     }
 }
