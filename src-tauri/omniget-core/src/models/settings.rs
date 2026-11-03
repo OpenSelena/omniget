@@ -269,6 +269,10 @@ pub struct DownloadSettings {
     /// Off by default: see `core::net_guard`.
     #[serde(default)]
     pub allow_private_network: bool,
+    /// Allow H.265 (HEVC) video when no format was picked. Off by default:
+    /// see `core::ytdlp::default_format_selector`.
+    #[serde(default)]
+    pub allow_h265: bool,
     #[serde(default = "default_filename_template")]
     pub filename_template: String,
     #[serde(default)]
@@ -652,6 +656,7 @@ impl Default for AppSettings {
                 clipboard_detection: false,
                 auto_download_on_paste: false,
                 allow_private_network: false,
+                allow_h265: false,
                 filename_template: default_filename_template(),
                 organize_by_platform: false,
                 download_subtitles: false,

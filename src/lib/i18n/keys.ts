@@ -2376,6 +2376,8 @@ export type TranslationKeys =
   | 'settings.dependencies.update_success'
   | 'settings.dependencies.use_managed_again'
   | 'settings.dependencies.variant_aria'
+  | 'settings.download.allow_h265'
+  | 'settings.download.allow_h265_desc'
   | 'settings.download.allow_private_network'
   | 'settings.download.allow_private_network_desc'
   | 'settings.download.always_ask_path'

@@ -4228,7 +4228,9 @@
       "filename_template_desc": "Шаблон вывода yt-dlp для скачиваемых файлов",
       "filename_template_preview": "Предпросмотр: {{preview}}",
       "allow_private_network": "Allow local network downloads",
-      "allow_private_network_desc": "Direct links to this computer or your local network (NAS, router) are blocked for safety. Turn on only if you download from your own devices."
+      "allow_private_network_desc": "Direct links to this computer or your local network (NAS, router) are blocked for safety. Turn on only if you download from your own devices.",
+      "allow_h265": "Allow H.265 (HEVC) video",
+      "allow_h265_desc": "Off: OmniGet prefers H.264, VP9 or AV1, which play everywhere. HEVC is still used when a site offers nothing else."
     },
     "update_available": "Доступен OmniGet {{version}}",
     "update_button": "обновить сейчас",

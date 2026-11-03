@@ -101,6 +101,14 @@
       </div>
       <button class="toggle" class:on={settings.download.allow_private_network ?? false} onclick={() => toggleBool("download", "allow_private_network", settings.download.allow_private_network ?? false)} role="switch" aria-checked={settings.download.allow_private_network ?? false} aria-label={$t('settings.download.allow_private_network') as string}><span class="toggle-knob"></span></button>
     </div>
+    <div class="divider"></div>
+    <div class="setting-row">
+      <div class="setting-col">
+        <span class="setting-label">{$t('settings.download.allow_h265')}</span>
+        <span class="setting-path">{$t('settings.download.allow_h265_desc')}</span>
+      </div>
+      <button class="toggle" class:on={settings.download.allow_h265 ?? false} onclick={() => toggleBool("download", "allow_h265", settings.download.allow_h265 ?? false)} role="switch" aria-checked={settings.download.allow_h265 ?? false} aria-label={$t('settings.download.allow_h265') as string}><span class="toggle-knob"></span></button>
+    </div>
   </div>
 
   <div class="preset-grid">

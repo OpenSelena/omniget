@@ -4229,7 +4229,9 @@
       "filename_template_desc": "Modèle de sortie yt-dlp pour les fichiers téléchargés",
       "filename_template_preview": "Aperçu : {{preview}}",
       "allow_private_network": "Autoriser les téléchargements sur le réseau local",
-      "allow_private_network_desc": "Les liens directs vers cet ordinateur ou votre réseau local (NAS, box) sont bloqués par sécurité. À activer seulement si vous téléchargez depuis vos propres appareils."
+      "allow_private_network_desc": "Les liens directs vers cet ordinateur ou votre réseau local (NAS, box) sont bloqués par sécurité. À activer seulement si vous téléchargez depuis vos propres appareils.",
+      "allow_h265": "Autoriser la vidéo H.265 (HEVC)",
+      "allow_h265_desc": "Désactivé : OmniGet préfère H.264, VP9 ou AV1, lisibles partout. Le HEVC reste utilisé quand un site ne propose rien d'autre."
     },
     "update_available": "OmniGet {{version}} est disponible",
     "update_button": "mettre à jour",

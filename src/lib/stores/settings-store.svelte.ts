@@ -10,6 +10,7 @@ export type AppSettings = {
     default_output_dir: string;
     always_ask_path: boolean;
     allow_private_network?: boolean;
+    allow_h265?: boolean;
     video_quality: string;
     skip_existing: boolean;
     download_attachments: boolean;

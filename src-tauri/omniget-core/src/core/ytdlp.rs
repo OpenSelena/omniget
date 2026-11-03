@@ -3087,6 +3087,64 @@ pub async fn write_netscape_cookie_file(
     Ok(())
 }
 
+static ALLOW_H265: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
+
+/// Set from the "Allow H.265 (HEVC)" setting at startup and on every save.
+pub fn set_allow_h265(allow: bool) {
+    ALLOW_H265.store(allow, std::sync::atomic::Ordering::Relaxed);
+}
+
+pub fn allow_h265() -> bool {
+    ALLOW_H265.load(std::sync::atomic::Ordering::Relaxed)
+}
+
+/// yt-dlp filter that drops HEVC video streams. Many Windows players need a
+/// paid codec extension to read HEVC, so it is skipped unless allowed.
+const NO_HEVC: &str = "[vcodec!^=hev][vcodec!^=hvc][vcodec!^=h265]";
+
+/// Format selector used when the user did not pick a specific format.
+/// Without `allow_h265`, HEVC-free alternatives come first and the previous
+/// selector stays as the fallback, so a site that only serves HEVC still works.
+pub fn default_format_selector(
+    mode: &str,
+    quality_height: Option<u32>,
+    ffmpeg_available: bool,
+    allow_h265: bool,
+) -> String {
+    let height = quality_height.filter(|h| *h > 0);
+    let base = match mode {
+        "audio" => return "ba/b".to_string(),
+        "mute" => match height {
+            Some(h) => format!("bv*[height<={}]/bv*/b", h),
+            None => "bv*/b".to_string(),
+        },
+        _ if ffmpeg_available => match height {
+            Some(h) => format!(
+                "bv*[height<={}]+ba[ext=m4a]/bv*[height<={}]+ba/b[height<={}]/b",
+                h, h, h
+            ),
+            None => "bv*+ba[ext=m4a]/bv*+ba/b".to_string(),
+        },
+        _ => match height {
+            Some(h) => format!("b[height<={}]/bv*[height<={}]/b", h, h),
+            None => "b/bv*".to_string(),
+        },
+    };
+    if allow_h265 {
+        return base;
+    }
+    let h = height.map(|h| format!("[height<={}]", h)).unwrap_or_default();
+    let preferred = match mode {
+        "mute" => format!("bv*{NO_HEVC}{h}"),
+        _ if ffmpeg_available => {
+            format!("bv*{NO_HEVC}{h}+ba[ext=m4a]/bv*{NO_HEVC}{h}+ba/b{NO_HEVC}{h}")
+        }
+        _ => format!("b{NO_HEVC}{h}"),
+    };
+    format!("{preferred}/{base}")
+}
+
+
 #[allow(clippy::too_many_arguments)]
 pub async fn download_video(
     ytdlp: &Path,
@@ -3163,30 +3221,10 @@ pub async fn download_video(
             fid.to_string()
         }
     } else {
-        match mode {
-            "audio" => "ba/b".to_string(),
-            "mute" => match quality_height {
-                Some(h) if h > 0 => format!("bv*[height<={}]/bv*/b", h),
-                _ => "bv*/b".to_string(),
-            },
-            _ => {
-                if ffmpeg_available {
-                    match quality_height {
-                        Some(h) if h > 0 => format!(
-                            "bv*[height<={}]+ba[ext=m4a]/bv*[height<={}]+ba/b[height<={}]/b",
-                            h, h, h
-                        ),
-                        _ => "bv*+ba[ext=m4a]/bv*+ba/b".to_string(),
-                    }
-                } else {
-                    tracing::warn!("[yt-dlp] ffmpeg not available, using fallback format selector");
-                    match quality_height {
-                        Some(h) if h > 0 => format!("b[height<={}]/bv*[height<={}]/b", h, h),
-                        _ => "b/bv*".to_string(),
-                    }
-                }
-            }
+        if !ffmpeg_available && mode != "audio" && mode != "mute" {
+            tracing::warn!("[yt-dlp] ffmpeg not available, using fallback format selector");
         }
+        default_format_selector(mode, quality_height, ffmpeg_available, allow_h265())
     };
 
     let dir_len = output_dir.to_string_lossy().len();
@@ -6395,5 +6433,26 @@ mod e2e {
         assert!(!planned.is_empty(), "planned formats parsed");
         assert!(!uniq.is_empty(), "stream info parsed");
         let _ = std::fs::remove_dir_all(&out);
+    }
+}
+
+#[cfg(test)]
+mod hevc_tests {
+    use super::default_format_selector;
+
+    #[test]
+    fn hevc_is_skipped_by_default_with_fallback() {
+        let sel = default_format_selector("video", Some(1080), true, false);
+        assert!(sel.starts_with("bv*[vcodec!^=hev][vcodec!^=hvc][vcodec!^=h265][height<=1080]+ba[ext=m4a]/"));
+        assert!(sel.ends_with("/bv*[height<=1080]+ba[ext=m4a]/bv*[height<=1080]+ba/b[height<=1080]/b"));
+        let mute = default_format_selector("mute", None, true, false);
+        assert_eq!(mute, "bv*[vcodec!^=hev][vcodec!^=hvc][vcodec!^=h265]/bv*/b");
+    }
+
+    #[test]
+    fn allowing_hevc_keeps_the_previous_selectors() {
+        assert_eq!(default_format_selector("video", None, true, true), "bv*+ba[ext=m4a]/bv*+ba/b");
+        assert_eq!(default_format_selector("video", Some(720), false, true), "b[height<=720]/bv*[height<=720]/b");
+        assert_eq!(default_format_selector("audio", None, true, false), "ba/b");
     }
 }

@@ -32,6 +32,7 @@ pub fn update_settings(app: tauri::AppHandle, partial: String) -> Result<AppSett
     omniget_core::core::net_guard::set_allow_private_network(
         current.download.allow_private_network,
     );
+    omniget_core::core::ytdlp::set_allow_h265(current.download.allow_h265);
     crate::core::http_fetcher::set_global_max_concurrent_segments(
         current.advanced.max_concurrent_segments as usize,
     );
