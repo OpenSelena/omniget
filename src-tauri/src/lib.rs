@@ -435,6 +435,7 @@ pub fn run() {
                 settings.download.allow_private_network,
             );
             omniget_core::core::ytdlp::set_allow_h265(settings.download.allow_h265);
+            omniget_core::core::slideshow::set_enabled(settings.download.make_slideshows);
             core::http_fetcher::set_global_max_concurrent_segments(
                 settings.advanced.max_concurrent_segments as usize,
             );

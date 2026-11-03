@@ -2464,6 +2464,8 @@ export type TranslationKeys =
   | 'settings.download.keep_vtt_desc'
   | 'settings.download.live_from_start'
   | 'settings.download.live_from_start_desc'
+  | 'settings.download.make_slideshows'
+  | 'settings.download.make_slideshows_desc'
   | 'settings.download.music_audio_format'
   | 'settings.download.music_audio_format_desc'
   | 'settings.download.music_hotkey_binding'

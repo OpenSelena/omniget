@@ -10,6 +10,9 @@ use crate::core::direct_downloader;
 use crate::models::media::{DownloadOptions, DownloadResult, MediaInfo, MediaType, VideoQuality};
 use crate::platforms::traits::PlatformDownloader;
 
+/// Label of the soundtrack entry added to photo posts.
+pub const SLIDESHOW_AUDIO_LABEL: &str = "slideshow_audio";
+
 const USER_AGENT: &str = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36";
 const SHORT_LINK_UA: &str =
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko)";
@@ -270,6 +273,35 @@ impl TikTokDownloader {
         None
     }
 
+    /// Downloads the soundtrack and builds `<base>_slideshow.mp4`.
+    async fn build_slideshow(
+        &self,
+        track: &VideoQuality,
+        photos: &[std::path::PathBuf],
+        base: &str,
+        opts: &DownloadOptions,
+        headers: reqwest::header::HeaderMap,
+    ) -> anyhow::Result<(std::path::PathBuf, u64)> {
+        let audio_path = opts.output_dir.join(format!("{base}_audio.mp3"));
+        let (tx, _rx) = mpsc::channel(8);
+        direct_downloader::download_direct_with_headers(
+            &self.client,
+            &track.url,
+            &audio_path,
+            tx,
+            Some(headers),
+            Some(&opts.cancel_token),
+        )
+        .await?;
+        let video = opts.output_dir.join(format!("{base}_slideshow.mp4"));
+        crate::core::slideshow::build(photos, &audio_path, &video).await?;
+        let bytes = tokio::fs::metadata(&video)
+            .await
+            .map(|m| m.len())
+            .unwrap_or(0);
+        Ok((video, bytes))
+    }
+
     fn extract_image_urls(detail: &serde_json::Value) -> Option<Vec<String>> {
         let images = detail
             .pointer("/imagePost/images")
@@ -432,7 +464,7 @@ impl PlatformDownloader for TikTokDownloader {
                 MediaType::Carousel
             };
 
-            let qualities: Vec<VideoQuality> = image_urls
+            let mut qualities: Vec<VideoQuality> = image_urls
                 .iter()
                 .enumerate()
                 .map(|(i, u)| VideoQuality {
@@ -443,6 +475,17 @@ impl PlatformDownloader for TikTokDownloader {
                     format: "jpg".to_string(),
                 })
                 .collect();
+            // The soundtrack rides along so the download can build a
+            // slideshow video (see `core::slideshow`).
+            if let Some(music_url) = Self::extract_music_url(&detail) {
+                qualities.push(VideoQuality {
+                    label: SLIDESHOW_AUDIO_LABEL.to_string(),
+                    width: 0,
+                    height: 0,
+                    url: music_url,
+                    format: "mp3".to_string(),
+                });
+            }
 
             return Ok(MediaInfo {
                 title: filename_base,
@@ -600,18 +643,20 @@ impl PlatformDownloader for TikTokDownloader {
             }
             MediaType::Photo | MediaType::Carousel => {
                 let mut total_bytes = 0u64;
-                let count = info.available_qualities.len();
+                let (audio, photos): (Vec<&VideoQuality>, Vec<&VideoQuality>) = info
+                    .available_qualities
+                    .iter()
+                    .partition(|q| q.label == SLIDESHOW_AUDIO_LABEL);
+                let count = photos.len();
+                let base = sanitize_filename::sanitize(&info.title);
                 let mut last_path = opts.output_dir.clone();
+                let mut saved = Vec::with_capacity(count);
 
-                for (i, quality) in info.available_qualities.iter().enumerate() {
+                for (i, quality) in photos.iter().enumerate() {
                     let filename = if count == 1 {
-                        format!("{}.jpg", sanitize_filename::sanitize(&info.title))
+                        format!("{base}.jpg")
                     } else {
-                        format!(
-                            "{}_photo_{}.jpg",
-                            sanitize_filename::sanitize(&info.title),
-                            i + 1
-                        )
+                        format!("{base}_photo_{}.jpg", i + 1)
                     };
                     let output = opts.output_dir.join(&filename);
                     let (tx, _rx) = mpsc::channel(8);
@@ -627,11 +672,27 @@ impl PlatformDownloader for TikTokDownloader {
                     .await?;
 
                     total_bytes += bytes;
-                    last_path = output;
+                    last_path = output.clone();
+                    saved.push(output);
 
-                    let percent = ((i + 1) as f64 / count as f64) * 100.0;
+                    let percent = ((i + 1) as f64 / count as f64) * 90.0;
                     let _ = progress.send(ProgressUpdate::percent(percent)).await;
                 }
+
+                if let (Some(track), true) = (audio.first(), crate::core::slideshow::enabled()) {
+                    match self
+                        .build_slideshow(track, &saved, &base, opts, headers.clone())
+                        .await
+                    {
+                        Ok((video, bytes)) => {
+                            total_bytes += bytes;
+                            last_path = video;
+                        }
+                        // The photos are already saved; a failed video is not fatal.
+                        Err(e) => tracing::warn!("[tiktok] slideshow failed: {}", e),
+                    }
+                }
+                let _ = progress.send(ProgressUpdate::percent(100.0)).await;
 
                 Ok(DownloadResult {
                     file_path: last_path,

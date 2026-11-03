@@ -4246,7 +4246,9 @@
       "allow_private_network": "Autoriser les téléchargements sur le réseau local",
       "allow_private_network_desc": "Les liens directs vers cet ordinateur ou votre réseau local (NAS, box) sont bloqués par sécurité. À activer seulement si vous téléchargez depuis vos propres appareils.",
       "allow_h265": "Autoriser la vidéo H.265 (HEVC)",
-      "allow_h265_desc": "Désactivé : OmniGet préfère H.264, VP9 ou AV1, lisibles partout. Le HEVC reste utilisé quand un site ne propose rien d'autre."
+      "allow_h265_desc": "Désactivé : OmniGet préfère H.264, VP9 ou AV1, lisibles partout. Le HEVC reste utilisé quand un site ne propose rien d'autre.",
+      "make_slideshows": "Créer des vidéos diaporama",
+      "make_slideshows_desc": "Les publications photo avec musique (mode photo TikTok) deviennent aussi une vidéo 9:16 avec zooms lents et fondus, de la durée de la musique. Les photos sont conservées."
     },
     "update_available": "OmniGet {{version}} est disponible",
     "update_button": "mettre à jour",

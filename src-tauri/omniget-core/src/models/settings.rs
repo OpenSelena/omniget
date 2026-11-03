@@ -273,6 +273,10 @@ pub struct DownloadSettings {
     /// see `core::ytdlp::default_format_selector`.
     #[serde(default)]
     pub allow_h265: bool,
+    /// Turn photo posts that come with a soundtrack into a slideshow video
+    /// (originals kept). On by default: see `core::slideshow`.
+    #[serde(default = "default_true_slideshow")]
+    pub make_slideshows: bool,
     #[serde(default = "default_filename_template")]
     pub filename_template: String,
     #[serde(default)]
@@ -657,6 +661,7 @@ impl Default for AppSettings {
                 auto_download_on_paste: false,
                 allow_private_network: false,
                 allow_h265: false,
+                make_slideshows: true,
                 filename_template: default_filename_template(),
                 organize_by_platform: false,
                 download_subtitles: false,
@@ -739,6 +744,15 @@ impl Default for AppSettings {
 #[cfg(test)]
 mod backcompat_tests {
     use super::*;
+
+    #[test]
+    fn old_download_settings_turn_slideshows_on() {
+        let mut value = serde_json::to_value(AppSettings::default().download).unwrap();
+        value.as_object_mut().unwrap().remove("make_slideshows");
+        let parsed: DownloadSettings = serde_json::from_value(value).unwrap();
+        assert!(parsed.make_slideshows);
+        assert!(!parsed.allow_h265);
+    }
 
     #[test]
     fn settings_da_v0_7_6_carregam_com_tls_verificado() {
@@ -826,4 +840,8 @@ mod backcompat_tests {
         assert!(back.accessibility.reduce_motion);
         assert!(back.accessibility.reduce_transparency);
     }
+}
+
+fn default_true_slideshow() -> bool {
+    true
 }

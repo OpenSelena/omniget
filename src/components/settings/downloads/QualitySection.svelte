@@ -109,6 +109,14 @@
       </div>
       <button class="toggle" class:on={settings.download.allow_h265 ?? false} onclick={() => toggleBool("download", "allow_h265", settings.download.allow_h265 ?? false)} role="switch" aria-checked={settings.download.allow_h265 ?? false} aria-label={$t('settings.download.allow_h265') as string}><span class="toggle-knob"></span></button>
     </div>
+    <div class="divider"></div>
+    <div class="setting-row">
+      <div class="setting-col">
+        <span class="setting-label">{$t('settings.download.make_slideshows')}</span>
+        <span class="setting-path">{$t('settings.download.make_slideshows_desc')}</span>
+      </div>
+      <button class="toggle" class:on={settings.download.make_slideshows ?? true} onclick={() => toggleBool("download", "make_slideshows", settings.download.make_slideshows ?? true)} role="switch" aria-checked={settings.download.make_slideshows ?? true} aria-label={$t('settings.download.make_slideshows') as string}><span class="toggle-knob"></span></button>
+    </div>
   </div>
 
   <div class="preset-grid">

@@ -11,6 +11,7 @@ export type AppSettings = {
     always_ask_path: boolean;
     allow_private_network?: boolean;
     allow_h265?: boolean;
+    make_slideshows?: boolean;
     video_quality: string;
     skip_existing: boolean;
     download_attachments: boolean;
