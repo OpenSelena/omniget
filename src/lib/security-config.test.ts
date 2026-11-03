@@ -17,6 +17,20 @@ describe("Desktop Security Configuration & Build Setup", () => {
     expect(csp).not.toContain("'unsafe-eval'");
   });
 
+  it("permits the loopback media bridge without allowing arbitrary HTTP origins", () => {
+    const csp = JSON.parse(fs.readFileSync(tauriConfPath, "utf-8")).app.security.csp as string;
+    const directives = new Map(csp.split(";").filter((part) => part.trim()).map((part) => {
+      const [name, ...sources] = part.trim().split(/\s+/);
+      return [name, sources];
+    }));
+    for (const name of ["connect-src", "media-src"]) {
+      const sources = directives.get(name) ?? [];
+      expect(sources.filter((source) => source.startsWith("http:"))).toEqual(["http://127.0.0.1:*"]);
+      expect(sources).not.toContain("*");
+    }
+    expect(directives.get("script-src")).not.toContain("http://127.0.0.1:*");
+  });
+
   it("should not allow wildcard '**' filesystem access in assetProtocol scope", () => {
     const tauriConf = JSON.parse(fs.readFileSync(tauriConfPath, "utf-8"));
     const allowList: string[] = tauriConf.app?.security?.assetProtocol?.scope?.allow ?? [];
