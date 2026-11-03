@@ -76,6 +76,34 @@ pub mod integrity {
         ))
     }
 
+    /// SHA-256 of the pinned aria2 1.37.0 Windows build
+    /// (`aria2-1.37.0-win-64bit-build1.zip`, official GitHub release, 2023).
+    pub const ARIA2_WIN64_1_37_0_SHA256: &str =
+        "67d015301eef0b612191212d564c5bb0a14b5b9c4796b76454276a4d28d9b288";
+
+    /// Fetch a single-asset `.sha256` file published next to the download
+    /// (martin-riedl.de layout: `<final url>.sha256`).
+    pub async fn expected_from_sibling(
+        client: &reqwest::Client,
+        final_url: &str,
+    ) -> anyhow::Result<String> {
+        let sums_url = format!("{}.sha256", final_url);
+        let response = client
+            .get(&sums_url)
+            .send()
+            .await
+            .map_err(|e| anyhow!("could not fetch {}: {}", sums_url, e))?;
+        if !response.status().is_success() {
+            return Err(anyhow!(
+                "could not fetch {}: HTTP {}",
+                sums_url,
+                response.status()
+            ));
+        }
+        let text = response.text().await?;
+        parse_single_sha256(&text).ok_or_else(|| anyhow!("no SHA-256 found in {}", sums_url))
+    }
+
     /// Busca o hash esperado num arquivo de sums remoto. `Err` quando a origem
     /// publica sums mas não conseguimos obtê-los — o chamador deve abortar.
     pub async fn expected_from_sums_url(
@@ -422,7 +450,7 @@ async fn download_ffmpeg() -> anyhow::Result<PathBuf> {
         .timeout(std::time::Duration::from_secs(300))
         .build()?;
 
-    for (url, archive_type) in downloads {
+    for (url, archive_type, checksum) in downloads {
         tracing::info!("Downloading FFmpeg component from {}", url);
         let response = client.get(url).send().await?;
         if !response.status().is_success() {
@@ -432,9 +460,12 @@ async fn download_ffmpeg() -> anyhow::Result<PathBuf> {
                 response.status()
             ));
         }
+        let final_url = response.url().to_string();
 
         let temp_path = bin_dir.join(".ffmpeg_download.tmp");
         let bytes = response.bytes().await?;
+        // Fail closed: nothing is written or executed unless the hash matches.
+        verify_ffmpeg_archive(&client, checksum, url, &final_url, &bytes).await?;
         let data = bytes.to_vec();
         let temp_clone = temp_path.clone();
         tokio::task::spawn_blocking(move || std::fs::write(&temp_clone, &data))
@@ -571,52 +602,95 @@ pub(crate) enum ArchiveType {
     TarXz,
 }
 
-fn ffmpeg_download_urls() -> Vec<(&'static str, ArchiveType)> {
+/// Where the expected SHA-256 of an FFmpeg archive comes from. Every source
+/// must publish one: downloads without a verifiable hash are refused.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum ChecksumSource {
+    /// A `sha256sum`-style file listing every asset of the release (BtbN).
+    SumsFile(&'static str),
+    /// A `.sha256` file next to the final (post-redirect) URL (martin-riedl.de).
+    SiblingSha256,
+}
+
+fn ffmpeg_download_urls() -> Vec<(&'static str, ArchiveType, ChecksumSource)> {
     ffmpeg_download_urls_for(std::env::consts::OS, std::env::consts::ARCH)
 }
+
+const BTBN_SUMS: &str =
+    "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/checksums.sha256";
 
 pub(crate) fn ffmpeg_download_urls_for(
     target_os: &str,
     target_arch: &str,
-) -> Vec<(&'static str, ArchiveType)> {
+) -> Vec<(&'static str, ArchiveType, ChecksumSource)> {
+    use ChecksumSource::{SiblingSha256, SumsFile};
     if target_os == "windows" {
         vec![(
             "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-win64-gpl.zip",
             ArchiveType::Zip,
+            SumsFile(BTBN_SUMS),
         )]
     } else if target_os == "macos" && target_arch == "aarch64" {
         vec![
             (
                 "https://ffmpeg.martin-riedl.de/redirect/latest/macos/arm64/release/ffmpeg.zip",
                 ArchiveType::Zip,
+                SiblingSha256,
             ),
             (
                 "https://ffmpeg.martin-riedl.de/redirect/latest/macos/arm64/release/ffprobe.zip",
                 ArchiveType::Zip,
+                SiblingSha256,
             ),
         ]
     } else if target_os == "macos" {
+        // evermeet.cx only publishes GPG signatures; martin-riedl.de builds the
+        // same release for Intel and publishes a SHA-256 for each file.
         vec![
             (
-                "https://evermeet.cx/ffmpeg/getrelease/zip",
+                "https://ffmpeg.martin-riedl.de/redirect/latest/macos/amd64/release/ffmpeg.zip",
                 ArchiveType::Zip,
+                SiblingSha256,
             ),
             (
-                "https://evermeet.cx/ffmpeg/getrelease/ffprobe/zip",
+                "https://ffmpeg.martin-riedl.de/redirect/latest/macos/amd64/release/ffprobe.zip",
                 ArchiveType::Zip,
+                SiblingSha256,
             ),
         ]
     } else if target_arch == "aarch64" {
         vec![(
             "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linuxarm64-gpl.tar.xz",
             ArchiveType::TarXz,
+            SumsFile(BTBN_SUMS),
         )]
     } else {
         vec![(
             "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-master-latest-linux64-gpl.tar.xz",
             ArchiveType::TarXz,
+            SumsFile(BTBN_SUMS),
         )]
     }
+}
+
+/// Resolve and check the expected hash for one downloaded FFmpeg archive.
+async fn verify_ffmpeg_archive(
+    client: &reqwest::Client,
+    source: ChecksumSource,
+    requested_url: &str,
+    final_url: &str,
+    bytes: &[u8],
+) -> anyhow::Result<()> {
+    let asset = requested_url.rsplit('/').next().unwrap_or(requested_url);
+    let expected = match source {
+        ChecksumSource::SumsFile(sums_url) => {
+            integrity::expected_from_sums_url(client, sums_url, asset).await?
+        }
+        ChecksumSource::SiblingSha256 => {
+            integrity::expected_from_sibling(client, final_url).await?
+        }
+    };
+    integrity::verify_sha256(bytes, &expected, asset)
 }
 
 async fn extract_zip_ffmpeg(
@@ -950,6 +1024,7 @@ async fn download_aria2c() -> anyhow::Result<PathBuf> {
     }
 
     let bytes = response.bytes().await?;
+    integrity::verify_sha256(&bytes, integrity::ARIA2_WIN64_1_37_0_SHA256, "aria2c")?;
 
     let data = bytes.to_vec();
     let bin_dir_clone = bin_dir.clone();
@@ -1060,7 +1135,7 @@ mod integrity_tests {
 
         let mac_intel = ffmpeg_download_urls_for("macos", "x86_64");
         assert_eq!(mac_intel.len(), 2);
-        assert!(mac_intel[0].0.contains("evermeet.cx"));
+        assert!(mac_intel[0].0.contains("macos/amd64") && mac_intel[0].0.ends_with("ffmpeg.zip"));
 
         let win = ffmpeg_download_urls_for("windows", "x86_64");
         assert_eq!(win.len(), 1);
@@ -1076,5 +1151,34 @@ mod integrity_tests {
         assert_eq!(linux_x64.len(), 1);
         assert!(linux_x64[0].0.contains("linux64"));
         assert_eq!(linux_x64[0].1, ArchiveType::TarXz);
+    }
+
+    #[test]
+    fn every_ffmpeg_source_publishes_a_checksum() {
+        use super::*;
+        for (os, arch) in [
+            ("windows", "x86_64"),
+            ("macos", "aarch64"),
+            ("macos", "x86_64"),
+            ("linux", "x86_64"),
+            ("linux", "aarch64"),
+        ] {
+            for (url, _, checksum) in ffmpeg_download_urls_for(os, arch) {
+                assert!(
+                    !url.contains("evermeet.cx"),
+                    "{os}/{arch}: evermeet.cx has no SHA-256, it cannot be verified"
+                );
+                if let ChecksumSource::SumsFile(sums) = checksum {
+                    assert!(sums.starts_with("https://"), "{url}");
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn aria2_pin_rejects_tampered_archive() {
+        let pinned = super::integrity::ARIA2_WIN64_1_37_0_SHA256;
+        assert_eq!(pinned.len(), 64);
+        assert!(verify_sha256(b"not the real aria2 zip", pinned, "aria2c").is_err());
     }
 }

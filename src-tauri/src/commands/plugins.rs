@@ -384,6 +384,30 @@ struct GitHubAsset {
     browser_download_url: String,
 }
 
+/// Upper bound for a plugin archive (current plugins are 5-30 MB).
+const MAX_PLUGIN_ZIP_BYTES: u64 = 200 * 1024 * 1024;
+
+/// `owner/name` with GitHub's allowed characters only, so the value can never
+/// change the API path (`../`, query strings, extra segments).
+fn validate_plugin_repo(repo: &str) -> Result<(), String> {
+    let valid_part = |p: &str| {
+        !p.is_empty()
+            && p.len() <= 100
+            && p != "."
+            && p != ".."
+            && p.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.'))
+    };
+    match repo.split_once('/') {
+        Some((owner, name)) if valid_part(owner) && valid_part(name) => Ok(()),
+        _ => Err(format!("Invalid plugin repository: {repo}")),
+    }
+}
+
+fn verify_plugin_archive(bytes: &[u8], expected: &str, label: &str) -> Result<(), String> {
+    omniget_core::core::dependencies::integrity::verify_sha256(bytes, expected, label)
+        .map_err(|e| e.to_string())
+}
+
 pub async fn install_plugin_zip_from_repo(
     state: &Arc<tokio::sync::RwLock<PluginManager>>,
     plugin_id: String,
@@ -394,39 +418,34 @@ pub async fn install_plugin_zip_from_repo(
         return Err("Unsupported platform".to_string());
     }
 
-    let client = crate::core::http_client::apply_global_proxy(
-        reqwest::Client::builder()
-            .user_agent("OmniGet")
-            .timeout(std::time::Duration::from_secs(60))
-            .connect_timeout(std::time::Duration::from_secs(15)),
-    )
-    .build()
-    .map_err(|e| e.to_string())?;
+    validate_plugin_repo(&repo)?;
 
-    let api_url = format!("https://api.github.com/repos/{}/releases/latest", repo);
-    let release: GitHubRelease = client
-        .get(&api_url)
-        .send()
-        .await
-        .map_err(|e| format!("NetworkUnreachable|Failed to fetch release: {}", e))?
-        .json()
-        .await
-        .map_err(|e| format!("Invalid release response: {}", e))?;
-
-    let asset = release
-        .assets
-        .iter()
-        .find(|a| a.name.contains(suffix) && a.name.ends_with(".zip"))
-        .ok_or_else(|| format!("No artifact found for {}", suffix))?;
+    let client = omniget_core::core::tools::github::client().map_err(|e| e.to_string())?;
+    let asset = omniget_core::core::tools::github::asset(&client, &repo, None, |name| {
+        name.contains(suffix) && name.ends_with(".zip")
+    })
+    .await
+    .map_err(|e| format!("NetworkUnreachable|Failed to fetch release: {}", e))?;
+    if asset.size > MAX_PLUGIN_ZIP_BYTES {
+        return Err(format!("Plugin archive too large ({} bytes)", asset.size));
+    }
+    // Plugins are native libraries loaded into the app: refuse any archive whose
+    // SHA-256 is not published by GitHub for this exact release asset.
+    let expected = asset
+        .digest
+        .clone()
+        .ok_or_else(|| format!("{} has no SHA-256 digest; install refused", asset.name))?;
 
     let zip_bytes = client
-        .get(&asset.browser_download_url)
+        .get(&asset.url)
         .send()
         .await
         .map_err(|e| format!("NetworkUnreachable|Failed to download: {}", e))?
         .bytes()
         .await
         .map_err(|e| format!("NetworkUnreachable|Failed to read download: {}", e))?;
+    verify_plugin_archive(&zip_bytes, &expected, &asset.name)?;
+    let release_tag = asset.tag.clone();
 
     let plugin_dir = {
         let manager = state.read().await;
@@ -460,7 +479,7 @@ pub async fn install_plugin_zip_from_repo(
         }
     }
 
-    let version = release.tag_name.trim_start_matches('v').to_string();
+    let version = release_tag.trim_start_matches('v').to_string();
 
     let mut manager = state.write().await;
     manager
@@ -471,7 +490,7 @@ pub async fn install_plugin_zip_from_repo(
             updated_at: chrono::Utc::now().to_rfc3339(),
             enabled: true,
             repo: Some(repo),
-            source_release: Some(release.tag_name),
+            source_release: Some(release_tag),
         })
         .map_err(|e| e.to_string())?;
 
@@ -673,4 +692,25 @@ pub async fn update_plugin(
     repo: String,
 ) -> Result<String, String> {
     install_plugin_from_registry(app, state, plugin_id, repo).await
+}
+
+#[cfg(test)]
+mod plugin_integrity_tests {
+    use super::*;
+
+    #[test]
+    fn plugin_repo_must_be_owner_slash_name() {
+        assert!(validate_plugin_repo("OpenSelena/omniget-plugin-courses").is_ok());
+        for bad in ["", "OpenSelena", "a/b/c", "../x", "a/..", "a/b?x=1", "a/b#x", "a /b"] {
+            assert!(validate_plugin_repo(bad).is_err(), "{bad}");
+        }
+    }
+
+    #[test]
+    fn tampered_plugin_archive_is_refused() {
+        let real = b"plugin zip";
+        let expected = omniget_core::core::dependencies::integrity::sha256_hex(real);
+        assert!(verify_plugin_archive(real, &expected, "p.zip").is_ok());
+        assert!(verify_plugin_archive(b"evil zip", &expected, "p.zip").is_err());
+    }
 }

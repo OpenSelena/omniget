@@ -4,8 +4,15 @@ use std::path::{Path, PathBuf};
 use anyhow::{anyhow, Context};
 use serde::Serialize;
 
-const PDFIUM_DOWNLOAD_BASE: &str =
-    "https://github.com/bblanchon/pdfium-binaries/releases/latest/download";
+const PDFIUM_REPO: &str = "bblanchon/pdfium-binaries";
+
+/// The expected SHA-256 of a release asset; assets without a digest are refused.
+fn require_digest(asset: &crate::core::tools::github::ReleaseAsset) -> anyhow::Result<String> {
+    asset
+        .digest
+        .clone()
+        .ok_or_else(|| anyhow!("{} has no SHA-256 digest; download refused", asset.name))
+}
 
 #[derive(Debug, Clone, Serialize)]
 pub struct DependencyVariant {
@@ -199,31 +206,29 @@ pub async fn ensure_pdfium_with_variant(variant: Option<String>) -> anyhow::Resu
         .with_context(|| format!("creating pdfium target dir {}", target_dir.display()))?;
 
     let archive_name = archive_name_for_variant(variant.as_deref());
-    let url = format!("{}/{}", PDFIUM_DOWNLOAD_BASE, archive_name);
     let lib_filename = pdfium_lib_filename();
     let target_path = target_dir.join(lib_filename);
 
-    tracing::info!("Downloading pdfium from {}", url);
+    // Resolve the asset through the GitHub API so the download URL and the
+    // SHA-256 digest come from the same release (fail closed without digest).
+    let client = crate::core::tools::github::client()?;
+    let asset = crate::core::tools::github::asset(&client, PDFIUM_REPO, None, |name| {
+        name == archive_name
+    })
+    .await?;
+    let expected = require_digest(&asset)?;
+    tracing::info!("Downloading pdfium from {}", asset.url);
 
-    let client = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
-        .timeout(std::time::Duration::from_secs(600))
-        .build()?;
-
-    let response = client.get(&url).send().await?;
+    let response = client.get(&asset.url).send().await?;
     if !response.status().is_success() {
         return Err(anyhow!(
             "Failed to download pdfium from {}: HTTP {}",
-            url,
+            asset.url,
             response.status()
         ));
     }
     let bytes = response.bytes().await?.to_vec();
-    if bytes.len() < 100_000 {
-        return Err(anyhow!(
-            "Downloaded pdfium archive is too small ({} bytes) — likely an error page",
-            bytes.len()
-        ));
-    }
+    crate::core::dependencies::integrity::verify_sha256(&bytes, &expected, &archive_name)?;
 
     let target_path_clone = target_path.clone();
     let target_dir_clone = target_dir.clone();
@@ -347,6 +352,23 @@ fn extract_pdfium_archive(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn pdfium_asset_without_digest_is_refused() {
+        let asset = crate::core::tools::github::ReleaseAsset {
+            tag: "chromium/1".into(),
+            name: "pdfium-win-x64.tgz".into(),
+            url: "https://example.invalid/pdfium-win-x64.tgz".into(),
+            size: 1,
+            digest: None,
+        };
+        assert!(super::require_digest(&asset).is_err());
+        let ok = crate::core::tools::github::ReleaseAsset {
+            digest: Some("a".repeat(64)),
+            ..asset
+        };
+        assert_eq!(super::require_digest(&ok).unwrap(), "a".repeat(64));
+    }
 
     #[test]
     fn test_parse_pdfium_version_string() {
