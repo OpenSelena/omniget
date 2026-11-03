@@ -2,9 +2,12 @@
   import { invoke } from "@tauri-apps/api/core";
   import { t } from "$lib/i18n";
   import { showToast } from "$lib/stores/toast-store.svelte";
+  import { mediaKind } from "$lib/video-ops/media-kind";
   import { pickWhisperModel, type WhisperModel } from "$lib/video-ops/whisper-model";
 
   let { filePath, onClose }: { filePath: string; onClose: () => void } = $props();
+
+  const kind = $derived(mediaKind(filePath));
 
   type Stage = "idle" | "review" | "busy" | "done";
   let stage = $state<Stage>("idle");
@@ -187,24 +190,29 @@
     {:else}
       <h3>{$t('downloads.vop.quick_actions')}</h3>
       <div class="quick">
-        <button disabled={stage === "busy"} onclick={() => runPreset("extract_audio")}>{$t('downloads.vop.extract_audio')}</button>
-        <button disabled={stage === "busy"} onclick={() => runPreset("mute")}>{$t('downloads.vop.mute')}</button>
-        <button disabled={stage === "busy"} onclick={() => runPreset("to_mp4")}>{$t('downloads.vop.to_mp4')}</button>
-        <button disabled={stage === "busy"} onclick={() => runPreset("to_gif")}>{$t('downloads.vop.to_gif')}</button>
-        <button disabled={stage === "busy"} onclick={() => runPreset("vertical_blur")} title={$t('downloads.vop.vertical_blur_hint') as string}>{$t('downloads.vop.vertical_blur')}</button>
-        <button disabled={stage === "busy"} onclick={() => runPreset("vertical_crop")} title={$t('downloads.vop.vertical_crop_hint') as string}>{$t('downloads.vop.vertical_crop')}</button>
+        {#if kind === "video"}<button disabled={stage === "busy"} onclick={() => runPreset("extract_audio")}>{$t('downloads.vop.extract_audio')}</button>{/if}
+        {#if kind === "video"}<button disabled={stage === "busy"} onclick={() => runPreset("mute")}>{$t('downloads.vop.mute')}</button>{/if}
+        {#if kind === "video"}<button disabled={stage === "busy"} onclick={() => runPreset("to_mp4")}>{$t('downloads.vop.to_mp4')}</button>{/if}
+        {#if kind === "video"}<button disabled={stage === "busy"} onclick={() => runPreset("to_gif")}>{$t('downloads.vop.to_gif')}</button>{/if}
+        {#if kind === "video"}<button disabled={stage === "busy"} onclick={() => runPreset("vertical_blur")} title={$t('downloads.vop.vertical_blur_hint') as string}>{$t('downloads.vop.vertical_blur')}</button>{/if}
+        {#if kind === "video"}<button disabled={stage === "busy"} onclick={() => runPreset("vertical_crop")} title={$t('downloads.vop.vertical_crop_hint') as string}>{$t('downloads.vop.vertical_crop')}</button>{/if}
         <button disabled={stage === "busy"} onclick={() => { void sendToPhone(filePath); }} title={$t('downloads.vop.send_to_phone_hint') as string}>{$t('downloads.vop.send_to_phone')}</button>
-        <button disabled={stage === "busy"} onclick={() => runPreset("voice_boost")}>{$t('downloads.vop.voice_boost')}</button>
-        <button disabled={stage === "busy"} onclick={() => { void estimateSmartSpeed(); }}>{$t('downloads.vop.smart_speed_check')}</button>
-        <button disabled={stage === "busy"} onclick={() => runPreset("smart_speed")}>{$t('downloads.vop.smart_speed')}</button>
+        {#if kind === "video"}<button disabled={stage === "busy"} onclick={() => runPreset("voice_boost")}>{$t('downloads.vop.voice_boost')}</button>{/if}
+        {#if kind === "video" || kind === "audio"}
+          <button disabled={stage === "busy"} onclick={() => { void estimateSmartSpeed(); }}>{$t('downloads.vop.smart_speed_check')}</button>
+          <button disabled={stage === "busy"} onclick={() => runPreset("smart_speed")}>{$t('downloads.vop.smart_speed')}</button>
+        {/if}
       </div>
 
-      <div class="trim">
-        <input type="text" placeholder={$t('downloads.vop.trim_start')} bind:value={trimStart} />
-        <input type="text" placeholder={$t('downloads.vop.trim_end')} bind:value={trimEnd} />
-        <button disabled={stage === "busy"} onclick={() => runPreset("trim")}>{$t('downloads.vop.trim')}</button>
-      </div>
+      {#if kind === "video"}
+        <div class="trim">
+          <input type="text" placeholder={$t('downloads.vop.trim_start')} bind:value={trimStart} />
+          <input type="text" placeholder={$t('downloads.vop.trim_end')} bind:value={trimEnd} />
+          <button disabled={stage === "busy"} onclick={() => runPreset("trim")}>{$t('downloads.vop.trim')}</button>
+        </div>
+      {/if}
 
+      {#if kind === "video" || kind === "audio"}
       <h3>{$t('downloads.vop.subtitles_title')}</h3>
       <div class="trim">
         <select bind:value={subtitlesLanguage} aria-label={$t('downloads.vop.subtitles_language') as string}>
@@ -218,6 +226,7 @@
         <label><input type="checkbox" bind:checked={burnSubtitles} /> {$t('downloads.vop.subtitles_burn')}</label>
         <button disabled={stage === "busy"} onclick={() => { void makeSubtitles(); }} title={$t('downloads.vop.subtitles_hint') as string}>{$t('downloads.vop.subtitles_make')}</button>
       </div>
+      {/if}
 
       {#if silenceHint}
         <p class="vop-hint">{silenceHint}</p>

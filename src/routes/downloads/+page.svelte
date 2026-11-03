@@ -33,6 +33,7 @@
   import ReencodeDialog from "$components/dialog/ReencodeDialog.svelte";
   import ToolsPanel from "$components/downloads/ToolsPanel.svelte";
   import VideoOpsOverlay from "$components/downloads/VideoOpsOverlay.svelte";
+  import { mediaKind } from "$lib/video-ops/media-kind";
   import { getSettings, updateSettings } from "$lib/stores/settings-store.svelte";
   import { locale as i18nLocale } from "$lib/i18n";
   import { get } from "svelte/store";
@@ -941,7 +942,7 @@
                   </svg>
                 </button>
               {/if}
-              {#if item.filePath && item.queueKind === "video"}
+              {#if item.filePath && mediaKind(item.filePath) !== "other"}
                 <button
                   class="action-icon-btn"
                   onclick={() => (vopPath = item.filePath!)}
