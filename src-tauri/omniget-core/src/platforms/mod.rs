@@ -9,6 +9,7 @@ pub mod p2p;
 pub mod p2p_words;
 pub mod pinterest;
 pub mod reddit;
+pub mod snapchat;
 pub mod threads;
 pub mod tiktok;
 pub mod traits;
@@ -26,6 +27,7 @@ pub use instagram::InstagramDownloader;
 pub use p2p::P2pDownloader;
 pub use pinterest::PinterestDownloader;
 pub use reddit::RedditDownloader;
+pub use snapchat::SnapchatDownloader;
 pub use threads::ThreadsDownloader;
 pub use tiktok::TikTokDownloader;
 pub use traits::PlatformDownloader;
@@ -180,6 +182,8 @@ impl Platform {
             Some(Platform::Udemy)
         } else if matches("bilibili.com") || matches("bilibili.tv") || host == "b23.tv" {
             Some(Platform::Bilibili)
+        } else if matches("snapchat.com") {
+            Some(Platform::Other("snapchat".to_string()))
         } else if matches("kiwify.com.br") {
             Some(Platform::Other("kiwify".to_string()))
         } else if matches("gumroad.com") {

@@ -233,6 +233,7 @@ pub fn run() {
     registry.register(Arc::new(omniget_core::platforms::InstagramDownloader::new()));
     registry.register(Arc::new(omniget_core::platforms::ThreadsDownloader::new()));
     registry.register(Arc::new(omniget_core::platforms::PinterestDownloader::new()));
+    registry.register(Arc::new(omniget_core::platforms::SnapchatDownloader::new()));
     registry.register(Arc::new(omniget_core::platforms::TikTokDownloader::new()));
     registry.register(Arc::new(omniget_core::platforms::TwitterDownloader::new()));
     registry.register(Arc::new(
