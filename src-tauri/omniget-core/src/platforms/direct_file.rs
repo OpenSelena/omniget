@@ -42,10 +42,12 @@ fn filename_from_url(url: &str) -> String {
 }
 
 async fn probe_client() -> Option<reqwest::Client> {
-    crate::core::net_guard::guard_client(http_client::apply_global_proxy(reqwest::Client::builder()))
-        .timeout(std::time::Duration::from_secs(10))
-        .build()
-        .ok()
+    crate::core::net_guard::guard_client(
+        http_client::apply_global_proxy(reqwest::Client::builder()),
+    )
+    .timeout(std::time::Duration::from_secs(10))
+    .build()
+    .ok()
 }
 
 async fn probe_file(url: &str) -> Option<crate::core::http_fetcher::RemoteProbe> {

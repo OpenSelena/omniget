@@ -212,10 +212,9 @@ pub async fn ensure_pdfium_with_variant(variant: Option<String>) -> anyhow::Resu
     // Resolve the asset through the GitHub API so the download URL and the
     // SHA-256 digest come from the same release (fail closed without digest).
     let client = crate::core::tools::github::client()?;
-    let asset = crate::core::tools::github::asset(&client, PDFIUM_REPO, None, |name| {
-        name == archive_name
-    })
-    .await?;
+    let asset =
+        crate::core::tools::github::asset(&client, PDFIUM_REPO, None, |name| name == archive_name)
+            .await?;
     let expected = require_digest(&asset)?;
     tracing::info!("Downloading pdfium from {}", asset.url);
 

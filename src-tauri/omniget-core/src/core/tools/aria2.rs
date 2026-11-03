@@ -169,7 +169,10 @@ mod tests {
             assert!(super::validate_url(bad).is_err(), "{bad}");
         }
         assert!(super::validate_url("https://example.com/file.iso").is_ok());
-        assert!(super::validate_url("magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567").is_ok());
+        assert!(super::validate_url(
+            "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567"
+        )
+        .is_ok());
     }
 
     #[test]

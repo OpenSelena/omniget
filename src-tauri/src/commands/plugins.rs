@@ -372,16 +372,11 @@ fn platform_artifact_suffix() -> &'static str {
     }
 }
 
+/// Only the tag is read here; asset lookup goes through `tools::github`,
+/// which also returns the published SHA-256 digest.
 #[derive(Deserialize)]
 struct GitHubRelease {
     tag_name: String,
-    assets: Vec<GitHubAsset>,
-}
-
-#[derive(Deserialize)]
-struct GitHubAsset {
-    name: String,
-    browser_download_url: String,
 }
 
 /// Upper bound for a plugin archive (current plugins are 5-30 MB).
@@ -395,7 +390,8 @@ fn validate_plugin_repo(repo: &str) -> Result<(), String> {
             && p.len() <= 100
             && p != "."
             && p != ".."
-            && p.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.'))
+            && p.chars()
+                .all(|c| c.is_ascii_alphanumeric() || matches!(c, '-' | '_' | '.'))
     };
     match repo.split_once('/') {
         Some((owner, name)) if valid_part(owner) && valid_part(name) => Ok(()),
@@ -704,7 +700,16 @@ mod plugin_integrity_tests {
     #[test]
     fn plugin_repo_must_be_owner_slash_name() {
         assert!(validate_plugin_repo("OpenSelena/omniget-plugin-courses").is_ok());
-        for bad in ["", "OpenSelena", "a/b/c", "../x", "a/..", "a/b?x=1", "a/b#x", "a /b"] {
+        for bad in [
+            "",
+            "OpenSelena",
+            "a/b/c",
+            "../x",
+            "a/..",
+            "a/b?x=1",
+            "a/b#x",
+            "a /b",
+        ] {
             assert!(validate_plugin_repo(bad).is_err(), "{bad}");
         }
     }

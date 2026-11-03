@@ -609,8 +609,11 @@ const ALLOWED_LOOPBACK_PAIR_ORIGINS: &[&str] = &[
 
 /// Browser extension schemes. The part after `://` is the extension id and must
 /// be a bare id (letters, digits, `-`), with no path, port or user info.
-const EXTENSION_ORIGIN_SCHEMES: &[&str] =
-    &["chrome-extension://", "moz-extension://", "safari-web-extension://"];
+const EXTENSION_ORIGIN_SCHEMES: &[&str] = &[
+    "chrome-extension://",
+    "moz-extension://",
+    "safari-web-extension://",
+];
 
 fn is_allowed_pair_origin(origin: &str) -> bool {
     let o = origin.trim();
@@ -956,7 +959,10 @@ mod tests {
             "tauri://localhost",
             "http://localhost:1420",
         ] {
-            assert!(super::is_allowed_pair_origin(good), "{good} must be accepted");
+            assert!(
+                super::is_allowed_pair_origin(good),
+                "{good} must be accepted"
+            );
         }
     }
 

@@ -234,7 +234,15 @@ const EXEC_LONG: &[&str] = &[
 /// these binaries but never at an arbitrary executable.
 const JS_RUNTIME_NAMES: &[&str] = &["deno", "node", "bun", "quickjs"];
 const JS_RUNTIME_BINARIES: &[&str] = &[
-    "deno", "deno.exe", "node", "node.exe", "bun", "bun.exe", "qjs", "qjs.exe", "quickjs",
+    "deno",
+    "deno.exe",
+    "node",
+    "node.exe",
+    "bun",
+    "bun.exe",
+    "qjs",
+    "qjs.exe",
+    "quickjs",
     "quickjs.exe",
 ];
 
@@ -259,7 +267,7 @@ fn resolve_long(name: &str) -> Option<(&'static str, Arity)> {
     if !name.starts_with("--") || name.len() < 3 {
         return None;
     }
-    if DANGEROUS_LONG.iter().any(|d| *d == name) {
+    if DANGEROUS_LONG.contains(&name) {
         return None;
     }
     if let Some(hit) = lookup_exact(name) {
@@ -298,7 +306,11 @@ fn is_valid_js_runtime(value: &str) -> bool {
     match path {
         None => true,
         Some(p) => {
-            let file = p.rsplit(['/', '\\']).next().unwrap_or("").to_ascii_lowercase();
+            let file = p
+                .rsplit(['/', '\\'])
+                .next()
+                .unwrap_or("")
+                .to_ascii_lowercase();
             !p.is_empty() && JS_RUNTIME_BINARIES.contains(&file.as_str())
         }
     }
@@ -428,7 +440,10 @@ mod tests {
             &["--exec", "touch /tmp/x"],
             &["--exec=touch /tmp/x"],
             &["--exec-befo", "touch /tmp/x"],
-            &["--use-postprocessor", "Exec:exec_cmd=touch /tmp/x;when=pre_process"],
+            &[
+                "--use-postprocessor",
+                "Exec:exec_cmd=touch /tmp/x;when=pre_process",
+            ],
             &["--use-post", "Exec:exec_cmd=id"],
             &["--netrc-cmd", "id"],
             &["--netrc-c", "id"],
@@ -443,8 +458,16 @@ mod tests {
         ];
         for tokens in vectors {
             let out = filter_user_flags(&v(tokens));
-            assert!(out.accepted.is_empty(), "{tokens:?} must be refused, got {:?}", out.accepted);
-            assert_eq!(out.rejected.len(), tokens.len(), "{tokens:?}: value must be dropped too");
+            assert!(
+                out.accepted.is_empty(),
+                "{tokens:?} must be refused, got {:?}",
+                out.accepted
+            );
+            assert_eq!(
+                out.rejected.len(),
+                tokens.len(),
+                "{tokens:?}: value must be dropped too"
+            );
         }
     }
 

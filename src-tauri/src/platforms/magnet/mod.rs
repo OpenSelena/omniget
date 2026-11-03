@@ -381,7 +381,8 @@ impl PlatformDownloader for MagnetDownloader {
 fn selected_size(lengths: &[u64], only_files: Option<&[usize]>) -> u64 {
     match only_files {
         Some(sel) if !sel.is_empty() => {
-            let mut picked: Vec<usize> = sel.iter().copied().filter(|i| *i < lengths.len()).collect();
+            let mut picked: Vec<usize> =
+                sel.iter().copied().filter(|i| *i < lengths.len()).collect();
             picked.sort_unstable();
             picked.dedup();
             picked.iter().map(|i| lengths[*i]).sum()

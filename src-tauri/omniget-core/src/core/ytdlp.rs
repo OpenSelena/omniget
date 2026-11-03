@@ -3133,7 +3133,9 @@ pub fn default_format_selector(
     if allow_h265 {
         return base;
     }
-    let h = height.map(|h| format!("[height<={}]", h)).unwrap_or_default();
+    let h = height
+        .map(|h| format!("[height<={}]", h))
+        .unwrap_or_default();
     let preferred = match mode {
         "mute" => format!("bv*{NO_HEVC}{h}"),
         _ if ffmpeg_available => {
@@ -3143,7 +3145,6 @@ pub fn default_format_selector(
     };
     format!("{preferred}/{base}")
 }
-
 
 #[allow(clippy::too_many_arguments)]
 pub async fn download_video(
@@ -6443,16 +6444,26 @@ mod hevc_tests {
     #[test]
     fn hevc_is_skipped_by_default_with_fallback() {
         let sel = default_format_selector("video", Some(1080), true, false);
-        assert!(sel.starts_with("bv*[vcodec!^=hev][vcodec!^=hvc][vcodec!^=h265][height<=1080]+ba[ext=m4a]/"));
-        assert!(sel.ends_with("/bv*[height<=1080]+ba[ext=m4a]/bv*[height<=1080]+ba/b[height<=1080]/b"));
+        assert!(sel.starts_with(
+            "bv*[vcodec!^=hev][vcodec!^=hvc][vcodec!^=h265][height<=1080]+ba[ext=m4a]/"
+        ));
+        assert!(
+            sel.ends_with("/bv*[height<=1080]+ba[ext=m4a]/bv*[height<=1080]+ba/b[height<=1080]/b")
+        );
         let mute = default_format_selector("mute", None, true, false);
         assert_eq!(mute, "bv*[vcodec!^=hev][vcodec!^=hvc][vcodec!^=h265]/bv*/b");
     }
 
     #[test]
     fn allowing_hevc_keeps_the_previous_selectors() {
-        assert_eq!(default_format_selector("video", None, true, true), "bv*+ba[ext=m4a]/bv*+ba/b");
-        assert_eq!(default_format_selector("video", Some(720), false, true), "b[height<=720]/bv*[height<=720]/b");
+        assert_eq!(
+            default_format_selector("video", None, true, true),
+            "bv*+ba[ext=m4a]/bv*+ba/b"
+        );
+        assert_eq!(
+            default_format_selector("video", Some(720), false, true),
+            "b[height<=720]/bv*[height<=720]/b"
+        );
         assert_eq!(default_format_selector("audio", None, true, false), "ba/b");
     }
 }

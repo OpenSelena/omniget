@@ -184,7 +184,10 @@ mod tests {
             "http://nas.local/a.zip",
             "http://router/a.zip",
         ] {
-            assert!(check_url_without_dns(url).is_err(), "{url} should be refused");
+            assert!(
+                check_url_without_dns(url).is_err(),
+                "{url} should be refused"
+            );
         }
     }
 
@@ -196,7 +199,10 @@ mod tests {
             "https://[2606:4700::1111]/file.zip",
             "https://cdn.example.org:8443/a.bin",
         ] {
-            assert!(check_url_without_dns(url).is_ok(), "{url} should be allowed");
+            assert!(
+                check_url_without_dns(url).is_ok(),
+                "{url} should be allowed"
+            );
         }
     }
 

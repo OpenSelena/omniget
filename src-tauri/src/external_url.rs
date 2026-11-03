@@ -335,8 +335,7 @@ pub async fn handle_external_url(
 
     let settings = config::load_settings(app);
     let can_queue_directly = !needs_confirmation
-        && (!settings.download.always_ask_path
-        || settings.download.auto_download_on_paste)
+        && (!settings.download.always_ask_path || settings.download.auto_download_on_paste)
         && has_valid_output_dir(&settings.download.default_output_dir);
 
     let open_app_flag = crate::extension_storage::peek_extension_open_app(&url);
@@ -428,12 +427,21 @@ mod tests {
 
     #[test]
     fn omniget_links_always_need_confirmation() {
-        assert!(needs_in_app_confirmation("omniget://youtu.be/x", "command-line"));
-        assert!(needs_in_app_confirmation("omniget:https://example.com/a", "single-instance"));
+        assert!(needs_in_app_confirmation(
+            "omniget://youtu.be/x",
+            "command-line"
+        ));
+        assert!(needs_in_app_confirmation(
+            "omniget:https://example.com/a",
+            "single-instance"
+        ));
         assert!(needs_in_app_confirmation("https://youtu.be/x", "deep-link"));
         assert!(!needs_in_app_confirmation("https://youtu.be/x", "bridge"));
         assert!(!needs_in_app_confirmation("https://youtu.be/x", "mcp"));
-        assert!(!needs_in_app_confirmation("https://youtu.be/x", "command-line"));
+        assert!(!needs_in_app_confirmation(
+            "https://youtu.be/x",
+            "command-line"
+        ));
         assert_eq!(ExternalUrlAction::Confirm.as_str(), "confirm");
     }
 
