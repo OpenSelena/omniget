@@ -65,6 +65,29 @@
     }
   }
 
+  let share = $state<{ id: string; url: string; qr_svg: string } | null>(null);
+
+  async function sendToPhone(path: string) {
+    try {
+      await stopShare();
+      share = await invoke<{ id: string; url: string; qr_svg: string }>("phone_share_start", { path });
+    } catch (e) {
+      fail(e);
+    }
+  }
+
+  async function stopShare() {
+    if (!share) return;
+    const id = share.id;
+    share = null;
+    await invoke("phone_share_stop", { id }).catch(() => {});
+  }
+
+  function close() {
+    void stopShare();
+    onClose();
+  }
+
   let burnSubtitles = $state(false);
   let subtitlesLanguage = $state("auto");
 
@@ -135,22 +158,31 @@
   class="overlay"
   role="button"
   tabindex="0"
-  onclick={(e) => { if (e.target === e.currentTarget) onClose(); }}
-  onkeydown={(e) => { if (e.key === "Escape") onClose(); }}
+  onclick={(e) => { if (e.target === e.currentTarget) close(); }}
+  onkeydown={(e) => { if (e.key === "Escape") close(); }}
 >
   <div class="panel" role="dialog" aria-modal="true" aria-label={$t('downloads.vop.title') as string}>
     <div class="head">
       <h2>{$t('downloads.vop.title')}</h2>
-      <button class="x" onclick={onClose} aria-label={$t('common.close') as string}>✕</button>
+      <button class="x" onclick={close} aria-label={$t('common.close') as string}>✕</button>
     </div>
 
     <p class="file" title={filePath}>{filePath}</p>
+
+    {#if share}
+      <div class="share">
+        <img src={`data:image/svg+xml;charset=utf-8,${encodeURIComponent(share.qr_svg)}`} alt={$t('downloads.vop.send_to_phone_qr') as string} width="200" height="200" />
+        <p>{$t('downloads.vop.send_to_phone_hint')}</p>
+        <button onclick={() => { void stopShare(); }}>{$t('downloads.vop.send_to_phone_stop')}</button>
+      </div>
+    {/if}
 
     {#if stage === "done"}
       <div class="done">
         <p>{$t('downloads.vop.done')}</p>
         <p class="result" title={resultPath}>{resultPath}</p>
-        <button class="primary" onclick={onClose}>{$t('common.close')}</button>
+        <button onclick={() => { void sendToPhone(resultPath); }}>{$t('downloads.vop.send_to_phone')}</button>
+        <button class="primary" onclick={close}>{$t('common.close')}</button>
       </div>
     {:else}
       <h3>{$t('downloads.vop.quick_actions')}</h3>
@@ -161,6 +193,7 @@
         <button disabled={stage === "busy"} onclick={() => runPreset("to_gif")}>{$t('downloads.vop.to_gif')}</button>
         <button disabled={stage === "busy"} onclick={() => runPreset("vertical_blur")} title={$t('downloads.vop.vertical_blur_hint') as string}>{$t('downloads.vop.vertical_blur')}</button>
         <button disabled={stage === "busy"} onclick={() => runPreset("vertical_crop")} title={$t('downloads.vop.vertical_crop_hint') as string}>{$t('downloads.vop.vertical_crop')}</button>
+        <button disabled={stage === "busy"} onclick={() => { void sendToPhone(filePath); }} title={$t('downloads.vop.send_to_phone_hint') as string}>{$t('downloads.vop.send_to_phone')}</button>
         <button disabled={stage === "busy"} onclick={() => runPreset("voice_boost")}>{$t('downloads.vop.voice_boost')}</button>
         <button disabled={stage === "busy"} onclick={() => { void estimateSmartSpeed(); }}>{$t('downloads.vop.smart_speed_check')}</button>
         <button disabled={stage === "busy"} onclick={() => runPreset("smart_speed")}>{$t('downloads.vop.smart_speed')}</button>
@@ -362,5 +395,17 @@
     flex-direction: column;
     gap: 8px;
     align-items: flex-start;
+  }
+  .share {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    margin: 8px 0 12px;
+    text-align: center;
+  }
+  .share img {
+    background: #fff;
+    border-radius: 8px;
   }
 </style>

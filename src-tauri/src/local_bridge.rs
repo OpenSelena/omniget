@@ -199,7 +199,7 @@ pub fn media_stream_url(path: String) -> Result<String, String> {
 
 /// MIME types the player asks this bridge for. `typefind` sniffs the bytes
 /// anyway; the header just stops WebKit from guessing a container wrong.
-fn media_mime(path: &Path) -> &'static str {
+pub(crate) fn media_mime(path: &Path) -> &'static str {
     match path
         .extension()
         .and_then(|ext| ext.to_str())

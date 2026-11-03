@@ -19,6 +19,7 @@ pub mod external_url;
 pub mod hotkey;
 pub mod local_bridge;
 pub mod mcp;
+pub mod phone_share;
 pub mod models;
 pub mod platforms;
 pub mod plugin_host;
@@ -1117,6 +1118,8 @@ pub fn run() {
             commands::video_ops::video_op_silence_estimate,
             commands::video_ops::video_op_preset,
             commands::video_ops::video_op_burn_subtitles,
+            phone_share::phone_share_start,
+            phone_share::phone_share_stop,
             commands::video_ops::video_op_propose,
             commands::video_ops::video_op_run,
             commands::video_ops::detect_shot_changes,

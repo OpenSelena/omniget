@@ -3649,7 +3649,11 @@
       "subtitles_burn": "Burn into the video",
       "subtitles_make": "Create subtitles",
       "subtitles_hint": "Writes .srt and .vtt files next to the video with Whisper, on your computer.",
-      "subtitles_setup": "Install Whisper and download a model first, in Tools > Transcribe."
+      "subtitles_setup": "Install Whisper and download a model first, in Tools > Transcribe.",
+      "send_to_phone": "Send to phone",
+      "send_to_phone_qr": "QR code to download the file on your phone",
+      "send_to_phone_hint": "Scan with a phone on the same Wi-Fi. The link works once and expires in 10 minutes.",
+      "send_to_phone_stop": "Stop sharing"
     },
     "quality_hint": "Qualità in download per questo elemento",
     "stats_line": "{{count}} download · {{size}} salvati",

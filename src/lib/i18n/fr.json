@@ -3649,7 +3649,11 @@
       "subtitles_burn": "Incruster dans la vidéo",
       "subtitles_make": "Créer les sous-titres",
       "subtitles_hint": "Crée des fichiers .srt et .vtt à côté de la vidéo avec Whisper, sur votre ordinateur.",
-      "subtitles_setup": "Installez d'abord Whisper et téléchargez un modèle, dans Outils > Transcrire."
+      "subtitles_setup": "Installez d'abord Whisper et téléchargez un modèle, dans Outils > Transcrire.",
+      "send_to_phone": "Envoyer sur le téléphone",
+      "send_to_phone_qr": "QR code pour télécharger le fichier sur votre téléphone",
+      "send_to_phone_hint": "Scannez avec un téléphone connecté au même Wi-Fi. Le lien ne marche qu'une fois et expire dans 10 minutes.",
+      "send_to_phone_stop": "Arrêter le partage"
     },
     "quality_hint": "Qualité en téléchargement pour cet élément",
     "stats_line": "{{count}} téléchargements · {{size}} enregistrés",
