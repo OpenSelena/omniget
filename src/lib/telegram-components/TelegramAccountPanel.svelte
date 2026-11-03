@@ -14,7 +14,7 @@
     type TelegramSelf,
   } from "$lib/telegram-bridge";
 
-  let { open = $bindable(false), sessionPhone } = $props<{ open: boolean; sessionPhone: string }>();
+  let { open = $bindable(false), sessionPhone }: { open: boolean; sessionPhone: string } = $props();
 
   let loading = $state(false);
   let error = $state("");

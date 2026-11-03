@@ -5,10 +5,10 @@
   let {
     open = $bindable(false),
     onPickResult,
-  } = $props<{
+  }: {
     open: boolean;
     onPickResult?: (hit: TelegramGlobalSearchHit) => void;
-  }>();
+  } = $props();
 
   let query = $state("");
   let inputRef: HTMLInputElement | null = $state(null);

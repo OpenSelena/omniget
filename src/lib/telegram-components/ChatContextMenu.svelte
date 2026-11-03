@@ -1,6 +1,4 @@
-<script lang="ts">
-  import { onMount } from "svelte";
-
+<script module lang="ts">
   export type MenuItem = {
     id: string;
     label: string;
@@ -9,6 +7,10 @@
     disabled?: boolean;
     onSelect?: () => void;
   };
+</script>
+
+<script lang="ts">
+  import { onMount } from "svelte";
 
   type MenuItemOrSeparator = MenuItem | { separator: true };
 
@@ -17,12 +19,12 @@
     y,
     items,
     onClose,
-  } = $props<{
+  }: {
     x: number;
     y: number;
     items: MenuItemOrSeparator[];
     onClose: () => void;
-  }>();
+  } = $props();
 
   let menuEl: HTMLDivElement | undefined = $state();
   let activeIdx = $state<number>(-1);

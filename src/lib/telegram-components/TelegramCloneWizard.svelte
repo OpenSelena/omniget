@@ -18,10 +18,10 @@
   let {
     open = $bindable(false),
     chats,
-  } = $props<{
+  }: {
     open: boolean;
     chats: ChatLite[];
-  }>();
+  } = $props();
 
   let view = $state<"list" | "new">("list");
   let sessions = $state<TelegramCloneSession[]>([]);

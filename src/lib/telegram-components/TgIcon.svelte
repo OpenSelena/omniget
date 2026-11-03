@@ -1,5 +1,5 @@
 <script lang="ts">
-  let { name, size = 22 } = $props<{
+  let { name, size = 22 }: {
     name:
       | "saved"
       | "star"
@@ -25,7 +25,7 @@
       | "chat-photo"
       | "photo-video";
     size?: number;
-  }>();
+  } = $props();
 </script>
 
 <svg

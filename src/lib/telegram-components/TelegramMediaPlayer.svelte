@@ -19,14 +19,14 @@
     onClose,
     onDownload,
     originRect,
-  } = $props<{
+  }: {
     chat: TelegramChat;
     playlist: TelegramMediaItem[];
     initialIdx: number;
     onClose: () => void;
     onDownload?: (item: TelegramMediaItem) => void;
     originRect?: DOMRect;
-  }>();
+  } = $props();
 
   let flipRoot: HTMLElement | null = $state(null);
   let flipPlayed = $state(false);

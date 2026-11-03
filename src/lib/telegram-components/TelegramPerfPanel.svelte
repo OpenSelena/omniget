@@ -14,7 +14,7 @@
     type TelegramSyncState,
   } from "$lib/telegram-bridge";
 
-  let { open = $bindable(false) } = $props<{ open: boolean }>();
+  let { open = $bindable(false) }: { open: boolean } = $props();
 
   let perf = $state<TelegramPerfSettings | null>(null);
   let loading = $state(false);

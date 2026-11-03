@@ -80,11 +80,11 @@
     outputDir = "",
     onDownloadEnqueued = () => {},
     onLogout = () => {},
-  } = $props<{
+  }: {
     outputDir?: string;
     onDownloadEnqueued?: () => void;
     onLogout?: () => void;
-  }>();
+  } = $props();
 
   type ConnectionStatus = "connected" | "checking" | "disconnected";
   let connectionStatus = $state<ConnectionStatus>("connected");

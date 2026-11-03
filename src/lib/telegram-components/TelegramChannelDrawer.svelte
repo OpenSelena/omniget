@@ -25,12 +25,12 @@
     chat,
     photo,
     onChatRemoved,
-  } = $props<{
+  }: {
     open: boolean;
     chat: ChatLite | null;
     photo?: string;
     onChatRemoved?: (chatId: number) => void;
-  }>();
+  } = $props();
 
   let tab = $state<"info" | "members">("info");
   let info = $state<TelegramFullChannelInfo | null>(null);

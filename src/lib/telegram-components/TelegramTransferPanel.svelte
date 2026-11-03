@@ -16,12 +16,12 @@
     active,
     history,
     onClearHistory,
-  } = $props<{
+  }: {
     open: boolean;
     active: TransferRecord[];
     history: TransferRecord[];
     onClearHistory?: () => void;
-  }>();
+  } = $props();
 
   function close() {
     open = false;

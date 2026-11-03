@@ -4,12 +4,12 @@
     height,
     gap = 6,
     block = false,
-  } = $props<{
+  }: {
     lines?: number[];
     height?: number;
     gap?: number;
     block?: boolean;
-  }>();
+  } = $props();
 </script>
 
 {#if block}
