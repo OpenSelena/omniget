@@ -19,7 +19,7 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 -->
 
 <p align="center">
-  <img src="assets/readme/hero.gif" alt="OmniGet: paste a link, get the file. Loop, the mascot, sends video, music, PDF, image, course and torrent files into a folder. Courses, video, audio, images and torrents, then transcribe, convert, read and study." width="100%" />
+  <img src="assets/readme/hero.gif" alt="OmniGet: paste a link, get the file. Loop, the mascot, sends video, music, PDF, image, course and torrent files into a folder. Courses, video, audio, images and torrents, then transcribe, convert and read." width="100%" />
 </p>
 
 <h1 align="center">OmniGet</h1>
@@ -32,7 +32,7 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 </p>
 
 <p align="center">
-  <b>Download Udemy and Hotmart courses, YouTube, Instagram, X, Pinterest, TikTok and 1,800+ other sites.<br/>Then transcribe, convert, read and study what you saved. One free desktop app, no terminal.</b>
+  <b>Download Udemy and Hotmart courses, YouTube, Instagram, X, Pinterest, TikTok and 1,800+ other sites.<br/>Then transcribe, convert and read what you saved. One free desktop app, no terminal.</b>
 </p>
 
 <p align="center">
@@ -75,7 +75,7 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 - [The browser extension, step by step](#the-browser-extension-step-by-step)
 - [The Tools section: 158 tools in 25 categories](#the-tools-section-158-tools-in-25-categories)
 - [OmniGet for AI agents: MCP server and Claude Code plugin](#omniget-for-ai-agents-mcp-server-and-claude-code-plugin)
-- [Plugins: Courses, Study, Telegram, Convert](#plugins-courses-study-telegram-convert)
+- [Plugins: Courses, Telegram, Convert](#plugins-courses-telegram-convert)
 - [Built-in chat, off by default](#built-in-chat-off-by-default)
 - [For League of Legends players](#for-league-of-legends-players)
 - [Everything else in the box](#everything-else-in-the-box)
@@ -125,12 +125,12 @@ Pick your system. Every build is published on the [Releases page](https://github
   </tr>
   <tr>
     <td><b>Windows 10 / 11</b></td>
-    <td><code>omniget_x.y.z_x64-setup.exe</code> (installer)<br/><code>omniget_x.y.z_x64-portable.exe</code> (no install, runs from anywhere)<br/><code>omniget_x.y.z_x64_en-US.msi</code> (for IT deployments)</td>
-    <td><code>winget install -e --id OpenSelena.OmniGet</code></td>
+    <td><code>OmniGet_x.y.z_x64-setup.exe</code> (installer)<br/><code>omniget_x.y.z_x64-portable.exe</code> (no install, runs from anywhere)<br/><code>OmniGet_x.y.z_x64_en-US.msi</code> (for IT deployments)</td>
+    <td>Not on winget yet: the manifest is ready in <code>packaging/winget/</code> and still has to be submitted</td>
   </tr>
   <tr>
     <td><b>macOS 10.15+</b></td>
-    <td><code>omniget_x.y.z_aarch64.dmg</code> for Apple Silicon (M1 and later)<br/><code>omniget_x.y.z_x64.dmg</code> for Intel Macs</td>
+    <td><code>OmniGet_x.y.z_aarch64.dmg</code> for Apple Silicon (M1 and later)<br/><code>OmniGet_x.y.z_x64.dmg</code> for Intel Macs</td>
     <td><code>brew install --cask OpenSelena/tap/omniget</code></td>
   </tr>
   <tr>
@@ -142,7 +142,7 @@ Pick your system. Every build is published on the [Releases page](https://github
 
 ### The first launch warning, and how to clear it
 
-OmniGet is not signed with a paid certificate, so each system shows a warning the first time. This is normal for open source desktop apps and you handle it once.
+OmniGet is not code-signed yet (the Windows installer of v0.14.0 carries no signature), so each system shows a warning the first time. This is normal for open source desktop apps and you handle it once.
 
 **Windows.** SmartScreen shows a blue box. Click **More info**, then **Run anyway**.
 
@@ -554,33 +554,17 @@ Setup downloads the prebuilt `omniget-cli` for your OS, which gives the skill Om
 
 ---
 
-## Plugins: Courses, Study, Telegram, Convert
+## Plugins: Courses, Telegram, Convert
 
 Core plugins are embedded directly into the application binary, eliminating runtime download and ABI compatibility errors. The Marketplace page shows active plugins, what each plugin is allowed to do (events, notifications, settings, download folders, proxy, managed tools, download queue), and lets you configure or toggle them.
 
 <p align="center">
-  <img src="assets/readme/marketplace.png" alt="OmniGet Marketplace listing the Courses, Study, Telegram and Convert plugins with version, author, permissions and enable switches" width="900" />
+  <img src="assets/readme/marketplace.png" alt="OmniGet Marketplace listing the Courses, Telegram and Convert plugins with version, author, permissions and enable switches" width="900" />
 </p>
 
 ### <img src="https://api.iconify.design/ph:graduation-cap.svg?color=%23F28500" width="20" height="20" align="center" alt="Courses" /> Courses
 
-The embedded Courses plugin supports 38 learning platforms, including **Hotmart**, **Udemy**, **Kiwify**, **Rocketseat**, **Coursera**, **Domestika**, **Skillshare**, **Alura**, and **Ebac**. Sign in through a webview inside the app, with saved cookies from the extension, or with account credentials where available. OmniGet lists your purchases, opens the course outline so you can select the sections you want (DRM-protected lectures are skipped and reported), and downloads lessons and attachments with optional continuous numbering. Downloaded courses index into Study automatically.
-
-### <img src="https://api.iconify.design/ph:book-open.svg?color=%233D5BF0" width="20" height="20" align="center" alt="Study" /> Study
-
-Study turns the folder of files you downloaded into something you can actually finish.
-
-<p align="center">
-  <img src="assets/readme/illustration-study.png" alt="Loop with headphones reading a book on a cushion, surrounded by a paused video lesson, flashcards, a notebook with a knowledge graph, a pomodoro timer and a vinyl record" width="900" />
-</p>
-
-- Library and player. Point Study at your course folders (nothing is copied or moved). The player resumes to the second, and pressing **N** captures a note at the current timestamp that jumps back there when clicked.
-- Reader. PDF, EPUB, DJVU, MOBI, AZW3, FB2, CBZ, CBR, TXT, RTF and HTML, with highlights, bookmarks, collections, a focus mode and a paper-like theme. Covers, titles and authors are pulled from the files.
-- Notes. A Markdown and LaTeX editor with links between pages, a daily journal, templates, tags, a knowledge graph, and export to `.md` or PDF. Any note can become a flashcard.
-- Anki. Spaced repetition decks with import from `.apkg`, `.txt` and CSV, filtered decks, presets, note types, tags, media, stats and a review log.
-- Focus. Pomodoro and deep-work timers with daily and weekly targets that pause the player when the session ends.
-- Progress and achievements. Streaks, daily goals, a year heatmap and local XP with no leaderboard.
-- Music. Your local library with covers, artists and albums, synced lyrics, favorites, history, playlists, genres, transcoding, and browsers for Spotify, SoundCloud and YouTube Music so playlists and likes sit next to your files.
+The embedded Courses plugin supports 38 learning platforms, including **Hotmart**, **Udemy**, **Kiwify**, **Rocketseat**, **Coursera**, **Domestika**, **Skillshare**, **Alura**, and **Ebac**. Sign in through a webview inside the app, with saved cookies from the extension, or with account credentials where available. OmniGet lists your purchases, opens the course outline so you can select the sections you want (DRM-protected lectures are skipped and reported), and downloads lessons and attachments with optional continuous numbering.
 
 ### <img src="https://cdn.simpleicons.org/telegram/2CA5E0" width="20" height="20" align="center" alt="Telegram" /> Telegram
 
@@ -644,7 +628,7 @@ OmniGet downloads what your own logged-in session can already open. It does not 
 
 ## Code signing policy
 
-Free code signing on Windows provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org).
+Windows releases are not code-signed yet. The release workflow is ready to sign the Windows installer through [SignPath.io](https://about.signpath.io) with a [SignPath Foundation](https://signpath.org) certificate once the project is accepted by SignPath Foundation and the `SIGNPATH_API_TOKEN` secret is configured. See [docs/windows-signing.md](docs/windows-signing.md).
 
 Code changes and signed releases are reviewed and approved by the OpenSelena maintainers. See [Privacy and what OmniGet refuses to do](#privacy-and-what-omniget-refuses-to-do) and the [privacy documentation](https://omniget.nav.bd/docs/#privacy) for how OmniGet handles data.
 
@@ -656,10 +640,10 @@ Code changes and signed releases are reviewed and approved by the OpenSelena mai
 Yes. GPL-3.0, no paid tier, no ads, no account.
 
 **Is OmniGet a yt-dlp GUI?**
-Partly. yt-dlp handles the long tail of sites and OmniGet bundles it, verifies it and updates it. On top of that sit native extractors for courses, Instagram, X, Pinterest, Bilibili, Telegram and torrents, a queue with resume and retry, the Tools section, and the Study library.
+Partly. yt-dlp handles the long tail of sites and OmniGet bundles it, verifies it and updates it. On top of that sit native extractors for courses, Instagram, X, Pinterest, Bilibili, Telegram and torrents, a queue with resume and retry, and the Tools section.
 
 **Can OmniGet download a Udemy or Hotmart course I bought?**
-Yes. The Courses plugin is embedded directly in the app. Sign in through the app, pick the course and sections, and download. Lessons and attachments land in a folder per course and appear in Study. 38 platforms are supported, including Hotmart, Udemy, Kiwify, Rocketseat, Coursera, Domestika, and more.
+Yes. The Courses plugin is embedded directly in the app. Sign in through the app, pick the course and sections, and download. Lessons and attachments land in a folder per course. 38 platforms are supported, including Hotmart, Udemy, Kiwify, Rocketseat, Coursera, Domestika, and more.
 
 **Can it download Instagram stories, close friends or highlights?**
 Yes, using your own session captured by the browser extension. Stories are downloaded without being marked as seen.
@@ -742,7 +726,7 @@ pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'
 
 Releases sign their updater artifacts with a private key only the maintainer holds, so a plain `pnpm tauri build` stops with "A public key has been found, but no private key". The flag above turns those artifacts off for a local build and changes nothing else.
 
-The `courses`, `telegram`, `convert` and `study` plugins live inside `src-tauri/plugins/` and compile into the main binary. The plugin registry is [omniget-plugins](https://github.com/OpenSelena/omniget-plugins).
+The `courses`, `telegram` and `convert` plugins live inside `src-tauri/plugins/` and compile into the main binary. The plugin registry is [omniget-plugins](https://github.com/OpenSelena/omniget-plugins).
 
 Stack: Tauri 2, Rust, SvelteKit with Svelte 5, SQLite, yt-dlp, FFmpeg, librqbit for torrents, whisper.cpp, aria2, gallery-dl.
 
