@@ -596,15 +596,37 @@ struct PairResponse {
     token: Option<String>,
 }
 
+/// Loopback origins allowed to pair: the Tauri webview and the dev server only.
+/// The comparison is exact (scheme, host and port), so look-alike hosts such as
+/// `http://localhost.evil.example` or `http://127.0.0.1.nip.io` are refused.
+const ALLOWED_LOOPBACK_PAIR_ORIGINS: &[&str] = &[
+    "tauri://localhost",
+    "http://tauri.localhost",
+    "https://tauri.localhost",
+    "http://localhost:1420",
+    "http://127.0.0.1:1420",
+];
+
+/// Browser extension schemes. The part after `://` is the extension id and must
+/// be a bare id (letters, digits, `-`), with no path, port or user info.
+const EXTENSION_ORIGIN_SCHEMES: &[&str] =
+    &["chrome-extension://", "moz-extension://", "safari-web-extension://"];
+
 fn is_allowed_pair_origin(origin: &str) -> bool {
     let o = origin.trim();
-    o.starts_with("chrome-extension://")
-        || o.starts_with("moz-extension://")
-        || o.starts_with("safari-web-extension://")
-        || o.starts_with("tauri://")
-        || o.starts_with("http://localhost")
-        || o.starts_with("http://127.0.0.1")
-        || o.starts_with("https://localhost")
+    if o.is_empty() || o.len() > 200 {
+        return false;
+    }
+    if ALLOWED_LOOPBACK_PAIR_ORIGINS.contains(&o) {
+        return true;
+    }
+    EXTENSION_ORIGIN_SCHEMES.iter().any(|scheme| {
+        o.strip_prefix(scheme).is_some_and(|id| {
+            !id.is_empty()
+                && id.len() <= 64
+                && id.chars().all(|c| c.is_ascii_alphanumeric() || c == '-')
+        })
+    })
 }
 
 async fn pair(State(state): State<BridgeState>, headers: HeaderMap) -> Response {
@@ -914,6 +936,30 @@ async fn mcp_get() -> Response {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn pair_origin_requires_exact_host_and_port() {
+        for bad in [
+            "http://localhost.evil-site.com",
+            "http://127.0.0.1.nip.io",
+            "https://localhost.attacker.net",
+            "http://localhost:8080",
+            "http://localhost@evil.example",
+            "chrome-extension://abc/../../evil",
+            "chrome-extension://",
+            "null",
+        ] {
+            assert!(!super::is_allowed_pair_origin(bad), "{bad} must be refused");
+        }
+        for good in [
+            "chrome-extension://abcdefghijklmnopabcdefghijklmnop",
+            "moz-extension://0b1c2d3e-1111-2222-3333-444455556666",
+            "tauri://localhost",
+            "http://localhost:1420",
+        ] {
+            assert!(super::is_allowed_pair_origin(good), "{good} must be accepted");
+        }
+    }
+
     use super::*;
     use axum::http::HeaderValue;
 
