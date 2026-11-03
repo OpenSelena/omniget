@@ -741,6 +741,10 @@ impl Default for AppSettings {
     }
 }
 
+fn default_true_slideshow() -> bool {
+    true
+}
+
 #[cfg(test)]
 mod backcompat_tests {
     use super::*;
@@ -840,8 +844,4 @@ mod backcompat_tests {
         assert!(back.accessibility.reduce_motion);
         assert!(back.accessibility.reduce_transparency);
     }
-}
-
-fn default_true_slideshow() -> bool {
-    true
 }
