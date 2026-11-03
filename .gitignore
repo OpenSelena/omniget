@@ -267,6 +267,8 @@ remake/shots/
 !.github/**/*.md
 !docs/agents/**/*.md
 !docs/adr/**/*.md
+!docs/windows-signing.md
+!packaging/**/*.md
 !GLOSSARY.md
 !GLOSSARY-MAP.md
 

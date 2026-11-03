@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.9.0.schema.json
+PackageIdentifier: OpenSelena.OmniGet
+PackageVersion: 0.14.0
+InstallerType: nullsoft
+Scope: user
+InstallModes:
+  - interactive
+  - silent
+UpgradeBehavior: install
+ReleaseDate: 2026-10-31
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/OpenSelena/omniget/releases/download/v0.14.0/OmniGet_0.14.0_x64-setup.exe
+    # SHA-256 of the published v0.14.0 installer, computed from the release asset.
+    InstallerSha256: 6EC0F359FA7E8BA9264202D398C5BD03CCD7DD57647BE30ACBAFBBCC4A522DB7
+ManifestType: installer
+ManifestVersion: 1.9.0

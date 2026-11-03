@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.9.0.schema.json
+PackageIdentifier: OpenSelena.OmniGet
+PackageVersion: 0.14.0
+PackageLocale: en-US
+Publisher: OpenSelena
+PublisherUrl: https://github.com/OpenSelena
+PublisherSupportUrl: https://github.com/OpenSelena/omniget/issues
+PackageName: OmniGet
+PackageUrl: https://github.com/OpenSelena/omniget
+License: GPL-3.0
+LicenseUrl: https://github.com/OpenSelena/omniget/blob/main/LICENSE
+ShortDescription: Desktop app to download videos, music, courses, images and torrents from 1,800+ sites.
+Moniker: omniget
+Tags:
+  - downloader
+  - video
+  - youtube
+  - torrent
+  - yt-dlp
+ReleaseNotesUrl: https://github.com/OpenSelena/omniget/releases/tag/v0.14.0
+ManifestType: defaultLocale
+ManifestVersion: 1.9.0

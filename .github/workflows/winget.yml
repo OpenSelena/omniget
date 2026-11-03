@@ -3,6 +3,8 @@
 # drafts have no public download URLs yet) and opens a PR against
 # microsoft/winget-pkgs. Requires the WINGET_TOKEN secret: a classic PAT with
 # public_repo scope, used by wingetcreate to fork and open the PR.
+# "wingetcreate update" only works once OpenSelena.OmniGet exists in
+# winget-pkgs: submit packaging/winget/ by hand first (docs/windows-signing.md).
 name: Publish to winget
 
 on:
