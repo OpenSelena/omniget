@@ -51,7 +51,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev libasound2-dev libpipewire-0.3-dev clang libclang-dev patchelf xdg-utils
 
-      - uses: pnpm/action-setup@v6
+      - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -65,13 +65,13 @@ jobs:
       # Pinned via rust-toolchain.toml: the plugin ABI depends on the exact
       # rustc version, so this must match what the plugin repos build with.
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@master
+        uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
         with:
           toolchain: 1.97.0
           targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
 
       - name: Setup sccache
-        uses: mozilla-actions/sccache-action@v0.0.11
+        uses: mozilla-actions/sccache-action@fc920bf0ec8de6ee65d409111f7ec508035751ba # v0.0.11
 
       - name: Configure sccache
         shell: bash
@@ -80,7 +80,7 @@ jobs:
           echo "RUSTC_WRAPPER=sccache" >> $GITHUB_ENV
 
       - name: Rust cache
-        uses: swatinem/rust-cache@v2
+        uses: swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
         with:
           workspaces: './src-tauri -> target'
 
@@ -91,7 +91,7 @@ jobs:
           cp scripts/linux/linuxdeploy-plugin-gtk.sh ~/.cache/tauri/linuxdeploy-plugin-gtk.sh
           chmod +x ~/.cache/tauri/linuxdeploy-plugin-gtk.sh
 
-      - uses: tauri-apps/tauri-action@v1
+      - uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # v1
         id: tauri-build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -178,7 +178,7 @@ jobs:
       - name: Sign Windows NSIS installer via SignPath
         if: matrix.platform == 'windows-latest' && env.SIGNPATH_API_TOKEN != '' && steps.upload-unsigned-setup.outputs.artifact-id != ''
         continue-on-error: true
-        uses: SignPath/github-action-submit-signing-request@v3
+        uses: SignPath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: '773e0b25-f263-45c9-8f29-c7a6a1aed6db'
@@ -196,7 +196,7 @@ jobs:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: |
-          $TAG = "${{ github.ref_name }}"
+          $TAG = $env:GITHUB_REF_NAME
           $SIGNED_SETUP = Get-ChildItem "src-tauri/target/release/bundle/nsis-signed" -Filter "*.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
           if ($SIGNED_SETUP) {
             Write-Host "Found SignPath-signed setup installer: $($SIGNED_SETUP.FullName)"
@@ -227,7 +227,7 @@ jobs:
       - name: Sign Windows portable binary via SignPath
         if: matrix.platform == 'windows-latest' && env.SIGNPATH_API_TOKEN != '' && steps.upload-unsigned-portable.outputs.artifact-id != ''
         continue-on-error: true
-        uses: SignPath/github-action-submit-signing-request@v3
+        uses: SignPath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: '773e0b25-f263-45c9-8f29-c7a6a1aed6db'
@@ -243,7 +243,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          $TAG = "${{ github.ref_name }}"
+          $TAG = $env:GITHUB_REF_NAME
           $VERSION = $TAG -replace '^v', ''
           $SIGNED_PORTABLE = Get-ChildItem "src-tauri/target/release/portable-signed" -Filter "*.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
           $SRC = if ($SIGNED_PORTABLE) { $SIGNED_PORTABLE.FullName } else { "src-tauri/target/release/omniget.exe" }
@@ -282,7 +282,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           $ErrorActionPreference = "Stop"
-          $TAG = "${{ github.ref_name }}"
+          $TAG = $env:GITHUB_REF_NAME
           $VERSION = $TAG -replace '^v', ''
           cargo build -p omniget-cli --release --manifest-path src-tauri/Cargo.toml
           $BIN = "src-tauri/target/release/omniget-cli.exe"
