@@ -182,6 +182,9 @@ fn qr_svg(content: &str) -> Result<String, String> {
 #[tauri::command]
 pub async fn phone_share_start(path: String) -> Result<PhoneShare, String> {
     let path = PathBuf::from(path);
+    if !is_shareable_file(&path) {
+        return Err("Only video, audio and image files can be sent".to_string());
+    }
     if !path.is_file() {
         return Err("File not found".to_string());
     }
@@ -236,9 +239,39 @@ pub async fn phone_share_stop(id: String) -> Result<(), String> {
     Ok(())
 }
 
+/// Same extension lists as `mediaKind` in src/lib/video-ops/media-kind.ts.
+/// The share is reachable from the whole LAN, so a compromised or buggy
+/// frontend must not be able to expose keys, configs or databases.
+const SHAREABLE_EXTENSIONS: &[&str] = &[
+    "mp4", "m4v", "mov", "mkv", "webm", "avi", "flv", "ts", "wmv", "mp3", "m4a", "aac", "flac",
+    "wav", "ogg", "opus", "wma", "jpg", "jpeg", "png", "webp", "gif", "heic", "avif",
+];
+
+fn is_shareable_file(path: &Path) -> bool {
+    path.extension()
+        .and_then(|e| e.to_str())
+        .map(|e| SHAREABLE_EXTENSIONS.contains(&e.to_ascii_lowercase().as_str()))
+        .unwrap_or(false)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn only_media_files_can_be_shared() {
+        assert!(is_shareable_file(Path::new("/d/clip.MP4")));
+        assert!(is_shareable_file(Path::new("/d/song.flac")));
+        assert!(is_shareable_file(Path::new("/d/photo.jpeg")));
+        for bad in [
+            "/home/u/.ssh/id_ed25519",
+            "/d/settings.json",
+            "/d/app.db",
+            "/d/a.exe",
+        ] {
+            assert!(!is_shareable_file(Path::new(bad)), "{bad}");
+        }
+    }
 
     fn ticket(now: Instant) -> Ticket {
         Ticket::new("secret-token".into(), PathBuf::from("/tmp/a.mp4"), now)
