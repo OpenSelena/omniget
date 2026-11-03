@@ -38,6 +38,11 @@ pub struct GalleryResult {
     pub log_tail: String,
 }
 
+/// gallery-dl only needs web URLs from this tool.
+pub fn validate_url(url: &str) -> anyhow::Result<String> {
+    super::validate_tool_url(url, &["http", "https"])
+}
+
 pub async fn download(
     url: &str,
     dest: &str,
@@ -45,6 +50,8 @@ pub async fn download(
     progress: super::ProgressFn,
 ) -> anyhow::Result<GalleryResult> {
     use tokio::io::{AsyncBufReadExt, BufReader};
+    let url = validate_url(url)?;
+    let url = url.as_str();
     let bin = crate::core::dependencies::ensure_gallerydl()
         .await
         .ok_or_else(|| anyhow!("gallery-dl nao esta instalado"))?;
@@ -54,7 +61,9 @@ pub async fn download(
     if let Some(c) = cookies_file.filter(|c| !c.trim().is_empty()) {
         cmd.args(["--cookies", c]);
     }
-    cmd.arg(url)
+    // "--" ends option parsing: the URL can never be read as a gallery-dl option.
+    cmd.arg("--")
+        .arg(url)
         .stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped());
@@ -109,4 +118,21 @@ pub async fn download(
         dest: dest.to_string(),
         log_tail: tail,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn option_like_urls_are_refused() {
+        for bad in [
+            "--exec=/tmp/evil.sh",
+            "-o/tmp",
+            "file:///etc/passwd",
+            "ftp://example.com/x",
+            "https://",
+        ] {
+            assert!(super::validate_url(bad).is_err(), "{bad}");
+        }
+        assert!(super::validate_url("https://www.pixiv.net/artworks/1").is_ok());
+    }
 }

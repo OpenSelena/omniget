@@ -56,11 +56,17 @@ pub fn parse_progress(line: &str) -> Option<(u64, String)> {
     Some((c[1].parse().ok()?, c[2].to_string()))
 }
 
+/// Schemes aria2c is allowed to fetch from this tool.
+pub fn validate_url(url: &str) -> anyhow::Result<String> {
+    super::validate_tool_url(url, &["http", "https", "ftp", "sftp", "magnet"])
+}
+
 pub async fn download(
     opts: Aria2Options,
     progress: super::ProgressFn,
 ) -> anyhow::Result<Aria2Result> {
     use tokio::io::{AsyncBufReadExt, BufReader};
+    let url = validate_url(&opts.url)?;
     let bin = crate::core::dependencies::ensure_aria2c()
         .await
         .ok_or_else(|| {
@@ -97,7 +103,9 @@ pub async fn download(
             cmd.arg(format!("--header={}", h.trim()));
         }
     }
-    cmd.arg(&opts.url)
+    // "--" ends option parsing: the URL can never be read as an aria2c option.
+    cmd.arg("--")
+        .arg(&url)
         .stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped());
@@ -148,6 +156,22 @@ pub async fn download(
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn option_like_urls_are_refused() {
+        for bad in [
+            "--on-download-complete=/tmp/evil.sh",
+            "-d/tmp",
+            "file:///etc/passwd",
+            "javascript:alert(1)",
+            "https://",
+            "https://exa mple.com/a",
+        ] {
+            assert!(super::validate_url(bad).is_err(), "{bad}");
+        }
+        assert!(super::validate_url("https://example.com/file.iso").is_ok());
+        assert!(super::validate_url("magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567").is_ok());
+    }
+
     #[test]
     fn parses_line() {
         let (p, s) =

@@ -194,6 +194,31 @@ pub async fn download_to(
     Ok(done)
 }
 
+/// Validate a URL that will be handed to an external downloader (aria2c,
+/// gallery-dl). Rejects values that the tool could parse as an option
+/// (`--on-download-complete=...`), unknown schemes and URLs without a host.
+pub fn validate_tool_url(raw: &str, allowed_schemes: &[&str]) -> anyhow::Result<String> {
+    let url = raw.trim();
+    if url.is_empty() {
+        anyhow::bail!("URL is required");
+    }
+    if url.starts_with('-') {
+        anyhow::bail!("URL must not start with '-'");
+    }
+    if url.chars().any(|c| c.is_control() || c.is_whitespace()) {
+        anyhow::bail!("URL must not contain spaces or control characters");
+    }
+    let parsed = url::Url::parse(url).map_err(|e| anyhow::anyhow!("invalid URL: {e}"))?;
+    let scheme = parsed.scheme().to_ascii_lowercase();
+    if !allowed_schemes.contains(&scheme.as_str()) {
+        anyhow::bail!("unsupported URL scheme: {scheme}");
+    }
+    if scheme != "magnet" && parsed.host_str().map(str::is_empty).unwrap_or(true) {
+        anyhow::bail!("URL has no host");
+    }
+    Ok(url.to_string())
+}
+
 pub fn sanitize_name(name: &str) -> String {
     let s = sanitize_filename::sanitize(name.trim());
     if s.is_empty() {
