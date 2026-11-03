@@ -9,8 +9,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      $lib: path.resolve(__dirname, "src/lib"),
-      $components: path.resolve(__dirname, "src/components"),
+      $lib: path.resolve(import.meta.dirname, "src/lib"),
+      $components: path.resolve(import.meta.dirname, "src/components"),
     },
   },
   define: {
