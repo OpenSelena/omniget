@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { sortByStartNewestFirst, sortNewestFirst } from "$lib/utils/download-sort";
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
   import { invoke } from "@tauri-apps/api/core";
@@ -165,7 +166,15 @@
         else if (d.status === "complete") completed.push(d);
       }
     }
-    return { active, paused, queued, finished, errored, completed };
+    return {
+      active: sortByStartNewestFirst(active),
+      paused: sortByStartNewestFirst(paused),
+      // Queued rows keep the queue order: that is the order they will start in.
+      queued,
+      finished: sortNewestFirst(finished),
+      errored: sortNewestFirst(errored),
+      completed: sortNewestFirst(completed),
+    };
   });
 
   type StatusFilter = "all" | "active" | "queued" | "completed" | "failed";
