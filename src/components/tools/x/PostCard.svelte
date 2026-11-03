@@ -1,8 +1,8 @@
 <script lang="ts">
   /** Card compacto de um post do X, usado por thread, busca, perfil e favoritos. */
-  import { t } from "$lib/i18n";
-  import { openUrl } from "$lib/tools/rt";
-  import { fmtDate, fmtN, type XPost } from "$lib/tools/x";
+  import { t } from "#lib/i18n/index.ts";
+  import { openUrl } from "#lib/tools/rt.ts";
+  import { fmtDate, fmtN, type XPost } from "#lib/tools/x.ts";
 
   let { post, index, total, compact = false }: { post: XPost; index?: number; total?: number; compact?: boolean } = $props();
 </script>

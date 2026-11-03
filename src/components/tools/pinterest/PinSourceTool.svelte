@@ -5,10 +5,10 @@
    * Bing, SauceNAO). Também expande pin.it.
    */
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, openUrl } from "$lib/tools/rt";
-  import { fmtCount, kindKey, loadCookies, looksAi, type SourceOut } from "$lib/tools/pinterest";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, openUrl } from "#lib/tools/rt.ts";
+  import { fmtCount, kindKey, loadCookies, looksAi, type SourceOut } from "#lib/tools/pinterest.ts";
 
   let url = $state("");
   let cookies = $state(loadCookies());

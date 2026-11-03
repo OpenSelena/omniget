@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { t } from "$lib/i18n";
+    import { t } from "#lib/i18n/index.ts";
     import { getVersion } from "@tauri-apps/api/app";
     import { open } from "@tauri-apps/plugin-shell";
-    import { BUILD_INFO } from "$lib/build-info";
+    import { BUILD_INFO } from "#lib/build-info.ts";
 
     let version = $state("");
 

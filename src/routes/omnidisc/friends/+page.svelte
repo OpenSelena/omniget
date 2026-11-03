@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
   import {
     acceptFriend,
     addFriend,
@@ -14,9 +14,9 @@
     openDm,
     removeFriend,
     userName,
-  } from "$lib/stores/omnidisc-store.svelte";
-  import type { OmnidiscRelationship } from "$lib/omnidisc/types";
-  import ProfilePopover from "$components/omnidisc/ProfilePopover.svelte";
+  } from "#lib/stores/omnidisc-store.svelte.ts";
+  import type { OmnidiscRelationship } from "#lib/omnidisc/types.ts";
+  import ProfilePopover from "#components/omnidisc/ProfilePopover.svelte";
 
   type Tab = "online" | "all" | "pending" | "blocked";
 

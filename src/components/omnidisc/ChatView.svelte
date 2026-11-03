@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
   import {
     canDeleteMessage,
     canEditMessage,
@@ -32,8 +32,8 @@
     toggleReaction,
     getChannel,
     getInstance,
-  } from "$lib/stores/omnidisc-store.svelte";
-  import type { NotificationLevel, OmnidiscMessage } from "$lib/omnidisc/types";
+  } from "#lib/stores/omnidisc-store.svelte.ts";
+  import type { NotificationLevel, OmnidiscMessage } from "#lib/omnidisc/types.ts";
   import MessageList from "./MessageList.svelte";
   import Composer from "./Composer.svelte";
   import SearchPanel from "./SearchPanel.svelte";

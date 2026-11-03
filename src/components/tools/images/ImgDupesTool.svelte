@@ -2,9 +2,9 @@
   /** Fotos duplicadas e parecidas (dHash), reusando o motor do Pinterest. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { baseName, errText, fmtBytes, onToolProgress, pct, pickDir, reveal, type ToolProgress } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { baseName, errText, fmtBytes, onToolProgress, pct, pickDir, reveal, type ToolProgress } from "#lib/tools/rt.ts";
 
   type File = { path: string; bytes: number; width: number; height: number; best: boolean };
   type Group = { kind: string; distance: number; files: File[]; wasted_bytes: number };

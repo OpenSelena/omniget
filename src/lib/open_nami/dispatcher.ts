@@ -1,5 +1,5 @@
-import { runGalleryDlDownload, type DownloadResult } from '$lib/api/open_nami';
-import type { ParsedProfile } from '$lib/utils/open_nami_parser';
+import { runGalleryDlDownload, type DownloadResult } from '#lib/api/open_nami.ts';
+import type { ParsedProfile } from '#lib/utils/open_nami_parser.ts';
 
 export interface MultiTierOptions {
   profile: ParsedProfile;

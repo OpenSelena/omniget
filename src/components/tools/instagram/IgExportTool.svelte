@@ -6,10 +6,10 @@
    * transformar em ações.
    */
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, openUrl, pickDir, pickFile } from "$lib/tools/rt";
-  import { DEFAULT_PACING, exportCsv, fmtDay, igState, jobId, n, profileUrl, slugArg, type ActionReport, type ExportReport, type ExportUser, type MiniUser } from "$lib/tools/ig.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, openUrl, pickDir, pickFile } from "#lib/tools/rt.ts";
+  import { DEFAULT_PACING, exportCsv, fmtDay, igState, jobId, n, profileUrl, slugArg, type ActionReport, type ExportReport, type ExportUser, type MiniUser } from "#lib/tools/ig.svelte.ts";
   import IgAccountRow from "./IgAccountRow.svelte";
 
   let report = $state<ExportReport | null>(null);

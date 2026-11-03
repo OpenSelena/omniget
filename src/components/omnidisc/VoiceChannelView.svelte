@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
-  import { getVoiceMembers, getInstance, getGuild, getChannel, userName } from "$lib/stores/omnidisc-store.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
+  import { getVoiceMembers, getInstance, getGuild, getChannel, userName } from "#lib/stores/omnidisc-store.svelte.ts";
   import {
     getVoiceSession,
     getVoiceState,
@@ -11,7 +11,7 @@
     joinVoice,
     leaveVoice,
     clearVoiceError,
-  } from "$lib/stores/omnidisc-voice-store.svelte";
+  } from "#lib/stores/omnidisc-voice-store.svelte.ts";
   import {
     isPublishing,
     isWatching,
@@ -24,8 +24,8 @@
     getMediaCapabilities,
     isStreamer,
     getStreamPreview,
-  } from "$lib/stores/omnidisc-stream-store.svelte";
-  import type { OmnidiscChannel } from "$lib/omnidisc/types";
+  } from "#lib/stores/omnidisc-stream-store.svelte.ts";
+  import type { OmnidiscChannel } from "#lib/omnidisc/types.ts";
 
   let { channel }: { channel: OmnidiscChannel } = $props();
 

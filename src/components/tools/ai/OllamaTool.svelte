@@ -2,9 +2,9 @@
   /** Modelos locais com Ollama (estudo 18): detectar, listar, baixar, remover. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, fmtBytes, onToolProgress, openUrl, pct, type ToolProgress } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, fmtBytes, onToolProgress, openUrl, pct, type ToolProgress } from "#lib/tools/rt.ts";
 
   type Model = { name: string; size: number; modified_at: string; details: { family: string; parameter_size: string; quantization_level: string }; capabilities: string[] };
   type Status = { running: boolean; version: string | null; host: string; models: Model[]; loaded: string[]; download_url: string };

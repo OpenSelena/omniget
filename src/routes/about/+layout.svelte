@@ -1,7 +1,7 @@
 <script lang="ts">
   import { page } from "$app/state";
-  import { t } from "$lib/i18n";
-  import { isDebugEnabled } from "$lib/stores/debug-store.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { isDebugEnabled } from "#lib/stores/debug-store.svelte.ts";
   import type { Snippet } from "svelte";
 
   let { children }: { children: Snippet } = $props();

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { tick, type Snippet } from "svelte";
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
 
   let {
     open,

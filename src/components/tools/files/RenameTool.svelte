@@ -1,9 +1,9 @@
 <script lang="ts">
   /** Renomear em massa com prévia (estudo 29, PowerRename). */
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { baseName, errText, pickFiles } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { baseName, errText, pickFiles } from "#lib/tools/rt.ts";
 
   type Plan = { from: string; to: string; changed: boolean; conflict: boolean };
   let files = $state<string[]>([]);

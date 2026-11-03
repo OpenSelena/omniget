@@ -1,10 +1,10 @@
 <script lang="ts">
   import { page } from "$app/state";
-  import { t } from "$lib/i18n";
-  import ToolIcon from "$components/tools/ToolIcon.svelte";
-  import ToolTile from "$components/tools/ToolTile.svelte";
-  import ToolsSearchBar from "$components/tools/ToolsSearchBar.svelte";
-  import { buildIndex, categoryById, search, toolHref, type PlatformFilter } from "$lib/tools/catalog";
+  import { t } from "#lib/i18n/index.ts";
+  import ToolIcon from "#components/tools/ToolIcon.svelte";
+  import ToolTile from "#components/tools/ToolTile.svelte";
+  import ToolsSearchBar from "#components/tools/ToolsSearchBar.svelte";
+  import { buildIndex, categoryById, search, toolHref, type PlatformFilter } from "#lib/tools/catalog.ts";
 
   let category = $derived(categoryById(page.params.category ?? ""));
 

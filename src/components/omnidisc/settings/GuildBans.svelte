@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
-  import { listBans, unbanMember, userName } from "$lib/stores/omnidisc-store.svelte";
-  import type { OmnidiscBan } from "$lib/omnidisc/types";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
+  import { listBans, unbanMember, userName } from "#lib/stores/omnidisc-store.svelte.ts";
+  import type { OmnidiscBan } from "#lib/omnidisc/types.ts";
   import OmnidiscPrompt from "../OmnidiscPrompt.svelte";
 
   let { guildId, instanceId, canBan }: { guildId: string; instanceId: string; canBan: boolean } = $props();

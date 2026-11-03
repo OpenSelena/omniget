@@ -3,8 +3,8 @@
   import { listen } from "@tauri-apps/api/event";
   import { invoke } from "@tauri-apps/api/core";
   import DialogContainer from "./DialogContainer.svelte";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { t } from "$lib/i18n";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { t } from "#lib/i18n/index.ts";
 
   type RecoveryItem = {
     id: number;

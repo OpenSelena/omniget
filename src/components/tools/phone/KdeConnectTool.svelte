@@ -2,9 +2,9 @@
   /** Enviar para o celular pelo KDE Connect (estudo 30). */
   import { invoke } from "@tauri-apps/api/core";
   import { onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, pickFile } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, pickFile } from "#lib/tools/rt.ts";
 
   type Device = { id: string; name: string; reachable: boolean; paired: boolean };
   type Status = { installed: boolean; path: string | null; devices: Device[]; install_hint: string };

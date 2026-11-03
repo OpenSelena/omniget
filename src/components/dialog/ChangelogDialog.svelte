@@ -1,11 +1,11 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
   import {
     getChangelogVisible,
     getChangelogBody,
     getCurrentVersion,
     dismissChangelog,
-  } from "$lib/stores/changelog-store.svelte";
+  } from "#lib/stores/changelog-store.svelte.ts";
 
   let visible = $derived(getChangelogVisible());
   let body = $derived(getChangelogBody());

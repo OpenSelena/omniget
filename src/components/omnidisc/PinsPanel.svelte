@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
-  import { getPins, loadPins, setPinned, userName } from "$lib/stores/omnidisc-store.svelte";
-  import type { OmnidiscMessage } from "$lib/omnidisc/types";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
+  import { getPins, loadPins, setPinned, userName } from "#lib/stores/omnidisc-store.svelte.ts";
+  import type { OmnidiscMessage } from "#lib/omnidisc/types.ts";
 
   let {
     instanceId,

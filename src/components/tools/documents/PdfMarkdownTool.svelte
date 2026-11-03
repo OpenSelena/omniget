@@ -2,9 +2,9 @@
   /** PDF → Markdown limpo (títulos, listas, tabelas) para jogar num LLM. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { baseName, errText, fmtBytes, onToolProgress, openPath, pct, pickFile, reveal, saveAs, type ToolProgress } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { baseName, errText, fmtBytes, onToolProgress, openPath, pct, pickFile, reveal, saveAs, type ToolProgress } from "#lib/tools/rt.ts";
 
   type PageReport = { page: number; chars: number; columns: number; headings: number; tables: number; needs_ocr: boolean };
   type Result = {

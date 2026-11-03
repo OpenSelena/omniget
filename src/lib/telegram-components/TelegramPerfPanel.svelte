@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { t } from "$lib/i18n";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { t } from "#lib/i18n/index.ts";
   import {
     telegramPerfGet,
     telegramPerfSet,
@@ -12,7 +12,7 @@
     type TelegramPerfSettings,
     type TelegramBandwidthStats,
     type TelegramSyncState,
-  } from "$lib/telegram-bridge";
+  } from "#lib/telegram-bridge.ts";
 
   let { open = $bindable(false) }: { open: boolean } = $props();
 

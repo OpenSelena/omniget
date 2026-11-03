@@ -1,7 +1,7 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { isDebugEnabled, setDebugEnabled, setDebugPanelOpen } from "$lib/stores/debug-store.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { isDebugEnabled, setDebugEnabled, setDebugPanelOpen } from "#lib/stores/debug-store.svelte.ts";
   import { getSettings, updateSettings, toggleBool, changeNumber } from "./settings-helpers";
   import SettingsDrillBack from "./SettingsDrillBack.svelte";
   import SettingsDrillItem from "./SettingsDrillItem.svelte";

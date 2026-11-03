@@ -4,7 +4,7 @@
     getAnnouncementOpen,
     getActiveAnnouncement,
     dismissAnnouncement,
-  } from "$lib/stores/announcement-store.svelte";
+  } from "#lib/stores/announcement-store.svelte.ts";
   import { open as openExternal } from "@tauri-apps/plugin-shell";
 
   let isOpen = $derived(getAnnouncementOpen());

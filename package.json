@@ -3,6 +3,10 @@
   "version": "0.14.0",
   "description": "",
   "type": "module",
+  "imports": {
+    "#lib/*": "./src/lib/*",
+    "#components/*": "./src/components/*"
+  },
   "packageManager": "pnpm@10.29.3",
   "scripts": {
     "dev": "vite dev",
@@ -75,8 +79,8 @@
     "vidstack": "^0.6.15"
   },
   "devDependencies": {
-    "@sveltejs/adapter-static": "^3.0.10",
-    "@sveltejs/kit": "^2.70.3",
+    "@sveltejs/adapter-static": "^4.0.1",
+    "@sveltejs/kit": "^3.1.1",
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
     "@tauri-apps/cli": "^2.12.4",
     "@types/katex": "^0.16.8",

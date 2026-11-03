@@ -7,10 +7,10 @@
   import { invoke } from "@tauri-apps/api/core";
   import { listen } from "@tauri-apps/api/event";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { baseName, errText, onToolProgress, openUrl, pickFiles, type ToolProgress } from "$lib/tools/rt";
-  import { fmtDate, igState, jobId, recall, remember, slugArg, type GraphAuth, type PublishRequest, type PublishResult, type ScheduledPost } from "$lib/tools/ig.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { baseName, errText, onToolProgress, openUrl, pickFiles, type ToolProgress } from "#lib/tools/rt.ts";
+  import { fmtDate, igState, jobId, recall, remember, slugArg, type GraphAuth, type PublishRequest, type PublishResult, type ScheduledPost } from "#lib/tools/ig.svelte.ts";
   import IgAccountRow from "./IgAccountRow.svelte";
 
   let { mode = "publish" }: { mode?: "publish" | "schedule" } = $props();

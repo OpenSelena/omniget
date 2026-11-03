@@ -6,10 +6,10 @@ import {
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import { get } from "svelte/store";
 
-import { onTrackerEvent, type TrackerEventPayload } from "$lib/tracker-bridge";
-import { getTrackerSettings } from "$lib/tracker-settings.svelte";
-import { privacyEnabled, maskCode } from "$lib/tracker-privacy.svelte";
-import { t } from "$lib/i18n";
+import { onTrackerEvent, type TrackerEventPayload } from "#lib/tracker-bridge.ts";
+import { getTrackerSettings } from "#lib/tracker-settings.svelte.ts";
+import { privacyEnabled, maskCode } from "#lib/tracker-privacy.svelte.ts";
+import { t } from "#lib/i18n/index.ts";
 
 const NOTIFICATION_DEBOUNCE_MS = 60_000;
 const lastNotifiedAt = new Map<number, number>();

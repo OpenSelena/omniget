@@ -1,10 +1,10 @@
 <script lang="ts">
   /** Desenrolar thread (estudo 67): FxTwitter público, GraphQL da sessão como reserva. */
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { reveal, saveAs } from "$lib/tools/rt";
-  import { extOf, xErr, type ExportFormat, type XPost } from "$lib/tools/x";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { reveal, saveAs } from "#lib/tools/rt.ts";
+  import { extOf, xErr, type ExportFormat, type XPost } from "#lib/tools/x.ts";
   import PostCard from "./PostCard.svelte";
 
   type Thread = { focal: XPost; posts: XPost[]; truncated: boolean; source: string };

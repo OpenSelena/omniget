@@ -2,9 +2,9 @@
   /** SlideShare → PDF (estudo 50). */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, onToolProgress, pct, pickDir, reveal, type ToolProgress } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, onToolProgress, pct, pickDir, reveal, type ToolProgress } from "#lib/tools/rt.ts";
 
   type Result = { title: string; pages: number; pdf_path: string };
   let url = $state("");

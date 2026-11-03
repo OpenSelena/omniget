@@ -5,8 +5,8 @@
    * não precisa escolher de novo a cada visita.
    */
   import { onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import type { PlatformFilter } from "$lib/tools/catalog";
+  import { t } from "#lib/i18n/index.ts";
+  import type { PlatformFilter } from "#lib/tools/catalog.ts";
 
   let {
     query = $bindable(""),

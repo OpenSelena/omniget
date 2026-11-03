@@ -1,9 +1,9 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
   import { getSettings, type DependencyStatus } from "./settings-helpers";
-  import { showToast } from "$lib/stores/toast-store.svelte";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
   import DependencyRow from "./DependencyRow.svelte";
 
   let { deps = [], installingDep = null, onInstallDep, onRefresh }: {

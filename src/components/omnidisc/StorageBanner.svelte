@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
-  import { getSelectedInstance, getStorage } from "$lib/stores/omnidisc-store.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { getSelectedInstance, getStorage } from "#lib/stores/omnidisc-store.svelte.ts";
 
   // A wipe that arrives unannounced reads as data loss. Warning early — while
   // there is still room — is what turns the policy into something people can

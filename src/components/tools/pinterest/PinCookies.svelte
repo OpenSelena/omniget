@@ -1,8 +1,8 @@
 <script lang="ts">
   /** Linha de cookies (arquivo cookies.txt ou string), lembrada entre telas. */
-  import { t } from "$lib/i18n";
-  import { pickFile } from "$lib/tools/rt";
-  import { saveCookies } from "$lib/tools/pinterest";
+  import { t } from "#lib/i18n/index.ts";
+  import { pickFile } from "#lib/tools/rt.ts";
+  import { saveCookies } from "#lib/tools/pinterest.ts";
 
   let { value = $bindable("") }: { value: string } = $props();
 

@@ -1,10 +1,10 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
-  import { formatBinding } from "$lib/platform";
-  import { getSettings } from "$lib/stores/settings-store.svelte";
-  import { getChannel, getGuild } from "$lib/stores/omnidisc-store.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
+  import { formatBinding } from "#lib/platform.ts";
+  import { getSettings } from "#lib/stores/settings-store.svelte.ts";
+  import { getChannel, getGuild } from "#lib/stores/omnidisc-store.svelte.ts";
   import {
     getVoiceSession,
     getVoiceState,
@@ -21,14 +21,14 @@
     toggleDeafen,
     leaveVoice,
     retryVoice,
-  } from "$lib/stores/omnidisc-voice-store.svelte";
+  } from "#lib/stores/omnidisc-voice-store.svelte.ts";
   import {
     isPublishing,
     stopStream,
     isStreamBusy,
     getMediaCapabilities,
-  } from "$lib/stores/omnidisc-stream-store.svelte";
-  import ShareScreenDialog from "$components/omnidisc/ShareScreenDialog.svelte";
+  } from "#lib/stores/omnidisc-stream-store.svelte.ts";
+  import ShareScreenDialog from "#components/omnidisc/ShareScreenDialog.svelte";
 
   let shareOpen = $state(false);
   let publishing = $derived(isPublishing());

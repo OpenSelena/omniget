@@ -3,13 +3,13 @@
   import { page } from "$app/state";
   import { invoke } from "@tauri-apps/api/core";
   import { getCurrentWindow } from "@tauri-apps/api/window";
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
   import {
     unwatchStream,
     setStreamVolume,
     refreshStreamStats,
     getStreamStats,
-  } from "$lib/stores/omnidisc-stream-store.svelte";
+  } from "#lib/stores/omnidisc-stream-store.svelte.ts";
 
   let userId = $derived(page.url.searchParams.get("user") ?? "");
   let volume = $state(100);

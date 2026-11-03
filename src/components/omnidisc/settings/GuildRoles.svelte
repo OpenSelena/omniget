@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
-  import { createRole, deleteRole, getRoles, updateRole } from "$lib/stores/omnidisc-store.svelte";
-  import { PERMISSION_GROUPS, has, perm, toBits, type PermissionGroup, type PermissionName } from "$lib/omnidisc/permissions";
-  import type { OmnidiscRole } from "$lib/omnidisc/types";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
+  import { createRole, deleteRole, getRoles, updateRole } from "#lib/stores/omnidisc-store.svelte.ts";
+  import { PERMISSION_GROUPS, has, perm, toBits, type PermissionGroup, type PermissionName } from "#lib/omnidisc/permissions.ts";
+  import type { OmnidiscRole } from "#lib/omnidisc/types.ts";
   import OmnidiscPrompt from "../OmnidiscPrompt.svelte";
 
   let { guildId, canManage }: { guildId: string; canManage: boolean } = $props();

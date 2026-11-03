@@ -2,9 +2,9 @@
   /** Mídia de um post do Reddit: vídeo do v.redd.it com áudio, galeria, imagem e link de fora. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { baseName, errText, onToolProgress, openUrl, pct, pickDir, pickFile, reveal, type ToolProgress } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { baseName, errText, onToolProgress, openUrl, pct, pickDir, pickFile, reveal, type ToolProgress } from "#lib/tools/rt.ts";
 
   type Info = {
     id: string; title: string; author: string; subreddit: string; created: string;

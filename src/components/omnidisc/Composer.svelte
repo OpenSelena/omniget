@@ -3,16 +3,16 @@
   import { open as openFileDialog } from "@tauri-apps/plugin-dialog";
   import { getCurrentWebview } from "@tauri-apps/api/webview";
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
   import {
     attachFile,
     getDraft,
     getPendingAttachments,
     hasUploadsInFlight,
     setDraft,
-  } from "$lib/stores/omnidisc-store.svelte";
-  import type { OmnidiscMessage } from "$lib/omnidisc/types";
+  } from "#lib/stores/omnidisc-store.svelte.ts";
+  import type { OmnidiscMessage } from "#lib/omnidisc/types.ts";
   import AttachmentStrip from "./AttachmentStrip.svelte";
   import EmojiPicker from "./EmojiPicker.svelte";
 

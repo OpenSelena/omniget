@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
-  import { loadAuditLog, userName } from "$lib/stores/omnidisc-store.svelte";
-  import type { OmnidiscAuditEntry } from "$lib/omnidisc/types";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
+  import { loadAuditLog, userName } from "#lib/stores/omnidisc-store.svelte.ts";
+  import type { OmnidiscAuditEntry } from "#lib/omnidisc/types.ts";
 
   let { guildId, instanceId }: { guildId: string; instanceId: string } = $props();
 

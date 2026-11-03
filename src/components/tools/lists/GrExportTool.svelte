@@ -2,9 +2,9 @@
   /** Goodreads: dispara o "Export Library" oficial, espera e enriquece por prateleira. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { baseName, errText, fmtSecs, onToolProgress, openUrl, pct, pickDir, pickFile, reveal, type ToolProgress } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { baseName, errText, fmtSecs, onToolProgress, openUrl, pct, pickDir, pickFile, reveal, type ToolProgress } from "#lib/tools/rt.ts";
 
   type Entry = { date: string; title: string; year: number | null; creator: string; rating: number | null; review: string; list: string; url: string };
   type ShelfCount = { shelf: string; books: number; reviews: number; rated: number };

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
   import { open as openShell } from "@tauri-apps/plugin-shell";
   import PlatformLogo from "./PlatformLogo.svelte";
 

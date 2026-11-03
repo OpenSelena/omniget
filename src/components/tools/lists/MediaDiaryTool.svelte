@@ -2,9 +2,9 @@
   /** Diário único: junta os exports dos três serviços mais o do Spotify. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { baseName, errText, onToolProgress, openUrl, pct, pickDir, pickFiles, reveal, type ToolProgress } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { baseName, errText, onToolProgress, openUrl, pct, pickDir, pickFiles, reveal, type ToolProgress } from "#lib/tools/rt.ts";
 
   type Entry = { date: string; kind: string; title: string; year: number | null; creator: string; rating: number | null; source: string; url: string; times: number };
   type SourceCount = { source: string; file: string; entries: number };

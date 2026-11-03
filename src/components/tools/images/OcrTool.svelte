@@ -2,9 +2,9 @@
   /** OCR com o Tesseract do sistema (estudo 29). */
   import { invoke } from "@tauri-apps/api/core";
   import { onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { baseName, errText, pickFiles, FILTERS } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { baseName, errText, pickFiles, FILTERS } from "#lib/tools/rt.ts";
 
   type Status = { installed: boolean; path: string | null; version: string | null; languages: string[]; install_hint: string };
   type Result = { path: string; text: string };

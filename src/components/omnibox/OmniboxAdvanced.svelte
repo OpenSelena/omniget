@@ -2,10 +2,10 @@
   import { onMount } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
   import { open } from "@tauri-apps/plugin-dialog";
-  import { t } from "$lib/i18n";
-  import { getSettings } from "$lib/stores/settings-store.svelte";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { validateYtdlpArgs } from "$lib/utils/ytdlp-args";
+  import { t } from "#lib/i18n/index.ts";
+  import { getSettings } from "#lib/stores/settings-store.svelte.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { validateYtdlpArgs } from "#lib/utils/ytdlp-args.ts";
 
   type Template = {
     id: string;

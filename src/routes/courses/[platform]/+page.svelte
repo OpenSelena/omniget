@@ -1,15 +1,15 @@
 <script lang="ts">
-  import { page } from "$app/stores";
+  import { page } from "$app/state";
   import { invoke } from "@tauri-apps/api/core";
-  import { pluginInvoke } from "$lib/plugin-invoke";
+  import { pluginInvoke } from "#lib/plugin-invoke.ts";
   import { listen } from "@tauri-apps/api/event";
   import { open } from "@tauri-apps/plugin-dialog";
-  import CourseCard from "$components/hotmart/CourseCard.svelte";
-  import CourseSectionsDialog from "$components/hotmart/CourseSectionsDialog.svelte";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { getDownloads } from "$lib/stores/download-store.svelte";
-  import { getSettings } from "$lib/stores/settings-store.svelte";
-  import { t } from "$lib/i18n";
+  import CourseCard from "#components/hotmart/CourseCard.svelte";
+  import CourseSectionsDialog from "#components/hotmart/CourseSectionsDialog.svelte";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { getDownloads } from "#lib/stores/download-store.svelte.ts";
+  import { getSettings } from "#lib/stores/settings-store.svelte.ts";
+  import { t } from "#lib/i18n/index.ts";
 
   let downloads = $derived(getDownloads());
 
@@ -29,7 +29,7 @@
     extra_fields: { key: string; label: string; placeholder: string; field_type: string }[];
   };
 
-  let platformId = $derived($page.params.platform);
+  let platformId = $derived(page.params.platform);
   let config = $state<PlatformConfig | null>(null);
   let configError = $state("");
 

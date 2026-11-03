@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
   import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-  import { showToast } from "$lib/stores/toast-store.svelte";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
   import {
     telegramCloneStart,
     telegramCloneList,
@@ -11,7 +11,7 @@
     type TelegramCloneSession,
     type TelegramCloneProgressEvent,
     type TelegramChatType,
-  } from "$lib/telegram-bridge";
+  } from "#lib/telegram-bridge.ts";
 
   type ChatLite = { id: number; title: string; chat_type: string };
 

@@ -2,9 +2,9 @@
   /** Busca instantânea (estudos 26/27): Everything, Spotlight ou fd/find. */
   import { invoke } from "@tauri-apps/api/core";
   import { onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { baseName, dirName, errText, fmtBytes, openPath, pickDir, reveal } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { baseName, dirName, errText, fmtBytes, openPath, pickDir, reveal } from "#lib/tools/rt.ts";
 
   type Backend = { name: string; available: boolean; path: string | null; install_hint: string };
   type Hit = { path: string; size: number | null; is_dir: boolean };

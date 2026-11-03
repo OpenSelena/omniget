@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
   import {
     deleteChannel,
     deleteOverwrite,
@@ -9,9 +9,9 @@
     putOverwrite,
     updateChannelSettings,
     userName,
-  } from "$lib/stores/omnidisc-store.svelte";
-  import { PERMISSION_GROUPS, perm, toBits, type PermissionGroup, type PermissionName } from "$lib/omnidisc/permissions";
-  import type { OmnidiscChannel } from "$lib/omnidisc/types";
+  } from "#lib/stores/omnidisc-store.svelte.ts";
+  import { PERMISSION_GROUPS, perm, toBits, type PermissionGroup, type PermissionName } from "#lib/omnidisc/permissions.ts";
+  import type { OmnidiscChannel } from "#lib/omnidisc/types.ts";
   import OmnidiscPrompt from "../OmnidiscPrompt.svelte";
 
   let {

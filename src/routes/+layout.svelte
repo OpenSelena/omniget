@@ -1,27 +1,27 @@
 <script lang="ts">
   import "../app.css";
-  import "$lib/style/queue-kinds.css";
+  import "#lib/style/queue-kinds.css";
   import { page } from "$app/state";
-  import { isMac } from "$lib/platform";
+  import { isMac } from "#lib/platform.ts";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
   import { listen } from "@tauri-apps/api/event";
-  import { initDownloadListener } from "$lib/stores/download-listener";
-  import { getCounts } from "$lib/stores/download-store.svelte";
+  import { initDownloadListener } from "#lib/stores/download-listener.ts";
+  import { getCounts } from "#lib/stores/download-store.svelte.ts";
   import {
     getUnreadCount as getChatUnreadCount,
     getMentionTotal as getChatMentionCount,
     isImmersive,
     initOmnidisc,
-  } from "$lib/stores/omnidisc-store.svelte";
-  import { getSettings, loadSettings } from "$lib/stores/settings-store.svelte";
-  import { isPrefillAction, queueExternalPrefill, type ExternalUrlEvent } from "$lib/stores/external-url-store.svelte";
-  import Toast from "$components/toast/Toast.svelte";
-  import AppSidebar from "$components/shell/AppSidebar.svelte";
-  import AppToolbar from "$components/shell/AppToolbar.svelte";
-  import CommandPalette from "$components/shell/CommandPalette.svelte";
-  import { setCommandPaletteItems } from "$lib/stores/command-palette-store.svelte";
+  } from "#lib/stores/omnidisc-store.svelte.ts";
+  import { getSettings, loadSettings } from "#lib/stores/settings-store.svelte.ts";
+  import { isPrefillAction, queueExternalPrefill, type ExternalUrlEvent } from "#lib/stores/external-url-store.svelte.ts";
+  import Toast from "#components/toast/Toast.svelte";
+  import AppSidebar from "#components/shell/AppSidebar.svelte";
+  import AppToolbar from "#components/shell/AppToolbar.svelte";
+  import CommandPalette from "#components/shell/CommandPalette.svelte";
+  import { setCommandPaletteItems } from "#lib/stores/command-palette-store.svelte.ts";
   import {
     refreshUpdateInfo,
     getUpdateInfo,
@@ -29,18 +29,18 @@
     dismissUpdate,
     getIsUpdating,
     performUpdate,
-  } from "$lib/stores/update-store.svelte";
-  import { startClipboardMonitor, stopClipboardMonitor, onClipboardUrl } from "$lib/stores/clipboard-monitor";
+  } from "#lib/stores/update-store.svelte.ts";
+  import { startClipboardMonitor, stopClipboardMonitor, onClipboardUrl } from "#lib/stores/clipboard-monitor.ts";
   import { readText } from "@tauri-apps/plugin-clipboard-manager";
-  import { initChangelog } from "$lib/stores/changelog-store.svelte";
-  import { checkAnnouncements } from "$lib/stores/announcement-store.svelte";
-  import { needsOnboarding } from "$lib/stores/onboarding-store.svelte";
-  import { isYtdlpAvailable, isDepsChecked, refreshYtdlpStatus } from "$lib/stores/dependency-store.svelte";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { t, locale, isRtlLocale } from "$lib/i18n";
+  import { initChangelog } from "#lib/stores/changelog-store.svelte.ts";
+  import { checkAnnouncements } from "#lib/stores/announcement-store.svelte.ts";
+  import { needsOnboarding } from "#lib/stores/onboarding-store.svelte.ts";
+  import { isYtdlpAvailable, isDepsChecked, refreshYtdlpStatus } from "#lib/stores/dependency-store.svelte.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { t, locale, isRtlLocale } from "#lib/i18n/index.ts";
   import { get } from "svelte/store";
-  import { CORE_NAV_ITEMS, pluginIconForRoute, type NavItem } from "$lib/nav-config";
-  import { TOOLS, toolHref } from "$lib/tools/catalog";
+  import { CORE_NAV_ITEMS, pluginIconForRoute, type NavItem } from "#lib/nav-config.ts";
+  import { TOOLS, toolHref } from "#lib/tools/catalog.ts";
   import type { Snippet } from "svelte";
   import type { Component } from "svelte";
 
@@ -166,30 +166,30 @@
     }
 
     if (import.meta.env.DEV) {
-      import("$components/debug/DebugPanel.svelte").then((m) => {
+      import("#components/debug/DebugPanel.svelte").then((m) => {
         DebugPanel = m.default;
       });
     }
 
-    import("$components/onboarding/OnboardingWizard.svelte").then((m) => {
+    import("#components/onboarding/OnboardingWizard.svelte").then((m) => {
       OnboardingWizard = m.default;
     });
-    import("$components/dialog/ChangelogDialog.svelte").then((m) => {
+    import("#components/dialog/ChangelogDialog.svelte").then((m) => {
       ChangelogDialog = m.default;
     });
-    import("$components/dialog/ConfirmCloseDialog.svelte").then((m) => {
+    import("#components/dialog/ConfirmCloseDialog.svelte").then((m) => {
       ConfirmCloseDialog = m.default;
     });
-    import("$components/dialog/ShortcutsDialog.svelte").then((m) => {
+    import("#components/dialog/ShortcutsDialog.svelte").then((m) => {
       ShortcutsDialog = m.default;
     });
-    import("$components/dialog/LegalDialog.svelte").then((m) => {
+    import("#components/dialog/LegalDialog.svelte").then((m) => {
       LegalDialog = m.default;
     });
-    import("$components/dialog/RecoveryDialog.svelte").then((m) => {
+    import("#components/dialog/RecoveryDialog.svelte").then((m) => {
       RecoveryDialog = m.default;
     });
-    import("$components/dialog/AnnouncementDialog.svelte").then((m) => {
+    import("#components/dialog/AnnouncementDialog.svelte").then((m) => {
       AnnouncementDialog = m.default;
     });
 

@@ -5,9 +5,9 @@
    */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, fmtBytes, onToolProgress, pct, pickDir, pickFile, reveal, FILTERS, type ToolProgress } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, fmtBytes, onToolProgress, pct, pickDir, pickFile, reveal, FILTERS, type ToolProgress } from "#lib/tools/rt.ts";
 
   type ModelInfo = { id: string; label: string; size_mb: number; note: string; installed: boolean; path: string | null; size_bytes: number };
   type Status = {

@@ -1,8 +1,8 @@
 <script lang="ts">
   /** Forçar H.264 (estudo 39, enhanced-h264ify): a opção mora na extensão do navegador; aqui está o guia e o script para quem usa Tampermonkey. */
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { openUrl } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { openUrl } from "#lib/tools/rt.ts";
 
   const USERSCRIPT = `// ==UserScript==
 // @name         OmniGet · Force H.264 on YouTube

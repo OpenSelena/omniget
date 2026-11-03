@@ -1,10 +1,10 @@
 <script lang="ts">
   /** Hashtag: total de posts, recentes ou populares, com download. */
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText } from "$lib/tools/rt";
-  import { cancelJob, igState, jobId, n, slugArg, type MediaItem, type TagInfo } from "$lib/tools/ig.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText } from "#lib/tools/rt.ts";
+  import { cancelJob, igState, jobId, n, slugArg, type MediaItem, type TagInfo } from "#lib/tools/ig.svelte.ts";
   import IgAccountRow from "./IgAccountRow.svelte";
   import IgMediaGrid from "./IgMediaGrid.svelte";
 

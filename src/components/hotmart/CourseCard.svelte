@@ -1,6 +1,6 @@
 <script lang="ts">
   import { open as openExternal } from "@tauri-apps/plugin-shell";
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
 
   type CardDownloadStatus = "idle" | "downloading" | "complete" | "error";
 

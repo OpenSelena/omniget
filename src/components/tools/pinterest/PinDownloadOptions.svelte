@@ -1,8 +1,8 @@
 <script lang="ts">
   /** Opções de download compartilhadas (pasta, imagens/vídeos, WebP, nomes, sync). */
-  import { t } from "$lib/i18n";
-  import { pickDir } from "$lib/tools/rt";
-  import type { DownloadOptions } from "$lib/tools/pinterest";
+  import { t } from "#lib/i18n/index.ts";
+  import { pickDir } from "#lib/tools/rt.ts";
+  import type { DownloadOptions } from "#lib/tools/pinterest.ts";
 
   let { opts = $bindable(), sections = true, sync = true }: { opts: DownloadOptions; sections?: boolean; sync?: boolean } = $props();
 </script>

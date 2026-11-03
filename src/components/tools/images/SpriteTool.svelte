@@ -2,8 +2,8 @@
   /** Spritesheet: fatiar em quadros, montar a folha com atlas, ou passar a régua numa pasta. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
   import {
     baseName,
     errText,
@@ -16,7 +16,7 @@
     pickFiles,
     reveal,
     type ToolProgress,
-  } from "$lib/tools/rt";
+  } from "#lib/tools/rt.ts";
 
   type Frame = { name: string; x: number; y: number; w: number; h: number };
   type Result = {

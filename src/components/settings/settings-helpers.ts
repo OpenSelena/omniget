@@ -1,9 +1,9 @@
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
-import { updateSettings, getSettings } from "$lib/stores/settings-store.svelte";
-import { loadTranslations, locale, t } from "$lib/i18n";
-import { syncTrayLabels } from "$lib/tray-labels";
-import { showToast } from "$lib/stores/toast-store.svelte";
+import { updateSettings, getSettings } from "#lib/stores/settings-store.svelte.ts";
+import { loadTranslations, locale, t } from "#lib/i18n/index.ts";
+import { syncTrayLabels } from "#lib/tray-labels.ts";
+import { showToast } from "#lib/stores/toast-store.svelte.ts";
 import { get } from "svelte/store";
 
 export async function chooseCookieFile() {

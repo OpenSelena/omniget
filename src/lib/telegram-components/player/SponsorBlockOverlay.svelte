@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { SponsorBlockSegment } from "$lib/player-types";
+  import type { SponsorBlockSegment } from "#lib/player-types.ts";
 
   type Props = {
     segments: SponsorBlockSegment[];

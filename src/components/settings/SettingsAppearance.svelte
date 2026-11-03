@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
   import RichPresencePanel from "./RichPresencePanel.svelte";
   import SettingsDrillBack from "./SettingsDrillBack.svelte";
   import SettingsDrillItem from "./SettingsDrillItem.svelte";

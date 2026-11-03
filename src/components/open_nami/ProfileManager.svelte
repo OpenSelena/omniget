@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { loadProfiles, saveProfile, deleteProfile, type Profile } from '$lib/api/open_nami';
-  import { t } from '$lib/i18n';
+  import { loadProfiles, saveProfile, deleteProfile, type Profile } from '#lib/api/open_nami.ts';
+  import { t } from '#lib/i18n/index.ts';
 
   interface Props {
     onSelectProfileForDownload?: (url: string) => void;

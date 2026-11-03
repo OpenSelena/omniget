@@ -1,17 +1,10 @@
 import { defineConfig } from "vitest/config";
-import path from "path";
 
 export default defineConfig({
   test: {
     include: ["src/**/*.test.ts"],
     environment: "node",
     globals: false,
-  },
-  resolve: {
-    alias: {
-      $lib: path.resolve(import.meta.dirname, "src/lib"),
-      $components: path.resolve(import.meta.dirname, "src/components"),
-    },
   },
   define: {
     __COMMIT_HASH__: JSON.stringify("test-commit"),

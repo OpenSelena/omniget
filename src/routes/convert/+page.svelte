@@ -3,9 +3,9 @@
   import { listen, type UnlistenFn } from "@tauri-apps/api/event";
   import { open } from "@tauri-apps/plugin-dialog";
   import { onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { pluginInvoke } from "$lib/plugin-invoke";
-  import { showToast } from "$lib/stores/toast-store.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { pluginInvoke } from "#lib/plugin-invoke.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
   import {
     getFiles,
     getOptions,
@@ -20,7 +20,7 @@
     setHwAccel,
     type ProbeInfo,
     type HwAccelInfo,
-  } from "$lib/stores/convert-store.svelte";
+  } from "#lib/stores/convert-store.svelte.ts";
 
   type PluginStatus =
     | "checking"

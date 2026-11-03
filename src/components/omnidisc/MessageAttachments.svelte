@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
-  import { downloadAttachment } from "$lib/stores/omnidisc-store.svelte";
-  import { portal } from "$lib/omnidisc/popover";
-  import type { OmnidiscAttachment, OmnidiscMessage } from "$lib/omnidisc/types";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
+  import { downloadAttachment } from "#lib/stores/omnidisc-store.svelte.ts";
+  import { portal } from "#lib/omnidisc/popover.ts";
+  import type { OmnidiscAttachment, OmnidiscMessage } from "#lib/omnidisc/types.ts";
 
   let { message }: { message: OmnidiscMessage } = $props();
 

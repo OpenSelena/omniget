@@ -2,9 +2,9 @@
   /** Tabela filtravel do Connections.csv, com duplicados e exportacao do filtrado. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, onToolProgress, openUrl, pct, pickDir, pickFile, reveal, type ToolProgress } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, onToolProgress, openUrl, pct, pickDir, pickFile, reveal, type ToolProgress } from "#lib/tools/rt.ts";
 
   type Count = { name: string; count: number };
   type Connection = { name: string; url: string; email: string; company: string; position: string; connected_on: string; date: string; month: string };

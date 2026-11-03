@@ -1,7 +1,7 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { getSettings, loadSettings } from "$lib/stores/settings-store.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { getSettings, loadSettings } from "#lib/stores/settings-store.svelte.ts";
   import DialogContainer from "./DialogContainer.svelte";
 
   const settings = $derived(getSettings());

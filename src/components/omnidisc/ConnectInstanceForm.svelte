@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
   import {
     connectInstance,
     authenticate,
@@ -13,8 +13,8 @@
     resetConnect,
     addDemoInstance,
     getGuilds,
-  } from "$lib/stores/omnidisc-store.svelte";
-  import type { AuthMode } from "$lib/omnidisc/types";
+  } from "#lib/stores/omnidisc-store.svelte.ts";
+  import type { AuthMode } from "#lib/omnidisc/types.ts";
 
   let { compact = false, onDone }: { compact?: boolean; onDone?: () => void } = $props();
 

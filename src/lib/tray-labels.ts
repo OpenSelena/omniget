@@ -1,6 +1,6 @@
 import { get } from "svelte/store";
 import { invoke } from "@tauri-apps/api/core";
-import { t, locale } from "$lib/i18n";
+import { t, locale } from "#lib/i18n/index.ts";
 
 type Translate = (key: string, values?: Record<string, unknown>) => string;
 

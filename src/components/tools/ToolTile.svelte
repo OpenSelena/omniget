@@ -5,9 +5,9 @@
    * roda no Windows ganha um selo no canto do ícone e a legenda "Só Windows",
    * para ninguém clicar achando que roda no Mac.
    */
-  import { t } from "$lib/i18n";
-  import ToolIcon from "$components/tools/ToolIcon.svelte";
-  import { ALL_OS, type OsName, type ToolStatus } from "$lib/tools/catalog";
+  import { t } from "#lib/i18n/index.ts";
+  import ToolIcon from "#components/tools/ToolIcon.svelte";
+  import { ALL_OS, type OsName, type ToolStatus } from "#lib/tools/catalog.ts";
 
   let {
     href,

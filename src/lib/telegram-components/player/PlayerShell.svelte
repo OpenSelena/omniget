@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { mediaSrc } from "$lib/media-src";
+  import { mediaSrc } from "#lib/media-src.ts";
   import SkipGapsButton from "./SkipGapsButton.svelte";
   import SponsorBlockOverlay from "./SponsorBlockOverlay.svelte";
   import ChaptersList from "./ChaptersList.svelte";
@@ -13,7 +13,7 @@
     StudySettings,
     SponsorBlockSegment,
     YoutubeChapter,
-  } from "$lib/player-types";
+  } from "#lib/player-types.ts";
 
   type Props = {
     videoSrc: string;

@@ -1,6 +1,6 @@
 <script lang="ts">
   import { open } from "@tauri-apps/plugin-shell";
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
 
   let expanded = $state(false);
 

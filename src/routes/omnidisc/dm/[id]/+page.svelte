@@ -1,20 +1,20 @@
 <script lang="ts">
   import { page } from "$app/state";
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
   import {
     selectChannel,
     getChannel,
     dmTitle,
     getSelectedInstance,
-  } from "$lib/stores/omnidisc-store.svelte";
-  import ChatView from "$components/omnidisc/ChatView.svelte";
+  } from "#lib/stores/omnidisc-store.svelte.ts";
+  import ChatView from "#components/omnidisc/ChatView.svelte";
   import {
     getVoiceSession,
     getVoiceState,
     isVoiceBusy,
     joinVoice,
     leaveVoice,
-  } from "$lib/stores/omnidisc-voice-store.svelte";
+  } from "#lib/stores/omnidisc-voice-store.svelte.ts";
 
   let channelId = $derived(page.params.id ?? "");
   let channel = $derived(getChannel(channelId));

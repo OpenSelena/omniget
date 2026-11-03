@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
-  import { removePendingAttachment, retryAttachment } from "$lib/stores/omnidisc-store.svelte";
-  import type { PendingAttachment } from "$lib/omnidisc/types";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
+  import { removePendingAttachment, retryAttachment } from "#lib/stores/omnidisc-store.svelte.ts";
+  import type { PendingAttachment } from "#lib/omnidisc/types.ts";
 
   let { channelId, items }: { channelId: string; items: PendingAttachment[] } = $props();
 

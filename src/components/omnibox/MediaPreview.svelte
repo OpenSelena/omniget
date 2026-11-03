@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { MediaPreview } from "$lib/stores/media-preview-store.svelte";
+  import type { MediaPreview } from "#lib/stores/media-preview-store.svelte.ts";
 
   let { mediaPreview = $bindable(), imageLoading = $bindable(true) } = $props();
 

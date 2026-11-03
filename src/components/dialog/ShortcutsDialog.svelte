@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { getSettings } from "$lib/stores/settings-store.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { getSettings } from "#lib/stores/settings-store.svelte.ts";
   import DialogContainer from "./DialogContainer.svelte";
 
   let isOpen = $state(false);

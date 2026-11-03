@@ -1,8 +1,8 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { page } from "$app/state";
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
   import {
     getSelectedInstance,
     getGuilds,
@@ -21,16 +21,16 @@
     getVoiceMembers,
     getVoiceMemberCount,
     userName,
-  } from "$lib/stores/omnidisc-store.svelte";
+  } from "#lib/stores/omnidisc-store.svelte.ts";
   import {
     getVoiceSession,
     getVoiceState,
     isVoiceBusy,
     isSpeaking,
     joinVoice,
-  } from "$lib/stores/omnidisc-voice-store.svelte";
-  import { isStreamer } from "$lib/stores/omnidisc-stream-store.svelte";
-  import type { ChannelKind, OmnidiscChannel } from "$lib/omnidisc/types";
+  } from "#lib/stores/omnidisc-voice-store.svelte.ts";
+  import { isStreamer } from "#lib/stores/omnidisc-stream-store.svelte.ts";
+  import type { ChannelKind, OmnidiscChannel } from "#lib/omnidisc/types.ts";
   import OmnidiscPrompt from "./OmnidiscPrompt.svelte";
   import VoiceBar from "./VoiceBar.svelte";
   import IncomingCallBar from "./IncomingCallBar.svelte";

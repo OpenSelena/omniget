@@ -1,22 +1,22 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
-  import { pluginInvoke } from "$lib/plugin-invoke";
+  import { pluginInvoke } from "#lib/plugin-invoke.ts";
   import { listen, type UnlistenFn } from "@tauri-apps/api/event";
   import { open } from "@tauri-apps/plugin-dialog";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { getSettings } from "$lib/stores/settings-store.svelte";
-  import { onBatchFileStatus, type BatchFileStatusPayload } from "$lib/stores/download-listener";
-  import ContextHint from "$components/hints/ContextHint.svelte";
-  import TelegramChannelDrawer from "$lib/telegram-components/TelegramChannelDrawer.svelte";
-  import TelegramPerfPanel from "$lib/telegram-components/TelegramPerfPanel.svelte";
-  import TelegramGlobalSearchModal from "$lib/telegram-components/TelegramGlobalSearchModal.svelte";
-  import TelegramTransferPanel from "$lib/telegram-components/TelegramTransferPanel.svelte";
-  import TelegramCloneWizard from "$lib/telegram-components/TelegramCloneWizard.svelte";
-  import TelegramAccountPanel from "$lib/telegram-components/TelegramAccountPanel.svelte";
-  import TelegramSyncIndicator from "$lib/telegram-components/TelegramSyncIndicator.svelte";
-  import { telegramCreateFolder, isOmnigetFolder, type TelegramGlobalSearchHit } from "$lib/telegram-bridge";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { getSettings } from "#lib/stores/settings-store.svelte.ts";
+  import { onBatchFileStatus, type BatchFileStatusPayload } from "#lib/stores/download-listener.ts";
+  import ContextHint from "#components/hints/ContextHint.svelte";
+  import TelegramChannelDrawer from "#lib/telegram-components/TelegramChannelDrawer.svelte";
+  import TelegramPerfPanel from "#lib/telegram-components/TelegramPerfPanel.svelte";
+  import TelegramGlobalSearchModal from "#lib/telegram-components/TelegramGlobalSearchModal.svelte";
+  import TelegramTransferPanel from "#lib/telegram-components/TelegramTransferPanel.svelte";
+  import TelegramCloneWizard from "#lib/telegram-components/TelegramCloneWizard.svelte";
+  import TelegramAccountPanel from "#lib/telegram-components/TelegramAccountPanel.svelte";
+  import TelegramSyncIndicator from "#lib/telegram-components/TelegramSyncIndicator.svelte";
+  import { telegramCreateFolder, isOmnigetFolder, type TelegramGlobalSearchHit } from "#lib/telegram-bridge.ts";
   import { onMount } from "svelte";
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
 
   type PluginStatus =
     | "checking_plugin"

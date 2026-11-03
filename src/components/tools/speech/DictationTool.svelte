@@ -3,9 +3,9 @@
   import { invoke } from "@tauri-apps/api/core";
   import { listen } from "@tauri-apps/api/event";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText } from "#lib/tools/rt.ts";
 
   type Device = { id: string; name: string };
   type Opts = { model: string; language: string; device: string; output: "type" | "paste" | "clipboard"; trailing_space: boolean };

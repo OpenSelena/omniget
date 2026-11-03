@@ -7,11 +7,11 @@ import {
   getInstance,
   getInstances,
   isEncryptedChannel,
-} from "$lib/stores/omnidisc-store.svelte";
-import { updateSettings } from "$lib/stores/settings-store.svelte";
-import { showToast } from "$lib/stores/toast-store.svelte";
-import { translateBackendError } from "$lib/error-translate";
-import { t } from "$lib/i18n";
+} from "#lib/stores/omnidisc-store.svelte.ts";
+import { updateSettings } from "#lib/stores/settings-store.svelte.ts";
+import { showToast } from "#lib/stores/toast-store.svelte.ts";
+import { translateBackendError } from "#lib/error-translate.ts";
+import { t } from "#lib/i18n/index.ts";
 import { get } from "svelte/store";
 
 export type VoiceConnState = "idle" | "connecting" | "connected" | "reconnecting" | "failed";

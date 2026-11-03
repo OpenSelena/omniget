@@ -2,9 +2,9 @@
   /** Enviar trechos ao SponsorBlock. O envio é público: só sai com confirmação explícita. */
   import { invoke } from "@tauri-apps/api/core";
   import { onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, fmtSecs, openUrl } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, fmtSecs, openUrl } from "#lib/tools/rt.ts";
 
   type NewSegment = { start: number; end: number; category: string; action_type: string; description: string };
   type SubmitResult = { video_id: string; accepted: number; uuids: string[]; fingerprint: string; message: string };

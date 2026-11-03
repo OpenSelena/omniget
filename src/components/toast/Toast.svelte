@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { getToasts, dismissToast, type ToastType } from "$lib/stores/toast-store.svelte";
-  import { t } from "$lib/i18n";
+  import { getToasts, dismissToast, type ToastType } from "#lib/stores/toast-store.svelte.ts";
+  import { t } from "#lib/i18n/index.ts";
 
   let toasts = $derived(getToasts());
 

@@ -2,9 +2,9 @@
   /** Texto para voz com o Edge TTS reimplementado em Rust (estudo 09). */
   import { invoke } from "@tauri-apps/api/core";
   import { onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, fmtMs, openPath, reveal, saveAs, FILTERS } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, fmtMs, openPath, reveal, saveAs, FILTERS } from "#lib/tools/rt.ts";
 
   type Voice = { short_name: string; gender: string; locale: string; friendly_name: string };
   type Result = { audio_path: string; srt_path: string; words: number; duration_ms: number };

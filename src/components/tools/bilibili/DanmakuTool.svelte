@@ -5,8 +5,8 @@
    */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
   import {
     baseName,
     errText,
@@ -20,7 +20,7 @@
     reveal,
     FILTERS,
     type ToolProgress,
-  } from "$lib/tools/rt";
+  } from "#lib/tools/rt.ts";
 
   let { mode = "export" }: { mode?: "export" | "burn" } = $props();
 

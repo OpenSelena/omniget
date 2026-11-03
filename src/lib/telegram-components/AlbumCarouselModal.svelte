@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { telegramExpandAlbum, type TelegramMediaItem, type TelegramChatType } from "$lib/telegram-bridge";
+  import { t } from "#lib/i18n/index.ts";
+  import { telegramExpandAlbum, type TelegramMediaItem, type TelegramChatType } from "#lib/telegram-bridge.ts";
 
   let { chatId, chatType, messageId, onClose }: {
     chatId: number;

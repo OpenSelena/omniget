@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
   import {
     getMe,
     getOwnPresence,
     getSelectedInstance,
     setOwnPresence,
     updateMe,
-  } from "$lib/stores/omnidisc-store.svelte";
+  } from "#lib/stores/omnidisc-store.svelte.ts";
 
   const PRESENCES = ["online", "idle", "dnd", "invisible"] as const;
   const BIO_MAX = 320;

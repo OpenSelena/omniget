@@ -3,8 +3,8 @@
     getSettings,
     updateSettings,
     type TypographySettings,
-  } from "$lib/stores/settings-store.svelte";
-  import { t } from "$lib/i18n";
+  } from "#lib/stores/settings-store.svelte.ts";
+  import { t } from "#lib/i18n/index.ts";
 
   type Preset = {
     id: string;

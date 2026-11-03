@@ -2,10 +2,10 @@
   /** Grok (estudo 67): API oficial da xAI com busca no X, ou o Grok do X pela sessão. */
   import { invoke } from "@tauri-apps/api/core";
   import { onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { openUrl } from "$lib/tools/rt";
-  import { postIdFrom, xErr, type XPost, type XSession } from "$lib/tools/x";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { openUrl } from "#lib/tools/rt.ts";
+  import { postIdFrom, xErr, type XPost, type XSession } from "#lib/tools/x.ts";
   import XSessionRow from "./XSession.svelte";
 
   type Cfg = { has_xai_key: boolean; xai_model: string; x_model: string };

@@ -1,6 +1,6 @@
 import { listen } from "@tauri-apps/api/event";
 import { get } from "svelte/store";
-import { t } from "$lib/i18n";
+import { t } from "#lib/i18n/index.ts";
 import {
   upsertProgress,
   markComplete,
@@ -17,7 +17,7 @@ import {
 import { setMediaPreview } from "./media-preview-store.svelte";
 import { addLog } from "./debug-store.svelte";
 import { recordDownloadComplete } from "./download-stats.svelte";
-import { rpcSyncIdleStats } from "$lib/rpc";
+import { rpcSyncIdleStats } from "#lib/rpc.ts";
 
 // Best-effort OS notification so completions reach the user when the window is
 // in the background (parity with the in-app toast and the channel feature).

@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
-  import ContextHint from "$components/hints/ContextHint.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import ContextHint from "#components/hints/ContextHint.svelte";
   import { getSettings, updateSettings, toggleBool } from "../settings-helpers";
 
   let { embedded = false }: { embedded?: boolean } = $props();

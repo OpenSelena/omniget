@@ -3,9 +3,9 @@
    * Grade de pins (masonry por colunas CSS) com seleção. Mostra os sinais
    * que o Pinterest esconde: anúncio, IA, tipo, saves.
    */
-  import { t } from "$lib/i18n";
-  import { openUrl } from "$lib/tools/rt";
-  import { fmtCount, kindKey, looksAi, preview, type Pin } from "$lib/tools/pinterest";
+  import { t } from "#lib/i18n/index.ts";
+  import { openUrl } from "#lib/tools/rt.ts";
+  import { fmtCount, kindKey, looksAi, preview, type Pin } from "#lib/tools/pinterest.ts";
 
   let {
     pins,

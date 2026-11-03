@@ -2,9 +2,9 @@
   /** Arquivar canal, playlist ou Watch Later, com estado por item e retomada. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, fmtSecs, onToolProgress, pct, pickDir, reveal, type ToolProgress } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, fmtSecs, onToolProgress, pct, pickDir, reveal, type ToolProgress } from "#lib/tools/rt.ts";
 
   type Item = { id: string; title: string; url: string; duration_seconds: number; status: "pending" | "ok" | "failed" | "skipped"; error: string | null; file: string | null; attempts: number };
   type Result = { dest: string; state_path: string; title: string; source_url: string; total: number; done: number; failed: number; skipped: number; pending: number; items: Item[]; used_session: boolean; cancelled: boolean };

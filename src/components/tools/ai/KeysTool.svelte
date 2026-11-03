@@ -2,9 +2,9 @@
   /** Chaves de API (estudo 24, All API Hub): cofre local, teste, saldo, exportação. */
   import { invoke } from "@tauri-apps/api/core";
   import { onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText } from "#lib/tools/rt.ts";
 
   type Kind = { id: string; name: string; base_url: string; balance: boolean; env: string };
   type View = { id: string; name: string; kind: string; base_url: string; key_hint: string; has_key: boolean; has_access_token: boolean; user_id: string; model: string; notes: string; created: number; last_ok: boolean | null; last_checked: number | null; balance: string | null; models: number; error: string | null };

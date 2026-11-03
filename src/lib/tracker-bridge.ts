@@ -1,5 +1,5 @@
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-import { pluginInvoke } from "$lib/plugin-invoke";
+import { pluginInvoke } from "#lib/plugin-invoke.ts";
 
 export type Carrier =
   | "loggi"

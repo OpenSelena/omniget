@@ -1,7 +1,7 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
-  import { t, locale } from "$lib/i18n";
-  import { getSettings, updateSettings } from "$lib/stores/settings-store.svelte";
+  import { t, locale } from "#lib/i18n/index.ts";
+  import { getSettings, updateSettings } from "#lib/stores/settings-store.svelte.ts";
   import type { Champion } from "./shared";
 
   let {

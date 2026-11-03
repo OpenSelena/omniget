@@ -1,4 +1,4 @@
-import { checkPythonDependencies, ensureBinaries, type DependencyStatus } from '$lib/api/open_nami';
+import { checkPythonDependencies, ensureBinaries, type DependencyStatus } from '#lib/api/open_nami.ts';
 
 let status = $state<DependencyStatus | null>(null);
 let checking = $state(false);

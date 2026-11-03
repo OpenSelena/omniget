@@ -1,18 +1,18 @@
 import { describe, it, expect, vi, beforeAll, beforeEach } from "vitest";
 
-vi.mock("$lib/updater", () => ({
+vi.mock("#lib/updater.ts", () => ({
   checkForUpdate: vi.fn(),
   installUpdate: vi.fn(),
 }));
 
 type UpdateStore = typeof import("./update-store.svelte");
 let store: UpdateStore;
-let updater: typeof import("$lib/updater");
+let updater: typeof import("#lib/updater.ts");
 
 beforeAll(async () => {
   vi.stubGlobal("$state", <T>(value: T) => value);
   store = await import("./update-store.svelte");
-  updater = await import("$lib/updater");
+  updater = await import("#lib/updater.ts");
 });
 
 describe("update-store", () => {

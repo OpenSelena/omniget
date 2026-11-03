@@ -1,8 +1,8 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { page } from "$app/state";
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
   import {
     canInGuild,
     deleteGuild,
@@ -15,14 +15,14 @@
     setNotificationLevel,
     transferGuild,
     updateGuild,
-  } from "$lib/stores/omnidisc-store.svelte";
-  import type { NotificationLevel } from "$lib/omnidisc/types";
-  import GuildRoles from "$components/omnidisc/settings/GuildRoles.svelte";
-  import GuildChannels from "$components/omnidisc/settings/GuildChannels.svelte";
-  import GuildInvites from "$components/omnidisc/settings/GuildInvites.svelte";
-  import GuildBans from "$components/omnidisc/settings/GuildBans.svelte";
-  import GuildAuditLog from "$components/omnidisc/settings/GuildAuditLog.svelte";
-  import OmnidiscPrompt from "$components/omnidisc/OmnidiscPrompt.svelte";
+  } from "#lib/stores/omnidisc-store.svelte.ts";
+  import type { NotificationLevel } from "#lib/omnidisc/types.ts";
+  import GuildRoles from "#components/omnidisc/settings/GuildRoles.svelte";
+  import GuildChannels from "#components/omnidisc/settings/GuildChannels.svelte";
+  import GuildInvites from "#components/omnidisc/settings/GuildInvites.svelte";
+  import GuildBans from "#components/omnidisc/settings/GuildBans.svelte";
+  import GuildAuditLog from "#components/omnidisc/settings/GuildAuditLog.svelte";
+  import OmnidiscPrompt from "#components/omnidisc/OmnidiscPrompt.svelte";
 
   type View = "overview" | "roles" | "channels" | "invites" | "bans" | "audit";
   type Danger = "transfer" | "leave" | "delete" | null;

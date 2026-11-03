@@ -1,12 +1,12 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
   import {
     getSettings,
     updateSettings,
     toggleBool,
     changeQuality,
   } from "../settings-helpers";
-  import { YTDLP_PRESETS, matchActivePreset, type YtdlpPresetId } from "$lib/ytdlp-presets";
+  import { YTDLP_PRESETS, matchActivePreset, type YtdlpPresetId } from "#lib/ytdlp-presets.ts";
 
   let { embedded = false }: { embedded?: boolean } = $props();
 

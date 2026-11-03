@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount, onDestroy, createEventDispatcher } from "svelte";
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
   import {
     telegramQrStart,
     telegramQrPoll,
@@ -8,7 +8,7 @@
     telegramVerifyCode,
     telegramVerify2fa,
     type TelegramQrStart,
-  } from "$lib/telegram-bridge";
+  } from "#lib/telegram-bridge.ts";
 
   const dispatch = createEventDispatcher<{ authenticated: { phone: string } }>();
 

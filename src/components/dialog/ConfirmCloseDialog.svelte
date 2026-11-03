@@ -3,7 +3,7 @@
   import { listen } from "@tauri-apps/api/event";
   import { invoke } from "@tauri-apps/api/core";
   import DialogContainer from "./DialogContainer.svelte";
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
 
   let isOpen = $state(false);
   let activeCount = $state(0);

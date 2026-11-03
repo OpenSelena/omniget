@@ -1,9 +1,9 @@
 <script lang="ts">
   import { page } from "$app/state";
-  import { t } from "$lib/i18n";
-  import NavIcon from "$components/shell/NavIcon.svelte";
-  import { getUpdateInfo } from "$lib/stores/update-store.svelte";
-  import type { NavItem } from "$lib/nav-config";
+  import { t } from "#lib/i18n/index.ts";
+  import NavIcon from "#components/shell/NavIcon.svelte";
+  import { getUpdateInfo } from "#lib/stores/update-store.svelte.ts";
+  import type { NavItem } from "#lib/nav-config.ts";
 
   interface Props {
     primaryNav?: NavItem[];

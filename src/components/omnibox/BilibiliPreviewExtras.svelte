@@ -1,7 +1,7 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { getSettings, updateSettings } from "$lib/stores/settings-store.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { getSettings, updateSettings } from "#lib/stores/settings-store.svelte.ts";
 
   type CodecOption = { codec_id: number; label_key: string };
   type QualityOption = { qn: number; label_key: string; codecs: CodecOption[] };

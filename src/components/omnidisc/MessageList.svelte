@@ -1,7 +1,7 @@
 <script lang="ts">
   import { tick } from "svelte";
-  import { t } from "$lib/i18n";
-  import type { OmnidiscMessage } from "$lib/omnidisc/types";
+  import { t } from "#lib/i18n/index.ts";
+  import type { OmnidiscMessage } from "#lib/omnidisc/types.ts";
   import VirtualList from "./VirtualList.svelte";
   import MessageItem from "./MessageItem.svelte";
 

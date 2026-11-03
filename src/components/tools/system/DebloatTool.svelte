@@ -2,9 +2,9 @@
   /** ⚠️ Só Windows. Debloat de apps da Store (estudo 25, Sophia). */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, onToolProgress, pct, type ToolProgress } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, onToolProgress, pct, type ToolProgress } from "#lib/tools/rt.ts";
 
   type Pkg = { name: string; full_name: string; version: string; publisher: string; suggested: boolean; label: string; non_removable: boolean };
   type Result = { removed: string[]; failed: string[] };

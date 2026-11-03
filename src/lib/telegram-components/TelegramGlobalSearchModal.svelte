@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
-  import { telegramSearchGlobalHits, type TelegramGlobalSearchHit } from "$lib/telegram-bridge";
+  import { t } from "#lib/i18n/index.ts";
+  import { telegramSearchGlobalHits, type TelegramGlobalSearchHit } from "#lib/telegram-bridge.ts";
 
   let {
     open = $bindable(false),

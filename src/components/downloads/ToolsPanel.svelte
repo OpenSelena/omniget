@@ -5,10 +5,10 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
   import { open as openDialog } from "@tauri-apps/plugin-dialog";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { getSettings } from "$lib/stores/settings-store.svelte";
-  import SubtitleWorkshop from "$components/downloads/SubtitleWorkshop.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { getSettings } from "#lib/stores/settings-store.svelte.ts";
+  import SubtitleWorkshop from "#components/downloads/SubtitleWorkshop.svelte";
 
   /**
    * A seção Tools monta uma ferramenta por página; a aba Tools de Downloads

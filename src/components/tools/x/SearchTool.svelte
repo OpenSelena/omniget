@@ -2,10 +2,10 @@
   /** Busca avançada e trends (estudo 67): monta a query com os operadores do X e roda no FxTwitter. */
   import { invoke } from "@tauri-apps/api/core";
   import { onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { openUrl, reveal, saveAs } from "$lib/tools/rt";
-  import { extOf, xErr, type ExportFormat, type XPost } from "$lib/tools/x";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { openUrl, reveal, saveAs } from "#lib/tools/rt.ts";
+  import { extOf, xErr, type ExportFormat, type XPost } from "#lib/tools/x.ts";
   import PostCard from "./PostCard.svelte";
 
   type Page = { posts: XPost[]; cursor: string | null; source: string };

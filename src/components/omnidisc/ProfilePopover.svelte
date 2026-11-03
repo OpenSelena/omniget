@@ -1,7 +1,7 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
   import {
     acceptFriend,
     addFriend,
@@ -24,7 +24,7 @@
     saveNote,
     updateMember,
     userName,
-  } from "$lib/stores/omnidisc-store.svelte";
+  } from "#lib/stores/omnidisc-store.svelte.ts";
   import OmnidiscPrompt from "./OmnidiscPrompt.svelte";
 
   let {

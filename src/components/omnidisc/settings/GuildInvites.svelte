@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
-  import { createInviteWithOptions, getGuild } from "$lib/stores/omnidisc-store.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
+  import { createInviteWithOptions, getGuild } from "#lib/stores/omnidisc-store.svelte.ts";
 
   let { guildId, canInvite }: { guildId: string; canInvite: boolean } = $props();
 

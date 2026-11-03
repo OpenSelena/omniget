@@ -5,9 +5,9 @@ import {
   generateDownloadId,
   type DownloadProgress,
   type DownloadResult,
-} from "$lib/api/open_nami";
-import { parseProfileUrl } from "$lib/utils/open_nami_parser";
-import { dispatchMultiTierDownload } from "$lib/open_nami/dispatcher";
+} from "#lib/api/open_nami.ts";
+import { parseProfileUrl } from "#lib/utils/open_nami_parser.ts";
+import { dispatchMultiTierDownload } from "#lib/open_nami/dispatcher.ts";
 
 export type StatusType = "success" | "error" | "info";
 

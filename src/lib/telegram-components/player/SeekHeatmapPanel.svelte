@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { studyPlayerSeekHeatmap, type SeekHeatmap } from "$lib/player-types";
+  import { studyPlayerSeekHeatmap, type SeekHeatmap } from "#lib/player-types.ts";
 
   type Props = {
     lessonId: number;

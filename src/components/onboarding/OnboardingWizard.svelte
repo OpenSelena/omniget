@@ -1,12 +1,12 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
   import { open } from "@tauri-apps/plugin-dialog";
-  import { t, locale, loadTranslations } from "$lib/i18n";
-  import { syncTrayLabels } from "$lib/tray-labels";
-  import { getSettings, updateSettings } from "$lib/stores/settings-store.svelte";
-  import { completeOnboarding } from "$lib/stores/onboarding-store.svelte";
-  import { refreshYtdlpStatus } from "$lib/stores/dependency-store.svelte";
-  import Mascot from "$components/mascot/Mascot.svelte";
+  import { t, locale, loadTranslations } from "#lib/i18n/index.ts";
+  import { syncTrayLabels } from "#lib/tray-labels.ts";
+  import { getSettings, updateSettings } from "#lib/stores/settings-store.svelte.ts";
+  import { completeOnboarding } from "#lib/stores/onboarding-store.svelte.ts";
+  import { refreshYtdlpStatus } from "#lib/stores/dependency-store.svelte.ts";
+  import Mascot from "#components/mascot/Mascot.svelte";
 
   type DependencyStatus = {
     name: string;

@@ -2,9 +2,9 @@
   /** Playlist exportada -> .m3u8/.pls apontando para os arquivos do disco. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { baseName, errText, onToolProgress, pct, pickDir, pickFile, reveal, type ToolProgress } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { baseName, errText, onToolProgress, pct, pickDir, pickFile, reveal, type ToolProgress } from "#lib/tools/rt.ts";
 
   type Track = { artist: string; title: string; album: string; duration_secs: number | null };
   type Matched = Track & { path: string; score: number; copied_to: string | null };

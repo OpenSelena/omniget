@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
-  import { pluginInvoke } from "$lib/plugin-invoke";
-  import DialogContainer from "$components/dialog/DialogContainer.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { pluginInvoke } from "#lib/plugin-invoke.ts";
+  import DialogContainer from "#components/dialog/DialogContainer.svelte";
 
   type Section = {
     id: number;

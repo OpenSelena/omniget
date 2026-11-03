@@ -2,8 +2,8 @@
   import { onMount, onDestroy } from "svelte";
   import { listen, type UnlistenFn } from "@tauri-apps/api/event";
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
 
   const DISMISS_KEY = "bilibili-session-banner-dismissed-until";
   const DISMISS_WINDOW_MS = 24 * 60 * 60 * 1000;

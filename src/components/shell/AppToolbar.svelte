@@ -1,9 +1,9 @@
 <script lang="ts">
   import { page } from "$app/state";
-  import { t } from "$lib/i18n";
-  import { openCommandPalette } from "$lib/stores/command-palette-store.svelte";
-  import { getToolbar } from "$lib/stores/toolbar-store.svelte";
-  import { shortcut } from "$lib/platform";
+  import { t } from "#lib/i18n/index.ts";
+  import { openCommandPalette } from "#lib/stores/command-palette-store.svelte.ts";
+  import { getToolbar } from "#lib/stores/toolbar-store.svelte.ts";
+  import { shortcut } from "#lib/platform.ts";
 
   let toolbar = $derived(getToolbar());
 

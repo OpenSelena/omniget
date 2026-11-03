@@ -1,9 +1,9 @@
 <script lang="ts">
   /** Google Docs/Slides/Sheets públicos via export oficial (estudo 51). */
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, pickDir, reveal } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, pickDir, reveal } from "#lib/tools/rt.ts";
 
   type Info = { kind: string; id: string; formats: string[] };
   let url = $state("");

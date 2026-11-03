@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
-  import { getSettings, updateSettings } from "$lib/stores/settings-store.svelte";
-  import { rpcTestConnection, rpcSyncIdleStats } from "$lib/rpc";
-  import { showToast } from "$lib/stores/toast-store.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { getSettings, updateSettings } from "#lib/stores/settings-store.svelte.ts";
+  import { rpcTestConnection, rpcSyncIdleStats } from "#lib/rpc.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
 
   let settings = $derived(getSettings());
   let busy = $state(false);

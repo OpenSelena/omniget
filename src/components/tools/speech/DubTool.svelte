@@ -2,9 +2,9 @@
   /** Dublagem a partir de uma legenda: Edge TTS por cue + atempo + mux (estudo 06). */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, onToolProgress, pct, pickFile, reveal, FILTERS, type ToolProgress } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, onToolProgress, pct, pickFile, reveal, FILTERS, type ToolProgress } from "#lib/tools/rt.ts";
 
   type Voice = { short_name: string; gender: string; locale: string };
   type Result = { audio_path: string; video_path: string | null; cues: number; sped_up: number };

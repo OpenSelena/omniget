@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { loadProfiles, type Profile } from '$lib/api/open_nami';
+  import { loadProfiles, type Profile } from '#lib/api/open_nami.ts';
   import {
     isActive,
     isCancelling,
@@ -16,20 +16,20 @@
     stopDownload as stopStoreDownload,
     getDraft,
     setDraft,
-  } from '$lib/stores/open_nami_download_store.svelte';
+  } from '#lib/stores/open_nami_download_store.svelte.ts';
   import {
     getOutputDir,
     getCookiesFile,
     loadSettings,
-  } from '$lib/stores/open_nami_settings_store.svelte';
+  } from '#lib/stores/open_nami_settings_store.svelte.ts';
   import {
     ensureDependenciesChecked,
     getDependencyStatus,
     isCheckingDependencies,
-  } from '$lib/stores/open_nami_deps_store.svelte';
-  import { openNamiStageLabel, openNamiStatusMessage, type OpenNamiTranslate } from '$lib/open_nami/i18n';
+  } from '#lib/stores/open_nami_deps_store.svelte.ts';
+  import { openNamiStageLabel, openNamiStatusMessage, type OpenNamiTranslate } from '#lib/open_nami/i18n.ts';
   import { onMount, onDestroy } from 'svelte';
-  import { t } from '$lib/i18n';
+  import { t } from '#lib/i18n/index.ts';
 
   interface Props {
     onSwitchToProfiles?: () => void;

@@ -2,9 +2,9 @@
   /** Limpar caches (estudo 10, Kudu): varrer → revisar → limpar. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, fmtBytes, onToolProgress, pct, type ToolProgress } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, fmtBytes, onToolProgress, pct, type ToolProgress } from "#lib/tools/rt.ts";
 
   type Rule = { id: string; group: string; name: string; risk: string; paths: string[]; bytes: number; files: number };
   type Result = { freed: number; removed: number; failed: string[] };

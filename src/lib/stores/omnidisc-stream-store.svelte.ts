@@ -1,8 +1,8 @@
 import { invoke } from "@tauri-apps/api/core";
 import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-import { getInstanceStreamingPolicy } from "$lib/stores/omnidisc-store.svelte";
-import { getVoiceSession } from "$lib/stores/omnidisc-voice-store.svelte";
-import type { StreamingPolicy } from "$lib/omnidisc/types";
+import { getInstanceStreamingPolicy } from "#lib/stores/omnidisc-store.svelte.ts";
+import { getVoiceSession } from "#lib/stores/omnidisc-voice-store.svelte.ts";
+import type { StreamingPolicy } from "#lib/omnidisc/types.ts";
 
 export type SourceKind = "display" | "window";
 export type AudioMode = { mode: "none" } | { mode: "app"; pid: number } | { mode: "system" };

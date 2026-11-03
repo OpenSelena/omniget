@@ -3,7 +3,7 @@
   import { fly } from "svelte/transition";
   import { cubicOut } from "svelte/easing";
   import { listen, type UnlistenFn } from "@tauri-apps/api/event";
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
   import { open as openDialog } from "@tauri-apps/plugin-dialog";
   import { getCurrentWebview } from "@tauri-apps/api/webview";
   import TelegramMediaPlayer from "./TelegramMediaPlayer.svelte";
@@ -11,7 +11,7 @@
   import ResizeBar from "./ResizeBar.svelte";
   import Skeleton from "./Skeleton.svelte";
   import KeymapHint from "./KeymapHint.svelte";
-  import { showToast } from "$lib/stores/toast-store.svelte";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
   import ConfirmDialog from "./ConfirmDialog.svelte";
   import ChatContextMenu from "./ChatContextMenu.svelte";
   import TgIcon from "./TgIcon.svelte";
@@ -74,7 +74,7 @@
     type StudyBookmarkRow,
     type SmartFolderId,
     type TelegramSelf,
-  } from "$lib/telegram-bridge";
+  } from "#lib/telegram-bridge.ts";
 
   let {
     outputDir = "",
@@ -953,7 +953,7 @@
     chatCtxMenu = null;
   }
   let chatsHasMore = $state(false);
-  let nextOffset: import("$lib/telegram-bridge").ChatPageOffset | null = null;
+  let nextOffset: import("#lib/telegram-bridge.ts").ChatPageOffset | null = null;
 
   async function loadFromCache(): Promise<boolean> {
     try {
@@ -1009,7 +1009,7 @@
 
     await new Promise((r) => setTimeout(r, 1500));
 
-    let cursor: import("$lib/telegram-bridge").ChatPageOffset | null = nextOffset;
+    let cursor: import("#lib/telegram-bridge.ts").ChatPageOffset | null = nextOffset;
     const maxPages = 10; // 40 * 10 = up to 400 extra chats indexed
     const allHashes: [number, number][] = [];
     let pageBaseSort = chats.length + 1;

@@ -3,21 +3,21 @@
   import { open } from "@tauri-apps/plugin-dialog";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
-  import SupportedServices from "$components/services/SupportedServices.svelte";
-  import BilibiliPreviewExtras from "$components/omnibox/BilibiliPreviewExtras.svelte";
-  import DownloadModeSelector from "$components/omnibox/DownloadModeSelector.svelte";
-  import QualityPicker from "$components/omnibox/QualityPicker.svelte";
-  import FormatSelector from "$components/omnibox/FormatSelector.svelte";
-  import CookieAccountPicker from "$components/omnibox/CookieAccountPicker.svelte";
-  import OmniboxAdvanced from "$components/omnibox/OmniboxAdvanced.svelte";
-  import MediaPreview from "$components/omnibox/MediaPreview.svelte";
-  import BatchDownload from "$components/omnibox/BatchDownload.svelte";
-  import SearchResults from "$components/omnibox/SearchResults.svelte";
-  import P2pSendDialog from "$components/p2p/P2pSendDialog.svelte";
-  import P2pReceiveDialog from "$components/p2p/P2pReceiveDialog.svelte";
-  import HomeHero from "$components/home/HomeHero.svelte";
-  import HomeUrlBar from "$components/home/HomeUrlBar.svelte";
-  import HomeInspector from "$components/home/HomeInspector.svelte";
+  import SupportedServices from "#components/services/SupportedServices.svelte";
+  import BilibiliPreviewExtras from "#components/omnibox/BilibiliPreviewExtras.svelte";
+  import DownloadModeSelector from "#components/omnibox/DownloadModeSelector.svelte";
+  import QualityPicker from "#components/omnibox/QualityPicker.svelte";
+  import FormatSelector from "#components/omnibox/FormatSelector.svelte";
+  import CookieAccountPicker from "#components/omnibox/CookieAccountPicker.svelte";
+  import OmniboxAdvanced from "#components/omnibox/OmniboxAdvanced.svelte";
+  import MediaPreview from "#components/omnibox/MediaPreview.svelte";
+  import BatchDownload from "#components/omnibox/BatchDownload.svelte";
+  import SearchResults from "#components/omnibox/SearchResults.svelte";
+  import P2pSendDialog from "#components/p2p/P2pSendDialog.svelte";
+  import P2pReceiveDialog from "#components/p2p/P2pReceiveDialog.svelte";
+  import HomeHero from "#components/home/HomeHero.svelte";
+  import HomeUrlBar from "#components/home/HomeUrlBar.svelte";
+  import HomeInspector from "#components/home/HomeInspector.svelte";
   import {
     type OmniState,
     type PlatformInfo,
@@ -26,18 +26,18 @@
     showInspectorForState,
     showOmniboxForState,
     isUrl,
-  } from "$lib/home/omnibox-controller";
-  import { getDownloads, formatBytes } from "$lib/stores/download-store.svelte";
-  import { getDownloadStats } from "$lib/stores/download-stats.svelte";
-  import { getSettings, updateSettings } from "$lib/stores/settings-store.svelte";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { onClipboardUrl } from "$lib/stores/clipboard-monitor";
-  import { getMediaPreview, clearMediaPreview } from "$lib/stores/media-preview-store.svelte";
-  import { clearPendingExternalPrefill, getPendingExternalPrefill, isPrefillAction, mayAutoStart, type ExternalUrlEvent } from "$lib/stores/external-url-store.svelte";
-  import { getOmniboxDraftUrl, setOmniboxDraftUrl } from "$lib/stores/omnibox-draft-store.svelte";
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
-  import { platformDisplayName } from "$lib/platform-display-names";
+  } from "#lib/home/omnibox-controller.ts";
+  import { getDownloads, formatBytes } from "#lib/stores/download-store.svelte.ts";
+  import { getDownloadStats } from "#lib/stores/download-stats.svelte.ts";
+  import { getSettings, updateSettings } from "#lib/stores/settings-store.svelte.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { onClipboardUrl } from "#lib/stores/clipboard-monitor.ts";
+  import { getMediaPreview, clearMediaPreview } from "#lib/stores/media-preview-store.svelte.ts";
+  import { clearPendingExternalPrefill, getPendingExternalPrefill, isPrefillAction, mayAutoStart, type ExternalUrlEvent } from "#lib/stores/external-url-store.svelte.ts";
+  import { getOmniboxDraftUrl, setOmniboxDraftUrl } from "#lib/stores/omnibox-draft-store.svelte.ts";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
+  import { platformDisplayName } from "#lib/platform-display-names.ts";
 
 
   type DownloadStarted = {

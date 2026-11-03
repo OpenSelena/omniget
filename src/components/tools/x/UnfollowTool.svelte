@@ -2,10 +2,10 @@
   /** Quem não me segue de volta (estudo 67): auditoria, whitelist e unfollow com jitter e limite diário. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { onToolProgress, openUrl, reveal, saveAs, type ToolProgress } from "$lib/tools/rt";
-  import { fmtN, xErr, type XSession, type XUser } from "$lib/tools/x";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { onToolProgress, openUrl, reveal, saveAs, type ToolProgress } from "#lib/tools/rt.ts";
+  import { fmtN, xErr, type XSession, type XUser } from "#lib/tools/x.ts";
   import XSessionRow from "./XSession.svelte";
 
   type Audit = { me: XUser; following: number; followers: number; mutuals: number; not_following_back: XUser[]; fans: XUser[]; whitelist: string[]; cancelled: boolean; unfollowed_today: number };

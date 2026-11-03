@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
 
   let { downloadMode = $bindable("auto" as "auto" | "audio" | "mute"), onChange = undefined } = $props();
 </script>

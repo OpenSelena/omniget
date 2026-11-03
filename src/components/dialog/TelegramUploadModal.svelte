@@ -1,8 +1,8 @@
 <script lang="ts">
   import { open as openFileDialog } from "@tauri-apps/plugin-dialog";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { formatBytes } from "$lib/stores/download-store.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { formatBytes } from "#lib/stores/download-store.svelte.ts";
   import {
     telegramUploadFile,
     calculateTelegramChunks,
@@ -11,7 +11,7 @@
     type TelegramSendAsMode,
     type TelegramChat,
     telegramGetChats,
-  } from "$lib/telegram-bridge";
+  } from "#lib/telegram-bridge.ts";
   import { onMount } from "svelte";
 
   let {

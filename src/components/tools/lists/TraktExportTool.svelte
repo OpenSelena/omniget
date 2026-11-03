@@ -2,9 +2,9 @@
   /** Trakt: device flow com as credenciais do próprio usuário, e o export. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, onToolProgress, openUrl, pct, pickDir, reveal, type ToolProgress } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, onToolProgress, openUrl, pct, pickDir, reveal, type ToolProgress } from "#lib/tools/rt.ts";
 
   type Creds = { client_id_hint: string; has_client_id: boolean; has_client_secret: boolean; connected: boolean; username: string; expires_at: number; app_url: string };
   type DeviceCode = { device_code: string; user_code: string; verification_url: string; expires_in: number; interval: number };

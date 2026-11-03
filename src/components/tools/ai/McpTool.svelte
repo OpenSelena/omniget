@@ -2,9 +2,9 @@
   /** Servidor MCP embutido (estudos 22 e 23): liga/desliga, endereço, trechos de configuração e a lista de tools. */
   import { invoke } from "@tauri-apps/api/core";
   import { onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText } from "#lib/tools/rt.ts";
 
   type Tool = { name: string; description: string; inputSchema: { properties?: Record<string, unknown>; required?: string[] } };
   type Status = { enabled: boolean; bridge_enabled: boolean; port: number; url: string; token: string; tools: Tool[]; snippets: [string, string][] };

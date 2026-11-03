@@ -1,7 +1,7 @@
 <script lang="ts">
   import { open } from "@tauri-apps/plugin-shell";
   import { getVersion } from "@tauri-apps/api/app";
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
 
   const GITHUB_URL = "https://github.com/OpenSelena/omniget";
   let appVersion = $state("");

@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
-  import { getChannel, dmTitle, userName } from "$lib/stores/omnidisc-store.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { getChannel, dmTitle, userName } from "#lib/stores/omnidisc-store.svelte.ts";
   import {
     getIncomingCall,
     ringSecondsLeft,
     acceptIncomingCall,
     dismissIncomingCall,
     isVoiceBusy,
-  } from "$lib/stores/omnidisc-voice-store.svelte";
+  } from "#lib/stores/omnidisc-voice-store.svelte.ts";
 
   let call = $derived(getIncomingCall());
   let busy = $derived(isVoiceBusy());

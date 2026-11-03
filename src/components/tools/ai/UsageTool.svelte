@@ -2,9 +2,9 @@
   /** Quanto gastei com IA (estudo 17): ledger local por dia, modelo e tarefa. */
   import { invoke } from "@tauri-apps/api/core";
   import { onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, fmtUsd, reveal } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, fmtUsd, reveal } from "#lib/tools/rt.ts";
 
   type Bucket = { key: string; calls: number; input_tokens: number; output_tokens: number; cost_usd: number; unknown_price: number };
   type Report = { since: string; calls: number; input_tokens: number; output_tokens: number; cost_usd: number; unknown_price: number; by_day: Bucket[]; by_model: Bucket[]; by_task: Bucket[]; entries_path: string | null };

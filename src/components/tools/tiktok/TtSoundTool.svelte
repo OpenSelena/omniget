@@ -2,9 +2,9 @@
   /** Só o áudio do TikTok — o "som" — com o crédito nas tags e num sidecar de texto. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { baseName, errText, onToolProgress, openUrl, pct, pickDir, pickFile, reveal, type ToolProgress } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { baseName, errText, onToolProgress, openUrl, pct, pickDir, pickFile, reveal, type ToolProgress } from "#lib/tools/rt.ts";
 
   type Attribution = {
     sound: string; sound_author: string; sound_url: string; sound_id: string; original: boolean;

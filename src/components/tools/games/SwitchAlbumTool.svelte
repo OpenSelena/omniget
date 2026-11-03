@@ -2,9 +2,9 @@
   /** Importa o álbum do Switch (SD ou pasta) para uma biblioteca por jogo. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { baseName, errText, fmtBytes, fmtSecs, onToolProgress, pct, pickDir, reveal, type ToolProgress } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { baseName, errText, fmtBytes, fmtSecs, onToolProgress, pct, pickDir, reveal, type ToolProgress } from "#lib/tools/rt.ts";
 
   type Item = {
     source: string;

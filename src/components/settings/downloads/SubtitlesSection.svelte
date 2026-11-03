@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
   import { getSettings, updateSettings, toggleBool } from "../settings-helpers";
 
   let { embedded = false }: { embedded?: boolean } = $props();

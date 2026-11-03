@@ -2,9 +2,9 @@
   /** Download acelerado com aria2c (estudo 53). */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, fmtBytes, onToolProgress, pickDir, reveal, type ToolProgress } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, fmtBytes, onToolProgress, pickDir, reveal, type ToolProgress } from "#lib/tools/rt.ts";
 
   type Status = { installed: boolean; path: string | null; version: string | null };
   type Result = { path: string; bytes: number };

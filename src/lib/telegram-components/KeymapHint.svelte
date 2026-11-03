@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
 
   type Ctx = "chat-list" | "media-grid" | "player";
 

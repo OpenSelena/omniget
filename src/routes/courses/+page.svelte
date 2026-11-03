@@ -1,10 +1,10 @@
 <script lang="ts">
   import { goto } from "$app/navigation";
   import { invoke } from "@tauri-apps/api/core";
-  import { pluginInvoke } from "$lib/plugin-invoke";
+  import { pluginInvoke } from "#lib/plugin-invoke.ts";
   import { onMount } from "svelte";
   import { PLATFORM_ICONS, DEFAULT_ICON } from "./platform-icons";
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
 
   type PlatformConfig = {
     id: string;

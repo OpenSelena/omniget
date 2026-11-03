@@ -4,8 +4,8 @@
  */
 import { invoke } from "@tauri-apps/api/core";
 import { get } from "svelte/store";
-import { t } from "$lib/i18n";
-import { errText } from "$lib/tools/rt";
+import { t } from "#lib/i18n/index.ts";
+import { errText } from "#lib/tools/rt.ts";
 
 export type XUser = {
   id: string;

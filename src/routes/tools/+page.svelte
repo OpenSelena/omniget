@@ -1,8 +1,8 @@
 <script lang="ts">
   import { page } from "$app/state";
-  import { t } from "$lib/i18n";
-  import ToolTile from "$components/tools/ToolTile.svelte";
-  import ToolsSearchBar from "$components/tools/ToolsSearchBar.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import ToolTile from "#components/tools/ToolTile.svelte";
+  import ToolsSearchBar from "#components/tools/ToolsSearchBar.svelte";
   import {
     CATEGORIES,
     buildIndex,
@@ -10,7 +10,7 @@
     toolHref,
     toolsOf,
     type PlatformFilter,
-  } from "$lib/tools/catalog";
+  } from "#lib/tools/catalog.ts";
 
   // `/tools?q=instagram` abre o hub já filtrado, para a paleta e para links.
   let query = $state(page.url.searchParams.get("q") ?? "");

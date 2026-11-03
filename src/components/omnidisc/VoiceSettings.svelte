@@ -1,9 +1,9 @@
 <script lang="ts">
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
-  import { formatBinding, isMac } from "$lib/platform";
-  import { getSettings } from "$lib/stores/settings-store.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
+  import { formatBinding, isMac } from "#lib/platform.ts";
+  import { getSettings } from "#lib/stores/settings-store.svelte.ts";
   import {
     getDevices,
     isDevicesLoading,
@@ -21,7 +21,7 @@
     isMicSilent,
     isPttRegistered,
     refreshPttStatus,
-  } from "$lib/stores/omnidisc-voice-store.svelte";
+  } from "#lib/stores/omnidisc-voice-store.svelte.ts";
 
   let settings = $derived(getSettings());
   let voice = $derived(settings?.omnidisc?.voice ?? {});

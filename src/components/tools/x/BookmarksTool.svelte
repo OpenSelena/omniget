@@ -2,10 +2,10 @@
   /** Exportar favoritos (estudo 67): pastas + todos os bookmarks, sem o limite de 800. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { onToolProgress, pickDir, reveal, type ToolProgress } from "$lib/tools/rt";
-  import { xErr, type XPost, type XSession } from "$lib/tools/x";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { onToolProgress, pickDir, reveal, type ToolProgress } from "#lib/tools/rt.ts";
+  import { xErr, type XPost, type XSession } from "#lib/tools/x.ts";
   import PostCard from "./PostCard.svelte";
   import XSessionRow from "./XSession.svelte";
 

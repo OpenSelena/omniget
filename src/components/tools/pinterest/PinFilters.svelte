@@ -1,7 +1,7 @@
 <script lang="ts">
   /** Filtros de conteúdo: anúncios, IA (3 níveis), tipo e largura mínima. */
-  import { t } from "$lib/i18n";
-  import type { Filters } from "$lib/tools/pinterest";
+  import { t } from "#lib/i18n/index.ts";
+  import type { Filters } from "#lib/tools/pinterest.ts";
 
   let { filters = $bindable(), compact = false }: { filters: Filters; compact?: boolean } = $props();
 </script>

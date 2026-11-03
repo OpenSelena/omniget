@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
-  import { getMembers, getUser, searchMessages, userName, type SearchFilters } from "$lib/stores/omnidisc-store.svelte";
-  import { snowflakeForTime } from "$lib/omnidisc/snowflake";
-  import type { OmnidiscMessage } from "$lib/omnidisc/types";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
+  import { getMembers, getUser, searchMessages, userName, type SearchFilters } from "#lib/stores/omnidisc-store.svelte.ts";
+  import { snowflakeForTime } from "#lib/omnidisc/snowflake.ts";
+  import type { OmnidiscMessage } from "#lib/omnidisc/types.ts";
   import VirtualList from "./VirtualList.svelte";
 
   let {

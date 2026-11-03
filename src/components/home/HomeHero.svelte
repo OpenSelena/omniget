@@ -1,6 +1,6 @@
 <script lang="ts">
-  import Mascot from "$components/mascot/Mascot.svelte";
-  import Confetti from "$components/celebrate/Confetti.svelte";
+  import Mascot from "#components/mascot/Mascot.svelte";
+  import Confetti from "#components/celebrate/Confetti.svelte";
 
   type MascotEmotion = "idle" | "downloading" | "error" | "stalled" | "queue" | "complete" | "amazed";
 

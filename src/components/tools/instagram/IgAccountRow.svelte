@@ -6,9 +6,9 @@
    */
   import { invoke } from "@tauri-apps/api/core";
   import { onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { openUrl } from "$lib/tools/rt";
-  import { igState, loadAccounts, setAccount, type UserInfo } from "$lib/tools/ig.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { openUrl } from "#lib/tools/rt.ts";
+  import { igState, loadAccounts, setAccount, type UserInfo } from "#lib/tools/ig.svelte.ts";
 
   let { onready }: { onready?: (me: UserInfo | null) => void } = $props();
   let loading = $state(true);

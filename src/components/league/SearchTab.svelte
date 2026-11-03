@@ -1,6 +1,6 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
   import { CDRAGON, TAG_KEYS, type Champion, type RankedEntry } from "./shared";
 
   let {

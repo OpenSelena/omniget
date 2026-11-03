@@ -2,9 +2,9 @@
   import { untrack } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
   import { open as openDialog } from "@tauri-apps/plugin-dialog";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { t } from "$lib/i18n";
-  import { formatDepVersion } from "$lib/utils/dep-version";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { t } from "#lib/i18n/index.ts";
+  import { formatDepVersion } from "#lib/utils/dep-version.ts";
 
   type DependencyVariantInfo = {
     id: string;

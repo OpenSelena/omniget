@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
-  import { getSelectedInstance, listSessions, revokeOtherSessions, revokeSession } from "$lib/stores/omnidisc-store.svelte";
-  import type { OmnidiscSession } from "$lib/omnidisc/types";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
+  import { getSelectedInstance, listSessions, revokeOtherSessions, revokeSession } from "#lib/stores/omnidisc-store.svelte.ts";
+  import type { OmnidiscSession } from "#lib/omnidisc/types.ts";
   import OmnidiscPrompt from "../OmnidiscPrompt.svelte";
 
   let instance = $derived(getSelectedInstance());

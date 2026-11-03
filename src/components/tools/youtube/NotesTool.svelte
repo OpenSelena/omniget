@@ -2,9 +2,9 @@
   /** Transcrição virando artigo em Markdown: parágrafos costurados, capítulos e timestamps. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { baseName, errText, FILTERS, onToolProgress, pct, pickFile, reveal, saveAs, type ToolProgress } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { baseName, errText, FILTERS, onToolProgress, pct, pickFile, reveal, saveAs, type ToolProgress } from "#lib/tools/rt.ts";
 
   type Result = { markdown: string; path: string; source: string; title: string; channel: string; url: string; duration_seconds: number; language: string; words: number; paragraphs: number; chapters: number; used_session: boolean };
 

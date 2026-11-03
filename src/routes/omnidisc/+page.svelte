@@ -2,15 +2,15 @@
   import { onMount } from "svelte";
   import { page } from "$app/state";
   import { goto } from "$app/navigation";
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
   import {
     hasInstances,
     resetConnect,
     connectInstance,
     getConnectStep,
     DEFAULT_INSTANCE_URL,
-  } from "$lib/stores/omnidisc-store.svelte";
-  import ConnectInstanceForm from "$components/omnidisc/ConnectInstanceForm.svelte";
+  } from "#lib/stores/omnidisc-store.svelte.ts";
+  import ConnectInstanceForm from "#components/omnidisc/ConnectInstanceForm.svelte";
 
   let hasAny = $derived(hasInstances());
   let addRequested = $derived(page.url.searchParams.get("add") === "1");

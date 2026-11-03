@@ -1,10 +1,10 @@
 <script lang="ts">
   /** Quem deixou de me seguir: snapshots locais e a diferença entre dois. */
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText } from "$lib/tools/rt";
-  import { cancelJob, fmtDate, igState, jobId, slugArg, type SnapshotDiff, type SnapshotMeta, type UserInfo } from "$lib/tools/ig.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText } from "#lib/tools/rt.ts";
+  import { cancelJob, fmtDate, igState, jobId, slugArg, type SnapshotDiff, type SnapshotMeta, type UserInfo } from "#lib/tools/ig.svelte.ts";
   import IgAccountRow from "./IgAccountRow.svelte";
   import IgUserList from "./IgUserList.svelte";
 

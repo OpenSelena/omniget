@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onDestroy } from "svelte";
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
   import { getSettings, updateSettings, toggleBool, changeNumber } from "./settings-helpers";
 
   let settings = $derived(getSettings());

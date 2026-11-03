@@ -1,8 +1,8 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { getSettings, updateSettings } from "$lib/stores/settings-store.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { getSettings, updateSettings } from "#lib/stores/settings-store.svelte.ts";
   import { CDRAGON, type Champion } from "./shared";
 
   let {

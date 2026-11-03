@@ -1,9 +1,9 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { mediaKind } from "$lib/video-ops/media-kind";
-  import { pickWhisperModel, type WhisperModel } from "$lib/video-ops/whisper-model";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { mediaKind } from "#lib/video-ops/media-kind.ts";
+  import { pickWhisperModel, type WhisperModel } from "#lib/video-ops/whisper-model.ts";
 
   let { filePath, onClose }: { filePath: string; onClose: () => void } = $props();
 

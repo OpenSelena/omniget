@@ -1,10 +1,10 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
   import { onMount } from "svelte";
-  import { t, locale as i18nLocale } from "$lib/i18n";
+  import { t, locale as i18nLocale } from "#lib/i18n/index.ts";
   import { get } from "svelte/store";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import timeAgo from "$lib/time-ago";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import timeAgo from "#lib/time-ago.ts";
 
   type Channel = {
     id: string;

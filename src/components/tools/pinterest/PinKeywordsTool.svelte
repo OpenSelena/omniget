@@ -5,10 +5,10 @@
    * topo. Para quem cria pins e quer ser encontrado.
    */
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, openUrl } from "$lib/tools/rt";
-  import type { KeywordsOut } from "$lib/tools/pinterest";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, openUrl } from "#lib/tools/rt.ts";
+  import type { KeywordsOut } from "#lib/tools/pinterest.ts";
 
   let term = $state("");
   let busy = $state(false);

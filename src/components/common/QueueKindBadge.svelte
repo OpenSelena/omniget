@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { QueueKind } from "$lib/stores/download-store.svelte";
+  import type { QueueKind } from "#lib/stores/download-store.svelte.ts";
 
   let { kind = "generic", size = 14, showLabel = false }: {
     kind?: QueueKind | undefined;

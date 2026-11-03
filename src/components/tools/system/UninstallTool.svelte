@@ -2,9 +2,9 @@
   /** Desinstalador (estudo 10, Kudu): lista, desinstala e manda as sobras para a lixeira. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, fmtBytes, onToolProgress, reveal, type ToolProgress } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, fmtBytes, onToolProgress, reveal, type ToolProgress } from "#lib/tools/rt.ts";
 
   type App = { id: string; name: string; version: string; publisher: string; kind: string; path: string; bytes: number; needs_admin: boolean; key: string };
   type Leftover = { path: string; bytes: number };

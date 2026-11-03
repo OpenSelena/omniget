@@ -1,12 +1,12 @@
 <script lang="ts">
   import { page } from "$app/state";
-  import { t } from "$lib/i18n";
-  import SettingsDrillBack from "$components/settings/SettingsDrillBack.svelte";
-  import SettingsDrillItem from "$components/settings/SettingsDrillItem.svelte";
-  import VoiceSettings from "$components/omnidisc/VoiceSettings.svelte";
-  import ProfileSettings from "$components/omnidisc/settings/ProfileSettings.svelte";
-  import SessionsSettings from "$components/omnidisc/settings/SessionsSettings.svelte";
-  import DevicesSettings from "$components/omnidisc/settings/DevicesSettings.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import SettingsDrillBack from "#components/settings/SettingsDrillBack.svelte";
+  import SettingsDrillItem from "#components/settings/SettingsDrillItem.svelte";
+  import VoiceSettings from "#components/omnidisc/VoiceSettings.svelte";
+  import ProfileSettings from "#components/omnidisc/settings/ProfileSettings.svelte";
+  import SessionsSettings from "#components/omnidisc/settings/SessionsSettings.svelte";
+  import DevicesSettings from "#components/omnidisc/settings/DevicesSettings.svelte";
 
   type Drill = "voice" | "profile" | "sessions" | "devices";
 

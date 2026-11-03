@@ -6,10 +6,10 @@
    */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, onToolProgress, openPath, pct, pickDir, reveal, type ToolProgress } from "$lib/tools/rt";
-  import { defaultFilters, loadCookies, type ExportOut } from "$lib/tools/pinterest";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, onToolProgress, openPath, pct, pickDir, reveal, type ToolProgress } from "#lib/tools/rt.ts";
+  import { defaultFilters, loadCookies, type ExportOut } from "#lib/tools/pinterest.ts";
   import PinCookies from "./PinCookies.svelte";
   import PinFilters from "./PinFilters.svelte";
 

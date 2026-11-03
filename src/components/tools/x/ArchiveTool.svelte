@@ -1,10 +1,10 @@
 <script lang="ts">
   /** Arquivo do X (estudo 67): abre o zip de "Baixar seus dados" offline. */
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { openUrl, pickDir, pickFile, reveal } from "$lib/tools/rt";
-  import { fmtDate, fmtN, xErr, type XPost } from "$lib/tools/x";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { openUrl, pickDir, pickFile, reveal } from "#lib/tools/rt.ts";
+  import { fmtDate, fmtN, xErr, type XPost } from "#lib/tools/x.ts";
   import PostCard from "./PostCard.svelte";
 
   type Acc = { account_id: string; user_link: string };

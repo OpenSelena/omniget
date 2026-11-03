@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
-  import ContextHint from "$components/hints/ContextHint.svelte";
-  import { shortcut } from "$lib/platform";
+  import { t } from "#lib/i18n/index.ts";
+  import ContextHint from "#components/hints/ContextHint.svelte";
+  import { shortcut } from "#lib/platform.ts";
 
   let { url = $bindable(""), onInput, prominent = false }: { url?: string; onInput?: () => void; prominent?: boolean } = $props();
 

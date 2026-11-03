@@ -3,10 +3,10 @@
    * Lista de contas (seguidores, fãs, fantasmas…) com filtro, seleção,
    * export CSV e ações em massa que o pai executa.
    */
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { openUrl } from "$lib/tools/rt";
-  import { exportCsv, profileUrl, usersCsv, type MiniUser } from "$lib/tools/ig.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { openUrl } from "#lib/tools/rt.ts";
+  import { exportCsv, profileUrl, usersCsv, type MiniUser } from "#lib/tools/ig.svelte.ts";
 
   type Action = { id: string; label: string; primary?: boolean; danger?: boolean };
   let {

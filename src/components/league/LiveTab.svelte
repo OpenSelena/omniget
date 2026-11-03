@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
   import { CDRAGON, ROLES, assetUrl, formatGameTime, type GoalKey, type Role } from "./shared";
   import { availability, featureById, needsBadge, type Platform } from "./registry";
 

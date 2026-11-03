@@ -4,7 +4,7 @@
  * localStorage para todas as tools da categoria usarem a mesma sessão.
  */
 import { invoke } from "@tauri-apps/api/core";
-import { saveAs } from "$lib/tools/rt";
+import { saveAs } from "#lib/tools/rt.ts";
 
 export type IgAccount = { slug: string; alias: string; captured_at_ms: number; cookie_count: number; has_session: boolean; user_id: string };
 

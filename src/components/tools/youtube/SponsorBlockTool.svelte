@@ -1,9 +1,9 @@
 <script lang="ts">
   /** Segmentos do SponsorBlock (estudo 43) e os argumentos do yt-dlp para baixar sem eles. */
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, fmtSecs, openUrl } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, fmtSecs, openUrl } from "#lib/tools/rt.ts";
 
   type Segment = { uuid: string; segment: [number, number]; category: string; action_type: string; votes: number; locked: number; video_duration: number; description: string };
   type Result = { video_id: string; segments: Segment[]; skipped_seconds: number; ytdlp_args: string };

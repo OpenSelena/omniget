@@ -2,9 +2,9 @@
   /** Tarja de verdade: apaga o texto e só depois pinta a barra preta. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { baseName, errText, fmtBytes, onToolProgress, openPath, pct, pickFile, reveal, type ToolProgress } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { baseName, errText, fmtBytes, onToolProgress, openPath, pct, pickFile, reveal, type ToolProgress } from "#lib/tools/rt.ts";
 
   type Area = { page: number; x: number; y: number; width: number; height: number };
   type PageReport = { page: number; areas: number; chars_removed: number; mode: string; note: string };

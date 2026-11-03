@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
   import {
     refreshSources,
     startStream,
@@ -18,7 +18,7 @@
     type SourceId,
     type AudioMode,
     type StreamMode,
-  } from "$lib/stores/omnidisc-stream-store.svelte";
+  } from "#lib/stores/omnidisc-stream-store.svelte.ts";
 
   let { onClose }: { onClose: () => void } = $props();
 

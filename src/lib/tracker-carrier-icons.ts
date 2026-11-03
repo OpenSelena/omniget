@@ -1,4 +1,4 @@
-import type { Carrier } from "$lib/tracker-bridge";
+import type { Carrier } from "#lib/tracker-bridge.ts";
 
 export type CarrierIcon = {
   svgPath: string;

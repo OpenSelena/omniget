@@ -1,6 +1,6 @@
 <script lang="ts">
   import { convertFileSrc } from "@tauri-apps/api/core";
-  import type { ThumbnailSlice } from "$lib/player-types";
+  import type { ThumbnailSlice } from "#lib/player-types.ts";
 
   type Props = {
     thumbnails: ThumbnailSlice[];

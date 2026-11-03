@@ -2,9 +2,9 @@
   /** Capítulos automáticos por silêncio + mudança de cena, no formato da descrição do YouTube. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { baseName, errText, fmtSecs, FILTERS, onToolProgress, pct, pickFile, reveal, type ToolProgress } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { baseName, errText, fmtSecs, FILTERS, onToolProgress, pct, pickFile, reveal, type ToolProgress } from "#lib/tools/rt.ts";
 
   type Chapter = { start: number; end: number; title: string; source: string };
   type Result = { input: string; duration_seconds: number; chapters: Chapter[]; description: string; ffmetadata: string; description_path: string; metadata_path: string; silence_marks: number; scene_marks: number; titled_from_transcript: boolean; youtube_ready: boolean; youtube_note: string | null };

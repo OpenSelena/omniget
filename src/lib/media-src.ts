@@ -1,5 +1,5 @@
 import { convertFileSrc, invoke } from "@tauri-apps/api/core";
-import { currentOs } from "$lib/platform";
+import { currentOs } from "#lib/platform.ts";
 
 const cache = new Map<string, { url: Promise<string>; mintedAt: number }>();
 

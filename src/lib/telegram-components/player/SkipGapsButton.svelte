@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { SkipGaps } from "$lib/player-types";
+  import type { SkipGaps } from "#lib/player-types.ts";
 
   type Props = {
     skipGaps: SkipGaps | null;

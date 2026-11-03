@@ -1,8 +1,8 @@
 <script lang="ts">
   import { open } from '@tauri-apps/plugin-dialog';
-  import { getOutputDir, getCookiesFile, loadSettings, saveSettings } from '$lib/stores/open_nami_settings_store.svelte';
+  import { getOutputDir, getCookiesFile, loadSettings, saveSettings } from '#lib/stores/open_nami_settings_store.svelte.ts';
   import { onMount } from 'svelte';
-  import { t } from '$lib/i18n';
+  import { t } from '#lib/i18n/index.ts';
 
   let outputDir = $state('');
   let cookiesFile = $state('');

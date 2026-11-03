@@ -25,14 +25,14 @@ import type {
   OmnidiscDevice,
   OmnidiscGroupStatus,
   PendingAttachment,
-} from "$lib/omnidisc/types";
+} from "#lib/omnidisc/types.ts";
 import {
   DEMO_INSTANCE_ID,
   DEMO_INSTANCE_URL,
   makeFixtureGuilds,
   makeFixtureMembers,
   makeFixtureMessages,
-} from "$lib/omnidisc/fixtures";
+} from "#lib/omnidisc/fixtures.ts";
 import {
   channelKindCode,
   emojiKey,
@@ -52,9 +52,9 @@ import {
   parseUser,
   str,
   withCategories,
-} from "$lib/omnidisc/wire";
-import { canIn, resolvePermissions, type PermissionName } from "$lib/omnidisc/permissions";
-import { compareSnowflakes, isAfter } from "$lib/omnidisc/snowflake";
+} from "#lib/omnidisc/wire.ts";
+import { canIn, resolvePermissions, type PermissionName } from "#lib/omnidisc/permissions.ts";
+import { compareSnowflakes, isAfter } from "#lib/omnidisc/snowflake.ts";
 
 const STORAGE_KEY = "omnidisc.instances";
 export const DEFAULT_INSTANCE_URL = "https://chat.tonho.wtf";
@@ -112,7 +112,7 @@ let selectedInstanceId = $state<string | null>(null);
 let selectedGuildId = $state<string | null>(null);
 let selectedChannelId = $state<string | null>(null);
 let memberListOpen = $state(true);
-let storageByInstance = $state<Record<string, import("$lib/omnidisc/types").OmnidiscStorage>>({});
+let storageByInstance = $state<Record<string, import("#lib/omnidisc/types.ts").OmnidiscStorage>>({});
 
 let drafts = $state<Record<string, string>>({});
 let guildsByInstance = $state<Record<string, OmnidiscGuild[]>>({});
@@ -559,7 +559,7 @@ export function selectChannel(guildId: string | null, channelId: string | null) 
 
 export function getStorage(
   instanceId: string | null,
-): import("$lib/omnidisc/types").OmnidiscStorage | null {
+): import("#lib/omnidisc/types.ts").OmnidiscStorage | null {
   return instanceId ? (storageByInstance[instanceId] ?? null) : null;
 }
 

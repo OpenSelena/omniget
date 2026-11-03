@@ -5,9 +5,9 @@
    * têm a mesma forma (entra texto ou arquivo, sai resultado) e tudo é local.
    */
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { baseName, errText, fmtBytes, pickFile } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { baseName, errText, fmtBytes, pickFile } from "#lib/tools/rt.ts";
 
   let { mode = "hash" }: { mode?: "hash" | "magic" | "cipher" | "xor" | "encode" | "freq" } = $props();
 

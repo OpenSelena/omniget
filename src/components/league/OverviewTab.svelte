@@ -1,8 +1,8 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
   import { CDRAGON, formatGameTime, type Champion, type RankedEntry, type LobbyQueue } from "./shared";
-  import { CHAMPION_CLASSES, drawLane, secondaryLane, type Lane } from "$lib/league-raffle";
+  import { CHAMPION_CLASSES, drawLane, secondaryLane, type Lane } from "#lib/league-raffle.ts";
   import Skeleton from "./Skeleton.svelte";
 
   let {

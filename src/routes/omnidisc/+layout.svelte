@@ -2,15 +2,15 @@
   import { page } from "$app/state";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { getSettings } from "$lib/stores/settings-store.svelte";
-  import { hasInstances, isMemberListOpen, initOmnidisc } from "$lib/stores/omnidisc-store.svelte";
-  import { initVoice } from "$lib/stores/omnidisc-voice-store.svelte";
-  import { initStream } from "$lib/stores/omnidisc-stream-store.svelte";
-  import InstanceRail from "$components/omnidisc/InstanceRail.svelte";
-  import ChannelList from "$components/omnidisc/ChannelList.svelte";
-  import MemberList from "$components/omnidisc/MemberList.svelte";
-  import StorageBanner from "$components/omnidisc/StorageBanner.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { getSettings } from "#lib/stores/settings-store.svelte.ts";
+  import { hasInstances, isMemberListOpen, initOmnidisc } from "#lib/stores/omnidisc-store.svelte.ts";
+  import { initVoice } from "#lib/stores/omnidisc-voice-store.svelte.ts";
+  import { initStream } from "#lib/stores/omnidisc-stream-store.svelte.ts";
+  import InstanceRail from "#components/omnidisc/InstanceRail.svelte";
+  import ChannelList from "#components/omnidisc/ChannelList.svelte";
+  import MemberList from "#components/omnidisc/MemberList.svelte";
+  import StorageBanner from "#components/omnidisc/StorageBanner.svelte";
   import type { Snippet } from "svelte";
 
   let { children }: { children: Snippet } = $props();

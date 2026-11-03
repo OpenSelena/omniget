@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
-  import type { CommandRecord, StreamInfo } from "$lib/stores/download-store.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import type { CommandRecord, StreamInfo } from "#lib/stores/download-store.svelte.ts";
 
   type Props = {
     phase: string;

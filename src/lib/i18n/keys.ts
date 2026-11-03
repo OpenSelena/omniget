@@ -5,12 +5,12 @@
  * Run: pnpm generate:i18n-keys
  *
  * This file provides autocomplete hints for translation keys.
- * Import the `t` function from '$lib/i18n' to use translations.
+ * Import the `t` function from '#lib/i18n/index.ts' to use translations.
  *
  * Usage:
  * ```svelte
  * <script>
- *   import { t } from '$lib/i18n';
+ *   import { t } from '#lib/i18n/index.ts';
  * </script>
  *
  * <h1>{$t('app.name')}</h1>

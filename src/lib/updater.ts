@@ -1,7 +1,7 @@
 import { check } from "@tauri-apps/plugin-updater";
 import { relaunch } from "@tauri-apps/plugin-process";
-import { storeChangelogForUpdate } from "$lib/stores/changelog-store.svelte";
-import { getSettings } from "$lib/stores/settings-store.svelte";
+import { storeChangelogForUpdate } from "#lib/stores/changelog-store.svelte.ts";
+import { getSettings } from "#lib/stores/settings-store.svelte.ts";
 
 export interface UpdateInfo {
   available: boolean;

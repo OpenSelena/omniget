@@ -1,5 +1,5 @@
 <script lang="ts">
-  import type { YoutubeChapter } from "$lib/player-types";
+  import type { YoutubeChapter } from "#lib/player-types.ts";
 
   type Props = {
     chapters: YoutubeChapter[];

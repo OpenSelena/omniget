@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { getDownloadStats } from "$lib/stores/download-stats.svelte";
+import { getDownloadStats } from "#lib/stores/download-stats.svelte.ts";
 
 export type RpcSource = "focus" | "music" | "video" | "course" | "reading";
 

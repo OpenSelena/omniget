@@ -1,6 +1,6 @@
 <script lang="ts">
   import { page } from "$app/state";
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
   import {
     selectChannel,
     getGuild,
@@ -8,9 +8,9 @@
     isMemberListOpen,
     toggleMemberList,
     getInstance,
-  } from "$lib/stores/omnidisc-store.svelte";
-  import ChatView from "$components/omnidisc/ChatView.svelte";
-  import VoiceChannelView from "$components/omnidisc/VoiceChannelView.svelte";
+  } from "#lib/stores/omnidisc-store.svelte.ts";
+  import ChatView from "#components/omnidisc/ChatView.svelte";
+  import VoiceChannelView from "#components/omnidisc/VoiceChannelView.svelte";
 
   let guildId = $derived(page.params.guild ?? "");
   let channelId = $derived(page.params.channel ?? "");

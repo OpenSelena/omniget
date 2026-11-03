@@ -20,7 +20,7 @@
 // `stroke-width="1.6"`, sem fills). Cada `svgPath` é uma string concatenada de
 // múltiplos `M ... L ...` subpaths que serão renderizados num único `<path>`.
 
-import type { CanonicalStatus } from "$lib/tracker-bridge";
+import type { CanonicalStatus } from "#lib/tracker-bridge.ts";
 
 export type StatusIcon = {
   svgPath: string;

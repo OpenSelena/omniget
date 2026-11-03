@@ -1,9 +1,9 @@
 <script lang="ts">
-  import DownloadManager from '$components/open_nami/DownloadManager.svelte';
-  import ProfileManager from '$components/open_nami/ProfileManager.svelte';
-  import SettingsManager from '$components/open_nami/SettingsManager.svelte';
-  import { setDraft } from '$lib/stores/open_nami_download_store.svelte';
-  import { t } from '$lib/i18n';
+  import DownloadManager from '#components/open_nami/DownloadManager.svelte';
+  import ProfileManager from '#components/open_nami/ProfileManager.svelte';
+  import SettingsManager from '#components/open_nami/SettingsManager.svelte';
+  import { setDraft } from '#lib/stores/open_nami_download_store.svelte.ts';
+  import { t } from '#lib/i18n/index.ts';
 
   type TabKey = 'download' | 'profiles' | 'settings';
 

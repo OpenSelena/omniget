@@ -2,7 +2,7 @@
   import { invoke } from "@tauri-apps/api/core";
   import { open as openDialog } from "@tauri-apps/plugin-dialog";
   import { emit } from "@tauri-apps/api/event";
-  import { mediaSrc } from "$lib/media-src";
+  import { mediaSrc } from "#lib/media-src.ts";
 
   type ClipResult = {
     output_path: string;

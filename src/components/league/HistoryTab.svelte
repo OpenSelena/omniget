@@ -1,10 +1,10 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
-  import { t, locale } from "$lib/i18n";
-  import timeAgo from "$lib/time-ago";
+  import { t, locale } from "#lib/i18n/index.ts";
+  import timeAgo from "#lib/time-ago.ts";
   import { CDRAGON, assetUrl, type Champion } from "./shared";
-  import { filterByQueue, queuesInGames, summarise } from "$lib/league-history";
-  import { findTeam, teamBans, teamObjectives } from "$lib/league-match-detail";
+  import { filterByQueue, queuesInGames, summarise } from "#lib/league-history.ts";
+  import { findTeam, teamBans, teamObjectives } from "#lib/league-match-detail.ts";
   import Skeleton from "./Skeleton.svelte";
 
   let {

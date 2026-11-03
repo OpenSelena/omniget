@@ -2,9 +2,9 @@
   /** ⚠️ Só Windows. Limpar registro (estudo 10, Kudu): órfãos com backup .reg antes. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, onToolProgress, openPath, pct, type ToolProgress } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, onToolProgress, openPath, pct, type ToolProgress } from "#lib/tools/rt.ts";
 
   type Orphan = { id: string; category: string; key: string; value: string | null; name: string; data: string; reason: string };
   type Result = { removed: number; backups: string[]; failed: string[] };

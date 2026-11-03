@@ -1,8 +1,8 @@
 <script lang="ts">
   import { page } from "$app/state";
   import { goto } from "$app/navigation";
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
   import {
     getInstances,
     getSelectedInstance,
@@ -16,8 +16,8 @@
     resetConnect,
     isImmersive,
     toggleImmersive,
-  } from "$lib/stores/omnidisc-store.svelte";
-  import type { OmnidiscGuild, OmnidiscInstance } from "$lib/omnidisc/types";
+  } from "#lib/stores/omnidisc-store.svelte.ts";
+  import type { OmnidiscGuild, OmnidiscInstance } from "#lib/omnidisc/types.ts";
   import OmnidiscPrompt from "./OmnidiscPrompt.svelte";
 
   let instances = $derived(getInstances());

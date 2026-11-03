@@ -1,4 +1,4 @@
-import { saveAppSettings, loadAppSettings } from "$lib/api/open_nami";
+import { saveAppSettings, loadAppSettings } from "#lib/api/open_nami.ts";
 
 let outputDir = $state("");
 let cookiesFile = $state("");

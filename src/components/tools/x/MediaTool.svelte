@@ -2,10 +2,10 @@
   /** Mídia em lote de um perfil (estudo 67): fotos em `name=orig` e o melhor mp4. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { onToolProgress, pickDir, reveal, type ToolProgress } from "$lib/tools/rt";
-  import { handleFrom, xErr } from "$lib/tools/x";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { onToolProgress, pickDir, reveal, type ToolProgress } from "#lib/tools/rt.ts";
+  import { handleFrom, xErr } from "#lib/tools/x.ts";
 
   type Result = { files: string[]; skipped: number; failed: number; posts: number; dest: string; cancelled: boolean };
 

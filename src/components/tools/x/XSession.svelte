@@ -2,9 +2,9 @@
   /** Linha de sessão do X: quem está logado, entrar e recarregar os query IDs. */
   import { invoke } from "@tauri-apps/api/core";
   import { onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { loginToX, session as loadSession, xErr, type XSession } from "$lib/tools/x";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { loginToX, session as loadSession, xErr, type XSession } from "#lib/tools/x.ts";
 
   let { required = false, onchange }: { required?: boolean; onchange?: (s: XSession) => void } = $props();
   let s = $state<XSession | null>(null);

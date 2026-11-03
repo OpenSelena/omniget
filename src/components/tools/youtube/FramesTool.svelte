@@ -1,9 +1,9 @@
 <script lang="ts">
   /** Capa real do vídeo (estudo 42): os frames hq1/hq2/hq3 e todas as variantes de thumbnail do CDN. */
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, saveAs } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, saveAs } from "#lib/tools/rt.ts";
 
   let url = $state("");
   let id = $state<string | null>(null);

@@ -2,9 +2,9 @@
   /** Duplicados por hash (estudo 38): escolher pastas, revisar grupos, apagar cópias. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, fmtBytes, onToolProgress, pct, pickDir, reveal, type ToolProgress } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, fmtBytes, onToolProgress, pct, pickDir, reveal, type ToolProgress } from "#lib/tools/rt.ts";
 
   type DupeFile = { path: string; modified: string | null };
   type Group = { size: number; hash: string; files: DupeFile[] };

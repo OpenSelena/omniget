@@ -2,8 +2,8 @@
   import { invoke } from "@tauri-apps/api/core";
   import { goto } from "$app/navigation";
   import { open as openExternal } from "@tauri-apps/plugin-shell";
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
 
   type Remedy =
     | "import_cookies"

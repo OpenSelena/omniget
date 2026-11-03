@@ -1,6 +1,8 @@
 import { defineConfig } from "vite";
 import { sveltekit } from "@sveltejs/kit/vite";
 import wasm from "vite-plugin-wasm";
+import adapter from "@sveltejs/adapter-static";
+import { vitePreprocess } from "@sveltejs/vite-plugin-svelte";
 import { execSync, spawnSync } from "child_process";
 import { readFileSync, existsSync } from "fs";
 import path from "path";
@@ -62,7 +64,16 @@ export default defineConfig(({ command }) => {
     plugins: [
       i18nKeysPlugin({ strict: strictI18n }),
       wasm(),
-      sveltekit(),
+      // SvelteKit 3 reads its configuration here (svelte.config.js is gone).
+      // Tauri has no Node.js server, so adapter-static with an index.html
+      // fallback runs the app as an SPA:
+      // https://svelte.dev/docs/kit/single-page-apps
+      sveltekit({
+        preprocess: vitePreprocess(),
+        adapter: adapter({
+          fallback: "index.html",
+        }),
+      }),
     ],
 
     // Top-level await needs no plugin since Vite 8: the default build

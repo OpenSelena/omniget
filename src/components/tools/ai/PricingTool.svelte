@@ -2,9 +2,9 @@
   /** Comparar preços de modelos (estudos 14, 15): tabela do LiteLLM, por milhão de tokens. */
   import { invoke } from "@tauri-apps/api/core";
   import { onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText } from "#lib/tools/rt.ts";
 
   type Price = {
     key: string; provider: string; mode: string; input_per_m: number | null; output_per_m: number | null; cache_read_per_m: number | null;

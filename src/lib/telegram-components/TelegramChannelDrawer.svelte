@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
   import {
     telegramFullChannelInfo,
     telegramSetMute,
@@ -16,7 +16,7 @@
     type TelegramFullChannelInfo,
     type TelegramParticipant,
     type TelegramParticipantFilter,
-  } from "$lib/telegram-bridge";
+  } from "#lib/telegram-bridge.ts";
 
   type ChatLite = { id: number; title: string; chat_type: string };
 

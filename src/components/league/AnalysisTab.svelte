@@ -1,8 +1,8 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
   import { CDRAGON, TAG_KEYS, type Champion, type RankedEntry, type ScoutPlayer } from "./shared";
-  import { markedPlayers, winrateSquad } from "$lib/league-scouting";
+  import { markedPlayers, winrateSquad } from "#lib/league-scouting.ts";
   import { availability, featureById, type Platform } from "./registry";
   import { writeText } from "@tauri-apps/plugin-clipboard-manager";
   import Skeleton from "./Skeleton.svelte";

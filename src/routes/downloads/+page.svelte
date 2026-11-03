@@ -1,13 +1,13 @@
 <script lang="ts">
-  import { sortByStartNewestFirst, sortNewestFirst } from "$lib/utils/download-sort";
-  import { rawErrorText, translateBackendError } from "$lib/error-translate";
+  import { sortByStartNewestFirst, sortNewestFirst } from "#lib/utils/download-sort.ts";
+  import { rawErrorText, translateBackendError } from "#lib/error-translate.ts";
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
   import { invoke } from "@tauri-apps/api/core";
-  import { pluginInvoke } from "$lib/plugin-invoke";
-  import { t } from "$lib/i18n";
-  import { setToolbar, type ToolbarAction } from "$lib/stores/toolbar-store.svelte";
-  import { showToast } from "$lib/stores/toast-store.svelte";
+  import { pluginInvoke } from "#lib/plugin-invoke.ts";
+  import { t } from "#lib/i18n/index.ts";
+  import { setToolbar, type ToolbarAction } from "#lib/stores/toolbar-store.svelte.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
   import {
     getDownloads,
     formatBytes,
@@ -19,25 +19,25 @@
     type GenericDownloadItem,
     type QueueKind,
     type StreamInfo,
-  } from "$lib/stores/download-store.svelte";
-  import { getDownloadStats } from "$lib/stores/download-stats.svelte";
-  import PlatformIcon from "$components/icons/PlatformIcon.svelte";
-  import QueueKindBadge from "$components/common/QueueKindBadge.svelte";
-  import Mascot from "$components/mascot/Mascot.svelte";
-  import RootCauseHint from "$components/downloads/RootCauseHint.svelte";
-  import DownloadSpeedGraph from "$components/download/DownloadSpeedGraph.svelte";
-  import DownloadLog from "$components/download/DownloadLog.svelte";
-  import DownloadPoster from "$components/download/DownloadPoster.svelte";
-  import DownloadPhases from "$components/download/DownloadPhases.svelte";
-  import DownloadCommand from "$components/download/DownloadCommand.svelte";
-  import ReencodeDialog from "$components/dialog/ReencodeDialog.svelte";
-  import ToolsPanel from "$components/downloads/ToolsPanel.svelte";
-  import VideoOpsOverlay from "$components/downloads/VideoOpsOverlay.svelte";
-  import { mediaKind } from "$lib/video-ops/media-kind";
-  import { getSettings, updateSettings } from "$lib/stores/settings-store.svelte";
-  import { locale as i18nLocale } from "$lib/i18n";
+  } from "#lib/stores/download-store.svelte.ts";
+  import { getDownloadStats } from "#lib/stores/download-stats.svelte.ts";
+  import PlatformIcon from "#components/icons/PlatformIcon.svelte";
+  import QueueKindBadge from "#components/common/QueueKindBadge.svelte";
+  import Mascot from "#components/mascot/Mascot.svelte";
+  import RootCauseHint from "#components/downloads/RootCauseHint.svelte";
+  import DownloadSpeedGraph from "#components/download/DownloadSpeedGraph.svelte";
+  import DownloadLog from "#components/download/DownloadLog.svelte";
+  import DownloadPoster from "#components/download/DownloadPoster.svelte";
+  import DownloadPhases from "#components/download/DownloadPhases.svelte";
+  import DownloadCommand from "#components/download/DownloadCommand.svelte";
+  import ReencodeDialog from "#components/dialog/ReencodeDialog.svelte";
+  import ToolsPanel from "#components/downloads/ToolsPanel.svelte";
+  import VideoOpsOverlay from "#components/downloads/VideoOpsOverlay.svelte";
+  import { mediaKind } from "#lib/video-ops/media-kind.ts";
+  import { getSettings, updateSettings } from "#lib/stores/settings-store.svelte.ts";
+  import { locale as i18nLocale } from "#lib/i18n/index.ts";
   import { get } from "svelte/store";
-  import timeAgo from "$lib/time-ago";
+  import timeAgo from "#lib/time-ago.ts";
 
 
 
@@ -425,7 +425,7 @@
 
   async function historyRetry(url: string, platform: string) {
     try {
-      const settings = (await import("$lib/stores/settings-store.svelte")).getSettings();
+      const settings = (await import("#lib/stores/settings-store.svelte.ts")).getSettings();
       const outputDir = settings?.download.default_output_dir ?? "";
       if (!outputDir) {
         showToast("error", $t("common.error") as string);

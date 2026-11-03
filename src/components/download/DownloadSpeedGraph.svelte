@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { formatSpeed, type SpeedPoint } from "$lib/stores/download-store.svelte";
+  import { formatSpeed, type SpeedPoint } from "#lib/stores/download-store.svelte.ts";
 
   interface Props {
     points: SpeedPoint[];

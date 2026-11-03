@@ -1,6 +1,6 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
-  import { EMOJI_GROUPS, rememberEmoji, recentEmojis, searchEmojis } from "$lib/omnidisc/emoji";
+  import { t } from "#lib/i18n/index.ts";
+  import { EMOJI_GROUPS, rememberEmoji, recentEmojis, searchEmojis } from "#lib/omnidisc/emoji.ts";
 
   let { onPick, onClose }: { onPick: (emoji: string) => void; onClose: () => void } = $props();
 

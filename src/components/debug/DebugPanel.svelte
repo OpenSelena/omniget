@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
   import { onMount } from "svelte";
   import {
     getDebugLogs,
@@ -9,8 +9,8 @@
     clearLogs,
     exportDiagnostics,
     type LogLevel,
-  } from "$lib/stores/debug-store.svelte";
-  import { showToast } from "$lib/stores/toast-store.svelte";
+  } from "#lib/stores/debug-store.svelte.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
 
   type FilterMode = "all" | "download" | "network" | "auth" | "system" | "convert" | "errors";
 

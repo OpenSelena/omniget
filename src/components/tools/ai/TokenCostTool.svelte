@@ -3,9 +3,9 @@
    *  contagem exata exigiria o tokenizador de cada familia. A UI diz isso. */
   import { invoke } from "@tauri-apps/api/core";
   import { onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { baseName, errText, fmtUsd, pickDir, pickFiles } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { baseName, errText, fmtUsd, pickDir, pickFiles } from "#lib/tools/rt.ts";
 
   type FileCount = { path: string; bytes: number; chars: number; tokens: number };
   type ModelCost = {

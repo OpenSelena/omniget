@@ -2,10 +2,10 @@
   /** arXiv -> Markdown com o LaTeX da matematica preservado. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import type { ToolProgress } from "$lib/tools/rt";
-  import { baseName, dirName, errText, onToolProgress, openUrl, pickDir, reveal, saveAs } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import type { ToolProgress } from "#lib/tools/rt.ts";
+  import { baseName, dirName, errText, onToolProgress, openUrl, pickDir, reveal, saveAs } from "#lib/tools/rt.ts";
 
   type Meta = {
     id: string; version: number | null; title: string; authors: string[]; summary: string;

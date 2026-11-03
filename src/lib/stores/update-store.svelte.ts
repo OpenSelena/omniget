@@ -1,4 +1,4 @@
-import { checkForUpdate, installUpdate, type UpdateInfo } from "$lib/updater";
+import { checkForUpdate, installUpdate, type UpdateInfo } from "#lib/updater.ts";
 
 let updateInfo: UpdateInfo = $state({ available: false });
 let updateDismissed: boolean = $state(false);

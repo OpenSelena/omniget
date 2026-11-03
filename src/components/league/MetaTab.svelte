@@ -1,10 +1,10 @@
 <script lang="ts">
   import { onMount } from "svelte";
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
   import { featureById, needsBadge } from "./registry";
-  import { getSettings, updateSettings } from "$lib/stores/settings-store.svelte";
+  import { getSettings, updateSettings } from "#lib/stores/settings-store.svelte.ts";
   import { CDRAGON, type Champion } from "./shared";
 
   let {

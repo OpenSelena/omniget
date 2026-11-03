@@ -6,10 +6,10 @@
    */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount, untrack } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, onToolProgress, openUrl, pickDir, reveal, type ToolProgress } from "$lib/tools/rt";
-  import { cancelJob, defaultDownloadOptions, fmtDay, jobId, kindLabel, n, recall, remember, slugArg, type DownloadOptions, type DownloadResult, type MediaItem } from "$lib/tools/ig.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, onToolProgress, openUrl, pickDir, reveal, type ToolProgress } from "#lib/tools/rt.ts";
+  import { cancelJob, defaultDownloadOptions, fmtDay, jobId, kindLabel, n, recall, remember, slugArg, type DownloadOptions, type DownloadResult, type MediaItem } from "#lib/tools/ig.svelte.ts";
 
   let { items, jobPrefix = "dl", audioDefault = "" as "" | "m4a" | "mp3" }: { items: MediaItem[]; jobPrefix?: string; audioDefault?: "" | "m4a" | "mp3" } = $props();
 

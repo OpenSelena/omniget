@@ -1,13 +1,13 @@
 <script lang="ts">
   import { listen, type UnlistenFn } from "@tauri-apps/api/event";
   import { onMount, onDestroy } from "svelte";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { t } from "$lib/i18n";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { t } from "#lib/i18n/index.ts";
   import {
     telegramSyncState,
     telegramSyncNow,
     type TelegramSyncState,
-  } from "$lib/telegram-bridge";
+  } from "#lib/telegram-bridge.ts";
 
   let syncSnap = $state<TelegramSyncState | null>(null);
   let busy = $state(false);

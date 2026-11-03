@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
   import {
     closeCommandPalette,
     getCommandPaletteItems,
@@ -11,7 +11,7 @@
     runCommandPaletteSelected,
     setCommandPaletteQuery,
     setCommandPaletteSelectedIndex,
-  } from "$lib/stores/command-palette-store.svelte";
+  } from "#lib/stores/command-palette-store.svelte.ts";
 
   let inputEl = $state<HTMLInputElement | null>(null);
   let listEl = $state<HTMLDivElement | null>(null);
@@ -89,7 +89,7 @@
     const handler = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
         e.preventDefault();
-        import("$lib/stores/command-palette-store.svelte").then((m) => m.openCommandPalette());
+        import("#lib/stores/command-palette-store.svelte.ts").then((m) => m.openCommandPalette());
       }
       onKeydown(e);
     };

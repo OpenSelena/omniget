@@ -5,10 +5,10 @@
    * com WebP → PNG para quem não abre WebP.
    */
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, openUrl, pickDir, reveal } from "$lib/tools/rt";
-  import { defaultDownload, fmtCount, fmtDuration, kindKey, loadCookies, looksAi, type Inspect, type Pin, type PinFiles } from "$lib/tools/pinterest";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, openUrl, pickDir, reveal } from "#lib/tools/rt.ts";
+  import { defaultDownload, fmtCount, fmtDuration, kindKey, loadCookies, looksAi, type Inspect, type Pin, type PinFiles } from "#lib/tools/pinterest.ts";
   import PinCookies from "./PinCookies.svelte";
   import PinDownloadOptions from "./PinDownloadOptions.svelte";
 

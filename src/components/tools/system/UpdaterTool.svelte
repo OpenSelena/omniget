@@ -2,9 +2,9 @@
   /** ⚠️ Só Windows. Atualizar programas em massa (estudo 10, Kudu) com winget, Chocolatey e Scoop. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, onToolProgress, pct, type ToolProgress } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, onToolProgress, pct, type ToolProgress } from "#lib/tools/rt.ts";
 
   type Item = { manager: string; id: string; name: string; current: string; available: string };
   type Status = { winget: boolean; choco: boolean; scoop: boolean; items: Item[] };

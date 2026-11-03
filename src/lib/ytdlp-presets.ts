@@ -1,4 +1,4 @@
-import type { AppSettings } from "$lib/stores/settings-store.svelte";
+import type { AppSettings } from "#lib/stores/settings-store.svelte.ts";
 
 export type YtdlpPresetId = "fast" | "quality" | "compact" | "music_only";
 

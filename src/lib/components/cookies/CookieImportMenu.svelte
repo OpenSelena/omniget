@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
   import { open as openDialog } from "@tauri-apps/plugin-dialog";
 
   type Props = {

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import OmniboxInput from "$components/omnibox/OmniboxInput.svelte";
-  import type { HomeInputMode } from "$lib/home/omnibox-controller";
-  import { t } from "$lib/i18n";
+  import OmniboxInput from "#components/omnibox/OmniboxInput.svelte";
+  import type { HomeInputMode } from "#lib/home/omnibox-controller.ts";
+  import { t } from "#lib/i18n/index.ts";
 
   let {
     url = $bindable(""),

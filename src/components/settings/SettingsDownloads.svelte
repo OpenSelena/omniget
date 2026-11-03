@@ -1,5 +1,5 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
   import { getSettings } from "./settings-helpers";
   import SettingsDrillBack from "./SettingsDrillBack.svelte";
   import SettingsDrillItem from "./SettingsDrillItem.svelte";

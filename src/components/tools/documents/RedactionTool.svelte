@@ -1,9 +1,9 @@
 <script lang="ts">
   /** Confere se a tarja do PDF escondeu texto ou só pintou por cima. */
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { baseName, errText, pickFile } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { baseName, errText, pickFile } from "#lib/tools/rt.ts";
 
   type Run = { page: number; text: string; cover: string; rect: [number, number, number, number] };
   type Report = { path: string; pages: number; pages_checked: number; chars_total: number; chars_hidden: number; runs: Run[] };

@@ -1,8 +1,8 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { formatBytes } from "$lib/stores/download-store.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { formatBytes } from "#lib/stores/download-store.svelte.ts";
   import DialogContainer from "./DialogContainer.svelte";
 
   type Codec = "hevc" | "h264" | "av1";

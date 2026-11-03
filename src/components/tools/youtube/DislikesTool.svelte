@@ -1,9 +1,9 @@
 <script lang="ts">
   /** Return YouTube Dislike (estudo 44): likes, dislikes e proporção. */
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText } from "#lib/tools/rt.ts";
 
   type Votes = { id: string; date_created: string; likes: number; dislikes: number; rating: number; view_count: number; deleted: boolean };
 

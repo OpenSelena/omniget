@@ -1,5 +1,5 @@
 import { invoke } from "@tauri-apps/api/core";
-import { pluginInvoke } from "$lib/plugin-invoke";
+import { pluginInvoke } from "#lib/plugin-invoke.ts";
 
 export type TelegramChatType = "private" | "group" | "channel";
 

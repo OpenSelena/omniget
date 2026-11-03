@@ -2,9 +2,9 @@
   /** Uma imagem → favicon.ico, PNG de web, apple-touch-icon e .icns. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { baseName, errText, fmtBytes, onToolProgress, pct, pickDir, pickFile, reveal, FILTERS, type ToolProgress } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { baseName, errText, fmtBytes, onToolProgress, pct, pickDir, pickFile, reveal, FILTERS, type ToolProgress } from "#lib/tools/rt.ts";
 
   type Out = { path: string; label: string; bytes: number };
   type Result = { folder: string; outputs: Out[]; source_size: [number, number]; upscaled_from: number | null };

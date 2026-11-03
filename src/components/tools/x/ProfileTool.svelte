@@ -1,10 +1,10 @@
 <script lang="ts">
   /** Raio-X de perfil (estudo 67): engajamento, melhor horário, top posts, hashtags. */
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { openUrl, reveal, saveAs } from "$lib/tools/rt";
-  import { fmtDate, fmtN, xErr, type XPost, type XUser } from "$lib/tools/x";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { openUrl, reveal, saveAs } from "#lib/tools/rt.ts";
+  import { fmtDate, fmtN, xErr, type XPost, type XUser } from "#lib/tools/x.ts";
   import PostCard from "./PostCard.svelte";
 
   type Slot = { key: number; posts: number; avg_likes: number };

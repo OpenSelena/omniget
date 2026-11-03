@@ -1,8 +1,8 @@
 <script lang="ts">
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import type { CommandRecord, DownloadStatus } from "$lib/stores/download-store.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import type { CommandRecord, DownloadStatus } from "#lib/stores/download-store.svelte.ts";
 
   type Props = { id: number; command: CommandRecord | null | undefined; status: DownloadStatus };
   let { id, command, status }: Props = $props();

@@ -5,10 +5,10 @@
    * "highlights" | "viewers".
    */
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText } from "$lib/tools/rt";
-  import { fmtDate, igState, jobId, n, slugArg, type Highlight, type MediaItem, type MiniUser, type Reel, type TrayEntry, type UserInfo } from "$lib/tools/ig.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText } from "#lib/tools/rt.ts";
+  import { fmtDate, igState, jobId, n, slugArg, type Highlight, type MediaItem, type MiniUser, type Reel, type TrayEntry, type UserInfo } from "#lib/tools/ig.svelte.ts";
   import IgAccountRow from "./IgAccountRow.svelte";
   import IgMediaGrid from "./IgMediaGrid.svelte";
   import IgUserList from "./IgUserList.svelte";

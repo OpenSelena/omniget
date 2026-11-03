@@ -6,10 +6,10 @@
    */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { errText, onToolProgress, pickDir, pickFile, reveal, type ToolProgress } from "$lib/tools/rt";
-  import { cancelJob, defaultDownloadOptions, jobId, recall, remember, slugArg, type DownloadResult, type MediaItem } from "$lib/tools/ig.svelte";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { errText, onToolProgress, pickDir, pickFile, reveal, type ToolProgress } from "#lib/tools/rt.ts";
+  import { cancelJob, defaultDownloadOptions, jobId, recall, remember, slugArg, type DownloadResult, type MediaItem } from "#lib/tools/ig.svelte.ts";
   import IgAccountRow from "./IgAccountRow.svelte";
   import IgMediaGrid from "./IgMediaGrid.svelte";
 

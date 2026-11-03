@@ -1,9 +1,9 @@
 <script lang="ts">
   import { tick } from "svelte";
-  import { t } from "$lib/i18n";
-  import { translateBackendError } from "$lib/error-translate";
-  import type { OmnidiscMessage } from "$lib/omnidisc/types";
-  import { placeMenu, portal } from "$lib/omnidisc/popover";
+  import { t } from "#lib/i18n/index.ts";
+  import { translateBackendError } from "#lib/error-translate.ts";
+  import type { OmnidiscMessage } from "#lib/omnidisc/types.ts";
+  import { placeMenu, portal } from "#lib/omnidisc/popover.ts";
   import EmojiPicker from "./EmojiPicker.svelte";
   import MessageAttachments from "./MessageAttachments.svelte";
 

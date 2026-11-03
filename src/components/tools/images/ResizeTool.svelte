@@ -1,9 +1,9 @@
 <script lang="ts">
   /** Redimensionar em lote com FFmpeg (estudo 29). */
   import { invoke } from "@tauri-apps/api/core";
-  import { t } from "$lib/i18n";
-  import { showToast } from "$lib/stores/toast-store.svelte";
-  import { baseName, errText, pickDir, pickFiles, reveal, FILTERS } from "$lib/tools/rt";
+  import { t } from "#lib/i18n/index.ts";
+  import { showToast } from "#lib/stores/toast-store.svelte.ts";
+  import { baseName, errText, pickDir, pickFiles, reveal, FILTERS } from "#lib/tools/rt.ts";
 
   type Result = { outputs: string[]; failed: string[] };
   let files = $state<string[]>([]);

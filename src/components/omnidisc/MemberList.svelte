@@ -1,8 +1,8 @@
 <script lang="ts">
-  import { t } from "$lib/i18n";
-  import { getMembers, getSelectedGuildId, getGuild, getInstance } from "$lib/stores/omnidisc-store.svelte";
-  import { getVolume, setVolume, isSpeaking } from "$lib/stores/omnidisc-voice-store.svelte";
-  import type { OmnidiscMember } from "$lib/omnidisc/types";
+  import { t } from "#lib/i18n/index.ts";
+  import { getMembers, getSelectedGuildId, getGuild, getInstance } from "#lib/stores/omnidisc-store.svelte.ts";
+  import { getVolume, setVolume, isSpeaking } from "#lib/stores/omnidisc-voice-store.svelte.ts";
+  import type { OmnidiscMember } from "#lib/omnidisc/types.ts";
   import ProfilePopover from "./ProfilePopover.svelte";
 
   let guildId = $derived(getSelectedGuildId());

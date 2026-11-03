@@ -1,11 +1,11 @@
 <script lang="ts">
   import { onMount } from "svelte";
-  import { t } from "$lib/i18n";
+  import { t } from "#lib/i18n/index.ts";
   import {
     getChangelogBody,
     getCurrentVersion,
     fetchChangelog,
-  } from "$lib/stores/changelog-store.svelte";
+  } from "#lib/stores/changelog-store.svelte.ts";
 
   let body = $derived(getChangelogBody());
   let version = $derived(getCurrentVersion());
