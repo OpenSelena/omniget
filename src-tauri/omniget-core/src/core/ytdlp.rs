@@ -776,31 +776,23 @@ fn extra_ytdlp_flags_setting() -> Vec<String> {
     EXTRA_YTDLP_FLAGS_FN.get().map(|f| f()).unwrap_or_default()
 }
 
+/// Internal (code-generated) flags: refuse anything that could run a program,
+/// including abbreviated spellings yt-dlp would accept (`--exec-befo`).
 pub(crate) fn is_disallowed_ytdlp_flag(flag: &str) -> bool {
-    let lower = flag.trim().to_ascii_lowercase();
-    let name = lower.split('=').next().unwrap_or(&lower);
-    matches!(
-        name,
-        "--exec"
-            | "--exec-before-download"
-            | "--external-downloader"
-            | "--downloader"
-            | "--external-downloader-args"
-            | "--downloader-args"
-            | "--config-locations"
-            | "--config-location"
-            | "--alias"
-            | "--print-to-file"
-    )
+    super::ytdlp_flags::is_dangerous_option(flag)
 }
 
+/// Merge the user's configured flags (allowlist, see `ytdlp_flags`) with the
+/// flags supplied by OmniGet code for this call.
 pub(crate) fn merge_extra_flags(configured: &[String], explicit: &[String]) -> Vec<String> {
-    let mut out: Vec<String> = configured
-        .iter()
-        .map(|s| s.trim())
-        .filter(|s| !s.is_empty() && !is_disallowed_ytdlp_flag(s))
-        .map(String::from)
-        .collect();
+    let filtered = super::ytdlp_flags::filter_user_flags(configured);
+    if !filtered.rejected.is_empty() {
+        tracing::warn!(
+            "[yt-dlp] ignored {} extra flag token(s) not on the allowlist",
+            filtered.rejected.len()
+        );
+    }
+    let mut out = filtered.accepted;
     for flag in explicit {
         let trimmed = flag.trim();
         if !trimmed.is_empty() && !is_disallowed_ytdlp_flag(trimmed) {
@@ -6093,6 +6085,26 @@ ERROR: [youtube] abc123: Requested format is not available";
             super::super::pot_provider::extractor_args(&health, "http://127.0.0.1:1").is_empty(),
             "provedor inalcancavel nao pode virar --extractor-args"
         );
+    }
+
+    #[test]
+    fn configured_extra_flags_cannot_run_commands() {
+        // Bypasses of the old blocklist, accepted by yt-dlp 2026.08.19.
+        let merged = merge_extra_flags(
+            &[
+                "--use-postprocessor".to_string(),
+                "Exec:exec_cmd=touch /tmp/pwned;when=pre_process".to_string(),
+                "--netrc-c".to_string(),
+                "id".to_string(),
+                "--plugin-dirs".to_string(),
+                "/tmp/evil".to_string(),
+                "--exec-befo".to_string(),
+                "id".to_string(),
+                "--no-mtime".to_string(),
+            ],
+            &["--exec-befo=id".to_string()],
+        );
+        assert_eq!(merged, vec!["--no-mtime".to_string()]);
     }
 
     #[test]

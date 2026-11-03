@@ -34,3 +34,4 @@ pub mod spicetify;
 pub mod subtitle_merge;
 pub mod tools;
 pub mod ytdlp;
+pub mod ytdlp_flags;

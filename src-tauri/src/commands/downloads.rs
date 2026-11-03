@@ -1026,34 +1026,8 @@ pub async fn download_from_url(
     })
 }
 
-fn validate_custom_ytdlp_args(args: &[String]) -> Result<(), String> {
-    for arg in args {
-        let trimmed = arg.trim();
-        let lower = trimmed.to_ascii_lowercase();
-        let name = lower.split('=').next().unwrap_or(&lower);
-        if matches!(
-            name,
-            "--exec"
-                | "--exec-before-download"
-                | "--external-downloader"
-                | "--downloader"
-                | "--external-downloader-args"
-                | "--downloader-args"
-                | "--config-locations"
-                | "--config-location"
-                | "--alias"
-                | "--print-to-file"
-                | "--netrc-cmd"
-                | "--ffmpeg-location"
-                | "--postprocessor-args"
-                | "--ppa"
-                | "--batch-file"
-                | "-a"
-        ) {
-            return Err(format!("Disallowed yt-dlp argument for security: {name}"));
-        }
-    }
-    Ok(())
+fn validate_custom_ytdlp_args(args: &[String]) -> Result<Vec<String>, String> {
+    omniget_core::core::ytdlp_flags::validate_user_flags(args)
 }
 
 #[cfg(not(target_os = "android"))]
@@ -1069,7 +1043,7 @@ pub async fn download_with_custom_args(
     if url.trim().is_empty() {
         return Err("URL is required".to_string());
     }
-    validate_custom_ytdlp_args(&custom_args)?;
+    let custom_args = validate_custom_ytdlp_args(&custom_args)?;
     if let Err(err) = crate::core::path_limits::validate_output_dir(&output_dir) {
         return Err(format!(
             "PathTooLong|{}|{}|{}",
@@ -1725,6 +1699,10 @@ mod tests {
             "--batch-file=/etc/passwd",
             "-a",
             "-a=/etc/passwd",
+            "--use-postprocessor=Exec:exec_cmd=id",
+            "--netrc-c=id",
+            "--plugin-dirs=/tmp/evil",
+            "--exec-befo=id",
         ];
         for flag in dangerous {
             let arg = vec![flag.to_string()];
