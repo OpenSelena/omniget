@@ -31,6 +31,7 @@ Local draft only. Nothing has been tagged, pushed or released.
 ## Dependencies
 - Rust: semver updates, plus zip 9 and rust_xlsxwriter 0.102. `cargo audit` went from 37 to 15 findings.
 - npm: semver updates, plus marked 18, mermaid 12 and graphviz-anywhere-web 0.2. The deprecated `@types/cytoscape` and `@types/marked` were removed. `pnpm audit` went from 36 to 5 low.
+- Frontend toolchain: SvelteKit 3 (configuration moved into `vite.config.js`, `$lib` / `$components` replaced by `#lib` / `#components` subpath imports), Vite 8 (the top-level-await plugin is no longer needed), Vitest 5, and type checking with TypeScript 7 (`svelte-check --tsgo`). TypeScript 6 stays installed because SvelteKit 3 and svelte-check still need it.
 - Plugins (Media Converter 1.0.3, Telegram Downloader 1.2.1, Course Downloader 1.4.1) are already on their latest releases.
 
 ## Known limitations
@@ -41,4 +42,4 @@ Local draft only. Nothing has been tagged, pushed or released.
 ---
 
 ## Résumé (français)
-Cette branche corrige plusieurs failles de sécurité : options yt-dlp, appairage de l'extension, vérification SHA-256 des téléchargements, liens omniget://, adresses du réseau local, et actions CI épinglées. Elle corrige aussi des bugs : ordre de la liste, taille des torrents, erreurs traduites. Elle ajoute des fonctions : format vertical 9:16, sous-titres automatiques, envoi vers le téléphone par QR code, Snapchat, actions sur les fichiers audio et image, diaporama TikTok, et H.265 évité. Enfin, elle met à jour les dépendances. Rien n'a été publié.
+Cette branche corrige plusieurs failles de sécurité : options yt-dlp, appairage de l'extension, vérification SHA-256 des téléchargements, liens omniget://, adresses du réseau local, et actions CI épinglées. Elle corrige aussi des bugs : ordre de la liste, taille des torrents, erreurs traduites. Elle ajoute des fonctions : format vertical 9:16, sous-titres automatiques, envoi vers le téléphone par QR code, Snapchat, actions sur les fichiers audio et image, diaporama TikTok, et H.265 évité. Enfin, elle met à jour les dépendances, dont SvelteKit 3, Vite 8, Vitest 5 et TypeScript 7. Rien n'a été publié.
