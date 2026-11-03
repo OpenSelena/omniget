@@ -1116,6 +1116,7 @@ pub fn run() {
             commands::ai::ai_history_clear,
             commands::video_ops::video_op_silence_estimate,
             commands::video_ops::video_op_preset,
+            commands::video_ops::video_op_burn_subtitles,
             commands::video_ops::video_op_propose,
             commands::video_ops::video_op_run,
             commands::video_ops::detect_shot_changes,

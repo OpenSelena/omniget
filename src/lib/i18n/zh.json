@@ -3642,7 +3642,14 @@
       "vertical_blur": "9:16 (blurred background)",
       "vertical_blur_hint": "Vertical 1080×1920 video for Shorts, Reels and TikTok. The whole picture stays visible over a blurred copy.",
       "vertical_crop": "9:16 (crop center)",
-      "vertical_crop_hint": "Vertical 1080×1920 video that keeps the center of the picture and cuts the sides."
+      "vertical_crop_hint": "Vertical 1080×1920 video that keeps the center of the picture and cuts the sides.",
+      "subtitles_title": "Automatic subtitles",
+      "subtitles_language": "Spoken language",
+      "subtitles_auto": "Detect language",
+      "subtitles_burn": "Burn into the video",
+      "subtitles_make": "Create subtitles",
+      "subtitles_hint": "Writes .srt and .vtt files next to the video with Whisper, on your computer.",
+      "subtitles_setup": "Install Whisper and download a model first, in Tools > Transcribe."
     },
     "quality_hint": "正在为此项下载的质量",
     "stats_line": "{{count}} 次下载 · 已保存 {{size}}",

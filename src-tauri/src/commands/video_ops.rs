@@ -193,6 +193,58 @@ pub async fn video_op_preset(
     })
 }
 
+/// Burns an existing `.srt` file into a copy of the video.
+#[cfg(not(target_os = "android"))]
+#[tauri::command]
+pub async fn video_op_burn_subtitles(
+    app: tauri::AppHandle,
+    input: String,
+    subtitles: String,
+) -> Result<VideoOpResult, String> {
+    let input_path = ensure_input(&input)?;
+    let subs_path = ensure_input(&subtitles)?;
+    let is_srt = subs_path
+        .extension()
+        .map(|e| e.eq_ignore_ascii_case("srt"))
+        .unwrap_or(false);
+    if !is_srt {
+        return Err("Subtitles must be an .srt file".to_string());
+    }
+    let ffmpeg = omniget_core::core::dependencies::find_tool("ffmpeg")
+        .await
+        .ok_or_else(|| "ffmpeg unavailable".to_string())?;
+
+    let work = std::env::temp_dir().join(format!("omniget-burn-{}", uuid::Uuid::new_v4()));
+    std::fs::create_dir_all(&work).map_err(|e| format!("temp dir: {}", e))?;
+    let result = async {
+        std::fs::copy(&subs_path, work.join(ffmpeg_ops::BURN_SUBTITLES_FILE))
+            .map_err(|e| format!("could not copy subtitles: {}", e))?;
+        let output = output_for(&input_path, "subtitled", "mp4");
+        let _ = app.emit("video-op-progress", "running");
+        let mut cmd = omniget_core::core::process::command(&ffmpeg);
+        cmd.current_dir(&work).arg("-y").arg("-i").arg(&input_path);
+        for a in ffmpeg_ops::burn_subtitles_args() {
+            cmd.arg(a);
+        }
+        cmd.arg(&output);
+        let status = cmd
+            .status()
+            .await
+            .map_err(|e| format!("ffmpeg failed to start: {}", e))?;
+        if !status.success() {
+            let _ = app.emit("video-op-progress", "error");
+            return Err("ffmpeg processing failed".to_string());
+        }
+        let _ = app.emit("video-op-progress", "done");
+        Ok(VideoOpResult {
+            output_path: output.to_string_lossy().to_string(),
+        })
+    }
+    .await;
+    let _ = std::fs::remove_dir_all(&work);
+    result
+}
+
 #[cfg(not(target_os = "android"))]
 #[tauri::command]
 pub async fn video_op_propose(instruction: String) -> Result<VideoOpProposal, String> {

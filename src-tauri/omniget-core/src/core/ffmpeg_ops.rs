@@ -292,6 +292,34 @@ pub fn validate_preset_args(action: &str, args: &[String]) -> Result<(), String>
     }
 }
 
+/// File name the subtitle track is copied to before burning it in. ffmpeg runs
+/// inside the folder that holds it, so the user's path never ends up inside
+/// the filter string (where `:`, `'` and `\\` would need escaping).
+pub const BURN_SUBTITLES_FILE: &str = "subs.srt";
+
+/// Arguments that burn `BURN_SUBTITLES_FILE` into the picture.
+pub fn burn_subtitles_args() -> Vec<String> {
+    vec![
+        s("-vf"),
+        format!(
+            "subtitles={BURN_SUBTITLES_FILE}:force_style='FontSize=20,Outline=2,MarginV=40',\
+             scale=trunc(iw/2)*2:trunc(ih/2)*2"
+        ),
+        s("-c:v"),
+        s("libx264"),
+        s("-preset"),
+        s("veryfast"),
+        s("-crf"),
+        s("20"),
+        s("-pix_fmt"),
+        s("yuv420p"),
+        s("-c:a"),
+        s("copy"),
+        s("-movflags"),
+        s("+faststart"),
+    ]
+}
+
 pub fn preset(action: &str, start: Option<&str>, end: Option<&str>) -> Result<Preset, String> {
     match action {
         "extract_audio" => Ok(Preset {
@@ -742,5 +770,20 @@ mod vertical_tests {
         assert!(validate_transform_args(&vertical_args(VERTICAL_BLUR_FILTER)).is_err());
         let crop = preset("vertical_crop", None, None).unwrap().args;
         assert!(validate_preset_args("vertical_blur", &crop).is_err());
+    }
+}
+
+#[cfg(test)]
+mod burn_subtitles_tests {
+    use super::*;
+
+    #[test]
+    fn burn_args_use_the_fixed_relative_file() {
+        let args = burn_subtitles_args();
+        let vf = &args[args.iter().position(|a| a == "-vf").unwrap() + 1];
+        // Only the fixed relative name goes into the filter, never a user path.
+        assert!(vf.starts_with("subtitles=subs.srt:force_style="), "{vf}");
+        assert!(!vf.contains('\\'), "{vf}");
+        assert!(args.join(" ").contains("-pix_fmt yuv420p"));
     }
 }

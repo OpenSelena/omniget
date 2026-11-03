@@ -2,6 +2,7 @@
   import { invoke } from "@tauri-apps/api/core";
   import { t } from "$lib/i18n";
   import { showToast } from "$lib/stores/toast-store.svelte";
+  import { pickWhisperModel, type WhisperModel } from "$lib/video-ops/whisper-model";
 
   let { filePath, onClose }: { filePath: string; onClose: () => void } = $props();
 
@@ -58,6 +59,40 @@
         end: action === "trim" ? trimEnd.trim() || null : null,
       });
       resultPath = r.output_path;
+      stage = "done";
+    } catch (e) {
+      fail(e);
+    }
+  }
+
+  let burnSubtitles = $state(false);
+  let subtitlesLanguage = $state("auto");
+
+  async function makeSubtitles() {
+    if (stage === "busy") return;
+    stage = "busy";
+    try {
+      const status = await invoke<{ installed: boolean; models: WhisperModel[] }>(
+        "tool_whisper_status",
+      );
+      const model = pickWhisperModel(status.models);
+      if (!status.installed || !model) {
+        showToast("info", $t("downloads.vop.subtitles_setup") as string);
+        stage = "idle";
+        return;
+      }
+      const r = await invoke<{ srt_path: string; vtt_path: string }>(
+        "tool_whisper_transcribe",
+        { opts: { input: filePath, model, language: subtitlesLanguage, max_len: 42 } },
+      );
+      resultPath = r.srt_path;
+      if (burnSubtitles) {
+        const b = await invoke<{ output_path: string }>("video_op_burn_subtitles", {
+          input: filePath,
+          subtitles: r.srt_path,
+        });
+        resultPath = b.output_path;
+      }
       stage = "done";
     } catch (e) {
       fail(e);
@@ -135,6 +170,20 @@
         <input type="text" placeholder={$t('downloads.vop.trim_start')} bind:value={trimStart} />
         <input type="text" placeholder={$t('downloads.vop.trim_end')} bind:value={trimEnd} />
         <button disabled={stage === "busy"} onclick={() => runPreset("trim")}>{$t('downloads.vop.trim')}</button>
+      </div>
+
+      <h3>{$t('downloads.vop.subtitles_title')}</h3>
+      <div class="trim">
+        <select bind:value={subtitlesLanguage} aria-label={$t('downloads.vop.subtitles_language') as string}>
+          <option value="auto">{$t('downloads.vop.subtitles_auto')}</option>
+          <option value="en">English</option>
+          <option value="fr">Français</option>
+          <option value="es">Español</option>
+          <option value="pt">Português</option>
+          <option value="de">Deutsch</option>
+        </select>
+        <label><input type="checkbox" bind:checked={burnSubtitles} /> {$t('downloads.vop.subtitles_burn')}</label>
+        <button disabled={stage === "busy"} onclick={() => { void makeSubtitles(); }} title={$t('downloads.vop.subtitles_hint') as string}>{$t('downloads.vop.subtitles_make')}</button>
       </div>
 
       {#if silenceHint}

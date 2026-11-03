@@ -3642,7 +3642,14 @@
       "vertical_blur": "9:16 (fond flouté)",
       "vertical_blur_hint": "Vidéo verticale 1080×1920 pour Shorts, Reels et TikTok. Toute l'image reste visible sur une copie floutée.",
       "vertical_crop": "9:16 (recadrer au centre)",
-      "vertical_crop_hint": "Vidéo verticale 1080×1920 qui garde le centre de l'image et coupe les côtés."
+      "vertical_crop_hint": "Vidéo verticale 1080×1920 qui garde le centre de l'image et coupe les côtés.",
+      "subtitles_title": "Sous-titres automatiques",
+      "subtitles_language": "Langue parlée",
+      "subtitles_auto": "Détecter la langue",
+      "subtitles_burn": "Incruster dans la vidéo",
+      "subtitles_make": "Créer les sous-titres",
+      "subtitles_hint": "Crée des fichiers .srt et .vtt à côté de la vidéo avec Whisper, sur votre ordinateur.",
+      "subtitles_setup": "Installez d'abord Whisper et téléchargez un modèle, dans Outils > Transcrire."
     },
     "quality_hint": "Qualité en téléchargement pour cet élément",
     "stats_line": "{{count}} téléchargements · {{size}} enregistrés",
