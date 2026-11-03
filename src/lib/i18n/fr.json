@@ -3685,7 +3685,8 @@
     "channel_new_auto": "{{channel}} : téléchargement de {{count}} nouvelle(s) vidéo(s)",
     "file_copied_to_clipboard": "Fichier copié dans le presse-papiers",
     "drm_skipped": "{{count}} vidéo(s) ignorée(s) — protégée(s) par DRM (FairPlay/SAMPLE-AES)",
-    "generic_download_complete": "{{name}} — téléchargement terminé !"
+    "generic_download_complete": "{{name}} — téléchargement terminé !",
+    "external_url_confirm": "Lien reçu : confirmez-le dans OmniGet"
   },
   "reencode": {
     "title": "Réencoder la vidéo",
@@ -4787,7 +4788,8 @@
     },
     "courses_plugin_needed": "This is a course page. The free Courses plugin signs in with your account and downloads every lesson.",
     "courses_plugin_ready": "Course pages are downloaded from the Courses tab with your account signed in.",
-    "install_courses_plugin": "Get the Courses plugin"
+    "install_courses_plugin": "Get the Courses plugin",
+    "external_url_confirm": "Un lien web demande à OmniGet de télécharger ceci. Vérifiez-le, puis appuyez sur Télécharger pour commencer."
   },
   "about": {
     "tab": {

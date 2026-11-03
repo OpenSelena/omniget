@@ -24,3 +24,5 @@ export function clearPendingExternalPrefill(id: number) {
     pendingPrefill = null;
   }
 }
+
+export { isPrefillAction, mayAutoStart } from "$lib/utils/external-url-actions";

@@ -3685,7 +3685,8 @@
     "channel_new_auto": "{{channel}}: downloading {{count}} new video(s)",
     "file_copied_to_clipboard": "File copied to clipboard",
     "drm_skipped": "{{count}} video(s) skipped — protected by DRM (FairPlay/SAMPLE-AES)",
-    "generic_download_complete": "{{name}} — download complete!"
+    "generic_download_complete": "{{name}} — download complete!",
+    "external_url_confirm": "Link received: confirm it in OmniGet"
   },
   "reencode": {
     "title": "Re-encode video",
@@ -4787,7 +4788,8 @@
     },
     "courses_plugin_needed": "This is a course page. The free Courses plugin signs in with your account and downloads every lesson.",
     "courses_plugin_ready": "Course pages are downloaded from the Courses tab with your account signed in.",
-    "install_courses_plugin": "Get the Courses plugin"
+    "install_courses_plugin": "Get the Courses plugin",
+    "external_url_confirm": "A web link asked OmniGet to download this. Check it, then press Download to start."
   },
   "about": {
     "tab": {

@@ -16,7 +16,7 @@
     initOmnidisc,
   } from "$lib/stores/omnidisc-store.svelte";
   import { getSettings, loadSettings } from "$lib/stores/settings-store.svelte";
-  import { queueExternalPrefill, type ExternalUrlEvent } from "$lib/stores/external-url-store.svelte";
+  import { isPrefillAction, queueExternalPrefill, type ExternalUrlEvent } from "$lib/stores/external-url-store.svelte";
   import Toast from "$components/toast/Toast.svelte";
   import AppSidebar from "$components/shell/AppSidebar.svelte";
   import AppToolbar from "$components/shell/AppToolbar.svelte";
@@ -102,9 +102,9 @@
   let AnnouncementDialog = $state<any>(null);
 
   function handleExternalUrlEvent(event: Omit<ExternalUrlEvent, "id">) {
-    if (event.action === "prefill") {
+    if (isPrefillAction(event.action)) {
       queueExternalPrefill(event);
-      showToast("info", $t("toast.external_url_ready"));
+      showToast("info", $t(event.action === "confirm" ? "toast.external_url_confirm" : "toast.external_url_ready"));
       if (page.url.pathname !== "/") {
         goto("/");
       }

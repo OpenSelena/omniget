@@ -3685,7 +3685,8 @@
     "channel_new_auto": "{{channel}}: ກຳລັງດາວໂຫຼດ {{count}} ວິດີໂອໃໝ່",
     "file_copied_to_clipboard": "ສຳເນົາໄຟລ໌ໄປຄລິບບອດແລ້ວ",
     "drm_skipped": "ຂ້າມ {{count}} ວິດີໂອ — ຖືກປ້ອງກັນດ້ວຍ DRM (FairPlay/SAMPLE-AES)",
-    "generic_download_complete": "{{name}} — ດາວໂຫຼດສຳເລັດ!"
+    "generic_download_complete": "{{name}} — ດາວໂຫຼດສຳເລັດ!",
+    "external_url_confirm": "Link received: confirm it in OmniGet"
   },
   "reencode": {
     "title": "ເຂົ້າລະຫັດວິດີໂອໃໝ່",
@@ -4787,7 +4788,8 @@
     },
     "courses_plugin_needed": "ນີ້ແມ່ນໜ້າຄອສຮຽນ. ປລັກອິນ Courses ຟຣີຈະເຂົ້າສູ່ລະບົບດ້ວຍບັນຊີຂອງທ່ານ ແລະ ດາວໂຫຼດທຸກບົດຮຽນ.",
     "courses_plugin_ready": "ໜ້າຄອສຮຽນຈະຖືກດາວໂຫຼດຈາກແຖບ Courses ໂດຍເຂົ້າສູ່ລະບົບບັນຊີຂອງທ່ານ.",
-    "install_courses_plugin": "ຮັບປລັກອິນ Courses"
+    "install_courses_plugin": "ຮັບປລັກອິນ Courses",
+    "external_url_confirm": "A web link asked OmniGet to download this. Check it, then press Download to start."
   },
   "about": {
     "tab": {

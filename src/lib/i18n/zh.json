@@ -3685,7 +3685,8 @@
     "channel_new_auto": "{{channel}}：正在下载 {{count}} 个新视频",
     "file_copied_to_clipboard": "文件已复制到剪贴板",
     "drm_skipped": "{{count}} 个视频已跳过 — 受DRM保护（FairPlay/SAMPLE-AES）",
-    "generic_download_complete": "{{name}} — 下载完成！"
+    "generic_download_complete": "{{name}} — 下载完成！",
+    "external_url_confirm": "Link received: confirm it in OmniGet"
   },
   "reencode": {
     "title": "重新编码视频",
@@ -4787,7 +4788,8 @@
     },
     "courses_plugin_needed": "This is a course page. The free Courses plugin signs in with your account and downloads every lesson.",
     "courses_plugin_ready": "Course pages are downloaded from the Courses tab with your account signed in.",
-    "install_courses_plugin": "Get the Courses plugin"
+    "install_courses_plugin": "Get the Courses plugin",
+    "external_url_confirm": "A web link asked OmniGet to download this. Check it, then press Download to start."
   },
   "about": {
     "tab": {

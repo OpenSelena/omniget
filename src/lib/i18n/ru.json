@@ -3685,7 +3685,8 @@
     "channel_new_auto": "{{channel}}: скачивание новых видео ({{count}})",
     "file_copied_to_clipboard": "Файл скопирован в буфер обмена",
     "drm_skipped": "Пропущено видео: {{count}} — защита DRM (FairPlay/SAMPLE-AES)",
-    "generic_download_complete": "{{name}} — скачивание завершено!"
+    "generic_download_complete": "{{name}} — скачивание завершено!",
+    "external_url_confirm": "Link received: confirm it in OmniGet"
   },
   "reencode": {
     "title": "Перекодировать видео",
@@ -4787,7 +4788,8 @@
     },
     "courses_plugin_needed": "Это страница курса. Бесплатный плагин «Курсы» войдёт в ваш аккаунт и скачает все уроки.",
     "courses_plugin_ready": "Страницы курсов скачиваются со вкладки «Курсы», когда вы вошли в аккаунт.",
-    "install_courses_plugin": "Установить плагин «Курсы»"
+    "install_courses_plugin": "Установить плагин «Курсы»",
+    "external_url_confirm": "A web link asked OmniGet to download this. Check it, then press Download to start."
   },
   "about": {
     "tab": {

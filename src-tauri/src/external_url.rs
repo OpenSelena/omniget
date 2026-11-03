@@ -25,6 +25,9 @@ pub enum QueueUrlOutcome {
 pub enum ExternalUrlAction {
     Queued,
     Prefill,
+    /// The link came from an `omniget://` page link: show it in the app and
+    /// wait for the user to press Download. Never auto-downloaded.
+    Confirm,
     AlreadyQueued,
 }
 
@@ -33,6 +36,7 @@ impl ExternalUrlAction {
         match self {
             Self::Queued => "queued",
             Self::Prefill => "prefill",
+            Self::Confirm => "confirm",
             Self::AlreadyQueued => "already-queued",
         }
     }
@@ -67,6 +71,14 @@ pub fn is_external_url(value: &str) -> bool {
 /// explicit intent.
 pub fn arrived_via_scheme(raw_url: &str, source: &str) -> bool {
     raw_url.trim_start().starts_with("omniget:") || source == "deep-link"
+}
+
+/// Any web page can open an `omniget://` link, so such a link must never start
+/// a download on its own: the app shows the URL and the user confirms it.
+/// Requests from the paired browser extension, the MCP server or a plain
+/// command-line URL keep their current behaviour.
+pub fn needs_in_app_confirmation(raw_url: &str, source: &str) -> bool {
+    arrived_via_scheme(raw_url, source)
 }
 
 pub fn normalize_external_url(value: &str) -> Option<String> {
@@ -315,13 +327,15 @@ pub async fn handle_external_url(
     source: &str,
 ) -> Result<ExternalUrlAction, String> {
     let scheme_arrival = arrived_via_scheme(&url, source);
+    let needs_confirmation = needs_in_app_confirmation(&url, source);
     let url = normalize_external_url(&url).unwrap_or(url);
     if !is_external_url(&url) {
         return Err("Invalid external URL".to_string());
     }
 
     let settings = config::load_settings(app);
-    let can_queue_directly = (!settings.download.always_ask_path
+    let can_queue_directly = !needs_confirmation
+        && (!settings.download.always_ask_path
         || settings.download.auto_download_on_paste)
         && has_valid_output_dir(&settings.download.default_output_dir);
 
@@ -336,6 +350,9 @@ pub async fn handle_external_url(
             QueueUrlOutcome::Queued => ExternalUrlAction::Queued,
             QueueUrlOutcome::AlreadyQueued => ExternalUrlAction::AlreadyQueued,
         }
+    } else if needs_confirmation {
+        crate::tray::show_window(app);
+        ExternalUrlAction::Confirm
     } else {
         crate::tray::show_window(app);
         ExternalUrlAction::Prefill
@@ -383,6 +400,9 @@ where
         .find(|arg| is_external_url(arg))
 }
 
+/// Event name the frontend listens to (`src/routes/+layout.svelte`).
+pub const EXTERNAL_URL_EVENT: &str = "external-url-event";
+
 async fn push_or_emit_event(app: &AppHandle, event: ExternalUrlEvent) {
     let state = app.state::<AppState>();
     let ready = {
@@ -391,7 +411,7 @@ async fn push_or_emit_event(app: &AppHandle, event: ExternalUrlEvent) {
     };
 
     if ready {
-        let _ = app.emit("external-url", &event);
+        let _ = app.emit(EXTERNAL_URL_EVENT, &event);
     } else {
         let mut pending = state.pending_external_events.lock().await;
         pending.push(event);
@@ -405,6 +425,23 @@ fn has_valid_output_dir(path: &PathBuf) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn omniget_links_always_need_confirmation() {
+        assert!(needs_in_app_confirmation("omniget://youtu.be/x", "command-line"));
+        assert!(needs_in_app_confirmation("omniget:https://example.com/a", "single-instance"));
+        assert!(needs_in_app_confirmation("https://youtu.be/x", "deep-link"));
+        assert!(!needs_in_app_confirmation("https://youtu.be/x", "bridge"));
+        assert!(!needs_in_app_confirmation("https://youtu.be/x", "mcp"));
+        assert!(!needs_in_app_confirmation("https://youtu.be/x", "command-line"));
+        assert_eq!(ExternalUrlAction::Confirm.as_str(), "confirm");
+    }
+
+    #[test]
+    fn live_events_use_the_name_the_frontend_listens_to() {
+        let layout = include_str!("../../src/routes/+layout.svelte");
+        assert!(layout.contains(&format!("\"{}\"", EXTERNAL_URL_EVENT)));
+    }
 
     #[test]
     fn normalize_strips_omniget_prefix_and_adds_https() {

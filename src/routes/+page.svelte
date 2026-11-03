@@ -33,7 +33,7 @@
   import { showToast } from "$lib/stores/toast-store.svelte";
   import { onClipboardUrl } from "$lib/stores/clipboard-monitor";
   import { getMediaPreview, clearMediaPreview } from "$lib/stores/media-preview-store.svelte";
-  import { clearPendingExternalPrefill, getPendingExternalPrefill, type ExternalUrlEvent } from "$lib/stores/external-url-store.svelte";
+  import { clearPendingExternalPrefill, getPendingExternalPrefill, isPrefillAction, mayAutoStart, type ExternalUrlEvent } from "$lib/stores/external-url-store.svelte";
   import { getOmniboxDraftUrl, setOmniboxDraftUrl } from "$lib/stores/omnibox-draft-store.svelte";
   import { t } from "$lib/i18n";
   import { translateBackendError } from "$lib/error-translate";
@@ -228,12 +228,12 @@
     clearPendingExternalPrefill(incoming.id);
     externalNotice = incoming;
 
-    if (incoming.action !== "prefill") {
+    if (!isPrefillAction(incoming.action)) {
       return;
     }
 
     url = incoming.url;
-    if (getSettings()?.download.auto_download_on_paste) {
+    if (mayAutoStart(incoming.action, getSettings()?.download.auto_download_on_paste ?? false)) {
       pendingAutoDownload = true;
     }
     handleInput();
@@ -1008,7 +1008,7 @@
             <path d="M12 5v14" />
             <path d="M5 12h14" />
           </svg>
-          <span class="card-title">{$t('omnibox.external_url_ready')}</span>
+          <span class="card-title">{$t(externalNotice.action === "confirm" ? 'omnibox.external_url_confirm' : 'omnibox.external_url_ready')}</span>
           <button class="dismiss-btn" onclick={() => { externalNotice = null; }} aria-label={$t('common.close')}>
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M18 6L6 18M6 6l12 12" />
