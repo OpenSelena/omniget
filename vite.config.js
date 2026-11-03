@@ -1,7 +1,6 @@
 import { defineConfig } from "vite";
 import { sveltekit } from "@sveltejs/kit/vite";
 import wasm from "vite-plugin-wasm";
-import topLevelAwait from "vite-plugin-top-level-await";
 import { execSync, spawnSync } from "child_process";
 import { readFileSync, existsSync } from "fs";
 import path from "path";
@@ -63,10 +62,11 @@ export default defineConfig(({ command }) => {
     plugins: [
       i18nKeysPlugin({ strict: strictI18n }),
       wasm(),
-      topLevelAwait(),
       sveltekit(),
     ],
 
+    // Top-level await needs no plugin since Vite 8: the default build
+    // target (baseline-widely-available) supports it natively.
     // PlantUML / Graphviz packages ship WASM + workers that need special
     // handling. `optimizeDeps.exclude` keeps the dep optimizer out of the way
     // so vite-plugin-wasm gets to handle the wasm imports. The graphviz
