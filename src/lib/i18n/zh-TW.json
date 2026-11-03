@@ -5122,7 +5122,11 @@
     "output_missing": "下載已完成，但資料夾中沒有出現檔案（或檔案為空）。請檢查磁碟空間與防毒軟體設定後重試。",
     "course_platform_url": "課程平台無法透過 URL 下載。請開啟課程頁面（需要課程外掛並登入帳號）。",
     "plugin_outdated": "This plugin is outdated and doesn't support this action. Update it in the Marketplace, then restart OmniGet.",
-    "private_network_blocked": "Blocked: this link points to this computer or your local network. You can allow it in Settings > Downloads."
+    "private_network_blocked": "Blocked: this link points to this computer or your local network. You can allow it in Settings > Downloads.",
+    "integrity_failed": "The downloaded file did not match its published checksum, so it was discarded. Try again later.",
+    "ytdlp_argument_refused": "This yt-dlp argument is not allowed for security reasons: {args}",
+    "ytdlp_argument_refused_generic": "One of the yt-dlp arguments is not allowed for security reasons.",
+    "invalid_url": "This link is not valid. Use a full http:// or https:// address."
   },
   "debug": {
     "title": "活動記錄",

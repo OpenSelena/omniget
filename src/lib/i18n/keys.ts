@@ -400,6 +400,8 @@ export type TranslationKeys =
   | 'errors.ffmpeg_missing'
   | 'errors.format_unavailable'
   | 'errors.geo_restricted'
+  | 'errors.integrity_failed'
+  | 'errors.invalid_url'
   | 'errors.login_required'
   | 'errors.no_formats'
   | 'errors.output_missing'
@@ -413,6 +415,8 @@ export type TranslationKeys =
   | 'errors.unsupported_url'
   | 'errors.video_private'
   | 'errors.video_unavailable'
+  | 'errors.ytdlp_argument_refused'
+  | 'errors.ytdlp_argument_refused_generic'
 
   | 'hints.clipboard'
   | 'hints.hotkey'

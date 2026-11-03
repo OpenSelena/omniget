@@ -5122,7 +5122,11 @@
     "output_missing": "Download finished, but no file appeared in the folder (or it's empty). Check disk space and antivirus exclusions, then try again.",
     "course_platform_url": "Course platforms can't be downloaded from a URL. Open the Courses page (requires the Courses plugin and a logged-in account).",
     "plugin_outdated": "This plugin is outdated and doesn't support this action. Update it in the Marketplace, then restart OmniGet.",
-    "private_network_blocked": "Blocked: this link points to this computer or your local network. You can allow it in Settings > Downloads."
+    "private_network_blocked": "Blocked: this link points to this computer or your local network. You can allow it in Settings > Downloads.",
+    "integrity_failed": "The downloaded file did not match its published checksum, so it was discarded. Try again later.",
+    "ytdlp_argument_refused": "This yt-dlp argument is not allowed for security reasons: {args}",
+    "ytdlp_argument_refused_generic": "One of the yt-dlp arguments is not allowed for security reasons.",
+    "invalid_url": "This link is not valid. Use a full http:// or https:// address."
   },
   "debug": {
     "title": "Activity Log",

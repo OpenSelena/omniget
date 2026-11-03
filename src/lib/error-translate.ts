@@ -160,6 +160,24 @@ export function translateBackendError(
   const lower = stripped.toLowerCase();
   // Stable code from core::net_guard; it can arrive wrapped in an HTTP error.
   if (lower.includes("private_network_blocked")) return t("errors.private_network_blocked");
+  // Integrity check failures from core::dependencies (the backend text is Portuguese).
+  if (lower.includes("hash nao confere") || lower.includes("no sha-256 digest"))
+    return t("errors.integrity_failed");
+  if (stripped.startsWith("Disallowed yt-dlp argument")) {
+    const args = stripped.split(":").slice(1).join(":").trim();
+    if (tWithValues && args) {
+      return tWithValues("errors.ytdlp_argument_refused", { values: { args } });
+    }
+    return t("errors.ytdlp_argument_refused_generic");
+  }
+  if (
+    lower.startsWith("invalid url") ||
+    lower.startsWith("invalid external url") ||
+    lower.startsWith("url must not") ||
+    lower.startsWith("url has no host") ||
+    lower.startsWith("unsupported url scheme")
+  )
+    return t("errors.invalid_url");
   if (lower.includes("could not copy") && lower.includes("cookie")) return t("errors.cookie_database");
   if (lower.includes("size mismatch")) return t("errors.size_mismatch");
   if (lower.includes("disk full") || lower.includes("write error")) return t("errors.disk_full");
@@ -170,4 +188,14 @@ export function translateBackendError(
     return t("errors.drm_protected");
 
   return stripped || msg;
+}
+
+/** Text of a value thrown by `invoke` or a plugin call. */
+export function rawErrorText(e: unknown): string {
+  if (typeof e === "string") return e;
+  if (e instanceof Error) return e.message;
+  if (e && typeof e === "object" && typeof (e as { message?: unknown }).message === "string") {
+    return (e as { message: string }).message;
+  }
+  return "";
 }

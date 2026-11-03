@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { translateBackendError } from "./error-translate";
+import { rawErrorText, translateBackendError } from "./error-translate";
 
 const mockT = (key: string) => `T[${key}]`;
 
@@ -81,5 +81,43 @@ describe("translateBackendError", () => {
         mockT,
       ),
     ).toBe("T[errors.private_network_blocked]");
+  });
+});
+
+describe("translateBackendError security and integrity messages", () => {
+  const withValues = (key: string, opts: { values: Record<string, string | number> }) =>
+    `T[${key}|${Object.values(opts.values).join(",")}]`;
+
+  it("translates a checksum failure from the dependency installer", () => {
+    expect(
+      translateBackendError(
+        "yt-dlp: hash nao confere — esperado abc, obtido def. Download descartado.",
+        mockT,
+      ),
+    ).toBe("T[errors.integrity_failed]");
+  });
+
+  it("translates a refused yt-dlp argument and keeps the argument", () => {
+    expect(
+      translateBackendError("Disallowed yt-dlp argument for security: --exec", mockT, withValues),
+    ).toBe("T[errors.ytdlp_argument_refused|--exec]");
+    expect(
+      translateBackendError("Disallowed yt-dlp argument for security: --exec", mockT),
+    ).toBe("T[errors.ytdlp_argument_refused_generic]");
+  });
+
+  it("translates URL validation errors", () => {
+    expect(translateBackendError("URL must not start with '-'", mockT)).toBe("T[errors.invalid_url]");
+    expect(translateBackendError("unsupported URL scheme: file", mockT)).toBe("T[errors.invalid_url]");
+    expect(translateBackendError("Invalid external URL", mockT)).toBe("T[errors.invalid_url]");
+  });
+});
+
+describe("rawErrorText", () => {
+  it("reads strings, errors and plain objects", () => {
+    expect(rawErrorText("boom")).toBe("boom");
+    expect(rawErrorText(new Error("bad"))).toBe("bad");
+    expect(rawErrorText({ message: "obj" })).toBe("obj");
+    expect(rawErrorText(42)).toBe("");
   });
 });

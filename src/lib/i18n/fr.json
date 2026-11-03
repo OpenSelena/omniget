@@ -5122,7 +5122,11 @@
     "output_missing": "Le téléchargement est terminé, mais aucun fichier n'est apparu dans le dossier (ou il est vide). Vérifiez l'espace disque et l'antivirus, puis réessayez.",
     "course_platform_url": "Les plateformes de cours ne peuvent pas être téléchargées depuis une URL. Ouvrez la page Cours (nécessite le plugin Cours et un compte connecté).",
     "plugin_outdated": "This plugin is outdated and doesn't support this action. Update it in the Marketplace, then restart OmniGet.",
-    "private_network_blocked": "Bloqué : ce lien pointe vers cet ordinateur ou votre réseau local. Vous pouvez l'autoriser dans Paramètres > Téléchargements."
+    "private_network_blocked": "Bloqué : ce lien pointe vers cet ordinateur ou votre réseau local. Vous pouvez l'autoriser dans Paramètres > Téléchargements.",
+    "integrity_failed": "Le fichier téléchargé ne correspond pas à son empreinte publiée, il a donc été supprimé. Réessayez plus tard.",
+    "ytdlp_argument_refused": "Cet argument yt-dlp est refusé pour des raisons de sécurité : {args}",
+    "ytdlp_argument_refused_generic": "Un des arguments yt-dlp est refusé pour des raisons de sécurité.",
+    "invalid_url": "Ce lien n'est pas valide. Utilisez une adresse complète en http:// ou https://."
   },
   "debug": {
     "title": "Journal d'activité",

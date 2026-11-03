@@ -1,5 +1,6 @@
 <script lang="ts">
   import { sortByStartNewestFirst, sortNewestFirst } from "$lib/utils/download-sort";
+  import { rawErrorText, translateBackendError } from "$lib/error-translate";
   import { onMount } from "svelte";
   import { goto } from "$app/navigation";
   import { invoke } from "@tauri-apps/api/core";
@@ -218,8 +219,7 @@
     try {
       await pluginInvoke("courses", "cancel_course_download", { courseId });
     } catch (e: any) {
-      const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
-      showToast("error", msg);
+      showToast("error", translateBackendError(rawErrorText(e), $t, $t));
     }
   }
 
@@ -227,8 +227,7 @@
     try {
       await invoke("cancel_generic_download", { downloadId: id });
     } catch (e: any) {
-      const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
-      showToast("error", msg);
+      showToast("error", translateBackendError(rawErrorText(e), $t, $t));
     }
   }
 
@@ -236,8 +235,7 @@
     try {
       await invoke("pause_download", { downloadId: id });
     } catch (e: any) {
-      const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
-      showToast("error", msg);
+      showToast("error", translateBackendError(rawErrorText(e), $t, $t));
     }
   }
 
@@ -245,8 +243,7 @@
     try {
       await invoke("resume_download", { downloadId: id });
     } catch (e: any) {
-      const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
-      showToast("error", msg);
+      showToast("error", translateBackendError(rawErrorText(e), $t, $t));
     }
   }
 
@@ -254,8 +251,7 @@
     try {
       await invoke("retry_download", { downloadId: id });
     } catch (e: any) {
-      const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
-      showToast("error", msg);
+      showToast("error", translateBackendError(rawErrorText(e), $t, $t));
     }
   }
 
@@ -268,8 +264,7 @@
       pendingRemove = null;
       pendingRemoveTimer = null;
       invoke("remove_download", { downloadId: id }).catch((e: any) => {
-        const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
-        showToast("error", msg);
+        showToast("error", translateBackendError(rawErrorText(e), $t, $t));
       });
     } else {
       if (pendingRemoveTimer) clearTimeout(pendingRemoveTimer);
@@ -286,8 +281,7 @@
     try {
       await invoke("remove_download", { downloadId: id, deleteFile: true });
     } catch (e: any) {
-      const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
-      showToast("error", msg);
+      showToast("error", translateBackendError(rawErrorText(e), $t, $t));
     }
   }
 
@@ -296,8 +290,7 @@
     try {
       await invoke("clear_finished_downloads");
     } catch (e: any) {
-      const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
-      showToast("error", msg);
+      showToast("error", translateBackendError(rawErrorText(e), $t, $t));
     }
   }
 
@@ -305,8 +298,7 @@
     try {
       await invoke("pause_all_downloads");
     } catch (e: any) {
-      const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
-      showToast("error", msg);
+      showToast("error", translateBackendError(rawErrorText(e), $t, $t));
     }
   }
 
@@ -314,8 +306,7 @@
     try {
       await invoke("resume_all_downloads");
     } catch (e: any) {
-      const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
-      showToast("error", msg);
+      showToast("error", translateBackendError(rawErrorText(e), $t, $t));
     }
   }
 
@@ -323,8 +314,7 @@
     try {
       await invoke("reveal_file", { path });
     } catch (e: any) {
-      const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
-      showToast("error", msg);
+      showToast("error", translateBackendError(rawErrorText(e), $t, $t));
     }
   }
 
@@ -403,8 +393,7 @@
     try {
       historyEntries = await invoke<HistoryEntry[]>("get_download_history");
     } catch (e: any) {
-      const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
-      showToast("error", msg);
+      showToast("error", translateBackendError(rawErrorText(e), $t, $t));
     } finally {
       historyLoading = false;
     }
@@ -416,8 +405,7 @@
       await invoke("clear_download_history");
       historyEntries = [];
     } catch (e: any) {
-      const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
-      showToast("error", msg);
+      showToast("error", translateBackendError(rawErrorText(e), $t, $t));
     }
   }
 
@@ -453,8 +441,7 @@
       viewMode = "active";
       showToast("info", $t("downloads.history_requeued") as string);
     } catch (e: any) {
-      const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
-      showToast("error", msg);
+      showToast("error", translateBackendError(rawErrorText(e), $t, $t));
     }
   }
 
@@ -516,8 +503,7 @@
     try {
       await invoke<boolean>("reorder_queue", { ids: order });
     } catch (e: any) {
-      const msg = typeof e === "string" ? e : e.message ?? $t("common.error");
-      showToast("error", msg);
+      showToast("error", translateBackendError(rawErrorText(e), $t, $t));
     }
   }
 
@@ -704,7 +690,7 @@
                     <span class="history-meta-chip">{formatBytes(entry.file_size_bytes)}</span>
                   {/if}
                   {#if !entry.success && entry.error}
-                    <span class="history-meta-chip history-meta-error">{entry.error}</span>
+                    <span class="history-meta-chip history-meta-error">{translateBackendError(entry.error, $t, $t)}</span>
                   {/if}
                 </div>
                 <div class="history-item-actions">

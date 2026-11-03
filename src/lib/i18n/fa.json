@@ -5122,7 +5122,11 @@
     "output_missing": "دانلود تمام شد اما فایلی در پوشه ظاهر نشد (یا خالی است). فضای دیسک و استثناهای آنتی‌ویروس را بررسی کنید و دوباره تلاش کنید.",
     "course_platform_url": "پلتفرم‌های دوره را نمی‌توان از آدرس دانلود کرد. صفحه دوره‌ها را باز کنید (به افزونه دوره‌ها و حساب واردشده نیاز دارد).",
     "plugin_outdated": "این افزونه قدیمی است و از این عملیات پشتیبانی نمی‌کند. آن را در فروشگاه به‌روزرسانی کنید و سپس OmniGet را دوباره باز کنید.",
-    "private_network_blocked": "Blocked: this link points to this computer or your local network. You can allow it in Settings > Downloads."
+    "private_network_blocked": "Blocked: this link points to this computer or your local network. You can allow it in Settings > Downloads.",
+    "integrity_failed": "The downloaded file did not match its published checksum, so it was discarded. Try again later.",
+    "ytdlp_argument_refused": "This yt-dlp argument is not allowed for security reasons: {args}",
+    "ytdlp_argument_refused_generic": "One of the yt-dlp arguments is not allowed for security reasons.",
+    "invalid_url": "This link is not valid. Use a full http:// or https:// address."
   },
   "debug": {
     "title": "Activity Log",
