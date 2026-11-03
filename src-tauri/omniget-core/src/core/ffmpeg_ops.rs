@@ -247,6 +247,51 @@ pub fn estimate_removable_secs(stderr: &str) -> f64 {
         .sum()
 }
 
+/// 9:16 (1080x1920) reframe that keeps the whole picture over a blurred,
+/// zoomed copy of itself. Built by the app only: it needs `;` and pad labels,
+/// which `validate_transform_args` refuses on purpose.
+pub const VERTICAL_BLUR_FILTER: &str = "split=2[vbg][vfg];\
+[vbg]scale=1080:1920:force_original_aspect_ratio=increase,crop=1080:1920,gblur=sigma=30[bg];\
+[vfg]scale=1080:1920:force_original_aspect_ratio=decrease,scale=trunc(iw/2)*2:trunc(ih/2)*2[fg];\
+[bg][fg]overlay=(W-w)/2:(H-h)/2,setsar=1";
+
+/// 9:16 (1080x1920) reframe that crops the center of the picture.
+pub const VERTICAL_CROP_FILTER: &str =
+    "crop='min(iw,ih*9/16)':'min(ih,iw*16/9)',scale=1080:1920,setsar=1";
+
+fn vertical_args(filter: &str) -> Vec<String> {
+    vec![
+        s("-vf"),
+        s(filter),
+        s("-c:v"),
+        s("libx264"),
+        s("-preset"),
+        s("veryfast"),
+        s("-crf"),
+        s("20"),
+        s("-pix_fmt"),
+        s("yuv420p"),
+        s("-c:a"),
+        s("aac"),
+        s("-b:a"),
+        s("192k"),
+        s("-movflags"),
+        s("+faststart"),
+    ]
+}
+
+/// Checks preset arguments before they reach ffmpeg. The 9:16 presets are
+/// compared with the exact arguments the app builds; every other preset goes
+/// through the allowlist.
+pub fn validate_preset_args(action: &str, args: &[String]) -> Result<(), String> {
+    match action {
+        "vertical_blur" if args == vertical_args(VERTICAL_BLUR_FILTER).as_slice() => Ok(()),
+        "vertical_crop" if args == vertical_args(VERTICAL_CROP_FILTER).as_slice() => Ok(()),
+        "vertical_blur" | "vertical_crop" => Err("Unexpected 9:16 arguments".to_string()),
+        _ => validate_transform_args(args),
+    }
+}
+
 pub fn preset(action: &str, start: Option<&str>, end: Option<&str>) -> Result<Preset, String> {
     match action {
         "extract_audio" => Ok(Preset {
@@ -308,6 +353,14 @@ pub fn preset(action: &str, start: Option<&str>, end: Option<&str>) -> Result<Pr
                 s("128k"),
             ],
             out_ext: "m4a",
+        }),
+        "vertical_blur" => Ok(Preset {
+            args: vertical_args(VERTICAL_BLUR_FILTER),
+            out_ext: "mp4",
+        }),
+        "vertical_crop" => Ok(Preset {
+            args: vertical_args(VERTICAL_CROP_FILTER),
+            out_ext: "mp4",
         }),
         "to_gif" => Ok(Preset {
             args: vec![s("-vf"), s("fps=12,scale=480:-1:flags=lanczos"), s("-an")],
@@ -659,5 +712,35 @@ size=N/A time=00:10:00.00 bitrate=N/A speed= 412x\n";
     fn trecho_menor_que_o_stop_duration_nao_vira_corte_negativo() {
         let stderr = "silence_duration: 0.1\nsilence_duration: 0.2\n";
         assert_eq!(estimate_removable_secs(stderr), 0.0);
+    }
+}
+
+#[cfg(test)]
+mod vertical_tests {
+    use super::*;
+
+    #[test]
+    fn vertical_presets_target_1080x1920_h264() {
+        for action in ["vertical_blur", "vertical_crop"] {
+            let p = preset(action, None, None).unwrap();
+            assert_eq!(p.out_ext, "mp4");
+            let joined = p.args.join(" ");
+            assert!(joined.contains("1080:1920"), "{action}: {joined}");
+            assert!(joined.contains("-c:v libx264"));
+            assert!(joined.contains("-pix_fmt yuv420p"));
+            assert!(joined.contains("-movflags +faststart"));
+            assert!(validate_preset_args(action, &p.args).is_ok());
+        }
+    }
+
+    #[test]
+    fn vertical_presets_cannot_carry_other_arguments() {
+        let mut args = preset("vertical_blur", None, None).unwrap().args;
+        args.push("-y".to_string());
+        assert!(validate_preset_args("vertical_blur", &args).is_err());
+        // The blur graph needs `;`, so it must never pass the generic allowlist.
+        assert!(validate_transform_args(&vertical_args(VERTICAL_BLUR_FILTER)).is_err());
+        let crop = preset("vertical_crop", None, None).unwrap().args;
+        assert!(validate_preset_args("vertical_blur", &crop).is_err());
     }
 }

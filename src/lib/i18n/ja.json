@@ -3638,7 +3638,11 @@
       "review_title": "実行前にコマンドを確認",
       "review_hint": "入力/出力はアプリが補います。確認後にのみ実行されます。",
       "run": "実行",
-      "processing": "処理中…"
+      "processing": "処理中…",
+      "vertical_blur": "9:16 (blurred background)",
+      "vertical_blur_hint": "Vertical 1080×1920 video for Shorts, Reels and TikTok. The whole picture stays visible over a blurred copy.",
+      "vertical_crop": "9:16 (crop center)",
+      "vertical_crop_hint": "Vertical 1080×1920 video that keeps the center of the picture and cuts the sides."
     },
     "quality_hint": "この項目でダウンロード中の画質",
     "stats_line": "{{count}} 件のダウンロード · {{size}} 保存済み",

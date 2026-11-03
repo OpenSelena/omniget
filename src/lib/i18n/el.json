@@ -3638,7 +3638,11 @@
       "review_title": "Έλεγξε την εντολή πριν την εκτέλεση",
       "review_hint": "Η εφαρμογή συμπληρώνει είσοδο/έξοδο. Εκτελείται μόνο μετά την επιβεβαίωση.",
       "run": "Εκτέλεση",
-      "processing": "Επεξεργασία…"
+      "processing": "Επεξεργασία…",
+      "vertical_blur": "9:16 (blurred background)",
+      "vertical_blur_hint": "Vertical 1080×1920 video for Shorts, Reels and TikTok. The whole picture stays visible over a blurred copy.",
+      "vertical_crop": "9:16 (crop center)",
+      "vertical_crop_hint": "Vertical 1080×1920 video that keeps the center of the picture and cuts the sides."
     },
     "quality_hint": "Ποιότητα που μεταφορτώνεται για αυτό το στοιχείο",
     "stats_line": "{{count}} λήψεις · {{size}} αποθηκευμένα",

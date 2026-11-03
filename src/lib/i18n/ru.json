@@ -3638,7 +3638,11 @@
       "review_title": "Проверьте команду перед выполнением",
       "review_hint": "Приложение само заполнит ввод/вывод. Команда выполнится только после вашего подтверждения.",
       "run": "Выполнить",
-      "processing": "Обработка…"
+      "processing": "Обработка…",
+      "vertical_blur": "9:16 (blurred background)",
+      "vertical_blur_hint": "Vertical 1080×1920 video for Shorts, Reels and TikTok. The whole picture stays visible over a blurred copy.",
+      "vertical_crop": "9:16 (crop center)",
+      "vertical_crop_hint": "Vertical 1080×1920 video that keeps the center of the picture and cuts the sides."
     },
     "quality_hint": "Качество скачиваемого элемента",
     "stats_line": "Загрузок: {{count}} · сохранено {{size}}",

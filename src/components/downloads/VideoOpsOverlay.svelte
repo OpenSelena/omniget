@@ -124,6 +124,8 @@
         <button disabled={stage === "busy"} onclick={() => runPreset("mute")}>{$t('downloads.vop.mute')}</button>
         <button disabled={stage === "busy"} onclick={() => runPreset("to_mp4")}>{$t('downloads.vop.to_mp4')}</button>
         <button disabled={stage === "busy"} onclick={() => runPreset("to_gif")}>{$t('downloads.vop.to_gif')}</button>
+        <button disabled={stage === "busy"} onclick={() => runPreset("vertical_blur")} title={$t('downloads.vop.vertical_blur_hint') as string}>{$t('downloads.vop.vertical_blur')}</button>
+        <button disabled={stage === "busy"} onclick={() => runPreset("vertical_crop")} title={$t('downloads.vop.vertical_crop_hint') as string}>{$t('downloads.vop.vertical_crop')}</button>
         <button disabled={stage === "busy"} onclick={() => runPreset("voice_boost")}>{$t('downloads.vop.voice_boost')}</button>
         <button disabled={stage === "busy"} onclick={() => { void estimateSmartSpeed(); }}>{$t('downloads.vop.smart_speed_check')}</button>
         <button disabled={stage === "busy"} onclick={() => runPreset("smart_speed")}>{$t('downloads.vop.smart_speed')}</button>

@@ -3638,7 +3638,11 @@
       "review_title": "ກວດຄຳສັ່ງກ່ອນເອີ້ນໃຊ້",
       "review_hint": "ແອັບຈະໃສ່ input/output ໃຫ້. ຈະເອີ້ນໃຊ້ຫຼັງຈາກທ່ານຢືນຢັນເທົ່ານັ້ນ.",
       "run": "ເອີ້ນໃຊ້",
-      "processing": "ກຳລັງປະມວນຜົນ…"
+      "processing": "ກຳລັງປະມວນຜົນ…",
+      "vertical_blur": "9:16 (blurred background)",
+      "vertical_blur_hint": "Vertical 1080×1920 video for Shorts, Reels and TikTok. The whole picture stays visible over a blurred copy.",
+      "vertical_crop": "9:16 (crop center)",
+      "vertical_crop_hint": "Vertical 1080×1920 video that keeps the center of the picture and cuts the sides."
     },
     "quality_hint": "ຄຸນນະພາບທີ່ກຳລັງດາວໂຫຼດສຳລັບລາຍການນີ້",
     "stats_line": "{{count}} ການດາວໂຫຼດ · ບັນທຶກ {{size}}",

@@ -185,7 +185,7 @@ pub async fn video_op_preset(
     let input_path = ensure_input(&input)?;
     let p = ffmpeg_ops::preset(&action, start.as_deref(), end.as_deref())?;
     // Defense in depth: presets are built safely but still re-validated.
-    ffmpeg_ops::validate_transform_args(&p.args)?;
+    ffmpeg_ops::validate_preset_args(&action, &p.args)?;
     let output = output_for(&input_path, &action, p.out_ext);
     run_ffmpeg(&app, &input_path, &p.args, &output).await?;
     Ok(VideoOpResult {

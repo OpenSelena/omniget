@@ -360,6 +360,10 @@ export type TranslationKeys =
   | 'downloads.vop.trim'
   | 'downloads.vop.trim_end'
   | 'downloads.vop.trim_start'
+  | 'downloads.vop.vertical_blur'
+  | 'downloads.vop.vertical_blur_hint'
+  | 'downloads.vop.vertical_crop'
+  | 'downloads.vop.vertical_crop_hint'
   | 'downloads.vop.voice_boost'
 
   | 'error.cause.disk_full'

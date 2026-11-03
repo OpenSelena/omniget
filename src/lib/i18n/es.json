@@ -3638,7 +3638,11 @@
       "review_title": "Revisa el comando antes de ejecutar",
       "review_hint": "La app rellena entrada/salida. Solo se ejecuta tras tu confirmación.",
       "run": "Ejecutar",
-      "processing": "Procesando…"
+      "processing": "Procesando…",
+      "vertical_blur": "9:16 (blurred background)",
+      "vertical_blur_hint": "Vertical 1080×1920 video for Shorts, Reels and TikTok. The whole picture stays visible over a blurred copy.",
+      "vertical_crop": "9:16 (crop center)",
+      "vertical_crop_hint": "Vertical 1080×1920 video that keeps the center of the picture and cuts the sides."
     },
     "quality_hint": "Calidad que se está descargando para este elemento",
     "stats_line": "{{count}} descargas · {{size}} guardados",

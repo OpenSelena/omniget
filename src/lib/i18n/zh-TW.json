@@ -3638,7 +3638,11 @@
       "review_title": "執行前請檢查指令",
       "review_hint": "應用程式會填入輸入/輸出。僅在你確認後執行。",
       "run": "執行",
-      "processing": "處理中…"
+      "processing": "處理中…",
+      "vertical_blur": "9:16 (blurred background)",
+      "vertical_blur_hint": "Vertical 1080×1920 video for Shorts, Reels and TikTok. The whole picture stays visible over a blurred copy.",
+      "vertical_crop": "9:16 (crop center)",
+      "vertical_crop_hint": "Vertical 1080×1920 video that keeps the center of the picture and cuts the sides."
     },
     "quality_hint": "目前下載此項目的品質",
     "stats_line": "{{count}} 次下载 · 已保存 {{size}}",

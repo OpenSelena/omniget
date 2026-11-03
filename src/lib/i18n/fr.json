@@ -3638,7 +3638,11 @@
       "review_title": "Vérifiez la commande avant d'exécuter",
       "review_hint": "L'app remplit l'entrée/sortie. Exécuté seulement après confirmation.",
       "run": "Exécuter",
-      "processing": "Traitement…"
+      "processing": "Traitement…",
+      "vertical_blur": "9:16 (fond flouté)",
+      "vertical_blur_hint": "Vidéo verticale 1080×1920 pour Shorts, Reels et TikTok. Toute l'image reste visible sur une copie floutée.",
+      "vertical_crop": "9:16 (recadrer au centre)",
+      "vertical_crop_hint": "Vidéo verticale 1080×1920 qui garde le centre de l'image et coupe les côtés."
     },
     "quality_hint": "Qualité en téléchargement pour cet élément",
     "stats_line": "{{count}} téléchargements · {{size}} enregistrés",
