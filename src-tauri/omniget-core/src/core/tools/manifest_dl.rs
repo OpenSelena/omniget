@@ -52,16 +52,29 @@ pub fn headers_arg(opts: &ManifestOptions) -> Option<String> {
     }
 }
 
+/// Protocols ffmpeg may open for a manifest. `file` is left out so a
+/// playlist cannot pull local files into the output.
+pub const PROTOCOL_WHITELIST: &str = "http,https,tcp,tls,crypto,data";
+
+/// The manifest must be a public http(s) URL.
+pub async fn checked_manifest_url(raw: &str) -> anyhow::Result<String> {
+    let url = raw.trim().to_string();
+    let parsed =
+        url::Url::parse(&url).map_err(|_| anyhow!("paste the URL of a .m3u8 or .mpd manifest"))?;
+    if !matches!(parsed.scheme(), "http" | "https") {
+        return Err(anyhow!("paste the http(s) URL of a .m3u8 or .mpd manifest"));
+    }
+    crate::core::net_guard::ensure_public_web_url(&url).await?;
+    Ok(url)
+}
+
 pub async fn download(
     opts: ManifestOptions,
     progress: super::ProgressFn,
 ) -> anyhow::Result<ManifestResult> {
     use tokio::io::{AsyncBufReadExt, BufReader};
+    let url = checked_manifest_url(&opts.url).await?;
     let ffmpeg = crate::core::dependencies::ensure_ffmpeg().await?;
-    let url = opts.url.trim().to_string();
-    if !(url.contains(".m3u8") || url.contains(".mpd") || url.starts_with("http")) {
-        return Err(anyhow!("paste the URL of a .m3u8 or .mpd manifest"));
-    }
     std::fs::create_dir_all(&opts.dest_dir)?;
     let mut name = super::sanitize_name(opts.file_name.trim());
     if !name.to_lowercase().ends_with(".mp4") && !name.to_lowercase().ends_with(".mkv") {
@@ -69,6 +82,8 @@ pub async fn download(
     }
     let out = PathBuf::from(&opts.dest_dir).join(name);
     let mut cmd = crate::core::process::command(&ffmpeg);
+    // Segments and keys named by the playlist go through the egress guard.
+    crate::core::egress_proxy::apply_to_command(&mut cmd);
     cmd.args([
         "-y",
         "-hide_banner",
@@ -86,7 +101,7 @@ pub async fn download(
     }
     cmd.args([
         "-protocol_whitelist",
-        "file,http,https,tcp,tls,crypto,data",
+        PROTOCOL_WHITELIST,
         "-allowed_extensions",
         "ALL",
         "-i",
@@ -170,6 +185,23 @@ pub async fn download(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[tokio::test]
+    async fn manifest_urls_must_be_public_web_links() {
+        for bad in [
+            "file:///etc/passwd",
+            "/home/me/list.m3u8",
+            "http://192.168.1.1/live.m3u8",
+            "https://127.0.0.1/x.mpd",
+            "data:application/vnd.apple.mpegurl,#EXTM3U",
+        ] {
+            assert!(checked_manifest_url(bad).await.is_err(), "accepted {bad}");
+        }
+        assert!(!PROTOCOL_WHITELIST.split(',').any(|p| p == "file"));
+        assert!(checked_manifest_url(" https://93.184.215.14/a.m3u8 ")
+            .await
+            .is_ok());
+    }
 
     #[test]
     fn builds_headers() {
