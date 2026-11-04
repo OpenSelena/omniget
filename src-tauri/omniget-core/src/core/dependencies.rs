@@ -76,6 +76,21 @@ pub mod integrity {
         ))
     }
 
+    /// Checks a release download against the API digest (already parsed) or,
+    /// failing that, a single-asset sums file. Neither available: refused.
+    pub fn verify_release_bytes(
+        bytes: &[u8],
+        digest: Option<&str>,
+        sums_text: Option<&str>,
+        label: &str,
+    ) -> anyhow::Result<()> {
+        let expected = digest
+            .map(|d| d.to_lowercase())
+            .or_else(|| sums_text.and_then(parse_single_sha256))
+            .ok_or_else(|| anyhow!("{}: no SHA-256 published for this download; refused", label))?;
+        verify_sha256(bytes, &expected, label)
+    }
+
     /// SHA-256 of the pinned aria2 1.37.0 Windows build
     /// (`aria2-1.37.0-win-64bit-build1.zip`, official GitHub release, 2023).
     pub const ARIA2_WIN64_1_37_0_SHA256: &str =
@@ -824,6 +839,35 @@ pub async fn ensure_js_runtime() -> Option<PathBuf> {
     }
 }
 
+/// Downloads `asset` from the latest release of `repo` and checks its
+/// SHA-256 before anything is written to disk. The hash comes from the
+/// GitHub API `digest`, or else from the `<asset>.sha256sum` file published
+/// next to it (Deno). Fail-closed: no hash, no binary.
+async fn fetch_verified_release_asset(repo: &str, asset: &str) -> anyhow::Result<Vec<u8>> {
+    let client = crate::core::tools::github::client()?;
+    let found = crate::core::tools::github::asset(&client, repo, None, |n| n == asset).await?;
+    let sums = if found.digest.is_none() {
+        let url = format!("{}.sha256sum", found.url);
+        match client.get(&url).send().await {
+            Ok(r) if r.status().is_success() => r.text().await.ok(),
+            _ => None,
+        }
+    } else {
+        None
+    };
+    let response = client.get(&found.url).send().await?;
+    if !response.status().is_success() {
+        return Err(anyhow!(
+            "Failed to download {}: HTTP {}",
+            asset,
+            response.status()
+        ));
+    }
+    let bytes = response.bytes().await?.to_vec();
+    integrity::verify_release_bytes(&bytes, found.digest.as_deref(), sums.as_deref(), asset)?;
+    Ok(bytes)
+}
+
 async fn download_deno() -> anyhow::Result<PathBuf> {
     let bin_dir = managed_bin_dir().ok_or_else(|| anyhow!("Could not determine data directory"))?;
     std::fs::create_dir_all(&bin_dir)?;
@@ -835,36 +879,22 @@ async fn download_deno() -> anyhow::Result<PathBuf> {
         return Ok(deno_target);
     }
 
-    let url = if cfg!(target_os = "windows") {
-        "https://github.com/denoland/deno/releases/latest/download/deno-x86_64-pc-windows-msvc.zip"
+    let asset = if cfg!(target_os = "windows") {
+        "deno-x86_64-pc-windows-msvc.zip"
     } else if cfg!(target_os = "macos") {
         if cfg!(target_arch = "aarch64") {
-            "https://github.com/denoland/deno/releases/latest/download/deno-aarch64-apple-darwin.zip"
+            "deno-aarch64-apple-darwin.zip"
         } else {
-            "https://github.com/denoland/deno/releases/latest/download/deno-x86_64-apple-darwin.zip"
+            "deno-x86_64-apple-darwin.zip"
         }
     } else if cfg!(target_arch = "aarch64") {
-        "https://github.com/denoland/deno/releases/latest/download/deno-aarch64-unknown-linux-gnu.zip"
+        "deno-aarch64-unknown-linux-gnu.zip"
     } else {
-        "https://github.com/denoland/deno/releases/latest/download/deno-x86_64-unknown-linux-gnu.zip"
+        "deno-x86_64-unknown-linux-gnu.zip"
     };
 
-    tracing::info!("Downloading Deno JS runtime from {}", url);
-
-    let client = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
-        .timeout(std::time::Duration::from_secs(300))
-        .build()?;
-
-    let response = client.get(url).send().await?;
-    if !response.status().is_success() {
-        return Err(anyhow!(
-            "Failed to download Deno: HTTP {}",
-            response.status()
-        ));
-    }
-
-    let bytes = response.bytes().await?;
-    let data = bytes.to_vec();
+    tracing::info!("Downloading Deno JS runtime ({})", asset);
+    let data = fetch_verified_release_asset("denoland/deno", asset).await?;
     let bin_dir_clone = bin_dir.clone();
     let deno_name_clone = deno_name.clone();
 
@@ -944,28 +974,15 @@ async fn download_gallerydl() -> anyhow::Result<PathBuf> {
     // Os executaveis standalone vivem no repo gdl-org/builds (Windows, Linux
     // e macOS); o release do mikf/gallery-dl nao publica mais assets.
     #[cfg(target_os = "windows")]
-    let url = "https://github.com/gdl-org/builds/releases/latest/download/gallery-dl_windows.exe";
+    let asset = "gallery-dl_windows.exe";
     #[cfg(target_os = "linux")]
-    let url = "https://github.com/gdl-org/builds/releases/latest/download/gallery-dl_linux";
+    let asset = "gallery-dl_linux";
     #[cfg(target_os = "macos")]
-    let url = "https://github.com/gdl-org/builds/releases/latest/download/gallery-dl_macos";
+    let asset = "gallery-dl_macos";
     #[cfg(not(any(target_os = "windows", target_os = "linux", target_os = "macos")))]
     return Err(anyhow!("gallery-dl nao tem binario para este sistema"));
 
-    let client = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
-        .timeout(std::time::Duration::from_secs(180))
-        .build()?;
-
-    let response = client.get(url).send().await?;
-    if !response.status().is_success() {
-        return Err(anyhow!(
-            "Failed to download gallery-dl: HTTP {}",
-            response.status()
-        ));
-    }
-
-    let bytes = response.bytes().await?;
-    let data = bytes.to_vec();
+    let data = fetch_verified_release_asset("gdl-org/builds", asset).await?;
     let target_clone = target.clone();
     tokio::task::spawn_blocking(move || -> anyhow::Result<()> {
         std::fs::write(&target_clone, &data)?;
@@ -1080,6 +1097,25 @@ mod integrity_tests {
     #[test]
     fn sha256_de_vetor_conhecido() {
         assert_eq!(sha256_hex(b""), VAZIO);
+    }
+
+    #[test]
+    fn release_downloads_without_a_published_hash_are_refused() {
+        use super::integrity::{sha256_hex, verify_release_bytes};
+        let good = b"deno binary";
+        let hash = sha256_hex(good);
+        assert!(verify_release_bytes(good, Some(&hash), None, "deno").is_ok());
+        let sums = format!("{hash}  deno-x86_64-unknown-linux-gnu.zip\n");
+        assert!(verify_release_bytes(good, None, Some(&sums), "deno").is_ok());
+        assert!(verify_release_bytes(b"tampered", Some(&hash), None, "deno").is_err());
+        assert!(verify_release_bytes(good, None, None, "gallery-dl").is_err());
+        assert!(verify_release_bytes(good, None, Some("<html>"), "deno").is_err());
+
+        let src = include_str!("dependencies.rs");
+        let unverified = ["releases/latest/", "download/deno-"].concat();
+        assert!(!src.contains(&unverified));
+        let unverified = ["releases/latest/", "download/gallery-dl_"].concat();
+        assert!(!src.contains(&unverified));
     }
 
     #[test]

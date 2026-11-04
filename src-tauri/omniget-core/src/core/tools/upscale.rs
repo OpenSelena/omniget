@@ -11,6 +11,30 @@ use super::github;
 use crate::core::dependencies::bin_name;
 
 const REPO: &str = "xinntao/Real-ESRGAN-ncnn-vulkan";
+/// Pinned release: GitHub publishes no digest for these 2022 assets, so the
+/// hashes below are checked instead.
+const TAG: &str = "v0.2.0";
+const PINNED_SHA256: &[(&str, &str)] = &[
+    (
+        "realesrgan-ncnn-vulkan-v0.2.0-macos.zip",
+        "f1cc31f13398126ddec25a186b9e50c7ab3e4f2bc011d0222331b43ce2037d3b",
+    ),
+    (
+        "realesrgan-ncnn-vulkan-v0.2.0-ubuntu.zip",
+        "d0e8e1cf954f5cde11be4745dd912cc3774bef36f71c5b1cb8f74c4112b6e919",
+    ),
+    (
+        "realesrgan-ncnn-vulkan-v0.2.0-windows.zip",
+        "1bbbdb12d470af80b035c773682e144c6c2f6ece9210832a289af0a48ce3fa9a",
+    ),
+];
+
+fn pinned_digest(name: &str) -> Option<String> {
+    PINNED_SHA256
+        .iter()
+        .find(|(n, _)| *n == name)
+        .map(|(_, h)| h.to_string())
+}
 const BIN: &str = "realesrgan-ncnn-vulkan";
 
 fn managed_dir() -> Option<PathBuf> {
@@ -80,9 +104,11 @@ fn asset_pick(name: &str) -> bool {
 pub async fn install(progress: super::ProgressFn) -> anyhow::Result<String> {
     let dir = managed_dir().ok_or_else(|| anyhow!("Could not determine data directory"))?;
     let client = github::client()?;
-    let asset = github::asset(&client, REPO, None, asset_pick).await?;
-    // Release de 2022: a API não tem digest para esses assets.
-    let data = github::download(&client, &asset, true, &progress, BIN).await?;
+    let mut asset = github::asset(&client, REPO, Some(TAG), asset_pick).await?;
+    if asset.digest.is_none() {
+        asset.digest = pinned_digest(&asset.name);
+    }
+    let data = github::download(&client, &asset, false, &progress, BIN).await?;
     let staging = dir.with_extension("new");
     let _ = std::fs::remove_dir_all(&staging);
     let (s2, n2) = (staging.clone(), asset.name.clone());
@@ -211,4 +237,21 @@ pub async fn run(
         }
     }
     Ok(UpscaleResult { outputs, failed })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn upscaler_download_is_always_hash_checked() {
+        for os in ["macos", "ubuntu", "windows"] {
+            let name = format!("realesrgan-ncnn-vulkan-{TAG}-{os}.zip");
+            let h = pinned_digest(&name).expect(&name);
+            assert_eq!(h.len(), 64);
+        }
+        let src = include_str!("upscale.rs");
+        let call = ["github::download(&client, &asset, ", "true"].concat();
+        assert!(!src.contains(&call), "upscaler accepted without a hash");
+    }
 }
