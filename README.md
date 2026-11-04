@@ -726,6 +726,15 @@ pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'
 
 Releases sign their updater artifacts with a private key only the maintainer holds, so a plain `pnpm tauri build` stops with "A public key has been found, but no private key". The flag above turns those artifacts off for a local build and changes nothing else.
 
+On Windows, MSVC cannot open headers whose full path is longer than 260 characters, and the WebRTC headers under `target\` go past that when the repository is cloned somewhere deep such as `C:\Users\<you>\Documents\...`. Build with a short target directory:
+
+```powershell
+$env:CARGO_TARGET_DIR = 'C:\t'
+pnpm tauri build --no-bundle
+```
+
+`pnpm check:tauri-versions` confirms that every `@tauri-apps` npm package matches its Rust crate in `Cargo.lock` and that the lockfile is consistent, which is what a Windows source build needs.
+
 The `courses`, `telegram` and `convert` plugins live inside `src-tauri/plugins/` and compile into the main binary. The plugin registry is [omniget-plugins](https://github.com/OpenSelena/omniget-plugins).
 
 Stack: Tauri 2, Rust, SvelteKit with Svelte 5, SQLite, yt-dlp, FFmpeg, librqbit for torrents, whisper.cpp, aria2, gallery-dl.

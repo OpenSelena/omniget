@@ -129,6 +129,13 @@ jobs:
       - name: Locales in sync with en.json
         run: pnpm check:i18n
 
+      # The Tauri CLI refuses to build when an @tauri-apps npm package and its
+      # crate differ in major.minor, and wgpu-hal stops compiling on Windows
+      # when gpu-allocator resolves another `windows` crate (issue #143).
+      # Neither shows up in cargo test, so check the lockfiles directly.
+      - name: Tauri npm packages match Cargo.lock
+        run: pnpm check:tauri-versions
+
       - name: Generated i18n keys are committed
         run: |
           pnpm generate:i18n-keys

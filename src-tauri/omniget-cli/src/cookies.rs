@@ -1,5 +1,4 @@
 use anyhow::{Context, Result};
-use std::collections::HashMap;
 use std::path::PathBuf;
 
 use omniget_core::core::cookie_parser::parse_cookie_input;

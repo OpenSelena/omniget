@@ -20,6 +20,7 @@
     "generate:i18n-keys": "node scripts/generate-i18n-keys.js",
     "check:i18n": "node scripts/generate-i18n-keys.js --strict",
     "check:clippy-baseline": "node scripts/clippy-baseline.mjs --check",
+    "check:tauri-versions": "node scripts/check-tauri-versions.mjs",
     "update:clippy-baseline": "node scripts/clippy-baseline.mjs --update",
     "lint:ui": "node scripts/lint-ui.mjs",
     "lint:ui:update": "node scripts/lint-ui.mjs --update",
