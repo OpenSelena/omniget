@@ -21,14 +21,15 @@ const here = dirname(fileURLToPath(import.meta.url));
 
 /**
  * @param {Record<string, string | undefined>} env
- * @param {object} base the static CI override (tauri.ci-build.conf.json)
- * @returns {object}
+ * @param {Record<string, any>} base the static CI override (tauri.ci-build.conf.json)
+ * @returns {Record<string, any>}
  */
 export function updaterConfig(env, base = {}) {
   const out = structuredClone(base);
   const endpoint = (env.OMNIGET_UPDATER_ENDPOINT ?? "").trim();
   const pubkey = (env.OMNIGET_UPDATER_PUBKEY ?? "").trim();
   if (!endpoint && !pubkey) return out;
+  /** @type {Record<string, any>} */
   const updater = {};
   if (endpoint) {
     let url;
