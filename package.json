@@ -85,7 +85,7 @@
     "@types/node": "^26.6.6",
     "lintapple": "^0.1.24",
     "playwright": "^1.62.0",
-    "svelte": "^5.57.2",
+    "svelte": "^5.57.3",
     "svelte-check": "^4.0.0",
     "typescript": "~5.9.3",
     "vite": "^6.4.4",
