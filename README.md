@@ -37,8 +37,8 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 
 <p align="center">
   <a href="https://omniget.nav.bd/"><img src="https://img.shields.io/badge/Website-omniget.nav.bd-FF7D38?style=for-the-badge" alt="Community Website" /></a>
-  <a href="https://github.com/OpenSelena/omniget/releases/latest"><img src="https://img.shields.io/github/v/release/OpenSelena/omniget?style=for-the-badge&label=release&color=F28500" alt="Latest release" /></a>
-  <a href="https://github.com/OpenSelena/omniget/releases"><img src="https://img.shields.io/github/downloads/OpenSelena/omniget/total?style=for-the-badge&label=downloads&color=1E6FE8" alt="Total downloads" /></a>
+  <a href="https://github.com/PixelStack1/omniget/releases/latest"><img src="https://img.shields.io/github/v/release/PixelStack1/omniget?style=for-the-badge&label=release&color=F28500" alt="Latest release" /></a>
+  <a href="https://github.com/PixelStack1/omniget/releases"><img src="https://img.shields.io/github/downloads/PixelStack1/omniget/total?style=for-the-badge&label=downloads&color=1E6FE8" alt="Total downloads" /></a>
   <a href="https://github.com/OpenSelena/omniget/stargazers"><img src="https://img.shields.io/github/stars/OpenSelena/omniget?style=for-the-badge&color=FFD426" alt="GitHub stars" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-2AA845?style=for-the-badge" alt="License GPL-3.0" /></a>
   <a href="https://t.me/OpenSelena"><img src="https://img.shields.io/badge/Telegram-channel-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram channel" /></a>
@@ -59,6 +59,29 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
   <img src="https://img.shields.io/badge/Disclaimer-FF7D38" alt="Disclaimer" height="20" /><br/>
   <sub>Maintained by <a href="https://github.com/igect">Igect</a> under GPL-3.0 · Based on original architecture by <a href="https://github.com/tonhowtf">tonhowtf</a></sub>
 </p>
+
+> **About this fork.** This is [PixelStack1/omniget](https://github.com/PixelStack1/omniget), a fork of
+> [OpenSelena/omniget](https://github.com/OpenSelena/omniget). All credit for OmniGet goes to the
+> OpenSelena project, its maintainer [Igect](https://github.com/igect), the original author
+> [tonhowtf](https://github.com/tonhowtf) and [every contributor](https://github.com/OpenSelena/omniget/graphs/contributors);
+> their full commit history is kept here. The fork adds security hardening on top and ships its
+> own signed builds and updates.
+>
+> **What's new in 0.15.0 (fork)**
+> - Downloads can no longer reach your local network (router, NAS, `localhost`) through redirects
+>   or DNS tricks: yt-dlp, ffmpeg, the manifest tool and aria2 go through a local network guard.
+>   See [docs/egress-guard.md](docs/egress-guard.md).
+> - Custom and edited yt-dlp commands can no longer run programs, load other configs, write
+>   outside the download folder or bypass the guard with `--proxy`.
+> - MCP server: its own token, and file-writing tools stay inside the download folder.
+> - Safer browser-extension pairing, checksum-verified tool downloads (with a size cap),
+>   DRM-protected content is detected and skipped.
+> - Release builds never see the signing key; updates are signed on a separate clean runner.
+> - Includes all upstream changes up to OpenSelena/omniget `main` (dependency updates,
+>   local media playback, AppImage media framework).
+>
+> Updates in this fork's builds come from this repository. Builds from OpenSelena keep updating from OpenSelena.
+
 
 <p align="center">
   <img src="assets/readme/home.png" alt="OmniGet home screen: paste a URL, magnet link or .torrent and the file lands in your folder" width="900" />
@@ -115,7 +138,7 @@ yt-dlp is the engine OmniGet runs on, and OmniGet would not exist without it. If
 
 ## Download and install
 
-Pick your system. Every build is published on the [Releases page](https://github.com/OpenSelena/omniget/releases/latest). Updates arrive inside the app.
+Pick your system. Every build is published on the [Releases page](https://github.com/PixelStack1/omniget/releases/latest). Updates arrive inside the app.
 
 <table>
   <tr>
@@ -126,12 +149,12 @@ Pick your system. Every build is published on the [Releases page](https://github
   <tr>
     <td><b>Windows 10 / 11</b></td>
     <td><code>OmniGet_x.y.z_x64-setup.exe</code> (installer)<br/><code>omniget_x.y.z_x64-portable.exe</code> (no install, runs from anywhere)<br/><code>OmniGet_x.y.z_x64_en-US.msi</code> (for IT deployments)</td>
-    <td>Not on winget yet: the manifest is ready in <code>packaging/winget/</code> and still has to be submitted</td>
+    <td>Not on winget. The manifest in <code>packaging/winget/</code> describes the upstream 0.14.0 build, not this fork</td>
   </tr>
   <tr>
     <td><b>macOS 10.15+</b></td>
     <td><code>OmniGet_x.y.z_aarch64.dmg</code> for Apple Silicon (M1 and later)<br/><code>OmniGet_x.y.z_x64.dmg</code> for Intel Macs</td>
-    <td><code>brew install --cask OpenSelena/tap/omniget</code></td>
+    <td>The <code>OpenSelena/tap</code> Homebrew cask installs the upstream build, not this fork</td>
   </tr>
   <tr>
     <td><b>Linux</b></td>
@@ -241,7 +264,7 @@ From now on, visit any supported page and click the icon. The page, its cookies 
 
 ### Level 2: from the release zip
 
-Every release ships `omniget-chrome-extension-vX.Y.Z.zip`. Download it from the [latest release](https://github.com/OpenSelena/omniget/releases/latest), unzip it, then follow steps 3 to 7 above pointing **Load unpacked** at the unzipped folder. Use this if you keep the app on one machine and the browser on another, or if you are installing for someone else.
+Every release ships `omniget-chrome-extension-vX.Y.Z.zip`. Download it from the [latest release](https://github.com/PixelStack1/omniget/releases/latest), unzip it, then follow steps 3 to 7 above pointing **Load unpacked** at the unzipped folder. Use this if you keep the app on one machine and the browser on another, or if you are installing for someone else.
 
 ### Level 3: Firefox, other browsers and manual pairing
 
@@ -632,7 +655,7 @@ OmniGet downloads what your own logged-in session can already open. It does not 
 
 Windows releases are not code-signed yet. The release workflow is ready to sign the Windows installer through [SignPath.io](https://about.signpath.io) with a [SignPath Foundation](https://signpath.org) certificate once the project is accepted by SignPath Foundation and the `SIGNPATH_API_TOKEN` secret is configured. See [docs/windows-signing.md](docs/windows-signing.md).
 
-Code changes and signed releases are reviewed and approved by the OpenSelena maintainers. See [Privacy and what OmniGet refuses to do](#privacy-and-what-omniget-refuses-to-do) and the [privacy documentation](https://omniget.nav.bd/docs/#privacy) for how OmniGet handles data.
+Releases of this fork are built from the `main` branch of https://github.com/PixelStack1/omniget and signed with the fork's own updater key. See [Privacy and what OmniGet refuses to do](#privacy-and-what-omniget-refuses-to-do) and the [privacy documentation](https://omniget.nav.bd/docs/#privacy) for how OmniGet handles data.
 
 ---
 
@@ -687,7 +710,7 @@ Debian and Ubuntu: `.deb`. Fedora, openSUSE, RHEL family: `.rpm`. Anything else:
 
 ## Command line
 
-`omniget-cli` ships with every release for Windows, macOS (Intel and Apple Silicon) and Linux. Grab `omniget-cli-<version>-<target>` from the [latest release](https://github.com/OpenSelena/omniget/releases/latest).
+`omniget-cli` ships with every release for Windows, macOS (Intel and Apple Silicon) and Linux. Grab `omniget-cli-<version>-<target>` from the [latest release](https://github.com/PixelStack1/omniget/releases/latest).
 
 ```bash
 omniget info <url>                     # title, formats and size, downloads nothing
@@ -704,7 +727,7 @@ omniget import-cookies cookies.txt     # Netscape format
 If you only want to use OmniGet, [grab a release](#download-and-install). To build it you need [Rust](https://rustup.rs/) (the exact toolchain is pinned in `rust-toolchain.toml` because the plugin ABI depends on it), [Node.js](https://nodejs.org/) 18+ and [pnpm](https://pnpm.io/).
 
 ```bash
-git clone https://github.com/OpenSelena/omniget.git
+git clone https://github.com/PixelStack1/omniget.git
 cd omniget
 pnpm install
 pnpm tauri dev
@@ -745,7 +768,7 @@ Stack: Tauri 2, Rust, SvelteKit with Svelte 5, SQLite, yt-dlp, FFmpeg, librqbit 
 
 ## Contributing and translations
 
-Bug reports and pull requests go to [Issues](https://github.com/OpenSelena/omniget/issues) and [Pull requests](https://github.com/OpenSelena/omniget/pulls). Questions and quick help live on [Telegram](https://t.me/OpenSelena). Security inquiries and vulnerability reports: [SECURITY.md](SECURITY.md) or [igect@vk.com](mailto:igect@vk.com).
+Bug reports about this fork's builds go to [its Issues](https://github.com/PixelStack1/omniget/issues). Upstream: [Issues](https://github.com/OpenSelena/omniget/issues) and [Pull requests](https://github.com/OpenSelena/omniget/pulls). Questions and quick help live on [Telegram](https://t.me/OpenSelena). Security inquiries and vulnerability reports: [SECURITY.md](SECURITY.md) or [igect@vk.com](mailto:igect@vk.com).
 
 Translations are managed on [Weblate](https://hosted.weblate.org/engage/omniget-openselena/). Pick your language and translate in the browser. New strings appear there a few hours after they land in `main`.
 
@@ -758,5 +781,5 @@ Loop, the creature on the home screen, is OmniGet's mascot. Fan art is welcome. 
 </p>
 
 <p align="center">
-  <a href="https://github.com/OpenSelena/omniget/releases/latest"><b>Download OmniGet</b></a> · <a href="LICENSE">GPL-3.0</a>
+  <a href="https://github.com/PixelStack1/omniget/releases/latest"><b>Download OmniGet</b></a> · <a href="LICENSE">GPL-3.0</a>
 </p>
