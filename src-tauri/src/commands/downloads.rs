@@ -789,6 +789,7 @@ pub async fn livechat_fetch(url: String) -> Result<LiveChatResult, String> {
             .arg("--no-warnings")
             .arg("-o")
             .arg(&out_template)
+            .arg("--")
             .arg(&url)
             .output()
             .await
@@ -1030,6 +1031,22 @@ pub async fn download_from_url(
     })
 }
 
+/// The custom-args path skips platform detection, so the link is checked
+/// here: it must be a real http(s) URL, never something yt-dlp could read as
+/// an option.
+fn validate_custom_download_url(raw: &str) -> Result<String, String> {
+    let raw = raw.trim();
+    if raw.is_empty() {
+        return Err("URL is required".to_string());
+    }
+    match url::Url::parse(raw) {
+        Ok(u) if matches!(u.scheme(), "http" | "https") && u.host_str().is_some() => {
+            Ok(raw.to_string())
+        }
+        _ => Err("Only http and https links can be downloaded with custom options".to_string()),
+    }
+}
+
 fn validate_custom_ytdlp_args(args: &[String]) -> Result<Vec<String>, String> {
     omniget_core::core::ytdlp_flags::validate_user_flags(args)
 }
@@ -1044,9 +1061,7 @@ pub async fn download_with_custom_args(
     custom_args: Vec<String>,
     cookie_slug: Option<String>,
 ) -> Result<DownloadStarted, String> {
-    if url.trim().is_empty() {
-        return Err("URL is required".to_string());
-    }
+    let url = validate_custom_download_url(&url)?;
     let custom_args = validate_custom_ytdlp_args(&custom_args)?;
     if let Err(err) = crate::core::path_limits::validate_output_dir(&output_dir) {
         return Err(format!(
@@ -1687,6 +1702,26 @@ pub fn sanitize_explorer_path(path: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn custom_args_download_needs_a_web_link() {
+        for bad in [
+            "",
+            "   ",
+            "--config-locations=\\\\host\\share\\x.conf",
+            "--batch-file=list.txt",
+            "-a list.txt",
+            "file:///etc/passwd",
+            "ytsearch:cats",
+            "https://",
+        ] {
+            assert!(validate_custom_download_url(bad).is_err(), "{bad}");
+        }
+        assert_eq!(
+            validate_custom_download_url(" https://example.com/v?id=1 ").unwrap(),
+            "https://example.com/v?id=1"
+        );
+    }
 
     #[test]
     fn test_validate_custom_ytdlp_args_rejects_dangerous_flags() {

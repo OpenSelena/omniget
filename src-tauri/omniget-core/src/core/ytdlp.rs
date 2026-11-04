@@ -431,6 +431,12 @@ pub(crate) fn prepare_override_args(
             args.remove(0);
         }
     }
+    // Whatever follows "--" is positional (the URL); options added below go
+    // in front of it.
+    let mut positional: Vec<String> = match args.iter().position(|a| a == "--") {
+        Some(i) => args.split_off(i).into_iter().skip(1).collect(),
+        None => Vec::new(),
+    };
     let has = |flag: &str, args: &[String]| {
         args.iter()
             .any(|a| a == flag || a.starts_with(&format!("{flag}=")))
@@ -471,9 +477,18 @@ pub(crate) fn prepare_override_args(
                 .to_string(),
         );
     }
-    if !args.iter().any(|a| a == url) {
-        args.push(url.to_string());
+    // Keep the URL behind the "--" so it can never be read as an option.
+    if let Some(i) = args.iter().position(|a| a == url) {
+        args.remove(i);
+        if !positional.iter().any(|a| a == url) {
+            positional.insert(0, url.to_string());
+        }
     }
+    if positional.is_empty() {
+        positional.push(url.to_string());
+    }
+    args.push("--".to_string());
+    args.extend(positional);
     args
 }
 
@@ -839,6 +854,7 @@ pub(crate) fn build_attempt_args(
     }
     args.extend(retry_extra_args.iter().cloned());
     args.extend(user_extra_flags.iter().cloned());
+    args.push("--".to_string());
     args.push(url.to_string());
     args
 }
@@ -2502,6 +2518,7 @@ pub async fn get_video_info(
             args.push(proxy_url);
         }
         args.extend(effective_extra_flags.iter().cloned());
+        args.push("--".to_string());
         args.push(url.to_string());
 
         let _slot = acquire_ytdlp_slot("video info").await;
@@ -2784,6 +2801,7 @@ pub async fn get_playlist_info(
 
     args.extend(proxy_args());
     args.extend(effective_extra_flags.iter().cloned());
+    args.push("--".to_string());
     args.push(url.to_string());
 
     let _slot = acquire_ytdlp_slot("playlist info").await;
@@ -2986,6 +3004,7 @@ pub async fn get_playlist_info_incremental(
     }
     args.extend(proxy_args());
     args.extend(configured_extra_flags(&[]));
+    args.push("--".to_string());
     args.push(url.to_string());
 
     let _slot = acquire_ytdlp_slot("playlist info").await;
@@ -5469,6 +5488,55 @@ mod tests {
             args2.last().map(String::as_str),
             Some(url),
             "URL entra no fim quando falta"
+        );
+    }
+
+    #[test]
+    fn url_always_follows_a_double_dash() {
+        let out = std::path::Path::new("/tmp/out");
+        let url = "https://example.com/v";
+        // The recorded command already ends with "-- URL": added options stay
+        // in front, nothing slips behind the "--".
+        let argv: Vec<String> = ["yt-dlp", "-f", "best", "--", url]
+            .iter()
+            .map(|s| s.to_string())
+            .collect();
+        let args = prepare_override_args(argv, url, out);
+        let dd = args.iter().position(|a| a == "--").expect("has --");
+        assert_eq!(&args[dd + 1..], &[url.to_string()]);
+        assert!(args[..dd].contains(&"--newline".to_string()));
+        assert_eq!(args.iter().filter(|a| *a == "--").count(), 1);
+
+        // An old record without "--": the URL is moved behind one.
+        let argv: Vec<String> = ["-f", "best", url, "--no-part"]
+            .iter()
+            .map(|s| s.to_string())
+            .collect();
+        let args = prepare_override_args(argv, url, out);
+        assert_eq!(
+            &args[args.len() - 2..],
+            &["--".to_string(), url.to_string()]
+        );
+        assert!(args.contains(&"--no-part".to_string()));
+
+        let attempt = build_attempt_args(
+            &["-f".to_string(), "b".to_string()],
+            false,
+            &YoutubeExtractorArgs {
+                player_client: None,
+                formats_dashy: false,
+                lang: None,
+            },
+            &[],
+            None,
+            None,
+            &[],
+            &[],
+            "--config-locations=x.conf",
+        );
+        assert_eq!(
+            &attempt[attempt.len() - 2..],
+            &["--".to_string(), "--config-locations=x.conf".to_string()]
         );
     }
 

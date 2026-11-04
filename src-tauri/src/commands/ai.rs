@@ -69,6 +69,7 @@ async fn transcribe_via_audio(
         .arg("--no-warnings")
         .arg("-o")
         .arg(audio_tmpl.to_string_lossy().to_string())
+        .arg("--")
         .arg(url)
         .output()
         .await

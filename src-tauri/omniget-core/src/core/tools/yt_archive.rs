@@ -637,6 +637,7 @@ async fn download_one(
         args.push("--write-info-json".to_string());
     }
     cookie.push_args(&mut args);
+    args.push("--".to_string());
     args.push(item.url.clone());
 
     let mut child = crate::core::ytdlp::ytdlp_command(bin)

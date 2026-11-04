@@ -373,6 +373,7 @@ pub fn ytdlp_args(
         args.push("--cookies".to_string());
         args.push(c.to_string());
     }
+    args.push("--".to_string());
     args.push(url.to_string());
     args
 }
