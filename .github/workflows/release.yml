@@ -104,66 +104,67 @@ jobs:
           cp scripts/linux/linuxdeploy-plugin-gtk.sh ~/.cache/tauri/linuxdeploy-plugin-gtk.sh
           chmod +x ~/.cache/tauri/linuxdeploy-plugin-gtk.sh
 
-      - uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # v1
+      # Build, sign and upload are separate steps so no step holds both the
+      # updater signing key and GITHUB_TOKEN, and the build (pnpm scripts,
+      # cargo build scripts) sees neither. Updater artifacts are signed
+      # afterwards with `tauri signer sign`.
+      - name: Locate bundle folder
+        id: bundle
+        shell: bash
+        run: |
+          if [ "${{ matrix.platform }}" = "macos-latest" ]; then
+            echo "dir=src-tauri/target/${{ matrix.cli_target }}/release/bundle" >> "$GITHUB_OUTPUT"
+          else
+            echo "dir=src-tauri/target/release/bundle" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build app (no secrets)
         id: tauri-build
+        shell: bash
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
           LDAI_UPDATE_INFORMATION: ${{ contains(matrix.platform, 'ubuntu') && 'gh-releases-zsync|OpenSelena|omniget|latest|*AppImage.zsync' || '' }}
           # linuxdeploy bundles an old `strip` that fails on modern .relr.dyn
           # relocations; disable stripping so AppImage bundling succeeds.
           NO_STRIP: ${{ contains(matrix.platform, 'ubuntu') && '1' || '' }}
           NODE_OPTIONS: --max-old-space-size=6144
-        with:
-          tagName: v__VERSION__
-          releaseName: 'OmniGet v__VERSION__'
-          releaseBody: |
-            ## Downloads
+        run: pnpm tauri build --config src-tauri/tauri.ci-build.conf.json ${{ matrix.args }}
 
-            **Windows**: `.exe` installer or portable.
-            **macOS**: `.dmg` (Apple Silicon `aarch64` or Intel `x86_64`).
-            **Linux**: `.AppImage` (universal) or `.deb` (Debian/Ubuntu).
+      - name: Create macOS updater archive
+        if: matrix.platform == 'macos-latest'
+        shell: bash
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          ARCH="${{ matrix.cli_target }}"; ARCH="${ARCH%%-*}"
+          IFS=$'\t' read -r APP ARCHIVE < <(node scripts/release-assets.mjs mac-archive "${{ steps.bundle.outputs.dir }}" "$VERSION" "$ARCH")
+          tar -czf "$ARCHIVE" -C "$(dirname "$APP")" "$(basename "$APP")"
 
-            ---
+      - name: Sign updater artifacts (signing key only)
+        shell: bash
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          if [ -z "$TAURI_SIGNING_PRIVATE_KEY" ]; then
+            echo "No updater signing key configured; skipping .sig files."
+            exit 0
+          fi
+          node scripts/release-assets.mjs sign "${{ steps.bundle.outputs.dir }}" | while IFS= read -r f; do
+            pnpm tauri signer sign "$f"
+          done
 
-            ### Debian/Ubuntu users: AppImage compatibility
-
-            **Debian 12+ ships without FUSE 2 by default**, which AppImage requires.
-            If `./omniget.AppImage` fails with a libfuse error, run:
-
-            ```bash
-            sudo apt install libfuse2
-            ```
-
-            ...or use `./omniget.AppImage --appimage-extract-and-run`.
-
-            **Easier alternative**: download the `.deb` instead, which works out of the
-            box on Debian 12+ and Ubuntu 22.04+.
-
-            ---
-
-            ### macOS users: "OmniGet is damaged and can't be opened"
-
-            The app is not notarized with Apple yet, so Gatekeeper quarantines it.
-            After moving the app to `/Applications`, run:
-
-            ```bash
-            xattr -cr /Applications/omniget.app
-            ```
-
-            Then open it normally. If it still refuses, allow it under
-            **System Settings → Privacy & Security**.
-
-            ---
-
-            ### Code signing policy
-
-            Windows installers are signed through [SignPath.io](https://about.signpath.io) (certificate by [SignPath Foundation](https://signpath.org)) only when the `SIGNPATH_API_TOKEN` secret is configured; otherwise this release is unsigned. Code changes and releases are reviewed and approved by the OpenSelena maintainers. See our [Privacy Policy](https://omniget.nav.bd/docs/#privacy).
-          releaseDraft: true
-          prerelease: false
-          includeUpdaterJson: false
-          args: ${{ matrix.args }}
+      - name: Create draft release and upload bundles (token only)
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          REPO="${{ github.repository }}"
+          gh release view "$TAG" --repo "$REPO" >/dev/null 2>&1 || \
+            gh release create "$TAG" --repo "$REPO" --draft --title "OmniGet $TAG" --notes-file .github/release-body.md || \
+            gh release view "$TAG" --repo "$REPO" >/dev/null
+          node scripts/release-assets.mjs bundles "${{ steps.bundle.outputs.dir }}" | while IFS= read -r f; do
+            gh release upload "$TAG" "$f" --repo "$REPO" --clobber
+          done
 
       - name: Generate and upload AppImage zsync files
         if: contains(matrix.platform, 'ubuntu')
@@ -202,24 +203,31 @@ jobs:
           wait-for-completion-timeout-in-seconds: 3600
           output-artifact-directory: 'src-tauri/target/release/bundle/nsis-signed'
 
-      - name: Publish signed Windows installer to release
+      - name: Re-sign updater signature for signed installer (signing key only)
+        if: matrix.platform == 'windows-latest' && steps.signpath.outputs.enabled == 'true'
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          $SIGNED_SETUP = Get-ChildItem "src-tauri/target/release/bundle/nsis-signed" -Filter "*.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+          if ($SIGNED_SETUP -and $env:TAURI_SIGNING_PRIVATE_KEY) {
+            Write-Host "Re-signing updater signature for signed installer..."
+            pnpm tauri signer sign $SIGNED_SETUP.FullName
+          }
+        shell: pwsh
+
+      - name: Publish signed Windows installer to release (token only)
         if: matrix.platform == 'windows-latest' && steps.signpath.outputs.enabled == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
         run: |
           $TAG = $env:GITHUB_REF_NAME
           $SIGNED_SETUP = Get-ChildItem "src-tauri/target/release/bundle/nsis-signed" -Filter "*.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
           if ($SIGNED_SETUP) {
             Write-Host "Found SignPath-signed setup installer: $($SIGNED_SETUP.FullName)"
-            if ($env:TAURI_SIGNING_PRIVATE_KEY) {
-              Write-Host "Re-signing updater signature for signed installer..."
-              pnpm tauri signer sign $SIGNED_SETUP.FullName
-              $SIG_FILE = "$($SIGNED_SETUP.FullName).sig"
-              if (Test-Path $SIG_FILE) {
-                gh release upload $TAG $SIG_FILE --repo ${{ github.repository }} --clobber
-              }
+            $SIG_FILE = "$($SIGNED_SETUP.FullName).sig"
+            if (Test-Path $SIG_FILE) {
+              gh release upload $TAG $SIG_FILE --repo ${{ github.repository }} --clobber
             }
             gh release upload $TAG $SIGNED_SETUP.FullName --repo ${{ github.repository }} --clobber
             Write-Host "Successfully published signed installer to release $TAG"
