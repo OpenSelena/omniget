@@ -336,13 +336,17 @@ fn resolve_shareable(raw: &Path) -> Result<PathBuf, String> {
 mod tests {
     use super::*;
 
-    /// Removes the directory when the test ends.
+    /// Removes the directory when the test ends. Only the unix-only symlink
+    /// test uses it, so it is compiled out elsewhere.
+    #[cfg(unix)]
     struct TempDir(PathBuf);
+    #[cfg(unix)]
     impl TempDir {
         fn path(&self) -> &Path {
             &self.0
         }
     }
+    #[cfg(unix)]
     impl Drop for TempDir {
         fn drop(&mut self) {
             let _ = std::fs::remove_dir_all(&self.0);
