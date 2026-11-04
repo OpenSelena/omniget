@@ -435,6 +435,10 @@ pub(crate) fn prepare_override_args(
         args.iter()
             .any(|a| a == flag || a.starts_with(&format!("{flag}=")))
     };
+    // A user `yt-dlp.conf` must not add options behind the edited command.
+    if !has("--ignore-config", &args) {
+        args.insert(0, "--ignore-config".to_string());
+    }
     if !has("--newline", &args) {
         args.push("--newline".to_string());
     }
@@ -5439,7 +5443,8 @@ mod tests {
             .map(|s| s.to_string())
             .collect();
         let args = prepare_override_args(argv, url, out);
-        assert_eq!(args[0], "-f", "o nome do programa sai");
+        assert_eq!(args[0], "--ignore-config");
+        assert_eq!(args[1], "-f", "o nome do programa sai");
         assert_eq!(args.iter().filter(|a| *a == "--newline").count(), 1);
         assert!(args.contains(&"--progress".to_string()));
         assert!(args.contains(&"--no-quiet".to_string()));

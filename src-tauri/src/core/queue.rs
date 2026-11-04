@@ -899,11 +899,12 @@ impl DownloadQueue {
         ) {
             return Err("Download is still running".to_string());
         }
-        if omniget_core::core::ytdlp::get_command(id).is_none() {
+        let Some(record) = omniget_core::core::ytdlp::get_command(id) else {
             return Err(
                 "This download did not run yt-dlp; there is no command to edit".to_string(),
             );
-        }
+        };
+        omniget_core::core::ytdlp_flags::validate_override_argv(&argv, &record.args)?;
         item.status = QueueStatus::Queued;
         item.cancel_token = CancellationToken::new();
         item.percent = 0.0;
