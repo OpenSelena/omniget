@@ -2,12 +2,13 @@
 PackageIdentifier: OpenSelena.OmniGet
 PackageVersion: 0.14.0
 PackageLocale: en-US
-Publisher: OpenSelena
+Publisher: Corpse
 PublisherUrl: https://github.com/OpenSelena
 PublisherSupportUrl: https://github.com/OpenSelena/omniget/issues
 PackageName: OmniGet
 PackageUrl: https://github.com/OpenSelena/omniget
 License: GPL-3.0
+Copyright: Copyright © 2026 Corpse. Based on OmniGet by OpenSelena and contributors.
 LicenseUrl: https://github.com/OpenSelena/omniget/blob/main/LICENSE
 ShortDescription: Desktop app to download videos, music, courses, images and torrents from 1,800+ sites.
 Moniker: omniget

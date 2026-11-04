@@ -63,7 +63,8 @@
   "bundle": {
     "active": true,
     "targets": "all",
-    "publisher": "OpenSelena",
+    "publisher": "Corpse",
+    "copyright": "Copyright © 2026 Corpse. Based on OmniGet by OpenSelena and contributors, GPL-3.0.",
     "createUpdaterArtifacts": true,
     "resources": {
       "../browser-extension/chrome/": "browser-extension/chrome/",
