@@ -917,6 +917,10 @@ pub async fn download_from_url(
         download_id = q.next_available_id(download_id);
     }
 
+    omniget_core::core::net_guard::ensure_public_web_url(&url)
+        .await
+        .map_err(|e| e.to_string())?;
+
     let resolved = match crate::core::url_resolver::resolve_downloader(&state.registry, &url).await
     {
         Some(r) => r,

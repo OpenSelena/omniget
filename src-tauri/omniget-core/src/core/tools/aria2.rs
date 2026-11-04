@@ -67,6 +67,7 @@ pub async fn download(
 ) -> anyhow::Result<Aria2Result> {
     use tokio::io::{AsyncBufReadExt, BufReader};
     let url = validate_url(&opts.url)?;
+    crate::core::net_guard::ensure_public_web_url(&url).await?;
     let bin = crate::core::dependencies::ensure_aria2c()
         .await
         .ok_or_else(|| {

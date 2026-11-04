@@ -1733,6 +1733,7 @@ async fn spawn_download_inner(
         ),
     );
     let dl_future = async {
+        omniget_core::core::net_guard::ensure_public_web_url(&url).await?;
         tokio::select! {
             r = downloader.download(&info, &opts, tx) => r,
             _ = cancel_token.cancelled() => {
@@ -2023,6 +2024,9 @@ async fn fetch_and_cache_info(
     platform: &str,
     ytdlp_path: Option<&std::path::Path>,
 ) -> anyhow::Result<MediaInfo> {
+    // Every platform, including yt-dlp, contacts the link while fetching its
+    // info, so the private-network guard runs here and not only in direct_file.
+    omniget_core::core::net_guard::ensure_public_web_url(url).await?;
     {
         let cache = info_cache().lock().await;
         if let Some(entry) = cache.get(url) {

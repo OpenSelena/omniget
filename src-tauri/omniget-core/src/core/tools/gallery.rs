@@ -51,6 +51,7 @@ pub async fn download(
 ) -> anyhow::Result<GalleryResult> {
     use tokio::io::{AsyncBufReadExt, BufReader};
     let url = validate_url(url)?;
+    crate::core::net_guard::ensure_public_web_url(&url).await?;
     let url = url.as_str();
     let bin = crate::core::dependencies::ensure_gallerydl()
         .await

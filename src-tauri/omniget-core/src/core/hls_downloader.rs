@@ -209,6 +209,7 @@ impl HlsDownloader {
             return Ok(text.to_string());
         }
 
+        crate::core::net_guard::check_url_without_dns(url)?;
         let mut last_err = None;
         for attempt in 0..max_retries {
             let req = apply_referer_headers(self.client.get(url), referer)
@@ -261,6 +262,7 @@ impl HlsDownloader {
                 text.to_string()
             }
             None => {
+                crate::core::net_guard::check_url_without_dns(m3u8_url)?;
                 let resp = apply_referer_headers(self.client.get(m3u8_url), referer)
                     .header("User-Agent", self.effective_user_agent())
                     .send()
@@ -466,6 +468,7 @@ impl HlsDownloader {
         referer: &str,
         max_retries: u32,
     ) -> anyhow::Result<Vec<u8>> {
+        crate::core::net_guard::check_url_without_dns(url)?;
         let mut last_err = None;
         for attempt in 0..max_retries {
             let req = apply_referer_headers(self.client.get(url), referer)
@@ -709,6 +712,9 @@ async fn download_segment_with_retry(
     max_retries: u32,
     cancel: &CancellationToken,
 ) -> anyhow::Result<Vec<u8>> {
+    // Segment and key URLs come from the playlist (which a page can forge
+    // through the extension), so each one is checked, not only the playlist.
+    crate::core::net_guard::check_url_without_dns(url)?;
     let mut last_err = None;
     for attempt in 0..max_retries {
         if cancel.is_cancelled() {
@@ -885,6 +891,22 @@ fn parse_hex_iv(iv_str: &str) -> [u8; 16] {
 mod tests {
     use super::*;
     use m3u8_rs::{MasterPlaylist, Resolution, VariantStream};
+
+    #[tokio::test]
+    async fn segments_on_the_local_network_are_never_fetched() {
+        let err = download_segment_with_retry(
+            &Client::new(),
+            "http://10.255.255.1:9/seg0.ts",
+            "",
+            "test",
+            1,
+            &CancellationToken::new(),
+        )
+        .await
+        .unwrap_err()
+        .to_string();
+        assert!(err.starts_with("private_network_blocked"), "{err}");
+    }
 
     #[test]
     fn url_origin_basic() {

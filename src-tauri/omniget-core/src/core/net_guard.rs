@@ -116,6 +116,21 @@ pub async fn ensure_public_url(raw: &str) -> anyhow::Result<()> {
     Ok(())
 }
 
+/// Entry check for a link that is about to be probed or downloaded by any
+/// downloader (yt-dlp, the generic HLS/direct path, aria2, gallery-dl...).
+/// Network links (http, https, ftp, ftps, sftp) must be public; magnet and
+/// p2p links and local file paths are left to their own handlers.
+pub async fn ensure_public_web_url(raw: &str) -> anyhow::Result<()> {
+    let raw = raw.trim();
+    let Ok(url) = url::Url::parse(raw) else {
+        return Ok(());
+    };
+    match url.scheme() {
+        "http" | "https" | "ftp" | "ftps" | "sftp" => ensure_public_url(raw).await,
+        _ => Ok(()),
+    }
+}
+
 /// DNS resolver that drops non-public addresses, so a name that changes its
 /// answer between the check and the connection (DNS rebinding) still cannot
 /// reach the local network.
@@ -163,6 +178,27 @@ pub fn guard_client(builder: reqwest::ClientBuilder) -> reqwest::ClientBuilder {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[tokio::test]
+    async fn every_downloader_entry_refuses_local_network_links() {
+        for url in [
+            "http://192.168.1.1/backup.mp4",
+            "http://[::ffff:10.0.0.1]/x.m3u8",
+            "https://127.0.0.1:8443/page",
+            "ftp://10.0.0.2/file.iso",
+            "sftp://router.lan/file",
+        ] {
+            let err = ensure_public_web_url(url).await.unwrap_err().to_string();
+            assert!(err.starts_with("private_network_blocked"), "{url}: {err}");
+        }
+        for other in [
+            "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567",
+            "C:\\Users\\me\\file.torrent",
+            "/home/me/file.torrent",
+        ] {
+            assert!(ensure_public_web_url(other).await.is_ok(), "{other}");
+        }
+    }
 
     #[test]
     fn local_and_private_addresses_are_refused() {

@@ -308,9 +308,11 @@ impl PlatformDownloader for GenericYtdlpDownloader {
                 &selected.url,
             );
 
-            let mut builder =
-                crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
-                    .timeout(std::time::Duration::from_secs(600));
+            crate::core::net_guard::ensure_public_url(&selected.url).await?;
+            let mut builder = crate::core::net_guard::guard_client(
+                crate::core::http_client::apply_global_proxy(reqwest::Client::builder()),
+            )
+            .timeout(std::time::Duration::from_secs(600));
 
             if let Some(ua) = opts.user_agent.as_deref() {
                 builder = builder.user_agent(ua);
@@ -341,7 +343,7 @@ impl PlatformDownloader for GenericYtdlpDownloader {
                 builder = builder.cookie_provider(jar);
             }
 
-            let client = builder.build().unwrap_or_default();
+            let client = builder.build()?;
             let mut downloader = HlsDownloader::with_client(client)
                 .with_user_agent_override(opts.user_agent.clone())
                 .with_progress(progress.clone());
@@ -389,9 +391,11 @@ impl PlatformDownloader for GenericYtdlpDownloader {
             let title = sanitize_filename::sanitize(&info.title);
             let output_path = opts.output_dir.join(&title);
 
-            let mut builder =
-                crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
-                    .timeout(std::time::Duration::from_secs(600));
+            crate::core::net_guard::ensure_public_url(&selected.url).await?;
+            let mut builder = crate::core::net_guard::guard_client(
+                crate::core::http_client::apply_global_proxy(reqwest::Client::builder()),
+            )
+            .timeout(std::time::Duration::from_secs(600));
 
             if let Some(ua) = opts.user_agent.as_deref() {
                 builder = builder.user_agent(ua);
@@ -407,7 +411,7 @@ impl PlatformDownloader for GenericYtdlpDownloader {
                 builder = builder.cookie_provider(jar);
             }
 
-            let client = builder.build().unwrap_or_default();
+            let client = builder.build()?;
 
             let mut headers = reqwest::header::HeaderMap::new();
             if let Some(ref r) = opts.referer {
