@@ -78,7 +78,8 @@ When they exist:
 2. Set the repository variables `OMNIGET_UPDATER_ENDPOINT` (https URL of
    the fork's `latest.json`) and `OMNIGET_UPDATER_PUBKEY` (the public key).
    The release build applies them through `scripts/updater-config.mjs`.
-3. Update the AppImage zsync update string (`LDAI_UPDATE_INFORMATION` in
-   `.github/workflows/release.yml`), which also names `OpenSelena`.
+3. Set both variables or neither: the build fails if only one is set.
+   The AppImage zsync update string now follows the repository that runs
+   the release; set `OMNIGET_APPIMAGE_UPDATE_INFORMATION` to override it.
 4. Users on an upstream build will not receive fork updates: their app
    trusts only the upstream key.

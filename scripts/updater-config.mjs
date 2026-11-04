@@ -8,7 +8,8 @@
 //   OMNIGET_UPDATER_ENDPOINT  URL of latest.json (https only)
 //   OMNIGET_UPDATER_PUBKEY    base64 minisign public key from `tauri signer generate`
 //
-// Unset variables keep the values from tauri.conf.json.
+// Set both or neither: with neither, tauri.conf.json's values stay; with only
+// one, the build fails.
 //
 //   node scripts/updater-config.mjs > src-tauri/tauri.release.conf.json
 //   pnpm tauri build --config src-tauri/tauri.release.conf.json
@@ -29,6 +30,10 @@ export function updaterConfig(env, base = {}) {
   const endpoint = (env.OMNIGET_UPDATER_ENDPOINT ?? "").trim();
   const pubkey = (env.OMNIGET_UPDATER_PUBKEY ?? "").trim();
   if (!endpoint && !pubkey) return out;
+  // One without the other gives an updater that silently never verifies.
+  if (!endpoint || !pubkey) {
+    throw new Error("Set both OMNIGET_UPDATER_ENDPOINT and OMNIGET_UPDATER_PUBKEY, or neither");
+  }
   /** @type {Record<string, any>} */
   const updater = {};
   if (endpoint) {

@@ -23,8 +23,25 @@ describe("updater config override", () => {
     expect(c.plugins.updater.pubkey).toBe("QUJD");
   });
 
+  it("refuses only one of the two values", () => {
+    expect(() =>
+      updaterConfig({ OMNIGET_UPDATER_ENDPOINT: "https://example.com/latest.json" }),
+    ).toThrow(/both/);
+    expect(() => updaterConfig({ OMNIGET_UPDATER_PUBKEY: "QUJD" })).toThrow(/both/);
+  });
+
+  it("points the AppImage zsync updates at this repository unless overridden", () => {
+    const yml = readFileSync(join(root, ".github/workflows/release.yml"), "utf8");
+    const line = yml.split("\n").find((l) => l.includes("LDAI_UPDATE_INFORMATION:")) ?? "";
+    expect(line).not.toContain("OpenSelena");
+    expect(line).toContain("vars.OMNIGET_APPIMAGE_UPDATE_INFORMATION");
+    expect(line).toContain("github.repository_owner");
+  });
+
   it("refuses a non-https endpoint", () => {
-    expect(() => updaterConfig({ OMNIGET_UPDATER_ENDPOINT: "http://x/latest.json" })).toThrow();
+    expect(() =>
+      updaterConfig({ OMNIGET_UPDATER_ENDPOINT: "http://x/latest.json", OMNIGET_UPDATER_PUBKEY: "QUJD" }),
+    ).toThrow(/https/);
   });
 
   it("is what the release build uses", () => {

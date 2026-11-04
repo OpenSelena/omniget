@@ -122,7 +122,9 @@ jobs:
         id: tauri-build
         shell: bash
         env:
-          LDAI_UPDATE_INFORMATION: ${{ contains(matrix.platform, 'ubuntu') && 'gh-releases-zsync|OpenSelena|omniget|latest|*AppImage.zsync' || '' }}
+          # AppImage self-update source. Defaults to this repository's releases;
+          # the OMNIGET_APPIMAGE_UPDATE_INFORMATION repository variable overrides it.
+          LDAI_UPDATE_INFORMATION: ${{ contains(matrix.platform, 'ubuntu') && (vars.OMNIGET_APPIMAGE_UPDATE_INFORMATION || format('gh-releases-zsync|{0}|{1}|latest|*AppImage.zsync', github.repository_owner, github.event.repository.name)) || '' }}
           # linuxdeploy bundles an old `strip` that fails on modern .relr.dyn
           # relocations; disable stripping so AppImage bundling succeeds.
           NO_STRIP: ${{ contains(matrix.platform, 'ubuntu') && '1' || '' }}
