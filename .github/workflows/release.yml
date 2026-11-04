@@ -63,6 +63,7 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libayatana-appindicator3-dev librsvg2-dev libasound2-dev libpipewire-0.3-dev clang libclang-dev patchelf xdg-utils
+          sudo apt-get install -y gstreamer1.0-tools gstreamer1.0-plugins-base gstreamer1.0-plugins-good gstreamer1.0-libav
 
       - uses: pnpm/action-setup@73e46992e05b19abd31f2f3c20e0e7370d762115 # v6
 
@@ -158,6 +159,13 @@ jobs:
             gh release view "$TAG" --repo "$REPO" >/dev/null
           node scripts/release-assets.mjs bundles "${{ steps.bundle.outputs.dir }}" | while IFS= read -r f; do
             gh release upload "$TAG" "$f" --repo "$REPO" --clobber
+          done
+
+      - name: Verify bundled AppImage media plugins
+        if: contains(matrix.platform, 'ubuntu')
+        run: |
+          for appdir in src-tauri/target/release/bundle/appimage/*.AppDir; do
+            bash scripts/linux/verify-appimage-media.sh "$appdir"
           done
 
       - name: Generate and upload AppImage zsync files

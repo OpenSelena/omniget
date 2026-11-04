@@ -1,6 +1,10 @@
 ---
 name: ui-lint
-description: Run targeted rendered UI verification with lintapple (`pnpm lint:ui <target>`). Use whenever modifying Svelte routes (`src/routes/`), UI components (`src/components/`), CSS stylesheets (`src/app.css`, `src/lib/style/`), the landing page (`index.html`), or documentation pages (`docs/`).
+description: >-
+  Run targeted rendered UI verification with lintapple (`pnpm lint:ui <target>`).
+  Use whenever modifying Svelte routes (`src/routes/`), UI components
+  (`src/components/`), CSS stylesheets (`src/app.css`, `src/lib/style/`), the
+  landing page (`index.html`), or documentation pages (`docs/`).
 ---
 
 # Targeted UI Lint (`lintapple`)

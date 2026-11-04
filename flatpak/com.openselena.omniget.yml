@@ -1,10 +1,10 @@
 app-id: com.openselena.omniget
 runtime: org.gnome.Platform
-runtime-version: '48'
+runtime-version: '51'
 sdk: org.gnome.Sdk
 sdk-extensions:
   - org.freedesktop.Sdk.Extension.rust-stable
-  - org.freedesktop.Sdk.Extension.node20
+  - org.freedesktop.Sdk.Extension.node22
 
 command: omniget
 
@@ -13,10 +13,6 @@ finish-args:
   - --share=network
   - --socket=fallback-x11
   - --socket=wayland
-  # Voice needs the audio socket, and the chat's screen-share audio reads the
-  # default sink's monitor directly — the ScreenCast portal carries video only.
-  # Screen capture itself needs no extra permission: the portal hands over a
-  # file descriptor, which is the whole point of asking through the portal.
   - --socket=pulseaudio
   - --socket=pipewire
   - --device=dri
@@ -28,10 +24,10 @@ finish-args:
   - --talk-name=org.freedesktop.FileManager1
 
 build-options:
-  append-path: /usr/lib/sdk/rust-stable/bin:/usr/lib/sdk/node20/bin
+  append-path: /usr/lib/sdk/rust-stable/bin:/usr/lib/sdk/node22/bin
   env:
     CARGO_HOME: /run/build/omniget/cargo
-    npm_config_nodedir: /usr/lib/sdk/node20
+    npm_config_nodedir: /usr/lib/sdk/node22
 
 cleanup:
   - /include
