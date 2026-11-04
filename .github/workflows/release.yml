@@ -39,11 +39,24 @@ jobs:
             args: ''
 
     runs-on: ${{ matrix.platform }}
-    env:
-      SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
 
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      # Only the signing steps see SIGNPATH_API_TOKEN; the build (pnpm
+      # install, cargo build scripts) never has it in its environment.
+      - name: Check for SignPath token
+        id: signpath
+        if: matrix.platform == 'windows-latest'
+        shell: bash
+        env:
+          SIGNPATH_API_TOKEN: ${{ secrets.SIGNPATH_API_TOKEN }}
+        run: |
+          if [ -n "$SIGNPATH_API_TOKEN" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Install dependencies (Ubuntu only)
         if: matrix.platform == 'ubuntu-22.04' || matrix.platform == 'ubuntu-24.04-arm'
@@ -167,7 +180,7 @@ jobs:
           done
 
       - name: Upload unsigned Windows NSIS installer
-        if: matrix.platform == 'windows-latest' && env.SIGNPATH_API_TOKEN != ''
+        if: matrix.platform == 'windows-latest' && steps.signpath.outputs.enabled == 'true'
         id: upload-unsigned-setup
         uses: actions/upload-artifact@v4
         with:
@@ -176,7 +189,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Sign Windows NSIS installer via SignPath
-        if: matrix.platform == 'windows-latest' && env.SIGNPATH_API_TOKEN != '' && steps.upload-unsigned-setup.outputs.artifact-id != ''
+        if: matrix.platform == 'windows-latest' && steps.signpath.outputs.enabled == 'true' && steps.upload-unsigned-setup.outputs.artifact-id != ''
         continue-on-error: true
         uses: SignPath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3
         with:
@@ -190,7 +203,7 @@ jobs:
           output-artifact-directory: 'src-tauri/target/release/bundle/nsis-signed'
 
       - name: Publish signed Windows installer to release
-        if: matrix.platform == 'windows-latest' && env.SIGNPATH_API_TOKEN != ''
+        if: matrix.platform == 'windows-latest' && steps.signpath.outputs.enabled == 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
@@ -216,7 +229,7 @@ jobs:
         shell: pwsh
 
       - name: Upload unsigned Windows portable binary
-        if: matrix.platform == 'windows-latest' && env.SIGNPATH_API_TOKEN != ''
+        if: matrix.platform == 'windows-latest' && steps.signpath.outputs.enabled == 'true'
         id: upload-unsigned-portable
         uses: actions/upload-artifact@v4
         with:
@@ -225,7 +238,7 @@ jobs:
           if-no-files-found: warn
 
       - name: Sign Windows portable binary via SignPath
-        if: matrix.platform == 'windows-latest' && env.SIGNPATH_API_TOKEN != '' && steps.upload-unsigned-portable.outputs.artifact-id != ''
+        if: matrix.platform == 'windows-latest' && steps.signpath.outputs.enabled == 'true' && steps.upload-unsigned-portable.outputs.artifact-id != ''
         continue-on-error: true
         uses: SignPath/github-action-submit-signing-request@f6d04783b4569d051e0c80105fe66e82819d0092 # v3
         with:
@@ -300,6 +313,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: Setup Node.js
         uses: actions/setup-node@v7

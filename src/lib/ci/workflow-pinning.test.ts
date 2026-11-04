@@ -28,6 +28,45 @@ describe("privileged workflows", () => {
   }
 });
 
+/** Each `actions/checkout` step with the lines of its block. */
+function checkoutBlocks(text: string): string[] {
+  const lines = text.split(/\r?\n/);
+  const blocks: string[] = [];
+  lines.forEach((line, i) => {
+    if (!/uses:\s*actions\/checkout@/.test(line)) return;
+    const indent = line.search(/\S/);
+    const block = [line];
+    for (let j = i + 1; j < lines.length; j++) {
+      const next = lines[j];
+      if (next.trim() === "") continue;
+      if (next.search(/\S/) < indent || /^\s*-\s/.test(next)) break;
+      block.push(next);
+    }
+    blocks.push(block.join("\n"));
+  });
+  return blocks;
+}
+
+describe("release secrets", () => {
+  for (const name of PRIVILEGED) {
+    it(`${name} does not leave the GitHub token in .git/config`, () => {
+      const blocks = checkoutBlocks(workflow(name));
+      expect(blocks.length).toBeGreaterThan(0);
+      for (const block of blocks) expect(block).toMatch(/persist-credentials:\s*false/);
+    });
+  }
+
+  it("release.yml gives SIGNPATH_API_TOKEN only to the steps that sign", () => {
+    const text = workflow("release.yml");
+    // Never at job level (visible to pnpm install and cargo build scripts).
+    expect(text).not.toMatch(/^ {4}env:\s*\r?\n {6}SIGNPATH_API_TOKEN:/m);
+    expect(text).not.toContain("env.SIGNPATH_API_TOKEN");
+    const envLines = text.match(/^\s+SIGNPATH_API_TOKEN: \$\{\{ secrets\.SIGNPATH_API_TOKEN \}\}/gm) ?? [];
+    expect(envLines).toHaveLength(1);
+    expect(text).toMatch(/id: signpath\s*\r?\n(?:.*\r?\n){0,3}\s+env:\s*\r?\n\s+SIGNPATH_API_TOKEN:/);
+  });
+});
+
 describe("winget workflow", () => {
   it("downloads a pinned wingetcreate and checks its SHA-256", () => {
     const text = workflow("winget.yml");
