@@ -33,7 +33,7 @@
   import { showToast } from "#lib/stores/toast-store.svelte.ts";
   import { onClipboardUrl } from "#lib/stores/clipboard-monitor.ts";
   import { getMediaPreview, clearMediaPreview } from "#lib/stores/media-preview-store.svelte.ts";
-  import { clearPendingExternalPrefill, getPendingExternalPrefill, isPrefillAction, mayAutoStart, type ExternalUrlEvent } from "#lib/stores/external-url-store.svelte.ts";
+  import { armsAutoDownload, clearPendingExternalPrefill, getPendingExternalPrefill, isPrefillAction, type ExternalUrlEvent } from "#lib/stores/external-url-store.svelte.ts";
   import { getOmniboxDraftUrl, setOmniboxDraftUrl } from "#lib/stores/omnibox-draft-store.svelte.ts";
   import { t } from "#lib/i18n/index.ts";
   import { translateBackendError } from "#lib/error-translate.ts";
@@ -233,10 +233,8 @@
     }
 
     url = incoming.url;
-    if (mayAutoStart(incoming.action, getSettings()?.download.auto_download_on_paste ?? false)) {
-      pendingAutoDownload = true;
-    }
-    handleInput();
+    pendingAutoDownload = false;
+    handleInput(incoming.action);
   });
 
   let mascotEmotion = $derived.by((): "idle" | "downloading" | "error" | "stalled" | "queue" | "complete" | "amazed" => {
@@ -367,7 +365,8 @@
     scheduleAt = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
   }
 
-  function handleInput() {
+  /** `source` is "typed" for the omnibox, or the action of a received URL. */
+  function handleInput(source: string = "typed") {
     if (debounceTimer) clearTimeout(debounceTimer);
     clearMediaPreview();
     clipStart = "";
@@ -411,7 +410,7 @@
 
     if (isUrl(trimmed)) {
       omniState = { kind: "detecting" };
-      if (getSettings()?.download.auto_download_on_paste) {
+      if (armsAutoDownload(source, getSettings()?.download.auto_download_on_paste ?? false)) {
         pendingAutoDownload = true;
       }
       debounceTimer = setTimeout(() => {
@@ -969,7 +968,7 @@
         variant="stage"
         bind:url
         bind:mode={homeInputMode}
-        onInput={handleInput}
+        onInput={() => handleInput()}
         onModeChange={handleHomeModeChange}
         onAdvanced={() => { advancedMode = true; }}
       />
@@ -1043,7 +1042,7 @@
       <HomeUrlBar
         bind:url
         bind:mode={homeInputMode}
-        onInput={handleInput}
+        onInput={() => handleInput()}
         onModeChange={handleHomeModeChange}
         onAdvanced={() => { advancedMode = true; }}
       />

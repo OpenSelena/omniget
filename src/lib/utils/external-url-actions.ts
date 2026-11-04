@@ -11,3 +11,12 @@ export function isPrefillAction(action: string): boolean {
 export function mayAutoStart(action: string, autoDownloadOnPaste: boolean): boolean {
   return action === "prefill" && autoDownloadOnPaste;
 }
+
+/**
+ * Whether putting a URL in the omnibox arms "download on paste". A URL the
+ * user typed or pasted follows the setting; a received URL follows
+ * `mayAutoStart`, so an `omniget://` link still waits for a click.
+ */
+export function armsAutoDownload(source: string, autoDownloadOnPaste: boolean): boolean {
+  return source === "typed" ? autoDownloadOnPaste : mayAutoStart(source, autoDownloadOnPaste);
+}

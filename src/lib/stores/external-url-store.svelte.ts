@@ -25,4 +25,4 @@ export function clearPendingExternalPrefill(id: number) {
   }
 }
 
-export { isPrefillAction, mayAutoStart } from "#lib/utils/external-url-actions.ts";
+export { armsAutoDownload, isPrefillAction, mayAutoStart } from "#lib/utils/external-url-actions.ts";
