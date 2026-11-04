@@ -8,6 +8,7 @@ overrides:
   '@tiptap/extension-node-range': ^3.31.4
   '@tiptap/extension-collaboration': ^3.31.4
   '@tiptap/y-tiptap': ^3.0.7
+  katex@<0.18.2: ^0.18.10
   dompurify: '>=3.4.16'
   markdown-it: '>=15.0.3'
   linkify-it: '>=5.0.2'
@@ -677,7 +678,7 @@ packages:
     peerDependencies:
       '@tiptap/core': 3.32.2
       '@tiptap/pm': 3.32.2
-      katex: ^0.16.4 || ^0.17.0 || ^0.18.0
+      katex: ^0.18.10
 
   '@tiptap/extension-mention@3.32.2':
     resolution: {integrity: sha512-q87HWG5iYV5jR8KxgU8shdXWjWgZmHIdnu0UkHE50NSRL88DZeiEt2ZU558P/R0JN85rVKf2z8i98MUR7lVTxQ==}
@@ -1116,10 +1117,6 @@ packages:
     resolution: {integrity: sha512-QrWXB+ZQSVPmIWIhtEO9H+gwHaMGYiF5ChvoJ+K9ZGHG/sVsa6yiesAD1GC/x46sET00Xlwo1u49RVVVzvcSkw==}
     engines: {node: '>= 10'}
 
-  commander@8.3.0:
-    resolution: {integrity: sha512-OkTL9umf+He2DZkUq8f8J9of7yL6RJKI24dVITBmNfZBmri9zYZQrKkuXiKhyfPSu8tUhnVBB1iKXevvnlR4Ww==}
-    engines: {node: '>= 12'}
-
   cookie@2.0.1:
     resolution: {integrity: sha512-yuToqVvRrj6pfDXREyQAAv8SkAEk/8GS3jQRTiUMm66TVtBYmqQeoEjL2Lmq8Rpo6271vH76InTChTitEAm65w==}
     engines: {node: '>=22'}
@@ -1433,10 +1430,6 @@ packages:
 
   isomorphic.js@0.2.5:
     resolution: {integrity: sha512-PIeMbHqMt4DnUP3MA/Flc0HElYjMXArsw1qwJZcm9sqR8mq3l8NYizFMty0pWwE/tzIGH3EKK5+jes5mAr85yw==}
-
-  katex@0.16.47:
-    resolution: {integrity: sha512-Eeo8Ys1doU1z+x8AZsPpQu+p/QcZBI5PeOo7QGQdy2x2m0MU/hYagBbGOmXwr5KVbEfVuWv9LpnQWeehogurjg==}
-    hasBin: true
 
   katex@0.18.10:
     resolution: {integrity: sha512-/B6p9eY9DX7aHBfpkHdpirDTZ5QH9xTwL9y837PWuzuv41O5jFdqNQwVQEQsimY0/iVNkwBY4+4hMfhQ7d4Dbw==}
@@ -2733,7 +2726,7 @@ snapshots:
 
   '@vscode/markdown-it-katex@1.1.2':
     dependencies:
-      katex: 0.16.47
+      katex: 0.18.10
 
   abcjs@6.7.2: {}
 
@@ -2793,8 +2786,6 @@ snapshots:
   commander@15.0.0: {}
 
   commander@7.2.0: {}
-
-  commander@8.3.0: {}
 
   cookie@2.0.1: {}
 
@@ -3114,10 +3105,6 @@ snapshots:
 
   isomorphic.js@0.2.5: {}
 
-  katex@0.16.47:
-    dependencies:
-      commander: 8.3.0
-
   katex@0.18.10:
     dependencies:
       commander: 15.0.0
@@ -3254,7 +3241,7 @@ snapshots:
       '@babel/runtime': 7.29.10
       '@vscode/markdown-it-katex': 1.1.2
       highlight.js: 11.12.0
-      katex: 0.16.47
+      katex: 0.18.10
       markdown-it: 15.0.3
       markdown-it-ins: 4.0.0
       markdown-it-mark: 4.0.0
