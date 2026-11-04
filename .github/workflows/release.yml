@@ -144,20 +144,6 @@ jobs:
           IFS=$'\t' read -r APP ARCHIVE < <(node scripts/release-assets.mjs mac-archive "${{ steps.bundle.outputs.dir }}" "$VERSION" "$ARCH")
           tar -czf "$ARCHIVE" -C "$(dirname "$APP")" "$(basename "$APP")"
 
-      - name: Sign updater artifacts (signing key only)
-        shell: bash
-        env:
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-        run: |
-          if [ -z "$TAURI_SIGNING_PRIVATE_KEY" ]; then
-            echo "No updater signing key configured; skipping .sig files."
-            exit 0
-          fi
-          node scripts/release-assets.mjs sign "${{ steps.bundle.outputs.dir }}" | while IFS= read -r f; do
-            pnpm tauri signer sign "$f"
-          done
-
       - name: Create draft release and upload bundles (token only)
         shell: bash
         env:
@@ -209,19 +195,6 @@ jobs:
           wait-for-completion-timeout-in-seconds: 3600
           output-artifact-directory: 'src-tauri/target/release/bundle/nsis-signed'
 
-      - name: Re-sign updater signature for signed installer (signing key only)
-        if: matrix.platform == 'windows-latest' && steps.signpath.outputs.enabled == 'true'
-        env:
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-        run: |
-          $SIGNED_SETUP = Get-ChildItem "src-tauri/target/release/bundle/nsis-signed" -Filter "*.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
-          if ($SIGNED_SETUP -and $env:TAURI_SIGNING_PRIVATE_KEY) {
-            Write-Host "Re-signing updater signature for signed installer..."
-            pnpm tauri signer sign $SIGNED_SETUP.FullName
-          }
-        shell: pwsh
-
       - name: Publish signed Windows installer to release (token only)
         if: matrix.platform == 'windows-latest' && steps.signpath.outputs.enabled == 'true'
         env:
@@ -231,10 +204,6 @@ jobs:
           $SIGNED_SETUP = Get-ChildItem "src-tauri/target/release/bundle/nsis-signed" -Filter "*.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
           if ($SIGNED_SETUP) {
             Write-Host "Found SignPath-signed setup installer: $($SIGNED_SETUP.FullName)"
-            $SIG_FILE = "$($SIGNED_SETUP.FullName).sig"
-            if (Test-Path $SIG_FILE) {
-              gh release upload $TAG $SIG_FILE --repo ${{ github.repository }} --clobber
-            }
             gh release upload $TAG $SIGNED_SETUP.FullName --repo ${{ github.repository }} --clobber
             Write-Host "Successfully published signed installer to release $TAG"
           } else {
@@ -320,6 +289,85 @@ jobs:
           gh release upload $TAG $OUT --repo ${{ github.repository }} --clobber
         shell: pwsh
 
+      # The updater signing key never comes to this runner: the files to sign
+      # are handed to the sign-updater job, which runs on a fresh runner.
+      - name: Collect files for updater signing
+        id: to-sign
+        shell: bash
+        run: |
+          DIR="${{ steps.bundle.outputs.dir }}"
+          SIGNED=$(ls "$DIR"/nsis-signed/*.exe 2>/dev/null | head -n 1 || true)
+          if [ -n "$SIGNED" ]; then
+            cp "$SIGNED" "$DIR/nsis/$(basename "$SIGNED")"
+          fi
+          mkdir -p updater-unsigned
+          node scripts/release-assets.mjs sign "$DIR" | while IFS= read -r f; do
+            cp "$f" updater-unsigned/
+          done
+
+      - name: Hand files to the signing job
+        uses: actions/upload-artifact@v4
+        with:
+          name: updater-unsigned-${{ strategy.job-index }}
+          path: updater-unsigned/
+          if-no-files-found: error
+          retention-days: 1
+
+  # Fresh runner: no project install and no build ran here. The Tauri CLI
+  # comes from npm at the exact version and integrity in pnpm-lock.yaml.
+  # This job has the signing key and no GITHUB_TOKEN permissions.
+  sign-updater:
+    needs: publish-tauri
+    runs-on: ubuntu-latest
+    permissions: {}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            pnpm-lock.yaml
+            scripts/pinned-tauri-cli.mjs
+          sparse-checkout-cone-mode: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: lts/*
+
+      - name: Install pinned Tauri CLI
+        id: cli
+        run: echo "tauri=$(node scripts/pinned-tauri-cli.mjs "$RUNNER_TEMP/tauri-cli")" >> "$GITHUB_OUTPUT"
+
+      - name: Download files to sign
+        uses: actions/download-artifact@v4
+        with:
+          pattern: updater-unsigned-*
+          path: unsigned
+          merge-multiple: true
+
+      - name: Sign updater artifacts (signing key only)
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        run: |
+          mkdir -p signatures
+          if [ -z "$TAURI_SIGNING_PRIVATE_KEY" ]; then
+            echo "No updater signing key configured; skipping .sig files."
+            exit 0
+          fi
+          for f in unsigned/*; do
+            node "${{ steps.cli.outputs.tauri }}" signer sign "$f"
+            mv "$f.sig" signatures/
+          done
+
+      - name: Hand signatures to the upload job
+        uses: actions/upload-artifact@v4
+        with:
+          name: updater-signatures
+          path: signatures/
+          if-no-files-found: ignore
+          retention-days: 1
+
   package-chrome-extension:
     needs: publish-tauri
     runs-on: ubuntu-latest
@@ -346,11 +394,28 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   upload-updater-json:
-    needs: publish-tauri
+    needs: [publish-tauri, sign-updater]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
+      - name: Download updater signatures
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: updater-signatures
+          path: signatures
+
+      - name: Upload updater signatures (token only)
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          for f in signatures/*.sig; do
+            [ -f "$f" ] || continue
+            gh release upload "$TAG" "$f" --repo "${GITHUB_REPOSITORY}" --clobber
+          done
+
       - name: Generate and upload latest.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

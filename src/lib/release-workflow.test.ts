@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { parse } from "yaml";
 import { filesToSign, filesToUpload, macArchive } from "../../scripts/release-assets.mjs";
+import { checkIntegrity, lockedPackage } from "../../scripts/pinned-tauri-cli.mjs";
 
 const root = join(__dirname, "..", "..");
 const workflow = parse(readFileSync(join(root, ".github/workflows/release.yml"), "utf8"));
@@ -36,6 +37,34 @@ describe("release workflow secrets", () => {
         s.name,
       ).toBe(false);
     }
+  });
+});
+
+describe("updater signing job", () => {
+  const jobs = workflow.jobs as Record<
+    string,
+    { steps: Step[]; needs?: string | string[]; permissions?: unknown }
+  >;
+  const usesKey = (j: { steps: Step[] }) =>
+    j.steps.some((s) => envOf(s).includes("TAURI_SIGNING_PRIVATE_KEY"));
+
+  it("signs only in its own job on a fresh runner", () => {
+    const withKey = Object.entries(jobs).filter(([, j]) => usesKey(j));
+    expect(withKey.map(([n]) => n)).toEqual(["sign-updater"]);
+    const job = jobs["sign-updater"];
+    expect([job.needs].flat()).toContain("publish-tauri");
+    expect(job.permissions).toEqual({});
+    const text = JSON.stringify(job.steps);
+    expect(text).not.toMatch(/pnpm (install|tauri|run)|tauri build|cargo |GITHUB_TOKEN/);
+    expect(text).toContain("scripts/pinned-tauri-cli.mjs");
+  });
+
+  it("uses the CLI pinned by the lockfile and checks its integrity", () => {
+    const lock = readFileSync(join(root, "pnpm-lock.yaml"), "utf8");
+    const cli = lockedPackage(lock, "@tauri-apps/cli");
+    expect(cli.version).toMatch(/^\d+\.\d+\.\d+$/);
+    expect(cli.integrity).toMatch(/^sha512-/);
+    expect(() => checkIntegrity(Buffer.from("x"), cli.integrity)).toThrow(/integrity/);
   });
 });
 
