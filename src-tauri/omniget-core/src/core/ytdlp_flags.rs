@@ -187,6 +187,9 @@ const DANGEROUS_LONG: &[&str] = &[
     "--no-exec",
     "--use-postprocessor",
     "--postprocessor-args",
+    // yt-dlp alias of --postprocessor-args; not a prefix, so the abbreviation
+    // check cannot catch it.
+    "--ppa",
     "--external-downloader",
     "--external-downloader-args",
     "--downloader",
@@ -627,6 +630,26 @@ mod tests {
             "https://example.com/watch?v=1",
         ]));
         assert_eq!(validate_override_argv(&ok, &generated()), Ok(()));
+    }
+
+    #[test]
+    fn every_yt_dlp_alias_of_a_dangerous_option_is_refused() {
+        // Aliases as declared in yt_dlp/options.py (2026.10.26).
+        let aliases: &[&[&str]] = &[
+            &["--ppa", "ffmpeg:-i /etc/passwd"],
+            &["--PPA=ffmpeg:-y /startup/x.bat"],
+            &["--external-downloader", "curl"],
+            &["--external-downloader-args", "x"],
+        ];
+        for vector in aliases {
+            let mut edited = generated();
+            edited.extend(v(vector));
+            assert!(
+                validate_override_argv(&edited, &generated()).is_err(),
+                "accepted {vector:?}"
+            );
+            assert!(filter_user_flags(&v(vector)).accepted.is_empty());
+        }
     }
 
     #[test]
