@@ -468,7 +468,14 @@ pub fn validate_override_argv(argv: &[String], generated: &[String]) -> Result<(
         let token = argv[i].trim();
         i += 1;
         if token == "--" {
-            break; // everything after is a URL
+            // optparse hands a bare "--" to an option that expects a value, so
+            // "--user-agent -- --exec calc" keeps parsing options after it.
+            // Only positional URLs may follow the separator.
+            let tail = &argv[i..];
+            if let Some(bad) = tail.iter().find(|t| t.trim().starts_with('-')) {
+                refused.push(format!("-- {}", bad.trim()));
+            }
+            break;
         }
         if let Some(long) = token.strip_prefix("--") {
             let (raw_name, inline) = match long.split_once('=') {
@@ -583,6 +590,43 @@ mod tests {
                 "accepted {vector:?}"
             );
         }
+    }
+
+    #[test]
+    fn double_dash_swallowed_as_an_option_value_does_not_end_validation() {
+        // optparse gives "--" to an option that expects a value, so everything
+        // after it is still parsed as options by yt-dlp.
+        let vectors: &[&[&str]] = &[
+            &[
+                "--user-agent",
+                "--",
+                "--exec",
+                "calc",
+                "--",
+                "https://example.com/v",
+            ],
+            &["--referer", "--", "--exec=calc", "https://example.com/v"],
+            &["--", "-o", "/startup/x.bat", "https://example.com/v"],
+            &["--", "https://example.com/v", "--exec", "calc"],
+        ];
+        for vector in vectors {
+            let mut edited = generated();
+            edited.pop();
+            edited.extend(v(vector));
+            assert!(
+                validate_override_argv(&edited, &generated()).is_err(),
+                "accepted {vector:?}"
+            );
+        }
+        let mut ok = generated();
+        ok.pop();
+        ok.extend(v(&[
+            "--user-agent",
+            "x",
+            "--",
+            "https://example.com/watch?v=1",
+        ]));
+        assert_eq!(validate_override_argv(&ok, &generated()), Ok(()));
     }
 
     #[test]

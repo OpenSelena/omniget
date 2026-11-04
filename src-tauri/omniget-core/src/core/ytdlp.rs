@@ -451,9 +451,6 @@ pub(crate) fn prepare_override_args(
     if !has("--progress", &args) {
         args.push("--progress".to_string());
     }
-    if !has("--no-quiet", &args) {
-        args.push("--no-quiet".to_string());
-    }
     if !has("--progress-template", &args) {
         args.push("--progress-template".to_string());
         args.push(PROGRESS_TEMPLATE.to_string());
@@ -487,6 +484,10 @@ pub(crate) fn prepare_override_args(
     if positional.is_empty() {
         positional.push(url.to_string());
     }
+    // Always end the options with a flag: if the edited command ends with an
+    // option that expects a value, it takes this flag instead of the "--",
+    // so the URL can never be parsed as an option.
+    args.push("--no-quiet".to_string());
     args.push("--".to_string());
     args.extend(positional);
     args
@@ -5504,6 +5505,34 @@ mod tests {
             Some(url),
             "URL entra no fim quando falta"
         );
+    }
+
+    #[test]
+    fn added_double_dash_is_never_the_value_of_a_dangling_option() {
+        let out = std::path::Path::new("/tmp/out");
+        let url = "https://example.com/v";
+        // Every instrumentation flag is already present and the command ends
+        // with an option that takes a value: the "--" added in front of the
+        // URL must not become that value.
+        let argv: Vec<String> = [
+            "--newline",
+            "--progress",
+            "--no-quiet",
+            "--progress-template",
+            PROGRESS_TEMPLATE,
+            "--print",
+            "after_move:OMNIGET_FILEPATH:%(filepath)s",
+            "-o",
+            "/tmp/out/x",
+            "--user-agent",
+        ]
+        .iter()
+        .map(|s| s.to_string())
+        .collect();
+        let args = prepare_override_args(argv, url, out);
+        let dd = args.iter().rposition(|a| a == "--").expect("has --");
+        assert_ne!(args[dd - 1], "--user-agent");
+        assert_eq!(&args[dd + 1..], &[url.to_string()]);
     }
 
     #[test]
