@@ -467,21 +467,9 @@ async fn download_ffmpeg() -> anyhow::Result<PathBuf> {
 
     for (url, archive_type, checksum) in downloads {
         tracing::info!("Downloading FFmpeg component from {}", url);
-        let response = client.get(url).send().await?;
-        if !response.status().is_success() {
-            return Err(anyhow!(
-                "Failed to download FFmpeg from {}: HTTP {}",
-                url,
-                response.status()
-            ));
-        }
-        let final_url = response.url().to_string();
-
         let temp_path = bin_dir.join(".ffmpeg_download.tmp");
-        let bytes = response.bytes().await?;
         // Fail closed: nothing is written or executed unless the hash matches.
-        verify_ffmpeg_archive(&client, checksum, url, &final_url, &bytes).await?;
-        let data = bytes.to_vec();
+        let data = fetch_verified_ffmpeg_archive(&client, url, checksum).await?;
         let temp_clone = temp_path.clone();
         tokio::task::spawn_blocking(move || std::fs::write(&temp_clone, &data))
             .await
@@ -688,24 +676,50 @@ pub(crate) fn ffmpeg_download_urls_for(
     }
 }
 
-/// Resolve and check the expected hash for one downloaded FFmpeg archive.
-async fn verify_ffmpeg_archive(
+/// Downloads one FFmpeg archive and checks its SHA-256.
+///
+/// BtbN's `latest` release is replaced in place by each new build. The sums
+/// file is read first and the pair is fetched again once on a mismatch, so a
+/// build published between the two requests gives a retry, not a false
+/// "corrupted download" error. A second mismatch is a real failure.
+async fn fetch_verified_ffmpeg_archive(
     client: &reqwest::Client,
+    url: &str,
     source: ChecksumSource,
-    requested_url: &str,
-    final_url: &str,
-    bytes: &[u8],
-) -> anyhow::Result<()> {
-    let asset = requested_url.rsplit('/').next().unwrap_or(requested_url);
-    let expected = match source {
-        ChecksumSource::SumsFile(sums_url) => {
-            integrity::expected_from_sums_url(client, sums_url, asset).await?
+) -> anyhow::Result<Vec<u8>> {
+    const ATTEMPTS: u32 = 2;
+    let asset = url.rsplit('/').next().unwrap_or(url);
+    let mut last_err = None;
+    for attempt in 1..=ATTEMPTS {
+        let listed = match source {
+            ChecksumSource::SumsFile(sums_url) => {
+                Some(integrity::expected_from_sums_url(client, sums_url, asset).await?)
+            }
+            ChecksumSource::SiblingSha256 => None,
+        };
+        let response = client.get(url).send().await?;
+        if !response.status().is_success() {
+            return Err(anyhow!(
+                "Failed to download FFmpeg from {}: HTTP {}",
+                url,
+                response.status()
+            ));
         }
-        ChecksumSource::SiblingSha256 => {
-            integrity::expected_from_sibling(client, final_url).await?
+        let final_url = response.url().to_string();
+        let bytes = response.bytes().await?;
+        let expected = match listed {
+            Some(hash) => hash,
+            None => integrity::expected_from_sibling(client, &final_url).await?,
+        };
+        match integrity::verify_sha256(&bytes, &expected, asset) {
+            Ok(()) => return Ok(bytes.to_vec()),
+            Err(e) => {
+                tracing::warn!("FFmpeg hash check failed (attempt {attempt}/{ATTEMPTS}): {e}");
+                last_err = Some(e);
+            }
         }
-    };
-    integrity::verify_sha256(bytes, &expected, asset)
+    }
+    Err(last_err.unwrap_or_else(|| anyhow!("FFmpeg download failed")))
 }
 
 async fn extract_zip_ffmpeg(
@@ -1196,6 +1210,57 @@ mod integrity_tests {
         assert_eq!(linux_x64.len(), 1);
         assert!(linux_x64[0].0.contains("linux64"));
         assert_eq!(linux_x64[0].1, ArchiveType::TarXz);
+    }
+
+    /// Serves `/sums` (old hash the first time, new hash after) and `/a.zip`
+    /// (always the new build), like BtbN replacing `latest` mid-download.
+    #[tokio::test]
+    async fn ffmpeg_build_replaced_during_download_is_retried() {
+        use tokio::io::{AsyncReadExt, AsyncWriteExt};
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+        let new_build = b"new ffmpeg build".to_vec();
+        let old_hash = sha256_hex(b"old ffmpeg build");
+        let new_hash = sha256_hex(&new_build);
+        let body = new_build.clone();
+        tokio::spawn(async move {
+            let mut sums_served = 0;
+            loop {
+                let Ok((mut sock, _)) = listener.accept().await else {
+                    break;
+                };
+                let mut buf = [0u8; 2048];
+                let n = sock.read(&mut buf).await.unwrap_or(0);
+                let req = String::from_utf8_lossy(&buf[..n]).to_string();
+                let payload: Vec<u8> = if req.starts_with("GET /sums") {
+                    sums_served += 1;
+                    let hash = if sums_served == 1 {
+                        &old_hash
+                    } else {
+                        &new_hash
+                    };
+                    format!("{hash}  a.zip\n").into_bytes()
+                } else {
+                    body.clone()
+                };
+                let head = format!(
+                    "HTTP/1.1 200 OK\r\nContent-Length: {}\r\nConnection: close\r\n\r\n",
+                    payload.len()
+                );
+                let _ = sock.write_all(head.as_bytes()).await;
+                let _ = sock.write_all(&payload).await;
+            }
+        });
+        let client = reqwest::Client::builder().no_proxy().build().unwrap();
+        let sums: &'static str = Box::leak(format!("http://{addr}/sums").into_boxed_str());
+        let got = super::fetch_verified_ffmpeg_archive(
+            &client,
+            &format!("http://{addr}/a.zip"),
+            super::ChecksumSource::SumsFile(sums),
+        )
+        .await
+        .unwrap();
+        assert_eq!(got, new_build);
     }
 
     #[test]
