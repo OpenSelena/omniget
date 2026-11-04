@@ -972,15 +972,6 @@ dependencies = [
 
 [[package]]
 name = "block-padding"
-version = "0.3.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a8894febbff9f758034a5b8e12d87918f56dfc64a8e1fe757d65e29041538d93"
-dependencies = [
- "generic-array 0.14.7",
-]
-
-[[package]]
-name = "block-padding"
 version = "0.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "710f1dd022ef4e93f8a438b4ba958de7f64308434fa6a87104481645cc30068b"
@@ -1195,15 +1186,6 @@ dependencies = [
  "semver",
  "serde",
  "toml 1.0.6+spec-1.1.0",
-]
-
-[[package]]
-name = "cbc"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "26b52a9543ae338f279b96b0b9fed9c8093744685043739079ce85cd58f289a6"
-dependencies = [
- "cipher 0.4.4",
 ]
 
 [[package]]
@@ -1933,7 +1915,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d045de693cb712d0b22c6a64be5b953f67b3ce00ab5ad3dd5d8b441886ab8e1a"
 dependencies = [
  "quote",
- "syn 2.0.117",
+ "syn 3.0.3",
 ]
 
 [[package]]
@@ -4400,7 +4382,6 @@ version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "879f10e63c20629ecabbb64a8010319738c66a5cd0c29b02d63d272b03751d01"
 dependencies = [
- "block-padding 0.3.3",
  "generic-array 0.14.7",
 ]
 
@@ -4410,7 +4391,7 @@ version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4250ce6452e92010fdf7268ccc5d14faa80bb12fc741938534c58f16804e03c7"
 dependencies = [
- "block-padding 0.4.2",
+ "block-padding",
  "hybrid-array",
 ]
 
@@ -5688,7 +5669,7 @@ dependencies = [
  "aes 0.9.3",
  "bitflags 2.13.1",
  "brotli-decompressor 5.0.0",
- "cbc 0.2.1",
+ "cbc",
  "chrono",
  "ecb",
  "encoding_rs",
@@ -6801,7 +6782,7 @@ dependencies = [
  "axum",
  "base64 0.22.1",
  "block2",
- "cbc 0.1.2",
+ "cbc",
  "chrono",
  "constant_time_eq",
  "dirs 6.0.0",
@@ -6901,7 +6882,7 @@ dependencies = [
  "anyhow",
  "async-trait",
  "base64 0.22.1",
- "cbc 0.1.2",
+ "cbc",
  "chrono",
  "dirs 6.0.0",
  "enigo",
@@ -6972,7 +6953,7 @@ dependencies = [
  "anyhow",
  "async-trait",
  "base64 0.22.1",
- "cbc 0.1.2",
+ "cbc",
  "chromiumoxide",
  "chrono",
  "dirs 6.0.0",
