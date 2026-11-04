@@ -991,6 +991,11 @@ static YTDLP_PATH_CACHE: std::sync::RwLock<Option<Option<PathBuf>>> = std::sync:
 static FFMPEG_LOCATION_CACHE: std::sync::RwLock<Option<Option<String>>> =
     std::sync::RwLock::new(None);
 static JS_RUNTIME_CACHE: std::sync::RwLock<Option<String>> = std::sync::RwLock::new(None);
+
+/// The `--js-runtimes` value OmniGet detected on this machine, if any.
+pub(crate) fn cached_js_runtime() -> Option<String> {
+    JS_RUNTIME_CACHE.read().ok().and_then(|c| c.clone())
+}
 static RATE_LIMIT_429_COUNT: AtomicU64 = AtomicU64::new(0);
 static RATE_LIMIT_429_LAST_TS: AtomicU64 = AtomicU64::new(0);
 static COOKIE_ERROR_FLAG: AtomicBool = AtomicBool::new(false);
@@ -6277,7 +6282,7 @@ ERROR: [youtube] abc123: Requested format is not available";
         let merged = merge_extra_flags(
             &[
                 "--js-runtimes".to_string(),
-                "node:C:\\node.exe".to_string(),
+                "node".to_string(),
                 "--extractor-args".to_string(),
                 "youtube:player_client=web_safari".to_string(),
             ],
@@ -6287,7 +6292,7 @@ ERROR: [youtube] abc123: Requested format is not available";
             merged,
             vec![
                 "--js-runtimes".to_string(),
-                "node:C:\\node.exe".to_string(),
+                "node".to_string(),
                 "--extractor-args".to_string(),
                 "youtube:player_client=web_safari".to_string(),
                 "--no-overwrites".to_string(),

@@ -298,7 +298,35 @@ fn resolve_option(name: &str) -> Option<(&'static str, Arity)> {
         .and_then(|(_, long)| lookup_exact(long))
 }
 
-fn is_valid_js_runtime(value: &str) -> bool {
+/// True for an absolute path that cannot reach the network or climb out of
+/// a folder: no UNC or `//` prefix, no `..`, and either `/…` or `X:\…`.
+fn is_plain_absolute_path(p: &str) -> bool {
+    if p.starts_with("\\\\") || p.starts_with("//") || p.starts_with("\\/") || p.starts_with("/\\")
+    {
+        return false;
+    }
+    if p.split(['/', '\\']).any(|part| part == "..") {
+        return false;
+    }
+    let bytes = p.as_bytes();
+    let windows_drive = bytes.len() > 3
+        && bytes[0].is_ascii_alphabetic()
+        && bytes[1] == b':'
+        && (bytes[2] == b'\\' || bytes[2] == b'/');
+    p.starts_with('/') || windows_drive
+}
+
+/// Policy for a `--js-runtimes` value typed by the user.
+///
+/// yt-dlp runs the binary it points at, so only a bare runtime name (looked up
+/// on PATH by yt-dlp), a binary inside OmniGet's managed `bin` folder, or the
+/// exact runtime OmniGet detected itself are accepted. A network path such as
+/// `\\host\share\node.exe` would make Windows fetch and run a remote file.
+pub(crate) fn js_runtime_allowed(
+    value: &str,
+    managed_bin: Option<&std::path::Path>,
+    detected: Option<&str>,
+) -> bool {
     let (name, path) = match value.split_once(':') {
         Some((n, p)) => (n, Some(p)),
         None => (value, None),
@@ -306,17 +334,30 @@ fn is_valid_js_runtime(value: &str) -> bool {
     if !JS_RUNTIME_NAMES.contains(&name.to_ascii_lowercase().as_str()) {
         return false;
     }
-    match path {
-        None => true,
-        Some(p) => {
-            let file = p
-                .rsplit(['/', '\\'])
-                .next()
-                .unwrap_or("")
-                .to_ascii_lowercase();
-            !p.is_empty() && JS_RUNTIME_BINARIES.contains(&file.as_str())
-        }
+    let Some(p) = path else {
+        return true;
+    };
+    if detected == Some(value) {
+        return true;
     }
+    let file = p
+        .rsplit(['/', '\\'])
+        .next()
+        .unwrap_or("")
+        .to_ascii_lowercase();
+    if p.is_empty() || !JS_RUNTIME_BINARIES.contains(&file.as_str()) || !is_plain_absolute_path(p) {
+        return false;
+    }
+    match managed_bin {
+        Some(dir) => std::path::Path::new(p).starts_with(dir),
+        None => false,
+    }
+}
+
+fn is_valid_js_runtime(value: &str) -> bool {
+    let managed = crate::core::dependencies::managed_bin_dir();
+    let detected = crate::core::ytdlp::cached_js_runtime();
+    js_runtime_allowed(value, managed.as_deref(), detected.as_deref())
 }
 
 fn is_valid_value(option: &str, value: &str) -> bool {
@@ -486,6 +527,26 @@ pub fn validate_override_argv(argv: &[String], generated: &[String]) -> Result<(
                 None => (long, false),
             };
             let name = format!("--{}", raw_name.to_ascii_lowercase());
+            if name.len() >= 5 && "--js-runtimes".starts_with(name.as_str()) {
+                let value = match long.split_once('=') {
+                    Some((_, v)) => Some(v.to_string()),
+                    None if i < argv.len() => {
+                        i += 1;
+                        Some(argv[i - 1].clone())
+                    }
+                    None => None,
+                };
+                let pair: Vec<String> = if inline {
+                    vec![argv[i - 1].clone()]
+                } else {
+                    argv[i.saturating_sub(2)..i].to_vec()
+                };
+                let ok = value.as_deref().is_some_and(is_valid_js_runtime);
+                if !ok && !contains_pair(generated, &pair) {
+                    refused.extend(pair);
+                }
+                continue;
+            }
             if !dangerous_long_name(&name) {
                 continue;
             }
@@ -653,6 +714,58 @@ mod tests {
     }
 
     #[test]
+    fn js_runtime_paths_outside_the_managed_folder_are_refused() {
+        let managed = std::path::Path::new("/app/data/bin");
+        let check = |value: &str| js_runtime_allowed(value, Some(managed), None);
+        for bad in [
+            "node:\\\\attacker\\share\\node.exe",
+            "node:\\\\files.evil.com@SSL\\x\\node.exe",
+            "node://attacker/share/node",
+            "node:/tmp/node",
+            "node:node",
+            "node:../bin/node",
+            "node:/app/data/bin/../../../tmp/node",
+            "deno:C:\\Users\\x\\Downloads\\deno.exe",
+        ] {
+            assert!(!check(bad), "accepted {bad}");
+            assert!(
+                filter_user_flags(&v(&["--js-runtimes", bad]))
+                    .accepted
+                    .is_empty(),
+                "allowlist accepted {bad}"
+            );
+        }
+        assert!(check("node"));
+        assert!(check("deno"));
+        assert!(check("deno:/app/data/bin/deno"));
+        // The runtime OmniGet detected itself stays usable.
+        assert!(js_runtime_allowed(
+            "node:/usr/bin/node",
+            Some(managed),
+            Some("node:/usr/bin/node")
+        ));
+    }
+
+    #[test]
+    fn edited_command_cannot_add_a_js_runtime_path() {
+        for bad in [
+            &["--js-runtimes", "node:\\\\attacker\\share\\node.exe"][..],
+            &["--js-runtimes=node:/tmp/node"][..],
+            &["--js-run", "node:/tmp/node"][..],
+        ] {
+            let mut edited = generated();
+            edited.extend(v(bad));
+            assert!(
+                validate_override_argv(&edited, &generated()).is_err(),
+                "accepted {bad:?}"
+            );
+        }
+        let mut ok = generated();
+        ok.extend(v(&["--js-runtimes", "deno"]));
+        assert_eq!(validate_override_argv(&ok, &generated()), Ok(()));
+    }
+
+    #[test]
     fn execution_vectors_are_rejected() {
         let vectors: &[&[&str]] = &[
             &["--exec", "touch /tmp/x"],
@@ -701,7 +814,7 @@ mod tests {
             "--sponsorblock-remove",
             "sponsor",
             "--js-runtimes",
-            "node:C:\\node.exe",
+            "node",
         ]));
         assert!(out.rejected.is_empty(), "{:?}", out.rejected);
         assert_eq!(
@@ -717,7 +830,7 @@ mod tests {
                 "--sponsorblock-remove",
                 "sponsor",
                 "--js-runtimes",
-                "node:C:\\node.exe",
+                "node",
             ])
         );
     }
