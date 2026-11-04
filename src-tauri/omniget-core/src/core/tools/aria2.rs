@@ -88,21 +88,13 @@ fn base_args(dest_dir: &str, conns: &str) -> Vec<String> {
     .collect()
 }
 
-pub async fn download(
-    opts: Aria2Options,
-    progress: super::ProgressFn,
-) -> anyhow::Result<Aria2Result> {
-    use tokio::io::{AsyncBufReadExt, BufReader};
-    let url = validate_url(&opts.url)?;
-    crate::core::net_guard::ensure_public_web_url(&url).await?;
-    let bin = crate::core::dependencies::ensure_aria2c()
-        .await
-        .ok_or_else(|| {
-            anyhow!("aria2c nao esta instalado (Linux/macOS: instale pelo gerenciador de pacotes)")
-        })?;
-    std::fs::create_dir_all(&opts.dest_dir)?;
+/// The aria2c command for one download. HTTP(S) requests, including
+/// redirects and BitTorrent HTTP tracker announces, go through the egress
+/// guard (aria2 reads the proxy environment); torrent peers and FTP do not.
+fn aria2_command(bin: &std::path::Path, opts: &Aria2Options, url: &str) -> tokio::process::Command {
     let conns = opts.connections.clamp(1, 16).to_string();
-    let mut cmd = crate::core::process::command(&bin);
+    let mut cmd = crate::core::process::command(bin);
+    crate::core::egress_proxy::apply_to_command(&mut cmd);
     cmd.args(base_args(&opts.dest_dir, &conns));
     if !opts.file_name.trim().is_empty() {
         cmd.args(["--out", opts.file_name.trim()]);
@@ -117,10 +109,27 @@ pub async fn download(
     }
     // "--" ends option parsing: the URL can never be read as an aria2c option.
     cmd.arg("--")
-        .arg(&url)
+        .arg(url)
         .stdin(std::process::Stdio::null())
         .stdout(std::process::Stdio::piped())
         .stderr(std::process::Stdio::piped());
+    cmd
+}
+
+pub async fn download(
+    opts: Aria2Options,
+    progress: super::ProgressFn,
+) -> anyhow::Result<Aria2Result> {
+    use tokio::io::{AsyncBufReadExt, BufReader};
+    let url = validate_url(&opts.url)?;
+    crate::core::net_guard::ensure_public_web_url(&url).await?;
+    let bin = crate::core::dependencies::ensure_aria2c()
+        .await
+        .ok_or_else(|| {
+            anyhow!("aria2c nao esta instalado (Linux/macOS: instale pelo gerenciador de pacotes)")
+        })?;
+    std::fs::create_dir_all(&opts.dest_dir)?;
+    let mut cmd = aria2_command(&bin, &opts, &url);
     let mut child = cmd
         .spawn()
         .map_err(|e| anyhow!("nao foi possivel iniciar o aria2c: {}", e))?;
@@ -193,6 +202,26 @@ mod tests {
         assert!(args.iter().any(|a| a == "--no-conf"));
         assert!(!args.iter().any(|a| a.starts_with("--allow-overwrite")));
         assert!(!args.iter().any(|a| a.starts_with("--conf-path")));
+    }
+
+    #[test]
+    fn aria2_goes_through_the_egress_guard() {
+        let opts = super::Aria2Options {
+            url: "https://example.com/f.iso".into(),
+            dest_dir: "/tmp/d".into(),
+            file_name: String::new(),
+            connections: 4,
+            sha256: String::new(),
+            headers: Vec::new(),
+        };
+        let cmd = super::aria2_command(std::path::Path::new("aria2c"), &opts, &opts.url);
+        let proxy = cmd
+            .as_std()
+            .get_envs()
+            .find(|(k, _)| *k == "HTTPS_PROXY")
+            .and_then(|(_, v)| v.map(|v| v.to_string_lossy().to_string()));
+        assert_eq!(proxy, crate::core::egress_proxy::proxy_url());
+        assert!(proxy.is_some());
     }
 
     #[test]
