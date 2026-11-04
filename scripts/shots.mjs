@@ -245,6 +245,7 @@ function initScript(theme) {
         case "save_settings": return null;
         case "list_plugins": return F.PLUGINS;
         case "check_ytdlp_available": return true;
+        case "ytdlp_setup_status": return { state: "ready" };
         case "register_external_frontend": return [];
         case "check_cookie_error": return false;
         case "get_download_history": return F.HISTORY;

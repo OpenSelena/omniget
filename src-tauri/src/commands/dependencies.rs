@@ -115,6 +115,21 @@ pub async fn check_ytdlp_available() -> Result<bool, String> {
     Ok(crate::core::ytdlp::find_ytdlp_cached().await.is_some())
 }
 
+/// State of the automatic yt-dlp install (see `core::ytdlp_setup`).
+#[tauri::command]
+pub fn ytdlp_setup_status() -> omniget_core::core::ytdlp_setup::SetupState {
+    omniget_core::core::ytdlp_setup::status()
+}
+
+/// "Retry now" in the banner: starts a new automatic install unless one is
+/// already running.
+#[tauri::command]
+pub fn ytdlp_setup_retry() {
+    if !omniget_core::core::ytdlp_setup::retry_now() {
+        tauri::async_runtime::spawn(omniget_core::core::ytdlp_setup::ensure_in_background());
+    }
+}
+
 #[tauri::command]
 pub async fn install_dependency(
     name: String,

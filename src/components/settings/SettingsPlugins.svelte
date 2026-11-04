@@ -123,7 +123,7 @@
   </section>
 
   {#if deps.length > 0}
-    <section class="section">
+    <section class="section" id="dependencies">
       <div class="settings-section-head section-title">
         <h5 class="section-title">{$t('settings.dependencies.title')}</h5>
       </div>

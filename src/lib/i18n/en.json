@@ -6540,9 +6540,14 @@
     }
   },
   "ytdlp_missing_banner": {
-    "text": "yt-dlp is missing, so downloads cannot start. Install it from Settings.",
+    "text": "yt-dlp could not be installed, so downloads cannot start. Try again or install it from Settings.",
     "open_settings": "Open Settings",
-    "dismiss": "Dismiss"
+    "dismiss": "Dismiss",
+    "installing": "Installing yt-dlp, the download engine…",
+    "installing_percent": "Installing yt-dlp, the download engine… {{percent}}%",
+    "retrying": "yt-dlp install failed. Trying again in {{seconds}} s…",
+    "offline": "No internet connection. yt-dlp will be installed as soon as you are back online.",
+    "retry": "Try again"
   },
   "misc": {
     "hub": {

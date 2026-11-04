@@ -37,3 +37,4 @@ pub mod subtitle_merge;
 pub mod tools;
 pub mod ytdlp;
 pub mod ytdlp_flags;
+pub mod ytdlp_setup;

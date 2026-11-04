@@ -6540,9 +6540,14 @@
     }
   },
   "ytdlp_missing_banner": {
-    "text": "yt-dlp is missing, so downloads cannot start. Install it from Settings.",
-    "open_settings": "Open Settings",
-    "dismiss": "Dismiss"
+    "text": "Δεν ήταν δυνατή η εγκατάσταση του yt-dlp, οπότε οι λήψεις δεν μπορούν να ξεκινήσουν. Δοκιμάστε ξανά ή εγκαταστήστε το από τις Ρυθμίσεις.",
+    "open_settings": "Άνοιγμα Ρυθμίσεων",
+    "dismiss": "Κλείσιμο",
+    "installing": "Εγκατάσταση του yt-dlp, της μηχανής λήψεων…",
+    "installing_percent": "Εγκατάσταση του yt-dlp, της μηχανής λήψεων… {{percent}}%",
+    "retrying": "Η εγκατάσταση του yt-dlp απέτυχε. Νέα προσπάθεια σε {{seconds}} δ…",
+    "offline": "Δεν υπάρχει σύνδεση στο Διαδίκτυο. Το yt-dlp θα εγκατασταθεί μόλις συνδεθείτε ξανά.",
+    "retry": "Δοκιμή ξανά"
   },
   "misc": {
     "hub": {

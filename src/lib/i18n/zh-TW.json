@@ -6540,9 +6540,14 @@
     }
   },
   "ytdlp_missing_banner": {
-    "text": "yt-dlp is missing, so downloads cannot start. Install it from Settings.",
-    "open_settings": "Open Settings",
-    "dismiss": "Dismiss"
+    "text": "無法安裝 yt-dlp，因此無法開始下載。請重試，或在設定中安裝。",
+    "open_settings": "開啟設定",
+    "dismiss": "關閉",
+    "installing": "正在安裝下載引擎 yt-dlp…",
+    "installing_percent": "正在安裝下載引擎 yt-dlp… {{percent}}%",
+    "retrying": "yt-dlp 安裝失敗。{{seconds}} 秒後重試…",
+    "offline": "沒有網路連線。恢復連線後將自動安裝 yt-dlp。",
+    "retry": "重試"
   },
   "misc": {
     "hub": {

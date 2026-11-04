@@ -5848,7 +5848,12 @@ export type TranslationKeys =
   | 'udemy.waiting_code_title'
 
   | 'ytdlp_missing_banner.dismiss'
+  | 'ytdlp_missing_banner.installing'
+  | 'ytdlp_missing_banner.installing_percent'
+  | 'ytdlp_missing_banner.offline'
   | 'ytdlp_missing_banner.open_settings'
+  | 'ytdlp_missing_banner.retry'
+  | 'ytdlp_missing_banner.retrying'
   | 'ytdlp_missing_banner.text'
   // Allows dynamic/computed keys while preserving autocomplete for known keys
   | (string & {});

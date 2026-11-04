@@ -1,5 +1,7 @@
 <script lang="ts">
   import { tick } from "svelte";
+  import { page } from "$app/state";
+  import { settingsTarget } from "#lib/settings-location.ts";
   import { invoke } from "@tauri-apps/api/core";
   import { open } from "@tauri-apps/plugin-dialog";
   import { t, locale, loadTranslations } from "#lib/i18n/index.ts";
@@ -151,7 +153,7 @@
     await updateSettings({ download: { video_quality: value } });
   }
 
-  type SettingsCategory = "downloads" | "appearance" | "typography" | "network" | "cookies" | "channels" | "ai" | "plugins" | "advanced";
+  type SettingsCategory = import("#lib/settings-location.ts").SettingsCategory;
 
   const SETTINGS_NAV_GROUPS: {
     labelKey: string;
@@ -186,14 +188,22 @@
 
   let activeCategory = $state<SettingsCategory>("downloads");
 
-  let tabApplied = false;
+  // Follows the URL (also when the yt-dlp banner links here while Settings
+  // is already open), then scrolls to the linked section.
   $effect(() => {
-    if (tabApplied || typeof window === "undefined") return;
-    tabApplied = true;
-    const tab = new URLSearchParams(window.location.search).get("tab");
-    const valid = ["downloads", "appearance", "typography", "network", "cookies", "channels", "ai", "plugins", "advanced"];
-    if (tab && valid.includes(tab)) {
-      activeCategory = tab as SettingsCategory;
+    const { tab, section } = settingsTarget(page.url.search, page.url.hash);
+    if (!tab) return;
+    activeCategory = tab;
+    searchQuery = "";
+    if (section) {
+      // The dependencies table appears once check_dependencies answers.
+      let tries = 0;
+      const scroll = () => {
+        const el = document.getElementById(section);
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+        else if (++tries < 30) setTimeout(scroll, 100);
+      };
+      void tick().then(scroll);
     }
   });
 

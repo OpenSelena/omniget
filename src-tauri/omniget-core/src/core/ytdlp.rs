@@ -1985,11 +1985,15 @@ async fn download_ytdlp_asset(asset: &str, target: PathBuf) -> anyhow::Result<Pa
     let download_url = format!("{}/{}", base, asset);
     let sums_url = format!("{}/SHA2-256SUMS", base);
 
+    // No overall deadline: the onefile build is ~20 MB and a slow link needs
+    // more than two minutes. A stalled connection still fails via the
+    // connect and read timeouts.
     let client = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
-        .timeout(std::time::Duration::from_secs(120))
+        .connect_timeout(std::time::Duration::from_secs(20))
+        .read_timeout(std::time::Duration::from_secs(60))
         .build()?;
 
-    let response = client.get(&download_url).send().await?;
+    let mut response = client.get(&download_url).send().await?;
 
     if !response.status().is_success() {
         return Err(anyhow!(
@@ -1998,7 +2002,13 @@ async fn download_ytdlp_asset(asset: &str, target: PathBuf) -> anyhow::Result<Pa
         ));
     }
 
-    let bytes = response.bytes().await?;
+    let total = response.content_length();
+    let mut bytes: Vec<u8> = Vec::with_capacity(total.unwrap_or(0).min(256 << 20) as usize);
+    crate::core::ytdlp_setup::report_progress(0, total);
+    while let Some(chunk) = response.chunk().await? {
+        bytes.extend_from_slice(&chunk);
+        crate::core::ytdlp_setup::report_progress(bytes.len() as u64, total);
+    }
 
     // Verify against the release's published checksums. Fail closed on a
     // mismatch; fail open only when the sums file itself can't be fetched, so

@@ -813,6 +813,17 @@ pub fn run() {
                     .ok();
             }
 
+            {
+                // yt-dlp is installed on its own (with retries and offline
+                // waiting) instead of asking the user to go to Settings.
+                use tauri::Emitter;
+                let handle = app.handle().clone();
+                omniget_core::core::ytdlp_setup::set_listener(move |state| {
+                    let _ = handle.emit("ytdlp-setup", state);
+                });
+                tauri::async_runtime::spawn(omniget_core::core::ytdlp_setup::ensure_in_background());
+            }
+
             std::thread::Builder::new()
                 .name("startup-checks".into())
                 .spawn(|| {
@@ -821,11 +832,6 @@ pub fn run() {
                         .build()
                         .expect("startup runtime");
                     rt.block_on(async {
-                        // Garante o yt-dlp (zipapp quando há Python, senão o
-                        // onefile) antes do primeiro download pedir por ele.
-                        if let Err(e) = core::ytdlp::ensure_ytdlp().await {
-                            tracing::warn!("yt-dlp not available at startup: {}", e);
-                        }
                         core::dependencies::ensure_js_runtime().await;
                         let _ = tokio::task::spawn_blocking(
                             core::ytdlp::cleanup_stale_pyinstaller_dirs,
@@ -1422,6 +1428,8 @@ pub fn run() {
             commands::tools::instagram::tool_ig_schedule_add,
             commands::tools::instagram::tool_ig_schedule_remove,
             commands::dependencies::check_ytdlp_available,
+            commands::dependencies::ytdlp_setup_status,
+            commands::dependencies::ytdlp_setup_retry,
             commands::dependencies::install_dependency,
             commands::dependencies::dependency_archived_versions,
             commands::diagnostics::flight_recorder_dump,

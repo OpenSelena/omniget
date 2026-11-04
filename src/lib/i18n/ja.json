@@ -6540,9 +6540,14 @@
     }
   },
   "ytdlp_missing_banner": {
-    "text": "yt-dlp is missing, so downloads cannot start. Install it from Settings.",
-    "open_settings": "Open Settings",
-    "dismiss": "Dismiss"
+    "text": "yt-dlp をインストールできなかったため、ダウンロードを開始できません。もう一度試すか、設定からインストールしてください。",
+    "open_settings": "設定を開く",
+    "dismiss": "閉じる",
+    "installing": "ダウンロードエンジン yt-dlp をインストールしています…",
+    "installing_percent": "ダウンロードエンジン yt-dlp をインストールしています… {{percent}}%",
+    "retrying": "yt-dlp のインストールに失敗しました。{{seconds}} 秒後に再試行します…",
+    "offline": "インターネットに接続されていません。オンラインに戻りしだい yt-dlp をインストールします。",
+    "retry": "再試行"
   },
   "misc": {
     "hub": {

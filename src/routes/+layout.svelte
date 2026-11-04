@@ -35,7 +35,16 @@
   import { initChangelog } from "#lib/stores/changelog-store.svelte.ts";
   import { checkAnnouncements } from "#lib/stores/announcement-store.svelte.ts";
   import { needsOnboarding } from "#lib/stores/onboarding-store.svelte.ts";
-  import { isYtdlpAvailable, isDepsChecked, refreshYtdlpStatus } from "#lib/stores/dependency-store.svelte.ts";
+  import {
+    isYtdlpAvailable,
+    isDepsChecked,
+    refreshYtdlpStatus,
+    getYtdlpSetup,
+    initYtdlpSetup,
+    retryYtdlpSetup,
+  } from "#lib/stores/dependency-store.svelte.ts";
+  import { ytdlpBanner } from "#lib/ytdlp-banner.ts";
+  import { DEPENDENCIES_SETTINGS_HREF } from "#lib/settings-location.ts";
   import { showToast } from "#lib/stores/toast-store.svelte.ts";
   import { t, locale, isRtlLocale } from "#lib/i18n/index.ts";
   import { get } from "svelte/store";
@@ -62,7 +71,7 @@
   let pluginNav = $derived(allNav.filter((item) => item.group === "plugins"));
 
   let ytdlpDismissed = $state(false);
-  let ytdlpMissing = $derived(isDepsChecked() && !isYtdlpAvailable());
+  let ytdlpStatus = $derived(ytdlpBanner(isDepsChecked(), isYtdlpAvailable(), getYtdlpSetup()));
   let showOnboarding = $derived(needsOnboarding());
 
   let updateInfo = $derived(getUpdateInfo());
@@ -194,6 +203,7 @@
     });
 
     refreshYtdlpStatus();
+    void initYtdlpSetup();
     refreshUpdateInfo();
     initChangelog();
     setTimeout(() => {
@@ -399,15 +409,44 @@
       </div>
     {/if}
 
-    {#if ytdlpMissing && !ytdlpDismissed}
-      <div class="ytdlp-banner" role="alert">
+    {#if ytdlpStatus.kind !== "none" && !ytdlpDismissed}
+      <div
+        class="ytdlp-banner"
+        class:ytdlp-banner--info={ytdlpStatus.kind === "installing"}
+        role={ytdlpStatus.kind === "failed" ? "alert" : "status"}
+      >
         <span class="ytdlp-banner-text">
-          {$t("ytdlp_missing_banner.text")}
+          {#if ytdlpStatus.kind === "installing"}
+            {ytdlpStatus.percent === null
+              ? $t("ytdlp_missing_banner.installing")
+              : $t("ytdlp_missing_banner.installing_percent", { percent: ytdlpStatus.percent })}
+          {:else if ytdlpStatus.kind === "retrying"}
+            {$t("ytdlp_missing_banner.retrying", { seconds: ytdlpStatus.seconds })}
+          {:else if ytdlpStatus.kind === "offline"}
+            {$t("ytdlp_missing_banner.offline")}
+          {:else}
+            {$t("ytdlp_missing_banner.text")}
+          {/if}
         </span>
+        {#if ytdlpStatus.kind === "installing"}
+          <progress
+            class="ytdlp-banner-progress"
+            max="100"
+            value={ytdlpStatus.percent ?? undefined}
+            aria-label={$t("ytdlp_missing_banner.installing") as string}
+          ></progress>
+        {/if}
         <div class="ytdlp-banner-actions">
-          <a href="/settings#dependencies" class="button ytdlp-banner-link">
-            {$t("ytdlp_missing_banner.open_settings")}
-          </a>
+          {#if ytdlpStatus.kind !== "installing"}
+            <button type="button" class="button ytdlp-banner-link" onclick={() => retryYtdlpSetup()}>
+              {$t("ytdlp_missing_banner.retry")}
+            </button>
+          {/if}
+          {#if ytdlpStatus.kind === "failed"}
+            <a href={DEPENDENCIES_SETTINGS_HREF} class="button ytdlp-banner-link">
+              {$t("ytdlp_missing_banner.open_settings")}
+            </a>
+          {/if}
           <button
             type="button"
             class="ytdlp-banner-close"
@@ -621,6 +660,17 @@
     border-radius: var(--radius-lg);
     box-shadow: inset 0 0 0 var(--hairline) color-mix(in srgb, var(--warning) 40%, transparent);
     font-size: var(--text-base);
+  }
+
+  .ytdlp-banner--info {
+    background: color-mix(in srgb, var(--accent) 12%, var(--pane-bg));
+    box-shadow: inset 0 0 0 var(--hairline) color-mix(in srgb, var(--accent) 35%, transparent);
+  }
+
+  .ytdlp-banner-progress {
+    flex: 0 1 160px;
+    min-width: 80px;
+    accent-color: var(--accent);
   }
 
   .ytdlp-banner-text {
