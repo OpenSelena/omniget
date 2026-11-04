@@ -62,3 +62,23 @@ Local draft only. Nothing has been tagged, pushed or released. The same notes sh
 
 ## Résumé (français)
 Cette branche corrige plusieurs failles de sécurité : options yt-dlp, appairage de l'extension, vérification SHA-256 des téléchargements, liens omniget://, adresses du réseau local, et actions CI épinglées. Elle corrige aussi des bugs : ordre de la liste, taille des torrents, erreurs traduites. Elle ajoute des fonctions : format vertical 9:16, sous-titres automatiques, envoi vers le téléphone par QR code, Snapchat, actions sur les fichiers audio et image, diaporama TikTok, et H.265 évité. Elle installe yt-dlp automatiquement, détecte les contenus protégés par DRM (sans jamais les contourner), affiche Corpse comme éditeur sous Windows, répare la compilation Windows (#143) et traduit les paramètres dans les 12 langues. Enfin, elle met à jour les dépendances, dont SvelteKit 3, Vite 8, Vitest 5 et TypeScript 7, et passe la version à 0.15.0. Rien n'a été publié.
+
+## TODO before the first fork release: updater
+
+The in-app updater still points at the upstream project
+(`OpenSelena/omniget` latest.json, upstream minisign public key in
+`src-tauri/tauri.conf.json`). The fork's repository and signing key do not
+exist yet, so nothing was changed by default and no key was generated.
+
+When they exist:
+
+1. Generate the key pair once, offline: `pnpm tauri signer generate`.
+   Store the private key and password as the `TAURI_SIGNING_PRIVATE_KEY`
+   and `TAURI_SIGNING_PRIVATE_KEY_PASSWORD` repository secrets.
+2. Set the repository variables `OMNIGET_UPDATER_ENDPOINT` (https URL of
+   the fork's `latest.json`) and `OMNIGET_UPDATER_PUBKEY` (the public key).
+   The release build applies them through `scripts/updater-config.mjs`.
+3. Update the AppImage zsync update string (`LDAI_UPDATE_INFORMATION` in
+   `.github/workflows/release.yml`), which also names `OpenSelena`.
+4. Users on an upstream build will not receive fork updates: their app
+   trusts only the upstream key.

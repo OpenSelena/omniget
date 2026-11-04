@@ -127,7 +127,13 @@ jobs:
           # relocations; disable stripping so AppImage bundling succeeds.
           NO_STRIP: ${{ contains(matrix.platform, 'ubuntu') && '1' || '' }}
           NODE_OPTIONS: --max-old-space-size=6144
-        run: pnpm tauri build --config src-tauri/tauri.ci-build.conf.json ${{ matrix.args }}
+          # Updater endpoint and public key for this fork (repository
+          # variables, not secrets). Empty keeps tauri.conf.json's values.
+          OMNIGET_UPDATER_ENDPOINT: ${{ vars.OMNIGET_UPDATER_ENDPOINT }}
+          OMNIGET_UPDATER_PUBKEY: ${{ vars.OMNIGET_UPDATER_PUBKEY }}
+        run: |
+          node scripts/updater-config.mjs > src-tauri/tauri.release.conf.json
+          pnpm tauri build --config src-tauri/tauri.release.conf.json ${{ matrix.args }}
 
       - name: Create macOS updater archive
         if: matrix.platform == 'macos-latest'

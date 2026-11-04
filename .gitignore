@@ -298,3 +298,4 @@ skills-lock.json
 /scratch/
 /.scratch/
 
+src-tauri/tauri.release.conf.json
