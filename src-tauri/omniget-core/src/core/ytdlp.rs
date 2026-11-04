@@ -1995,6 +1995,19 @@ async fn download_ytdlp_zipapp() -> anyhow::Result<PathBuf> {
     download_ytdlp_asset(YTDLP_ZIPAPP_ASSET, target).await
 }
 
+/// Upper bound for a yt-dlp self-download. The real builds are ~20-40 MB;
+/// anything far larger is not yt-dlp and must not be buffered in memory.
+const YTDLP_MAX_DOWNLOAD_BYTES: u64 = 256 << 20;
+
+/// Appends `chunk` to `buf`, failing once the total would exceed `max`.
+fn append_capped(buf: &mut Vec<u8>, chunk: &[u8], max: u64) -> anyhow::Result<()> {
+    if buf.len() as u64 + chunk.len() as u64 > max {
+        return Err(anyhow!("Failed to download yt-dlp: file is too large"));
+    }
+    buf.extend_from_slice(chunk);
+    Ok(())
+}
+
 async fn download_ytdlp_asset(asset: &str, target: PathBuf) -> anyhow::Result<PathBuf> {
     if let Some(parent) = target.parent() {
         std::fs::create_dir_all(parent)?;
@@ -2023,16 +2036,19 @@ async fn download_ytdlp_asset(asset: &str, target: PathBuf) -> anyhow::Result<Pa
     }
 
     let total = response.content_length();
-    let mut bytes: Vec<u8> = Vec::with_capacity(total.unwrap_or(0).min(256 << 20) as usize);
+    if total.is_some_and(|t| t > YTDLP_MAX_DOWNLOAD_BYTES) {
+        return Err(anyhow!("Failed to download yt-dlp: file is too large"));
+    }
+    let mut bytes: Vec<u8> =
+        Vec::with_capacity(total.unwrap_or(0).min(YTDLP_MAX_DOWNLOAD_BYTES) as usize);
     crate::core::ytdlp_setup::report_progress(0, total);
     while let Some(chunk) = response.chunk().await? {
-        bytes.extend_from_slice(&chunk);
+        append_capped(&mut bytes, &chunk, YTDLP_MAX_DOWNLOAD_BYTES)?;
         crate::core::ytdlp_setup::report_progress(bytes.len() as u64, total);
     }
 
-    // Verify against the release's published checksums. Fail closed on a
-    // mismatch; fail open only when the sums file itself can't be fetched, so
-    // a transient GitHub hiccup doesn't block downloads entirely.
+    // Verify against the release's published checksums. Fails closed both on
+    // a mismatch and when the sums file cannot be fetched.
     // Fail-closed. O yt-dlp publica `SHA2-256SUMS` em toda release; não
     // conseguir buscá-lo é indistinguível de alguém suprimindo a verificação,
     // então o binário é descartado em vez de instalado sem conferência.
@@ -5320,6 +5336,17 @@ fn extract_id_from_url(url: &str) -> Option<String> {
 
 #[cfg(test)]
 mod tests {
+
+    #[test]
+    fn self_download_stops_at_the_size_cap() {
+        let mut buf = Vec::new();
+        assert!(append_capped(&mut buf, &[0; 6], 10).is_ok());
+        assert!(append_capped(&mut buf, &[0; 4], 10).is_ok());
+        assert!(append_capped(&mut buf, &[0; 1], 10).is_err());
+        assert_eq!(buf.len(), 10);
+        assert_eq!(YTDLP_MAX_DOWNLOAD_BYTES, 256 << 20);
+    }
+
     #[test]
     fn python_version_parsing_and_minimum() {
         assert_eq!(parse_python_version("3.14\n"), Some((3, 14)));
