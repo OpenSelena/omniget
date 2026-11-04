@@ -3,7 +3,12 @@
 pub fn is_terminal_category(category: &str) -> bool {
     matches!(
         category,
-        "not_found" | "broken_source" | "postprocess_failed" | "restricted" | "auth_required"
+        "not_found"
+            | "broken_source"
+            | "postprocess_failed"
+            | "restricted"
+            | "auth_required"
+            | "drm_protected"
     )
 }
 
@@ -32,6 +37,10 @@ pub fn classify_download_error(error: &str) -> (&str, &str) {
             "postprocess_failed",
             "Post-processing failed: the downloaded streams are incomplete or unsupported.",
         );
+    }
+
+    if lower.contains("drm") {
+        return ("drm_protected", crate::core::drm::DRM_ERROR);
     }
 
     if lower.contains("cookie")
@@ -115,6 +124,19 @@ mod tests {
             assert!(is_terminal_category(cat), "{msg} → {cat}");
             assert_ne!(cat, "unknown");
             assert_ne!(cat, "ytdlp_needed");
+        }
+    }
+
+    #[test]
+    fn drm_errors_are_terminal_and_explained() {
+        for msg in [
+            crate::core::drm::DRM_ERROR,
+            "ERROR: [generic] abc: This video is DRM protected",
+        ] {
+            let (cat, text) = classify_download_error(msg);
+            assert_eq!(cat, "drm_protected", "{msg}");
+            assert!(is_terminal_category(cat));
+            assert_eq!(text, crate::core::drm::DRM_ERROR);
         }
     }
 

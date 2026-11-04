@@ -42,6 +42,8 @@ const BACKEND_ERROR_MAP: Record<string, string> = {
     "errors.output_missing",
   "Downloaded streams are DRM-protected and cannot be merged. This content is not supported.":
     "errors.drm_protected",
+  "This content is protected by DRM (Widevine, PlayReady or FairPlay). OmniGet cannot download DRM-protected media.":
+    "errors.drm_protected",
   "Course platforms can't be downloaded from a URL. Open the Courses page (requires the Courses plugin and a logged-in account).":
     "errors.course_platform_url",
   "OmniDisc: invalid instance URL. Use http:// or https:// without a username or password.":
@@ -184,7 +186,12 @@ export function translateBackendError(
   if (lower.includes("tiktok") && lower.includes("blocking")) return t("errors.tiktok_blocked");
   if (lower.includes("download reported success but no matching file"))
     return t("errors.console_encoding");
-  if (lower.includes("invalid data found when processing input") || lower.includes("drm-protected"))
+  if (
+    lower.includes("invalid data found when processing input") ||
+    lower.includes("drm-protected") ||
+    lower.includes("drm protected") ||
+    lower.includes("protected by drm")
+  )
     return t("errors.drm_protected");
 
   return stripped || msg;

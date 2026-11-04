@@ -111,6 +111,18 @@ describe("translateBackendError security and integrity messages", () => {
     expect(translateBackendError("unsupported URL scheme: file", mockT)).toBe("T[errors.invalid_url]");
     expect(translateBackendError("Invalid external URL", mockT)).toBe("T[errors.invalid_url]");
   });
+
+  it("explains DRM-protected media instead of a generic failure", () => {
+    const backendDrm =
+      "This content is protected by DRM (Widevine, PlayReady or FairPlay). OmniGet cannot download DRM-protected media.";
+    expect(translateBackendError(backendDrm, mockT)).toBe("T[errors.drm_protected]");
+    expect(
+      translateBackendError(`Failed to get formats: ${backendDrm}`, mockT),
+    ).toBe("T[errors.drm_protected]");
+    expect(
+      translateBackendError("ERROR: [generic] abc: This video is DRM protected", mockT),
+    ).toBe("T[errors.drm_protected]");
+  });
 });
 
 describe("rawErrorText", () => {

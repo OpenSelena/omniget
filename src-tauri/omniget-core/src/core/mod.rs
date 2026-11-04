@@ -5,6 +5,7 @@ pub mod clipboard;
 pub mod cookie_parser;
 pub mod course_utils;
 pub mod dependencies;
+pub mod drm;
 pub mod direct_downloader;
 pub mod errors;
 pub mod events;

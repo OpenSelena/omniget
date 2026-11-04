@@ -144,6 +144,7 @@ impl HlsDownloader {
         }
 
         let m3u8_text = self.fetch_m3u8_with_retry(m3u8_url, referer, 3).await?;
+        refuse_drm_manifest(&m3u8_text)?;
 
         let m3u8_bytes = m3u8_text.as_bytes();
 
@@ -275,6 +276,8 @@ impl HlsDownloader {
                 resp.text().await?
             }
         };
+
+        refuse_drm_manifest(&text)?;
 
         let (_, playlist) = parse_media_playlist(text.as_bytes())
             .map_err(|e| anyhow::anyhow!("Parse media playlist: {:?}", e))?;
@@ -453,7 +456,7 @@ impl HlsDownloader {
                         }
                     }
                     m3u8_rs::KeyMethod::SampleAES => {
-                        anyhow::bail!("HLS stream uses SAMPLE-AES (FairPlay DRM), cannot decrypt");
+                        anyhow::bail!("{}", crate::core::drm::DRM_ERROR);
                     }
                     _ => {}
                 }
@@ -506,6 +509,16 @@ struct EncryptionInfo {
 /// Attach `Referer` (and a matching `Origin`) headers to a request.
 /// An empty referer means "send no Referer/Origin at all" — some CDNs
 /// reject requests with a wrong Referer but accept ones without any.
+/// Stops before any segment is fetched when the playlist signals DRM.
+/// Protected media is refused, never decrypted.
+fn refuse_drm_manifest(text: &str) -> anyhow::Result<()> {
+    if let Some(system) = crate::core::drm::manifest_drm(text) {
+        tracing::warn!("[hls] playlist is protected by {}", system.name());
+        anyhow::bail!("{}", crate::core::drm::DRM_ERROR);
+    }
+    Ok(())
+}
+
 fn apply_referer_headers(req: reqwest::RequestBuilder, referer: &str) -> reqwest::RequestBuilder {
     if referer.is_empty() {
         return req;
@@ -906,6 +919,31 @@ mod tests {
         .unwrap_err()
         .to_string();
         assert!(err.starts_with("private_network_blocked"), "{err}");
+    }
+
+    #[tokio::test]
+    async fn drm_playlists_are_refused_before_any_segment() {
+        let url = "https://media.example/drm/index.m3u8";
+        let text = "#EXTM3U\n#EXT-X-KEY:METHOD=SAMPLE-AES-CTR,URI=\"data:x\",KEYFORMAT=\"urn:uuid:edef8ba9-79d6-4ace-a3c8-27dcd51d21ed\"\n#EXTINF:4,\nhttp://10.255.255.1:9/seg0.mp4\n#EXT-X-ENDLIST\n";
+        let out = std::env::temp_dir().join("omniget-drm-test.mp4");
+        let err = HlsDownloader::new()
+            .with_prefetched_playlist(url.to_string(), text.to_string())
+            .download_with_quality(
+                url,
+                out.to_str().unwrap(),
+                "",
+                None,
+                CancellationToken::new(),
+                1,
+                1,
+                None,
+            )
+            .await
+            .err()
+            .expect("DRM playlist must be refused")
+            .to_string();
+        assert_eq!(err, crate::core::drm::DRM_ERROR);
+        assert!(!out.exists());
     }
 
     #[test]

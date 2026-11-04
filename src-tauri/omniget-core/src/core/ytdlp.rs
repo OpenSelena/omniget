@@ -4765,10 +4765,15 @@ pub(crate) fn is_terminal_ytdlp_error(stderr_lower: &str) -> bool {
         "http error 410",
     ];
     PATTERNS.iter().any(|p| stderr_lower.contains(p))
+        || crate::core::drm::ytdlp_reports_drm(stderr_lower)
 }
 
 fn translate_ytdlp_error(stderr: &str) -> anyhow::Error {
     let lower = stderr.to_lowercase();
+
+    if crate::core::drm::ytdlp_reports_drm(stderr) {
+        return anyhow!("{}", crate::core::drm::DRM_ERROR);
+    }
 
     if lower.contains("errno 22")
         && (lower.contains("textiowrapper")
@@ -5926,6 +5931,15 @@ e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  yt-dlp.exe\n\
     #[test]
     fn extract_id_non_youtube() {
         assert_eq!(extract_id_from_url("https://vimeo.com/123456"), None);
+    }
+
+    #[test]
+    fn translate_error_drm() {
+        let err = translate_ytdlp_error("ERROR: [generic] abc: This video is DRM protected");
+        assert_eq!(err.to_string(), crate::core::drm::DRM_ERROR);
+        assert!(is_terminal_ytdlp_error(
+            "error: [generic] abc: this video is drm protected"
+        ));
     }
 
     #[test]
