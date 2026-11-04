@@ -43,7 +43,7 @@ pub fn tools() -> Vec<ToolDef> {
         t("pdf_render", "Render PDF pages to PNG or JPG files.", obj(json!({ "input": { "type": "string" }, "pages": { "type": "string" }, "dpi": { "type": "integer" }, "format": { "type": "string", "enum": ["png", "jpg"] }, "output_dir": { "type": "string", "description": "Inside the OmniGet download folder; relative paths start there, empty means the folder itself." } }), &["input"])),
         t("pdf_sanitize", "Rebuild a PDF from pixels (Dangerzone-style) so scripts, forms and attachments are dropped.", obj(json!({ "input": { "type": "string" }, "output_dir": { "type": "string", "description": "Inside the OmniGet download folder; relative paths start there, empty means the folder itself." } }), &["input"])),
         t("tts_speak", "Text to speech with Microsoft Edge neural voices; writes an MP3.", obj(json!({ "text": { "type": "string" }, "voice": { "type": "string", "description": "e.g. pt-BR-AntonioNeural, en-US-AriaNeural" }, "output": { "type": "string", "description": "Inside the OmniGet download folder; relative paths start there, empty means the folder itself." } }), &["text"])),
-        t("transcribe", "Transcribe audio or video locally with whisper.cpp; returns text and SRT path.", obj(json!({ "input": { "type": "string" }, "model": { "type": "string", "description": "GGML model id, default base" }, "language": { "type": "string", "description": "auto | pt | en …" } }), &["input"])),
+        t("transcribe", "Transcribe audio or video locally with whisper.cpp; returns text and SRT path.", obj(json!({ "input": { "type": "string" }, "model": { "type": "string", "description": "GGML model id, default base" }, "language": { "type": "string", "description": "auto | pt | en …" }, "output_dir": { "type": "string", "description": "folder inside the download folder (default: the download folder)" } }), &["input"])),
         t("image_resize", "Resize images in batch. mode width | height | fit | percent.", obj(json!({ "inputs": { "type": "array", "items": { "type": "string" } }, "mode": { "type": "string" }, "value": { "type": "integer" }, "value2": { "type": "integer" }, "format": { "type": "string" }, "output_dir": { "type": "string", "description": "Inside the OmniGet download folder; relative paths start there, empty means the folder itself." } }), &["inputs", "mode", "value"])),
         t("ocr", "Extract text from images with Tesseract.", obj(json!({ "inputs": { "type": "array", "items": { "type": "string" } }, "langs": { "type": "string", "description": "por+eng" } }), &["inputs"])),
         t("find_duplicates", "Find duplicate files (same content) under folders.", obj(json!({ "dirs": { "type": "array", "items": { "type": "string" } }, "min_size": { "type": "integer" } }), &["dirs"])),
@@ -333,10 +333,7 @@ pub async fn call(app: &AppHandle, name: &str, a: Value) -> Result<Value, String
                     l
                 }
             };
-            let opts: whisper::TranscribeOptions = serde_json::from_value(
-                json!({ "input": s(&a, "input"), "model": model, "language": language }),
-            )
-            .map_err(err)?;
+            let opts = transcribe_options(&a, model, language, &download_root(app))?;
             let r = whisper::transcribe(opts, p).await.map_err(err)?;
             Ok(
                 json!({ "language": r.language, "text": r.text, "srt": r.srt_path, "vtt": r.vtt_path, "txt": r.txt_path, "seconds": r.seconds }),
@@ -637,6 +634,24 @@ pub fn confine_write_path(
     Ok(resolved)
 }
 
+/// Subtitles from the MCP `transcribe` tool go to the download folder (or a
+/// folder inside it), never next to an arbitrary input file.
+fn transcribe_options(
+    a: &Value,
+    model: String,
+    language: String,
+    root: &std::path::Path,
+) -> Result<whisper::TranscribeOptions, String> {
+    let output_dir = confine_write_path(&s(a, "output_dir"), root, None)?;
+    serde_json::from_value(json!({
+        "input": s(a, "input"),
+        "model": model,
+        "language": language,
+        "output_dir": output_dir.to_string_lossy(),
+    }))
+    .map_err(err)
+}
+
 fn download_root(app: &AppHandle) -> std::path::PathBuf {
     crate::storage::config::load_settings(app)
         .download
@@ -828,6 +843,32 @@ mod tests {
             std::os::unix::fs::symlink(&outside, root.join("link")).unwrap();
             assert!(confine_write_path("link/x.bat", &root, None).is_err());
         }
+        let _ = std::fs::remove_dir_all(&base);
+    }
+
+    #[test]
+    fn transcribe_writes_into_the_download_folder() {
+        let base = scratch("transcribe");
+        let root = base.join("Downloads");
+        let docs = base.join("Documents");
+        std::fs::create_dir_all(&docs).unwrap();
+        let input = docs.join("notes.mp3").to_string_lossy().to_string();
+        let opts = transcribe_options(
+            &json!({ "input": input }),
+            "base".into(),
+            "auto".into(),
+            &root,
+        )
+        .unwrap();
+        assert_eq!(std::path::PathBuf::from(&opts.output_dir), root);
+        let outside = docs.to_string_lossy().to_string();
+        assert!(transcribe_options(
+            &json!({ "input": input, "output_dir": outside }),
+            "base".into(),
+            "auto".into(),
+            &root,
+        )
+        .is_err());
         let _ = std::fs::remove_dir_all(&base);
     }
 

@@ -233,6 +233,23 @@ pub async fn install(variant: &str, progress: ProgressFn) -> anyhow::Result<Path
     Ok(final_exe)
 }
 
+/// First `stem`, `stem (1)`, `stem (2)`… for which none of the `.srt`, `.vtt`
+/// and `.txt` outputs exists yet, so a transcription never overwrites a file.
+pub fn free_output_stem(dir: &std::path::Path, stem: &str) -> String {
+    let taken = |s: &str| {
+        ["srt", "vtt", "txt"]
+            .iter()
+            .any(|ext| dir.join(format!("{s}.{ext}")).exists())
+    };
+    if !taken(stem) {
+        return stem.to_string();
+    }
+    (1u32..)
+        .map(|n| format!("{stem} ({n})"))
+        .find(|s| !taken(s))
+        .unwrap_or_else(|| stem.to_string())
+}
+
 #[derive(Debug, Clone, Deserialize)]
 pub struct TranscribeOptions {
     pub input: String,
@@ -406,6 +423,7 @@ pub async fn transcribe(
         .file_stem()
         .map(|s| s.to_string_lossy().to_string())
         .unwrap_or_else(|| "transcricao".into());
+    let stem = free_output_stem(&out_dir, &stem);
     let srt_path = out_dir.join(format!("{}.srt", stem));
     let vtt_path = out_dir.join(format!("{}.vtt", stem));
     let txt_path = out_dir.join(format!("{}.txt", stem));
@@ -432,6 +450,18 @@ pub async fn transcribe(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn transcription_never_overwrites_existing_files() {
+        let dir = std::env::temp_dir().join(format!("omniget-stem-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        assert_eq!(free_output_stem(&dir, "notes"), "notes");
+        std::fs::write(dir.join("notes.txt"), "mine").unwrap();
+        assert_eq!(free_output_stem(&dir, "notes"), "notes (1)");
+        std::fs::write(dir.join("notes (1).srt"), "x").unwrap();
+        assert_eq!(free_output_stem(&dir, "notes"), "notes (2)");
+        let _ = std::fs::remove_dir_all(&dir);
+    }
 
     #[test]
     fn parses_whisper_json() {
