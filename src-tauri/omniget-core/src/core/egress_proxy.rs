@@ -32,6 +32,13 @@ const PROXY_USER: &str = "omniget";
 const MAX_HEAD: usize = 32 * 1024;
 const HEAD_TIMEOUT: Duration = Duration::from_secs(30);
 const CONNECT_TIMEOUT: Duration = Duration::from_secs(20);
+/// Connections handled at once; more are closed right away so a local
+/// process cannot exhaust the app's file descriptors through the proxy.
+const MAX_CONNECTIONS: usize = 256;
+/// A tunnel with no traffic either way for this long is closed.
+const IDLE_TIMEOUT: Duration = Duration::from_secs(300);
+/// Pause after a failed accept (for example out of descriptors).
+const ACCEPT_BACKOFF: Duration = Duration::from_millis(100);
 
 struct Proxy {
     port: u16,
@@ -64,6 +71,61 @@ fn proxy() -> Option<&'static Proxy> {
     PROXY.get_or_init(start).as_ref()
 }
 
+/// Accept loop: at most `max` connections are handled at once.
+async fn serve(listener: tokio::net::TcpListener, expected: String, max: usize) {
+    let slots = std::sync::Arc::new(tokio::sync::Semaphore::new(max));
+    loop {
+        let stream = match listener.accept().await {
+            Ok((stream, _)) => stream,
+            Err(_) => {
+                tokio::time::sleep(ACCEPT_BACKOFF).await;
+                continue;
+            }
+        };
+        let Ok(permit) = slots.clone().try_acquire_owned() else {
+            drop(stream);
+            continue;
+        };
+        let expected = expected.clone();
+        tokio::spawn(async move {
+            let _ = handle(stream, &expected).await;
+            drop(permit);
+        });
+    }
+}
+
+/// Copies bytes both ways until one side closes or nothing moves for `idle`.
+async fn relay<A, B>(a: &mut A, b: &mut B, idle: Duration)
+where
+    A: tokio::io::AsyncRead + tokio::io::AsyncWrite + Unpin,
+    B: tokio::io::AsyncRead + tokio::io::AsyncWrite + Unpin,
+{
+    let (mut ar, mut aw) = tokio::io::split(a);
+    let (mut br, mut bw) = tokio::io::split(b);
+    let mut abuf = vec![0u8; 16 * 1024];
+    let mut bbuf = vec![0u8; 16 * 1024];
+    loop {
+        let step = tokio::time::timeout(idle, async {
+            tokio::select! {
+                r = ar.read(&mut abuf) => match r {
+                    Ok(0) | Err(_) => false,
+                    Ok(n) => bw.write_all(&abuf[..n]).await.is_ok(),
+                },
+                r = br.read(&mut bbuf) => match r {
+                    Ok(0) | Err(_) => false,
+                    Ok(n) => aw.write_all(&bbuf[..n]).await.is_ok(),
+                },
+            }
+        })
+        .await;
+        if !matches!(step, Ok(true)) {
+            break;
+        }
+    }
+    let _ = aw.shutdown().await;
+    let _ = bw.shutdown().await;
+}
+
 fn start() -> Option<Proxy> {
     let listener = match std::net::TcpListener::bind(("127.0.0.1", 0)) {
         Ok(l) => l,
@@ -94,15 +156,7 @@ fn start() -> Option<Proxy> {
                 let Ok(listener) = tokio::net::TcpListener::from_std(listener) else {
                     return;
                 };
-                loop {
-                    let Ok((stream, _)) = listener.accept().await else {
-                        continue;
-                    };
-                    let expected = expected.clone();
-                    tokio::spawn(async move {
-                        let _ = handle(stream, &expected).await;
-                    });
-                }
+                serve(listener, expected, MAX_CONNECTIONS).await;
             });
         });
     if let Err(e) = spawned {
@@ -340,7 +394,7 @@ async fn handle(mut client: TcpStream, expected: &str) -> anyhow::Result<()> {
         if !rest.is_empty() {
             upstream.write_all(&rest).await?;
         }
-        let _ = tokio::io::copy_bidirectional(&mut client, &mut upstream).await;
+        relay(&mut client, &mut upstream, IDLE_TIMEOUT).await;
         return Ok(());
     }
 
@@ -401,7 +455,7 @@ async fn handle(mut client: TcpStream, expected: &str) -> anyhow::Result<()> {
     if !rest.is_empty() {
         upstream.write_all(&rest).await?;
     }
-    let _ = tokio::io::copy_bidirectional(&mut client, &mut upstream).await;
+    relay(&mut client, &mut upstream, IDLE_TIMEOUT).await;
     Ok(())
 }
 
@@ -434,6 +488,37 @@ mod tests {
             "Proxy-Authorization: Basic {}\r\n",
             base64::engine::general_purpose::STANDARD.encode(cred)
         )
+    }
+
+    #[tokio::test]
+    async fn connections_over_the_limit_are_closed() {
+        let listener = tokio::net::TcpListener::bind(("127.0.0.1", 0))
+            .await
+            .unwrap();
+        let port = listener.local_addr().unwrap().port();
+        tokio::spawn(serve(listener, "omniget:t".into(), 1));
+        // The first connection holds the only slot (it never sends a head).
+        let _held = TcpStream::connect(("127.0.0.1", port)).await.unwrap();
+        tokio::time::sleep(Duration::from_millis(200)).await;
+        let mut second = TcpStream::connect(("127.0.0.1", port)).await.unwrap();
+        let mut buf = [0u8; 1];
+        let n = tokio::time::timeout(Duration::from_secs(5), second.read(&mut buf))
+            .await
+            .expect("second connection should be closed, not left waiting")
+            .unwrap_or(0);
+        assert_eq!(n, 0);
+    }
+
+    #[tokio::test]
+    async fn idle_tunnels_are_closed() {
+        let (mut a, mut _a_peer) = tokio::io::duplex(64);
+        let (mut b, mut _b_peer) = tokio::io::duplex(64);
+        let done = tokio::time::timeout(
+            Duration::from_secs(5),
+            relay(&mut a, &mut b, Duration::from_millis(200)),
+        )
+        .await;
+        assert!(done.is_ok(), "idle tunnel stayed open");
     }
 
     #[tokio::test]
