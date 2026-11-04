@@ -251,10 +251,59 @@ pub async fn plugin_command(
         })
 }
 
-const REGISTRY_URLS: &[&str] = &[
-    "https://raw.githubusercontent.com/OpenSelena/omniget-plugins/main/plugins.json",
-    "https://cdn.jsdelivr.net/gh/OpenSelena/omniget-plugins@main/plugins.json",
-];
+/// Commit of `OpenSelena/omniget-plugins` the registry is read from. A moving
+/// branch would let anyone who can push there change which repositories the
+/// app downloads native plugins from; bump this on release after review.
+const REGISTRY_COMMIT: &str = "f53454a9337927837b162479481686a8479c6161";
+
+fn registry_urls() -> [String; 2] {
+    [
+        format!(
+            "https://raw.githubusercontent.com/OpenSelena/omniget-plugins/{REGISTRY_COMMIT}/plugins.json"
+        ),
+        format!("https://cdn.jsdelivr.net/gh/OpenSelena/omniget-plugins@{REGISTRY_COMMIT}/plugins.json"),
+    ]
+}
+
+/// Only official plugins from the OpenSelena organization are installed
+/// without the user asking for them.
+fn auto_install_allowed(entry: &RegistryEntry) -> bool {
+    entry.official
+        && entry
+            .repo
+            .split_once('/')
+            .is_some_and(|(owner, _)| owner.eq_ignore_ascii_case("OpenSelena"))
+}
+
+/// The frontend sends `repo`; accept it only when the registry (or the record
+/// of an already installed plugin) lists that exact repository for this id.
+fn check_repo_is_listed(
+    entries: &[RegistryEntry],
+    installed_repo: Option<&str>,
+    plugin_id: &str,
+    repo: &str,
+) -> Result<(), String> {
+    let listed = entries
+        .iter()
+        .any(|e| e.id == plugin_id && e.repo.eq_ignore_ascii_case(repo));
+    let same_as_installed = installed_repo.is_some_and(|r| r.eq_ignore_ascii_case(repo));
+    if listed || same_as_installed {
+        Ok(())
+    } else {
+        Err(format!(
+            "Repository {repo} is not listed for plugin {plugin_id}; install refused"
+        ))
+    }
+}
+
+/// Appends `chunk` unless the total would exceed `max` bytes.
+fn push_capped(buf: &mut Vec<u8>, chunk: &[u8], max: u64) -> Result<(), String> {
+    if (buf.len() + chunk.len()) as u64 > max {
+        return Err(format!("Plugin archive too large (over {max} bytes)"));
+    }
+    buf.extend_from_slice(chunk);
+    Ok(())
+}
 
 #[derive(Debug, Serialize)]
 pub struct MarketplaceEntry {
@@ -275,67 +324,14 @@ pub struct MarketplaceEntry {
 pub async fn fetch_marketplace_registry(
     state: tauri::State<'_, Arc<tokio::sync::RwLock<PluginManager>>>,
 ) -> Result<Vec<MarketplaceEntry>, String> {
-    let client = crate::core::http_client::apply_global_proxy(
-        reqwest::Client::builder()
-            .user_agent("OmniGet")
-            .timeout(std::time::Duration::from_secs(15)),
-    )
-    .build()
-    .map_err(|e| e.to_string())?;
-
-    #[derive(Deserialize)]
-    struct RegistryFile {
-        plugins: Vec<RegistryEntry>,
-    }
-
-    let mut registry: Option<RegistryFile> = None;
-    let mut last_err = String::from("Failed to fetch registry");
-
-    for url in REGISTRY_URLS {
-        let body = match client.get(*url).send().await {
-            Ok(resp) => match resp.error_for_status() {
-                Ok(resp) => match resp.text().await {
-                    Ok(body) => body,
-                    Err(e) => {
-                        last_err = format!("Failed to read registry: {}", e);
-                        tracing::warn!("registry fetch via {} failed: {}", url, last_err);
-                        continue;
-                    }
-                },
-                Err(e) => {
-                    last_err = format!("Registry request failed: {}", e);
-                    tracing::warn!("registry fetch via {} failed: {}", url, last_err);
-                    continue;
-                }
-            },
-            Err(e) => {
-                last_err = format!("Failed to fetch registry: {}", e);
-                tracing::warn!("registry fetch via {} failed: {}", url, last_err);
-                continue;
-            }
-        };
-
-        match serde_json::from_str::<RegistryFile>(&body) {
-            Ok(parsed) => {
-                registry = Some(parsed);
-                break;
-            }
-            Err(e) => {
-                last_err = format!("Invalid registry: {}", e);
-                tracing::warn!("registry fetch via {} failed: {}", url, last_err);
-            }
-        }
-    }
-
-    let registry = registry.ok_or(last_err)?;
+    let plugins = fetch_registry_entries().await?;
 
     let installed = {
         let manager = state.read().await;
         manager.installed_plugins().to_vec()
     };
 
-    let entries = registry
-        .plugins
+    let entries = plugins
         .into_iter()
         .map(|entry| {
             let inst = installed.iter().find(|i| i.id == entry.id);
@@ -432,14 +428,22 @@ pub async fn install_plugin_zip_from_repo(
         .clone()
         .ok_or_else(|| format!("{} has no SHA-256 digest; install refused", asset.name))?;
 
-    let zip_bytes = client
+    // The advertised size is not trusted: the body is capped while streaming.
+    let mut resp = client
         .get(&asset.url)
         .send()
         .await
         .map_err(|e| format!("NetworkUnreachable|Failed to download: {}", e))?
-        .bytes()
+        .error_for_status()
+        .map_err(|e| format!("NetworkUnreachable|Failed to download: {}", e))?;
+    let mut zip_bytes = Vec::with_capacity(asset.size.min(MAX_PLUGIN_ZIP_BYTES) as usize);
+    while let Some(chunk) = resp
+        .chunk()
         .await
-        .map_err(|e| format!("NetworkUnreachable|Failed to read download: {}", e))?;
+        .map_err(|e| format!("NetworkUnreachable|Failed to read download: {}", e))?
+    {
+        push_capped(&mut zip_bytes, &chunk, MAX_PLUGIN_ZIP_BYTES)?;
+    }
     verify_plugin_archive(&zip_bytes, &expected, &asset.name)?;
     let release_tag = asset.tag.clone();
 
@@ -503,6 +507,16 @@ pub async fn install_plugin_from_registry(
     plugin_id: String,
     repo: String,
 ) -> Result<String, String> {
+    let entries = fetch_registry_entries().await?;
+    let installed_repo = {
+        let manager = state.read().await;
+        manager
+            .installed_plugins()
+            .iter()
+            .find(|p| p.id == plugin_id)
+            .and_then(|p| p.repo.clone())
+    };
+    check_repo_is_listed(&entries, installed_repo.as_deref(), &plugin_id, &repo)?;
     let version =
         install_plugin_zip_from_repo(&state.inner().clone(), plugin_id.clone(), repo).await?;
     {
@@ -532,8 +546,8 @@ async fn fetch_registry_entries() -> Result<Vec<RegistryEntry>, String> {
     }
 
     let mut last_err = String::from("Failed to fetch registry");
-    for url in REGISTRY_URLS {
-        match client.get(*url).send().await {
+    for url in registry_urls() {
+        match client.get(&url).send().await {
             Ok(resp) => match resp.error_for_status() {
                 Ok(resp) => match resp.text().await {
                     Ok(body) => match serde_json::from_str::<RegistryFile>(&body) {
@@ -566,6 +580,14 @@ pub async fn ensure_default_plugins(state: Arc<tokio::sync::RwLock<PluginManager
                 || manager.is_user_removed(&entry.id)
         };
         if skip {
+            continue;
+        }
+        if !auto_install_allowed(&entry) {
+            tracing::info!(
+                "not auto-installing '{}' from {}: not an official OpenSelena plugin",
+                entry.id,
+                entry.repo
+            );
             continue;
         }
         tracing::info!(
@@ -712,6 +734,72 @@ mod plugin_integrity_tests {
         ] {
             assert!(validate_plugin_repo(bad).is_err(), "{bad}");
         }
+    }
+
+    fn entry(id: &str, repo: &str, official: bool) -> RegistryEntry {
+        serde_json::from_value(serde_json::json!({
+            "id": id,
+            "name": id,
+            "description": "",
+            "author": "",
+            "repo": repo,
+            "tags": [],
+            "official": official,
+            "capabilities": [],
+        }))
+        .unwrap()
+    }
+
+    #[test]
+    fn registry_is_pinned_and_repos_must_be_listed() {
+        for url in registry_urls() {
+            assert!(url.contains(REGISTRY_COMMIT), "{url}");
+            assert!(!url.contains("/main/") && !url.contains("@main"), "{url}");
+        }
+        assert_eq!(REGISTRY_COMMIT.len(), 40);
+
+        let entries = [entry("courses", "OpenSelena/omniget-plugin-courses", true)];
+        assert!(check_repo_is_listed(
+            &entries,
+            None,
+            "courses",
+            "OpenSelena/omniget-plugin-courses"
+        )
+        .is_ok());
+        assert!(
+            check_repo_is_listed(&entries, None, "courses", "evil/omniget-plugin-courses").is_err()
+        );
+        assert!(
+            check_repo_is_listed(&entries, None, "other", "OpenSelena/omniget-plugin-courses")
+                .is_err()
+        );
+        assert!(
+            check_repo_is_listed(&entries, Some("me/my-plugin"), "mine", "me/my-plugin").is_ok()
+        );
+    }
+
+    #[test]
+    fn only_official_plugins_install_on_their_own() {
+        assert!(auto_install_allowed(&entry(
+            "a",
+            "OpenSelena/omniget-plugin-a",
+            true
+        )));
+        assert!(!auto_install_allowed(&entry("b", "someone/plugin-b", true)));
+        assert!(!auto_install_allowed(&entry(
+            "c",
+            "OpenSelena/plugin-c",
+            false
+        )));
+    }
+
+    #[test]
+    fn plugin_download_is_capped_while_streaming() {
+        let mut buf = Vec::new();
+        assert!(push_capped(&mut buf, &[0; 6], 10).is_ok());
+        assert!(push_capped(&mut buf, &[0; 4], 10).is_ok());
+        assert!(push_capped(&mut buf, &[0; 1], 10).is_err());
+        assert_eq!(buf.len(), 10);
     }
 
     #[test]
