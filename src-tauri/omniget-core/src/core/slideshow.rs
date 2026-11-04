@@ -88,8 +88,9 @@ pub fn filter_graph(images: usize, slide: f64) -> String {
 pub fn ffmpeg_args(images: &[PathBuf], audio: &Path, audio_secs: f64, out: &Path) -> Vec<String> {
     let slide = slide_secs(images.len(), audio_secs);
     let total = images.len() as f64 * slide - (images.len().saturating_sub(1)) as f64 * FADE_SECS;
+    // `-n`: never replace a file that already exists at `out`.
     let mut args: Vec<String> = vec![
-        "-y".into(),
+        "-n".into(),
         "-hide_banner".into(),
         "-loglevel".into(),
         "error".into(),
@@ -190,6 +191,7 @@ mod tests {
         assert!(j.contains("-map [vout] -map 2:a:0 -t 10.000"), "{j}");
         assert!(j.contains("-pix_fmt yuv420p") && j.contains("-movflags +faststart"));
         assert_eq!(a.last().unwrap(), "o.mp4");
+        assert!(a.contains(&"-n".to_string()) && !a.contains(&"-y".to_string()));
     }
 }
 

@@ -14,21 +14,25 @@ pub struct VideoOpResult {
     pub output_path: String,
 }
 
+/// Absolute path of an existing file. ffmpeg may run with another working
+/// directory (subtitle burn-in), so a relative path would point elsewhere.
 fn ensure_input(input: &str) -> Result<PathBuf, String> {
-    let p = PathBuf::from(input);
+    let p = std::path::absolute(input).map_err(|_| "Input file not found".to_string())?;
     if !p.is_file() {
         return Err("Input file not found".to_string());
     }
     Ok(p)
 }
 
+/// `<stem>.<tag>.<ext>` next to the input, or `<stem>.<tag> (2).<ext>` and so
+/// on when that name is taken: an earlier result is never overwritten.
 fn output_for(input: &Path, tag: &str, ext: &str) -> PathBuf {
     let stem = input
         .file_stem()
         .map(|s| s.to_string_lossy().to_string())
         .unwrap_or_else(|| "output".to_string());
     let dir = input.parent().map(PathBuf::from).unwrap_or_default();
-    dir.join(format!("{stem}.{tag}.{ext}"))
+    omniget_core::core::tools::games::unique_path(&dir, &format!("{stem}.{tag}"), ext)
 }
 
 #[cfg(not(target_os = "android"))]
@@ -45,7 +49,7 @@ async fn run_ffmpeg(
     let _ = app.emit("video-op-progress", "running");
 
     let mut cmd = omniget_core::core::process::command(&ffmpeg);
-    cmd.arg("-y")
+    cmd.arg("-n")
         .arg("-i")
         .arg(input.to_string_lossy().to_string());
     for a in args {
@@ -222,7 +226,7 @@ pub async fn video_op_burn_subtitles(
         let output = output_for(&input_path, "subtitled", "mp4");
         let _ = app.emit("video-op-progress", "running");
         let mut cmd = omniget_core::core::process::command(&ffmpeg);
-        cmd.current_dir(&work).arg("-y").arg("-i").arg(&input_path);
+        cmd.current_dir(&work).arg("-n").arg("-i").arg(&input_path);
         for a in ffmpeg_ops::burn_subtitles_args() {
             cmd.arg(a);
         }
@@ -294,4 +298,47 @@ pub async fn video_op_run(
     Ok(VideoOpResult {
         output_path: output.to_string_lossy().to_string(),
     })
+}
+
+#[cfg(test)]
+mod path_tests {
+    use super::*;
+
+    #[test]
+    fn inputs_are_absolute_and_outputs_never_overwrite() {
+        let dir = std::env::temp_dir().join(format!("omniget-vops-{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let input = dir.join("clip.mp4");
+        std::fs::write(&input, b"v").unwrap();
+
+        let cwd = std::env::current_dir().unwrap();
+        let relative = pathdiff_like(&input, &cwd);
+        let resolved = ensure_input(relative.to_str().unwrap()).unwrap();
+        assert!(resolved.is_absolute(), "{}", resolved.display());
+        assert!(ensure_input("does-not-exist.mp4").is_err());
+
+        let first = output_for(&input, "subtitled", "mp4");
+        assert_eq!(first, dir.join("clip.subtitled.mp4"));
+        std::fs::write(&first, b"old").unwrap();
+        let second = output_for(&input, "subtitled", "mp4");
+        assert_ne!(second, first);
+        assert!(!second.exists());
+
+        let _ = std::fs::remove_dir_all(&dir);
+    }
+
+    /// `target` written relative to `base` (both absolute).
+    fn pathdiff_like(target: &Path, base: &Path) -> PathBuf {
+        let t: Vec<_> = target.components().collect();
+        let b: Vec<_> = base.components().collect();
+        let common = t.iter().zip(&b).take_while(|(x, y)| x == y).count();
+        let mut out = PathBuf::new();
+        for _ in common..b.len() {
+            out.push("..");
+        }
+        for c in &t[common..] {
+            out.push(c);
+        }
+        out
+    }
 }

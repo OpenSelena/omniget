@@ -293,7 +293,11 @@ impl TikTokDownloader {
             Some(&opts.cancel_token),
         )
         .await?;
-        let video = opts.output_dir.join(format!("{base}_slideshow.mp4"));
+        let video = crate::core::tools::games::unique_path(
+            &opts.output_dir,
+            &format!("{base}_slideshow"),
+            "mp4",
+        );
         crate::core::slideshow::build(photos, &audio_path, &video).await?;
         let bytes = tokio::fs::metadata(&video)
             .await
