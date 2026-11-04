@@ -73,6 +73,13 @@ pub fn extractor_args(health: &ProviderHealth, base_url: &str) -> Vec<String> {
     let Some(url) = normalize_base_url(base_url) else {
         return Vec::new();
     };
+    // The provider usually runs on this computer: let yt-dlp reach exactly
+    // that address through the egress guard.
+    if let Ok(parsed) = url::Url::parse(&url) {
+        if let (Some(host), Some(port)) = (parsed.host_str(), parsed.port_or_known_default()) {
+            crate::core::egress_proxy::allow_destination(host, port);
+        }
+    }
     vec![
         "--extractor-args".to_string(),
         format!("youtubepot-bgutilhttp:base_url={url}"),

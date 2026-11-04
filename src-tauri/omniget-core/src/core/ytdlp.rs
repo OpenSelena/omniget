@@ -1739,26 +1739,40 @@ fn python_cached() -> Option<PathBuf> {
 }
 
 /// Comando para lançar este yt-dlp: o zipapp vai via Python, o binário direto.
+/// Every yt-dlp process (and the ffmpeg it starts) goes through the egress
+/// guard, so redirects and re-resolved names cannot reach the local network.
 pub fn ytdlp_command(ytdlp: &Path) -> tokio::process::Command {
-    if is_ytdlp_zipapp(ytdlp) {
-        if let Some(py) = python_cached() {
-            let mut cmd = crate::core::process::command(py);
-            cmd.arg(ytdlp);
-            return cmd;
+    let mut cmd = if is_ytdlp_zipapp(ytdlp) {
+        match python_cached() {
+            Some(py) => {
+                let mut cmd = crate::core::process::command(py);
+                cmd.arg(ytdlp);
+                cmd
+            }
+            None => crate::core::process::command(ytdlp),
         }
-    }
-    crate::core::process::command(ytdlp)
+    } else {
+        crate::core::process::command(ytdlp)
+    };
+    crate::core::egress_proxy::apply_to_command(&mut cmd);
+    cmd
 }
 
 pub fn ytdlp_std_command(ytdlp: &Path) -> std::process::Command {
-    if is_ytdlp_zipapp(ytdlp) {
-        if let Some(py) = python_cached() {
-            let mut cmd = crate::core::process::std_command(py);
-            cmd.arg(ytdlp);
-            return cmd;
+    let mut cmd = if is_ytdlp_zipapp(ytdlp) {
+        match python_cached() {
+            Some(py) => {
+                let mut cmd = crate::core::process::std_command(py);
+                cmd.arg(ytdlp);
+                cmd
+            }
+            None => crate::core::process::std_command(ytdlp),
         }
-    }
-    crate::core::process::std_command(ytdlp)
+    } else {
+        crate::core::process::std_command(ytdlp)
+    };
+    crate::core::egress_proxy::apply_to_std_command(&mut cmd);
+    cmd
 }
 
 static ZIPAPP_DOWNLOAD_STARTED: AtomicBool = AtomicBool::new(false);
@@ -4755,6 +4769,7 @@ pub(crate) fn is_terminal_ytdlp_error(stderr_lower: &str) -> bool {
         return false;
     }
     const PATTERNS: &[&str] = &[
+        "private_network_blocked",
         "not found, unable to continue",
         "the downloaded file is empty",
         "conflicting range",
@@ -4789,6 +4804,11 @@ fn translate_ytdlp_error(stderr: &str) -> anyhow::Error {
         return anyhow!(
             "Console encoding error (non-UTF-8 locale). Update yt-dlp in Settings → Dependencies, or run `chcp 65001` in a terminal and reopen the app."
         );
+    }
+
+    // The egress guard refused a redirect or a re-resolved private address.
+    if lower.contains("private_network_blocked") {
+        return anyhow!("{}", crate::core::net_guard::BLOCKED_MESSAGE);
     }
 
     if lower.contains("http error 429") {
@@ -5538,6 +5558,29 @@ mod tests {
         let dd = args.iter().rposition(|a| a == "--").expect("has --");
         assert_ne!(args[dd - 1], "--user-agent");
         assert_eq!(&args[dd + 1..], &[url.to_string()]);
+    }
+
+    #[test]
+    fn every_ytdlp_process_goes_through_the_egress_guard() {
+        let cmd = ytdlp_command(std::path::Path::new("/usr/bin/yt-dlp"));
+        let https = cmd
+            .as_std()
+            .get_envs()
+            .find(|(k, _)| *k == "HTTPS_PROXY")
+            .and_then(|(_, v)| v.map(|v| v.to_string_lossy().to_string()));
+        assert_eq!(https, crate::core::egress_proxy::proxy_url());
+        assert!(https.is_some());
+        let std_cmd = ytdlp_std_command(std::path::Path::new("/usr/bin/yt-dlp"));
+        assert!(std_cmd.get_envs().any(|(k, _)| k == "HTTP_PROXY"));
+    }
+
+    #[test]
+    fn proxy_refusal_is_reported_as_the_private_network_error() {
+        let stderr = "ERROR: [generic] Unable to download webpage: Tunnel connection failed: 403 private_network_blocked";
+        assert!(translate_ytdlp_error(stderr)
+            .to_string()
+            .starts_with("private_network_blocked"));
+        assert!(is_terminal_ytdlp_error(&stderr.to_lowercase()));
     }
 
     #[test]

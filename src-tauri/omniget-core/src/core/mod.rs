@@ -22,6 +22,7 @@ pub mod livechat;
 pub mod log_hook;
 pub mod media_processor;
 pub mod media_signature;
+pub mod egress_proxy;
 pub mod net_guard;
 pub mod onnxrt;
 pub mod paths;
