@@ -125,6 +125,13 @@ pub fn proxy_url() -> Option<String> {
     ))
 }
 
+/// True when yt-dlp and ffmpeg are routed through the guard: the private
+/// network is not allowed and no user proxy takes over. While it is on, a
+/// `--proxy` in user flags must be refused, since it would bypass the guard.
+pub fn guard_enabled() -> bool {
+    !private_network_allowed() && !user_proxy_in_environment()
+}
+
 /// A proxy the user set in the environment (corporate networks) wins: yt-dlp
 /// must keep using it, and that proxy is outside this computer anyway.
 fn user_proxy_in_environment() -> bool {

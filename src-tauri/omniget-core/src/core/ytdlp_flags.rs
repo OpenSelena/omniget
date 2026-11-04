@@ -374,6 +374,17 @@ fn is_valid_value(option: &str, value: &str) -> bool {
 ///
 /// Tokens are the same shape as on a command line: options and their values may
 /// be separate items (`["--format", "best"]`) or joined (`["--format=best"]`).
+/// `--proxy` (and its abbreviations) would replace the egress guard, or with
+/// an empty value make yt-dlp connect directly, so it is refused while the
+/// guard is on. The app's own proxy setting is a generated pair and stays.
+fn is_proxy_option(name: &str) -> bool {
+    name.len() >= 6 && "--proxy".starts_with(name)
+}
+
+fn proxy_override_refused(name: &str) -> bool {
+    is_proxy_option(name) && crate::core::egress_proxy::guard_enabled()
+}
+
 pub fn filter_user_flags(tokens: &[String]) -> FilteredFlags {
     let mut out = FilteredFlags::default();
     let cleaned: Vec<&str> = tokens
@@ -400,7 +411,8 @@ pub fn filter_user_flags(tokens: &[String]) -> FilteredFlags {
         } else {
             raw_name.to_string()
         };
-        let Some((canonical, arity)) = resolve_option(&name) else {
+        let resolved = resolve_option(&name).filter(|(c, _)| !proxy_override_refused(c));
+        let Some((canonical, arity)) = resolved else {
             out.rejected.push(token.to_string());
             // Swallow the value that belonged to the refused option.
             if inline_value.is_none() && i < cleaned.len() && !cleaned[i].starts_with('-') {
@@ -547,7 +559,7 @@ pub fn validate_override_argv(argv: &[String], generated: &[String]) -> Result<(
                 }
                 continue;
             }
-            if !dangerous_long_name(&name) {
+            if !dangerous_long_name(&name) && !proxy_override_refused(&name) {
                 continue;
             }
             let pair: Vec<String> = if inline || DANGEROUS_FLAGS.contains(&name.as_str()) {
@@ -654,6 +666,32 @@ mod tests {
                 "accepted {vector:?}"
             );
         }
+    }
+
+    #[test]
+    fn proxy_flag_cannot_bypass_the_egress_guard() {
+        assert!(crate::core::egress_proxy::guard_enabled());
+        for vector in [
+            &["--proxy", ""][..],
+            &["--proxy", "http://10.0.0.1:8080"][..],
+            &["--proxy="][..],
+            &["--prox", "socks5://192.168.1.1"][..],
+        ] {
+            let filtered = filter_user_flags(&v(vector));
+            assert!(filtered.accepted.is_empty(), "accepted {vector:?}");
+            let mut edited = generated();
+            edited.pop();
+            edited.extend(v(vector));
+            edited.push("https://example.com/v".into());
+            assert!(
+                validate_override_argv(&edited, &generated()).is_err(),
+                "override accepted {vector:?}"
+            );
+        }
+        // The app's own proxy setting is generated and stays allowed.
+        let mut gen = generated();
+        gen.splice(0..0, v(&["--proxy", "http://corp:3128"]));
+        assert_eq!(validate_override_argv(&gen, &gen), Ok(()));
     }
 
     #[test]
