@@ -1,3 +1,8 @@
+// Deep async futures (MCP tool dispatch, which reaches GPU-backed tools)
+// need more trait-solver depth than the default when the whole workspace is
+// built together.
+#![recursion_limit = "256"]
+
 use std::collections::HashMap;
 use std::sync::Arc;
 use tauri::Manager;
