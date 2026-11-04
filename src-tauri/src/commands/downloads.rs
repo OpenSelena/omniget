@@ -111,8 +111,18 @@ pub async fn detect_platform(url: String) -> Result<PlatformInfo, String> {
 }
 
 #[cfg(not(target_os = "android"))]
+/// Tool commands (formats, metadata, subtitles, playlist...) hand the URL to
+/// yt-dlp or the torrent client: refuse local network links up front, with
+/// the same translated error as a download.
+async fn guard_tool_url(url: &str) -> Result<(), String> {
+    omniget_core::core::net_guard::ensure_public_web_url(url)
+        .await
+        .map_err(|e| e.to_string())
+}
+
 #[tauri::command]
 pub async fn get_media_formats(url: String) -> Result<Vec<FormatInfo>, String> {
+    guard_tool_url(&url).await?;
     let _timer_start = std::time::Instant::now();
     let ytdlp_path = ytdlp::ensure_ytdlp()
         .await
@@ -212,6 +222,7 @@ fn is_torrent_source(url: &str) -> bool {
 #[cfg(not(target_os = "android"))]
 #[tauri::command]
 pub async fn torrent_contents(url: String) -> Result<Vec<TorrentFileEntry>, String> {
+    guard_tool_url(&url).await?;
     if !is_torrent_source(&url) {
         return Err("Not a torrent source".to_string());
     }
@@ -280,6 +291,7 @@ pub async fn metadata_fetch(
     url: String,
     output_dir: String,
 ) -> Result<MetadataFetchResult, String> {
+    guard_tool_url(&url).await?;
     let ytdlp_path = ytdlp::find_ytdlp_cached()
         .await
         .ok_or_else(|| "yt-dlp unavailable".to_string())?;
@@ -352,6 +364,7 @@ pub struct ThumbnailListResult {
 #[cfg(not(target_os = "android"))]
 #[tauri::command]
 pub async fn thumbnails_list(url: String) -> Result<ThumbnailListResult, String> {
+    guard_tool_url(&url).await?;
     let ytdlp_path = ytdlp::find_ytdlp_cached()
         .await
         .ok_or_else(|| "yt-dlp unavailable".to_string())?;
@@ -503,6 +516,7 @@ fn collect_sub_tracks(map: Option<&serde_json::Value>, auto: bool, out: &mut Vec
 #[cfg(not(target_os = "android"))]
 #[tauri::command]
 pub async fn subtitles_list(url: String) -> Result<SubtitleListResult, String> {
+    guard_tool_url(&url).await?;
     let ytdlp_path = ytdlp::find_ytdlp_cached()
         .await
         .ok_or_else(|| "yt-dlp unavailable".to_string())?;
@@ -622,6 +636,7 @@ pub async fn comments_fetch(
     max_comments: u32,
     sort: String,
 ) -> Result<CommentsResult, String> {
+    guard_tool_url(&url).await?;
     let ytdlp_path = ytdlp::find_ytdlp_cached()
         .await
         .ok_or_else(|| "yt-dlp unavailable".to_string())?;
@@ -708,6 +723,7 @@ pub struct ChaptersResult {
 #[cfg(not(target_os = "android"))]
 #[tauri::command]
 pub async fn chapters_fetch(url: String) -> Result<ChaptersResult, String> {
+    guard_tool_url(&url).await?;
     let ytdlp_path = ytdlp::find_ytdlp_cached()
         .await
         .ok_or_else(|| "yt-dlp unavailable".to_string())?;
@@ -766,6 +782,7 @@ pub struct LiveChatResult {
 #[cfg(not(target_os = "android"))]
 #[tauri::command]
 pub async fn livechat_fetch(url: String) -> Result<LiveChatResult, String> {
+    guard_tool_url(&url).await?;
     let ytdlp_path = ytdlp::find_ytdlp_cached()
         .await
         .ok_or_else(|| "yt-dlp unavailable".to_string())?;
@@ -837,6 +854,7 @@ pub async fn livechat_fetch(url: String) -> Result<LiveChatResult, String> {
 #[cfg(not(target_os = "android"))]
 #[tauri::command]
 pub async fn playlist_entries(url: String) -> Result<Vec<PlaylistEntryInfo>, String> {
+    guard_tool_url(&url).await?;
     let ytdlp_path = ytdlp::find_ytdlp_cached()
         .await
         .ok_or_else(|| "yt-dlp unavailable".to_string())?;
@@ -1701,6 +1719,31 @@ pub fn sanitize_explorer_path(path: &str) -> String {
 
 #[cfg(test)]
 mod tests {
+
+    #[tokio::test]
+    async fn tool_commands_refuse_local_network_links() {
+        let url = || "http://192.168.1.1/video".to_string();
+        let errors = vec![
+            get_media_formats(url()).await.err(),
+            torrent_contents("http://10.0.0.2/x.torrent".to_string())
+                .await
+                .err(),
+            metadata_fetch(url(), "/tmp".to_string()).await.err(),
+            thumbnails_list(url()).await.err(),
+            subtitles_list(url()).await.err(),
+            comments_fetch(url(), 10, "top".to_string()).await.err(),
+            chapters_fetch(url()).await.err(),
+            livechat_fetch(url()).await.err(),
+            playlist_entries(url()).await.err(),
+        ];
+        for (i, err) in errors.into_iter().enumerate() {
+            let err = err.unwrap_or_default();
+            assert!(
+                err.starts_with("private_network_blocked"),
+                "command {i}: {err}"
+            );
+        }
+    }
     use super::*;
 
     #[test]
