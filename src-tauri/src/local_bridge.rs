@@ -518,6 +518,18 @@ pub async fn spawn(app: AppHandle) {
         .route("/v1/cookies", post(cookies_export))
         .route("/mcp", post(mcp_post).get(mcp_get).delete(mcp_get))
         .with_state(state)
+        .layer(axum::middleware::from_fn(
+            move |request: axum::extract::Request, next: axum::middleware::Next| async move {
+                let host = request
+                    .headers()
+                    .get(axum::http::header::HOST)
+                    .and_then(|v| v.to_str().ok());
+                if !is_allowed_host(host, port) {
+                    return StatusCode::MISDIRECTED_REQUEST.into_response();
+                }
+                next.run(request).await
+            },
+        ))
         .layer(cors);
 
     tracing::info!("local bridge listening on http://127.0.0.1:{port}");
@@ -609,18 +621,26 @@ const ALLOWED_LOOPBACK_PAIR_ORIGINS: &[&str] = &[
 
 /// Browser extension schemes. The part after `://` is the extension id and must
 /// be a bare id (letters, digits, `-`), with no path, port or user info.
-const EXTENSION_ORIGIN_SCHEMES: &[&str] = &[
-    "chrome-extension://",
-    "moz-extension://",
-    "safari-web-extension://",
-];
+const EXTENSION_ORIGIN_SCHEMES: &[&str] = &["moz-extension://", "safari-web-extension://"];
+
+/// Chromium extension id of the official OmniGet extension, derived from the
+/// `key` in `browser-extension/chrome/manifest.json`. Chromium ids are stable,
+/// so only this one may pair. (Firefox and Safari use a random id per
+/// install, which cannot be pinned.)
+const OFFICIAL_CHROME_EXTENSION_ORIGIN: &str =
+    "chrome-extension://dkjelkhaaakffpghdfalobccaaipajip";
+
+/// Header the extension sends with `GET /v1/pair`. A web page cannot send it
+/// without a CORS preflight, and a CORS request always carries an `Origin`,
+/// so a pairing request without `Origin` must carry this header instead.
+const PAIR_REQUEST_HEADER: &str = "x-omniget-pair";
 
 fn is_allowed_pair_origin(origin: &str) -> bool {
     let o = origin.trim();
     if o.is_empty() || o.len() > 200 {
         return false;
     }
-    if ALLOWED_LOOPBACK_PAIR_ORIGINS.contains(&o) {
+    if ALLOWED_LOOPBACK_PAIR_ORIGINS.contains(&o) || o == OFFICIAL_CHROME_EXTENSION_ORIGIN {
         return true;
     }
     EXTENSION_ORIGIN_SCHEMES.iter().any(|scheme| {
@@ -632,19 +652,45 @@ fn is_allowed_pair_origin(origin: &str) -> bool {
     })
 }
 
+/// A pairing request must name an allowed `Origin`. Without one (some
+/// extension runtimes omit it), it must carry [`PAIR_REQUEST_HEADER`], which a
+/// page cannot add to a simple, preflight-free request.
+fn is_allowed_pair_request(headers: &HeaderMap) -> bool {
+    match headers.get("origin") {
+        Some(origin) => origin.to_str().is_ok_and(is_allowed_pair_origin),
+        None => headers
+            .get(PAIR_REQUEST_HEADER)
+            .is_some_and(|v| v.as_bytes() == b"1"),
+    }
+}
+
+/// The bridge only answers requests addressed to the loopback interface on its
+/// own port. Any other `Host` (for example a DNS-rebound `evil.example:port`)
+/// is refused before a handler runs.
+fn is_allowed_host(host: Option<&str>, port: u16) -> bool {
+    let Some(host) = host else {
+        return false;
+    };
+    ["127.0.0.1", "localhost", "[::1]"]
+        .iter()
+        .any(|name| host.eq_ignore_ascii_case(&format!("{name}:{port}")))
+}
+
 async fn pair(State(state): State<BridgeState>, headers: HeaderMap) -> Response {
-    if let Some(origin) = headers.get("origin").and_then(|v| v.to_str().ok()) {
-        if !is_allowed_pair_origin(origin) {
-            tracing::warn!("[bridge] rejected pairing request from untrusted origin: {origin}");
-            return (
-                StatusCode::FORBIDDEN,
-                Json(PairResponse {
-                    ok: false,
-                    token: None,
-                }),
-            )
-                .into_response();
-        }
+    if !is_allowed_pair_request(&headers) {
+        let origin = headers
+            .get("origin")
+            .and_then(|v| v.to_str().ok())
+            .unwrap_or("<none>");
+        tracing::warn!("[bridge] rejected pairing request from untrusted origin: {origin}");
+        return (
+            StatusCode::FORBIDDEN,
+            Json(PairResponse {
+                ok: false,
+                token: None,
+            }),
+        )
+            .into_response();
     }
 
     if !pairing_open() {
@@ -949,12 +995,13 @@ mod tests {
             "http://localhost@evil.example",
             "chrome-extension://abc/../../evil",
             "chrome-extension://",
+            "chrome-extension://abcdefghijklmnopabcdefghijklmnop",
             "null",
         ] {
             assert!(!super::is_allowed_pair_origin(bad), "{bad} must be refused");
         }
         for good in [
-            "chrome-extension://abcdefghijklmnopabcdefghijklmnop",
+            "chrome-extension://dkjelkhaaakffpghdfalobccaaipajip",
             "moz-extension://0b1c2d3e-1111-2222-3333-444455556666",
             "tauri://localhost",
             "http://localhost:1420",
@@ -968,6 +1015,44 @@ mod tests {
 
     use super::*;
     use axum::http::HeaderValue;
+
+    #[test]
+    fn pairing_requires_an_origin_or_the_pair_header() {
+        // A DNS-rebound, same-origin GET carries no Origin and no custom header.
+        assert!(!is_allowed_pair_request(&HeaderMap::new()));
+        let mut evil = HeaderMap::new();
+        evil.insert(
+            "origin",
+            HeaderValue::from_static("http://evil.example:47720"),
+        );
+        evil.insert(PAIR_REQUEST_HEADER, HeaderValue::from_static("1"));
+        assert!(!is_allowed_pair_request(&evil));
+        let mut extension = HeaderMap::new();
+        extension.insert(PAIR_REQUEST_HEADER, HeaderValue::from_static("1"));
+        assert!(is_allowed_pair_request(&extension));
+        let mut chrome = HeaderMap::new();
+        chrome.insert(
+            "origin",
+            HeaderValue::from_static("chrome-extension://dkjelkhaaakffpghdfalobccaaipajip"),
+        );
+        assert!(is_allowed_pair_request(&chrome));
+    }
+
+    #[test]
+    fn bridge_only_answers_its_loopback_host() {
+        assert!(is_allowed_host(Some("127.0.0.1:47720"), 47720));
+        assert!(is_allowed_host(Some("localhost:47720"), 47720));
+        assert!(is_allowed_host(Some("[::1]:47720"), 47720));
+        for bad in [
+            None,
+            Some("evil.example:47720"),
+            Some("127.0.0.1"),
+            Some("127.0.0.1:1"),
+            Some("127.0.0.1.nip.io:47720"),
+        ] {
+            assert!(!is_allowed_host(bad, 47720), "{bad:?} must be refused");
+        }
+    }
 
     fn header_with_auth(value: &str) -> HeaderMap {
         let mut headers = HeaderMap::new();

@@ -212,7 +212,13 @@ export async function autoPair({
   const controller = typeof AbortController !== "undefined" ? new AbortController() : null;
   try {
     const response = await withTimeout(
-      fetchImpl(`${endpoint}/v1/pair`, { method: "GET", signal: controller?.signal }),
+      // The app refuses a pairing request that has neither an allowed Origin
+      // nor this header (a web page cannot add it without a CORS preflight).
+      fetchImpl(`${endpoint}/v1/pair`, {
+        method: "GET",
+        headers: { "X-OmniGet-Pair": "1" },
+        signal: controller?.signal,
+      }),
       timeoutMs,
       controller
     );

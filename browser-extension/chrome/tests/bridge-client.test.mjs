@@ -10,6 +10,7 @@ import {
   checkBridgeHealth,
   discoverBridgeEndpoint,
   sendViaBridge,
+  autoPair,
   STORAGE_KEY_ENDPOINT,
   STORAGE_KEY_TOKEN,
   STORAGE_KEY_AUTO_CAPTURE_COOKIES,
@@ -245,3 +246,18 @@ test("loadAutoCaptureCookies defaults to true and saveAutoCaptureCookies persist
   assert.equal(await loadAutoCaptureCookies({ storage }), true);
 });
 
+
+test("autoPair sends the pairing header the app requires", async () => {
+  const storage = fakeStorage({ [STORAGE_KEY_ENDPOINT]: "http://127.0.0.1:47720" });
+  let pairOptions = null;
+  const fetchImpl = async (url, options = {}) => {
+    if (String(url).endsWith("/v1/pair")) {
+      pairOptions = options;
+      return { ok: true, status: 200, json: async () => ({ ok: true, token: "t0k" }) };
+    }
+    return { ok: false, status: 404, json: async () => ({}) };
+  };
+  const result = await autoPair({ fetchImpl, storage, timeoutMs: 200 });
+  assert.equal(result.ok, true);
+  assert.equal(pairOptions?.headers?.["X-OmniGet-Pair"], "1");
+});
