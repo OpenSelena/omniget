@@ -4975,7 +4975,52 @@
   },
   "changelog": {
     "title": "更新内容",
-    "empty": "暂无发行说明。"
+    "empty": "暂无发行说明。",
+    "notes": {
+      "heading": "OmniGet {{version}} 新功能",
+      "features": {
+        "title": "新功能",
+        "ytdlp_auto": "yt-dlp 会自动安装，网络中断时自动重试，离线时会等待。只有安装失败时才会显示横幅，并附有前往 设置 → 依赖项 的链接。",
+        "drm": "会检测受 DRM（Widevine、PlayReady、FairPlay）保护的媒体，并给出清晰的说明。OmniGet 不会下载受 DRM 保护的内容。",
+        "reframe": "9:16 重新构图预设：模糊背景或居中裁剪。",
+        "subtitles": "使用 Whisper 自动生成字幕，可选择烧录到视频中。",
+        "phone_qr": "扫描二维码即可把下载的文件发送到手机。链接只在本地网络中有效，只能使用一次，10 分钟后过期。",
+        "snapchat": "Snapchat：Spotlight 视频、精选和公开个人资料的快拍。",
+        "file_actions": "音频和图片下载也支持文件操作。",
+        "slideshow": "带音乐的 TikTok 图文帖子也会生成幻灯片视频。可以在设置中关闭。",
+        "h265": "默认避免 H.265 视频，以获得更好的兼容性。",
+        "publisher": "Windows 版本显示 Corpse 为发布者。OmniGet 基于 OpenSelena 及其贡献者的工作。"
+      },
+      "security": {
+        "title": "安全",
+        "ytdlp_options": "yt-dlp 的额外选项会按允许列表检查，包括缩写选项和重试前编辑过的命令。",
+        "extension_pairing": "浏览器扩展配对只接受扩展的确切来源，本地桥接令牌可防御 DNS 重绑定。",
+        "checksums": "插件、FFmpeg、aria2、PDFium、Deno、gallery-dl 和超分工具在使用前都会校验 SHA-256 摘要。",
+        "links": "omniget:// 链接会在应用内弹出确认，绝不会自行开始下载。",
+        "local_network": "指向本地或私有网络地址的下载会被阻止，包括隐藏在 IPv6 中的地址。可以在设置中关闭。",
+        "plugins": "插件注册表已固定，插件必须来自列出的仓库，插件下载上限为 200 MB。",
+        "phone_share": "发送到手机只提供媒体文件，链接预览不再消耗一次性链接。",
+        "mcp": "MCP 服务器使用独立的令牌，并且只在下载文件夹内写入。",
+        "ci": "发布工作流固定第三方 Action，并让签名令牌远离构建过程。"
+      },
+      "fixes": {
+        "title": "修复",
+        "newest_first": "下载列表按最新优先显示 (#96)。",
+        "torrent_size": "种子大小只计算已选择的文件。",
+        "errors_translated": "通知和历史记录中的下载错误已翻译。",
+        "video_ops": "视频工具使用绝对路径，绝不会悄悄覆盖已有文件。",
+        "windows_build": "在 Windows 上从源码构建恢复正常：通知插件和 windows crate 的版本已对齐 (#143)。",
+        "translations": "设置和主屏幕已翻译为全部 12 种语言，并修正了法语重音。"
+      },
+      "deps": {
+        "title": "依赖项",
+        "rust": "已更新 Rust 依赖；cargo audit 发现的问题从 37 个降到 15 个。",
+        "npm": "已更新 npm 依赖，包括 marked 18 和 mermaid 12；pnpm audit 发现的问题从 36 个降到 5 个低风险。",
+        "toolchain": "界面现在使用 SvelteKit 3、Vite 8、Vitest 5 和 TypeScript 7 类型检查构建。",
+        "katex": "KaTeX 已全部升级到 0.18.10。",
+        "ffmpeg": "FFmpeg 最新构建被替换时，更新不再报告错误的校验和错误。"
+      }
+    }
   },
   "onboarding": {
     "welcome_title": "欢迎使用 OmniGet！",

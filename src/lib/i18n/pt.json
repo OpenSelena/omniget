@@ -4975,7 +4975,52 @@
   },
   "changelog": {
     "title": "Novidades",
-    "empty": "Nenhuma nota de atualização disponível."
+    "empty": "Nenhuma nota de atualização disponível.",
+    "notes": {
+      "heading": "Novidades do OmniGet {{version}}",
+      "features": {
+        "title": "Novos recursos",
+        "ytdlp_auto": "O yt-dlp se instala sozinho, tenta de novo quando a conexão cai e espera enquanto você está offline. Um aviso só aparece se a instalação falhar, com um link para Configurações → Dependências.",
+        "drm": "Mídias protegidas por DRM (Widevine, PlayReady, FairPlay) são detectadas e explicadas com uma mensagem clara. O OmniGet não baixa conteúdo protegido por DRM.",
+        "reframe": "Predefinições de reenquadramento 9:16: fundo desfocado ou corte centralizado.",
+        "subtitles": "Legendas automáticas com Whisper, que podem ser embutidas no vídeo.",
+        "phone_qr": "Envie um arquivo baixado para o celular escaneando um código QR. O link só funciona na sua rede local, uma única vez, e expira após 10 minutos.",
+        "snapchat": "Snapchat: vídeos do Spotlight, destaques e stories de perfis públicos.",
+        "file_actions": "Ações de arquivo para downloads de áudio e imagem.",
+        "slideshow": "Posts de fotos do TikTok com música também geram um vídeo de slides. Você pode desativar isso nas Configurações.",
+        "h265": "Vídeo H.265 é evitado por padrão, para melhor compatibilidade.",
+        "publisher": "As versões para Windows mostram Corpse como editor. O OmniGet é baseado no trabalho da OpenSelena e de seus colaboradores."
+      },
+      "security": {
+        "title": "Segurança",
+        "ytdlp_options": "As opções extras do yt-dlp são verificadas por uma lista de permissões, incluindo opções abreviadas e comandos editados antes de uma nova tentativa.",
+        "extension_pairing": "O pareamento da extensão do navegador só aceita a origem exata da extensão, e o token da ponte local é protegido contra DNS rebinding.",
+        "checksums": "Plugins, FFmpeg, aria2, PDFium, Deno, gallery-dl e o upscaler são verificados pelo hash SHA-256 antes do uso.",
+        "links": "Links omniget:// abrem uma confirmação no app e nunca iniciam um download sozinhos.",
+        "local_network": "Downloads que apontam para endereços da rede local ou privada são bloqueados, incluindo endereços escondidos em IPv6. Você pode desativar isso nas Configurações.",
+        "plugins": "O registro de plugins é fixado, os plugins precisam vir de um repositório listado e os downloads deles são limitados a 200 MB.",
+        "phone_share": "Enviar para o celular só serve arquivos de mídia, e as prévias de link não gastam mais o link de uso único.",
+        "mcp": "O servidor MCP tem seu próprio token e só grava dentro da pasta de downloads.",
+        "ci": "Os workflows de lançamento fixam ações de terceiros e mantêm os tokens de assinatura fora do build."
+      },
+      "fixes": {
+        "title": "Correções",
+        "newest_first": "A lista de downloads mostra os mais recentes primeiro (#96).",
+        "torrent_size": "O tamanho do torrent conta só os arquivos selecionados.",
+        "errors_translated": "Erros de download nas notificações e no histórico são traduzidos.",
+        "video_ops": "As ferramentas de vídeo usam caminhos absolutos e nunca sobrescrevem um arquivo existente sem avisar.",
+        "windows_build": "Compilar a partir do código-fonte no Windows voltou a funcionar: as versões do plugin de notificação e do crate windows estão alinhadas (#143).",
+        "translations": "As configurações e a tela inicial estão traduzidas nos 12 idiomas, e os acentos do francês foram corrigidos."
+      },
+      "deps": {
+        "title": "Dependências",
+        "rust": "Dependências Rust atualizadas; os alertas do cargo audit caíram de 37 para 15.",
+        "npm": "Dependências npm atualizadas, incluindo marked 18 e mermaid 12; os alertas do pnpm audit caíram de 36 para 5 leves.",
+        "toolchain": "A interface agora é compilada com SvelteKit 3, Vite 8, Vitest 5 e checagem de tipos do TypeScript 7.",
+        "katex": "KaTeX atualizado para 0.18.10 em todo lugar.",
+        "ffmpeg": "As atualizações do FFmpeg não mostram mais um falso erro de hash quando a versão mais recente é substituída."
+      }
+    }
   },
   "onboarding": {
     "welcome_title": "Bem-vindo ao OmniGet!",

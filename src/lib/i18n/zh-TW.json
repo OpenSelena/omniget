@@ -4975,7 +4975,52 @@
   },
   "changelog": {
     "title": "更新內容",
-    "empty": "沒有可用的版本說明。"
+    "empty": "沒有可用的版本說明。",
+    "notes": {
+      "heading": "OmniGet {{version}} 新功能",
+      "features": {
+        "title": "新功能",
+        "ytdlp_auto": "yt-dlp 會自動安裝，網路中斷時自動重試，離線時會等待。只有安裝失敗時才會顯示橫幅，並附上前往 設定 → 相依元件 的連結。",
+        "drm": "會偵測受 DRM（Widevine、PlayReady、FairPlay）保護的媒體，並以清楚的訊息說明。OmniGet 不會下載受 DRM 保護的內容。",
+        "reframe": "9:16 重新構圖預設：模糊背景或置中裁切。",
+        "subtitles": "使用 Whisper 自動產生字幕，可選擇燒錄到影片中。",
+        "phone_qr": "掃描 QR 碼即可將下載的檔案傳送到手機。連結只在區域網路中有效，只能使用一次，10 分鐘後失效。",
+        "snapchat": "Snapchat：Spotlight 影片、精選動態和公開個人檔案的限時動態。",
+        "file_actions": "音訊和圖片下載也支援檔案操作。",
+        "slideshow": "帶有音樂的 TikTok 相片貼文也會產生投影片影片。可以在設定中關閉。",
+        "h265": "預設避免 H.265 影片，以獲得更好的相容性。",
+        "publisher": "Windows 版本顯示 Corpse 為發行者。OmniGet 以 OpenSelena 及其貢獻者的成果為基礎。"
+      },
+      "security": {
+        "title": "安全性",
+        "ytdlp_options": "yt-dlp 的額外選項會依允許清單檢查，包括縮寫選項和重試前編輯過的命令。",
+        "extension_pairing": "瀏覽器擴充功能配對只接受擴充功能的確切來源，本機橋接權杖可防禦 DNS 重新繫結。",
+        "checksums": "外掛程式、FFmpeg、aria2、PDFium、Deno、gallery-dl 和超解析度工具在使用前都會驗證 SHA-256 摘要。",
+        "links": "omniget:// 連結會在應用程式內開啟確認，絕不會自行開始下載。",
+        "local_network": "指向本機或私人網路位址的下載會被封鎖，包括隱藏在 IPv6 中的位址。可以在設定中關閉。",
+        "plugins": "外掛程式登錄已固定，外掛程式必須來自列出的儲存庫，下載上限為 200 MB。",
+        "phone_share": "傳送到手機只提供媒體檔案，連結預覽不再消耗一次性連結。",
+        "mcp": "MCP 伺服器使用獨立的權杖，且只在下載資料夾內寫入。",
+        "ci": "發行工作流程固定第三方 Action，並讓簽章權杖遠離建置過程。"
+      },
+      "fixes": {
+        "title": "修正",
+        "newest_first": "下載清單以最新的優先顯示 (#96)。",
+        "torrent_size": "種子大小只計算已選取的檔案。",
+        "errors_translated": "通知和歷史記錄中的下載錯誤已翻譯。",
+        "video_ops": "影片工具使用絕對路徑，絕不會默默覆寫既有檔案。",
+        "windows_build": "在 Windows 上從原始碼建置恢復正常：通知外掛程式和 windows crate 的版本已對齊 (#143)。",
+        "translations": "設定和主畫面已翻譯為全部 12 種語言，並修正了法文重音。"
+      },
+      "deps": {
+        "title": "相依元件",
+        "rust": "已更新 Rust 相依元件；cargo audit 發現的問題從 37 個降到 15 個。",
+        "npm": "已更新 npm 相依元件，包括 marked 18 和 mermaid 12；pnpm audit 發現的問題從 36 個降到 5 個低風險。",
+        "toolchain": "介面現在使用 SvelteKit 3、Vite 8、Vitest 5 和 TypeScript 7 型別檢查建置。",
+        "katex": "KaTeX 已全面升級到 0.18.10。",
+        "ffmpeg": "FFmpeg 最新建置被替換時，更新不再回報錯誤的雜湊錯誤。"
+      }
+    }
   },
   "onboarding": {
     "welcome_title": "歡迎使用 OmniGet",

@@ -6,13 +6,17 @@
     getCurrentVersion,
     fetchChangelog,
   } from "#lib/stores/changelog-store.svelte.ts";
+  import { releaseNotesFor } from "#lib/changelog/release-notes.ts";
 
   let body = $derived(getChangelogBody());
   let version = $derived(getCurrentVersion());
+  let bundled = $derived(releaseNotesFor(version));
   let loading = $state(true);
 
   onMount(async () => {
-    await fetchChangelog();
+    // Notes shipped with this version are translated and work offline; the
+    // GitHub release body is only a fallback for versions without them.
+    if (!releaseNotesFor(getCurrentVersion())) await fetchChangelog();
     loading = false;
   });
 
@@ -83,7 +87,21 @@
     </div>
   {/if}
 
-  {#if loading}
+  {#if bundled}
+    <div class="card">
+      <div class="markdown-content">
+        <h2>{$t("changelog.notes.heading", { version: bundled.version })}</h2>
+        {#each bundled.sections as section (section.title)}
+          <h3>{$t(section.title)}</h3>
+          <ul>
+            {#each section.items as item (item)}
+              <li>{$t(item)}</li>
+            {/each}
+          </ul>
+        {/each}
+      </div>
+    </div>
+  {:else if loading}
     <div class="loading">
       <span class="spinner"></span>
     </div>

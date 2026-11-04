@@ -4975,7 +4975,52 @@
   },
   "changelog": {
     "title": "What's New",
-    "empty": "No release notes available."
+    "empty": "No release notes available.",
+    "notes": {
+      "heading": "What's new in OmniGet {{version}}",
+      "features": {
+        "title": "New features",
+        "ytdlp_auto": "yt-dlp installs itself automatically, retries when the connection drops and waits while you are offline. A banner appears only if the install fails, with a link to Settings → Dependencies.",
+        "drm": "DRM-protected media (Widevine, PlayReady, FairPlay) is detected and explained with a clear message. OmniGet does not download DRM-protected content.",
+        "reframe": "9:16 reframe presets: blurred background or center crop.",
+        "subtitles": "Automatic subtitles with Whisper, optionally burned into the video.",
+        "phone_qr": "Send a downloaded file to your phone by scanning a QR code. The link works only on your local network, only once, and expires after 10 minutes.",
+        "snapchat": "Snapchat: Spotlight videos, highlights and public profile stories.",
+        "file_actions": "File actions for audio and image downloads.",
+        "slideshow": "TikTok photo posts with music also get a slideshow video. You can turn this off in Settings.",
+        "h265": "H.265 video is avoided by default, for better compatibility.",
+        "publisher": "Windows builds show Corpse as the publisher. OmniGet is based on the work of OpenSelena and its contributors."
+      },
+      "security": {
+        "title": "Security",
+        "ytdlp_options": "Extra yt-dlp options are checked against an allowlist, including abbreviated options and commands edited before a retry.",
+        "extension_pairing": "Browser extension pairing only accepts the exact extension origin, and the local bridge token is protected against DNS rebinding.",
+        "checksums": "Plugins, FFmpeg, aria2, PDFium, Deno, gallery-dl and the upscaler are checked against their SHA-256 digest before use.",
+        "links": "omniget:// links open a confirmation in the app and never start a download on their own.",
+        "local_network": "Downloads that point to local or private network addresses are blocked, including addresses hidden inside IPv6. You can turn this off in Settings.",
+        "plugins": "The plugin registry is pinned, plugins must come from a listed repository, and plugin downloads are capped at 200 MB.",
+        "phone_share": "Send to phone only serves media files, and link previews no longer use up the single-use link.",
+        "mcp": "The MCP server has its own token and only writes inside the download folder.",
+        "ci": "Release workflows pin third-party actions and keep signing tokens out of the build."
+      },
+      "fixes": {
+        "title": "Fixes",
+        "newest_first": "The download list shows the newest downloads first (#96).",
+        "torrent_size": "Torrent size only counts the selected files.",
+        "errors_translated": "Download errors in notifications and history are translated.",
+        "video_ops": "Video tools use absolute paths and never silently overwrite an existing file.",
+        "windows_build": "Building from source on Windows works again: the notification plugin and the windows crate versions are aligned (#143).",
+        "translations": "Settings and the home screen are translated in all 12 languages, and French accents are fixed."
+      },
+      "deps": {
+        "title": "Dependencies",
+        "rust": "Rust dependencies updated; cargo audit findings went from 37 to 15.",
+        "npm": "npm dependencies updated, including marked 18 and mermaid 12; pnpm audit findings went from 36 to 5 low.",
+        "toolchain": "The interface now builds with SvelteKit 3, Vite 8, Vitest 5 and TypeScript 7 type checking.",
+        "katex": "KaTeX is raised to 0.18.10 everywhere.",
+        "ffmpeg": "FFmpeg updates no longer report a false checksum error when the latest build is replaced."
+      }
+    }
   },
   "onboarding": {
     "welcome_title": "Paste a link. Get the file.",
