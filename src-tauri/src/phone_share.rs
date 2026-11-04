@@ -249,13 +249,7 @@ fn qr_svg(content: &str) -> Result<String, String> {
 
 #[tauri::command]
 pub async fn phone_share_start(path: String) -> Result<PhoneShare, String> {
-    let path = PathBuf::from(path);
-    if !is_shareable_file(&path) {
-        return Err("Only video, audio and image files can be sent".to_string());
-    }
-    if !path.is_file() {
-        return Err("File not found".to_string());
-    }
+    let path = resolve_shareable(Path::new(&path))?;
     let ip = lan_ip().ok_or_else(|| "No local network connection found".to_string())?;
     let listener = tokio::net::TcpListener::bind(SocketAddr::new(ip, 0))
         .await
@@ -322,9 +316,64 @@ fn is_shareable_file(path: &Path) -> bool {
         .unwrap_or(false)
 }
 
+/// Resolves links first, so `clip.mp4 -> ~/.ssh/id_ed25519` is judged by its
+/// real target, and the server later opens that resolved path only.
+fn resolve_shareable(raw: &Path) -> Result<PathBuf, String> {
+    if !is_shareable_file(raw) {
+        return Err("Only video, audio and image files can be sent".to_string());
+    }
+    let real = std::fs::canonicalize(raw).map_err(|_| "File not found".to_string())?;
+    if !real.is_file() {
+        return Err("File not found".to_string());
+    }
+    if !is_shareable_file(&real) {
+        return Err("Only video, audio and image files can be sent".to_string());
+    }
+    Ok(real)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Removes the directory when the test ends.
+    struct TempDir(PathBuf);
+    impl TempDir {
+        fn path(&self) -> &Path {
+            &self.0
+        }
+    }
+    impl Drop for TempDir {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.0);
+        }
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn a_media_named_link_to_another_file_is_refused() {
+        let dir = std::env::temp_dir().join(format!(
+            "omniget-share-link-{}",
+            crate::local_bridge::generate_token()
+        ));
+        std::fs::create_dir_all(&dir).unwrap();
+        let dir = TempDir(dir);
+        let secret = dir.path().join("id_ed25519");
+        std::fs::write(&secret, b"key").unwrap();
+        let link = dir.path().join("clip.mp4");
+        std::os::unix::fs::symlink(&secret, &link).unwrap();
+        assert!(resolve_shareable(&link).is_err());
+
+        let real = dir.path().join("real.mp4");
+        std::fs::write(&real, b"video").unwrap();
+        let ok_link = dir.path().join("other.mp4");
+        std::os::unix::fs::symlink(&real, &ok_link).unwrap();
+        assert_eq!(
+            resolve_shareable(&ok_link).unwrap(),
+            std::fs::canonicalize(&real).unwrap()
+        );
+        assert!(resolve_shareable(&dir.path().join("missing.mp4")).is_err());
+    }
 
     #[test]
     fn only_media_files_can_be_shared() {
