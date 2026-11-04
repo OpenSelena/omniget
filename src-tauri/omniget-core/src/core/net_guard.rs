@@ -49,17 +49,47 @@ fn is_non_public_v4(ip: Ipv4Addr) -> bool {
         || a >= 240
 }
 
-fn is_non_public_v6(ip: Ipv6Addr) -> bool {
+/// IPv4 address carried inside an IPv6 one: IPv4-mapped `::ffff:a.b.c.d`,
+/// IPv4-compatible `::a.b.c.d`, NAT64 `64:ff9b::/96`, 6to4 `2002::/16` and
+/// Teredo `2001::/32` (client address, stored inverted).
+fn embedded_ipv4(ip: Ipv6Addr) -> Option<Ipv4Addr> {
     if let Some(v4) = ip.to_ipv4_mapped() {
+        return Some(v4);
+    }
+    let seg = ip.segments();
+    let from =
+        |hi: u16, lo: u16| Ipv4Addr::new((hi >> 8) as u8, hi as u8, (lo >> 8) as u8, lo as u8);
+    if seg[..6].iter().all(|&x| x == 0) && !ip.is_loopback() && !ip.is_unspecified() {
+        return Some(from(seg[6], seg[7]));
+    }
+    if seg[0] == 0x0064 && seg[1] == 0xff9b && seg[2..6].iter().all(|&x| x == 0) {
+        return Some(from(seg[6], seg[7]));
+    }
+    if seg[0] == 0x2002 {
+        return Some(from(seg[1], seg[2]));
+    }
+    if seg[0] == 0x2001 && seg[1] == 0 {
+        return Some(from(!seg[6], !seg[7]));
+    }
+    None
+}
+
+fn is_non_public_v6(ip: Ipv6Addr) -> bool {
+    if let Some(v4) = embedded_ipv4(ip) {
         return is_non_public_v4(v4);
     }
-    let first = ip.segments()[0];
+    let seg = ip.segments();
+    let first = seg[0];
     ip.is_loopback()
         || ip.is_unspecified()
         || ip.is_multicast()
         || (first & 0xfe00) == 0xfc00
         || (first & 0xffc0) == 0xfe80
-        || (first == 0x2001 && ip.segments()[1] == 0x0db8)
+        // Deprecated site-local fec0::/10.
+        || (first & 0xffc0) == 0xfec0
+        // Local-use NAT64 64:ff9b:1::/48 maps to private IPv4 by design.
+        || (first == 0x0064 && seg[1] == 0xff9b && seg[2] == 0x0001)
+        || (first == 0x2001 && seg[1] == 0x0db8)
 }
 
 /// Names that always mean "this machine or the local network".
@@ -224,6 +254,28 @@ mod tests {
                 check_url_without_dns(url).is_err(),
                 "{url} should be refused"
             );
+        }
+    }
+
+    #[test]
+    fn ipv4_hidden_in_ipv6_follows_the_ipv4_rule() {
+        for blocked in [
+            "64:ff9b::c0a8:101",                    // NAT64 -> 192.168.1.1
+            "64:ff9b::7f00:1",                      // NAT64 -> 127.0.0.1
+            "2002:c0a8:101::1",                     // 6to4 -> 192.168.1.1
+            "2002:0a00:0001::",                     // 6to4 -> 10.0.0.1
+            "::c0a8:101",                           // IPv4-compatible -> 192.168.1.1
+            "::7f00:1",                             // IPv4-compatible -> 127.0.0.1
+            "2001:0:4136:e378:8000:63bf:3f57:fefe", // Teredo -> 192.168.1.1
+            "64:ff9b:1::a00:1",                     // local-use NAT64
+            "fec0::1",                              // site-local
+        ] {
+            let ip: IpAddr = blocked.parse().unwrap();
+            assert!(is_non_public_ip(ip), "{blocked} should be refused");
+        }
+        for public in ["64:ff9b::808:808", "2002:0808:0808::1", "::808:808"] {
+            let ip: IpAddr = public.parse().unwrap();
+            assert!(!is_non_public_ip(ip), "{public} should be allowed");
         }
     }
 
