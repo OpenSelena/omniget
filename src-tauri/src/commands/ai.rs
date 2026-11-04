@@ -118,7 +118,51 @@ async fn transcribe_via_audio(
 }
 
 #[cfg(not(target_os = "android"))]
+/// The summary link must be a public http(s) URL; it goes to yt-dlp behind
+/// "--", so it can never be read as an option.
+async fn checked_summary_url(raw: &str) -> Result<String, String> {
+    let url = raw.trim().to_string();
+    let scheme_ok = url::Url::parse(&url)
+        .map(|u| matches!(u.scheme(), "http" | "https"))
+        .unwrap_or(false);
+    if !scheme_ok {
+        return Err("Invalid URL: only http and https links can be summarized".to_string());
+    }
+    omniget_core::core::net_guard::ensure_public_web_url(&url)
+        .await
+        .map_err(|e| e.to_string())?;
+    Ok(url)
+}
+
+#[cfg(not(target_os = "android"))]
+fn transcript_args(out_template: &std::path::Path, url: &str) -> Vec<String> {
+    [
+        "--skip-download",
+        "--write-subs",
+        "--write-auto-subs",
+        "--sub-langs",
+        "en.*,en,.*-orig,.*",
+        "--convert-subs",
+        "srt",
+        "--no-warnings",
+        "--print",
+        "title",
+        "-o",
+    ]
+    .iter()
+    .map(|s| s.to_string())
+    .chain([
+        out_template.to_string_lossy().to_string(),
+        "--".to_string(),
+        url.to_string(),
+    ])
+    .collect()
+}
+
+#[cfg(not(target_os = "android"))]
 async fn fetch_transcript(url: &str) -> Result<(String, String), String> {
+    let url = checked_summary_url(url).await?;
+    let url = url.as_str();
     let ytdlp = crate::core::ytdlp::find_ytdlp_cached()
         .await
         .ok_or_else(|| "yt-dlp unavailable".to_string())?;
@@ -135,19 +179,7 @@ async fn fetch_transcript(url: &str) -> Result<(String, String), String> {
     let out_template = tmp.join("t.%(ext)s");
     let result: Result<(String, String), String> = (|| async {
         let output = omniget_core::core::ytdlp::ytdlp_command(&ytdlp)
-            .arg("--skip-download")
-            .arg("--write-subs")
-            .arg("--write-auto-subs")
-            .arg("--sub-langs")
-            .arg("en.*,en,.*-orig,.*")
-            .arg("--convert-subs")
-            .arg("srt")
-            .arg("--no-warnings")
-            .arg("--print")
-            .arg("title")
-            .arg("-o")
-            .arg(out_template.to_string_lossy().to_string())
-            .arg(url)
+            .args(transcript_args(&out_template, url))
             .output()
             .await
             .map_err(|e| format!("yt-dlp failed: {}", e))?;
@@ -264,4 +296,23 @@ pub fn ai_history_list() -> Vec<AiHistoryEntry> {
 #[tauri::command]
 pub fn ai_history_clear() {
     ai::history_clear();
+}
+
+#[cfg(all(test, not(target_os = "android")))]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn summary_links_are_checked_and_kept_behind_a_double_dash() {
+        for bad in [
+            "--exec=calc",
+            "file:///etc/passwd",
+            "http://192.168.1.1/video",
+            "https://[::1]/x",
+        ] {
+            assert!(checked_summary_url(bad).await.is_err(), "accepted {bad}");
+        }
+        let args = transcript_args(std::path::Path::new("/tmp/t.%(ext)s"), "https://e.com/v");
+        assert_eq!(&args[args.len() - 2..], &["--", "https://e.com/v"]);
+    }
 }
