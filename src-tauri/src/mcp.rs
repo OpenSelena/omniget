@@ -37,14 +37,14 @@ pub fn tools() -> Vec<ToolDef> {
         t("youtube_sponsorblock", "SponsorBlock segments (sponsor, intro, outro, selfpromo…) of a YouTube video.", obj(json!({ "url": { "type": "string" }, "categories": { "type": "array", "items": { "type": "string" } } }), &["url"])),
         t("youtube_dislikes", "Return YouTube Dislike estimates for a video.", obj(json!({ "url": { "type": "string" } }), &["url"])),
         t("pdf_info", "Pages, size, title, author and whether the PDF has a text layer.", obj(json!({ "path": { "type": "string" } }), &["path"])),
-        t("pdf_merge", "Merge PDFs into one file, in the given order.", obj(json!({ "inputs": { "type": "array", "items": { "type": "string" } }, "output": { "type": "string" } }), &["inputs", "output"])),
-        t("pdf_split", "Split a PDF: mode each | every | ranges (\"1-3; 4-10\") | extract (\"1,3,5-7\").", obj(json!({ "input": { "type": "string" }, "mode": { "type": "string" }, "every": { "type": "integer" }, "ranges": { "type": "string" }, "output_dir": { "type": "string" } }), &["input", "mode"])),
+        t("pdf_merge", "Merge PDFs into one file, in the given order.", obj(json!({ "inputs": { "type": "array", "items": { "type": "string" } }, "output": { "type": "string", "description": "Inside the OmniGet download folder; relative paths start there, empty means the folder itself." } }), &["inputs"])),
+        t("pdf_split", "Split a PDF: mode each | every | ranges (\"1-3; 4-10\") | extract (\"1,3,5-7\").", obj(json!({ "input": { "type": "string" }, "mode": { "type": "string" }, "every": { "type": "integer" }, "ranges": { "type": "string" }, "output_dir": { "type": "string", "description": "Inside the OmniGet download folder; relative paths start there, empty means the folder itself." } }), &["input", "mode"])),
         t("pdf_text", "Extract the text of a PDF (optionally a page range like \"1-3, 5\").", obj(json!({ "path": { "type": "string" }, "pages": { "type": "string" } }), &["path"])),
-        t("pdf_render", "Render PDF pages to PNG or JPG files.", obj(json!({ "input": { "type": "string" }, "pages": { "type": "string" }, "dpi": { "type": "integer" }, "format": { "type": "string", "enum": ["png", "jpg"] }, "output_dir": { "type": "string" } }), &["input"])),
-        t("pdf_sanitize", "Rebuild a PDF from pixels (Dangerzone-style) so scripts, forms and attachments are dropped.", obj(json!({ "input": { "type": "string" }, "output_dir": { "type": "string" } }), &["input"])),
-        t("tts_speak", "Text to speech with Microsoft Edge neural voices; writes an MP3.", obj(json!({ "text": { "type": "string" }, "voice": { "type": "string", "description": "e.g. pt-BR-AntonioNeural, en-US-AriaNeural" }, "output": { "type": "string" } }), &["text", "output"])),
+        t("pdf_render", "Render PDF pages to PNG or JPG files.", obj(json!({ "input": { "type": "string" }, "pages": { "type": "string" }, "dpi": { "type": "integer" }, "format": { "type": "string", "enum": ["png", "jpg"] }, "output_dir": { "type": "string", "description": "Inside the OmniGet download folder; relative paths start there, empty means the folder itself." } }), &["input"])),
+        t("pdf_sanitize", "Rebuild a PDF from pixels (Dangerzone-style) so scripts, forms and attachments are dropped.", obj(json!({ "input": { "type": "string" }, "output_dir": { "type": "string", "description": "Inside the OmniGet download folder; relative paths start there, empty means the folder itself." } }), &["input"])),
+        t("tts_speak", "Text to speech with Microsoft Edge neural voices; writes an MP3.", obj(json!({ "text": { "type": "string" }, "voice": { "type": "string", "description": "e.g. pt-BR-AntonioNeural, en-US-AriaNeural" }, "output": { "type": "string", "description": "Inside the OmniGet download folder; relative paths start there, empty means the folder itself." } }), &["text"])),
         t("transcribe", "Transcribe audio or video locally with whisper.cpp; returns text and SRT path.", obj(json!({ "input": { "type": "string" }, "model": { "type": "string", "description": "GGML model id, default base" }, "language": { "type": "string", "description": "auto | pt | en …" } }), &["input"])),
-        t("image_resize", "Resize images in batch. mode width | height | fit | percent.", obj(json!({ "inputs": { "type": "array", "items": { "type": "string" } }, "mode": { "type": "string" }, "value": { "type": "integer" }, "value2": { "type": "integer" }, "format": { "type": "string" }, "output_dir": { "type": "string" } }), &["inputs", "mode", "value"])),
+        t("image_resize", "Resize images in batch. mode width | height | fit | percent.", obj(json!({ "inputs": { "type": "array", "items": { "type": "string" } }, "mode": { "type": "string" }, "value": { "type": "integer" }, "value2": { "type": "integer" }, "format": { "type": "string" }, "output_dir": { "type": "string", "description": "Inside the OmniGet download folder; relative paths start there, empty means the folder itself." } }), &["inputs", "mode", "value"])),
         t("ocr", "Extract text from images with Tesseract.", obj(json!({ "inputs": { "type": "array", "items": { "type": "string" } }, "langs": { "type": "string", "description": "por+eng" } }), &["inputs"])),
         t("find_duplicates", "Find duplicate files (same content) under folders.", obj(json!({ "dirs": { "type": "array", "items": { "type": "string" } }, "min_size": { "type": "integer" } }), &["dirs"])),
         t("file_search", "Search files by name (Everything, Spotlight or locate/find).", obj(json!({ "query": { "type": "string" }, "folder": { "type": "string" }, "limit": { "type": "integer" } }), &["query"])),
@@ -56,8 +56,8 @@ pub fn tools() -> Vec<ToolDef> {
         t("x_search", "Search X/Twitter posts (advanced operators supported).", obj(json!({ "query": { "type": "string" }, "feed": { "type": "string", "enum": ["latest", "top"] } }), &["query"])),
         t("x_trends", "Current X/Twitter trends.", obj(json!({}), &[])),
         t("instagram_profile", "Public info of an Instagram profile, using the cookies captured by the OmniGet extension.", obj(json!({ "username": { "type": "string" }, "account": { "type": "string", "description": "cookie slot, default _default" } }), &["username"])),
-        t("gallery_download", "Download a gallery/profile with gallery-dl (Pinterest, ArtStation, DeviantArt, Reddit…).", obj(json!({ "url": { "type": "string" }, "dest": { "type": "string" } }), &["url", "dest"])),
-        t("aria2_download", "Download a large file with aria2 (multi-connection).", obj(json!({ "url": { "type": "string" }, "dest_dir": { "type": "string" }, "connections": { "type": "integer" } }), &["url", "dest_dir"])),
+        t("gallery_download", "Download a gallery/profile with gallery-dl (Pinterest, ArtStation, DeviantArt, Reddit…).", obj(json!({ "url": { "type": "string" }, "dest": { "type": "string", "description": "Inside the OmniGet download folder; relative paths start there, empty means the folder itself." } }), &["url"])),
+        t("aria2_download", "Download a large file with aria2 (multi-connection).", obj(json!({ "url": { "type": "string" }, "dest_dir": { "type": "string", "description": "Inside the OmniGet download folder; relative paths start there, empty means the folder itself." }, "connections": { "type": "integer" } }), &["url"])),
         t("disk_volumes", "Mounted volumes with total and free space.", obj(json!({}), &[])),
         t("disk_scan", "Folder sizes tree and largest files under a path.", obj(json!({ "path": { "type": "string" }, "depth": { "type": "integer" } }), &["path"])),
         t("clean_scan", "What the cache cleaner would remove (rule, size, files). Does not delete anything.", obj(json!({}), &[])),
@@ -236,7 +236,7 @@ pub async fn call(app: &AppHandle, name: &str, a: Value) -> Result<Value, String
         "pdf_merge" => {
             let opts = pdf::MergeOptions {
                 inputs: list(&a, "inputs"),
-                output: s(&a, "output"),
+                output: confined(app, &a, "output", Some("merged.pdf"))?,
             };
             to_json(
                 tokio::task::spawn_blocking(move || pdf::merge(&opts, &p))
@@ -251,7 +251,7 @@ pub async fn call(app: &AppHandle, name: &str, a: Value) -> Result<Value, String
                 mode: s(&a, "mode"),
                 every: num(&a, "every").unwrap_or(0) as usize,
                 ranges: s(&a, "ranges"),
-                output_dir: s(&a, "output_dir"),
+                output_dir: confined(app, &a, "output_dir", None)?,
             };
             to_json(
                 tokio::task::spawn_blocking(move || pdf::split(&opts, &p))
@@ -276,7 +276,7 @@ pub async fn call(app: &AppHandle, name: &str, a: Value) -> Result<Value, String
                 dpi: num(&a, "dpi").unwrap_or(0) as u32,
                 format: s(&a, "format"),
                 quality: 0,
-                output_dir: s(&a, "output_dir"),
+                output_dir: confined(app, &a, "output_dir", None)?,
             };
             to_json(
                 tokio::task::spawn_blocking(move || pdf::render(&opts, &p))
@@ -286,7 +286,7 @@ pub async fn call(app: &AppHandle, name: &str, a: Value) -> Result<Value, String
             )
         }
         "pdf_sanitize" => {
-            let (input, dir) = (s(&a, "input"), s(&a, "output_dir"));
+            let (input, dir) = (s(&a, "input"), confined(app, &a, "output_dir", None)?);
             to_json(
                 tokio::task::spawn_blocking(move || pdf::sanitize(&input, &dir, 0, 0, &p))
                     .await
@@ -307,9 +307,13 @@ pub async fn call(app: &AppHandle, name: &str, a: Value) -> Result<Value, String
                 serde_json::from_value(json!({ "text": s(&a, "text"), "voice": voice }))
                     .map_err(err)?;
             to_json(
-                edge_tts::synthesize(opts, std::path::Path::new(&s(&a, "output")), p)
-                    .await
-                    .map_err(err)?,
+                edge_tts::synthesize(
+                    opts,
+                    std::path::Path::new(&confined(app, &a, "output", Some("speech.mp3"))?),
+                    p,
+                )
+                .await
+                .map_err(err)?,
             )
         }
         "transcribe" => {
@@ -339,7 +343,7 @@ pub async fn call(app: &AppHandle, name: &str, a: Value) -> Result<Value, String
             )
         }
         "image_resize" => {
-            let opts: image_resize::ResizeOptions = serde_json::from_value(json!({ "inputs": list(&a, "inputs"), "mode": s(&a, "mode"), "value": num(&a, "value").unwrap_or(1024), "value2": num(&a, "value2").unwrap_or(0), "format": s(&a, "format"), "output_dir": s(&a, "output_dir") })).map_err(err)?;
+            let opts: image_resize::ResizeOptions = serde_json::from_value(json!({ "inputs": list(&a, "inputs"), "mode": s(&a, "mode"), "value": num(&a, "value").unwrap_or(1024), "value2": num(&a, "value2").unwrap_or(0), "format": s(&a, "format"), "output_dir": confined(app, &a, "output_dir", None)? })).map_err(err)?;
             to_json(image_resize::run(opts, p).await.map_err(err)?)
         }
         "ocr" => to_json(
@@ -418,12 +422,12 @@ pub async fn call(app: &AppHandle, name: &str, a: Value) -> Result<Value, String
             )
         }
         "gallery_download" => to_json(
-            tools::gallery::download(&s(&a, "url"), &s(&a, "dest"), None, p)
+            tools::gallery::download(&s(&a, "url"), &confined(app, &a, "dest", None)?, None, p)
                 .await
                 .map_err(err)?,
         ),
         "aria2_download" => {
-            let opts: tools::aria2::Aria2Options = serde_json::from_value(json!({ "url": s(&a, "url"), "dest_dir": s(&a, "dest_dir"), "connections": num(&a, "connections").unwrap_or(16) })).map_err(err)?;
+            let opts: tools::aria2::Aria2Options = serde_json::from_value(json!({ "url": s(&a, "url"), "dest_dir": confined(app, &a, "dest_dir", None)?, "connections": num(&a, "connections").unwrap_or(16) })).map_err(err)?;
             to_json(tools::aria2::download(opts, p).await.map_err(err)?)
         }
         "disk_volumes" => to_json(disk::volumes()),
@@ -517,22 +521,136 @@ fn config_file() -> Option<std::path::PathBuf> {
     tools::tools_dir().map(|d| d.join("mcp.json"))
 }
 
-pub fn enabled() -> bool {
+fn read_config() -> serde_json::Map<String, Value> {
     config_file()
         .and_then(|p| std::fs::read_to_string(p).ok())
         .and_then(|s| serde_json::from_str::<Value>(&s).ok())
-        .and_then(|v| v.get("enabled").and_then(|b| b.as_bool()))
+        .and_then(|v| v.as_object().cloned())
+        .unwrap_or_default()
+}
+
+fn write_config(cfg: &serde_json::Map<String, Value>) -> Result<(), String> {
+    let p = config_file().ok_or("no data dir")?;
+    std::fs::create_dir_all(p.parent().unwrap()).map_err(err)?;
+    std::fs::write(&p, serde_json::to_string_pretty(cfg).unwrap()).map_err(err)
+}
+
+pub fn enabled() -> bool {
+    read_config()
+        .get("enabled")
+        .and_then(|b| b.as_bool())
         .unwrap_or(false)
 }
 
 pub fn set_enabled(on: bool) -> Result<(), String> {
-    let p = config_file().ok_or("no data dir")?;
-    std::fs::create_dir_all(p.parent().unwrap()).map_err(err)?;
-    std::fs::write(
-        &p,
-        serde_json::to_string_pretty(&json!({ "enabled": on })).unwrap(),
-    )
-    .map_err(err)
+    let mut cfg = read_config();
+    cfg.insert("enabled".into(), json!(on));
+    write_config(&cfg)
+}
+
+/// Bearer token for MCP clients. It is separate from the browser extension
+/// token: a leaked extension token must not unlock the MCP tools, which can
+/// read and write files. Created on first use and kept in `mcp.json`.
+pub fn token() -> Result<String, String> {
+    let mut cfg = read_config();
+    if let Some(t) = cfg.get("token").and_then(|t| t.as_str()) {
+        if !t.trim().is_empty() {
+            return Ok(t.to_string());
+        }
+    }
+    let fresh = crate::local_bridge::generate_token();
+    cfg.insert("token".into(), json!(fresh));
+    write_config(&cfg)?;
+    Ok(fresh)
+}
+
+/// Replaces the MCP token; every configured client must be updated.
+pub fn rotate_token() -> Result<String, String> {
+    let mut cfg = read_config();
+    let fresh = crate::local_bridge::generate_token();
+    cfg.insert("token".into(), json!(fresh));
+    write_config(&cfg)?;
+    Ok(fresh)
+}
+
+// ── Write confinement ──────────────────────────────────────────────────
+
+/// Resolves a path an MCP client wants a tool to write to and keeps it inside
+/// `root` (the download folder). Empty means `root` itself (or
+/// `root/default_name` when a file name is needed); relative paths are taken
+/// from `root`. `..` is refused, and symlinks are resolved on the part of the
+/// path that already exists, so a link cannot lead outside either.
+pub fn confine_write_path(
+    raw: &str,
+    root: &std::path::Path,
+    default_name: Option<&str>,
+) -> Result<std::path::PathBuf, String> {
+    use std::path::{Component, PathBuf};
+    if root.as_os_str().is_empty() {
+        return Err("set a download folder in OmniGet settings first".into());
+    }
+    std::fs::create_dir_all(root).map_err(err)?;
+    let root = std::fs::canonicalize(root).map_err(err)?;
+    let raw = raw.trim();
+    let wanted: PathBuf = if raw.is_empty() {
+        match default_name {
+            Some(name) => root.join(name),
+            None => root.clone(),
+        }
+    } else {
+        let p = PathBuf::from(raw);
+        if p.is_absolute() {
+            p
+        } else {
+            root.join(p)
+        }
+    };
+    if wanted
+        .components()
+        .any(|c| matches!(c, Component::ParentDir))
+    {
+        return Err(format!("path must not contain \"..\": {}", raw));
+    }
+    // Canonicalize the deepest part that exists, then re-append the rest.
+    let mut existing = wanted.clone();
+    let mut rest: Vec<std::ffi::OsString> = Vec::new();
+    while !existing.exists() {
+        match (existing.file_name(), existing.parent()) {
+            (Some(name), Some(parent)) => {
+                rest.push(name.to_os_string());
+                existing = parent.to_path_buf();
+            }
+            _ => break,
+        }
+    }
+    let mut resolved = std::fs::canonicalize(&existing).map_err(err)?;
+    for part in rest.into_iter().rev() {
+        resolved.push(part);
+    }
+    if !resolved.starts_with(&root) {
+        return Err(format!(
+            "MCP tools can only write inside the download folder ({}); refused: {}",
+            root.display(),
+            raw
+        ));
+    }
+    Ok(resolved)
+}
+
+fn download_root(app: &AppHandle) -> std::path::PathBuf {
+    crate::storage::config::load_settings(app)
+        .download
+        .default_output_dir
+}
+
+fn confined(
+    app: &AppHandle,
+    a: &Value,
+    key: &str,
+    default_name: Option<&str>,
+) -> Result<String, String> {
+    confine_write_path(&s(a, key), &download_root(app), default_name)
+        .map(|p| p.to_string_lossy().to_string())
 }
 
 // ── JSON-RPC ───────────────────────────────────────────────────────────
@@ -655,6 +773,63 @@ pub fn client_snippets(url: &str, token: &str) -> Vec<(String, String)> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn scratch(name: &str) -> std::path::PathBuf {
+        let d = std::env::temp_dir().join(format!(
+            "omniget-mcp-{}-{}-{}",
+            name,
+            std::process::id(),
+            std::time::SystemTime::now()
+                .duration_since(std::time::UNIX_EPOCH)
+                .unwrap()
+                .as_nanos()
+        ));
+        std::fs::create_dir_all(&d).unwrap();
+        std::fs::canonicalize(d).unwrap()
+    }
+
+    #[test]
+    fn tool_writes_stay_inside_the_download_folder() {
+        let base = scratch("confine");
+        let root = base.join("Downloads");
+        let outside = base.join("Startup");
+        std::fs::create_dir_all(&outside).unwrap();
+
+        assert_eq!(confine_write_path("", &root, None).unwrap(), root);
+        assert_eq!(
+            confine_write_path("", &root, Some("merged.pdf")).unwrap(),
+            root.join("merged.pdf")
+        );
+        assert_eq!(
+            confine_write_path("pdf/out", &root, None).unwrap(),
+            root.join("pdf").join("out")
+        );
+        let inside = root.join("a").join("b.mp3");
+        assert_eq!(
+            confine_write_path(inside.to_str().unwrap(), &root, None).unwrap(),
+            inside
+        );
+
+        for bad in [
+            outside.join("x.bat").to_string_lossy().to_string(),
+            outside.to_string_lossy().to_string(),
+            "../Startup".to_string(),
+            root.join("..")
+                .join("Startup")
+                .to_string_lossy()
+                .to_string(),
+        ] {
+            assert!(confine_write_path(&bad, &root, None).is_err(), "{bad}");
+        }
+        assert!(confine_write_path("x", std::path::Path::new(""), None).is_err());
+
+        #[cfg(unix)]
+        {
+            std::os::unix::fs::symlink(&outside, root.join("link")).unwrap();
+            assert!(confine_write_path("link/x.bat", &root, None).is_err());
+        }
+        let _ = std::fs::remove_dir_all(&base);
+    }
 
     #[test]
     fn schemas_are_objects() {

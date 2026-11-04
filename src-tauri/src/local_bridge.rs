@@ -740,6 +740,16 @@ fn unauthorized() -> Response {
 }
 
 fn check_bearer(headers: &HeaderMap, fallback: &str) -> bool {
+    let current_token = active_token();
+    bearer_matches(headers, current_token.as_deref().unwrap_or(fallback))
+}
+
+/// MCP has its own token (see `mcp::token`), never the extension one.
+fn check_mcp_bearer(headers: &HeaderMap, mcp_token: &str) -> bool {
+    !mcp_token.is_empty() && bearer_matches(headers, mcp_token)
+}
+
+fn bearer_matches(headers: &HeaderMap, expected: &str) -> bool {
     let header = match headers.get("authorization") {
         Some(v) => v,
         None => return false,
@@ -755,8 +765,6 @@ fn check_bearer(headers: &HeaderMap, fallback: &str) -> bool {
         Some(s) => s.trim(),
         None => return false,
     };
-    let current_token = active_token();
-    let expected = current_token.as_deref().unwrap_or(fallback);
     constant_time_eq::constant_time_eq(provided.as_bytes(), expected.as_bytes())
 }
 
@@ -949,14 +957,15 @@ pub fn build_pairing_url(port: u16) -> String {
 
 // ── MCP (Streamable HTTP, só JSON) ─────────────────────────────────────
 
-/// `POST /mcp`: JSON-RPC do MCP. Mesmo bearer da extensão; 403 quando a
-/// tool "Servidor MCP" está desligada; 202 sem corpo para notificações.
+/// `POST /mcp`: MCP JSON-RPC. Uses the MCP token, not the extension one;
+/// 403 when the "MCP server" tool is off; 202 with no body for notifications.
 async fn mcp_post(
     State(state): State<BridgeState>,
     headers: HeaderMap,
     body: axum::body::Bytes,
 ) -> Response {
-    if !check_bearer(&headers, &state.token) {
+    let mcp_token = crate::mcp::token().unwrap_or_default();
+    if !check_mcp_bearer(&headers, &mcp_token) {
         return unauthorized();
     }
     if !crate::mcp::enabled() {
@@ -1070,6 +1079,21 @@ mod tests {
         assert!(!t.contains('+'));
         assert!(!t.contains('/'));
         assert!(!t.contains('='));
+    }
+
+    #[test]
+    fn mcp_refuses_the_extension_token() {
+        let ext = generate_token();
+        let mcp = generate_token();
+        assert!(!check_mcp_bearer(
+            &header_with_auth(&format!("Bearer {ext}")),
+            &mcp
+        ));
+        assert!(check_mcp_bearer(
+            &header_with_auth(&format!("Bearer {mcp}")),
+            &mcp
+        ));
+        assert!(!check_mcp_bearer(&header_with_auth("Bearer "), ""));
     }
 
     #[test]

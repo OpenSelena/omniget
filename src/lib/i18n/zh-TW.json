@@ -2440,12 +2440,14 @@
       "endpoint": "Endpoint",
       "test": "Test",
       "token": "Bearer token",
-      "token_hint": "Same token the browser extension uses. Rotate it in Settings → Browser extension.",
+      "token_hint": "MCP has its own token, separate from the browser extension. Regenerating it disconnects clients that use the old one.",
       "show": "Show",
       "hide": "Hide",
       "connect": "Connect a client",
       "connect_hint": "Copy the snippet for your agent. Claude Code: run the command. Others: paste in the config file.",
-      "tools": "tools exposed"
+      "tools": "tools exposed",
+      "rotate": "Regenerate",
+      "rotated": "New MCP token created. Update your clients."
     },
     "autoclick": {
       "running": "Clicking…",

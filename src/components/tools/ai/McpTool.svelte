@@ -29,6 +29,12 @@
     try { selftest = await invoke<string>("tool_mcp_selftest"); showToast("success", "OK"); }
     catch (e) { selftest = errText(e); showToast("error", selftest); } finally { busy = false; }
   }
+  async function rotate() {
+    if (busy) return;
+    busy = true;
+    try { await invoke("tool_mcp_rotate_token"); await refresh(); showToast("success", $t("tools.mcp.rotated") as string); }
+    catch (e) { showToast("error", errText(e)); } finally { busy = false; }
+  }
   async function copy(text: string) { await navigator.clipboard.writeText(text); showToast("success", $t("tools.common.copied") as string); }
   const mask = (tok: string) => (tok.length > 8 ? `${tok.slice(0, 4)}…${tok.slice(-4)}` : "••••");
   const snippetMasked = (s: string) => (status && !showToken ? s.replaceAll(status.token, mask(status.token)) : s);
@@ -50,7 +56,7 @@
       </div>
       <div class="group-row">
         <div class="group-row-content"><div class="group-row-title">{$t("tools.mcp.token")}</div><div class="group-row-sub mono">{status ? (showToken ? status.token : mask(status.token)) : "…"}</div><div class="group-row-sub">{$t("tools.mcp.token_hint")}</div></div>
-        <div class="group-row-trailing btn-row"><button class="btn btn-ghost btn-sm" type="button" onclick={() => (showToken = !showToken)}>{showToken ? $t("tools.mcp.hide") : $t("tools.mcp.show")}</button>{#if status}<button class="btn btn-ghost btn-sm" type="button" onclick={() => copy(status!.token)}>{$t("tools.common.copy")}</button>{/if}</div>
+        <div class="group-row-trailing btn-row"><button class="btn btn-ghost btn-sm" type="button" onclick={() => (showToken = !showToken)}>{showToken ? $t("tools.mcp.hide") : $t("tools.mcp.show")}</button>{#if status}<button class="btn btn-ghost btn-sm" type="button" onclick={() => copy(status!.token)}>{$t("tools.common.copy")}</button><button class="btn btn-ghost btn-sm" type="button" disabled={busy} onclick={rotate}>{$t("tools.mcp.rotate")}</button>{/if}</div>
       </div>
       {#if selftest}<div class="group-row"><div class="group-row-sub mono">{selftest}</div></div>{/if}
     </div>

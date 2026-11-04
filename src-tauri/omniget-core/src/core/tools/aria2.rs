@@ -61,6 +61,33 @@ pub fn validate_url(url: &str) -> anyhow::Result<String> {
     super::validate_tool_url(url, &["http", "https", "ftp", "sftp", "magnet"])
 }
 
+/// Fixed aria2c options. Existing files are never overwritten (no
+/// --allow-overwrite) and the user's aria2.conf is ignored.
+fn base_args(dest_dir: &str, conns: &str) -> Vec<String> {
+    [
+        // Ignore any aria2.conf on the machine: it could turn on hooks such
+        // as --on-download-complete.
+        "--no-conf",
+        "--dir",
+        dest_dir,
+        "-x",
+        conns,
+        "-s",
+        conns,
+        "-k",
+        "1M",
+        "--continue=true",
+        "--auto-file-renaming=false",
+        "--summary-interval=1",
+        "--console-log-level=warn",
+        "--download-result=hide",
+        "--file-allocation=none",
+    ]
+    .iter()
+    .map(|s| s.to_string())
+    .collect()
+}
+
 pub async fn download(
     opts: Aria2Options,
     progress: super::ProgressFn,
@@ -76,23 +103,7 @@ pub async fn download(
     std::fs::create_dir_all(&opts.dest_dir)?;
     let conns = opts.connections.clamp(1, 16).to_string();
     let mut cmd = crate::core::process::command(&bin);
-    cmd.args([
-        "--dir",
-        &opts.dest_dir,
-        "-x",
-        &conns,
-        "-s",
-        &conns,
-        "-k",
-        "1M",
-        "--continue=true",
-        "--auto-file-renaming=false",
-        "--allow-overwrite=true",
-        "--summary-interval=1",
-        "--console-log-level=warn",
-        "--download-result=hide",
-        "--file-allocation=none",
-    ]);
+    cmd.args(base_args(&opts.dest_dir, &conns));
     if !opts.file_name.trim().is_empty() {
         cmd.args(["--out", opts.file_name.trim()]);
     }
@@ -174,6 +185,14 @@ mod tests {
             "magnet:?xt=urn:btih:0123456789abcdef0123456789abcdef01234567"
         )
         .is_ok());
+    }
+
+    #[test]
+    fn aria2_ignores_its_config_and_never_overwrites() {
+        let args = super::base_args("/tmp/d", "4");
+        assert!(args.iter().any(|a| a == "--no-conf"));
+        assert!(!args.iter().any(|a| a.starts_with("--allow-overwrite")));
+        assert!(!args.iter().any(|a| a.starts_with("--conf-path")));
     }
 
     #[test]

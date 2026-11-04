@@ -136,15 +136,22 @@ pub fn tool_mcp_status(app: tauri::AppHandle) -> McpStatus {
     } else {
         format!("http://127.0.0.1:{}/mcp", settings.bridge.port)
     };
+    let token = crate::mcp::token().unwrap_or_default();
     McpStatus {
         enabled: crate::mcp::enabled(),
         bridge_enabled: settings.bridge.enabled,
         port: settings.bridge.port,
-        snippets: crate::mcp::client_snippets(&url, &settings.bridge.token),
+        snippets: crate::mcp::client_snippets(&url, &token),
         url,
-        token: settings.bridge.token,
+        token,
         tools: crate::mcp::tools(),
     }
+}
+
+/// Issues a new MCP token; clients configured with the old one stop working.
+#[tauri::command]
+pub fn tool_mcp_rotate_token() -> Result<(), String> {
+    crate::mcp::rotate_token().map(|_| ())
 }
 
 #[tauri::command]
@@ -162,6 +169,7 @@ pub async fn tool_mcp_selftest(app: tauri::AppHandle) -> Result<String, String> 
         return Err("bridge sem porta".into());
     }
     let url = format!("http://127.0.0.1:{}/mcp", settings.bridge.port);
+    let token = crate::mcp::token()?;
     let client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(10))
         .build()
@@ -169,7 +177,7 @@ pub async fn tool_mcp_selftest(app: tauri::AppHandle) -> Result<String, String> 
     let init = serde_json::json!({ "jsonrpc": "2.0", "id": 1, "method": "initialize", "params": { "protocolVersion": crate::mcp::PROTOCOL, "capabilities": {}, "clientInfo": { "name": "omniget-selftest", "version": "1" } } });
     let r: serde_json::Value = client
         .post(&url)
-        .bearer_auth(&settings.bridge.token)
+        .bearer_auth(&token)
         .json(&init)
         .send()
         .await
@@ -186,7 +194,7 @@ pub async fn tool_mcp_selftest(app: tauri::AppHandle) -> Result<String, String> 
     let list = serde_json::json!({ "jsonrpc": "2.0", "id": 2, "method": "tools/list" });
     let r: serde_json::Value = client
         .post(&url)
-        .bearer_auth(&settings.bridge.token)
+        .bearer_auth(&token)
         .json(&list)
         .send()
         .await

@@ -2440,12 +2440,14 @@
       "endpoint": "Endpoint",
       "test": "Test",
       "token": "Bearer token",
-      "token_hint": "Same token the browser extension uses. Rotate it in Settings → Browser extension.",
+      "token_hint": "Jeton propre au serveur MCP, distinct de celui de l'extension. Le régénérer déconnecte les clients déjà configurés.",
       "show": "Show",
       "hide": "Hide",
       "connect": "Connect a client",
       "connect_hint": "Copy the snippet for your agent. Claude Code: run the command. Others: paste in the config file.",
-      "tools": "tools exposed"
+      "tools": "tools exposed",
+      "rotate": "Régénérer",
+      "rotated": "Nouveau jeton MCP créé. Mettez à jour vos clients."
     },
     "autoclick": {
       "running": "Clicking…",

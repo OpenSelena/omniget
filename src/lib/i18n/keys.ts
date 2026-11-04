@@ -4468,6 +4468,8 @@ export type TranslationKeys =
   | 'tools.mcp.hide'
   | 'tools.mcp.off'
   | 'tools.mcp.on'
+  | 'tools.mcp.rotate'
+  | 'tools.mcp.rotated'
   | 'tools.mcp.server'
   | 'tools.mcp.show'
   | 'tools.mcp.test'

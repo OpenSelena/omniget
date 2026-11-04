@@ -1269,6 +1269,7 @@ pub fn run() {
             commands::tools::ai::tool_keys_use,
             commands::tools::ai::tool_mcp_status,
             commands::tools::ai::tool_mcp_set_enabled,
+            commands::tools::ai::tool_mcp_rotate_token,
             commands::tools::ai::tool_mcp_selftest,
             commands::tools::desktop::tool_hotkeys_get,
             commands::tools::desktop::tool_hotkey_set,

@@ -2440,12 +2440,14 @@
       "endpoint": "Endpoint",
       "test": "ທົດສອບ",
       "token": "Bearer token",
-      "token_hint": "ໂທເຄັນດຽວກັນກັບທີ່ສ່ວນຂະຫຍາຍບຣາວເຊີໃຊ້. ປ່ຽນໃໝ່ໄດ້ໃນ ການຕັ້ງຄ່າ → ສ່ວນຂະຫຍາຍບຣາວເຊີ.",
+      "token_hint": "MCP has its own token, separate from the browser extension. Regenerating it disconnects clients that use the old one.",
       "show": "ສະແດງ",
       "hide": "ເຊື່ອງ",
       "connect": "ເຊື່ອມຕໍ່ໄຄລເອັນ",
       "connect_hint": "ສຳເນົາໂຄດສຳລັບເອເຈນຂອງທ່ານ. Claude Code: ແລ່ນຄຳສັ່ງ. ອື່ນໆ: ວາງໃນໄຟລ໌ຕັ້ງຄ່າ.",
-      "tools": "ເຄື່ອງມືທີ່ເປີດໃຫ້ໃຊ້"
+      "tools": "ເຄື່ອງມືທີ່ເປີດໃຫ້ໃຊ້",
+      "rotate": "Regenerate",
+      "rotated": "New MCP token created. Update your clients."
     },
     "autoclick": {
       "running": "ກຳລັງຄລິກ…",
