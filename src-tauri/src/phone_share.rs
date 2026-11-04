@@ -3,8 +3,10 @@
 //!
 //! Each share starts its own small HTTP server on the computer's private LAN
 //! address (never on a public interface) and on a random port. The link holds
-//! a random 256-bit token, works once, and stops after 10 minutes. The server
-//! shuts itself down when the file has been sent or the link expires.
+//! a random 256-bit token and stops after 10 minutes. Once the file has been
+//! requested, the link keeps working for one more minute (phones often send a
+//! preview or a second request), then the server shuts itself down. HEAD
+//! requests never use the link up.
 
 use std::collections::HashMap;
 use std::net::{IpAddr, SocketAddr, UdpSocket};
@@ -36,12 +38,18 @@ pub enum Refusal {
     AlreadyUsed,
 }
 
-/// One single-use link to one file.
+/// After the first download starts, other requests are still served for
+/// this long, then the link is closed.
+pub const REUSE_WINDOW: Duration = Duration::from_secs(60);
+
+/// One short-lived link to one file.
 pub struct Ticket {
     token: String,
     path: PathBuf,
     expires_at: Instant,
+    /// Set when the link is closed by hand.
     used: AtomicBool,
+    first_use: Mutex<Option<Instant>>,
     stop: Notify,
 }
 
@@ -52,22 +60,43 @@ impl Ticket {
             path,
             expires_at: now + SHARE_TTL,
             used: AtomicBool::new(false),
+            first_use: Mutex::new(None),
             stop: Notify::new(),
         }
     }
 
-    /// Accepts the request at most once, and only before the link expires.
-    pub fn claim(&self, token: &str, now: Instant) -> Result<&Path, Refusal> {
+    /// Checks a request without using the link (HEAD, previews).
+    pub fn check(&self, token: &str, now: Instant) -> Result<&Path, Refusal> {
         if !constant_time_eq(token.as_bytes(), self.token.as_bytes()) {
             return Err(Refusal::UnknownLink);
         }
         if now >= self.expires_at {
             return Err(Refusal::Expired);
         }
-        if self.used.swap(true, Ordering::SeqCst) {
+        if self.used.load(Ordering::SeqCst) {
             return Err(Refusal::AlreadyUsed);
         }
+        if let Ok(first) = self.first_use.lock() {
+            if matches!(*first, Some(t) if now >= t + REUSE_WINDOW) {
+                return Err(Refusal::AlreadyUsed);
+            }
+        }
         Ok(&self.path)
+    }
+
+    /// Accepts a download. The first one starts the reuse window; the
+    /// returned flag tells whether this request was that first one.
+    pub fn claim(&self, token: &str, now: Instant) -> Result<(&Path, bool), Refusal> {
+        let path = self.check(token, now)?;
+        let mut first = self.first_use.lock().map_err(|_| Refusal::AlreadyUsed)?;
+        match *first {
+            Some(t) if now >= t + REUSE_WINDOW => Err(Refusal::AlreadyUsed),
+            Some(_) => Ok((path, false)),
+            None => {
+                *first = Some(now);
+                Ok((path, true))
+            }
+        }
     }
 }
 
@@ -120,11 +149,43 @@ pub fn content_disposition(file_name: &str) -> String {
     format!("attachment; filename=\"{ascii}\"; filename*=UTF-8''{encoded}")
 }
 
-async fn serve(State(ticket): State<Arc<Ticket>>, AxumPath(token): AxumPath<String>) -> Response {
-    let path = match ticket.claim(&token, Instant::now()) {
+fn refusal_response(r: Refusal) -> Response {
+    match r {
+        Refusal::UnknownLink => StatusCode::NOT_FOUND.into_response(),
+        _ => StatusCode::GONE.into_response(),
+    }
+}
+
+/// HEAD: same headers as the download, without using the link.
+async fn serve_head(
+    State(ticket): State<Arc<Ticket>>,
+    AxumPath(token): AxumPath<String>,
+) -> Response {
+    let path = match ticket.check(&token, Instant::now()) {
         Ok(p) => p.to_path_buf(),
-        Err(Refusal::UnknownLink) => return StatusCode::NOT_FOUND.into_response(),
-        Err(_) => return StatusCode::GONE.into_response(),
+        Err(r) => return refusal_response(r),
+    };
+    let Ok(meta) = tokio::fs::metadata(&path).await else {
+        return StatusCode::NOT_FOUND.into_response();
+    };
+    let name = path
+        .file_name()
+        .map(|n| n.to_string_lossy().to_string())
+        .unwrap_or_else(|| "download".to_string());
+    Response::builder()
+        .status(StatusCode::OK)
+        .header(header::CONTENT_TYPE, crate::local_bridge::media_mime(&path))
+        .header(header::CONTENT_LENGTH, meta.len())
+        .header(header::CONTENT_DISPOSITION, content_disposition(&name))
+        .header(header::CACHE_CONTROL, "no-store")
+        .body(Body::empty())
+        .unwrap_or_else(|_| StatusCode::INTERNAL_SERVER_ERROR.into_response())
+}
+
+async fn serve(State(ticket): State<Arc<Ticket>>, AxumPath(token): AxumPath<String>) -> Response {
+    let (path, first) = match ticket.claim(&token, Instant::now()) {
+        Ok((p, first)) => (p.to_path_buf(), first),
+        Err(r) => return refusal_response(r),
     };
     let file = match tokio::fs::File::open(&path).await {
         Ok(f) => f,
@@ -138,8 +199,15 @@ async fn serve(State(ticket): State<Arc<Ticket>>, AxumPath(token): AxumPath<Stri
         .file_name()
         .map(|n| n.to_string_lossy().to_string())
         .unwrap_or_else(|| "download".to_string());
-    // The response keeps streaming during graceful shutdown.
-    ticket.stop.notify_one();
+    // Close the link once the reuse window ends; responses already streaming
+    // keep going during graceful shutdown.
+    if first {
+        let closer = ticket.clone();
+        tokio::spawn(async move {
+            tokio::time::sleep(REUSE_WINDOW).await;
+            closer.stop.notify_one();
+        });
+    }
     Response::builder()
         .status(StatusCode::OK)
         .header(header::CONTENT_TYPE, crate::local_bridge::media_mime(&path))
@@ -152,7 +220,7 @@ async fn serve(State(ticket): State<Arc<Ticket>>, AxumPath(token): AxumPath<Stri
 
 fn router(ticket: Arc<Ticket>) -> Router {
     Router::new()
-        .route("/s/{token}", get(serve))
+        .route("/s/{token}", get(serve).head(serve_head))
         .with_state(ticket)
 }
 
@@ -278,11 +346,16 @@ mod tests {
     }
 
     #[test]
-    fn link_works_once() {
+    fn link_closes_one_minute_after_the_first_download() {
         let now = Instant::now();
         let t = ticket(now);
-        assert!(t.claim("secret-token", now).is_ok());
-        assert_eq!(t.claim("secret-token", now), Err(Refusal::AlreadyUsed));
+        assert!(t.check("secret-token", now).is_ok());
+        assert_eq!(t.claim("secret-token", now).map(|(_, f)| f), Ok(true));
+        let soon = now + Duration::from_secs(30);
+        assert_eq!(t.claim("secret-token", soon).map(|(_, f)| f), Ok(false));
+        let late = now + REUSE_WINDOW;
+        assert_eq!(t.claim("secret-token", late), Err(Refusal::AlreadyUsed));
+        assert_eq!(t.check("secret-token", late), Err(Refusal::AlreadyUsed));
     }
 
     #[test]
@@ -307,10 +380,14 @@ mod tests {
     }
 
     async fn get_status(addr: SocketAddr, path: &str) -> String {
+        request(addr, "GET", path).await
+    }
+
+    async fn request(addr: SocketAddr, method: &str, path: &str) -> String {
         use tokio::io::{AsyncReadExt, AsyncWriteExt};
         let mut s = tokio::net::TcpStream::connect(addr).await.unwrap();
         s.write_all(
-            format!("GET {path} HTTP/1.1\r\nHost: x\r\nConnection: close\r\n\r\n").as_bytes(),
+            format!("{method} {path} HTTP/1.1\r\nHost: x\r\nConnection: close\r\n\r\n").as_bytes(),
         )
         .await
         .unwrap();
@@ -320,7 +397,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn server_sends_the_file_once() {
+    async fn server_survives_previews_and_a_second_request() {
         let dir = std::env::temp_dir().join(format!("phone-share-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let file = dir.join("clip.mp4");
@@ -333,10 +410,16 @@ mod tests {
         assert!(get_status(addr, "/s/nope")
             .await
             .starts_with("HTTP/1.1 404"));
+        // A preview or HEAD request must not use the link up.
+        let head = request(addr, "HEAD", "/s/tok").await;
+        assert!(head.starts_with("HTTP/1.1 200"), "{head}");
+        assert!(!head.ends_with("hello"));
         let first = get_status(addr, "/s/tok").await;
         assert!(first.starts_with("HTTP/1.1 200"), "{first}");
         assert!(first.ends_with("hello"));
-        assert!(get_status(addr, "/s/tok").await.starts_with("HTTP/1.1 410"));
+        // A second request right after (download managers do this) works.
+        let again = get_status(addr, "/s/tok").await;
+        assert!(again.starts_with("HTTP/1.1 200"), "{again}");
         let _ = std::fs::remove_dir_all(dir);
     }
 

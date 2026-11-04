@@ -3654,7 +3654,7 @@
       "subtitles_setup": "Install Whisper and download a model first, in Tools > Transcribe.",
       "send_to_phone": "Send to phone",
       "send_to_phone_qr": "QR code to download the file on your phone",
-      "send_to_phone_hint": "Scan with a phone on the same Wi-Fi. The link works once and expires in 10 minutes.",
+      "send_to_phone_hint": "Scan with a phone on the same Wi-Fi. The link expires after 10 minutes, and one minute after the first download.",
       "send_to_phone_stop": "Stop sharing"
     },
     "quality_hint": "Calidad que se está descargando para este elemento",
