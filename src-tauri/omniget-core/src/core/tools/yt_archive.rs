@@ -414,9 +414,12 @@ pub fn format_args(quality: &str) -> Vec<String> {
             "--audio-format".into(),
             "mp3".into(),
         ],
+        // `bv` (só vídeo) e não `bv*`: com `bv*` o sort elege o progressivo
+        // 18 (360p h264+aac num arquivo só), que o YouTube estrangula por IP
+        // após um volume grande (500 KB em 75 s contra 2,5 MiB/s do DASH 134).
         (_, Some(h)) => vec![
             "-f".into(),
-            format!("bv*[height<={h}]+ba/b[height<={h}]/bv*+ba/b"),
+            format!("bv[height<={h}]+ba/b[height<={h}]/bv*+ba/b"),
             "-S".into(),
             format!("res:{h},vcodec:h264,acodec:aac"),
             "--merge-output-format".into(),
@@ -1043,7 +1046,7 @@ mod tests {
             .any(|a| a.contains("height<=1080")));
         assert!(format_args("best").iter().any(|a| a == "bv*+ba/b"));
         let low = format_args("360");
-        assert!(low.iter().any(|a| a.contains("height<=360")));
+        assert!(low.iter().any(|a| a.starts_with("bv[height<=360]+ba/")));
         assert!(low.iter().any(|a| a == "res:360,vcodec:h264,acodec:aac"));
         assert!(!format_args("0").iter().any(|a| a.contains("height")));
     }
