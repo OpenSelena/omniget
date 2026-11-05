@@ -52,9 +52,13 @@ or in the app's data folder; `ffmpeg` must be on PATH.
    `omniget-cli --json archive --dest videos --scan-only | tail -1`
    (the last line is the summary: `done`, `failed`, `pending`, `size_bytes`,
    `cap_reached`).
-4. **Resume** by running the same archive command again. Ctrl+C (SIGINT to the
-   process group) puts the current item back in the queue.
-5. **Retry failures** later with `--retry-failed`.
+4. **Resume** by running the same archive command again. Ctrl+C, or
+   `pkill -INT -f "omniget-cli --json archive"`, stops yt-dlp within a second
+   and puts the current item back in the queue (its `.part` is reused). Wait
+   for the process to exit before starting another run on the same folder.
+5. **Retry failures** later with `--retry-failed`. If the network drops, the
+   run does not burn the queue: it logs `sem conexão: aguardando a rede voltar`
+   and waits for DNS to come back.
 
 ## Choices and why
 

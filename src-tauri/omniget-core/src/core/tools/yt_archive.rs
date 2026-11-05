@@ -7,6 +7,7 @@
 
 use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
+use std::time::Duration;
 
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
@@ -548,29 +549,18 @@ pub async fn run(opts: Options, progress: super::ProgressFn) -> anyhow::Result<A
     std::fs::create_dir_all(&dest)?;
     CANCEL.store(false, Ordering::SeqCst);
 
-    let mut st = match load_state(&dest) {
-        Some(st) if !opts.refresh => {
-            let mut st = st;
-            if opts.retry_failed {
-                st.merge("", Vec::new(), true);
-            }
-            st
-        }
-        _ => enumerate(&opts, &dest, &progress).await?,
-    };
-    save_state(&dest, &mut st)?;
-
+    let mut st = open_state(&opts, &dest, &progress).await?;
     let bin = ytdlp_path().await?;
     let cookie = CookieFile::new(opts.session_netscape.as_deref())?;
     let archive_txt = dest.join(ARCHIVE_FILE);
     let total = st.items.len() as u64;
-    let limit = if opts.max_items == 0 {
-        usize::MAX
-    } else {
-        opts.max_items as usize
+    let limit = match opts.max_items {
+        0 => usize::MAX,
+        n => n as usize,
     };
 
     let mut rodados = 0usize;
+    let mut offline_waits = 0u32;
     let mut cancelled = false;
     let mut cap_reached = false;
     while rodados < limit {
@@ -595,11 +585,21 @@ pub async fn run(opts: Options, progress: super::ProgressFn) -> anyhow::Result<A
         );
         match download_one(&bin, &opts, &cookie, &archive_txt, &dest, &item, &progress).await {
             Ok(file) => st.mark(&item.id, ItemStatus::Ok, file, None),
-            // Ctrl+C mata o yt-dlp junto: o item foi interrompido, não falhou,
-            // e continua na fila para a próxima rodada.
+            // Cancelado no meio (o yt-dlp é encerrado em `wait_or_cancel`): o
+            // item foi interrompido, não falhou, e continua na fila.
             Err(_) if CANCEL.load(Ordering::SeqCst) => {
                 cancelled = true;
                 break;
+            }
+            // Sem rede, todo item falharia em segundos e a fila inteira seria
+            // queimada. O item fica pendente e a rodada espera a conexão voltar.
+            Err(e) if is_offline_error(&e.to_string()) && offline_waits < MAX_OFFLINE_WAITS => {
+                offline_waits += 1;
+                if !wait_online(&progress, feitos, total).await {
+                    cancelled = true;
+                    break;
+                }
+                continue;
             }
             Err(e) => {
                 tracing::warn!("[yt-archive] {}: {}", item.id, e);
@@ -607,6 +607,7 @@ pub async fn run(opts: Options, progress: super::ProgressFn) -> anyhow::Result<A
             }
         }
         save_state(&dest, &mut st)?;
+        offline_waits = 0;
         rodados += 1;
     }
 
@@ -622,6 +623,63 @@ pub async fn run(opts: Options, progress: super::ProgressFn) -> anyhow::Result<A
     let mut result = result_of(&dest, &st, has_session(&opts), cancelled);
     result.cap_reached = cap_reached;
     Ok(result)
+}
+
+/// Fila salva (com as falhas devolvidas, se pedido) ou enumerada do zero.
+async fn open_state(
+    opts: &Options,
+    dest: &Path,
+    progress: &super::ProgressFn,
+) -> anyhow::Result<ArchiveState> {
+    let mut st = match load_state(dest) {
+        Some(mut st) if !opts.refresh => {
+            if opts.retry_failed {
+                st.merge("", Vec::new(), true);
+            }
+            st
+        }
+        _ => enumerate(opts, dest, progress).await?,
+    };
+    save_state(dest, &mut st)?;
+    Ok(st)
+}
+
+/// Esperas seguidas pela rede no mesmo item antes de tratá-lo como falha
+/// comum; evita laço infinito se um item der erro de DNS com a rede de pé.
+const MAX_OFFLINE_WAITS: u32 = 5;
+const ONLINE_PROBE: &str = "www.youtube.com:443";
+const OFFLINE_POLL_SECS: u64 = 30;
+
+/// Erros da rede da máquina (DNS, rota), não do vídeo, em macOS, Linux e
+/// Windows.
+fn is_offline_error(msg: &str) -> bool {
+    const SINAIS: [&str; 6] = [
+        "nodename nor servname provided",
+        "Temporary failure in name resolution",
+        "Name or service not known",
+        "getaddrinfo failed",
+        "Network is unreachable",
+        "No route to host",
+    ];
+    SINAIS.iter().any(|s| msg.contains(s))
+}
+
+/// Espera o DNS do YouTube voltar a resolver. Devolve `false` se a rodada foi
+/// cancelada durante a espera.
+async fn wait_online(progress: &super::ProgressFn, done: u64, total: u64) -> bool {
+    let msg = "sem conexão: aguardando a rede voltar".to_string();
+    super::report(progress, ID, "progress", done, Some(total), Some(msg));
+    loop {
+        for _ in 0..OFFLINE_POLL_SECS {
+            if CANCEL.load(Ordering::SeqCst) {
+                return false;
+            }
+            tokio::time::sleep(Duration::from_secs(1)).await;
+        }
+        if tokio::net::lookup_host(ONLINE_PROBE).await.is_ok() {
+            return true;
+        }
+    }
 }
 
 fn over_cap(dest: &Path, max_bytes: u64) -> bool {
@@ -748,7 +806,7 @@ async fn download_one(
         tail.join(" / ")
     });
 
-    let status = child.wait().await?;
+    let status = wait_or_cancel(&mut child).await?;
     let file = out_task.await.unwrap_or(None);
     let tail = err_task.await.unwrap_or_default();
     if !status.success() {
@@ -762,6 +820,24 @@ async fn download_one(
         ));
     }
     Ok(file)
+}
+
+/// Espera o yt-dlp, mas o encerra se a rodada for cancelada. Sem isso um
+/// `cancel()` (botão do app ou SIGINT só no processo da CLI) esperava o vídeo
+/// inteiro terminar. O `.part` fica e o yt-dlp retoma dele na próxima rodada.
+async fn wait_or_cancel(
+    child: &mut tokio::process::Child,
+) -> anyhow::Result<std::process::ExitStatus> {
+    loop {
+        if let Some(status) = child.try_wait()? {
+            return Ok(status);
+        }
+        if CANCEL.load(Ordering::SeqCst) {
+            let _ = child.kill().await;
+            return Err(anyhow!("cancelado"));
+        }
+        tokio::time::sleep(Duration::from_millis(300)).await;
+    }
 }
 
 #[cfg(test)]
@@ -990,6 +1066,29 @@ mod tests {
         assert!(a.contains(&"--ignore-errors".to_string()));
         let i = a.iter().position(|x| x == "--max-sleep-interval").expect("pausa");
         assert_eq!(a[i + 1], "10");
+    }
+
+    /// Mensagens reais do yt-dlp: as de rede caída pausam a rodada, as do
+    /// servidor ou do vídeo continuam virando falha do item.
+    #[test]
+    fn offline_errors_are_told_apart_from_item_errors() {
+        let mac = "ERROR: [youtube] Ye9xvMX9qs8: Unable to download API page: \
+                   [Errno 8] nodename nor servname provided, or not known (caused by ...)";
+        let linux = "ERROR: [youtube] x: Unable to download webpage: \
+                     [Errno -3] Temporary failure in name resolution";
+        let win = "ERROR: [youtube] x: Unable to download webpage: \
+                   <urlopen error [Errno 11001] getaddrinfo failed>";
+        for m in [mac, linux, win] {
+            assert!(is_offline_error(m), "{m}");
+        }
+        for m in [
+            "ERROR: \r[download] Got error: Remote end closed connection without response. Giving up after 10 retries",
+            "ERROR: \r[download] Got error: HTTP Error 503: Service Unavailable. Giving up after 10 retries",
+            "ERROR: [youtube] abc: Video unavailable. This video is private",
+            "ERROR: unable to download video data: HTTP Error 429: Too Many Requests",
+        ] {
+            assert!(!is_offline_error(m), "{m}");
+        }
     }
 
     /// Com o teto já estourado a rodada nem chama o yt-dlp: sai antes do
