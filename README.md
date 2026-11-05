@@ -592,14 +592,6 @@ FFmpeg conversions with GPU acceleration where the machine has it: container, co
 
 ---
 
-## Built-in chat, off by default
-
-OmniGet includes an optional Discord-style chat called OmniDisc for servers you self-host with `omnidisc-server`. Features include text channels, direct messages, friends, roles, voice, video, and screen sharing with hardware encoding. Direct messages and calls use MLS end-to-end encryption. Files sent through chat are encrypted at rest and deleted from the server after thirty minutes.
-
-OmniDisc is disabled by default. Turn it on in **Settings → Advanced → OmniDisc** or type `/omnidisc` into the command palette (**Ctrl+K**).
-
----
-
 ## For League of Legends players
 
 A League menu sits in the sidebar. It reads your running League client locally, with no account and no third-party build site, and does nothing until the client is open. If you never play, switch it off in **Settings → Advanced → League of Legends** and the menu disappears.

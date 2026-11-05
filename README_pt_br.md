@@ -445,14 +445,6 @@ Conversões com FFmpeg e aceleração por GPU quando a máquina tem: contêiner,
 
 ---
 
-## Chat embutido, desligado por padrão
-
-O OmniGet traz um chat no estilo Discord chamado OmniDisc para servidores que você mesmo hospeda com o omnidisc-server. Canais de texto, mensagens diretas, amigos, cargos e permissões, fixados, busca, voz, vídeo e compartilhamento de tela. Mensagens diretas e os arquivos enviados nelas são criptografados de ponta a ponta com MLS, e a chave de uma chamada criptografada deriva do mesmo grupo, então quem opera o servidor não consegue ouvir. A voz roda em Rust em vez de no webview e o compartilhamento de tela usa o codificador de hardware da máquina. Arquivos enviados pelo chat ficam criptografados em repouso e são apagados do servidor depois de trinta minutos.
-
-É experimental e não faz nada até você ativar em **Configurações → Avançado → Chat (OmniDisc)** e adicionar um servidor.
-
----
-
 ## Para quem joga League of Legends
 
 Um menu League fica na barra lateral. Ele lê o cliente do League em execução, localmente, sem conta e sem site de builds de terceiros, e não faz nada enquanto o cliente não está aberto. Se você não joga, desligue em **Configurações → Avançado → League of Legends** e o menu some.

@@ -42,13 +42,7 @@
       "label-consistency": 3,
       "text-contrast": 20
     },
-    "/omnidisc": {
-      "control-gap": 2,
-      "control-size": 2,
-      "label-consistency": 3,
-      "text-contrast": 2
-    },
-    "/open-nami": {
+    "/nami": {
       "aria-reference": 4,
       "control-gap": 8,
       "control-size": 6,

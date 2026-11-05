@@ -67,7 +67,7 @@ describe("UI Lint Policies & Target Runner", () => {
 
     const shellPlan = resolveTargets(["--shell"]);
     expect(shellPlan.targets).toEqual(SHELL_ROUTES);
-    expect(SHELL_ROUTES).toContain("/omnidisc");
+    expect(SHELL_ROUTES).toContain("/nami");
 
     const docShort = resolveTargets(["docs/mcp"]);
     expect(docShort.surface).toBe("docs");
@@ -81,7 +81,6 @@ describe("UI Lint Policies & Target Runner", () => {
     expect(ALL_APP_THEMES.length).toBe(14);
 
     const mockScript = buildTauriMockInitScript("dark");
-    expect(mockScript).toContain("omnidisc_connect");
     expect(mockScript).toContain("plugin:courses|courses_list_platforms");
   });
 

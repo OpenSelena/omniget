@@ -337,7 +337,9 @@ pub async fn start(opts: RecordOptions) -> anyhow::Result<RecordState> {
         && std::env::var("WAYLAND_DISPLAY").is_ok()
         && std::env::var("DISPLAY").is_err()
     {
-        return Err(anyhow!("sessao Wayland sem XWayland: o x11grab nao enxerga a tela. Use a captura do OmniDisc (PipeWire) ou entre numa sessao X11."));
+        return Err(anyhow!(
+            "sessao Wayland sem XWayland: o x11grab nao enxerga a tela. Entre numa sessao X11."
+        ));
     }
     let ffmpeg = crate::core::dependencies::ensure_ffmpeg().await?;
     let dir = if opts.output_dir.trim().is_empty() {

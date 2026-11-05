@@ -60,11 +60,10 @@ export const LIGHT_SCHEME_THEMES = new Set([
 export const SHELL_ROUTES = [
   "/",
   "/downloads",
-  "/omnidisc",
   "/settings",
   "/marketplace",
   "/about",
-  "/open-nami",
+  "/nami",
   "/league",
   "/tools",
 ];
@@ -300,7 +299,6 @@ export function buildTauriMockInitScript(theme = "dark") {
         },
         telegram: { concurrent_downloads: 2, fix_file_extensions: true },
         rpc: { enabled: false, app_id: "", large_image_key: "" },
-        omnidisc: { enabled: true },
         league: { enabled: true, auto_accept: false },
         onboarding_completed: true,
         start_with_system: false,
@@ -397,20 +395,6 @@ export function buildTauriMockInitScript(theme = "dark") {
             case "check_ytdlp":
             case "is_ytdlp_available":
               return { available: true, version: "2026.10.01", path: "yt-dlp" };
-            case "omnidisc_connect":
-              return {
-                url: args?.url || "https://chat.tonho.wtf",
-                instance: { name: "OmniDisc", registration_open: true },
-                insecure: false,
-              };
-            case "omnidisc_has_session":
-              return { has_session: false };
-            case "omnidisc_voice_status":
-              return { connected: false, muted: false, deafened: false, speaking: [] };
-            case "omnidisc_voice_devices":
-              return { inputs: [], outputs: [] };
-            case "omnidisc_voice_ptt_status":
-              return { binding: "Control+Shift+M", registered: false };
             case "plugin:courses|courses_list_platforms":
               return [
                 { id: "udemy", name: "Udemy", auth_type: "token" },

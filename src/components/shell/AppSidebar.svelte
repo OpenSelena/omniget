@@ -11,7 +11,6 @@
     pluginNav?: NavItem[];
     badgeLabel?: string;
     badgeCount?: number;
-    chatBadgeCount?: number;
   }
 
   let {
@@ -20,11 +19,9 @@
     pluginNav = [],
     badgeLabel = "",
     badgeCount = 0,
-    chatBadgeCount = 0,
   }: Props = $props();
 
   let updateInfo = $derived(getUpdateInfo());
-  let chatBadgeLabel = $derived(chatBadgeCount > 99 ? "99+" : String(chatBadgeCount));
 
   const PLUGINS_KEY = "omniget.sidebar.plugins_expanded";
   let pluginsExpanded = $state(
@@ -62,8 +59,6 @@
     <span class="mac-nav-label">{title}</span>
     {#if item.badge === "downloads" && badgeCount > 0}
       <span class="mac-nav-badge live">{badgeLabel}</span>
-    {:else if item.badge === "omnidisc" && chatBadgeCount > 0}
-      <span class="mac-nav-badge live">{chatBadgeLabel}</span>
     {:else if item.href === "/settings" && updateInfo.available}
       <span class="mac-nav-badge live update-badge">UPDATE</span>
     {/if}

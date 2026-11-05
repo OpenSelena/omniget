@@ -15,7 +15,6 @@
     if (path.startsWith("/marketplace")) return $t("nav.marketplace");
     if (path.startsWith("/settings")) return $t("nav.settings");
     if (path.startsWith("/about")) return $t("nav.about");
-    if (path.startsWith("/omnidisc")) return $t("nav.omnidisc");
     if (path.startsWith("/league")) return $t("league.nav");
     if (path.startsWith("/courses")) return $t("courses.title");
     if (path.startsWith("/convert")) return $t("convert.title");
