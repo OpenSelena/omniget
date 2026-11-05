@@ -40,15 +40,9 @@
 
   let pluginNavItems = $state<NavItem[]>([]);
 
-  let leagueNavItems = $derived<NavItem[]>(
-    (getSettings()?.league?.enabled ?? true)
-      ? [{ href: "/league", labelKey: "league.nav", icon: "league", group: "app", order: 45 }]
-      : []
-  );
-
   let coreNavItems = $derived(CORE_NAV_ITEMS);
 
-  let allNav = $derived([...coreNavItems, ...leagueNavItems, ...pluginNavItems].sort((a, b) => (a.order ?? 50) - (b.order ?? 50)));
+  let allNav = $derived([...coreNavItems, ...pluginNavItems].sort((a, b) => (a.order ?? 50) - (b.order ?? 50)));
   let primaryNav = $derived(allNav.filter((item) => item.group === "primary"));
   let appNav = $derived(allNav.filter((item) => item.group === "app"));
   let pluginNav = $derived(allNav.filter((item) => item.group === "plugins"));
@@ -70,7 +64,6 @@
     page.url.pathname.startsWith("/downloads") ||
     page.url.pathname.startsWith("/settings") ||
     page.url.pathname.startsWith("/marketplace") ||
-    page.url.pathname.startsWith("/league") ||
     page.url.pathname.startsWith("/about") ||
     page.url.pathname.startsWith("/nami"),
   );
@@ -132,9 +125,8 @@
 
   onMount(() => {
     initDownloadListener();
-    // If `get_settings` failed while the shell was booting, the sidebar has no
-    // League entry and Settings spins forever. Retry a few times instead of
-    // leaving the app half-configured until the next restart.
+    // If `get_settings` failed while the shell was booting, Settings spins forever.
+    // Retry a few times instead of leaving the app half-configured until the next restart.
     if (!getSettings()) {
       let attempts = 0;
       const retry = () => {

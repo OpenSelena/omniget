@@ -30,12 +30,6 @@
       "label-consistency": 3,
       "text-contrast": 2
     },
-    "/league": {
-      "control-size": 2,
-      "font-size": 6,
-      "label-consistency": 3,
-      "text-contrast": 2
-    },
     "/marketplace": {
       "control-gap": 1,
       "control-size": 20,

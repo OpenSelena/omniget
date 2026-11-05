@@ -76,8 +76,6 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 - [The Tools section: 158 tools in 25 categories](#the-tools-section-158-tools-in-25-categories)
 - [OmniGet for AI agents: MCP server and Claude Code plugin](#omniget-for-ai-agents-mcp-server-and-claude-code-plugin)
 - [Plugins: Courses, Study, Telegram, Convert](#plugins-courses-study-telegram-convert)
-- [Built-in chat, off by default](#built-in-chat-off-by-default)
-- [For League of Legends players](#for-league-of-legends-players)
 - [Everything else in the box](#everything-else-in-the-box)
 - [Privacy and what OmniGet refuses to do](#privacy-and-what-omniget-refuses-to-do)
 - [Code signing policy](#code-signing-policy)
@@ -589,20 +587,6 @@ Sign in with a QR code or your phone number. Browse every channel and group you 
 ### <img src="https://api.iconify.design/ph:arrows-clockwise.svg?color=%232AA845" width="20" height="20" align="center" alt="Convert" /> Convert
 
 FFmpeg conversions with GPU acceleration where the machine has it: container, codec, resolution, bitrate and compression for video and audio, no internet required.
-
----
-
-## For League of Legends players
-
-A League menu sits in the sidebar. It reads your running League client locally, with no account and no third-party build site, and does nothing until the client is open. If you never play, switch it off in **Settings → Advanced → League of Legends** and the menu disappears.
-
-<p align="center">
-  <img src="assets/readme/illustration-league.png" alt="Loop in a gaming chair with a headset, looking at a monitor with a three-lane map and a ten-player scoreboard, with trophy, dice, chart and AI tiles beside it" width="900" />
-</p>
-
-Match scouting for both teams with rank, recent form, KDA and the champions each player actually plays. Win probability that shrinks win rates toward the baseline by sample size and always shows a range. Live gold, CS and level for all ten players. Goals per role you can edit. Runes and summoner spells recommended by the client itself, applied in one click and only ever replacing the page OmniGet created. Champion tiers by role. Player search by Riot ID. Opt-in automation: accept matches, pick and ban from your priority list, grab a champion off the ARAM bench. Every automation has its own switch.
-
-New and marked beta or experimental: a **Profile** tab that edits what other players see (rank shown in chat, challenge medals and title, banner and crest, chat icon, bulk friend management); a **skin, chroma and ward roulette** that rolls an owned skin the moment you lock in, with rerolls; a **champion and lane raffle** for when you want the queue to decide, plus an optional random pick in champion select; full **match history and ranked stats for any player** through the client's own backend gateway, with replay download; and an **AI coach** that reviews a game, spots trends over your last matches or answers a question about the current champ select, using your configured AI provider and OP.GG's public data.
 
 ---
 

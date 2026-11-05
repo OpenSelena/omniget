@@ -65,8 +65,6 @@ leitor pdf, flashcards anki, repetição espaçada, player de música, spicetify
 - [A extensão do navegador, passo a passo](#a-extensão-do-navegador-passo-a-passo)
 - [A seção Tools: 108 ferramentas em 16 categorias](#a-seção-tools-108-ferramentas-em-16-categorias)
 - [Plugins: Courses, Study, Telegram, Convert](#plugins-courses-study-telegram-convert)
-- [Chat embutido, desligado por padrão](#chat-embutido-desligado-por-padrão)
-- [Para quem joga League of Legends](#para-quem-joga-league-of-legends)
 - [Tudo o mais que vem na caixa](#tudo-o-mais-que-vem-na-caixa)
 - [Privacidade e o que o OmniGet se recusa a fazer](#privacidade-e-o-que-o-omniget-se-recusa-a-fazer)
 - [Perguntas frequentes](#perguntas-frequentes)
@@ -442,16 +440,6 @@ Entre com QR code ou número de telefone. Navegue por todos os canais e grupos e
 ### <img src="https://api.iconify.design/ph:arrows-clockwise.svg?color=%232AA845" width="20" height="20" align="center" alt="Convert" /> Convert
 
 Conversões com FFmpeg e aceleração por GPU quando a máquina tem: contêiner, codec, resolução, bitrate e compressão de vídeo e áudio, sem internet.
-
----
-
-## Para quem joga League of Legends
-
-Um menu League fica na barra lateral. Ele lê o cliente do League em execução, localmente, sem conta e sem site de builds de terceiros, e não faz nada enquanto o cliente não está aberto. Se você não joga, desligue em **Configurações → Avançado → League of Legends** e o menu some.
-
-Scouting da partida para os dois times com elo, forma recente, KDA e os campeões que cada jogador realmente joga. Probabilidade de vitória que encolhe as taxas de vitória em direção à média conforme o tamanho da amostra e sempre mostra uma faixa. Ouro, CS e nível ao vivo dos dez jogadores. Metas por função que você pode editar. Runas e feitiços recomendados pelo próprio cliente, aplicados em um clique e substituindo apenas a página que o OmniGet criou. Tiers de campeões por função. Busca de jogador por Riot ID. Automação opcional: aceitar partidas, escolher e banir pela sua lista de prioridade, pegar um campeão do banco do ARAM. Cada automação tem o seu próprio interruptor.
-
-Novidades marcadas como beta ou experimentais: uma aba **Perfil** que edita o que os outros jogadores veem (elo exibido no chat, medalhas e título de desafio, banner e brasão, ícone do chat, gestão de amigos em massa); uma **roleta de skin, chroma e ward** que sorteia uma skin sua no momento do lock-in, com re-sorteio; um **sorteio de campeão e de rota** para quando você quer que a fila decida, mais um pick aleatório opcional na seleção de campeões; **histórico completo e ranked de qualquer jogador** pelo gateway do próprio cliente com o backend, com download de replay; e um **coach de IA** que revisa uma partida, aponta tendências das suas últimas partidas ou responde a uma pergunta sobre a seleção atual, usando o provedor de IA configurado e os dados públicos do OP.GG.
 
 ---
 

@@ -64,7 +64,6 @@ export const SHELL_ROUTES = [
   "/marketplace",
   "/about",
   "/nami",
-  "/league",
   "/tools",
 ];
 
@@ -299,7 +298,6 @@ export function buildTauriMockInitScript(theme = "dark") {
         },
         telegram: { concurrent_downloads: 2, fix_file_extensions: true },
         rpc: { enabled: false, app_id: "", large_image_key: "" },
-        league: { enabled: true, auto_accept: false },
         onboarding_completed: true,
         start_with_system: false,
         start_minimized: false,

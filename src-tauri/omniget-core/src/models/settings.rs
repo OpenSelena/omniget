@@ -30,8 +30,6 @@ pub struct AppSettings {
     #[serde(default)]
     pub bridge: BridgeSettings,
     #[serde(default)]
-    pub league: LeagueSettings,
-    #[serde(default)]
     pub accessibility: AccessibilitySettings,
 }
 
@@ -43,113 +41,6 @@ pub struct AccessibilitySettings {
     pub reduce_transparency: bool,
     #[serde(default)]
     pub disable_haptics: bool,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct LeagueSettings {
-    #[serde(default = "default_league_enabled")]
-    pub enabled: bool,
-    #[serde(default)]
-    pub auto_accept: bool,
-    #[serde(default)]
-    pub auto_accept_delay: u8,
-    #[serde(default = "default_notify_ready_check")]
-    pub notify_ready_check: bool,
-    #[serde(default)]
-    pub auto_pick: bool,
-    #[serde(default)]
-    pub auto_ban: bool,
-    #[serde(default)]
-    pub auto_ban_delay: u8,
-    #[serde(default)]
-    pub auto_lock: bool,
-    #[serde(default)]
-    pub auto_lock_at_timeout: bool,
-    #[serde(default)]
-    pub auto_runes: bool,
-    #[serde(default)]
-    pub auto_honor: bool,
-    #[serde(default)]
-    pub auto_play_again: bool,
-    #[serde(default)]
-    pub auto_requeue: bool,
-    #[serde(default)]
-    pub auto_accept_swaps: bool,
-    #[serde(default)]
-    pub auto_reconnect: bool,
-    #[serde(default)]
-    pub auto_trade: String,
-    #[serde(default)]
-    pub auto_message: String,
-    #[serde(default)]
-    pub pick_champions: Vec<i64>,
-    #[serde(default)]
-    pub ban_champions: Vec<i64>,
-    /// Auto-pick ignores the list and locks a random legal champion instead.
-    #[serde(default)]
-    pub pick_random: bool,
-    /// Rolls a random owned skin (and chroma) the moment a champion is locked.
-    #[serde(default)]
-    pub skin_roulette: bool,
-    #[serde(default)]
-    pub skin_roulette_include_base: bool,
-    /// Rolls a random owned ward skin on lock-in.
-    #[serde(default)]
-    pub ward_roulette: bool,
-    /// Falls back to the client's backend (SGP) when the local history is thin.
-    #[serde(default = "default_sgp_enabled")]
-    pub sgp_enabled: bool,
-    /// Tone of the AI coach: "objective", "roast" or "praise".
-    #[serde(default = "default_coach_style")]
-    pub coach_style: String,
-}
-
-fn default_sgp_enabled() -> bool {
-    true
-}
-
-fn default_coach_style() -> String {
-    "objective".to_string()
-}
-
-fn default_league_enabled() -> bool {
-    true
-}
-
-fn default_notify_ready_check() -> bool {
-    true
-}
-
-impl Default for LeagueSettings {
-    fn default() -> Self {
-        Self {
-            enabled: default_league_enabled(),
-            auto_accept: false,
-            auto_accept_delay: 0,
-            notify_ready_check: default_notify_ready_check(),
-            auto_pick: false,
-            auto_ban: false,
-            auto_ban_delay: 0,
-            auto_lock: false,
-            auto_lock_at_timeout: false,
-            auto_runes: false,
-            auto_honor: false,
-            auto_play_again: false,
-            auto_requeue: false,
-            auto_accept_swaps: false,
-            auto_reconnect: false,
-            auto_trade: String::new(),
-            auto_message: String::new(),
-            pick_champions: Vec::new(),
-            ban_champions: Vec::new(),
-            pick_random: false,
-            skin_roulette: false,
-            skin_roulette_include_base: false,
-            ward_roulette: false,
-            sgp_enabled: default_sgp_enabled(),
-            coach_style: default_coach_style(),
-        }
-    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -670,7 +561,6 @@ impl Default for AppSettings {
             typography: TypographySettings::default(),
             rpc: RpcSettings::default(),
             bridge: BridgeSettings::default(),
-            league: LeagueSettings::default(),
             accessibility: AccessibilitySettings::default(),
         }
     }

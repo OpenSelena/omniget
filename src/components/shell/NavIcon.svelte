@@ -31,7 +31,6 @@
     marketplace: { glyph: "storefront", from: "#6E8CFF", to: "#3D5BF0" },
     settings: { glyph: "gear-six", from: "#A3A3A8", to: "#6F6F75" },
     about: { glyph: "info", from: "#5AA9FF", to: "#1E6FE8" },
-    league: { glyph: "sword", from: "#E8B84A", to: "#B8860B" },
     courses: { glyph: "graduation-cap", from: "#C77DFF", to: "#8E3FD8" },
     telegram: { glyph: "paper-plane-tilt", from: "#55C2FF", to: "#1F8FE0" },
     convert: { glyph: "arrows-clockwise", from: "#FF7A7A", to: "#E33A3A" },
