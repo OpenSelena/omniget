@@ -80,7 +80,7 @@
   },
   "home": {
     "inspector_title": "Download options",
-    "hero_title": "Paste a link. Get the file.",
+    "hero_title": "Grab a link, get the file.",
     "hero_subtitle": "Video, audio, images, courses and torrents from 1,000+ sites, saved straight to your folder. No account, no ads.",
     "action_batch": "Many links at once",
     "action_torrent": "Open a .torrent file",
@@ -4536,7 +4536,7 @@
     "empty": "No release notes available."
   },
   "onboarding": {
-    "welcome_title": "Paste a link. Get the file.",
+    "welcome_title": "Grab a link, get the file.",
     "welcome_desc": "OmniGet downloads video, audio, images and courses from 1,000+ sites. Two quick things, then your first link.",
     "next": "Continue",
     "skip": "Skip setup",

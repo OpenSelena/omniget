@@ -19,7 +19,7 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 -->
 
 <p align="center">
-  <img src="assets/readme/hero.gif" alt="OmniGet: paste a link, get the file. Loop, the mascot, sends video, music, PDF, image, course and torrent files into a folder. Courses, video, audio, images and torrents, then transcribe, convert, read and study." width="100%" />
+  <img src="assets/readme/hero.gif" alt="OmniGet: grab a link, get the file. Loop, the mascot, sends video, music, PDF, image, course and torrent files into a folder. Courses, video, audio, images and torrents, then transcribe, convert, read and study." width="100%" />
 </p>
 
 <h1 align="center">OmniGet</h1>
