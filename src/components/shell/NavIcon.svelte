@@ -17,9 +17,9 @@
     "open-nami": "/icons/nav/open-nami.svg",
     marketplace: "/icons/nav/marketplace.svg",
     convert: "/icons/nav/convert.svg",
-    settings: "/emoji/gear.png",
+    settings: "/icons/nav/settings.svg",
     about: "/icons/about-64.png",
-    courses: "/emoji/books.png",
+    courses: "/icons/nav/courses.svg",
     telegram: "/icons/telegram-64.png",
   };
 

@@ -197,7 +197,7 @@
 {:else}
 <div class="courses-page">
   <header class="courses-head">
-    <img src="/emoji/books.png" alt="" class="courses-hero-icon" width="56" height="56" draggable="false" />
+    <img src="/icons/nav/courses.svg" alt="" class="courses-hero-icon" width="56" height="56" draggable="false" />
     <div class="courses-identity">
       <h1 class="page-title">{$t("courses.title")}</h1>
       <p class="courses-subtitle">{$t("courses.subtitle")}</p>
