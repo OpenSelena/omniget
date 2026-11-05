@@ -65,9 +65,7 @@ pub fn parse_netscape_cookies(content: &str, filter_domain: Option<&str>) -> Vec
 }
 
 #[command]
-pub async fn nami_http_fetch(
-    options: HttpRequestOptions,
-) -> Result<HttpResponsePayload, String> {
+pub async fn nami_http_fetch(options: HttpRequestOptions) -> Result<HttpResponsePayload, String> {
     let timeout = Duration::from_millis(options.timeout_ms.unwrap_or(15_000));
     let client = reqwest::Client::builder()
         .timeout(timeout)

@@ -221,9 +221,7 @@ pub fn nami_save_app_settings(
     output_directory: Option<String>,
     cookies_file: Option<String>,
 ) -> Result<String, String> {
-    let _storage_guard = NAMI_STORAGE_LOCK
-        .lock()
-        .unwrap_or_else(|p| p.into_inner());
+    let _storage_guard = NAMI_STORAGE_LOCK.lock().unwrap_or_else(|p| p.into_inner());
 
     let settings = AppSettings {
         output_directory,
@@ -241,9 +239,7 @@ pub fn nami_save_app_settings(
 
 #[command]
 pub fn nami_load_app_settings() -> Result<AppSettings, String> {
-    let _storage_guard = NAMI_STORAGE_LOCK
-        .lock()
-        .unwrap_or_else(|p| p.into_inner());
+    let _storage_guard = NAMI_STORAGE_LOCK.lock().unwrap_or_else(|p| p.into_inner());
 
     let settings_file = omniget_nami_dir()?.join("app_settings.json");
     if !settings_file.exists() {
@@ -263,9 +259,7 @@ pub fn nami_load_app_settings() -> Result<AppSettings, String> {
 #[command]
 pub fn nami_load_profiles(platform: String) -> Result<Vec<Profile>, String> {
     validate_profile_platform(&platform)?;
-    let _storage_guard = NAMI_STORAGE_LOCK
-        .lock()
-        .unwrap_or_else(|p| p.into_inner());
+    let _storage_guard = NAMI_STORAGE_LOCK.lock().unwrap_or_else(|p| p.into_inner());
 
     let profiles_file = omniget_nami_dir()?.join("profiles.json");
     if !profiles_file.exists() {
@@ -293,9 +287,7 @@ pub fn nami_load_profiles(platform: String) -> Result<Vec<Profile>, String> {
 #[command]
 pub fn nami_save_profile(platform: String, url: String) -> Result<String, String> {
     validate_profile_platform(&platform)?;
-    let _storage_guard = NAMI_STORAGE_LOCK
-        .lock()
-        .unwrap_or_else(|p| p.into_inner());
+    let _storage_guard = NAMI_STORAGE_LOCK.lock().unwrap_or_else(|p| p.into_inner());
 
     let raw_input = url.trim().to_string();
     if raw_input.is_empty() {
@@ -370,9 +362,7 @@ pub fn nami_save_profile(platform: String, url: String) -> Result<String, String
 #[command]
 pub fn nami_delete_profile(platform: String, profile_url: String) -> Result<String, String> {
     validate_profile_platform(&platform)?;
-    let _storage_guard = NAMI_STORAGE_LOCK
-        .lock()
-        .unwrap_or_else(|p| p.into_inner());
+    let _storage_guard = NAMI_STORAGE_LOCK.lock().unwrap_or_else(|p| p.into_inner());
 
     let profiles_file = omniget_nami_dir()?.join("profiles.json");
     if !profiles_file.exists() {
