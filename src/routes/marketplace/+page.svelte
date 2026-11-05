@@ -4,6 +4,7 @@
   import { t } from "$lib/i18n";
   import { setToolbar } from "$lib/stores/toolbar-store.svelte";
   import { showToast } from "$lib/stores/toast-store.svelte";
+  import NavIcon from "$components/shell/NavIcon.svelte";
 
   type PluginNavInfo = {
     route: string;
@@ -60,6 +61,14 @@
   function capLabel(cap: string): string {
     const key = CAP_LABELS[cap];
     return key ? $t(`marketplace.${key}`) : cap;
+  }
+
+  function getPluginIcon(id: string): string {
+    const norm = id.toLowerCase();
+    if (norm === "convert" || norm.includes("convert")) return "convert";
+    if (norm === "courses" || norm.includes("course")) return "courses";
+    if (norm === "telegram" || norm.includes("telegram")) return "telegram";
+    return id;
   }
 
   type UpdateInfo = {
@@ -255,6 +264,7 @@
         {#each [0, 1, 2] as i (i)}
           <div class="plugin-card skeleton">
             <div class="plugin-header">
+              <span class="skeleton-line skeleton-line-icon"></span>
               <div class="plugin-info">
                 <span class="skeleton-line skeleton-line-name"></span>
                 <span class="skeleton-line skeleton-line-meta"></span>
@@ -282,6 +292,9 @@
         {#each registry as entry (entry.id)}
           <div class="plugin-card">
             <div class="plugin-header">
+              <div class="plugin-icon-slot">
+                <NavIcon icon={getPluginIcon(entry.id)} size={40} />
+              </div>
               <div class="plugin-info">
                 <div class="plugin-name-row">
                   <span class="plugin-name">{entry.name}</span>
@@ -347,6 +360,9 @@
 {#snippet installedCard(plugin: PluginInfo)}
   <div class="plugin-card" class:active-sidebar={plugin.enabled}>
     <div class="plugin-header">
+      <div class="plugin-icon-slot">
+        <NavIcon icon={getPluginIcon(plugin.id)} iconSvg={plugin.nav?.[0]?.icon_svg || undefined} size={40} />
+      </div>
       <div class="plugin-info">
         <div class="plugin-name-row">
           <span class="plugin-name">{plugin.name}</span>
@@ -548,20 +564,20 @@
     gap: var(--space-3);
   }
 
-  .plugin-header::before {
-    content: "";
+  .plugin-icon-slot {
     width: 40px;
     height: 40px;
     flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .skeleton-line-icon {
+    width: 40px;
+    height: 40px;
     border-radius: 10px;
-    background: linear-gradient(160deg, color-mix(in srgb, var(--accent) 85%, white), var(--accent-lo));
-    box-shadow: inset 0 0 0 var(--hairline) rgba(0, 0, 0, 0.12);
-    background-image:
-      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='rgba(30,18,0,0.85)' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'><path d='M9.2 3.4h5.6v2.3a2 2 0 0 1-2 2h-1.6a2 2 0 0 1-2-2V3.4z'/><path d='M6.4 6.8h11.2c.88 0 1.6.72 1.6 1.6v4.7h-2.15a1.85 1.85 0 1 0 0 3.7H19.2v2.55c0 .88-.72 1.6-1.6 1.6H6.4c-.88 0-1.6-.72-1.6-1.6V16.8h2.15a1.85 1.85 0 1 0 0-3.7H4.8V8.4c0-.88.72-1.6 1.6-1.6z'/></svg>"),
-      linear-gradient(160deg, color-mix(in srgb, var(--accent) 85%, white), var(--accent-lo));
-    background-repeat: no-repeat;
-    background-position: center;
-    background-size: 22px 22px, cover;
+    flex-shrink: 0;
   }
 
   .plugin-info {
