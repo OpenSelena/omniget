@@ -83,7 +83,9 @@ pub mod win_updater;
 pub mod x;
 pub mod yt_archive;
 pub mod yt_chapters;
+pub mod yt_dataset;
 pub mod yt_notes;
+pub mod yt_search;
 
 use std::sync::Arc;
 

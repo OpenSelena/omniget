@@ -385,25 +385,39 @@ pub struct Options {
     pub account_slug: Option<String>,
     #[serde(default)]
     pub session_netscape: Option<String>,
+    /// Idiomas de legenda no formato do `--sub-langs` (padrão "pt.*,en.*").
+    #[serde(default)]
+    pub sub_langs: Option<String>,
+    /// Para antes do próximo item quando a pasta passar disso (0 = sem teto).
+    #[serde(default)]
+    pub max_bytes: u64,
+    /// Pausa antes de cada download, contra o limite de taxa do YouTube.
+    #[serde(default)]
+    pub sleep_seconds: u32,
 }
 
 fn default_quality() -> String {
     "best".to_string()
 }
 
-/// Tradução da qualidade escolhida para o seletor do yt-dlp.
+/// Tradução da qualidade escolhida para o seletor do yt-dlp. Qualquer altura
+/// numérica vale (360, 240...); entre formatos da mesma altura o H.264/AAC
+/// ganha, porque o MP4 final toca em qualquer lugar e decodifica rápido.
 pub fn format_args(quality: &str) -> Vec<String> {
-    match quality {
-        "audio" => vec![
+    let height = quality.parse::<u32>().ok().filter(|h| *h > 0);
+    match (quality, height) {
+        ("audio", _) => vec![
             "-f".into(),
             "bestaudio/best".into(),
             "-x".into(),
             "--audio-format".into(),
             "mp3".into(),
         ],
-        "1080" | "720" | "480" => vec![
+        (_, Some(h)) => vec![
             "-f".into(),
-            format!("bv*[height<={h}]+ba/b[height<={h}]/bv*+ba/b", h = quality),
+            format!("bv*[height<={h}]+ba/b[height<={h}]/bv*+ba/b"),
+            "-S".into(),
+            format!("res:{h},vcodec:h264,acodec:aac"),
             "--merge-output-format".into(),
             "mp4".into(),
         ],
@@ -430,6 +444,8 @@ pub struct ArchiveResult {
     pub items: Vec<ArchiveItem>,
     pub used_session: bool,
     pub cancelled: bool,
+    /// A rodada parou porque a pasta atingiu `max_bytes`.
+    pub cap_reached: bool,
 }
 
 fn result_of(
@@ -452,6 +468,7 @@ fn result_of(
         items: state.items.clone(),
         used_session,
         cancelled,
+        cap_reached: false,
     }
 }
 
@@ -555,9 +572,14 @@ pub async fn run(opts: Options, progress: super::ProgressFn) -> anyhow::Result<A
 
     let mut rodados = 0usize;
     let mut cancelled = false;
+    let mut cap_reached = false;
     while rodados < limit {
         if CANCEL.load(Ordering::SeqCst) {
             cancelled = true;
+            break;
+        }
+        if over_cap(&dest, opts.max_bytes) {
+            cap_reached = true;
             break;
         }
         let Some(idx) = st.next_pending() else { break };
@@ -573,6 +595,12 @@ pub async fn run(opts: Options, progress: super::ProgressFn) -> anyhow::Result<A
         );
         match download_one(&bin, &opts, &cookie, &archive_txt, &dest, &item, &progress).await {
             Ok(file) => st.mark(&item.id, ItemStatus::Ok, file, None),
+            // Ctrl+C mata o yt-dlp junto: o item foi interrompido, não falhou,
+            // e continua na fila para a próxima rodada.
+            Err(_) if CANCEL.load(Ordering::SeqCst) => {
+                cancelled = true;
+                break;
+            }
             Err(e) => {
                 tracing::warn!("[yt-archive] {}: {}", item.id, e);
                 st.mark(&item.id, ItemStatus::Failed, None, Some(e.to_string()));
@@ -591,7 +619,50 @@ pub async fn run(opts: Options, progress: super::ProgressFn) -> anyhow::Result<A
         Some(total),
         None,
     );
-    Ok(result_of(&dest, &st, has_session(&opts), cancelled))
+    let mut result = result_of(&dest, &st, has_session(&opts), cancelled);
+    result.cap_reached = cap_reached;
+    Ok(result)
+}
+
+fn over_cap(dest: &Path, max_bytes: u64) -> bool {
+    max_bytes > 0 && super::yt_dataset::dir_size(dest) >= max_bytes
+}
+
+/// Legendas e pausa entre downloads, conforme as opções.
+fn extra_args(opts: &Options) -> Vec<String> {
+    let mut args = Vec::new();
+    if opts.write_subs {
+        let langs = opts
+            .sub_langs
+            .as_deref()
+            .map(str::trim)
+            .filter(|l| !l.is_empty())
+            .unwrap_or("pt.*,en.*");
+        // `--ignore-errors` rebaixa erro de legenda (o 429 do YouTube é
+        // comum) a aviso: o vídeo é o que importa. Erro no vídeo continua
+        // saindo com código 1 e o item fica como falha.
+        args.extend(
+            [
+                "--write-subs",
+                "--write-auto-subs",
+                "--sub-langs",
+                langs,
+                "--convert-subs",
+                "srt",
+                "--ignore-errors",
+            ]
+            .map(String::from),
+        );
+    }
+    if opts.sleep_seconds > 0 {
+        args.extend([
+            "--sleep-interval".to_string(),
+            opts.sleep_seconds.to_string(),
+            "--max-sleep-interval".to_string(),
+            (opts.sleep_seconds * 2).to_string(),
+        ]);
+    }
+    args
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -620,16 +691,7 @@ async fn download_one(
         "-o".to_string(),
         template.to_string_lossy().to_string(),
     ]);
-    if opts.write_subs {
-        args.extend([
-            "--write-subs".to_string(),
-            "--write-auto-subs".to_string(),
-            "--sub-langs".to_string(),
-            "pt.*,en.*".to_string(),
-            "--convert-subs".to_string(),
-            "srt".to_string(),
-        ]);
-    }
+    args.extend(extra_args(opts));
     if opts.write_thumbnail {
         args.push("--write-thumbnail".to_string());
     }
@@ -904,6 +966,54 @@ mod tests {
             .iter()
             .any(|a| a.contains("height<=1080")));
         assert!(format_args("best").iter().any(|a| a == "bv*+ba/b"));
+        let low = format_args("360");
+        assert!(low.iter().any(|a| a.contains("height<=360")));
+        assert!(low.iter().any(|a| a == "res:360,vcodec:h264,acodec:aac"));
+        assert!(!format_args("0").iter().any(|a| a.contains("height")));
+    }
+
+    fn opts_for(dest: &str) -> Options {
+        serde_json::from_value(serde_json::json!({ "url": "", "dest": dest }))
+            .expect("opções mínimas")
+    }
+
+    #[test]
+    fn extra_args_follow_subs_and_sleep_options() {
+        let mut o = opts_for("x");
+        assert!(extra_args(&o).is_empty(), "sem legenda nem pausa");
+        o.write_subs = true;
+        assert!(extra_args(&o).contains(&"pt.*,en.*".to_string()));
+        o.sub_langs = Some(".*-orig,en".into());
+        o.sleep_seconds = 5;
+        let a = extra_args(&o);
+        assert!(a.contains(&".*-orig,en".to_string()));
+        assert!(a.contains(&"--ignore-errors".to_string()));
+        let i = a.iter().position(|x| x == "--max-sleep-interval").expect("pausa");
+        assert_eq!(a[i + 1], "10");
+    }
+
+    /// Com o teto já estourado a rodada nem chama o yt-dlp: sai antes do
+    /// primeiro item, com a fila intacta.
+    #[tokio::test]
+    async fn run_stops_before_downloading_when_folder_is_over_cap() {
+        let dir = super::super::temp_dir().join(format!("yt-archive-cap-{}", uuid::Uuid::new_v4()));
+        std::fs::create_dir_all(&dir).expect("pasta");
+        std::fs::write(dir.join("big.bin"), vec![0u8; 2048]).expect("arquivo");
+        let items = super::super::yt_dataset::parse_seed("{\"id\":\"a1\"}\n{\"id\":\"b2\"}");
+        super::super::yt_dataset::seed(&dir, "cap", items).expect("semeia");
+
+        let mut o = opts_for(&dir.to_string_lossy());
+        o.max_bytes = 1024;
+        let r = run(o, super::super::noop_progress()).await;
+        let _ = std::fs::remove_dir_all(&dir);
+        let r = match r {
+            Ok(r) => r,
+            // Máquina sem yt-dlp: o teto não chegou a ser testado aqui.
+            Err(e) if e.to_string().contains("yt-dlp") => return,
+            Err(e) => panic!("{e}"),
+        };
+        assert!(r.cap_reached);
+        assert_eq!((r.pending, r.done, r.failed), (2, 0, 0));
     }
 
     #[test]
@@ -949,6 +1059,9 @@ mod tests {
             retry_failed: false,
             account_slug: None,
             session_netscape: None,
+            sub_langs: None,
+            max_bytes: 0,
+            sleep_seconds: 0,
         };
         let r = run(opts.clone(), super::super::noop_progress())
             .await
@@ -992,6 +1105,9 @@ mod tests {
             retry_failed: false,
             account_slug: None,
             session_netscape: None,
+            sub_langs: None,
+            max_bytes: 0,
+            sleep_seconds: 0,
         };
         let r = scan(&opts, &super::super::noop_progress())
             .await

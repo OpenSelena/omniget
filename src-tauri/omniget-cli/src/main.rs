@@ -51,6 +51,10 @@ enum Commands {
         #[arg(short, long)]
         output: Option<String>,
     },
+    /// Search videos by text (one per line; NDJSON with --json)
+    Search(commands::search::SearchArgs),
+    /// Resumable archive of a channel, playlist or search results in a folder
+    Archive(commands::archive::ArchiveArgs),
     /// Import a cookies.txt file (Netscape format)
     ImportCookies {
         file: String,
@@ -99,6 +103,12 @@ async fn main() -> anyhow::Result<()> {
             output,
         } => {
             commands::batch::execute(file, max_concurrent, output, cli.proxy).await?;
+        }
+        Commands::Search(args) => {
+            commands::search::execute(args, cli.proxy).await?;
+        }
+        Commands::Archive(args) => {
+            commands::archive::execute(args, cli.proxy).await?;
         }
         Commands::ImportCookies {
             file,

@@ -100,6 +100,10 @@ Canonical triage roles (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-
 
 Single-context (`GLOSSARY.md` and `docs/adr/`). See `docs/agents/domain.md`.
 
+### Video datasets from the CLI
+
+`omniget-cli search` + `omniget-cli archive` build a resumable local video archive (search terms, filters, size cap). See [.agents/skills/video-archive/SKILL.md](.agents/skills/video-archive/SKILL.md).
+
 ---
 
 ## Local Overrides & Session Protocol
