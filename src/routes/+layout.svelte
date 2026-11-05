@@ -83,7 +83,7 @@
     page.url.pathname.startsWith("/marketplace") ||
     page.url.pathname.startsWith("/league") ||
     page.url.pathname.startsWith("/about") ||
-    page.url.pathname.startsWith("/open-nami"),
+    page.url.pathname.startsWith("/nami"),
   );
 
   let isFlushRoute = $derived(

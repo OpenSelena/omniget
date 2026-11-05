@@ -23,16 +23,16 @@ export function runTier4Tests() {
     // 1: docs/installation/index.html (Installation)
     // 2: docs/mcp/index.html (MCP Server)
     // 3: docs/courses/index.html (Courses)
-    // 4: docs/opennami/index.html (OpenNami)
+    // 4: docs/nami/index.html (Nami)
     // 5: docs/troubleshooting/index.html (Troubleshooting)
     // 6: docs/changelog/index.html (Changelog)
     const expectedChain = [
       { from: 'docs/index.html', nextFile: 'installation/' },
       { from: 'docs/installation/index.html', prevFile: '../', nextFile: '../mcp/' },
       { from: 'docs/mcp/index.html', prevFile: '../installation/', nextFile: '../courses/' },
-      { from: 'docs/courses/index.html', prevFile: '../mcp/', nextFile: '../opennami/' },
-      { from: 'docs/opennami/index.html', prevFile: '../courses/', nextFile: '../troubleshooting/' },
-      { from: 'docs/troubleshooting/index.html', prevFile: '../opennami/', nextFile: '../changelog/' },
+      { from: 'docs/courses/index.html', prevFile: '../mcp/', nextFile: '../nami/' },
+      { from: 'docs/nami/index.html', prevFile: '../courses/', nextFile: '../troubleshooting/' },
+      { from: 'docs/troubleshooting/index.html', prevFile: '../nami/', nextFile: '../changelog/' },
       { from: 'docs/changelog/index.html', prevFile: '../troubleshooting/' }
     ];
 
@@ -196,9 +196,9 @@ export function runTier4Tests() {
       }
 
       // 2. Specific rhetorical headings cataloged in Survey 3:
-      // "What is OpenNami?", "What is the OmniGet MCP Server?", "Why this happens:"
+      // "What is Nami?", "What is the OmniGet MCP Server?", "Why this happens:"
       const knownQuestions = [
-        /What is OpenNami\?/i,
+        /What is Nami\?/i,
         /What is the OmniGet MCP Server\?/i,
         /Looking for older releases/i,
         /Why this happens:/i

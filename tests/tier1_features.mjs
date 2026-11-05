@@ -249,7 +249,7 @@ export function runTier1Tests() {
       { key: 'installation', pattern: /installation|binary|packages/i },
       { key: 'mcp', pattern: /mcp|model context protocol/i },
       { key: 'courses', pattern: /course/i },
-      { key: 'opennami', pattern: /opennami/i },
+      { key: 'nami', pattern: /nami/i },
       { key: 'troubleshooting', pattern: /troubleshooting|fixes/i },
       { key: 'privacy', pattern: /privacy|telemetry/i },
       { key: 'changelog', pattern: /changelog|release/i }

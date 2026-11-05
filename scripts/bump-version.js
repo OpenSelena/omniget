@@ -172,7 +172,7 @@ if (fs.existsSync(indexPath)) {
 }
 
 // Update docs sidebar version pills
-const docsDirs = ["docs", "docs/changelog", "docs/courses", "docs/installation", "docs/mcp", "docs/opennami", "docs/troubleshooting"];
+const docsDirs = ["docs", "docs/changelog", "docs/courses", "docs/installation", "docs/mcp", "docs/nami", "docs/troubleshooting"];
 for (const d of docsDirs) {
   const docFile = path.join(root, d, "index.html");
   if (fs.existsSync(docFile)) {

@@ -10,7 +10,7 @@ export const CANONICAL_DOC_PAGES = [
   'docs/installation/index.html',
   'docs/mcp/index.html',
   'docs/courses/index.html',
-  'docs/opennami/index.html',
+  'docs/nami/index.html',
   'docs/troubleshooting/index.html',
   'docs/changelog/index.html'
 ];

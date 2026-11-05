@@ -15,6 +15,7 @@
     downloads: "/icons/nav/downloads.svg",
     tools: "/icons/nav/tools.svg",
     "open-nami": "/icons/nav/open-nami.svg",
+    nami: "/icons/nav/open-nami.svg",
     marketplace: "/icons/nav/marketplace.svg",
     convert: "/icons/nav/convert.svg",
     settings: "/icons/nav/settings.svg",
@@ -37,6 +38,7 @@
     misc: { glyph: "wrench", from: "#9B9BA3", to: "#63636B" },
     tools: { glyph: "toolbox", from: "#FF9F5A", to: "#E8641A" },
     "open-nami": { glyph: "cloud-arrow-down", from: "#FF6584", to: "#D23B68" },
+    nami: { glyph: "cloud-arrow-down", from: "#FF6584", to: "#D23B68" },
     plugin: { glyph: "puzzle-piece", from: "#8E8E93", to: "#5C5C60" },
   };
 

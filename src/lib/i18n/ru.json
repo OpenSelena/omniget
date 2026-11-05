@@ -6540,14 +6540,14 @@
     "decimal_separator": ","
   },
   "open_nami": {
-    "page_title": "Open Nami — загрузчик из соцсетей",
-    "sections_aria": "Разделы Open Nami",
+    "page_title": "Nami — загрузчик из соцсетей",
+    "sections_aria": "Разделы Nami",
     "tab_download": "Загрузка",
     "tab_profiles": "Профили",
     "tab_settings": "Настройки",
     "desc_download": "Сохраняйте посты и медиа из подключённых профилей.",
     "desc_profiles": "Управляйте профилями, которые используете чаще всего.",
-    "desc_settings": "Выберите, куда Open Nami сохраняет скачанное.",
+    "desc_settings": "Выберите, куда Nami сохраняет скачанное.",
     "view_log": "Показать журнал",
     "saved_profiles_aria": "Сохранённые профили",
     "no_saved_profiles": "Нет сохранённых профилей —",

@@ -6,11 +6,11 @@ describe("CORE_NAV_ITEMS", () => {
     expect(CORE_NAV_ITEMS).toHaveLength(8);
   });
 
-  it("Open Nami is in primary group with order 28", () => {
-    const nami = CORE_NAV_ITEMS.find((i) => i.href === "/open-nami");
+  it("Nami is in primary group with order 28", () => {
+    const nami = CORE_NAV_ITEMS.find((i) => i.href === "/nami");
     expect(nami?.group).toBe("primary");
-    expect(nami?.icon).toBe("open-nami");
-    expect(nami?.label).toBe("Open Nami");
+    expect(nami?.icon).toBe("nami");
+    expect(nami?.label).toBe("Nami");
     expect(nami?.order).toBe(28);
   });
 

@@ -225,7 +225,7 @@ export function runTier3Tests() {
       { file: 'docs/installation/index.html', labelPattern: /installation/i },
       { file: 'docs/mcp/index.html', labelPattern: /mcp/i },
       { file: 'docs/courses/index.html', labelPattern: /course/i },
-      { file: 'docs/opennami/index.html', labelPattern: /opennami/i },
+      { file: 'docs/nami/index.html', labelPattern: /nami/i },
       { file: 'docs/troubleshooting/index.html', labelPattern: /troubleshooting/i },
       { file: 'docs/changelog/index.html', labelPattern: /changelog|release/i }
     ];

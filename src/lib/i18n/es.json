@@ -6532,14 +6532,14 @@
     }
   },
   "open_nami": {
-    "page_title": "Open Nami - Social Media Downloader",
-    "sections_aria": "Open Nami sections",
+    "page_title": "Nami - Social Media Downloader",
+    "sections_aria": "Nami sections",
     "tab_download": "Download",
     "tab_profiles": "Profiles",
     "tab_settings": "Settings",
     "desc_download": "Save posts and media from your connected social profiles.",
     "desc_profiles": "Manage the profiles you use most often.",
-    "desc_settings": "Choose where Open Nami saves downloaded media.",
+    "desc_settings": "Choose where Nami saves downloaded media.",
     "view_log": "View log",
     "saved_profiles_aria": "Saved profiles",
     "no_saved_profiles": "No saved profiles —",

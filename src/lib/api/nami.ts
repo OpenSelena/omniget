@@ -1,0 +1,126 @@
+import { invoke } from '@tauri-apps/api/core';
+import { listen, type UnlistenFn } from '@tauri-apps/api/event';
+
+export interface Profile {
+  url: string;
+  username?: string;
+  platform: string;
+  added_at: number;
+}
+
+export interface DownloadResult {
+  success: boolean;
+  message: string;
+  files_count: number;
+  cancelled: boolean;
+}
+
+export interface DownloadProgress {
+  message: string;
+  files_downloaded: number;
+  stage?: string | null;
+  stage_index?: number | null;
+  stage_total?: number | null;
+}
+
+export interface AppSettings {
+  output_directory: string | null;
+  cookies_file: string | null;
+}
+
+export interface DependencyStatus {
+  ok: boolean;
+  message: string;
+  gallery_dl_version: string | null;
+  yt_dlp_version?: string | null;
+  auto_provision_available?: boolean;
+}
+
+export async function checkPythonDependencies(): Promise<DependencyStatus> {
+  return await invoke<DependencyStatus>('nami_check_python_dependencies');
+}
+
+export interface HttpRequestOptions {
+  url: string;
+  method?: string;
+  headers?: Record<string, string>;
+  body?: string | null;
+  cookie_path?: string | null;
+  timeout_ms?: number;
+}
+
+export interface HttpResponsePayload {
+  status: number;
+  ok: boolean;
+  headers: Record<string, string>;
+  body: string;
+}
+
+export async function httpFetch(options: HttpRequestOptions): Promise<HttpResponsePayload> {
+  return await invoke<HttpResponsePayload>('nami_http_fetch', { options });
+}
+
+export async function ensureBinaries(): Promise<DependencyStatus> {
+  return await invoke<DependencyStatus>('nami_ensure_binaries');
+}
+
+export async function runGalleryDlDownload(
+  url: string,
+  outputDir: string,
+  cookiesFile: string | null,
+  contentType: string,
+  downloadId: string,
+  skipReplies?: boolean
+): Promise<DownloadResult> {
+  return await invoke<DownloadResult>('nami_run_gallery_dl_download', {
+    url,
+    outputDir,
+    cookiesFile,
+    contentType,
+    downloadId,
+    skipReplies: skipReplies ?? null
+  });
+}
+
+export async function cancelDownload(downloadId: string): Promise<string> {
+  return await invoke<string>('nami_cancel_download', { downloadId });
+}
+
+export async function listenToDownloadProgress(
+  downloadId: string,
+  callback: (progress: DownloadProgress) => void
+): Promise<UnlistenFn> {
+  return await listen<DownloadProgress>(`download_${downloadId}`, (event) => {
+    callback(event.payload);
+  });
+}
+
+export async function saveAppSettings(
+  outputDirectory: string | null,
+  cookiesFile: string | null
+): Promise<string> {
+  return await invoke<string>('nami_save_app_settings', {
+    outputDirectory,
+    cookiesFile
+  });
+}
+
+export async function loadAppSettings(): Promise<AppSettings> {
+  return await invoke<AppSettings>('nami_load_app_settings');
+}
+
+export async function loadProfiles(platform: string): Promise<Profile[]> {
+  return await invoke<Profile[]>('nami_load_profiles', { platform });
+}
+
+export async function saveProfile(platform: string, url: string): Promise<string> {
+  return await invoke<string>('nami_save_profile', { platform, url });
+}
+
+export async function deleteProfile(platform: string, profileUrl: string): Promise<string> {
+  return await invoke<string>('nami_delete_profile', { platform, profileUrl });
+}
+
+export function generateDownloadId(): string {
+  return `dl_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
+}
