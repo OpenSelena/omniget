@@ -47,8 +47,8 @@ importers:
         specifier: ^2.8.4
         version: 2.8.4
       '@tauri-apps/plugin-notification':
-        specifier: ^2.8.0
-        version: 2.8.0
+        specifier: ~2.3.3
+        version: 2.3.3
       '@tauri-apps/plugin-opener':
         specifier: ^2
         version: 2.5.3
@@ -56,11 +56,11 @@ importers:
         specifier: ^2.4.0
         version: 2.4.0
       '@tauri-apps/plugin-shell':
-        specifier: ^2.6.0
-        version: 2.6.0
+        specifier: ~2.3.5
+        version: 2.3.6
       '@tauri-apps/plugin-updater':
-        specifier: ^2.14.1
-        version: 2.14.1
+        specifier: ~2.10.0
+        version: 2.10.1
       '@tiptap/core':
         specifier: ^3.31.4
         version: 3.31.4(@tiptap/pm@3.31.4)
@@ -846,8 +846,8 @@ packages:
   '@tauri-apps/plugin-dialog@2.8.4':
     resolution: {integrity: sha512-+6ZOiXenOaxXwb8qCbBPdT2jX2cFPaVVHGIskrpmJLpmWj+qKRTD6X/z9x7hTdSQn7NedcoXCkWGej4a7dC4lw==}
 
-  '@tauri-apps/plugin-notification@2.8.0':
-    resolution: {integrity: sha512-BB9Kk2emiNHyMjIQr3k/ye8RKD2RJeOPCjM5OZLF+4/pO6Kfjl9RtkX4hVCe1vqgbAx5HjHXjf0O8rtdW2F2dw==}
+  '@tauri-apps/plugin-notification@2.3.3':
+    resolution: {integrity: sha512-Zw+ZH18RJb41G4NrfHgIuofJiymusqN+q8fGUIIV7vyCH+5sSn5coqRv/MWB9qETsUs97vmU045q7OyseCV3Qg==}
 
   '@tauri-apps/plugin-opener@2.5.3':
     resolution: {integrity: sha512-CCcUltXMOfUEArbf3db3kCE7Ggy1ExBEBl51Ko2ODJ6GDYHRp1nSNlQm5uNCFY5k7/ufaK5Ib3Du/Zir19IYQQ==}
@@ -855,11 +855,11 @@ packages:
   '@tauri-apps/plugin-process@2.4.0':
     resolution: {integrity: sha512-GddrmsSLAYrLa/yTXlXK/YRDzUgYeeOnUXTbiyvJWkmI424RmDPD3FVLeqcon7rv6O6ZfhBilcrHWnSo7o6hIQ==}
 
-  '@tauri-apps/plugin-shell@2.6.0':
-    resolution: {integrity: sha512-z9LZGSr8jfD0FWWJ+CdD99i2FQcmJ26ebNJlYJdrlFdMLcggUS29BYrfS4hJlXO1UAI6A6r084vJUAG5734Y6w==}
+  '@tauri-apps/plugin-shell@2.3.6':
+    resolution: {integrity: sha512-C2AG+QmBJPK0E3gccLXfRdjTfGBC9DgwzGi/PfYa61ieAZbYvhvOss4OdSGfn/D28N3THGhJZEhf3lozOh/Uqw==}
 
-  '@tauri-apps/plugin-updater@2.14.1':
-    resolution: {integrity: sha512-Hr7nlBm1wT6xbwzjZ/S36YULazu8MNlj5vvOwMl47fXI7HTa5Bjl1PbDEwVHaZTAKzE1VZsUy35UqnbrQxmYQw==}
+  '@tauri-apps/plugin-updater@2.10.1':
+    resolution: {integrity: sha512-NFYMg+tWOZPJdzE/PpFj2qfqwAWwNS3kXrb1tm1gnBJ9mYzZ4WDRrwy8udzWoAnfGCHLuePNLY1WVCNHnh3eRA==}
 
   '@tiptap/core@3.31.4':
     resolution: {integrity: sha512-cIVUQYBycighzsk6GbmCef8ZiEDVxoT5EuAe4xg2q9dNkDqCXVqI4YGr9aavCQEiAS4uHiRwqvcsPqJHipFDfg==}
@@ -2672,7 +2672,7 @@ snapshots:
     dependencies:
       '@tauri-apps/api': 2.12.4
 
-  '@tauri-apps/plugin-notification@2.8.0':
+  '@tauri-apps/plugin-notification@2.3.3':
     dependencies:
       '@tauri-apps/api': 2.12.4
 
@@ -2684,11 +2684,11 @@ snapshots:
     dependencies:
       '@tauri-apps/api': 2.12.4
 
-  '@tauri-apps/plugin-shell@2.6.0':
+  '@tauri-apps/plugin-shell@2.3.6':
     dependencies:
       '@tauri-apps/api': 2.12.4
 
-  '@tauri-apps/plugin-updater@2.14.1':
+  '@tauri-apps/plugin-updater@2.10.1':
     dependencies:
       '@tauri-apps/api': 2.12.4
 
