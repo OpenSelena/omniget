@@ -127,6 +127,44 @@ pub async fn resolve_media_info(
     }
 }
 
+/// Turns `--format` into a yt-dlp format selector and extra flags.
+///
+/// `mp4`, `mkv` and `webm` are container names, not selectors: handed to yt-dlp
+/// as-is, `mp4` means "best pre-muxed MP4", which on YouTube is the 360p itag 18
+/// and wins over the quality-limited fallback appended after it. So a container
+/// becomes a stream filter that keeps the height limit, plus the merge container.
+/// Anything else is passed through as a raw selector.
+fn video_format(format: &str, quality: Option<u32>) -> (Option<String>, Vec<String>) {
+    let (height, fallback) = match quality.filter(|h| *h > 0) {
+        Some(h) => (
+            format!("[height<={h}]"),
+            format!("bv*[height<={h}]+ba/b[height<={h}]/b"),
+        ),
+        None => (String::new(), "bv*+ba/b".to_string()),
+    };
+    let (selector, merge) = match format.trim().to_ascii_lowercase().as_str() {
+        "mp4" => (
+            Some(format!("bv*[ext=mp4]{height}+ba[ext=m4a]/{fallback}")),
+            "mp4",
+        ),
+        // WebM can't hold AAC, so let yt-dlp fall back to MKV when only
+        // incompatible streams are left.
+        "webm" => (
+            Some(format!("bv*[ext=webm]{height}+ba[ext=webm]/{fallback}")),
+            "webm/mkv",
+        ),
+        "mkv" => (None, "mkv"),
+        _ => return (Some(format.to_string()), Vec::new()),
+    };
+    let mut flags = vec!["--merge-output-format".to_string(), merge.to_string()];
+    if merge.starts_with("webm") {
+        // yt-dlp can't embed a thumbnail in WebM and fails the whole download
+        // in post-processing when "embed thumbnail" is on.
+        flags.push("--no-embed-thumbnail".to_string());
+    }
+    (selector, flags)
+}
+
 pub fn download_options(
     output_dir: PathBuf,
     quality: Option<u32>,
@@ -143,6 +181,15 @@ pub fn download_options(
         custom_ytdlp_args.push(lang);
     }
 
+    let mut format_id = None;
+    if !audio_only {
+        if let Some(format) = format.as_deref() {
+            let (selector, flags) = video_format(format, quality);
+            format_id = selector;
+            custom_ytdlp_args.extend(flags);
+        }
+    }
+
     DownloadOptions {
         quality: quality.map(|q| q.to_string()),
         output_dir,
@@ -151,7 +198,7 @@ pub fn download_options(
         include_auto_subtitles: false,
         download_mode: audio_only.then(|| "audio".to_string()),
         audio_format: audio_only.then(|| format.clone()).flatten(),
-        format_id: (!audio_only).then(|| format.clone()).flatten(),
+        format_id,
         referer: None,
         extra_headers: None,
         page_url: None,
@@ -165,5 +212,85 @@ pub fn download_options(
         torrent_files: None,
         torrent_auto_trackers: true,
         torrent_upnp: false,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn opts(quality: Option<u32>, audio_only: bool, format: &str) -> DownloadOptions {
+        download_options(
+            PathBuf::from("out"),
+            quality,
+            audio_only,
+            None,
+            Some(format.to_string()),
+            None,
+        )
+    }
+
+    #[test]
+    fn mp4_keeps_the_quality_limit() {
+        let o = opts(Some(1080), false, "mp4");
+        assert_eq!(
+            o.format_id.as_deref(),
+            Some("bv*[ext=mp4][height<=1080]+ba[ext=m4a]/bv*[height<=1080]+ba/b[height<=1080]/b")
+        );
+        assert_eq!(
+            o.custom_ytdlp_args,
+            Some(vec!["--merge-output-format".to_string(), "mp4".to_string()])
+        );
+    }
+
+    #[test]
+    fn mp4_without_quality_still_falls_back() {
+        let o = opts(None, false, "MP4");
+        assert_eq!(
+            o.format_id.as_deref(),
+            Some("bv*[ext=mp4]+ba[ext=m4a]/bv*+ba/b")
+        );
+    }
+
+    #[test]
+    fn webm_prefers_webm_streams_and_may_merge_into_mkv() {
+        let o = opts(Some(720), false, "webm");
+        assert_eq!(
+            o.format_id.as_deref(),
+            Some("bv*[ext=webm][height<=720]+ba[ext=webm]/bv*[height<=720]+ba/b[height<=720]/b")
+        );
+        assert_eq!(
+            o.custom_ytdlp_args,
+            Some(vec![
+                "--merge-output-format".to_string(),
+                "webm/mkv".to_string(),
+                "--no-embed-thumbnail".to_string(),
+            ])
+        );
+    }
+
+    #[test]
+    fn mkv_only_sets_the_merge_container() {
+        let o = opts(Some(2160), false, "mkv");
+        assert_eq!(o.format_id, None);
+        assert_eq!(
+            o.custom_ytdlp_args,
+            Some(vec!["--merge-output-format".to_string(), "mkv".to_string()])
+        );
+    }
+
+    #[test]
+    fn raw_selectors_pass_through() {
+        let o = opts(Some(1080), false, "137+140");
+        assert_eq!(o.format_id.as_deref(), Some("137+140"));
+        assert_eq!(o.custom_ytdlp_args, None);
+    }
+
+    #[test]
+    fn audio_only_uses_format_as_audio_format() {
+        let o = opts(None, true, "mp3");
+        assert_eq!(o.format_id, None);
+        assert_eq!(o.audio_format.as_deref(), Some("mp3"));
+        assert_eq!(o.custom_ytdlp_args, None);
     }
 }
