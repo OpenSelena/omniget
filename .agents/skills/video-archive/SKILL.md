@@ -58,7 +58,11 @@ or in the app's data folder; `ffmpeg` must be on PATH.
    for the process to exit before starting another run on the same folder.
 5. **Retry failures** later with `--retry-failed`. If the network drops, the
    run does not burn the queue: it logs `sem conexão: aguardando a rede voltar`
-   and waits for DNS to come back.
+   and waits for DNS to come back. If YouTube flags the IP ("Sign in to
+   confirm you're not a bot"), it logs `YouTube barrou o IP como robô` and
+   retries the same item after 15, 30, 60, 120, 240 and 240 min (~12 h). If the
+   block outlasts that, it stops with `blocked: true` and keeps the queue
+   pending; run again hours later.
 
 ## Choices and why
 

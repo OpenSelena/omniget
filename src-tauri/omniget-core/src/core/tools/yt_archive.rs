@@ -450,6 +450,9 @@ pub struct ArchiveResult {
     pub cancelled: bool,
     /// A rodada parou porque a pasta atingiu `max_bytes`.
     pub cap_reached: bool,
+    /// A rodada parou porque o YouTube seguiu barrando o IP como robô depois
+    /// de todas as pausas; os itens continuam pendentes.
+    pub blocked: bool,
 }
 
 fn result_of(
@@ -473,6 +476,7 @@ fn result_of(
         used_session,
         cancelled,
         cap_reached: false,
+        blocked: false,
     }
 }
 
@@ -563,8 +567,9 @@ pub async fn run(opts: Options, progress: super::ProgressFn) -> anyhow::Result<A
     };
 
     let mut rodados = 0usize;
-    let mut offline_waits = 0u32;
+    let mut waits = 0u32;
     let mut cancelled = false;
+    let mut blocked = false;
     let mut cap_reached = false;
     while rodados < limit {
         if CANCEL.load(Ordering::SeqCst) {
@@ -594,23 +599,24 @@ pub async fn run(opts: Options, progress: super::ProgressFn) -> anyhow::Result<A
                 cancelled = true;
                 break;
             }
-            // Sem rede, todo item falharia em segundos e a fila inteira seria
-            // queimada. O item fica pendente e a rodada espera a conexão voltar.
-            Err(e) if is_offline_error(&e.to_string()) && offline_waits < MAX_OFFLINE_WAITS => {
-                offline_waits += 1;
-                if !wait_online(&progress, feitos, total).await {
+            Err(e) => match on_error(&e.to_string(), &mut waits, &progress, feitos, total).await {
+                OnError::Retry => continue,
+                OnError::Cancelled => {
                     cancelled = true;
                     break;
                 }
-                continue;
-            }
-            Err(e) => {
-                tracing::warn!("[yt-archive] {}: {}", item.id, e);
-                st.mark(&item.id, ItemStatus::Failed, None, Some(e.to_string()));
-            }
+                OnError::Blocked => {
+                    blocked = true;
+                    break;
+                }
+                OnError::Fail => {
+                    tracing::warn!("[yt-archive] {}: {}", item.id, e);
+                    st.mark(&item.id, ItemStatus::Failed, None, Some(e.to_string()));
+                }
+            },
         }
         save_state(&dest, &mut st)?;
-        offline_waits = 0;
+        waits = 0;
         rodados += 1;
     }
 
@@ -618,14 +624,54 @@ pub async fn run(opts: Options, progress: super::ProgressFn) -> anyhow::Result<A
     super::report(
         &progress,
         ID,
-        if cancelled { "progress" } else { "done" },
+        if cancelled || blocked { "progress" } else { "done" },
         c.done as u64,
         Some(total),
         None,
     );
     let mut result = result_of(&dest, &st, has_session(&opts), cancelled);
     result.cap_reached = cap_reached;
+    result.blocked = blocked;
     Ok(result)
+}
+
+/// O que a rodada faz com o item depois de um erro do yt-dlp.
+#[derive(Debug, PartialEq)]
+enum OnError {
+    Retry,
+    Fail,
+    Cancelled,
+    Blocked,
+}
+
+/// Erros da máquina ou do IP (sem rede; YouTube barrando o IP como robô) não
+/// são do vídeo: todo item falharia em segundos e a fila inteira seria
+/// queimada. O item fica pendente e a rodada espera antes de repeti-lo.
+/// `waits` conta as pausas seguidas no mesmo item.
+async fn on_error(
+    msg: &str,
+    waits: &mut u32,
+    progress: &super::ProgressFn,
+    done: u64,
+    total: u64,
+) -> OnError {
+    let n = *waits as usize;
+    let resumed = if is_offline_error(msg) && *waits < MAX_OFFLINE_WAITS {
+        wait_online(progress, done, total).await
+    } else if is_blocked_error(msg) {
+        let Some(mins) = BLOCK_WAIT_MINS.get(n) else {
+            return OnError::Blocked;
+        };
+        wait_unblocked(*mins, progress, done, total).await
+    } else {
+        return OnError::Fail;
+    };
+    *waits += 1;
+    if resumed {
+        OnError::Retry
+    } else {
+        OnError::Cancelled
+    }
 }
 
 /// Fila salva (com as falhas devolvidas, se pedido) ou enumerada do zero.
@@ -667,22 +713,48 @@ fn is_offline_error(msg: &str) -> bool {
     SINAIS.iter().any(|s| msg.contains(s))
 }
 
+/// Pausas, em minutos, antes de repetir um item barrado como robô. O bloqueio
+/// é do IP e costuma durar horas; somadas dão ~12 h, depois a rodada para.
+const BLOCK_WAIT_MINS: [u64; 6] = [15, 30, 60, 120, 240, 240];
+
+/// O YouTube pediu login "para confirmar que você não é um robô": vale para
+/// o IP inteiro, não para o vídeo (o pedido de idade é outro erro, do vídeo).
+fn is_blocked_error(msg: &str) -> bool {
+    msg.contains("confirm you") && msg.contains("not a bot")
+}
+
 /// Espera o DNS do YouTube voltar a resolver. Devolve `false` se a rodada foi
 /// cancelada durante a espera.
 async fn wait_online(progress: &super::ProgressFn, done: u64, total: u64) -> bool {
     let msg = "sem conexão: aguardando a rede voltar".to_string();
     super::report(progress, ID, "progress", done, Some(total), Some(msg));
     loop {
-        for _ in 0..OFFLINE_POLL_SECS {
-            if CANCEL.load(Ordering::SeqCst) {
-                return false;
-            }
-            tokio::time::sleep(Duration::from_secs(1)).await;
+        if !sleep_or_cancel(OFFLINE_POLL_SECS).await {
+            return false;
         }
         if tokio::net::lookup_host(ONLINE_PROBE).await.is_ok() {
             return true;
         }
     }
+}
+
+/// Pausa antes de repetir um item barrado como robô. Devolve `false` se a
+/// rodada foi cancelada durante a pausa.
+async fn wait_unblocked(mins: u64, progress: &super::ProgressFn, done: u64, total: u64) -> bool {
+    let msg = format!("YouTube barrou o IP como robô: nova tentativa em {mins} min");
+    super::report(progress, ID, "progress", done, Some(total), Some(msg));
+    sleep_or_cancel(mins * 60).await
+}
+
+/// Dorme `secs` segundos olhando o cancelamento a cada segundo.
+async fn sleep_or_cancel(secs: u64) -> bool {
+    for _ in 0..secs {
+        if CANCEL.load(Ordering::SeqCst) {
+            return false;
+        }
+        tokio::time::sleep(Duration::from_secs(1)).await;
+    }
+    !CANCEL.load(Ordering::SeqCst)
 }
 
 fn over_cap(dest: &Path, max_bytes: u64) -> bool {
@@ -1092,6 +1164,33 @@ mod tests {
         ] {
             assert!(!is_offline_error(m), "{m}");
         }
+    }
+
+    const BOT: &str = "ERROR: [youtube] azI9TwV0EWk: Sign in to confirm you’re not a bot. \
+                       This helps protect our community. Use --cookies-from-browser";
+
+    #[test]
+    fn bot_check_is_told_apart_from_video_errors() {
+        assert!(is_blocked_error(BOT));
+        for m in [
+            "ERROR: [youtube] mxfBFUzbDPs: Sign in to confirm your age. This video may be inappropriate",
+            "ERROR: unable to download video data: HTTP Error 403: Forbidden",
+            "ERROR: [youtube] x: [Errno 8] nodename nor servname provided, or not known",
+        ] {
+            assert!(!is_blocked_error(m), "{m}");
+        }
+    }
+
+    /// Erro do vídeo falha o item na hora; bot check depois de todas as pausas
+    /// para a rodada sem marcar falha (os dois caminhos não dormem).
+    #[tokio::test]
+    async fn on_error_fails_the_item_or_stops_the_run() {
+        let p = super::super::noop_progress();
+        let mut waits = 0;
+        let r = on_error("ERROR: HTTP Error 403: Forbidden", &mut waits, &p, 0, 1).await;
+        assert_eq!(r, OnError::Fail);
+        let mut waits = BLOCK_WAIT_MINS.len() as u32;
+        assert_eq!(on_error(BOT, &mut waits, &p, 0, 1).await, OnError::Blocked);
     }
 
     /// Com o teto já estourado a rodada nem chama o yt-dlp: sai antes do
