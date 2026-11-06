@@ -64,7 +64,7 @@ spicetify, 下载管理器, tauri, rust, svelte.
 - [OmniGet 能下载什么](#omniget-能下载什么)
 - [浏览器扩展，手把手安装](#浏览器扩展手把手安装)
 - [Tools 工具区：16 个分类共 108 个工具](#tools-工具区16-个分类共-108-个工具)
-- [插件：Courses、Study、Telegram、Convert](#插件coursesstudytelegramconvert)
+- [插件：Courses、Telegram、Convert](#插件coursestelegramconvert)
 - [其他随附功能](#其他随附功能)
 - [隐私，以及 OmniGet 拒绝做的事](#隐私以及-omniget-拒绝做的事)
 - [常见问题](#常见问题)
@@ -409,33 +409,21 @@ Tools 是 OmniGet 里长到下载之外的那部分。每个方块是一项工�
 
 ---
 
-## 插件：Courses、Study、Telegram、Convert
+## 插件：Courses、Telegram、Convert
 
 插件是启动时加载的独立 Rust 库。OmniGet 在第一次启动时安装官方插件集，并自动更新。Marketplace 页面显示已安装的插件、每个插件被允许做什么（事件、通知、设置、下载文件夹、代理、托管工具、下载队列），并且可以隐藏、禁用或卸载任何一个。
 
 <p align="center">
-  <img src="assets/readme/marketplace.png" alt="OmniGet 的 Marketplace，列出 Courses、Study、Telegram 和 Convert 插件，显示版本、作者、权限和启用开关" width="900" />
+  <img src="assets/readme/marketplace.png" alt="OmniGet 的 Marketplace，列出 Courses、Telegram 和 Convert 插件，显示版本、作者、权限和启用开关" width="900" />
 </p>
 
 ### <img src="https://api.iconify.design/ph:graduation-cap.svg?color=%23F28500" width="20" height="20" align="center" alt="Courses" /> Courses
 
-通过应用内的浏览器窗口登录 **Hotmart**、**Udemy**、**Kiwify**、**Rocketseat** 或 **Meta-Analysis Academy**，也可以使用扩展保存的 Cookie，或在平台允许时直接用邮箱和密码。OmniGet 列出你购买的课程，打开课程大纲让你勾选想要的章节（并告诉你有多少课时受 DRM 保护、会被跳过），然后下载全部课时和附件，需要的话可以连续编号。Hotmart 使用当前的 OIDC 登录流程，所以在 Hotmart 2026 年更换认证方式之后仍然可用，免费课程和在 Hotmart Club 之外交付的课程也会列出来。下载好的课程自动出现在 Study 里。
-
-### <img src="https://api.iconify.design/ph:book-open.svg?color=%233D5BF0" width="20" height="20" align="center" alt="Study" /> Study
-
-Study 把你下载下来的一堆文件变成真正能学完的东西。
-
-- 库与播放器。把 Study 指向你的课程文件夹（不复制、不移动）。播放器精确到秒续播，观看时按 **N** 在当前时间点记一条笔记，点击笔记即可跳回。
-- 阅读器。支持 PDF、EPUB、DJVU、MOBI、AZW3、FB2、CBZ、CBR、TXT、RTF 和 HTML，带高亮、书签、合集、专注模式和纸质感主题。封面、书名和作者从文件中提取。
-- 笔记。Markdown 加 LaTeX 编辑器，页面互链、每日日记、模板、标签、知识图谱，可导出 `.md` 或 PDF。任何笔记都能变成记忆卡。
-- Anki。间隔重复卡组，支持导入 `.apkg`、`.txt` 和 CSV，过滤卡组、预设、笔记类型、标签、媒体、统计和复习日志。
-- 专注。番茄钟和深度工作计时器，带每日和每周目标，结束时自动暂停播放器。
-- 进度与成就。连续天数、每日目标、年度热力图和本地 XP，没有排行榜。
-- 音乐。带封面、歌手和专辑的本地音乐库，同步歌词、收藏、历史、播放列表、流派、转码，还有 Spotify、SoundCloud 和 YouTube Music 浏览器，让播放列表和喜欢的歌与本地文件并排。
+通过应用内的浏览器窗口登录 **Hotmart**、**Udemy**、**Kiwify**、**Rocketseat** 或 **Meta-Analysis Academy**，也可以使用扩展保存的 Cookie，或在平台允许时直接用邮箱和密码。OmniGet 列出你购买的课程，打开课程大纲让你勾选想要的章节（并告诉你有多少课时受 DRM 保护、会被跳过），然后下载全部课时和附件，需要的话可以连续编号。Hotmart 使用当前的 OIDC 登录流程，所以在 Hotmart 2026 年更换认证方式之后仍然可用，免费课程和在 Hotmart Club 之外交付的课程也会列出来。
 
 ### <img src="https://cdn.simpleicons.org/telegram/2CA5E0" width="20" height="20" align="center" alt="Telegram" /> Telegram
 
-用二维码或手机号登录。浏览你所在的所有频道和群组，按照片、视频、文档或音频筛选，搜索文件，下载单个条目或整个聊天并显示进度列表。频道里的视频可以直接导入 Study 库。
+用二维码或手机号登录。浏览你所在的所有频道和群组，按照片、视频、文档或音频筛选，搜索文件，下载单个条目或整个聊天并显示进度列表。
 
 ### <img src="https://api.iconify.design/ph:arrows-clockwise.svg?color=%232AA845" width="20" height="20" align="center" alt="Convert" /> Convert
 
@@ -473,10 +461,10 @@ OmniGet 只下载你自己已登录的会话本来就能打开的内容。它不
 免费。GPL-3.0，没有付费版本，没有广告，不用注册。
 
 **OmniGet 是 yt-dlp 的图形界面吗？**
-一部分是。yt-dlp 负责长尾网站，OmniGet 把它打包、校验并自动更新。在此之上还有课程、Instagram、X、Pinterest、哔哩哔哩、Telegram 和种子的原生提取器，带续传和重试的队列，Tools 工具区，以及 Study 学习库。
+一部分是。yt-dlp 负责长尾网站，OmniGet 把它打包、校验并自动更新。在此之上还有课程、Instagram、X、Pinterest、哔哩哔哩、Telegram 和种子的原生提取器，带续传和重试的队列，Tools 工具区，以及媒体转换功能。
 
 **能下载我买过的 Udemy 或 Hotmart 课程吗？**
-能。安装 Courses 插件（已预装），在应用里登录，选择课程和章节，下载。课时和附件按课程分文件夹保存，并出现在 Study 里。Kiwify、Rocketseat 和 Meta-Analysis Academy 的用法相同。
+能。安装 Courses 插件（已预装），在应用里登录，选择课程和章节，下载。课时和附件按课程分文件夹保存。Kiwify、Rocketseat 和 Meta-Analysis Academy 的用法相同。
 
 **能下载 Instagram 快拍、密友快拍或精选吗？**
 能，使用扩展捕获的你自己的会话。下载快拍不会标记为已看。
@@ -553,7 +541,7 @@ pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'
 
 正式版本用只有维护者持有的私钥签名更新包，所以直接 `pnpm tauri build` 会停在 "A public key has been found, but no private key"。上面的参数在本地构建时关掉这些更新包，其他一切不变。
 
-核心插件（`courses`、`telegram`、`convert`）以及 `study` 均作为内置模块静态链接在 `src-tauri/plugins/` 目录中，随主程序一起编译。插件注册表为 [omniget-plugins](https://github.com/OpenSelena/omniget-plugins)。
+核心插件（`courses`、`telegram`、`convert`）均作为内置模块静态链接在 `src-tauri/plugins/` 目录中，随主程序一起编译。插件注册表为 [omniget-plugins](https://github.com/OpenSelena/omniget-plugins)。
 
 技术栈：Tauri 2、Rust、SvelteKit（Svelte 5）、SQLite、yt-dlp、FFmpeg、librqbit（种子）、whisper.cpp、aria2、gallery-dl。
 
@@ -567,7 +555,7 @@ Bug 报告和 Pull Request 请提到 [Issues](https://github.com/OpenSelena/omni
 
 OmniGet 建立在 [yt-dlp](https://github.com/yt-dlp/yt-dlp)、[FFmpeg](https://ffmpeg.org/)、[gallery-dl](https://github.com/mikf/gallery-dl)、[whisper.cpp](https://github.com/ggerganov/whisper.cpp)、[aria2](https://aria2.github.io/)、[SponsorBlock](https://sponsor.ajay.app/)、[Return YouTube Dislike](https://returnyoutubedislike.com/)、[FxTwitter](https://github.com/FixTweet/FxTwitter)、[Spicetify](https://spicetify.app/) 和 [Tauri](https://tauri.app/) 之上。感谢所有维护这些项目的人。
 
-主界面上的小生物 Loop 是 OmniGet 的吉祥物。欢迎同人创作。原始美术不得用于商业用途，也不得修改后再分发。
+主界面上的企鹅是 OmniGet 的吉祥物。欢迎社区同人创作。项目品牌与美术资源不得用于商业用途或打包进第三方衍生版本。
 
 <p align="center">
   <a href="https://star-history.com/#OpenSelena/omniget&Date"><img src="https://api.star-history.com/svg?repos=OpenSelena/omniget&type=Date" alt="OpenSelena/omniget 的 Star 历史" width="600" /></a>

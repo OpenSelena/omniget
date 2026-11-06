@@ -9,7 +9,7 @@ leitor pdf, flashcards anki, repetição espaçada, player de música, spicetify
 -->
 
 <p align="center">
-  <img src="assets/readme/hero.png" alt="OmniGet: cole um link, receba o arquivo. Downloads, ferramentas e biblioteca de estudo em um só app para Windows, macOS e Linux." width="100%" />
+  <img src="assets/readme/hero.png" alt="OmniGet: cole um link, receba o arquivo. Downloads, ferramentas e conversão de mídia em um só app para Windows, macOS e Linux." width="100%" />
 </p>
 
 <h1 align="center">OmniGet</h1>
@@ -22,7 +22,7 @@ leitor pdf, flashcards anki, repetição espaçada, player de música, spicetify
 </p>
 
 <p align="center">
-  <b>Baixe cursos da Udemy e da Hotmart, YouTube, Instagram, X, Pinterest, TikTok e mais de 1.800 outros sites.<br/>Depois transcreva, converta, leia e estude o que salvou. Um único app de desktop, gratuito, sem terminal.</b>
+  <b>Baixe cursos da Udemy e da Hotmart, YouTube, Instagram, X, Pinterest, TikTok e mais de 1.800 outros sites.<br/>Depois transcreva, converta e gerencie o que salvou. Um único app de desktop, gratuito, sem terminal.</b>
 </p>
 
 <p align="center">
@@ -64,7 +64,7 @@ leitor pdf, flashcards anki, repetição espaçada, player de música, spicetify
 - [O que o OmniGet baixa](#o-que-o-omniget-baixa)
 - [A extensão do navegador, passo a passo](#a-extensão-do-navegador-passo-a-passo)
 - [A seção Tools: 108 ferramentas em 16 categorias](#a-seção-tools-108-ferramentas-em-16-categorias)
-- [Plugins: Courses, Study, Telegram, Convert](#plugins-courses-study-telegram-convert)
+- [Plugins: Courses, Telegram, Convert](#plugins-courses-telegram-convert)
 - [Tudo o mais que vem na caixa](#tudo-o-mais-que-vem-na-caixa)
 - [Privacidade e o que o OmniGet se recusa a fazer](#privacidade-e-o-que-o-omniget-se-recusa-a-fazer)
 - [Perguntas frequentes](#perguntas-frequentes)
@@ -409,33 +409,21 @@ Toda ferramenta que fala com uma IA usa o provedor definido em **Configurações
 
 ---
 
-## Plugins: Courses, Study, Telegram, Convert
+## Plugins: Courses, Telegram, Convert
 
 Plugins são bibliotecas Rust separadas, carregadas na inicialização. O OmniGet instala o conjunto oficial na primeira abertura e atualiza sozinho. A página Marketplace mostra o que está instalado, o que cada plugin pode fazer (eventos, notificações, configurações, pastas de download, proxy, ferramentas gerenciadas, fila de downloads), e permite ocultar, desativar ou desinstalar qualquer um.
 
 <p align="center">
-  <img src="assets/readme/marketplace.png" alt="Marketplace do OmniGet listando os plugins Courses, Study, Telegram e Convert com versão, autor, permissões e interruptores" width="900" />
+  <img src="assets/readme/marketplace.png" alt="Marketplace do OmniGet listando os plugins Courses, Telegram e Convert com versão, autor, permissões e interruptores" width="900" />
 </p>
 
 ### <img src="https://api.iconify.design/ph:graduation-cap.svg?color=%23F28500" width="20" height="20" align="center" alt="Courses" /> Courses
 
-Entre na **Hotmart**, **Udemy**, **Kiwify**, **Rocketseat** ou **Meta-Analysis Academy** por uma janela de navegador dentro do app, com cookies salvos pela extensão, ou com e-mail e senha onde a plataforma permite. O OmniGet lista suas compras, abre o sumário do curso para você marcar as seções que quer (avisando quantas aulas têm DRM e serão puladas) e baixa todas as aulas e anexos, com numeração contínua se quiser. A Hotmart usa o fluxo de login OIDC atual, então continua funcionando depois da mudança de autenticação de 2026, e cursos gratuitos e cursos entregues fora do Hotmart Club também aparecem na lista. Cursos baixados aparecem no Study automaticamente.
-
-### <img src="https://api.iconify.design/ph:book-open.svg?color=%233D5BF0" width="20" height="20" align="center" alt="Study" /> Study
-
-O Study transforma a pasta de arquivos que você baixou em algo que dá para terminar de verdade.
-
-- Biblioteca e player. Aponte o Study para as pastas dos seus cursos (nada é copiado nem movido). O player retoma no segundo exato, e apertar **N** captura uma nota no tempo atual que volta para lá quando clicada.
-- Leitor. PDF, EPUB, DJVU, MOBI, AZW3, FB2, CBZ, CBR, TXT, RTF e HTML, com marcações, favoritos, coleções, modo foco e um tema com jeito de papel. Capas, títulos e autores são extraídos dos arquivos.
-- Notas. Editor Markdown e LaTeX com links entre páginas, diário, modelos, tags, grafo de conhecimento e exportação em `.md` ou PDF. Qualquer nota pode virar flashcard.
-- Anki. Baralhos de repetição espaçada com importação de `.apkg`, `.txt` e CSV, baralhos filtrados, presets, tipos de nota, tags, mídia, estatísticas e histórico de revisões.
-- Foco. Pomodoro e sessões de trabalho profundo com metas diárias e semanais que pausam o player ao terminar.
-- Progresso e conquistas. Sequências, metas diárias, heatmap do ano e XP local sem ranking.
-- Música. Sua biblioteca local com capas, artistas e álbuns, letras sincronizadas, favoritos, histórico, playlists, gêneros, transcodificação e navegadores de Spotify, SoundCloud e YouTube Music, para playlists e curtidas ficarem ao lado dos seus arquivos.
+Entre na **Hotmart**, **Udemy**, **Kiwify**, **Rocketseat** ou **Meta-Analysis Academy** por uma janela de navegador dentro do app, com cookies salvos pela extensão, ou com e-mail e senha onde a plataforma permite. O OmniGet lista suas compras, abre o sumário do curso para você marcar as seções que quer (avisando quantas aulas têm DRM e serão puladas) e baixa todas as aulas e anexos, com numeração contínua se quiser. A Hotmart usa o fluxo de login OIDC atual, então continua funcionando depois da mudança de autenticação de 2026, e cursos gratuitos e cursos entregues fora do Hotmart Club também aparecem na lista.
 
 ### <img src="https://cdn.simpleicons.org/telegram/2CA5E0" width="20" height="20" align="center" alt="Telegram" /> Telegram
 
-Entre com QR code ou número de telefone. Navegue por todos os canais e grupos em que está, filtre por foto, vídeo, documento ou áudio, busque arquivos e baixe um item ou o chat inteiro com lista de progresso. Vídeos de canais podem ser importados direto para a biblioteca do Study.
+Entre com QR code ou número de telefone. Navegue por todos os canais e grupos em que está, filtre por foto, vídeo, documento ou áudio, busque arquivos e baixe um item ou o chat inteiro com lista de progresso.
 
 ### <img src="https://api.iconify.design/ph:arrows-clockwise.svg?color=%232AA845" width="20" height="20" align="center" alt="Convert" /> Convert
 
@@ -473,10 +461,10 @@ O OmniGet baixa o que a sua própria sessão logada já consegue abrir. Ele não
 Sim. GPL-3.0, sem plano pago, sem anúncios, sem conta.
 
 **O OmniGet é uma interface para o yt-dlp?**
-Em parte. O yt-dlp cuida da cauda longa de sites e o OmniGet o embute, verifica e atualiza. Em cima disso ficam extratores nativos para cursos, Instagram, X, Pinterest, Bilibili, Telegram e torrents, uma fila com retomada e repetição, a seção Tools e a biblioteca do Study.
+Em parte. O yt-dlp cuida da cauda longa de sites e o OmniGet o embute, verifica e atualiza. Em cima disso ficam extratores nativos para cursos, Instagram, X, Pinterest, Bilibili, Telegram e torrents, uma fila com retomada e repetição, a seção Tools e ferramentas de conversão.
 
 **Dá para baixar um curso da Udemy ou da Hotmart que eu comprei?**
-Sim. Instale o plugin Courses (já vem instalado), entre pelo app, escolha o curso e as seções e baixe. Aulas e anexos caem numa pasta por curso e aparecem no Study. Kiwify, Rocketseat e Meta-Analysis Academy funcionam do mesmo jeito.
+Sim. Instale o plugin Courses (já vem instalado), entre pelo app, escolha o curso e as seções e baixe. Aulas e anexos caem numa pasta organizada por curso. Kiwify, Rocketseat e Meta-Analysis Academy funcionam do mesmo jeito.
 
 **Dá para baixar stories, melhores amigos ou destaques do Instagram?**
 Sim, usando a sua própria sessão capturada pela extensão. Stories são baixados sem marcar como vistos.
@@ -553,7 +541,7 @@ pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'
 
 As releases assinam os artefatos do atualizador com uma chave privada que só o mantenedor tem, então um `pnpm tauri build` puro para com "A public key has been found, but no private key". A flag acima desliga esses artefatos numa build local e não muda mais nada.
 
-Os plugins `courses`, `telegram`, `convert` e `study` ficam dentro de `src-tauri/plugins/` e compilam junto com o binário principal. O registro de plugins é o [omniget-plugins](https://github.com/OpenSelena/omniget-plugins).
+Os plugins `courses`, `telegram` e `convert` ficam dentro de `src-tauri/plugins/` e compilam junto com o binário principal. O registro de plugins é o [omniget-plugins](https://github.com/OpenSelena/omniget-plugins).
 
 Stack: Tauri 2, Rust, SvelteKit com Svelte 5, SQLite, yt-dlp, FFmpeg, librqbit para torrents, whisper.cpp, aria2, gallery-dl.
 
@@ -567,7 +555,7 @@ As traduções são feitas no [Weblate](https://hosted.weblate.org/engage/omnige
 
 O OmniGet é construído sobre [yt-dlp](https://github.com/yt-dlp/yt-dlp), [FFmpeg](https://ffmpeg.org/), [gallery-dl](https://github.com/mikf/gallery-dl), [whisper.cpp](https://github.com/ggerganov/whisper.cpp), [aria2](https://aria2.github.io/), [SponsorBlock](https://sponsor.ajay.app/), [Return YouTube Dislike](https://returnyoutubedislike.com/), [FxTwitter](https://github.com/FixTweet/FxTwitter), [Spicetify](https://spicetify.app/) e [Tauri](https://tauri.app/). Obrigado a todo mundo que os mantém.
 
-O Loop, a criatura da tela inicial, é o mascote do OmniGet. Fan art é bem-vinda. A arte original não pode ser usada comercialmente nem redistribuída modificada.
+O pinguim é o mascote do OmniGet. Fan art é bem-vinda. A marca do projeto e as artes não podem ser usadas comercialmente nem empacotadas em forks de terceiros.
 
 <p align="center">
   <a href="https://star-history.com/#OpenSelena/omniget&Date"><img src="https://api.star-history.com/svg?repos=OpenSelena/omniget&type=Date" alt="Histórico de estrelas de OpenSelena/omniget" width="600" /></a>
