@@ -1933,7 +1933,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d045de693cb712d0b22c6a64be5b953f67b3ce00ab5ad3dd5d8b441886ab8e1a"
 dependencies = [
  "quote",
- "syn 2.0.117",
+ "syn 3.0.3",
 ]
 
 [[package]]
@@ -6873,7 +6873,7 @@ dependencies = [
  "which 8.0.6",
  "windows 0.62.2",
  "xz2",
- "zip 8.6.0",
+ "zip 9.0.5",
 ]
 
 [[package]]
@@ -6947,7 +6947,7 @@ dependencies = [
  "uuid 1.21.0",
  "walkdir",
  "xz2",
- "zip 8.6.0",
+ "zip 9.0.5",
 ]
 
 [[package]]
@@ -12937,6 +12937,21 @@ dependencies = [
  "flate2",
  "indexmap 2.14.2",
  "memchr",
+ "typed-path",
+ "zopfli",
+]
+
+[[package]]
+name = "zip"
+version = "9.0.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6e04976da629d3b04204ba8105b396a193af8ad2583b2c79bfb3ab8af580a11e"
+dependencies = [
+ "crc32fast",
+ "flate2",
+ "indexmap 2.14.2",
+ "memchr",
+ "nix 0.31.3",
  "typed-path",
  "zopfli",
 ]
