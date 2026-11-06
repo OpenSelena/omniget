@@ -19,7 +19,7 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 -->
 
 <p align="center">
-  <img src="assets/readme/hero.gif" alt="OmniGet: grab a link, get the file. The mascot sends video, music, PDF, image, course and torrent files into a folder. Courses, video, audio, images and torrents, then transcribe, convert, and manage." width="100%" />
+  <img src="assets/readme/hero.png" alt="OmniGet: grab a link, get the file. The mascot sends video, music, PDF, image, course and torrent files into a folder. Courses, video, audio, images and torrents, then transcribe, convert, and manage." width="100%" />
 </p>
 
 <h1 align="center">OmniGet</h1>
@@ -222,7 +222,7 @@ For the sites the sniffer cannot see, there is **Deep search**, a switch in the 
 Pick the level that matches how comfortable you are.
 
 <p align="center">
-  <img src="assets/readme/extension.png" alt="Loop plugging a cable from a browser window into the OmniGet app window, with cookies travelling along it and a padlock and a house above it: the pairing stays on your own machine." width="100%" />
+  <img src="assets/readme/extension.png" alt="Penguin mascot plugging a cable from a browser window into the OmniGet app window, with cookies travelling along it and a padlock and a house above it: the pairing stays on your own machine." width="100%" />
 </p>
 
 ### Level 1: from inside the app (no downloads, no zip files)
@@ -256,7 +256,7 @@ If the extension is installed but OmniGet is closed, clicks fall back to the `om
 Tools is the part of OmniGet that grew beyond downloading. Each tile is one job: an isolated Rust command with JSON in and JSON out, which is also what lets AI agents drive them through the built-in MCP server. The hub has a search box that understands English and Portuguese ("legenda" finds subtitle tools) and a platform filter, and tools that only run on Windows say so on the tile and stay hidden elsewhere. Everything below runs on your machine; the only tools that touch the network are the ones that fetch from the site they are named after.
 
 <p align="center">
-  <img src="assets/readme/illustration-tools.png" alt="Loop, the OmniGet mascot, opening a toolbox full of tool tiles: microphone, subtitles, scissors, PDF, photo, gear, folder, magnet, phone, AI, music, globe, keyboard, chat and wrench" width="900" />
+  <img src="assets/readme/illustration-tools.png" alt="Penguin mascot opening a toolbox full of tool tiles: microphone, subtitles, scissors, PDF, photo, gear, folder, magnet, phone, AI, music, globe, keyboard, chat and wrench" width="900" />
 </p>
 
 <p align="center">
@@ -529,7 +529,7 @@ Every tool that talks to an AI uses the provider you set in **Settings → AI**:
 ## OmniGet for AI agents: MCP server and Claude Code plugin
 
 <p align="center">
-  <img src="assets/readme/illustration-agents.png" alt="Loop at a terminal handing a folder of files to a small robot that hands back a link, with microphone, subtitle and video tiles above the screen" width="900" />
+  <img src="assets/readme/illustration-agents.png" alt="Penguin mascot at a terminal handing a folder of files to a small robot that hands back a link, with microphone, subtitle and video tiles above the screen" width="900" />
 </p>
 
 Two doors, depending on where your agent lives.
@@ -593,7 +593,7 @@ FFmpeg conversions with GPU acceleration where the machine has it: container, co
 ## Privacy and what OmniGet refuses to do
 
 <p align="center">
-  <img src="assets/readme/illustration-privacy.png" alt="Loop hugging a laptop with the OmniGet download icon and a green padlock, inside a glowing shield" width="700" />
+  <img src="assets/readme/illustration-privacy.png" alt="Penguin mascot hugging a laptop with the OmniGet download icon and a green padlock, inside a glowing shield" width="700" />
 </p>
 
 Everything runs on your computer. There is no account, no server of ours in the middle, and no telemetry about what you download. Cookies and API keys live in your local profile. The only network calls OmniGet makes on its own are to the sites you asked it to download from, to GitHub for updates and plugins, and to the AI provider you configured, when you use an AI tool.
