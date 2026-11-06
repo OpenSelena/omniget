@@ -17,12 +17,13 @@ use crate::platforms::traits::PlatformDownloader;
 
 const CHUNK_SIZE: usize = 64 * 1024;
 
-fn relay_addr() -> String {
-    std::env::var("OMNIGET_RELAY").unwrap_or_else(|_| "relay.tonho.wtf:9009".to_string())
+fn relay_addr() -> anyhow::Result<String> {
+    std::env::var("OMNIGET_RELAY")
+        .map_err(|_| anyhow!("P2P relay server not configured. Set OMNIGET_RELAY environment variable."))
 }
 
 async fn connect_relay() -> anyhow::Result<TcpStream> {
-    let addr = relay_addr();
+    let addr = relay_addr()?;
     let stream = tokio::time::timeout(
         std::time::Duration::from_secs(10),
         TcpStream::connect(&addr),
