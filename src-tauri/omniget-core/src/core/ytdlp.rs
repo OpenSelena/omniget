@@ -6280,7 +6280,7 @@ ERROR: [youtube] abc123: Requested format is not available";
 
 /// Teste de ponta a ponta contra o yt-dlp gerido, ignorado por padrão porque
 /// depende de rede e do binário local. Rodar com:
-/// `OMNIGET_YTDLP=~/Library/Application\ Support/wtf.tonho.omniget/bin/yt-dlp cargo test -p omniget-core --features desktop -- --ignored e2e_download_reports_streams --nocapture`
+/// `OMNIGET_YTDLP=~/Library/Application\ Support/com.openselena.omniget/bin/yt-dlp cargo test -p omniget-core --features desktop -- --ignored e2e_download_reports_streams --nocapture`
 #[cfg(test)]
 mod e2e {
     #[tokio::test]

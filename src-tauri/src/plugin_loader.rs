@@ -635,7 +635,7 @@ mod plugin_id_tests {
             "telegram",
             "convert",
             "my-plugin_2",
-            "wtf.tonho.x",
+            "com.openselena.x",
         ] {
             assert!(validate_plugin_id(id).is_ok(), "recusou id valido {id:?}");
         }

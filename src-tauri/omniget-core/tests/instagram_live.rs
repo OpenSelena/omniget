@@ -2,7 +2,7 @@
 //! por padrão; roda com um cookies.txt (Netscape) do instagram.com:
 //!
 //! ```text
-//! OMNIGET_IG_COOKIES="$HOME/Library/Application Support/wtf.tonho.omniget/cookies/instagram.com/_default.txt" \
+//! OMNIGET_IG_COOKIES="$HOME/Library/Application Support/com.openselena.omniget/cookies/instagram.com/_default.txt" \
 //!   cargo test -p omniget-core --test instagram_live -- --ignored --nocapture
 //! ```
 //!

@@ -6,7 +6,7 @@
 
   const USERSCRIPT = `// ==UserScript==
 // @name         OmniGet · Force H.264 on YouTube
-// @namespace    wtf.tonho.omniget
+// @namespace    com.openselena.omniget
 // @version      1.0
 // @match        *://*.youtube.com/*
 // @match        *://*.youtube-nocookie.com/*
