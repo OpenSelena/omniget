@@ -1415,7 +1415,7 @@
           <li>
             <a href="./courses/" class="sidebar-link">
               <span>36 Course Platforms</span>
-              <span class="sidebar-tag">v0.14.3</span>
+              <span class="sidebar-tag">v0.15.0</span>
             </a>
           </li>
         </ul>
@@ -1950,12 +1950,44 @@
         Track every update and bugfix shipped in OmniGet. OmniGet follows Semantic Versioning and publishes signed artifacts with SHA-256 checksums for every desktop release.
       </p>
 
-            <!-- v0.14.3 Release -->
+            <!-- v0.15.0 Release -->
       <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
           <div>
             <div style="display: flex; align-items: center; gap: 10px;">
-              <span class="sidebar-tag" style="background: var(--primary); color: var(--text-inverse); font-weight: 600; padding: 3px 8px; border-radius: 6px;">v0.14.3 Latest Release</span>
+              <span class="sidebar-tag" style="background: var(--primary); color: var(--text-inverse); font-weight: 600; padding: 3px 8px; border-radius: 6px;">v0.15.0 Latest Release</span>
+              <span style="font-size: 13px; color: var(--text-subtle);">Released November 2026</span>
+            </div>
+            <h3 style="font-size: 18px; font-weight: 700; color: var(--text); margin-top: 6px;">Brand Redesign, Local-First Architecture &amp; CLI Dataset Archiving</h3>
+          </div>
+          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.15.0" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+            <span>View Release on GitHub</span>
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+
+        <div style="display: grid; gap: 18px;">
+          <div>
+            <h4 style="font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              Branding &amp; Architecture Overhaul
+            </h4>
+            <ul style="margin-left: 20px; color: var(--text-muted); font-size: 14px; line-height: 1.6; display: grid; gap: 4px;">
+              <li>Original Penguin mascot designed from scratch across all 7 desktop states; purged legacy upstream mascot art.</li>
+              <li>Completely removed OmniDisc real-time chat, MLS encryption, and hardcoded P2P relay servers (56,391 lines deleted).</li>
+              <li>Purged experimental League of Legends companion (21,739 lines deleted) to enforce local-first, zero-telemetry architecture.</li>
+              <li>Added <code>omniget-cli search</code> and <code>omniget-cli archive</code> for YouTube dataset archiving with rate-limit backoff.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- v0.14.3 Release -->
+      <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="sidebar-tag">v0.14.3</span>
               <span style="font-size: 13px; color: var(--text-subtle);">Released November 2026</span>
             </div>
             <h3 style="font-size: 18px; font-weight: 700; color: var(--text); margin-top: 6px;">CLI Output Formatting, AppImage Library Isolation &amp; Localization Expansion</h3>
