@@ -27,7 +27,12 @@ pub struct ArchiveArgs {
     #[arg(long, help = "NDJSON from `omniget search --json` to add to the queue")]
     pub seed: Option<String>,
 
-    #[arg(short, long, default_value = "best", help = "best | audio | max height (e.g. 360)")]
+    #[arg(
+        short,
+        long,
+        default_value = "best",
+        help = "best | audio | max height (e.g. 360)"
+    )]
     pub quality: String,
 
     #[arg(long, help = "Subtitle languages, yt-dlp syntax (e.g. \".*-orig,en\")")]
@@ -39,13 +44,21 @@ pub struct ArchiveArgs {
     #[arg(long, help = "Save the thumbnail next to each video")]
     pub thumbnail: bool,
 
-    #[arg(long, default_value_t = 0, help = "Stop after N items this run (0 = all)")]
+    #[arg(
+        long,
+        default_value_t = 0,
+        help = "Stop after N items this run (0 = all)"
+    )]
     pub max_items: u32,
 
     #[arg(long, help = "Stop when the folder reaches this size in GB")]
     pub max_gb: Option<f64>,
 
-    #[arg(long, default_value_t = 0, help = "Seconds to wait before each download")]
+    #[arg(
+        long,
+        default_value_t = 0,
+        help = "Seconds to wait before each download"
+    )]
     pub sleep: u32,
 
     #[arg(long, help = "Put failed items back in the queue")]
@@ -98,7 +111,10 @@ fn seed_queue(dest: &Path, seed: &str) -> Result<()> {
         .unwrap_or_default();
     let r = yt_dataset::seed(dest, &title, yt_dataset::parse_seed(&text))?;
     if output::is_json_mode() {
-        println!("{}", json!({ "type": "seeded", "added": r.added, "total": r.total }));
+        println!(
+            "{}",
+            json!({ "type": "seeded", "added": r.added, "total": r.total })
+        );
     } else {
         println!("Queue: +{} new, {} total", r.added, r.total);
     }

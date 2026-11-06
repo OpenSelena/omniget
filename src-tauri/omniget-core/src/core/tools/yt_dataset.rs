@@ -124,7 +124,11 @@ lixo
         assert_eq!((r2.added, r2.total), (1, 3));
         let st = yt_archive::load_state(&dir).expect("estado");
         let a1 = st.items.iter().find(|i| i.id == "a1").expect("a1");
-        assert_eq!(a1.status, ItemStatus::Ok, "o que já baixou não volta à fila");
+        assert_eq!(
+            a1.status,
+            ItemStatus::Ok,
+            "o que já baixou não volta à fila"
+        );
         let _ = std::fs::remove_dir_all(&dir);
     }
 

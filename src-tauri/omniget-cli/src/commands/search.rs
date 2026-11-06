@@ -21,7 +21,12 @@ pub struct SearchArgs {
     #[arg(long, help = "File with one search term per line (# starts a comment)")]
     pub queries_file: Option<String>,
 
-    #[arg(short = 'n', long, default_value_t = 20, help = "Results per term (max 500)")]
+    #[arg(
+        short = 'n',
+        long,
+        default_value_t = 20,
+        help = "Results per term (max 500)"
+    )]
     pub max_results: u32,
 
     #[arg(long, default_value = "youtube", help = "youtube | soundcloud")]
@@ -33,7 +38,11 @@ pub struct SearchArgs {
     #[arg(long, help = "Drop videos longer than this (seconds)")]
     pub max_duration: Option<f64>,
 
-    #[arg(long, value_delimiter = ',', help = "Keep titles containing any of these (comma-separated)")]
+    #[arg(
+        long,
+        value_delimiter = ',',
+        help = "Keep titles containing any of these (comma-separated)"
+    )]
     pub title_has: Vec<String>,
 }
 
@@ -57,8 +66,10 @@ pub async fn execute(args: SearchArgs, proxy: Option<String>) -> Result<()> {
         };
         match yt_search::search(&opts).await {
             Ok(hits) => {
-                let fresh: Vec<SearchHit> =
-                    hits.into_iter().filter(|h| seen.insert(h.id.clone())).collect();
+                let fresh: Vec<SearchHit> = hits
+                    .into_iter()
+                    .filter(|h| seen.insert(h.id.clone()))
+                    .collect();
                 eprintln!("{query}: {} new", fresh.len());
                 fresh.iter().try_for_each(print_hit)?;
             }

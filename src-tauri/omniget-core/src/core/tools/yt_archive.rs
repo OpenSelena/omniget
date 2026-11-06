@@ -624,7 +624,11 @@ pub async fn run(opts: Options, progress: super::ProgressFn) -> anyhow::Result<A
     super::report(
         &progress,
         ID,
-        if cancelled || blocked { "progress" } else { "done" },
+        if cancelled || blocked {
+            "progress"
+        } else {
+            "done"
+        },
         c.done as u64,
         Some(total),
         None,
@@ -1139,7 +1143,10 @@ mod tests {
         let a = extra_args(&o);
         assert!(a.contains(&".*-orig,en".to_string()));
         assert!(a.contains(&"--ignore-errors".to_string()));
-        let i = a.iter().position(|x| x == "--max-sleep-interval").expect("pausa");
+        let i = a
+            .iter()
+            .position(|x| x == "--max-sleep-interval")
+            .expect("pausa");
         assert_eq!(a[i + 1], "10");
     }
 
