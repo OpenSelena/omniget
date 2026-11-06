@@ -89,7 +89,6 @@ pub fn find_candidate_cookie(
 
     if let Some(user_home) = dirs::home_dir() {
         candidate_dirs.push(user_home.join(".nami").join("cookies"));
-        candidate_dirs.push(user_home.join(".open-nami").join("cookies"));
         candidate_dirs.push(user_home.join("cookies"));
     }
 
