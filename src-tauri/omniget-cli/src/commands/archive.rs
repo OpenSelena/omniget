@@ -172,6 +172,7 @@ fn print_summary(r: &ArchiveResult, dest: &Path) {
                     "total": r.total, "done": r.done, "failed": r.failed,
                     "skipped": r.skipped, "pending": r.pending,
                     "cap_reached": r.cap_reached, "cancelled": r.cancelled,
+                    "blocked": r.blocked,
                     "size_bytes": size_bytes, "failures": failures })
         );
         return;
@@ -190,6 +191,9 @@ fn print_summary(r: &ArchiveResult, dest: &Path) {
     }
     if r.cancelled {
         println!("Stopped by request; run again to continue");
+    }
+    if r.blocked {
+        println!("Stopped: YouTube kept flagging this IP as a bot; run again in a few hours");
     }
     for f in &failures {
         println!("  failed {} — {}", f["id"], f["error"]);
