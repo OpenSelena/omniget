@@ -11,7 +11,7 @@ Welcome to OmniGet. This file serves as the definitive reference and operating m
 - **Embedded Plugins**: Statically linked core plugins (`courses`, `telegram`, `convert`) in `src-tauri/plugins/`.
 - **Public Website & Docs**: GitHub Pages static suite served from repo root:
   - Root landing page: `index.html`.
-  - Documentation suite: `docs/` (`docs/index.html`, `docs/changelog/`, `docs/installation/`, `docs/courses/`, `docs/opennami/`, `docs/mcp/`, `docs/troubleshooting/`).
+  - Documentation suite: `docs/` (`docs/index.html`, `docs/changelog/`, `docs/installation/`, `docs/courses/`, `docs/nami/`, `docs/mcp/`, `docs/troubleshooting/`).
   - Companion Browser Extension: `browser-extension/chrome/`.
 
 ---

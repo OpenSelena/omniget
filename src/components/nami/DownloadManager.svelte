@@ -27,7 +27,7 @@
     getDependencyStatus,
     isCheckingDependencies,
   } from '$lib/stores/nami_deps_store.svelte';
-  import { openNamiStageLabel, openNamiStatusMessage, type OpenNamiTranslate } from '$lib/nami/i18n';
+  import { namiStageLabel, namiStatusMessage, type NamiTranslate } from '$lib/nami/i18n';
   import { onMount, onDestroy } from 'svelte';
   import { t } from '$lib/i18n';
 
@@ -38,7 +38,7 @@
 
   let { onSwitchToProfiles, onSwitchToSettings }: Props = $props();
 
-  const tr: OpenNamiTranslate = (key, values) => $t(key, values) as string;
+  const tr: NamiTranslate = (key, values) => $t(key, values) as string;
 
   const RING_RADIUS = 44;
   const RING_CIRCUMFERENCE = 2 * Math.PI * RING_RADIUS;
@@ -193,7 +193,7 @@
 <div class="dl">
   {#if depStatus && !depStatus.ok}
     <div class="dl-alert error" role="alert">
-      <span>{openNamiStatusMessage(depStatus.message, tr)}</span>
+      <span>{namiStatusMessage(depStatus.message, tr)}</span>
     </div>
   {/if}
 
@@ -207,7 +207,7 @@
         role={statusType === 'error' ? 'alert' : 'status'}
       >
         <div class="dl-alert-body">
-          <span>{openNamiStatusMessage(status, tr)}</span>
+          <span>{namiStatusMessage(status, tr)}</span>
           {#if statusDetail}
             <details class="dl-alert-details">
               <summary>{$t('open_nami.view_log')}</summary>
@@ -347,11 +347,11 @@
           {$t('open_nami.stage_of', {
             index: stageIndex ?? 1,
             total: stageTotal,
-            stage: openNamiStageLabel(stage, tr)
+            stage: namiStageLabel(stage, tr)
           })}
         {:else}
           {stage
-            ? $t('open_nami.downloading_stage', { stage: openNamiStageLabel(stage, tr) })
+            ? $t('open_nami.downloading_stage', { stage: namiStageLabel(stage, tr) })
             : $t('open_nami.downloading')}
         {/if}
       </p>

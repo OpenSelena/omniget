@@ -1,8 +1,8 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
 
-type OpenNamiStore = typeof import("./nami_download_store.svelte");
+type NamiStore = typeof import("./nami_download_store.svelte");
 
-let store: OpenNamiStore;
+let store: NamiStore;
 
 beforeAll(async () => {
   vi.stubGlobal("$state", <T>(value: T) => value);

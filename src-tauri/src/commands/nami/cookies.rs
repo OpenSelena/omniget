@@ -112,7 +112,7 @@ mod tests {
 
     #[test]
     fn test_safe_cookie_sandbox_lifecycle() {
-        let temp_dir = std::env::temp_dir().join("opennami_test_cookie");
+        let temp_dir = std::env::temp_dir().join("nami_test_cookie");
         let _ = fs::create_dir_all(&temp_dir);
 
         let master = temp_dir.join("master_cookies.txt");

@@ -11,13 +11,14 @@ import { dispatchMultiTierDownload } from "$lib/nami/dispatcher";
 
 export type StatusType = "success" | "error" | "info";
 
-export interface OpenNamiDraft {
+export interface NamiDraft {
   url: string;
   contentType: string;
   selectedProfileUrl: string | null;
 }
+export type OpenNamiDraft = NamiDraft;
 
-let draft = $state<OpenNamiDraft>({
+let draft = $state<NamiDraft>({
   url: "",
   contentType: "all",
   selectedProfileUrl: null,
@@ -36,11 +37,11 @@ let statusDetail = $state("");
 let cancelling = $state(false);
 let unlisten: (() => void) | null = null;
 
-export function getDraft(): OpenNamiDraft {
+export function getDraft(): NamiDraft {
   return draft;
 }
 
-export function setDraft(newDraft: Partial<OpenNamiDraft>) {
+export function setDraft(newDraft: Partial<NamiDraft>) {
   if (newDraft.url !== undefined) draft.url = newDraft.url;
   if (newDraft.contentType !== undefined) draft.contentType = newDraft.contentType;
   if (newDraft.selectedProfileUrl !== undefined) draft.selectedProfileUrl = newDraft.selectedProfileUrl;

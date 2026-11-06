@@ -1,7 +1,7 @@
 ---
 version: alpha
 name: OmniGet Universal Studio & OmniGuard Security Suite
-description: Precision local media workbench and privacy security suite for OmniGet, OmniGuard, and OpenNami.
+description: Precision local media workbench and privacy security suite for OmniGet, OmniGuard, and Nami.
 colors:
   primary: "#FF7D38"
   primary-container: "#F28500"
@@ -93,7 +93,7 @@ components:
 
 # Design System: OmniGet Universal Studio & OmniGuard Security Suite
 
-Design specification for OmniGet desktop suite, OmniGuard privacy shield, and OpenNami social archiver.
+Design specification for OmniGet desktop suite, OmniGuard privacy shield, and Nami social archiver.
 
 ## Overview
 - **Core Mental Model**: Precision local media workbench. Unifies high-velocity media extraction with offline reading, Hi-Fi listening, and verifiable system security.
@@ -103,7 +103,7 @@ Design specification for OmniGet desktop suite, OmniGuard privacy shield, and Op
 ## Colors
 ### Primary Foundations
 - **Brand Primary Orange (`#FF7D38` / `#F28500`)**: Download triggers, primary action buttons, key metrics, active focus rings.
-- **Accent Tech Sky (`#0284C7` / `#38BDF8`)**: Stream connections, protocol indicators, secondary actions, OpenNami accent.
+- **Accent Tech Sky (`#0284C7` / `#38BDF8`)**: Stream connections, protocol indicators, secondary actions, Nami accent.
 - **OmniGuard Security Emerald (`#10B981` / `#059669`)**: Cryptographic SHA-256 verification, zero-telemetry badge, integrity check passes, offline status.
 - **Course & Academic Violet (`#8B5CF6`)**: Course downloads, notes, PDF attachments, EPUB reader.
 
@@ -155,11 +155,11 @@ Design specification for OmniGet desktop suite, OmniGuard privacy shield, and Op
   - Interactive inputs & chips: `10px` to `12px` (`sm`)
 
 ## Components
-1. **Floating Pill Navigation Bar**: High-contrast blur pill housing brand mascot (`Loop`), live tab switches (`Home`, `OmniGuard`, `OpenNami`, `158 Tools`, `Downloads`, `Release Notes`, `FAQ`), theme toggle, and GitHub star badge.
+1. **Floating Pill Navigation Bar**: High-contrast blur pill housing brand mascot (`Loop`), live tab switches (`Home`, `OmniGuard`, `Nami`, `158 Tools`, `Downloads`, `Release Notes`, `FAQ`), theme toggle, and GitHub star badge.
 2. **Interactive Omnibox Simulator**: Real-time URL parser with platform icon auto-detection (YouTube, Udemy, Instagram, TikTok, Bilibili, Magnet), dynamic resolution selector, and simulated live download stream with real-time ETA/speed telemetry.
 3. **OmniGuard Security & Privacy Matrix**: Detailed cryptographic security view with real SHA-256 hash checks, zero-telemetry guarantee, localhost 127.0.0.1 token verification, and sandboxed ABI isolation cards.
 4. **Interactive 158 Tools Hub**: 25-category filterable toolbox with live instant search query filter, status tags (`Ready`, `Beta`, `Planned`), and Rust command-line inspector.
-5. **OpenNami Social Archiver Shell**: Embedded interactive TUI and desktop console mirror for Instagram, TikTok, and X downloads with circular progress ring.
+5. **Nami Social Archiver Shell**: Embedded interactive TUI and desktop console mirror for Instagram, TikTok, and X downloads with circular progress ring.
 6. **Operating System Platform Matrix**: Direct detection of client OS with instant Windows (.exe/portable/.msi), macOS (Universal M1-M4 DMG), and Linux (.AppImage/.deb/.rpm) download cards.
 
 ## Do's and Don'ts

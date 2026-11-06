@@ -454,7 +454,7 @@ fn run_single_stage(
     };
 
     let final_dest = PathBuf::from(output_dir)
-        .join("OpenNami")
+        .join("Nami")
         .join(sanitize_path_component(platform_name))
         .join(sanitize_path_component(&username))
         .join(media_folder);

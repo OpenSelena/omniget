@@ -235,7 +235,7 @@ mod tests {
 
     #[test]
     fn test_gallery_dl_args_anti_bot_and_injection_guard() {
-        let dest = PathBuf::from("C:/downloads/OpenNami/instagram/test/photos");
+        let dest = PathBuf::from("C:/downloads/Nami/instagram/test/photos");
         let opts = GalleryDlArgsOptions {
             dest_dir: &dest,
             content_type: "photos",
@@ -262,7 +262,7 @@ mod tests {
 
     #[test]
     fn test_gallery_dl_args_x_skip_replies() {
-        let dest = PathBuf::from("C:/downloads/OpenNami/x/test/photos");
+        let dest = PathBuf::from("C:/downloads/Nami/x/test/photos");
         let opts = GalleryDlArgsOptions {
             dest_dir: &dest,
             content_type: "photos",
@@ -282,7 +282,7 @@ mod tests {
 
     #[test]
     fn test_yt_dlp_args_impersonate_and_backoff() {
-        let dest = PathBuf::from("C:/downloads/OpenNami/tiktok/creator/videos");
+        let dest = PathBuf::from("C:/downloads/Nami/tiktok/creator/videos");
         let opts = YtDlpArgsOptions {
             dest_dir: &dest,
             platform: "tiktok",

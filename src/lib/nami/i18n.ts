@@ -1,5 +1,5 @@
 /**
- * The Open Nami download engine reports stage names and status messages in
+ * The Nami download engine reports stage names and status messages in
  * English from the Rust side. This module maps the known ones onto the active
  * locale and passes everything else through untouched.
  */
