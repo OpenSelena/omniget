@@ -343,9 +343,7 @@ const DEFS: &[Def] = &[
         "apps",
         "OmniGet (temporários das tools)",
         "safe",
-        &[
-            "%APPDATA%\\com.openselena.omniget\\tools\\tmp",
-        ],
+        &["%APPDATA%\\com.openselena.omniget\\tools\\tmp"],
     ),
     d(
         "npm",
