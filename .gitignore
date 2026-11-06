@@ -261,6 +261,7 @@ remake/shots/
 
 # Local
 *.md
+!README*.md
 !AGENTS.md
 !SECURITY.md
 !DESIGN.md

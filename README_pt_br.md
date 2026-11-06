@@ -16,6 +16,7 @@ leitor pdf, flashcards anki, repetição espaçada, player de música, spicetify
 
 <p align="center">
   <a href="README.md">English</a>
+  · <a href="README.ja.md">日本語</a>
   · <b>Português (BR)</b>
   · <a href="README.ru.md">Русский</a>
   · <a href="README_zh_CN.md">简体中文</a>

@@ -16,6 +16,7 @@ spicetify, 下载管理器, tauri, rust, svelte.
 
 <p align="center">
   <a href="README.md">English</a>
+  · <a href="README.ja.md">日本語</a>
   · <a href="README_pt_br.md">Português (BR)</a>
   · <a href="README.ru.md">Русский</a>
   · <b>简体中文</b>
