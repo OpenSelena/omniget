@@ -16,7 +16,6 @@ export interface NamiDraft {
   contentType: string;
   selectedProfileUrl: string | null;
 }
-export type OpenNamiDraft = NamiDraft;
 
 let draft = $state<NamiDraft>({
   url: "",

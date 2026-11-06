@@ -124,10 +124,6 @@ if (portable) {
     join(fakeProfile, "Roaming", "com.openselena.omniget"),
     join(fakeProfile, "share", "com.openselena.omniget"),
     join(fakeProfile, "Library", "Application Support", "com.openselena.omniget"),
-    join(fakeProfile, "Local", "wtf.tonho.omniget"),
-    join(fakeProfile, "Roaming", "wtf.tonho.omniget"),
-    join(fakeProfile, "share", "wtf.tonho.omniget"),
-    join(fakeProfile, "Library", "Application Support", "wtf.tonho.omniget"),
   ].filter((p) => existsSync(p));
 
   if (vazouParaOPerfil.length > 0) {

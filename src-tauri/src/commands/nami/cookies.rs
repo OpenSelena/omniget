@@ -83,7 +83,6 @@ pub fn find_candidate_cookie(
 
     let mut candidate_dirs: Vec<PathBuf> = vec![
         app_data_dir.join("nami").join("cookies"),
-        app_data_dir.join("open_nami").join("cookies"),
         app_data_dir.join("cookies"),
     ];
 

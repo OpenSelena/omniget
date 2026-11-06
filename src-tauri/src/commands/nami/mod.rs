@@ -45,35 +45,6 @@ pub fn omniget_nami_dir() -> Result<PathBuf, String> {
     let base =
         omniget_core::core::paths::app_data_dir().ok_or("Could not find app data directory")?;
     let dir = base.join("nami");
-    let legacy_open_nami = base.join("open_nami");
-    let legacy_open_omni = base.join("open_omni");
-
-    // Seamless automatic data migration from legacy open_nami / open_omni to nami
-    if !dir.exists() {
-        if legacy_open_nami.exists() {
-            if let Err(e) = fs::rename(&legacy_open_nami, &dir) {
-                tracing::warn!(
-                    "Failed to rename legacy open_nami directory: {}. Creating fresh nami dir.",
-                    e
-                );
-            } else {
-                tracing::info!(
-                    "Successfully migrated legacy open_nami user data directory to nami."
-                );
-            }
-        } else if legacy_open_omni.exists() {
-            if let Err(e) = fs::rename(&legacy_open_omni, &dir) {
-                tracing::warn!(
-                    "Failed to rename legacy open_omni directory: {}. Creating fresh nami dir.",
-                    e
-                );
-            } else {
-                tracing::info!(
-                    "Successfully migrated legacy open_omni user data directory to nami."
-                );
-            }
-        }
-    }
 
     fs::create_dir_all(&dir).map_err(|e| format!("Failed to create config dir: {}", e))?;
     Ok(dir)

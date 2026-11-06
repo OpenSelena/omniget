@@ -5,7 +5,6 @@
  */
 
 export type NamiTranslate = (key: string, values?: Record<string, unknown>) => string;
-export type OpenNamiTranslate = NamiTranslate;
 
 const STAGE_KEYS: Record<string, string> = {
   setup: 'nami.stage_setup',
@@ -31,7 +30,6 @@ export function namiStageLabel(
   const key = STAGE_KEYS[stage.trim().toLowerCase()];
   return key ? t(key) : stage;
 }
-export const openNamiStageLabel = namiStageLabel;
 
 export function namiStatusMessage(
   message: string | null | undefined,
@@ -58,4 +56,3 @@ export function namiStatusMessage(
 
   return text;
 }
-export const openNamiStatusMessage = namiStatusMessage;

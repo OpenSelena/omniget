@@ -27,16 +27,8 @@ fn check_portable_mode() {
                     if let Some(base) = dirs::data_dir() {
                         let modern_settings =
                             base.join("com.openselena.omniget").join("settings.json");
-                        let legacy_settings = base.join("wtf.tonho.omniget").join("settings.json");
-                        let source = if modern_settings.exists() {
-                            Some(modern_settings)
-                        } else if legacy_settings.exists() {
-                            Some(legacy_settings)
-                        } else {
-                            None
-                        };
-                        if let Some(src) = source {
-                            let _ = std::fs::copy(&src, &portable_settings);
+                        if modern_settings.exists() {
+                            let _ = std::fs::copy(&modern_settings, &portable_settings);
                         }
                     }
                 }

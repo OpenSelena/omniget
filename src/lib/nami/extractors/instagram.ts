@@ -19,7 +19,7 @@ export const IG_QUERIES = {
 export const IG_POLARIS_DOC_ID = IG_QUERIES.PolarisProfilePostsTabContentQuery_connection
 
 function logExtractorDebug(endpoint: string, err: unknown): void {
-  if (process.env.DEBUG || process.env.NAMI_DEBUG || process.env.OPEN_NAMI_DEBUG) {
+  if (process.env.DEBUG || process.env.NAMI_DEBUG) {
     const message = err instanceof Error ? err.message : String(err)
     console.debug(`[nami:instagram] ${endpoint} query fallback: ${message}`)
   }

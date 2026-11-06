@@ -19,14 +19,7 @@ pub struct EngineStatus {
 }
 
 pub fn get_nami_bin_dir(app_data_dir: &Path) -> PathBuf {
-    let nami_bin = app_data_dir.join("nami").join("bin");
-    if !nami_bin.exists() {
-        let legacy_bin = app_data_dir.join("open_nami").join("bin");
-        if legacy_bin.exists() {
-            return legacy_bin;
-        }
-    }
-    nami_bin
+    app_data_dir.join("nami").join("bin")
 }
 
 pub fn gallery_dl_asset_name() -> &'static str {

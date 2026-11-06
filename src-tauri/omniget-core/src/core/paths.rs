@@ -5,7 +5,7 @@ pub fn app_data_dir() -> Option<std::path::PathBuf> {
 
     let base = dirs::data_dir()?;
     let new_path = base.join("com.openselena.omniget");
-    let legacy_paths = [base.join("wtf.tonho.omniget"), base.join("omniget")];
+    let legacy_paths = [base.join("omniget")];
 
     for old_path in &legacy_paths {
         if old_path.exists() {
