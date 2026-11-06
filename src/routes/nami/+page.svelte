@@ -10,9 +10,9 @@
   let activeTab = $state<TabKey>('download');
 
   const NAV_ITEMS: { key: TabKey; labelKey: string; icon: string }[] = [
-    { key: 'download', labelKey: 'nami.tab_download', icon: '/icons/open-nami-download.png' },
-    { key: 'profiles', labelKey: 'nami.tab_profiles', icon: '/icons/open-nami-profiles.png' },
-    { key: 'settings', labelKey: 'nami.tab_settings', icon: '/icons/open-nami-settings.png' }
+    { key: 'download', labelKey: 'nami.tab_download', icon: '/icons/nami-download.png' },
+    { key: 'profiles', labelKey: 'nami.tab_profiles', icon: '/icons/nami-profiles.png' },
+    { key: 'settings', labelKey: 'nami.tab_settings', icon: '/icons/nami-settings.png' }
   ];
 
   const DESCRIPTION_KEYS: Record<TabKey, string> = {
