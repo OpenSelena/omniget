@@ -58,7 +58,8 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 
 <p align="center">
   <img src="https://img.shields.io/badge/Disclaimer-FF7D38" alt="Disclaimer" height="20" /><br/>
-  <sub>Maintained by <a href="https://github.com/igect">Igect</a> under GPL-3.0 · Based on original architecture by <a href="https://github.com/tonhowtf">tonhowtf</a></sub>
+  <sub>This project is an independent fork and is not affiliated with OmniGet or with Tonho.<br/>
+  Maintained by <a href="https://github.com/igect">igect</a> under GPL-3.0 · Based on original architecture by <a href="https://github.com/tonhowtf">Tonho</a></sub>
 </p>
 
 <p align="center">

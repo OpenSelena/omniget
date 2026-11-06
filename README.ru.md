@@ -58,7 +58,8 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 
 <p align="center">
   <img src="https://img.shields.io/badge/Дисклеймер-FF7D38" alt="Дисклеймер" height="20" /><br/>
-  <sub>Поддерживается <a href="https://github.com/igect">Igect</a> под GPL-3.0 · На основе оригинальной архитектуры <a href="https://github.com/tonhowtf">tonhowtf</a></sub>
+  <sub>Этот проект является независимым форком и не связан с OmniGet или с Tonho.<br/>
+  Поддерживается <a href="https://github.com/igect">igect</a> под GPL-3.0 · На основе оригинальной архитектуры <a href="https://github.com/tonhowtf">Tonho</a></sub>
 </p>
 
 <p align="center">
