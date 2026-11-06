@@ -29,12 +29,38 @@ fn enhanced_path() -> Option<String> {
         .clone()
 }
 
+pub fn clean_ld_library_path(appdir: &str, current_ld: &str) -> Option<String> {
+    let appdir_trimmed = appdir.trim_end_matches('/');
+    let kept: Vec<&str> = current_ld
+        .split(':')
+        .map(str::trim)
+        .filter(|p| !p.is_empty() && !p.starts_with(appdir_trimmed))
+        .collect();
+    if kept.is_empty() {
+        None
+    } else {
+        Some(kept.join(":"))
+    }
+}
+
 pub fn command<S: AsRef<std::ffi::OsStr>>(program: S) -> tokio::process::Command {
     let mut cmd = tokio::process::Command::new(program);
     #[cfg(target_os = "windows")]
     cmd.creation_flags(0x08000000);
     if let Some(path) = enhanced_path() {
         cmd.env("PATH", path);
+    }
+    #[cfg(target_os = "linux")]
+    if let Ok(appdir) = std::env::var("APPDIR") {
+        let current = std::env::var("LD_LIBRARY_PATH").unwrap_or_default();
+        match clean_ld_library_path(&appdir, &current) {
+            Some(kept) => {
+                cmd.env("LD_LIBRARY_PATH", kept);
+            }
+            None => {
+                cmd.env_remove("LD_LIBRARY_PATH");
+            }
+        }
     }
     cmd.env_remove("PYTHONHOME");
     cmd.env_remove("PYTHONPATH");
@@ -54,10 +80,61 @@ pub fn std_command<S: AsRef<std::ffi::OsStr>>(program: S) -> std::process::Comma
     if let Some(path) = enhanced_path() {
         cmd.env("PATH", path);
     }
+    #[cfg(target_os = "linux")]
+    if let Ok(appdir) = std::env::var("APPDIR") {
+        let current = std::env::var("LD_LIBRARY_PATH").unwrap_or_default();
+        match clean_ld_library_path(&appdir, &current) {
+            Some(kept) => {
+                cmd.env("LD_LIBRARY_PATH", kept);
+            }
+            None => {
+                cmd.env_remove("LD_LIBRARY_PATH");
+            }
+        }
+    }
     cmd.env_remove("PYTHONHOME");
     cmd.env_remove("PYTHONPATH");
     cmd.env("PYTHONIOENCODING", "utf-8");
     cmd.env("PYTHONUTF8", "1");
     cmd.env("PYTHONLEGACYWINDOWSSTDIO", "0");
     cmd
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn cleans_appdir_from_ld_library_path() {
+        let appdir = "/tmp/.mount_omniget123";
+        let ld = "/tmp/.mount_omniget123/usr/lib:/tmp/.mount_omniget123/usr/lib64:/usr/lib64";
+        assert_eq!(
+            clean_ld_library_path(appdir, ld),
+            Some("/usr/lib64".to_string())
+        );
+    }
+
+    #[test]
+    fn removes_ld_library_path_when_only_appdir_paths_present() {
+        let appdir = "/tmp/.mount_omniget123/";
+        let ld = "/tmp/.mount_omniget123/usr/lib:/tmp/.mount_omniget123/usr/lib64";
+        assert_eq!(clean_ld_library_path(appdir, ld), None);
+    }
+
+    #[test]
+    fn preserves_custom_user_ld_paths() {
+        let appdir = "/tmp/.mount_omniget123";
+        let ld = "/opt/cuda/lib64:/usr/local/lib";
+        assert_eq!(
+            clean_ld_library_path(appdir, ld),
+            Some("/opt/cuda/lib64:/usr/local/lib".to_string())
+        );
+    }
+
+    #[test]
+    fn handles_empty_or_whitespace_ld_path() {
+        let appdir = "/tmp/.mount_omniget123";
+        assert_eq!(clean_ld_library_path(appdir, ""), None);
+        assert_eq!(clean_ld_library_path(appdir, "  : :  "), None);
+    }
 }
