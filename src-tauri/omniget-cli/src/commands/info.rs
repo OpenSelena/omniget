@@ -5,6 +5,7 @@ use crate::output;
 
 pub async fn execute(url: String, proxy: Option<String>) -> Result<()> {
     common::init_cli_runtime(proxy.as_deref())?;
+    let url = common::extract_url(&url).to_string();
 
     let registry = common::core_platform_registry();
     let (platform, info) = common::resolve_media_info(&registry, &url).await?;

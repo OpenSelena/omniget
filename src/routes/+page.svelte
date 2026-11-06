@@ -26,6 +26,7 @@
     showInspectorForState,
     showOmniboxForState,
     isUrl,
+    extractUrls,
   } from "$lib/home/omnibox-controller";
   import { getDownloads, formatBytes } from "$lib/stores/download-store.svelte";
   import { getDownloadStats } from "$lib/stores/download-stats.svelte";
@@ -402,20 +403,24 @@
       return;
     }
 
-    const urls = trimmed.split(/[\s\n]+/).filter(isUrl);
+    const urls = extractUrls(trimmed);
 
     if (urls.length > 1) {
       omniState = { kind: "batch", urls };
       return;
     }
 
-    if (isUrl(trimmed)) {
+    if (urls.length === 1) {
+      const targetUrl = urls[0];
+      if (url !== targetUrl) {
+        url = targetUrl;
+      }
       omniState = { kind: "detecting" };
       if (getSettings()?.download.auto_download_on_paste) {
         pendingAutoDownload = true;
       }
       debounceTimer = setTimeout(() => {
-        detectPlatform(trimmed);
+        detectPlatform(targetUrl);
       }, 500);
       return;
     }

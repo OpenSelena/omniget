@@ -98,10 +98,48 @@ pub fn core_platform_registry() -> PlatformRegistry {
     registry
 }
 
+fn is_cjk_or_punct(c: char) -> bool {
+    matches!(
+        c,
+        '\u{3000}'..='\u{303F}'
+        | '\u{4E00}'..='\u{9FFF}'
+        | '\u{FF01}'..='\u{FF5E}'
+        | '^' | '<' | '>'
+    )
+}
+
+pub fn extract_url(input: &str) -> &str {
+    let trimmed = input.trim();
+    if trimmed.starts_with("http://")
+        || trimmed.starts_with("https://")
+        || trimmed.starts_with("magnet:")
+        || trimmed.starts_with("p2p:")
+    {
+        return trimmed;
+    }
+
+    for prefix in &["https://", "http://", "magnet:?xt=", "p2p:"] {
+        if let Some(start_idx) = trimmed.find(prefix) {
+            let slice = &trimmed[start_idx..];
+            let end_idx = slice
+                .find(|c: char| c.is_whitespace() || is_cjk_or_punct(c))
+                .unwrap_or(slice.len());
+            let candidate = &slice[..end_idx];
+            let cleaned = candidate
+                .trim_end_matches(&['.', ',', ';', ':', '!', '?', '\'', '"', ')', ']', '>'][..]);
+            if !cleaned.is_empty() {
+                return cleaned;
+            }
+        }
+    }
+    trimmed
+}
+
 pub async fn resolve_media_info(
     registry: &PlatformRegistry,
-    url: &str,
+    raw_url: &str,
 ) -> Result<(Arc<dyn PlatformDownloader>, MediaInfo)> {
+    let url = extract_url(raw_url);
     let platform = registry
         .find_platform(url)
         .unwrap_or_else(|| Arc::new(GenericYtdlpDownloader::new()));
@@ -292,5 +330,28 @@ mod tests {
         assert_eq!(o.format_id, None);
         assert_eq!(o.audio_format.as_deref(), Some("mp3"));
         assert_eq!(o.custom_ytdlp_args, None);
+    }
+
+    #[test]
+    fn extract_url_from_share_text() {
+        assert_eq!(
+            extract_url("https://www.bilibili.com/video/BV1GJ411x7h7"),
+            "https://www.bilibili.com/video/BV1GJ411x7h7"
+        );
+        assert_eq!(
+            extract_url(
+                "复制打开抖音，看看这个 https://www.bilibili.com/video/BV1GJ411x7h7 复制此链接"
+            ),
+            "https://www.bilibili.com/video/BV1GJ411x7h7"
+        );
+        assert_eq!(
+            extract_url("Check this: https://example.com/video.mp4!"),
+            "https://example.com/video.mp4"
+        );
+        assert_eq!(
+            extract_url("看作品https://v.douyin.com/xyz/，复制"),
+            "https://v.douyin.com/xyz/"
+        );
+        assert_eq!(extract_url("regular search query"), "regular search query");
     }
 }

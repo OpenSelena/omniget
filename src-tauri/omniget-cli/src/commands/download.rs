@@ -35,6 +35,7 @@ pub async fn execute(
     proxy: Option<String>,
 ) -> Result<()> {
     common::init_cli_runtime(proxy.as_deref())?;
+    let url = common::extract_url(&url).to_string();
 
     let json_mode = output::is_json_mode();
     let pb = ProgressBar::new(100);

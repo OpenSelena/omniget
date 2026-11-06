@@ -39,6 +39,40 @@ export function isUrl(value: string): boolean {
   );
 }
 
+const URL_SCHEME_REGEX =
+  /(?:https?:\/\/[^\s\u3000\u4e00-\u9fff，。！？、“”‘’（）《》〈〉【】^<>]+|magnet:\?xt=[^\s]+|p2p:[^\s]+)/gi;
+const TRAILING_PUNCT_REGEX = /[.,;:!?'")\]>]+$/;
+
+export function extractUrls(text: string): string[] {
+  const trimmed = text.trim();
+  if (!trimmed) return [];
+
+  if (isUrl(trimmed)) {
+    return [trimmed];
+  }
+
+  const matches = trimmed.match(URL_SCHEME_REGEX) ?? [];
+  const results: string[] = [];
+
+  for (const m of matches) {
+    const cleaned = m.replace(TRAILING_PUNCT_REGEX, "").trim();
+    if (cleaned && isUrl(cleaned) && !results.includes(cleaned)) {
+      results.push(cleaned);
+    }
+  }
+
+  if (results.length === 0) {
+    const tokens = trimmed.split(/[\s\n]+/).filter(isUrl);
+    for (const t of tokens) {
+      if (!results.includes(t)) {
+        results.push(t);
+      }
+    }
+  }
+
+  return results;
+}
+
 export function showInspectorForState(state: OmniState): boolean {
   return (
     state.kind === "detected" ||
