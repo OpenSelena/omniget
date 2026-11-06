@@ -165,6 +165,14 @@
         else if (d.status === "complete") completed.push(d);
       }
     }
+
+    const byRecency = (a: GenericDownloadItem, b: GenericDownloadItem) =>
+      (b.lastUpdateAt || b.startedAt || b.id) - (a.lastUpdateAt || a.startedAt || a.id);
+
+    finished.sort(byRecency);
+    completed.sort(byRecency);
+    errored.sort(byRecency);
+
     return { active, paused, queued, finished, errored, completed };
   });
 
