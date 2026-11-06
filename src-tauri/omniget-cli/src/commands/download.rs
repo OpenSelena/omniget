@@ -13,6 +13,18 @@ const PROGRESS_STYLE: &str =
     "{spinner:.cyan} [{elapsed_precise}] [{bar:40.cyan/blue}] {pos:>3}% {msg}";
 const SPINNER_STYLE: &str = "{spinner:.cyan} {msg:.dim}";
 
+pub fn format_progress_json(update: &ProgressUpdate) -> String {
+    serde_json::to_string(&serde_json::json!({
+        "type": "progress",
+        "percent": update.percent,
+        "downloaded_bytes": update.downloaded_bytes,
+        "total_bytes": update.total_bytes,
+        "speed_bps": update.speed_bps,
+        "eta_seconds": update.eta_seconds,
+    }))
+    .unwrap_or_default()
+}
+
 pub async fn execute(
     url: String,
     quality: Option<u32>,
@@ -56,14 +68,7 @@ pub async fn execute(
     let progress_task = tokio::spawn(async move {
         while let Some(update) = rx.recv().await {
             if json_mode {
-                println!(
-                    r#"{{"type":"progress","percent":{},"downloaded_bytes":{:?},"total_bytes":{:?},"speed_bps":{:?},"eta_seconds":{:?}}}"#,
-                    update.percent,
-                    update.downloaded_bytes,
-                    update.total_bytes,
-                    update.speed_bps,
-                    update.eta_seconds,
-                );
+                println!("{}", format_progress_json(&update));
             } else if update.percent >= 0.0 {
                 pb_clone.set_position(update.percent.clamp(0.0, 100.0).round() as u64);
                 pb_clone.set_style(
@@ -126,5 +131,52 @@ pub async fn execute(
             }
             Err(e)
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn progress_json_serializes_none_as_null() {
+        let update = ProgressUpdate {
+            percent: 0.0,
+            downloaded_bytes: None,
+            total_bytes: None,
+            speed_bps: None,
+            eta_seconds: None,
+            ..Default::default()
+        };
+        let line = format_progress_json(&update);
+        let parsed: serde_json::Value =
+            serde_json::from_str(&line).expect("must parse as valid JSON");
+        assert_eq!(parsed["type"], "progress");
+        assert_eq!(parsed["percent"], 0.0);
+        assert!(parsed["downloaded_bytes"].is_null());
+        assert!(parsed["total_bytes"].is_null());
+        assert!(parsed["speed_bps"].is_null());
+        assert!(parsed["eta_seconds"].is_null());
+    }
+
+    #[test]
+    fn progress_json_serializes_some_as_raw_value() {
+        let update = ProgressUpdate {
+            percent: 100.0,
+            downloaded_bytes: Some(5408198),
+            total_bytes: Some(5408198),
+            speed_bps: Some(20329200.18),
+            eta_seconds: Some(0),
+            ..Default::default()
+        };
+        let line = format_progress_json(&update);
+        let parsed: serde_json::Value =
+            serde_json::from_str(&line).expect("must parse as valid JSON");
+        assert_eq!(parsed["type"], "progress");
+        assert_eq!(parsed["percent"], 100.0);
+        assert_eq!(parsed["downloaded_bytes"], 5408198);
+        assert_eq!(parsed["total_bytes"], 5408198);
+        assert_eq!(parsed["speed_bps"], 20329200.18);
+        assert_eq!(parsed["eta_seconds"], 0);
     }
 }
