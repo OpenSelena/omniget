@@ -5310,7 +5310,7 @@
     "speed_unit_mb": "МБ/с",
     "decimal_separator": ","
   },
-  "open_nami": {
+  "nami": {
     "page_title": "Nami — загрузчик из соцсетей",
     "sections_aria": "Разделы Nami",
     "tab_download": "Загрузка",

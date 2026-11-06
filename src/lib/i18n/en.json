@@ -5310,7 +5310,7 @@
     "speed_unit_mb": "MB/s",
     "decimal_separator": "."
   },
-  "open_nami": {
+  "nami": {
     "page_title": "Nami - Social Media Downloader",
     "sections_aria": "Nami sections",
     "tab_download": "Download",

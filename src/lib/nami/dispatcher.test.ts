@@ -2,7 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { dispatchMultiTierDownload } from './dispatcher';
 import type { ParsedProfile } from '../utils/nami_parser';
 
-describe('open_nami multi-tier dispatcher', () => {
+describe('nami multi-tier dispatcher', () => {
   const mockProfile: ParsedProfile = {
     platform: 'instagram',
     username: 'test_creator',

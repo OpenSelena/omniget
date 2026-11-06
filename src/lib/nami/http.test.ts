@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { HttpClient, parseNetscapeCookies, formatCookieHeader } from './http';
 
-describe('open_nami http client', () => {
+describe('nami http client', () => {
   it('parses netscape cookie format correctly', () => {
     const raw = `# Netscape HTTP Cookie File
 .instagram.com\tTRUE\t/\tTRUE\t1799999999\tsessionid\t12345%3Aabc

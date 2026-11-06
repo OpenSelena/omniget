@@ -10,15 +10,15 @@
   let activeTab = $state<TabKey>('download');
 
   const NAV_ITEMS: { key: TabKey; labelKey: string; icon: string }[] = [
-    { key: 'download', labelKey: 'open_nami.tab_download', icon: '/icons/open-nami-download.png' },
-    { key: 'profiles', labelKey: 'open_nami.tab_profiles', icon: '/icons/open-nami-profiles.png' },
-    { key: 'settings', labelKey: 'open_nami.tab_settings', icon: '/icons/open-nami-settings.png' }
+    { key: 'download', labelKey: 'nami.tab_download', icon: '/icons/open-nami-download.png' },
+    { key: 'profiles', labelKey: 'nami.tab_profiles', icon: '/icons/open-nami-profiles.png' },
+    { key: 'settings', labelKey: 'nami.tab_settings', icon: '/icons/open-nami-settings.png' }
   ];
 
   const DESCRIPTION_KEYS: Record<TabKey, string> = {
-    download: 'open_nami.desc_download',
-    profiles: 'open_nami.desc_profiles',
-    settings: 'open_nami.desc_settings'
+    download: 'nami.desc_download',
+    profiles: 'nami.desc_profiles',
+    settings: 'nami.desc_settings'
   };
 
   function switchTab(tab: TabKey) {
@@ -27,11 +27,11 @@
 </script>
 
 <svelte:head>
-  <title>{$t('open_nami.page_title')}</title>
+  <title>{$t('nami.page_title')}</title>
 </svelte:head>
 
 <div class="oo-shell">
-  <aside class="oo-sidebar" aria-label={$t('open_nami.sections_aria')}>
+  <aside class="oo-sidebar" aria-label={$t('nami.sections_aria')}>
     <nav class="oo-nav" role="tablist" aria-orientation="vertical">
       {#each NAV_ITEMS as item (item.key)}
         <button
@@ -64,7 +64,7 @@
     <header class="oo-header">
       <p class="oo-kicker">Nami</p>
       <h1 class="oo-title">
-        {$t(NAV_ITEMS.find((i) => i.key === activeTab)?.labelKey ?? 'open_nami.tab_download')}
+        {$t(NAV_ITEMS.find((i) => i.key === activeTab)?.labelKey ?? 'nami.tab_download')}
       </h1>
       <p class="oo-description">
         {$t(DESCRIPTION_KEYS[activeTab])}

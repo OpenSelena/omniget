@@ -5,7 +5,7 @@ import { parseTikTokRehydrationJson } from './tiktok';
 import { extractFacebookMediaFromHtml } from './facebook';
 import { shouldSkipTweetReply } from './x';
 
-describe('open_nami extractors suite', () => {
+describe('nami extractors suite', () => {
   it('instantiates all 4 platform extractors cleanly', () => {
     expect(getExtractor('instagram').platform).toBe('instagram');
     expect(getExtractor('tiktok').platform).toBe('tiktok');

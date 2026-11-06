@@ -5302,7 +5302,7 @@
       "tracking_desc": "ຕິດຕາມພັດສະດຸຈາກ 8 ບໍລິສັດຂົນສົ່ງຂອງບຣາຊິວໃນບ່ອນດຽວ, ອັບເດດອັດຕະໂນມັດ."
     }
   },
-  "open_nami": {
+  "nami": {
     "page_title": "Nami - Social Media Downloader",
     "sections_aria": "Nami sections",
     "tab_download": "Download",

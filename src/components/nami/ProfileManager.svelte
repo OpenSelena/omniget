@@ -36,7 +36,7 @@
       profiles = result;
     } catch (err) {
       if (thisRequest !== requestId) return;
-      error = $t('open_nami.failed_to_load_profiles') as string;
+      error = $t('nami.failed_to_load_profiles') as string;
       console.error(err);
     } finally {
       if (thisRequest === requestId) {
@@ -54,7 +54,7 @@
   async function addProfile() {
     const trimmedUrl = newUrl.trim();
     if (!trimmedUrl) {
-      error = $t('open_nami.enter_url_or_username') as string;
+      error = $t('nami.enter_url_or_username') as string;
       return;
     }
     error = '';
@@ -63,7 +63,7 @@
       newUrl = '';
       await loadPlatformProfiles();
     } catch (err) {
-      error = errorMessage(err, $t('open_nami.failed_to_add_profile') as string);
+      error = errorMessage(err, $t('nami.failed_to_add_profile') as string);
       console.error(err);
     }
   }
@@ -86,7 +86,7 @@
       await deleteProfile(activePlatform, url);
       await loadPlatformProfiles();
     } catch (err) {
-      error = errorMessage(err, $t('open_nami.failed_to_delete_profile') as string);
+      error = errorMessage(err, $t('nami.failed_to_delete_profile') as string);
       console.error('Failed to delete profile:', err);
     }
   }
@@ -109,7 +109,7 @@
 </script>
 
 <div class="pm">
-  <div class="pm-segmented" role="tablist" aria-label={$t('open_nami.platform_aria')}>
+  <div class="pm-segmented" role="tablist" aria-label={$t('nami.platform_aria')}>
     {#each platforms as platform (platform.key)}
       <button
         type="button"
@@ -138,22 +138,22 @@
         id="profile-url"
         type="text"
         bind:value={newUrl}
-        placeholder={$t('open_nami.profile_placeholder')}
+        placeholder={$t('nami.profile_placeholder')}
         onkeydown={(e) => e.key === 'Enter' && addProfile()}
         autocomplete="off"
         spellcheck="false"
-        aria-label={$t('open_nami.profile_url_aria')}
+        aria-label={$t('nami.profile_url_aria')}
       />
       <button type="button" class="pm-add-btn" onclick={addProfile} disabled={!newUrl.trim() || loading}>
-        {$t('open_nami.add')}
+        {$t('nami.add')}
       </button>
     </div>
   </div>
 
   {#if loading}
-    <p class="pm-empty">{$t('open_nami.loading_profiles')}</p>
+    <p class="pm-empty">{$t('nami.loading_profiles')}</p>
   {:else if profiles.length === 0}
-    <p class="pm-empty">{$t('open_nami.no_profiles_yet')}</p>
+    <p class="pm-empty">{$t('nami.no_profiles_yet')}</p>
   {:else}
     <div class="pm-group">
       {#each profiles as profile (profile.url)}
@@ -171,18 +171,18 @@
                 type="button"
                 class="pm-download-btn"
                 onclick={() => onSelectProfileForDownload?.(profile.url)}
-                aria-label={$t('open_nami.download_with', { name: profile.username || profile.url })}
+                aria-label={$t('nami.download_with', { name: profile.username || profile.url })}
               >
-                {$t('open_nami.download')}
+                {$t('nami.download')}
               </button>
             {/if}
             <button
               type="button"
               class="pm-remove"
               onclick={() => promptDelete(profile.url)}
-              aria-label={$t('open_nami.remove_profile_aria', { name: profile.username || profile.url })}
+              aria-label={$t('nami.remove_profile_aria', { name: profile.username || profile.url })}
             >
-              {$t('open_nami.remove')}
+              {$t('nami.remove')}
             </button>
           </div>
         </div>
@@ -193,11 +193,11 @@
 
 <dialog bind:this={dialogEl} class="pm-dialog" onclose={() => (confirmDeleteUrl = null)}>
   <div class="pm-dialog-content">
-    <p class="pm-dialog-title" id="pm-confirm-title">{$t('open_nami.delete_profile_title')}</p>
+    <p class="pm-dialog-title" id="pm-confirm-title">{$t('nami.delete_profile_title')}</p>
     <p class="pm-dialog-url">{confirmDeleteUrl}</p>
     <div class="pm-dialog-actions">
       <button type="button" class="pm-dialog-btn" onclick={cancelDelete}>{$t('common.cancel')}</button>
-      <button type="button" class="pm-dialog-btn danger" onclick={confirmDelete}>{$t('open_nami.delete')}</button>
+      <button type="button" class="pm-dialog-btn danger" onclick={confirmDelete}>{$t('nami.delete')}</button>
     </div>
   </div>
 </dialog>
