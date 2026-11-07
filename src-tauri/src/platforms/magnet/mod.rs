@@ -36,6 +36,13 @@ fn torrent_stem(name: &str) -> &str {
     }
 }
 
+/// True when the input is an HTTP or HTTPS URL pointing to a .torrent file.
+fn is_remote_torrent_url(url: &str) -> bool {
+    let trimmed = url.trim().trim_matches('"');
+    let lower = trimmed.to_ascii_lowercase();
+    (lower.starts_with("http://") || lower.starts_with("https://")) && lower.ends_with(".torrent")
+}
+
 /// Folders searched for a bare `.torrent` filename that is not in the working directory.
 fn torrent_search_dirs(output_dir: &Path) -> Vec<PathBuf> {
     let mut dirs = vec![output_dir.to_path_buf()];
@@ -92,7 +99,9 @@ impl PlatformDownloader for MagnetDownloader {
 
     fn can_handle(&self, url: &str) -> bool {
         let trimmed = url.trim().trim_matches('"');
-        trimmed.starts_with("magnet:") || looks_like_torrent_path(trimmed)
+        trimmed.starts_with("magnet:")
+            || looks_like_torrent_path(trimmed)
+            || is_remote_torrent_url(trimmed)
     }
 
     async fn get_media_info(&self, url: &str) -> anyhow::Result<MediaInfo> {
@@ -114,7 +123,7 @@ impl PlatformDownloader for MagnetDownloader {
                 if let Some(stem) = path.file_stem() {
                     title = stem.to_string_lossy().to_string();
                 }
-            } else if looks_like_torrent_path(trimmed) {
+            } else if looks_like_torrent_path(trimmed) || is_remote_torrent_url(trimmed) {
                 let name = trimmed.rsplit(['/', '\\']).next().unwrap_or(trimmed);
                 title = torrent_stem(name).to_string();
             }
@@ -223,9 +232,9 @@ impl PlatformDownloader for MagnetDownloader {
 
         let add_torrent = if let Some(path) = torrent_file.as_deref() {
             tracing::info!("[magnet] loading local torrent file: {}", path.display());
-            let bytes = tokio::fs::read(path)
-                .await
-                .map_err(|e| anyhow::anyhow!("Failed to read .torrent file {}: {}", path.display(), e))?;
+            let bytes = tokio::fs::read(path).await.map_err(|e| {
+                anyhow::anyhow!("Failed to read .torrent file {}: {}", path.display(), e)
+            })?;
             AddTorrent::from_bytes(bytes)
         } else if url.starts_with("magnet:")
             || url.starts_with("http://")
@@ -447,11 +456,28 @@ mod tests {
     #[test]
     fn local_file_inputs_are_recognised() {
         assert!(looks_like_torrent_path("Remastered.torrent"));
-        assert!(looks_like_torrent_path("  \"C:\\Users\\me\\Downloads\\Remastered.torrent\"  "));
+        assert!(looks_like_torrent_path(
+            "  \"C:\\Users\\me\\Downloads\\Remastered.torrent\"  "
+        ));
         assert!(!looks_like_torrent_path("magnet:?xt=urn:btih:abc"));
-        assert!(!looks_like_torrent_path("https://example.com/Remastered.torrent"));
+        assert!(!looks_like_torrent_path(
+            "https://example.com/Remastered.torrent"
+        ));
         assert!(!looks_like_torrent_path("https://example.com/video.mp4"));
         assert!(!looks_like_torrent_path("   "));
+    }
+
+    #[test]
+    fn can_handle_recognises_all_torrent_sources() {
+        let downloader = MagnetDownloader::new(Arc::new(tokio::sync::Mutex::new(None)));
+        assert!(downloader.can_handle("magnet:?xt=urn:btih:abc"));
+        assert!(downloader.can_handle("Remastered.torrent"));
+        assert!(downloader.can_handle("  \"C:\\Downloads\\test.torrent\"  "));
+        assert!(downloader.can_handle("https://example.com/linux.iso.torrent"));
+        assert!(downloader.can_handle("http://example.com/linux.iso.TORRENT"));
+        assert!(!downloader.can_handle("https://example.com/video.mp4"));
+        assert!(!downloader.can_handle("https://youtube.com/watch?v=123"));
+        assert!(!downloader.can_handle("   "));
     }
 
     #[test]
@@ -474,7 +500,10 @@ mod tests {
 
         // a missing filename stays a local-path input so the caller can report it
         assert!(looks_like_torrent_path("omniget-missing-xyz.torrent"));
-        assert_eq!(resolve_torrent_file("omniget-missing-xyz.torrent", &tmp), None);
+        assert_eq!(
+            resolve_torrent_file("omniget-missing-xyz.torrent", &tmp),
+            None
+        );
 
         // URIs are never resolved as files
         assert_eq!(resolve_torrent_file("magnet:?xt=urn:btih:abc", &tmp), None);
