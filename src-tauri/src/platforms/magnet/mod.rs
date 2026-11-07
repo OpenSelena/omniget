@@ -1,5 +1,5 @@
 use omniget_core::models::progress::ProgressUpdate;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use async_trait::async_trait;
@@ -10,6 +10,72 @@ use crate::models::media::{DownloadOptions, DownloadResult, MediaInfo, MediaType
 use crate::platforms::traits::PlatformDownloader;
 
 type SharedSession = Arc<tokio::sync::Mutex<Option<Arc<Session>>>>;
+
+/// True when the input names a local BitTorrent metainfo file rather than a URI.
+///
+/// A bare `Remastered.torrent` has no scheme, so handing it to the torrent backend
+/// as a URL fails with "unsupported URL ... Supporting magnet:, http:, and https".
+/// Detecting the `.torrent` suffix first is what keeps local files working.
+fn looks_like_torrent_path(input: &str) -> bool {
+    let trimmed = input.trim().trim_matches('"');
+    let lower = trimmed.to_ascii_lowercase();
+    !trimmed.is_empty()
+        && !lower.starts_with("magnet:")
+        && !trimmed.contains("://")
+        && lower.ends_with(".torrent")
+}
+
+/// `Remastered.torrent` → `Remastered`, matching the suffix case-insensitively.
+fn torrent_stem(name: &str) -> &str {
+    const SUFFIX: &str = ".torrent";
+    match name.len().checked_sub(SUFFIX.len()) {
+        Some(cut) if name.is_char_boundary(cut) && name[cut..].eq_ignore_ascii_case(SUFFIX) => {
+            &name[..cut]
+        }
+        _ => name,
+    }
+}
+
+/// True when the input is an HTTP or HTTPS URL pointing to a .torrent file.
+fn is_remote_torrent_url(url: &str) -> bool {
+    let trimmed = url.trim().trim_matches('"');
+    let lower = trimmed.to_ascii_lowercase();
+    (lower.starts_with("http://") || lower.starts_with("https://")) && lower.ends_with(".torrent")
+}
+
+/// Folders searched for a bare `.torrent` filename that is not in the working directory.
+fn torrent_search_dirs(output_dir: &Path) -> Vec<PathBuf> {
+    let mut dirs = vec![output_dir.to_path_buf()];
+    if let Ok(cwd) = std::env::current_dir() {
+        if cwd != output_dir {
+            dirs.push(cwd);
+        }
+    }
+    if let Some(downloads) = dirs::download_dir() {
+        dirs.push(downloads);
+    }
+    dirs
+}
+
+/// Resolve a local `.torrent` input to an existing file.
+///
+/// `None` means either "not a local torrent path" or "not found"; callers use
+/// [`looks_like_torrent_path`] to tell those apart when reporting the error.
+fn resolve_torrent_file(input: &str, output_dir: &Path) -> Option<PathBuf> {
+    if !looks_like_torrent_path(input) {
+        return None;
+    }
+    let trimmed = input.trim().trim_matches('"');
+    let candidate = Path::new(trimmed);
+    if candidate.is_file() {
+        return Some(candidate.to_path_buf());
+    }
+    let file_name = candidate.file_name()?;
+    torrent_search_dirs(output_dir)
+        .into_iter()
+        .map(|dir| dir.join(file_name))
+        .find(|path| path.is_file())
+}
 
 pub struct MagnetDownloader {
     session: SharedSession,
@@ -32,13 +98,10 @@ impl PlatformDownloader for MagnetDownloader {
     }
 
     fn can_handle(&self, url: &str) -> bool {
-        url.starts_with("magnet:")
-            || url.ends_with(".torrent")
-            || (std::path::Path::new(url).exists()
-                && std::path::Path::new(url)
-                    .extension()
-                    .map(|e| e == "torrent")
-                    .unwrap_or(false))
+        let trimmed = url.trim().trim_matches('"');
+        trimmed.starts_with("magnet:")
+            || looks_like_torrent_path(trimmed)
+            || is_remote_torrent_url(trimmed)
     }
 
     async fn get_media_info(&self, url: &str) -> anyhow::Result<MediaInfo> {
@@ -54,15 +117,15 @@ impl PlatformDownloader for MagnetDownloader {
                 }
             }
         } else {
-            let path = std::path::Path::new(url);
-            if path.exists() {
+            let trimmed = url.trim().trim_matches('"');
+            let path = Path::new(trimmed);
+            if path.is_file() {
                 if let Some(stem) = path.file_stem() {
                     title = stem.to_string_lossy().to_string();
                 }
-            } else if url.ends_with(".torrent") {
-                if let Some(name) = url.rsplit('/').next() {
-                    title = name.trim_end_matches(".torrent").to_string();
-                }
+            } else if looks_like_torrent_path(trimmed) || is_remote_torrent_url(trimmed) {
+                let name = trimmed.rsplit(['/', '\\']).next().unwrap_or(trimmed);
+                title = torrent_stem(name).to_string();
             }
         }
 
@@ -165,21 +228,26 @@ impl PlatformDownloader for MagnetDownloader {
             }
         };
 
-        let add_torrent = if url.starts_with("magnet:")
+        let torrent_file = resolve_torrent_file(url, output_dir);
+
+        let add_torrent = if let Some(path) = torrent_file.as_deref() {
+            tracing::info!("[magnet] loading local torrent file: {}", path.display());
+            let bytes = tokio::fs::read(path).await.map_err(|e| {
+                anyhow::anyhow!("Failed to read .torrent file {}: {}", path.display(), e)
+            })?;
+            AddTorrent::from_bytes(bytes)
+        } else if url.starts_with("magnet:")
             || url.starts_with("http://")
             || url.starts_with("https://")
         {
             AddTorrent::from_url(url)
+        } else if looks_like_torrent_path(url) {
+            anyhow::bail!(
+                "Torrent file not found: \"{}\". Put the .torrent in the download folder or in Downloads, or paste a magnet link instead.",
+                url
+            )
         } else {
-            let path = std::path::Path::new(url);
-            if path.exists() && path.extension().map(|e| e == "torrent").unwrap_or(false) {
-                let bytes = tokio::fs::read(path)
-                    .await
-                    .map_err(|e| anyhow::anyhow!("Failed to read .torrent file: {}", e))?;
-                AddTorrent::from_bytes(bytes)
-            } else {
-                AddTorrent::from_url(url)
-            }
+            AddTorrent::from_url(url)
         };
         let only_files = opts
             .torrent_files
@@ -370,5 +438,81 @@ impl PlatformDownloader for MagnetDownloader {
             duration_seconds: 0.0,
             torrent_id: Some(torrent_id),
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn torrent_suffix_is_matched_case_insensitively() {
+        assert_eq!(torrent_stem("Remastered.torrent"), "Remastered");
+        assert_eq!(torrent_stem("Remastered.TORRENT"), "Remastered");
+        assert_eq!(torrent_stem("no-suffix"), "no-suffix");
+        assert_eq!(torrent_stem(""), "");
+    }
+
+    #[test]
+    fn local_file_inputs_are_recognised() {
+        assert!(looks_like_torrent_path("Remastered.torrent"));
+        assert!(looks_like_torrent_path(
+            "  \"C:\\Users\\me\\Downloads\\Remastered.torrent\"  "
+        ));
+        assert!(!looks_like_torrent_path("magnet:?xt=urn:btih:abc"));
+        assert!(!looks_like_torrent_path(
+            "https://example.com/Remastered.torrent"
+        ));
+        assert!(!looks_like_torrent_path("https://example.com/video.mp4"));
+        assert!(!looks_like_torrent_path("   "));
+    }
+
+    #[test]
+    fn can_handle_recognises_all_torrent_sources() {
+        let downloader = MagnetDownloader::new(Arc::new(tokio::sync::Mutex::new(None)));
+        assert!(downloader.can_handle("magnet:?xt=urn:btih:abc"));
+        assert!(downloader.can_handle("Remastered.torrent"));
+        assert!(downloader.can_handle("  \"C:\\Downloads\\test.torrent\"  "));
+        assert!(downloader.can_handle("https://example.com/linux.iso.torrent"));
+        assert!(downloader.can_handle("http://example.com/linux.iso.TORRENT"));
+        assert!(!downloader.can_handle("https://example.com/video.mp4"));
+        assert!(!downloader.can_handle("https://youtube.com/watch?v=123"));
+        assert!(!downloader.can_handle("   "));
+    }
+
+    #[test]
+    fn bare_filename_resolves_through_search_dirs() {
+        let tmp = std::env::temp_dir().join(format!("omniget-magnet-{}", std::process::id()));
+        std::fs::create_dir_all(&tmp).unwrap();
+        let file = tmp.join("OmniGetTest.torrent");
+        std::fs::write(&file, b"d4:infod4:name4:teste").unwrap();
+
+        // an absolute or relative path that exists is used as given
+        assert_eq!(
+            resolve_torrent_file(file.to_str().unwrap(), &tmp),
+            Some(file.clone())
+        );
+        // a bare filename is found in the output folder
+        assert_eq!(
+            resolve_torrent_file("OmniGetTest.torrent", &tmp),
+            Some(file.clone())
+        );
+
+        // a missing filename stays a local-path input so the caller can report it
+        assert!(looks_like_torrent_path("omniget-missing-xyz.torrent"));
+        assert_eq!(
+            resolve_torrent_file("omniget-missing-xyz.torrent", &tmp),
+            None
+        );
+
+        // URIs are never resolved as files
+        assert_eq!(resolve_torrent_file("magnet:?xt=urn:btih:abc", &tmp), None);
+        assert_eq!(
+            resolve_torrent_file("https://example.com/OmniGetTest.torrent", &tmp),
+            None
+        );
+
+        std::fs::remove_file(&file).ok();
+        std::fs::remove_dir_all(&tmp).ok();
     }
 }
