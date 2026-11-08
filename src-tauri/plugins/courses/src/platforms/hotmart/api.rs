@@ -362,6 +362,112 @@ pub async fn get_modules(
     Ok(modules)
 }
 
+pub fn parse_attachments(body: &serde_json::Value) -> Vec<Attachment> {
+    body.get("attachments")
+        .and_then(|v| v.as_array())
+        .map(|arr| {
+            arr.iter()
+                .filter_map(|a| {
+                    let file_membership_id = a
+                        .get("fileMembershipId")
+                        .or_else(|| a.get("id"))
+                        .map(|v| match v {
+                            serde_json::Value::Number(n) => n.to_string(),
+                            serde_json::Value::String(s) => s.trim().to_string(),
+                            _ => String::new(),
+                        })
+                        .unwrap_or_default();
+                    if file_membership_id.is_empty() {
+                        return None;
+                    }
+                    let file_name = a
+                        .get("fileName")
+                        .or_else(|| a.get("name"))
+                        .and_then(|v| v.as_str())
+                        .unwrap_or("")
+                        .trim()
+                        .to_string();
+                    Some(Attachment {
+                        file_membership_id,
+                        file_name,
+                    })
+                })
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+pub fn parse_complementary_readings(body: &serde_json::Value) -> Option<Vec<ReadingLink>> {
+    let readings: Vec<ReadingLink> = body
+        .get("complementaryReadings")
+        .and_then(|v| v.as_array())
+        .map(|arr| {
+            arr.iter()
+                .filter_map(|r| {
+                    let title = r
+                        .get("articleName")
+                        .or_else(|| r.get("title"))
+                        .and_then(|v| v.as_str())
+                        .map(str::trim)
+                        .filter(|s| !s.is_empty())
+                        .map(String::from);
+                    let url = r
+                        .get("articleUrl")
+                        .or_else(|| r.get("url"))
+                        .and_then(|v| v.as_str())
+                        .map(str::trim)
+                        .filter(|s| !s.is_empty())
+                        .map(String::from);
+                    if title.is_none() && url.is_none() {
+                        return None;
+                    }
+                    Some(ReadingLink { title, url })
+                })
+                .collect()
+        })
+        .unwrap_or_default();
+
+    if readings.is_empty() {
+        None
+    } else {
+        Some(readings)
+    }
+}
+
+pub async fn get_complementary_content(
+    session: &HotmartSession,
+    slug: &str,
+    product_id: u64,
+    page_hash: &str,
+) -> anyhow::Result<(Vec<Attachment>, Option<Vec<ReadingLink>>)> {
+    let url = format!(
+        "https://api-club-course-consumption-gateway-ga.cb.hotmart.com/v1/pages/{}/complementary-content",
+        page_hash
+    );
+    let resp = session
+        .client
+        .get(&url)
+        .headers(navigation_headers(&session.token, slug, product_id))
+        .send()
+        .await?;
+
+    let status = resp.status();
+    if !status.is_success() {
+        let body_text = resp.text().await.unwrap_or_default();
+        return Err(anyhow!(
+            "get_complementary_content retornou status {}: {}",
+            status,
+            &body_text[..500.min(body_text.len())]
+        ));
+    }
+
+    let body: serde_json::Value = resp.json().await?;
+    Ok((
+        parse_attachments(&body),
+        parse_complementary_readings(&body),
+    ))
+}
+
 pub async fn get_lesson(
     session: &HotmartSession,
     slug: &str,
@@ -460,49 +566,24 @@ pub async fn get_lesson(
         })
         .unwrap_or_default();
 
-    let attachments: Vec<Attachment> = body
-        .get("attachments")
-        .and_then(|v| v.as_array())
-        .map(|arr| {
-            arr.iter()
-                .map(|a| Attachment {
-                    file_membership_id: a
-                        .get("fileMembershipId")
-                        .map(|v| match v {
-                            serde_json::Value::Number(n) => n.to_string(),
-                            serde_json::Value::String(s) => s.clone(),
-                            _ => String::new(),
-                        })
-                        .unwrap_or_default(),
-                    file_name: a
-                        .get("fileName")
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("")
-                        .to_string(),
-                })
-                .collect()
-        })
-        .unwrap_or_default();
+    let mut attachments = parse_attachments(&body);
+    let mut complementary_readings = parse_complementary_readings(&body);
 
-    let complementary_readings = body
-        .get("complementaryReadings")
-        .and_then(|v| v.as_array())
-        .map(|arr| {
-            arr.iter()
-                .map(|r| ReadingLink {
-                    title: r
-                        .get("articleName")
-                        .or_else(|| r.get("title"))
-                        .and_then(|v| v.as_str())
-                        .map(String::from),
-                    url: r
-                        .get("articleUrl")
-                        .or_else(|| r.get("url"))
-                        .and_then(|v| v.as_str())
-                        .map(String::from),
-                })
-                .collect()
-        });
+    if attachments.is_empty() && complementary_readings.is_none() {
+        match get_complementary_content(session, slug, product_id, page_hash).await {
+            Ok((comp_attachments, comp_readings)) => {
+                attachments = comp_attachments;
+                complementary_readings = comp_readings;
+            }
+            Err(e) => {
+                tracing::warn!(
+                    "[hotmart] falha ao buscar complementary-content da aula '{}': {}",
+                    page_hash,
+                    e
+                );
+            }
+        }
+    }
 
     Ok(Lesson {
         hash,
@@ -516,31 +597,28 @@ pub async fn get_lesson(
     })
 }
 
-pub async fn get_attachment_url(
-    session: &HotmartSession,
-    id: &str,
-) -> anyhow::Result<AttachmentInfo> {
-    let url = format!(
-        "https://api-club-hot-club-api.cb.hotmart.com/rest/v3/attachment/{}/download",
-        id
-    );
-    let resp = session
-        .client
-        .get(&url)
-        .header("Accept", "application/json, text/plain, */*")
-        .header("Origin", "https://hotmart.com")
-        .header("Referer", "https://hotmart.com")
-        .send()
-        .await?
-        .error_for_status()?;
+pub fn parse_attachment_info(body_text: &str) -> anyhow::Result<AttachmentInfo> {
+    let trimmed = body_text.trim();
+    let unquoted = trimmed.trim_matches('"').trim();
+    if unquoted.starts_with("http://") || unquoted.starts_with("https://") {
+        return Ok(AttachmentInfo {
+            url: unquoted.to_string(),
+            file_name: None,
+            token: None,
+            lambda_url: None,
+            is_drm: false,
+        });
+    }
 
-    let body: serde_json::Value = resp.json().await?;
-    let body_str = body.to_string();
-    let is_drm = body_str.contains("drm-protection");
+    let body: serde_json::Value = serde_json::from_str(trimmed)?;
+    let is_drm = trimmed.contains("drm-protection");
 
     let download_url = body
         .get("directDownloadUrl")
         .or_else(|| body.get("url"))
+        .or_else(|| body.get("downloadUrl"))
+        .or_else(|| body.get("signedUrl"))
+        .or_else(|| body.get("link"))
         .and_then(|v| v.as_str())
         .unwrap_or("")
         .to_string();
@@ -562,4 +640,133 @@ pub async fn get_attachment_url(
         lambda_url,
         is_drm,
     })
+}
+
+pub async fn get_attachment_url(
+    session: &HotmartSession,
+    slug: &str,
+    product_id: u64,
+    id: &str,
+) -> anyhow::Result<AttachmentInfo> {
+    let url = format!(
+        "https://api-club-hot-club-api.cb.hotmart.com/rest/v3/attachment/{}/download",
+        id
+    );
+    let resp = session
+        .client
+        .get(&url)
+        .headers(navigation_headers(&session.token, slug, product_id))
+        .send()
+        .await?;
+
+    let status = resp.status();
+    let body_text = resp.text().await.unwrap_or_default();
+    if !status.is_success() {
+        return Err(anyhow!(
+            "get_attachment_url retornou status {} para {}: {}",
+            status,
+            id,
+            &body_text[..500.min(body_text.len())]
+        ));
+    }
+
+    parse_attachment_info(&body_text)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parses_complementary_content_attachments_and_readings() {
+        let raw = r#"{
+            "complementaryReadings": [
+                {
+                    "articleName": "Guia de Referencia",
+                    "articleUrl": "https://example.com/guia"
+                }
+            ],
+            "attachments": [
+                {
+                    "fileOrder": 4,
+                    "fileMembershipId": "641db8a0-b918-4460-b007-a001b9f79bb5",
+                    "fileName": "PDF DIAPOSITIVAS MMSS_watermark (1).pdf",
+                    "fileSize": 83952102
+                },
+                {
+                    "fileOrder": 5,
+                    "fileMembershipId": 987654,
+                    "fileName": "Apostila.pdf"
+                }
+            ]
+        }"#;
+        let json: serde_json::Value = serde_json::from_str(raw).unwrap();
+        let attachments = parse_attachments(&json);
+        assert_eq!(attachments.len(), 2);
+        assert_eq!(
+            attachments[0].file_membership_id,
+            "641db8a0-b918-4460-b007-a001b9f79bb5"
+        );
+        assert_eq!(
+            attachments[0].file_name,
+            "PDF DIAPOSITIVAS MMSS_watermark (1).pdf"
+        );
+        assert_eq!(attachments[1].file_membership_id, "987654");
+        assert_eq!(attachments[1].file_name, "Apostila.pdf");
+
+        let readings = parse_complementary_readings(&json).unwrap();
+        assert_eq!(readings.len(), 1);
+        assert_eq!(readings[0].title.as_deref(), Some("Guia de Referencia"));
+        assert_eq!(readings[0].url.as_deref(), Some("https://example.com/guia"));
+    }
+
+    #[test]
+    fn empty_complementary_content_yields_empty_attachments_and_none_readings() {
+        let raw = r#"{"complementaryReadings":[],"attachments":[]}"#;
+        let json: serde_json::Value = serde_json::from_str(raw).unwrap();
+        assert!(parse_attachments(&json).is_empty());
+        assert!(parse_complementary_readings(&json).is_none());
+    }
+
+    #[test]
+    fn parses_attachment_download_info_variants() {
+        let direct = r#"{"directDownloadUrl":"https://hotmart-club-files.cb.hotmart.com/membership_area/x/y.pdf?Expires=1&Signature=s"}"#;
+        let info = parse_attachment_info(direct).unwrap();
+        assert!(!info.is_drm);
+        assert_eq!(
+            info.url,
+            "https://hotmart-club-files.cb.hotmart.com/membership_area/x/y.pdf?Expires=1&Signature=s"
+        );
+
+        let bare = "https://hotmart-club-files.cb.hotmart.com/membership_area/x/y.pdf";
+        let info_bare = parse_attachment_info(bare).unwrap();
+        assert_eq!(info_bare.url, bare);
+
+        let drm =
+            r#"{"lambdaUrl":"https://drm-protection.cb.hotmart.com/sign","token":"drm-tok-1"}"#;
+        let info_drm = parse_attachment_info(drm).unwrap();
+        assert!(info_drm.is_drm);
+        assert_eq!(
+            info_drm.lambda_url.as_deref(),
+            Some("https://drm-protection.cb.hotmart.com/sign")
+        );
+        assert_eq!(info_drm.token.as_deref(), Some("drm-tok-1"));
+    }
+
+    #[test]
+    fn navigation_headers_include_product_id_and_slug() {
+        let headers = navigation_headers("jwt-tok", "anatomy-club", 6083220);
+        assert_eq!(
+            headers.get("Authorization").unwrap().to_str().unwrap(),
+            "Bearer jwt-tok"
+        );
+        assert_eq!(
+            headers.get("x-product-id").unwrap().to_str().unwrap(),
+            "6083220"
+        );
+        assert_eq!(
+            headers.get("slug").unwrap().to_str().unwrap(),
+            "anatomy-club"
+        );
+    }
 }
