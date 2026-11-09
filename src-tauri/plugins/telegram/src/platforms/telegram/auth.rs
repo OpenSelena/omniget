@@ -48,9 +48,24 @@ impl TelegramState {
     }
 }
 
-fn session_file_path() -> anyhow::Result<PathBuf> {
+pub fn session_file_path() -> anyhow::Result<PathBuf> {
     let data_dir = dirs::data_dir().ok_or_else(|| anyhow!("Cannot find app data directory"))?;
     Ok(data_dir.join("omniget").join("telegram.session"))
+}
+
+pub async fn disconnect_and_clear_client(handle: &TelegramSessionHandle) {
+    let mut guard = handle.lock().await;
+    if let Some(client) = guard.client.take() {
+        client.disconnect();
+    }
+    guard.phone.clear();
+    guard.login_token = None;
+    guard.password_token = None;
+    guard.updates_rx = None;
+    guard.peer_hashes.clear();
+    drop(guard);
+    set_home_dc(0);
+    super::parallel_download::clear_auth_copied_dcs().await;
 }
 
 fn open_session() -> anyhow::Result<Arc<SqliteSession>> {

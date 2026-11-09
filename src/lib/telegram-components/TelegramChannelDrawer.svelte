@@ -114,7 +114,7 @@
       participants = [];
       participantsCount = 0;
       const msg = typeof e === "string" ? e : (e?.message ?? "");
-      if (msg.includes("ERR_PLUGIN_OUTDATED") || msg.includes("ADMIN_REQUIRED") || msg.includes("CHAT_ADMIN_REQUIRED")) {
+      if (msg.includes("ADMIN_REQUIRED") || msg.includes("CHAT_ADMIN_REQUIRED")) {
         participantsError = "";
       } else {
         participantsError = msg || $t("telegram.channel_drawer.error_loading_members");

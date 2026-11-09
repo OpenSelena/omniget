@@ -267,6 +267,7 @@ pub async fn telegram_download_media(
 
     let session = state.telegram_session.clone();
     let active_downloads = state.active_generic_downloads.clone();
+    let persistent = state.persistent.clone();
     let file_name_clone = file_name.clone();
 
     tokio::spawn(async move {
@@ -329,6 +330,11 @@ pub async fn telegram_download_media(
 
         match result {
             Ok(size) => {
+                {
+                    let mut p = persistent.lock().await;
+                    p.bandwidth.record_bytes(size);
+                    p.save();
+                }
                 emit_event(
                     &host,
                     "generic-download-complete",
@@ -417,11 +423,18 @@ pub async fn telegram_download_batch(
 
     let session = state.telegram_session.clone();
     let active_downloads = state.active_generic_downloads.clone();
+    let persistent = state.persistent.clone();
     let total_files = items.len() as u32;
 
-    // Read Telegram settings
     let tg_settings = settings_helper::load_settings().telegram;
-    let concurrent = tg_settings.concurrent_downloads.clamp(1, 10) as usize;
+    let perf_threads = {
+        let p = state.persistent.lock().await;
+        p.perf.max_threads
+    };
+    let concurrent = tg_settings
+        .concurrent_downloads
+        .max(perf_threads.min(10))
+        .clamp(1, 10) as usize;
 
     // Emit initial 0% batch progress
     emit_event(
@@ -456,6 +469,7 @@ pub async fn telegram_download_batch(
         for item in items {
             let sem = semaphore.clone();
             let session = session.clone();
+            let persistent = persistent.clone();
             let host = host.clone();
             let chat_type = chat_type.clone();
             let chat_title = chat_title.clone();
@@ -569,7 +583,12 @@ pub async fn telegram_download_batch(
                 let _ = progress_forwarder.await;
 
                 match result {
-                    Ok(_) => {
+                    Ok(size) => {
+                        {
+                            let mut p = persistent.lock().await;
+                            p.bandwidth.record_bytes(size);
+                            p.save();
+                        }
                         completed.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
                         emit_event(
                             &host,
@@ -730,6 +749,534 @@ pub async fn telegram_get_chat_photo(
 pub async fn telegram_clear_thumbnail_cache() -> Result<(), String> {
     thumbnail_cache::clear_cache().await;
     Ok(())
+}
+
+pub async fn telegram_upload_media(
+    host: Option<Arc<dyn PluginHost>>,
+    state: &TelegramPluginState,
+    chat_id: i64,
+    chat_type: String,
+    file_path: String,
+    caption: Option<String>,
+) -> Result<TelegramDownloadStarted, String> {
+    let upload_id = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_millis() as u64;
+
+    let path_buf = std::path::PathBuf::from(&file_path);
+    let file_name = path_buf
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("upload.bin")
+        .to_string();
+
+    let cancel_token = CancellationToken::new();
+    {
+        let mut active = state.active_generic_downloads.lock().await;
+        active.insert(
+            upload_id,
+            (format!("tg-up:{}", upload_id), cancel_token.clone()),
+        );
+    }
+
+    let session = state.telegram_session.clone();
+    let active_downloads = state.active_generic_downloads.clone();
+    let persistent = state.persistent.clone();
+    let file_name_clone = file_name.clone();
+    let caption_str = caption.unwrap_or_default();
+
+    tokio::spawn(async move {
+        let access_hash = {
+            let guard = session.lock().await;
+            guard.peer_hashes.get(&chat_id).copied().unwrap_or(0)
+        };
+        let peer = api::make_input_peer(chat_id, &chat_type, access_hash);
+
+        let (tx, mut rx) = mpsc::channel::<(u64, u64)>(32);
+        let host_progress = host.clone();
+        let progress_forwarder = tokio::spawn(async move {
+            while let Some((uploaded, total)) = rx.recv().await {
+                let percent = if total > 0 {
+                    (uploaded as f64 / total as f64) * 100.0
+                } else {
+                    0.0
+                };
+                emit_event(
+                    &host_progress,
+                    "generic-upload-progress",
+                    &serde_json::json!({
+                        "id": upload_id,
+                        "percent": percent,
+                        "uploaded_bytes": uploaded,
+                        "total_bytes": total,
+                    }),
+                );
+            }
+        });
+
+        let res =
+            api::upload_file_to_peer(&session, peer, &path_buf, &caption_str, tx, &cancel_token)
+                .await;
+
+        let _ = progress_forwarder.await;
+        active_downloads.lock().await.remove(&upload_id);
+
+        match res {
+            Ok(size) => {
+                {
+                    let mut p = persistent.lock().await;
+                    p.bandwidth.record_bytes(size);
+                    p.save();
+                }
+                emit_event(
+                    &host,
+                    "generic-upload-complete",
+                    &serde_json::json!({
+                        "id": upload_id,
+                        "success": true,
+                        "file_name": file_name_clone,
+                        "file_size_bytes": size,
+                    }),
+                );
+            }
+            Err(e) => {
+                emit_event(
+                    &host,
+                    "generic-upload-complete",
+                    &serde_json::json!({
+                        "id": upload_id,
+                        "success": false,
+                        "error": e.to_string(),
+                    }),
+                );
+            }
+        }
+    });
+
+    Ok(TelegramDownloadStarted {
+        id: upload_id,
+        file_name,
+    })
+}
+
+pub async fn telegram_user_upload_file(
+    host: Option<Arc<dyn PluginHost>>,
+    state: &TelegramPluginState,
+    file_path: String,
+    destination: String,
+    caption: String,
+) -> Result<serde_json::Value, String> {
+    let path_buf = std::path::PathBuf::from(&file_path);
+    let peer = api::resolve_destination_peer(&state.telegram_session, &destination)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    let cancel_token = CancellationToken::new();
+    {
+        state
+            .active_ops
+            .lock()
+            .await
+            .insert("upload".to_string(), cancel_token.clone());
+    }
+
+    let (tx, mut rx) = mpsc::channel::<(u64, u64)>(32);
+    let host_progress = host.clone();
+    let progress_forwarder = tokio::spawn(async move {
+        while let Some((uploaded, total)) = rx.recv().await {
+            let percent = if total > 0 {
+                (uploaded as f64 / total as f64) * 100.0
+            } else {
+                0.0
+            };
+            emit_event(
+                &host_progress,
+                "telegram-upload-progress",
+                &serde_json::json!({
+                    "percent": percent,
+                    "uploaded_bytes": uploaded,
+                    "total_bytes": total,
+                }),
+            );
+        }
+    });
+
+    let res = api::upload_file_to_peer(
+        &state.telegram_session,
+        peer,
+        &path_buf,
+        &caption,
+        tx,
+        &cancel_token,
+    )
+    .await;
+
+    let _ = progress_forwarder.await;
+    state.active_ops.lock().await.remove("upload");
+
+    match res {
+        Ok(size) => {
+            {
+                let mut p = state.persistent.lock().await;
+                p.bandwidth.record_bytes(size);
+                p.save();
+            }
+            Ok(serde_json::json!({
+                "success": true,
+                "message": "Uploaded via Telegram MTProto"
+            }))
+        }
+        Err(e) => Ok(serde_json::json!({
+            "success": false,
+            "message": e.to_string()
+        })),
+    }
+}
+
+pub async fn telegram_bot_upload_file(
+    host: Option<Arc<dyn PluginHost>>,
+    file_path: String,
+    bot_token: String,
+    chat_id: String,
+    caption: String,
+) -> Result<serde_json::Value, String> {
+    let path_buf = std::path::PathBuf::from(&file_path);
+    let bytes = tokio::fs::read(&path_buf)
+        .await
+        .map_err(|e| format!("Failed to read file: {}", e))?;
+    let total = bytes.len() as u64;
+    let file_name = path_buf
+        .file_name()
+        .and_then(|n| n.to_str())
+        .unwrap_or("upload.bin")
+        .to_string();
+
+    emit_event(
+        &host,
+        "telegram-upload-progress",
+        &serde_json::json!({
+            "percent": 15.0,
+            "uploaded_bytes": 0,
+            "total_bytes": total,
+        }),
+    );
+
+    let part = reqwest::multipart::Part::bytes(bytes).file_name(file_name);
+    let form = reqwest::multipart::Form::new()
+        .text("chat_id", chat_id)
+        .text("caption", caption)
+        .part("document", part);
+
+    let url = format!(
+        "https://api.telegram.org/bot{}/sendDocument",
+        bot_token.trim()
+    );
+    let client = reqwest::Client::new();
+    let resp = client
+        .post(&url)
+        .multipart(form)
+        .send()
+        .await
+        .map_err(|e| format!("Bot upload request failed: {}", e))?;
+
+    let status = resp.status();
+    let body: serde_json::Value = resp.json().await.unwrap_or_default();
+
+    emit_event(
+        &host,
+        "telegram-upload-progress",
+        &serde_json::json!({
+            "percent": 100.0,
+            "uploaded_bytes": total,
+            "total_bytes": total,
+        }),
+    );
+
+    if status.is_success() && body.get("ok").and_then(|v| v.as_bool()).unwrap_or(false) {
+        Ok(serde_json::json!({
+            "success": true,
+            "message": "Uploaded via Bot API"
+        }))
+    } else {
+        let desc = body
+            .get("description")
+            .and_then(|v| v.as_str())
+            .unwrap_or("Bot API upload failed");
+        Ok(serde_json::json!({
+            "success": false,
+            "message": desc
+        }))
+    }
+}
+
+pub fn redact_phone(phone: &str) -> Option<String> {
+    let trimmed = phone.trim();
+    if trimmed.is_empty() {
+        return None;
+    }
+    let chars: Vec<char> = trimmed.chars().collect();
+    if chars.len() <= 4 {
+        return Some(trimmed.to_string());
+    }
+    let prefix: String = chars.iter().take(3).collect();
+    let suffix: String = chars[chars.len() - 2..].iter().collect();
+    Some(format!("{}***{}", prefix, suffix))
+}
+
+#[allow(clippy::too_many_arguments)]
+pub async fn telegram_clone_start(
+    host: Option<Arc<dyn PluginHost>>,
+    state: &TelegramPluginState,
+    source_id: i64,
+    source_type: String,
+    source_title: Option<String>,
+    dest_id: Option<i64>,
+    dest_type: Option<String>,
+    dest_title: Option<String>,
+    options: crate::state::TelegramCloneOptions,
+) -> Result<serde_json::Value, String> {
+    let src_title = source_title
+        .filter(|s| !s.trim().is_empty())
+        .unwrap_or_else(|| format!("Chat {}", source_id));
+
+    let (resolved_dest_id, resolved_dest_type, resolved_dest_title) = match dest_id {
+        Some(did) if did != 0 => (
+            did,
+            dest_type.unwrap_or_else(|| "channel".to_string()),
+            dest_title.unwrap_or_else(|| format!("Chat {}", did)),
+        ),
+        _ => {
+            let new_title = dest_title
+                .filter(|s| !s.trim().is_empty())
+                .unwrap_or_else(|| format!("{} (Clone)", src_title));
+            let created = api::create_channel_or_folder(
+                &state.telegram_session,
+                &new_title,
+                "Cloned with OmniGet",
+                false,
+            )
+            .await
+            .map_err(|e| e.to_string())?;
+            (created.id, created.chat_type, created.title)
+        }
+    };
+
+    let now = crate::state::unix_now_secs();
+    let session_id = format!(
+        "clone_{}",
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_millis()
+    );
+
+    let clone_session = crate::state::TelegramCloneSession {
+        id: session_id.clone(),
+        source_chat_id: source_id,
+        source_chat_type: source_type.clone(),
+        source_title: src_title,
+        dest_chat_id: resolved_dest_id,
+        dest_chat_type: resolved_dest_type.clone(),
+        dest_title: resolved_dest_title.clone(),
+        last_message_id: 0,
+        total_collected: 0,
+        cloned_count: 0,
+        failed_count: 0,
+        status: "running".to_string(),
+        last_error: None,
+        options: options.clone(),
+        created_at: now,
+        updated_at: now,
+    };
+
+    {
+        let mut p = state.persistent.lock().await;
+        p.clones.push(clone_session);
+        p.save();
+    }
+
+    let cancel_token = CancellationToken::new();
+    {
+        state
+            .active_ops
+            .lock()
+            .await
+            .insert(session_id.clone(), cancel_token.clone());
+    }
+
+    let tg_session = state.telegram_session.clone();
+    let persistent = state.persistent.clone();
+    let active_ops = state.active_ops.clone();
+    let sid = session_id.clone();
+    let resolved_dest_type_for_task = resolved_dest_type.clone();
+
+    tokio::spawn(async move {
+        let max_items = options.limit.unwrap_or(500).clamp(1, 5000) as u32;
+        let media_items = api::list_media(
+            &tg_session,
+            source_id,
+            &source_type,
+            None,
+            0,
+            max_items,
+            true,
+        )
+        .await;
+
+        let mut msg_ids: Vec<i32> = match media_items {
+            Ok(items) => items.into_iter().map(|i| i.message_id).collect(),
+            Err(e) => {
+                let mut p = persistent.lock().await;
+                if let Some(c) = p.clones.iter_mut().find(|c| c.id == sid) {
+                    c.status = "failed".to_string();
+                    c.last_error = Some(e.to_string());
+                    c.updated_at = crate::state::unix_now_secs();
+                }
+                p.save();
+                active_ops.lock().await.remove(&sid);
+                return;
+            }
+        };
+
+        msg_ids.sort_unstable();
+        msg_ids.dedup();
+        let total = msg_ids.len();
+
+        {
+            let mut p = persistent.lock().await;
+            if let Some(c) = p.clones.iter_mut().find(|c| c.id == sid) {
+                c.total_collected = total;
+                c.updated_at = crate::state::unix_now_secs();
+            }
+            p.save();
+        }
+
+        emit_event(
+            &host,
+            "telegram:clone:progress",
+            &serde_json::json!({
+                "session_id": sid,
+                "phase": "cloning",
+                "stage": "cloning",
+                "cloned": 0,
+                "current": 0,
+                "failed": 0,
+                "total": total,
+                "last_message_id": 0,
+            }),
+        );
+
+        let batch_size = options.batch_size.clamp(1, 100);
+        let delay_ms = options.delay_ms.clamp(200, 60_000);
+        let mut cloned = 0usize;
+        let mut failed = 0usize;
+        let mut last_id = 0i32;
+
+        for chunk in msg_ids.chunks(batch_size) {
+            if cancel_token.is_cancelled() {
+                break;
+            }
+            last_id = *chunk.last().unwrap_or(&last_id);
+            match api::forward_messages(
+                &tg_session,
+                source_id,
+                &source_type,
+                resolved_dest_id,
+                &resolved_dest_type_for_task,
+                chunk.to_vec(),
+                options.drop_author,
+                options.drop_captions,
+            )
+            .await
+            {
+                Ok(()) => {
+                    cloned += chunk.len();
+                }
+                Err(e) => {
+                    failed += chunk.len();
+                    let mut p = persistent.lock().await;
+                    if let Some(c) = p.clones.iter_mut().find(|c| c.id == sid) {
+                        c.last_error = Some(e.to_string());
+                    }
+                }
+            }
+
+            {
+                let mut p = persistent.lock().await;
+                if let Some(c) = p.clones.iter_mut().find(|c| c.id == sid) {
+                    c.cloned_count = cloned;
+                    c.failed_count = failed;
+                    c.last_message_id = last_id;
+                    c.updated_at = crate::state::unix_now_secs();
+                }
+                p.save();
+            }
+
+            emit_event(
+                &host,
+                "telegram:clone:progress",
+                &serde_json::json!({
+                    "session_id": sid,
+                    "phase": "cloning",
+                    "stage": "cloning",
+                    "cloned": cloned,
+                    "current": cloned,
+                    "failed": failed,
+                    "total": total,
+                    "last_message_id": last_id,
+                }),
+            );
+
+            tokio::select! {
+                _ = tokio::time::sleep( std::time::Duration::from_millis(delay_ms) ) => {},
+                _ = cancel_token.cancelled() => break,
+            }
+        }
+
+        {
+            let mut p = persistent.lock().await;
+            if let Some(c) = p.clones.iter_mut().find(|c| c.id == sid) {
+                if c.status == "running" {
+                    c.status = if cancel_token.is_cancelled() {
+                        "paused".to_string()
+                    } else {
+                        "completed".to_string()
+                    };
+                }
+                c.updated_at = crate::state::unix_now_secs();
+            }
+            p.save();
+        }
+
+        let final_stage = if cancel_token.is_cancelled() {
+            "paused"
+        } else {
+            "completed"
+        };
+        active_ops.lock().await.remove(&sid);
+        emit_event(
+            &host,
+            "telegram:clone:progress",
+            &serde_json::json!({
+                "session_id": sid,
+                "phase": "done",
+                "stage": final_stage,
+                "cloned": cloned,
+                "current": cloned,
+                "failed": failed,
+                "total": total,
+                "last_message_id": last_id,
+            }),
+        );
+    });
+
+    Ok(serde_json::json!({
+        "session_id": session_id,
+        "dest_chat_id": resolved_dest_id,
+        "dest_chat_type": resolved_dest_type,
+        "dest_title": resolved_dest_title,
+    }))
 }
 
 #[cfg(test)]

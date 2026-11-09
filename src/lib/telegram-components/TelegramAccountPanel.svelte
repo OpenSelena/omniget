@@ -52,9 +52,7 @@
       backups = Array.isArray(bks) ? bks : [];
     } catch (e: any) {
       const msg = typeof e === "string" ? e : (e?.message ?? "");
-      if (!msg.includes("ERR_PLUGIN_OUTDATED")) {
-        error = msg || $t("common.error");
-      }
+      error = msg || $t("common.error");
     } finally {
       loading = false;
     }

@@ -121,7 +121,18 @@ impl PluginManager {
             },
         );
         self.load_errors.remove(&id);
-        if !self.installed.iter().any(|p| p.id == id) {
+        if let Some(existing) = self.installed.iter_mut().find(|p| p.id == id) {
+            if existing.version != manifest.version
+                || existing.repo.is_some()
+                || existing.source_release.is_some()
+            {
+                existing.version = manifest.version.clone();
+                existing.repo = None;
+                existing.source_release = None;
+                existing.updated_at = chrono::Utc::now().to_rfc3339();
+                let _ = self.save_installed();
+            }
+        } else {
             self.installed.push(InstalledPlugin {
                 id: id.clone(),
                 version: manifest.version.clone(),
@@ -139,6 +150,13 @@ impl PluginManager {
             manifest.version
         );
         Ok(())
+    }
+
+    pub fn is_builtin(&self, id: &str) -> bool {
+        self.loaded
+            .get(id)
+            .map(|lp| lp._lib.is_none())
+            .unwrap_or(false)
     }
 
     pub fn load_one(&mut self, id: &str, host: Arc<dyn PluginHost>) -> Result<(), PluginLoadError> {
