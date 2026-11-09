@@ -548,8 +548,8 @@ pub fn parse_lesson_detail(body: &serde_json::Value, fallback_id: &str) -> Kiwif
         .unwrap_or("")
         .to_string();
 
-    let description = first_non_empty_str(lesson, &["description", "content", "body"])
-        .map(String::from);
+    let description =
+        first_non_empty_str(lesson, &["description", "content", "body"]).map(String::from);
 
     let video_url = lesson
         .get("video")
@@ -773,7 +773,8 @@ mod tests {
             "certificate_enabled": true
         });
 
-        let modules = parse_course_modules(&course_payload).expect("should parse nested course.modules");
+        let modules =
+            parse_course_modules(&course_payload).expect("should parse nested course.modules");
         assert_eq!(modules.len(), 2);
         assert_eq!(modules[0].id, "mod-1");
         assert_eq!(modules[0].name, "Módulo 1");
@@ -797,7 +798,8 @@ mod tests {
             }
         });
 
-        let club_modules = parse_course_modules(&club_payload).expect("should parse nested content.modules");
+        let club_modules =
+            parse_course_modules(&club_payload).expect("should parse nested content.modules");
         assert_eq!(club_modules.len(), 1);
         assert_eq!(club_modules[0].id, "club-mod-1");
         assert_eq!(club_modules[0].lessons[0].id, "club-les-1");
@@ -828,7 +830,10 @@ mod tests {
         let detail = parse_lesson_detail(&payload, "fallback-id");
         assert_eq!(detail.id, "les-1a");
         assert_eq!(detail.name, "Aula 1A - Introdução");
-        assert_eq!(detail.description.as_deref(), Some("<p>Material de apoio</p>"));
+        assert_eq!(
+            detail.description.as_deref(),
+            Some("<p>Material de apoio</p>")
+        );
         assert_eq!(
             detail.video_url.as_deref(),
             Some("https://d3pjuhbfoxhm7c.cloudfront.net/courses/550e8400/videos/master.m3u8")
