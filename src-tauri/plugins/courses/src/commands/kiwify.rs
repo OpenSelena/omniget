@@ -222,7 +222,13 @@ pub async fn start_kiwify_course_download(
         serde_json::from_str(&course_json).map_err(|e| format!("Invalid JSON: {}", e))?;
 
     let course_name = course.name.clone();
-    let course_id = course.id as u64;
+    let course_id = {
+        use std::collections::hash_map::DefaultHasher;
+        use std::hash::{Hash, Hasher};
+        let mut hasher = DefaultHasher::new();
+        course.id.hash(&mut hasher);
+        hasher.finish()
+    };
     let active = state.active_downloads.clone();
 
     let cancel_token = CancellationToken::new();

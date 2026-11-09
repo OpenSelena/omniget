@@ -13,7 +13,7 @@ use super::api::{self, KiwifyCourse, KiwifySession};
 
 #[derive(Debug, Clone, serde::Serialize)]
 pub struct KiwifyCourseDownloadProgress {
-    pub course_id: i64,
+    pub course_id: String,
     pub course_name: String,
     pub percent: f64,
     pub current_module: String,
@@ -35,7 +35,7 @@ pub async fn download_full_course(
     output_dir: &str,
     cancel_token: CancellationToken,
 ) -> anyhow::Result<()> {
-    let modules = api::get_course_content(session, course.id).await?;
+    let modules = api::get_course_content(session, &course.id).await?;
 
     if modules.is_empty() {
         return Err(anyhow!(
@@ -63,7 +63,7 @@ pub async fn download_full_course(
     let _ = app.emit(
         "download-progress",
         &KiwifyCourseDownloadProgress {
-            course_id: course.id,
+            course_id: course.id.clone(),
             course_name: course.name.clone(),
             percent: 0.0,
             current_module: "Starting...".to_string(),
@@ -94,7 +94,7 @@ pub async fn download_full_course(
             let lesson_dir = format!("{}/{}. {}", mod_dir, li + 1, lesson_name);
             tokio::fs::create_dir_all(&lesson_dir).await?;
 
-            let detail = match api::get_lesson_detail(session, course.id, &lesson.id).await {
+            let detail = match api::get_lesson_detail(session, &course.id, &lesson.id).await {
                 Ok(d) => d,
                 Err(e) => {
                     tracing::error!(
@@ -106,7 +106,7 @@ pub async fn download_full_course(
                     let _ = app.emit(
                         "download-progress",
                         &KiwifyCourseDownloadProgress {
-                            course_id: course.id,
+                            course_id: course.id.clone(),
                             course_name: course.name.clone(),
                             percent: done as f64 / total_lessons as f64 * 100.0,
                             current_module: module.name.clone(),
@@ -157,7 +157,7 @@ pub async fn download_full_course(
                         let _ = app.emit(
                             "download-progress",
                             &KiwifyCourseDownloadProgress {
-                                course_id: course.id,
+                                course_id: course.id.clone(),
                                 course_name: course.name.clone(),
                                 percent: done as f64 / total_lessons as f64 * 100.0,
                                 current_module: module.name.clone(),
@@ -240,7 +240,7 @@ pub async fn download_full_course(
                 let download_url = if let Some(ref url) = file.url {
                     url.clone()
                 } else {
-                    match api::get_file_download_url(session, course.id, &file.id).await {
+                    match api::get_file_download_url(session, &course.id, &file.id).await {
                         Ok(url) => url,
                         Err(e) => {
                             tracing::error!(
@@ -274,7 +274,7 @@ pub async fn download_full_course(
             let _ = app.emit(
                 "download-progress",
                 &KiwifyCourseDownloadProgress {
-                    course_id: course.id,
+                    course_id: course.id.clone(),
                     course_name: course.name.clone(),
                     percent: done as f64 / total_lessons as f64 * 100.0,
                     current_module: module.name.clone(),

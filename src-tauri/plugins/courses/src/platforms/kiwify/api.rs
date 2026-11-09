@@ -25,7 +25,7 @@ pub struct SavedSession {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct KiwifyCourse {
-    pub id: i64,
+    pub id: String,
     pub name: String,
     pub seller: String,
     pub image_url: Option<String>,
@@ -190,76 +190,22 @@ pub async fn list_courses(session: &KiwifySession) -> anyhow::Result<Vec<KiwifyC
 
         let body: serde_json::Value = serde_json::from_str(&body_text)?;
 
-        let courses_arr = body
-            .get("courses")
-            .and_then(|v| v.as_array())
-            .cloned()
-            .unwrap_or_default();
-
         let total_count = body.get("count").and_then(|v| v.as_i64()).unwrap_or(0);
         let page_size = body.get("page_size").and_then(|v| v.as_i64()).unwrap_or(10);
 
+        let page_courses = parse_courses_page(&body);
         tracing::info!(
             "[kiwify] page {} returned {} courses (total={}, page_size={})",
             page,
-            courses_arr.len(),
+            page_courses.len(),
             total_count,
             page_size
         );
 
-        if courses_arr.is_empty() {
+        if page_courses.is_empty() {
             break;
         }
-
-        for item in &courses_arr {
-            let course_in_school = item
-                .get("course_in_school")
-                .and_then(|v| v.as_bool())
-                .unwrap_or(false);
-
-            let (info_obj, is_school) = if course_in_school {
-                (item.get("school_info").unwrap_or(item), true)
-            } else {
-                (item.get("course_info").unwrap_or(item), false)
-            };
-
-            let id = info_obj
-                .get("id")
-                .and_then(|v| v.as_i64())
-                .or_else(|| item.get("id").and_then(|v| v.as_i64()))
-                .unwrap_or(0);
-
-            let name = info_obj
-                .get("name")
-                .and_then(|v| v.as_str())
-                .or_else(|| item.get("name").and_then(|v| v.as_str()))
-                .unwrap_or("")
-                .to_string();
-
-            let seller = info_obj
-                .get("producer")
-                .and_then(|p| p.get("name").and_then(|n| n.as_str()))
-                .or_else(|| {
-                    item.get("producer")
-                        .and_then(|p| p.get("name").and_then(|n| n.as_str()))
-                })
-                .unwrap_or("")
-                .to_string();
-
-            let image_url = info_obj
-                .get("image")
-                .and_then(|v| v.as_str())
-                .or_else(|| info_obj.get("thumbnail").and_then(|v| v.as_str()))
-                .map(String::from);
-
-            all_courses.push(KiwifyCourse {
-                id,
-                name,
-                seller,
-                image_url,
-                is_school,
-            });
-        }
+        all_courses.extend(page_courses);
 
         if total_count > 0 && (page as i64 * page_size) >= total_count {
             break;
@@ -277,12 +223,81 @@ pub async fn list_courses(session: &KiwifySession) -> anyhow::Result<Vec<KiwifyC
     Ok(all_courses)
 }
 
+fn first_non_empty_str<'a>(obj: &'a serde_json::Value, keys: &[&str]) -> Option<&'a str> {
+    keys.iter().find_map(|key| {
+        obj.get(*key)
+            .and_then(|v| v.as_str())
+            .filter(|s| !s.trim().is_empty())
+    })
+}
+
+fn extract_id_string(obj: &serde_json::Value) -> Option<String> {
+    obj.get("id").and_then(|v| {
+        v.as_str()
+            .filter(|s| !s.is_empty())
+            .map(String::from)
+            .or_else(|| v.as_i64().map(|n| n.to_string()))
+    })
+}
+
+pub fn parse_courses_page(body: &serde_json::Value) -> Vec<KiwifyCourse> {
+    let Some(courses_arr) = body.get("courses").and_then(|v| v.as_array()) else {
+        return Vec::new();
+    };
+
+    let mut courses = Vec::new();
+    for item in courses_arr {
+        let course_in_school = item
+            .get("course_in_school")
+            .and_then(|v| v.as_bool())
+            .unwrap_or(false);
+
+        let (info_obj, is_school) = if course_in_school {
+            (item.get("school_info").unwrap_or(item), true)
+        } else {
+            (item.get("course_info").unwrap_or(item), false)
+        };
+
+        let id = extract_id_string(info_obj)
+            .or_else(|| extract_id_string(item))
+            .unwrap_or_default();
+
+        let name = first_non_empty_str(info_obj, &["name"])
+            .or_else(|| first_non_empty_str(item, &["name"]))
+            .unwrap_or("")
+            .to_string();
+
+        let seller = info_obj
+            .get("producer")
+            .and_then(|p| first_non_empty_str(p, &["name"]))
+            .or_else(|| {
+                item.get("producer")
+                    .and_then(|p| first_non_empty_str(p, &["name"]))
+            })
+            .unwrap_or("")
+            .to_string();
+
+        let image_url =
+            first_non_empty_str(info_obj, &["course_img", "logo_url", "image", "thumbnail"])
+                .map(String::from);
+
+        courses.push(KiwifyCourse {
+            id,
+            name,
+            seller,
+            image_url,
+            is_school,
+        });
+    }
+    courses
+}
+
 pub async fn get_course_content(
     session: &KiwifySession,
-    course_id: i64,
+    course_id: &str,
 ) -> anyhow::Result<Vec<KiwifyModule>> {
     let club_url = format!(
-        "https://admin-api.kiwify.com/v1/viewer/clubs/{}/content?caipirinha=true",
+        "https://admin-api.kiwify.com.br/v1/viewer/clubs/{}/content?caipirinha=true",
         course_id
     );
 
@@ -310,8 +325,15 @@ pub async fn get_course_content(
         }
     };
 
+    parse_course_modules(&body)
+}
+
+pub fn parse_course_modules(body: &serde_json::Value) -> anyhow::Result<Vec<KiwifyModule>> {
     let modules_obj = body
-        .get("modules")
+        .get("course")
+        .and_then(|c| c.get("modules"))
+        .or_else(|| body.get("content").and_then(|c| c.get("modules")))
+        .or_else(|| body.get("modules"))
         .or_else(|| body.get("content"))
         .ok_or_else(|| anyhow!("No modules found in course content response"))?;
 
@@ -490,11 +512,11 @@ pub async fn get_course_content(
 
 pub async fn get_lesson_detail(
     session: &KiwifySession,
-    course_id: i64,
+    course_id: &str,
     lesson_id: &str,
 ) -> anyhow::Result<KiwifyLessonDetail> {
     let url = format!(
-        "https://admin-api.kiwify.com/v1/viewer/courses/{}/lesson/{}",
+        "https://admin-api.kiwify.com.br/v1/viewer/courses/{}/lesson/{}",
         course_id, lesson_id
     );
 
@@ -512,35 +534,30 @@ pub async fn get_lesson_detail(
     }
 
     let body: serde_json::Value = serde_json::from_str(&body_text)?;
+    Ok(parse_lesson_detail(&body, lesson_id))
+}
 
-    let lesson = body.get("lesson").unwrap_or(&body);
+pub fn parse_lesson_detail(body: &serde_json::Value, fallback_id: &str) -> KiwifyLessonDetail {
+    let lesson = body.get("lesson").unwrap_or(body);
 
-    let id = lesson
-        .get("id")
-        .and_then(|v| v.as_str())
-        .unwrap_or(lesson_id)
+    let id = first_non_empty_str(lesson, &["id"])
+        .unwrap_or(fallback_id)
         .to_string();
 
-    let name = lesson
-        .get("title")
-        .or_else(|| lesson.get("name"))
-        .and_then(|v| v.as_str())
+    let name = first_non_empty_str(lesson, &["title", "name"])
         .unwrap_or("")
         .to_string();
 
-    let description = lesson
-        .get("description")
-        .or_else(|| lesson.get("content"))
-        .or_else(|| lesson.get("body"))
-        .and_then(|v| v.as_str())
-        .filter(|s| !s.trim().is_empty())
+    let description = first_non_empty_str(lesson, &["description", "content", "body"])
         .map(String::from);
 
     let video_url = lesson
-        .get("stream_link")
-        .or_else(|| lesson.get("video_url"))
-        .or_else(|| lesson.get("video"))
-        .and_then(|v| v.as_str())
+        .get("video")
+        .and_then(|v| {
+            first_non_empty_str(v, &["stream_link", "download_link", "url"])
+                .or_else(|| v.as_str().filter(|s| !s.trim().is_empty()))
+        })
+        .or_else(|| first_non_empty_str(lesson, &["stream_link", "video_url"]))
         .map(|url| {
             if url.starts_with('/') {
                 format!("{}{}", CDN_BASE, url)
@@ -583,18 +600,18 @@ pub async fn get_lesson_detail(
         })
         .unwrap_or_default();
 
-    Ok(KiwifyLessonDetail {
+    KiwifyLessonDetail {
         id,
         name,
         description,
         video_url,
         files,
-    })
+    }
 }
 
 pub async fn get_file_download_url(
     session: &KiwifySession,
-    course_id: i64,
+    course_id: &str,
     file_id: &str,
 ) -> anyhow::Result<String> {
     let url = format!(
@@ -673,4 +690,168 @@ pub async fn delete_saved_session() -> anyhow::Result<()> {
         tokio::fs::remove_file(&path).await?;
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use serde_json::json;
+
+    #[test]
+    fn parse_courses_page_extracts_uuid_and_course_img() {
+        let payload = json!({
+            "count": 2,
+            "page_size": 10,
+            "courses": [
+                {
+                    "course_in_school": false,
+                    "course_info": {
+                        "id": "550e8400-e29b-41d4-a716-446655440000",
+                        "name": "Curso Kiwify Pro",
+                        "course_img": "https://cdn.kiwify.com.br/cover.png",
+                        "producer": { "name": "Produtor A" }
+                    }
+                },
+                {
+                    "course_in_school": true,
+                    "school_info": {
+                        "id": "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d",
+                        "name": "Escola Premium",
+                        "course_img": "",
+                        "logo_url": "https://cdn.kiwify.com.br/logo.png",
+                        "producer": { "name": "Produtor B" }
+                    }
+                }
+            ]
+        });
+
+        let courses = parse_courses_page(&payload);
+        assert_eq!(courses.len(), 2);
+        assert_eq!(courses[0].id, "550e8400-e29b-41d4-a716-446655440000");
+        assert_eq!(courses[0].name, "Curso Kiwify Pro");
+        assert_eq!(courses[0].seller, "Produtor A");
+        assert_eq!(
+            courses[0].image_url.as_deref(),
+            Some("https://cdn.kiwify.com.br/cover.png")
+        );
+        assert!(!courses[0].is_school);
+
+        assert_eq!(courses[1].id, "9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d");
+        assert_eq!(
+            courses[1].image_url.as_deref(),
+            Some("https://cdn.kiwify.com.br/logo.png")
+        );
+        assert!(courses[1].is_school);
+    }
+
+    #[test]
+    fn parse_course_modules_unwraps_nested_course_and_content_objects() {
+        let course_payload = json!({
+            "course": {
+                "id": "550e8400-e29b-41d4-a716-446655440000",
+                "name": "Curso Kiwify Pro",
+                "modules": [
+                    {
+                        "id": "mod-2",
+                        "name": "Módulo 2",
+                        "order": 2,
+                        "lessons": [
+                            { "id": "les-2", "title": "Aula 2", "order": 1 }
+                        ]
+                    },
+                    {
+                        "id": "mod-1",
+                        "name": "Módulo 1",
+                        "order": 1,
+                        "lessons": [
+                            { "id": "les-1b", "title": "Aula 1B", "order": 2 },
+                            { "id": "les-1a", "title": "Aula 1A", "order": 1 }
+                        ]
+                    }
+                ]
+            },
+            "certificate_enabled": true
+        });
+
+        let modules = parse_course_modules(&course_payload).expect("should parse nested course.modules");
+        assert_eq!(modules.len(), 2);
+        assert_eq!(modules[0].id, "mod-1");
+        assert_eq!(modules[0].name, "Módulo 1");
+        assert_eq!(modules[0].lessons.len(), 2);
+        assert_eq!(modules[0].lessons[0].id, "les-1a");
+        assert_eq!(modules[0].lessons[0].name, "Aula 1A");
+        assert_eq!(modules[1].id, "mod-2");
+
+        let club_payload = json!({
+            "content": {
+                "modules": [
+                    {
+                        "id": "club-mod-1",
+                        "title": "Boas-vindas",
+                        "order": 1,
+                        "lessons": [
+                            { "id": "club-les-1", "title": "Comece aqui", "order": 1 }
+                        ]
+                    }
+                ]
+            }
+        });
+
+        let club_modules = parse_course_modules(&club_payload).expect("should parse nested content.modules");
+        assert_eq!(club_modules.len(), 1);
+        assert_eq!(club_modules[0].id, "club-mod-1");
+        assert_eq!(club_modules[0].lessons[0].id, "club-les-1");
+    }
+
+    #[test]
+    fn parse_lesson_detail_extracts_nested_video_stream_link_and_files() {
+        let payload = json!({
+            "lesson": {
+                "id": "les-1a",
+                "title": "Aula 1A - Introdução",
+                "content": "<p>Material de apoio</p>",
+                "video": {
+                    "id": "vid-1",
+                    "name": "aula1.mp4",
+                    "stream_link": "/courses/550e8400/videos/master.m3u8",
+                    "download_link": null
+                },
+                "files": [
+                    {
+                        "id": "file-uuid-1",
+                        "name": "slides.pdf"
+                    }
+                ]
+            }
+        });
+
+        let detail = parse_lesson_detail(&payload, "fallback-id");
+        assert_eq!(detail.id, "les-1a");
+        assert_eq!(detail.name, "Aula 1A - Introdução");
+        assert_eq!(detail.description.as_deref(), Some("<p>Material de apoio</p>"));
+        assert_eq!(
+            detail.video_url.as_deref(),
+            Some("https://d3pjuhbfoxhm7c.cloudfront.net/courses/550e8400/videos/master.m3u8")
+        );
+        assert_eq!(detail.files.len(), 1);
+        assert_eq!(detail.files[0].id, "file-uuid-1");
+        assert_eq!(detail.files[0].name, "slides.pdf");
+
+        let fallback_video_payload = json!({
+            "lesson": {
+                "id": "les-1b",
+                "title": "Aula 1B",
+                "video": {
+                    "id": "vid-2",
+                    "stream_link": null,
+                    "download_link": "/courses/550e8400/videos/aula1b.mp4"
+                }
+            }
+        });
+        let fallback_detail = parse_lesson_detail(&fallback_video_payload, "fallback-id");
+        assert_eq!(
+            fallback_detail.video_url.as_deref(),
+            Some("https://d3pjuhbfoxhm7c.cloudfront.net/courses/550e8400/videos/aula1b.mp4")
+        );
+    }
 }
