@@ -145,7 +145,7 @@
               <select
                 id="onboarding-language"
                 class="pref-select"
-                value={settings?.appearance.language ?? "en"}
+                value={settings?.appearance.language || $locale || "en"}
                 onchange={changeLanguage}
               >
                 {#each LANGUAGES as [code, name] (code)}

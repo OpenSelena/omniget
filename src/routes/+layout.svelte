@@ -31,7 +31,7 @@
   import { needsOnboarding } from "$lib/stores/onboarding-store.svelte";
   import { isYtdlpAvailable, isDepsChecked, refreshYtdlpStatus } from "$lib/stores/dependency-store.svelte";
   import { showToast } from "$lib/stores/toast-store.svelte";
-  import { t, locale, isRtlLocale } from "$lib/i18n";
+  import { t, locale, isRtlLocale, loadTranslations } from "$lib/i18n";
   import { get } from "svelte/store";
   import { CORE_NAV_ITEMS, pluginIconForRoute, type NavItem } from "$lib/nav-config";
   import { TOOLS, toolHref } from "$lib/tools/catalog";
@@ -133,7 +133,17 @@
         if (getSettings() || attempts >= 5) return;
         attempts += 1;
         loadSettings()
-          .then(() => reloadPluginNav())
+          .then(async (s) => {
+            reloadPluginNav();
+            const target = s?.appearance?.language;
+            if (target && target !== get(locale)) {
+              try {
+                await loadTranslations(target, page.url.pathname);
+                locale.set(target);
+                await syncTrayLabels();
+              } catch {}
+            }
+          })
           .catch(() => setTimeout(retry, 1000 * attempts));
       };
       setTimeout(retry, 500);
@@ -302,6 +312,21 @@
     document.documentElement.setAttribute("dir", isRtlLocale($locale) ? "rtl" : "ltr");
     document.documentElement.setAttribute("lang", $locale || "en");
     buildCommandPaletteItems();
+  });
+
+  $effect(() => {
+    const targetLang = settings?.appearance?.language;
+    if (targetLang && targetLang !== $locale) {
+      void (async () => {
+        try {
+          await loadTranslations(targetLang, page.url.pathname);
+          locale.set(targetLang);
+          await syncTrayLabels();
+        } catch (e) {
+          console.warn(`[i18n] could not sync locale to "${targetLang}":`, e);
+        }
+      })();
+    }
   });
 
   let { children }: { children: Snippet } = $props();

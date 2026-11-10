@@ -250,7 +250,9 @@
   function countPanelMatches(panel: HTMLElement, query: string): number {
     let count = 0;
     panel.querySelectorAll<HTMLElement>(PANEL_MATCH_SELECTORS).forEach((el) => {
-      if ((el.textContent ?? "").toLowerCase().includes(query)) count += 1;
+      const text = (el.textContent ?? "").toLowerCase();
+      const keywords = (el.getAttribute("data-search-keywords") ?? "").toLowerCase();
+      if (text.includes(query) || keywords.includes(query)) count += 1;
     });
     return count;
   }
@@ -273,7 +275,8 @@
     );
     rows.forEach((row) => {
       const text = (row.textContent ?? "").toLowerCase();
-      row.style.display = text.includes(query) ? "" : "none";
+      const keywords = (row.getAttribute("data-search-keywords") ?? "").toLowerCase();
+      row.style.display = (text.includes(query) || keywords.includes(query)) ? "" : "none";
     });
     content.querySelectorAll<HTMLElement>(".preset-card").forEach((card) => {
       const text = (card.textContent ?? "").toLowerCase();

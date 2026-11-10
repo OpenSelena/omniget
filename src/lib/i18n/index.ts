@@ -77,6 +77,57 @@ const config = {
 
 export const defaultLocale = "en";
 
+export const SUPPORTED_LOCALES = [
+  "en",
+  "ru",
+  "el",
+  "pt",
+  "zh",
+  "zh-TW",
+  "ja",
+  "it",
+  "fr",
+  "es",
+  "fa",
+  "lo",
+] as const;
+
+export function resolveSupportedLocale(lang: string | null | undefined): string | null {
+  if (!lang) return null;
+  const clean = lang.trim().toLowerCase();
+  if (
+    clean.startsWith("zh-tw") ||
+    clean.startsWith("zh-hk") ||
+    clean.startsWith("zh-mo") ||
+    clean.startsWith("zh-hant")
+  ) {
+    return "zh-TW";
+  }
+  if (clean.startsWith("zh")) {
+    return "zh";
+  }
+  const prefix2 = clean.slice(0, 2);
+  const found = SUPPORTED_LOCALES.find((l) => l.toLowerCase() === prefix2);
+  if (found) return found;
+  return null;
+}
+
+export function detectSystemLocale(): string {
+  if (typeof navigator !== "undefined") {
+    if (Array.isArray(navigator.languages)) {
+      for (const candidate of navigator.languages) {
+        const resolved = resolveSupportedLocale(candidate);
+        if (resolved) return resolved;
+      }
+    }
+    if (typeof navigator.language === "string") {
+      const resolved = resolveSupportedLocale(navigator.language);
+      if (resolved) return resolved;
+    }
+  }
+  return defaultLocale;
+}
+
 export const RTL_LOCALES = ["fa", "ar", "he"];
 
 export function isRtlLocale(l: string | null | undefined): boolean {

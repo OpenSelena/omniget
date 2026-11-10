@@ -34,6 +34,27 @@
   <section class="section">
     <h5 class="section-title">{$t('settings.general.title')}</h5>
     <div class="card">
+      <div class="setting-row" data-search-keywords="language 语言 語言 idioma langue lingua sprache">
+        <div class="setting-col">
+          <span class="setting-label">{$t('settings.appearance.language')}</span>
+          <span class="setting-path">{$t('settings.appearance.lang_en')} · {$t('settings.appearance.lang_zh')} · {$t('settings.appearance.lang_pt')}</span>
+        </div>
+        <select class="select" value={settings.appearance.language} onchange={changeLanguage} aria-label={$t('settings.appearance.language') as string}>
+          <option value="en">{$t('settings.appearance.lang_en')}</option>
+          <option value="ru">{$t('settings.appearance.lang_ru')}</option>
+          <option value="pt">{$t('settings.appearance.lang_pt')}</option>
+          <option value="zh">{$t('settings.appearance.lang_zh')}</option>
+          <option value="zh-TW">{$t('settings.appearance.lang_zh_tw')}</option>
+          <option value="ja">{$t('settings.appearance.lang_ja')}</option>
+          <option value="it">{$t('settings.appearance.lang_it')}</option>
+          <option value="fr">{$t('settings.appearance.lang_fr')}</option>
+          <option value="es">{$t('settings.appearance.lang_es')}</option>
+          <option value="el">{$t('settings.appearance.lang_el')}</option>
+          <option value="fa">{$t('settings.appearance.lang_fa')}</option>
+          <option value="lo">{$t('settings.appearance.lang_lo')}</option>
+        </select>
+      </div>
+      <div class="divider"></div>
       <div class="setting-row">
         <div class="setting-col">
           <span class="setting-label">{$t('settings.general.start_with_system')}</span>
@@ -163,24 +184,6 @@
           </div>
         </div>
       {/if}
-      <div class="divider"></div>
-      <div class="setting-row">
-        <span class="setting-label">{$t('settings.appearance.language')}</span>
-        <select class="select" value={settings.appearance.language} onchange={changeLanguage}>
-          <option value="en">{$t('settings.appearance.lang_en')}</option>
-		  <option value="ru">{$t('settings.appearance.lang_ru')}</option>
-          <option value="pt">{$t('settings.appearance.lang_pt')}</option>
-          <option value="zh">{$t('settings.appearance.lang_zh')}</option>
-          <option value="zh-TW">{$t('settings.appearance.lang_zh_tw')}</option>
-          <option value="ja">{$t('settings.appearance.lang_ja')}</option>
-          <option value="it">{$t('settings.appearance.lang_it')}</option>
-          <option value="fr">{$t('settings.appearance.lang_fr')}</option>
-          <option value="es">{$t('settings.appearance.lang_es')}</option>
-          <option value="el">{$t('settings.appearance.lang_el')}</option>
-          <option value="fa">{$t('settings.appearance.lang_fa')}</option>
-          <option value="lo">{$t('settings.appearance.lang_lo')}</option>
-        </select>
-      </div>
     </div>
   </section>
 

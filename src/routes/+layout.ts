@@ -1,16 +1,16 @@
-import { loadTranslations, defaultLocale } from "$lib/i18n";
+import { loadTranslations, defaultLocale, detectSystemLocale } from "$lib/i18n";
 import { syncTrayLabels } from "$lib/tray-labels";
 import { loadSettings } from "$lib/stores/settings-store.svelte";
 
 export const ssr = false;
 
 export const load = async ({ url }) => {
-  let lang = defaultLocale;
+  let lang = detectSystemLocale();
   try {
     const settings = await loadSettings();
-    lang = settings.appearance?.language || defaultLocale;
+    lang = settings.appearance?.language || lang;
   } catch {
-    // First run or settings unavailable — use defaultLocale
+    // First run or settings unavailable — keep detected system locale
   }
   try {
     await loadTranslations(lang, url.pathname);
