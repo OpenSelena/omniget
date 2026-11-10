@@ -494,7 +494,9 @@ mod tests {
         assert_eq!(media_info.available_qualities.len(), 2);
         assert_eq!(media_info.available_qualities[0].label, "1080p");
         assert_eq!(media_info.available_qualities[1].label, "720p");
-        assert!(media_info.available_qualities[0].url.contains("ratio=1080p"));
+        assert!(media_info.available_qualities[0]
+            .url
+            .contains("ratio=1080p"));
         assert!(media_info.available_qualities[1].url.contains("ratio=720p"));
     }
 }
