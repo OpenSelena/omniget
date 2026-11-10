@@ -1292,6 +1292,9 @@ pub fn run() {
             commands::nami::nami_load_profiles,
             commands::nami::nami_save_profile,
             commands::nami::nami_delete_profile,
+            commands::nami::nami_get_history,
+            commands::nami::nami_reconcile_disk,
+            commands::nami::nami_delete_history_record,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

@@ -6,6 +6,7 @@ pub mod cookies;
 pub mod dispatcher;
 pub mod fetcher;
 pub mod http;
+pub mod ledger;
 
 use chrono::Utc;
 pub use dispatcher::{DownloadProgress, DownloadResult};
@@ -370,6 +371,25 @@ pub fn nami_delete_profile(platform: String, profile_url: String) -> Result<Stri
 
     atomic_write(&profiles_file, &content)?;
     Ok("Profile deleted".to_string())
+}
+
+#[command]
+pub async fn nami_get_history(
+    platform: Option<String>,
+    limit: Option<u32>,
+    offset: Option<u32>,
+) -> Result<Vec<ledger::NamiMediaRecord>, String> {
+    ledger::get_history(platform.as_deref(), limit.unwrap_or(50), offset.unwrap_or(0))
+}
+
+#[command]
+pub async fn nami_reconcile_disk() -> Result<ledger::ReconcileResult, String> {
+    ledger::reconcile_disk()
+}
+
+#[command]
+pub async fn nami_delete_history_record(id: String) -> Result<bool, String> {
+    ledger::delete_record(&id)
 }
 
 #[cfg(test)]

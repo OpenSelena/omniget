@@ -102,6 +102,10 @@ pub fn build_gallery_dl_args(options: &GalleryDlArgsOptions) -> Vec<String> {
                 args.push("-o".to_string());
                 args.push("include=posts,reels".to_string());
             }
+            if options.platform.eq_ignore_ascii_case("tiktok") {
+                args.push("-o".to_string());
+                args.push("format=best".to_string());
+            }
             args.push("--sleep-request".to_string());
             args.push(sleep_delay.to_string());
         }
@@ -129,6 +133,10 @@ pub fn build_gallery_dl_args(options: &GalleryDlArgsOptions) -> Vec<String> {
             }
         }
         _ => {
+            if options.platform.eq_ignore_ascii_case("tiktok") {
+                args.push("-o".to_string());
+                args.push("format=best".to_string());
+            }
             args.push("--sleep-request".to_string());
             args.push(sleep_delay.to_string());
         }
@@ -302,5 +310,26 @@ mod tests {
         let dash_dash_pos = args.iter().position(|r| r == "--").unwrap();
         assert_eq!(dash_dash_pos, args.len() - 2);
         assert_eq!(args[args.len() - 1], "https://www.tiktok.com/@creator");
+    }
+
+    #[test]
+    fn test_gallery_dl_args_tiktok_format_best_safeguard() {
+        let dest = PathBuf::from("C:/downloads/Nami/tiktok/creator/videos");
+        let opts = GalleryDlArgsOptions {
+            dest_dir: &dest,
+            content_type: "videos",
+            platform: "tiktok",
+            clean_url: "https://www.tiktok.com/@creator",
+            username: "creator",
+            cookie_path: None,
+            custom_ua: None,
+            proxy: None,
+            skip_replies: None,
+        };
+
+        let args = build_gallery_dl_args(&opts);
+        let format_pos = args.iter().position(|r| r == "format=best");
+        assert!(format_pos.is_some(), "gallery-dl must include format=best for TikTok to prevent silent DASH streams");
+        assert_eq!(args[format_pos.unwrap() - 1], "-o");
     }
 }

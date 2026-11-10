@@ -124,3 +124,40 @@ export async function deleteProfile(platform: string, profileUrl: string): Promi
 export function generateDownloadId(): string {
   return `dl_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 }
+
+export interface NamiMediaRecord {
+  id: string;
+  platform: string;
+  post_id: string;
+  author?: string | null;
+  url: string;
+  file_path: string;
+  file_size?: number | null;
+  sha256?: string | null;
+  downloaded_at: number;
+}
+
+export interface ReconcileResult {
+  checked: number;
+  removed: number;
+}
+
+export async function loadNamiHistory(
+  platform?: string | null,
+  limit = 50,
+  offset = 0
+): Promise<NamiMediaRecord[]> {
+  return await invoke<NamiMediaRecord[]>('nami_get_history', {
+    platform: platform ?? null,
+    limit,
+    offset,
+  });
+}
+
+export async function reconcileNamiDisk(): Promise<ReconcileResult> {
+  return await invoke<ReconcileResult>('nami_reconcile_disk');
+}
+
+export async function deleteNamiHistoryRecord(id: string): Promise<boolean> {
+  return await invoke<boolean>('nami_delete_history_record', { id });
+}

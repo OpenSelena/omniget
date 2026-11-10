@@ -489,6 +489,13 @@ fn run_single_stage(
     };
     let gdl_args = build_gallery_dl_args(&gdl_opts);
 
+    let target_context = Some((
+        final_dest.clone(),
+        platform_name.to_string(),
+        username.clone(),
+        url.to_string(),
+    ));
+
     let gdl_result = run_process_stream(
         app,
         gallery_bin,
@@ -498,6 +505,7 @@ fn run_single_stage(
         media_type_name,
         stage_index,
         stage_total,
+        target_context.clone(),
     )?;
 
     sync_cross_engine_archives(&final_dest);
@@ -535,6 +543,7 @@ fn run_single_stage(
                 media_type_name,
                 stage_index,
                 stage_total,
+                target_context,
             )?;
             sync_cross_engine_archives(&final_dest);
             return Ok(yt_result);
@@ -553,6 +562,7 @@ fn run_process_stream(
     stage_label: &str,
     stage_index: u32,
     stage_total: u32,
+    target_context: Option<(PathBuf, String, String, String)>,
 ) -> Result<DownloadResult, String> {
     let mut cmd = Command::new(executable);
     cmd.args(args);
@@ -592,6 +602,31 @@ fn run_process_stream(
                 if let Some(pos) = line.find("FILE_OK:") {
                     let filename = line[pos + "FILE_OK:".len()..].trim();
                     let count = files_downloaded.fetch_add(1, Ordering::SeqCst) + 1;
+                    if let Some((ref dest, ref plat, ref author, ref page_url)) = target_context {
+                        let full_path = dest.join(filename);
+                        let size = fs::metadata(&full_path).ok().map(|m| m.len());
+                        let stem = Path::new(filename)
+                            .file_stem()
+                            .and_then(|s| s.to_str())
+                            .unwrap_or(filename);
+                        let post_id = stem
+                            .split(['_', '-', ' '])
+                            .last()
+                            .unwrap_or(stem)
+                            .to_string();
+                        let record = crate::commands::nami::ledger::NamiMediaRecord {
+                            id: format!("{}_{}", plat.to_lowercase(), stem),
+                            platform: plat.to_lowercase(),
+                            post_id,
+                            author: Some(author.clone()),
+                            url: page_url.clone(),
+                            file_path: full_path.to_string_lossy().to_string(),
+                            file_size: size,
+                            sha256: None,
+                            downloaded_at: chrono::Utc::now().timestamp(),
+                        };
+                        let _ = crate::commands::nami::ledger::record_media(&record);
+                    }
                     let _ = app.emit(
                         &format!("download_{}", download_id),
                         DownloadProgress {
@@ -604,6 +639,38 @@ fn run_process_stream(
                     );
                 } else if line.contains("[download]") && line.contains("Destination:") {
                     let count = files_downloaded.fetch_add(1, Ordering::SeqCst) + 1;
+                    if let Some(dest_pos) = line.find("Destination:") {
+                        let raw_dest = line[dest_pos + "Destination:".len()..].trim();
+                        let full_path = PathBuf::from(raw_dest);
+                        let filename = full_path
+                            .file_name()
+                            .and_then(|n| n.to_str())
+                            .unwrap_or(raw_dest);
+                        let size = fs::metadata(&full_path).ok().map(|m| m.len());
+                        let stem = Path::new(filename)
+                            .file_stem()
+                            .and_then(|s| s.to_str())
+                            .unwrap_or(filename);
+                        let post_id = stem
+                            .split(['_', '-', ' '])
+                            .last()
+                            .unwrap_or(stem)
+                            .to_string();
+                        if let Some((_, ref plat, ref author, ref page_url)) = target_context {
+                            let record = crate::commands::nami::ledger::NamiMediaRecord {
+                                id: format!("{}_{}", plat.to_lowercase(), stem),
+                                platform: plat.to_lowercase(),
+                                post_id,
+                                author: Some(author.clone()),
+                                url: page_url.clone(),
+                                file_path: full_path.to_string_lossy().to_string(),
+                                file_size: size,
+                                sha256: None,
+                                downloaded_at: chrono::Utc::now().timestamp(),
+                            };
+                            let _ = crate::commands::nami::ledger::record_media(&record);
+                        }
+                    }
                     let _ = app.emit(
                         &format!("download_{}", download_id),
                         DownloadProgress {
