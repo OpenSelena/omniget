@@ -105,7 +105,9 @@
   "commands": {
     "send-to-omniget": {
       "suggested_key": {
-        "default": "Alt+O"
+        "default": "Alt+O",
+        "mac": "Alt+O",
+        "linux": "Alt+Shift+O"
       },
       "description": "Send current page to OmniGet"
     }

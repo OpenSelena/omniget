@@ -267,26 +267,44 @@ export async function recordDetectedMedia(tabId, entry) {
 }
 
 export function registerSnifferListeners(onMediaDetected) {
-  chrome.webRequest.onSendHeaders.addListener(
-    (details) => {
-      if (!isSnifferEnabled()) return;
-      if (details.tabId < 0) return;
-      if (details.method !== "GET") {
-        try {
-          const host = new URL(details.url).hostname;
-          if (!host.includes("googlevideo")) return;
-        } catch { return; }
-      }
+  const onSendHeadersHandler = (details) => {
+    if (!isSnifferEnabled()) return;
+    if (details.tabId < 0) return;
+    if (details.method !== "GET") {
+      try {
+        const host = new URL(details.url).hostname;
+        if (!host.includes("googlevideo")) return;
+      } catch { return; }
+    }
 
-      pendingRequests.set(details.requestId, {
-        requestHeaders: details.requestHeaders || [],
-        tabId: details.tabId,
-      });
-      trimPendingRequests(pendingRequests);
-    },
-    { urls: ["http://*/*", "https://*/*"] },
-    ["requestHeaders", "extraHeaders"]
-  );
+    pendingRequests.set(details.requestId, {
+      requestHeaders: details.requestHeaders || [],
+      tabId: details.tabId,
+    });
+    trimPendingRequests(pendingRequests);
+  };
+
+  const isFirefox =
+    (typeof navigator !== "undefined" && /firefox/i.test(navigator.userAgent)) ||
+    (typeof browser !== "undefined" && !globalThis.chrome?.app);
+
+  const sendHeadersSpec = isFirefox ? ["requestHeaders"] : ["requestHeaders", "extraHeaders"];
+
+  try {
+    chrome.webRequest.onSendHeaders.addListener(
+      onSendHeadersHandler,
+      { urls: ["http://*/*", "https://*/*"] },
+      sendHeadersSpec
+    );
+  } catch {
+    try {
+      chrome.webRequest.onSendHeaders.addListener(
+        onSendHeadersHandler,
+        { urls: ["http://*/*", "https://*/*"] },
+        ["requestHeaders"]
+      );
+    } catch {}
+  }
 
   chrome.webRequest.onHeadersReceived.addListener(
     (details) => {

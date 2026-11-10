@@ -126,6 +126,7 @@ loadSnifferState().catch(() => {});
 loadDeepSearchState().catch(() => {});
 loadH264State().catch(() => {});
 restoreMedia().catch(() => {});
+registerContextMenu();
 
 chrome.runtime.onInstalled.addListener(async (details) => {
   registerContextMenu();
@@ -155,25 +156,42 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   }
 });
 
-chrome.contextMenus.onClicked.addListener(async (info, tab) => {
-  if (info.menuItemId !== getContextMenuId()) return;
+const menusApi =
+  globalThis.browser?.menus ||
+  globalThis.browser?.contextMenus ||
+  globalThis.chrome?.contextMenus;
 
-  const url = info.linkUrl || info.srcUrl;
-  if (!url) return;
+if (menusApi?.onClicked) {
+  menusApi.onClicked.addListener(async (info, tab) => {
+    if (info.menuItemId !== getContextMenuId()) return;
 
-  const result = await handleSendToApp({
-    type: "sendToOmniGet",
-    url,
-    platform: "generic",
-    referer: tab?.url || "",
+    let url = info.linkUrl || info.srcUrl;
+    if (!url && info.selectionText) {
+      const trimmed = info.selectionText.trim();
+      if (/^https?:\/\//i.test(trimmed)) {
+        url = trimmed;
+      }
+    }
+    if (!url) {
+      url = info.pageUrl || tab?.url;
+    }
+    if (!url) return;
+
+    const result = await handleSendToApp({
+      type: "sendToOmniGet",
+      url,
+      platform: "generic",
+      referer: tab?.url || "",
+    });
+
+    if (result.ok) {
+      actionFeedback.showSuccessBadge(tab?.id);
+    }
   });
-
-  if (result.ok) {
-    actionFeedback.showSuccessBadge(tab?.id);
-  }
-});
+}
 
 chrome.runtime.onStartup.addListener(() => {
+  registerContextMenu();
   refreshActiveTab().catch(() => {});
   void runAutoPairTick();
   void ensureAutoPairAlarm();

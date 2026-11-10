@@ -7,7 +7,12 @@
   "browser_specific_settings": {
     "gecko": {
       "id": "omniget@openselena.org",
-      "strict_min_version": "109.0"
+      "strict_min_version": "109.0",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
     }
   },
   "permissions": [
@@ -15,6 +20,7 @@
     "cookies",
     "webRequest",
     "storage",
+    "contextMenus",
     "menus",
     "alarms",
     "scripting"
@@ -109,7 +115,9 @@
   "commands": {
     "send-to-omniget": {
       "suggested_key": {
-        "default": "Alt+O"
+        "default": "Alt+O",
+        "mac": "Alt+O",
+        "linux": "Alt+Shift+O"
       },
       "description": "Send current page to OmniGet"
     }
