@@ -48,6 +48,13 @@ pub fn parse_url(url_str: &str) -> Option<ParsedUrl> {
             "douyin" => parse_douyin(&segments),
             "tencentvideo" => parse_tencent(&segments),
             "xiaohongshu" => parse_xiaohongshu(&segments),
+            "gdocs" => {
+                if let Some(info) = omniget_core::core::tools::gdocs::parse(url_str) {
+                    (Some(info.id), ParsedContentType::Post)
+                } else {
+                    (None, ParsedContentType::Unknown)
+                }
+            }
             _ => (None, ParsedContentType::Unknown),
         },
     };

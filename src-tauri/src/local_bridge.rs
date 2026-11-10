@@ -517,6 +517,12 @@ pub async fn spawn(app: AppHandle) {
         .route("/v1/log/{id}", get(download_log))
         .route("/v1/cookies", post(cookies_export))
         .route("/mcp", post(mcp_post).get(mcp_get).delete(mcp_get))
+        .route("/api/reset", post(slides_reset))
+        .route(
+            "/api/slide",
+            post(slides_receive).layer(DefaultBodyLimit::max(32 * 1024 * 1024)),
+        )
+        .route("/api/compile", post(slides_compile))
         .with_state(state)
         .layer(cors);
 
@@ -910,6 +916,201 @@ async fn mcp_post(
 /// Sem canal SSE: quem pedir GET recebe 405 e continua só com POST.
 async fn mcp_get() -> Response {
     StatusCode::METHOD_NOT_ALLOWED.into_response()
+}
+
+// ── Receptor local de diapositivas Google Slides (/api/reset, /api/slide, /api/compile) ──
+
+#[derive(Default)]
+struct SlidesSession {
+    title: Option<String>,
+    slides: Vec<(usize, String)>,
+    last_output: Option<String>,
+}
+
+static SLIDES_BUFFER: OnceLock<Mutex<SlidesSession>> = OnceLock::new();
+
+fn slides_buffer() -> &'static Mutex<SlidesSession> {
+    SLIDES_BUFFER.get_or_init(|| Mutex::new(SlidesSession::default()))
+}
+
+#[derive(Debug, Clone, Serialize)]
+pub struct SlidesBridgeStatus {
+    pub port: u16,
+    pub slide_count: usize,
+    pub last_output: Option<String>,
+    pub script: String,
+}
+
+pub fn slides_bridge_status() -> SlidesBridgeStatus {
+    let port = BOUND_PORT.load(Ordering::SeqCst);
+    let effective_port = if port == 0 { 47720 } else { port };
+    let (slide_count, last_output) = slides_buffer()
+        .lock()
+        .ok()
+        .map(|s| (s.slides.len(), s.last_output.clone()))
+        .unwrap_or((0, None));
+    SlidesBridgeStatus {
+        port: effective_port,
+        slide_count,
+        last_output,
+        script: omniget_core::core::tools::gslides::browser_extractor_script(effective_port),
+    }
+}
+
+#[derive(Debug, Deserialize, Default)]
+struct SlideResetBody {
+    #[serde(default)]
+    title: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+struct SlideReceiveBody {
+    index: usize,
+    svg_content: String,
+    #[serde(default)]
+    title: Option<String>,
+}
+
+async fn slides_reset(
+    State(state): State<BridgeState>,
+    body: Option<Json<SlideResetBody>>,
+) -> Response {
+    if let Ok(mut guard) = slides_buffer().lock() {
+        guard.slides.clear();
+        guard.title = body.and_then(|b| b.0.title).filter(|t| !t.trim().is_empty());
+    }
+    let _ = state.app.emit(
+        "gslides-bridge-progress",
+        serde_json::json!({ "slide_count": 0 }),
+    );
+    (
+        StatusCode::OK,
+        Json(serde_json::json!({ "status": "reset_successful" })),
+    )
+        .into_response()
+}
+
+async fn slides_receive(
+    State(state): State<BridgeState>,
+    Json(data): Json<SlideReceiveBody>,
+) -> Response {
+    let count = if let Ok(mut guard) = slides_buffer().lock() {
+        if let Some(t) = data.title.filter(|t| !t.trim().is_empty()) {
+            guard.title = Some(t);
+        }
+        if let Some(existing) = guard.slides.iter_mut().find(|(idx, _)| *idx == data.index) {
+            existing.1 = data.svg_content;
+        } else {
+            guard.slides.push((data.index, data.svg_content));
+        }
+        guard.slides.len()
+    } else {
+        0
+    };
+    let _ = state.app.emit(
+        "gslides-bridge-progress",
+        serde_json::json!({ "slide_count": count, "index": data.index }),
+    );
+    (
+        StatusCode::OK,
+        Json(serde_json::json!({ "status": "ok", "slide_count": count })),
+    )
+        .into_response()
+}
+
+async fn slides_compile(
+    State(state): State<BridgeState>,
+    body: Option<Json<SlideResetBody>>,
+) -> Response {
+    let (mut indexed_svgs, title) = match slides_buffer().lock() {
+        Ok(mut guard) => {
+            if let Some(t) = body.and_then(|b| b.0.title).filter(|t| !t.trim().is_empty()) {
+                guard.title = Some(t);
+            }
+            (
+                guard.slides.clone(),
+                guard
+                    .title
+                    .clone()
+                    .unwrap_or_else(|| "presentacion_compilada".to_string()),
+            )
+        }
+        Err(_) => (Vec::new(), "presentacion_compilada".to_string()),
+    };
+
+    if indexed_svgs.is_empty() {
+        return (
+            StatusCode::BAD_REQUEST,
+            Json(serde_json::json!({ "status": "error", "detail": "No hay diapositivas acumuladas." })),
+        )
+            .into_response();
+    }
+
+    indexed_svgs.sort_by_key(|(idx, _)| *idx);
+    let svgs: Vec<String> = indexed_svgs.into_iter().map(|(_, s)| s).collect();
+    let pages = svgs.len();
+
+    let settings = config::load_settings(&state.app);
+    let out_dir = if !settings.download.default_output_dir.as_os_str().is_empty() {
+        settings.download.default_output_dir.clone()
+    } else {
+        dirs::download_dir().unwrap_or_else(|| PathBuf::from("."))
+    };
+    let _ = std::fs::create_dir_all(&out_dir);
+    let safe_title = omniget_core::core::tools::sanitize_name(&title);
+    let out_file = out_dir.join(format!("{}.pdf", safe_title));
+
+    let compile_res = tokio::task::spawn_blocking(move || {
+        omniget_core::core::tools::gslides::compile_svgs_to_pdf(
+            &svgs,
+            &omniget_core::core::tools::noop_progress(),
+            "bridge-compile",
+        )
+    })
+    .await;
+
+    let pdf_bytes = match compile_res {
+        Ok(Ok(b)) => b,
+        Ok(Err(e)) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(serde_json::json!({ "status": "error", "detail": e.to_string() })),
+            )
+                .into_response();
+        }
+        Err(e) => {
+            return (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                Json(serde_json::json!({ "status": "error", "detail": e.to_string() })),
+            )
+                .into_response();
+        }
+    };
+
+    if let Err(e) = tokio::fs::write(&out_file, &pdf_bytes).await {
+        return (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Json(serde_json::json!({ "status": "error", "detail": e.to_string() })),
+        )
+            .into_response();
+    }
+
+    let file_str = out_file.to_string_lossy().to_string();
+    if let Ok(mut guard) = slides_buffer().lock() {
+        guard.last_output = Some(file_str.clone());
+        guard.slides.clear();
+    }
+
+    let _ = state.app.emit(
+        "gslides-bridge-complete",
+        serde_json::json!({ "file": file_str, "pages": pages }),
+    );
+
+    (
+        StatusCode::OK,
+        Json(serde_json::json!({ "status": "success", "file": file_str, "pages": pages })),
+    )
+        .into_response()
 }
 
 #[cfg(test)]

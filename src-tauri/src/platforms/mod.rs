@@ -3,6 +3,7 @@ pub use omniget_core::platforms::traits;
 pub use omniget_core::platforms::BlueskyDownloader;
 pub use omniget_core::platforms::DirectFileDownloader;
 pub use omniget_core::platforms::DouyinDownloader;
+pub use omniget_core::platforms::GdocsDownloader;
 pub use omniget_core::platforms::GenericYtdlpDownloader;
 pub use omniget_core::platforms::InstagramDownloader;
 pub use omniget_core::platforms::P2pDownloader;

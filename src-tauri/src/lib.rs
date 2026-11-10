@@ -244,6 +244,7 @@ pub fn run() {
         torrent_session.clone(),
     )));
     registry.register(Arc::new(omniget_core::platforms::P2pDownloader::new()));
+    registry.register(Arc::new(omniget_core::platforms::GdocsDownloader::new()));
     registry.register(Arc::new(
         omniget_core::platforms::DirectFileDownloader::new(),
     ));
@@ -1003,6 +1004,8 @@ pub fn run() {
             commands::tools::documents::tool_slideshare,
             commands::tools::documents::tool_gdocs_parse,
             commands::tools::documents::tool_gdocs_download,
+            commands::tools::documents::tool_gslides_compile_dir,
+            commands::tools::documents::tool_gslides_bridge_info,
             commands::tools::documents::tool_calameo,
             commands::tools::documents::tool_gallery_status,
             commands::tools::documents::tool_gallery_install,

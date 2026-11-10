@@ -11,24 +11,49 @@ pub struct GdocInfo {
     pub kind: String,
     pub id: String,
     pub formats: Vec<String>,
+    #[serde(default)]
+    pub is_published: bool,
 }
 
 pub fn parse(url: &str) -> Option<GdocInfo> {
+    let pub_re = regex::Regex::new(
+        r"docs\.google\.com/(document|presentation|spreadsheets)/d/e/([A-Za-z0-9_-]+)",
+    )
+    .ok()?;
+    if let Some(c) = pub_re.captures(url) {
+        let kind = c[1].to_string();
+        let formats = match kind.as_str() {
+            "presentation" => vec!["pdf", "svg"],
+            "document" => vec!["pdf", "html"],
+            _ => vec!["pdf", "csv"],
+        };
+        return Some(GdocInfo {
+            kind,
+            id: c[2].to_string(),
+            formats: formats.into_iter().map(String::from).collect(),
+            is_published: true,
+        });
+    }
+
     let re = regex::Regex::new(
         r"docs\.google\.com/(document|presentation|spreadsheets)/d/([A-Za-z0-9_-]+)",
     )
     .ok()?;
     let c = re.captures(url)?;
+    if &c[2] == "e" {
+        return None;
+    }
     let kind = c[1].to_string();
     let formats = match kind.as_str() {
         "document" => vec!["pdf", "docx", "odt", "txt", "epub", "html"],
-        "presentation" => vec!["pdf", "pptx", "odp", "txt"],
+        "presentation" => vec!["pdf", "pptx", "odp", "txt", "svg"],
         _ => vec!["pdf", "xlsx", "ods", "csv"],
     };
     Some(GdocInfo {
         kind,
         id: c[2].to_string(),
         formats: formats.into_iter().map(String::from).collect(),
+        is_published: false,
     })
 }
 
@@ -68,16 +93,38 @@ pub async fn download(
             info.kind
         ));
     }
-    let client = super::client()?;
+
+    if info.kind == "presentation" && (info.is_published || format == "svg") {
+        let res = super::gslides::download_presentation(url, format, dest_dir, progress).await?;
+        return Ok(res.output_path);
+    }
+
+    let client = super::gslides::build_google_client(Some(url)).or_else(|_| super::client())?;
     let export = export_url(&info, format);
     let resp = client.get(&export).send().await?;
-    if resp.status().as_u16() == 401 || resp.status().as_u16() == 403 {
+    let status = resp.status();
+    let is_html_redirect = resp
+        .headers()
+        .get(reqwest::header::CONTENT_TYPE)
+        .and_then(|v| v.to_str().ok())
+        .map(|ct| ct.to_ascii_lowercase().starts_with("text/html") && format != "html")
+        .unwrap_or(false);
+
+    if (!status.is_success() || is_html_redirect) && info.kind == "presentation" && format == "pdf" {
+        if let Ok(res) =
+            super::gslides::download_presentation(url, "pdf", dest_dir, progress.clone()).await
+        {
+            return Ok(res.output_path);
+        }
+    }
+
+    if status.as_u16() == 401 || status.as_u16() == 403 {
         return Err(anyhow!(
             "o arquivo nao e publico; abra no navegador e use Arquivo > Fazer download"
         ));
     }
-    if !resp.status().is_success() {
-        return Err(anyhow!("Google Docs: HTTP {}", resp.status()));
+    if !status.is_success() {
+        return Err(anyhow!("Google Docs: HTTP {}", status));
     }
     let name = resp
         .headers()
@@ -110,11 +157,21 @@ mod tests {
         let i = parse("https://docs.google.com/presentation/d/1AbC_d-e/edit#slide=1").unwrap();
         assert_eq!(i.kind, "presentation");
         assert_eq!(i.id, "1AbC_d-e");
+        assert!(!i.is_published);
         assert!(parse("https://drive.google.com/x").is_none());
         assert_eq!(
             export_url(&i, "pdf"),
             "https://docs.google.com/presentation/d/1AbC_d-e/export?format=pdf"
         );
+
+        let pub_i = parse("https://docs.google.com/presentation/d/e/2PACX-1vMockDummyId1234567890abcdefghijklmnopqrstuvwxyz/pubembed?start=false&loop=false").unwrap();
+        assert_eq!(pub_i.kind, "presentation");
+        assert!(pub_i.is_published);
+        assert_eq!(
+            pub_i.id,
+            "2PACX-1vMockDummyId1234567890abcdefghijklmnopqrstuvwxyz"
+        );
+        assert_eq!(pub_i.formats, vec!["pdf".to_string(), "svg".to_string()]);
     }
 
     #[test]

@@ -54,6 +54,24 @@ pub fn is_jpeg(data: &[u8]) -> bool {
 
 /// Monta o PDF em memória. Página no tamanho da imagem em pontos (72 dpi).
 pub fn build_pdf(images: &[Vec<u8>]) -> anyhow::Result<Vec<u8>> {
+    build_pdf_inner(images, None)
+}
+
+/// Monta o PDF em memória fixando o tamanho físico de cada página em pontos
+/// (ex.: `1280.0 x 720.0` para apresentações 16:9), independentemente da
+/// resolução em pixels do JPEG embutido.
+pub fn build_pdf_with_page_size(
+    images: &[Vec<u8>],
+    page_width_pt: f64,
+    page_height_pt: f64,
+) -> anyhow::Result<Vec<u8>> {
+    build_pdf_inner(images, Some((page_width_pt, page_height_pt)))
+}
+
+fn build_pdf_inner(
+    images: &[Vec<u8>],
+    fixed_page_pt: Option<(f64, f64)>,
+) -> anyhow::Result<Vec<u8>> {
     if images.is_empty() {
         return Err(anyhow!("nenhuma imagem"));
     }
@@ -98,15 +116,18 @@ pub fn build_pdf(images: &[Vec<u8>]) -> anyhow::Result<Vec<u8>> {
             4 => "/DeviceCMYK",
             _ => "/DeviceRGB",
         };
-        let (w, h) = (info.width.max(1), info.height.max(1));
+        let (img_w, img_h) = (info.width.max(1), info.height.max(1));
+        let (page_w, page_h) = fixed_page_pt
+            .map(|(pw, ph)| (pw.max(1.0), ph.max(1.0)))
+            .unwrap_or((img_w as f64, img_h as f64));
         push_obj(
             &mut out,
             &mut offsets,
             format!(
                 "{} 0 obj\n<< /Type /Page /Parent 2 0 R /MediaBox [0 0 {} {}] /Resources << /XObject << /Im0 {} 0 R >> >> /Contents {} 0 R >>\nendobj\n",
                 obj_page(i),
-                w,
-                h,
+                page_w,
+                page_h,
                 obj_img(i),
                 obj_content(i)
             )
@@ -115,8 +136,8 @@ pub fn build_pdf(images: &[Vec<u8>]) -> anyhow::Result<Vec<u8>> {
         let mut xobj = format!(
             "{} 0 obj\n<< /Type /XObject /Subtype /Image /Width {} /Height {} /ColorSpace {} /BitsPerComponent 8 /Filter /DCTDecode /Length {} >>\nstream\n",
             obj_img(i),
-            w,
-            h,
+            img_w,
+            img_h,
             cs,
             img.len()
         )
@@ -124,7 +145,7 @@ pub fn build_pdf(images: &[Vec<u8>]) -> anyhow::Result<Vec<u8>> {
         xobj.extend_from_slice(img);
         xobj.extend_from_slice(b"\nendstream\nendobj\n");
         push_obj(&mut out, &mut offsets, &xobj);
-        let content = format!("q {} 0 0 {} 0 0 cm /Im0 Do Q", w, h);
+        let content = format!("q {} 0 0 {} 0 0 cm /Im0 Do Q", page_w, page_h);
         push_obj(
             &mut out,
             &mut offsets,

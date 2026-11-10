@@ -95,6 +95,12 @@
     <path d="M2 8h3l3 8 3-8h3" />
     <path d="M18 8v4c0 3-1 4-2 5l3 3" />
   </svg>
+{:else if platform === "gdocs"}
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+    <path d="M14 2v6h6" />
+    <rect x="8" y="12" width="8" height="6" rx="1" />
+  </svg>
 {:else if platform === "generic"}
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
     <path d="M9 15l6 -6" />

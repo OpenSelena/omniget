@@ -22,6 +22,7 @@ export const PLATFORM_DISPLAY_NAMES: Record<string, string> = {
   metaanalysis: "Meta-Analysis Academy",
   magnet: "BitTorrent",
   p2p: "P2P",
+  gdocs: "Google Docs / Slides",
   direct_file: "Direct file",
 };
 
