@@ -1,23 +1,26 @@
 <script lang="ts">
   import DownloadManager from '$components/nami/DownloadManager.svelte';
   import ProfileManager from '$components/nami/ProfileManager.svelte';
+  import HistoryManager from '$components/nami/HistoryManager.svelte';
   import SettingsManager from '$components/nami/SettingsManager.svelte';
   import { setDraft } from '$lib/stores/nami_download_store.svelte';
   import { t } from '$lib/i18n';
 
-  type TabKey = 'download' | 'profiles' | 'settings';
+  type TabKey = 'download' | 'profiles' | 'history' | 'settings';
 
   let activeTab = $state<TabKey>('download');
 
   const NAV_ITEMS: { key: TabKey; labelKey: string; icon: string }[] = [
     { key: 'download', labelKey: 'nami.tab_download', icon: '/icons/nami-download.png' },
     { key: 'profiles', labelKey: 'nami.tab_profiles', icon: '/icons/nami-profiles.png' },
+    { key: 'history', labelKey: 'nami.tab_history', icon: '/icons/clock-counter-clockwise.svg' },
     { key: 'settings', labelKey: 'nami.tab_settings', icon: '/icons/nami-settings.png' }
   ];
 
   const DESCRIPTION_KEYS: Record<TabKey, string> = {
     download: 'nami.desc_download',
     profiles: 'nami.desc_profiles',
+    history: 'nami.desc_history',
     settings: 'nami.desc_settings'
   };
 
@@ -38,7 +41,7 @@
           type="button"
           role="tab"
           id="tab-{item.key}"
-          aria-controls="tabpanel-{item.key}"
+          aria-controls={activeTab === item.key ? `tabpanel-${item.key}` : undefined}
           aria-selected={activeTab === item.key}
           class="oo-nav-item"
           class:active={activeTab === item.key}
@@ -83,6 +86,8 @@
           switchTab('download');
         }}
       />
+    {:else if activeTab === 'history'}
+      <HistoryManager onSwitchToDownload={() => switchTab('download')} />
     {:else}
       <SettingsManager />
     {/if}
@@ -133,7 +138,7 @@
     min-height: 44px;
     padding: 8px 10px;
     border-radius: var(--oo-radius-sm);
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     color: var(--oo-text);
     text-align: left;
@@ -238,7 +243,7 @@
 
     .oo-nav {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
 
     .oo-nav-item {

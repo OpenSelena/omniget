@@ -5376,7 +5376,19 @@
     "clear_cookies_file": "Clear cookies file",
     "cookies_hint": "Cookies are only required for downloading Stories and Highlights.",
     "saving": "Saving...",
-    "save_settings": "Save Settings"
+    "save_settings": "Save Settings",
+    "tab_history": "履歴",
+    "desc_history": "ダウンロードしたメディアを閲覧し、ディスクをローカル台帳と同期します。",
+    "sync_disk": "ディスク照合",
+    "syncing_disk": "照合中...",
+    "search_history_placeholder": "作成者、ファイル名、投稿IDで絞り込み...",
+    "no_history_yet": "ダウンロード履歴がまだ記録されていません。",
+    "open_file": "ファイルを開く",
+    "open_folder": "フォルダを開く",
+    "delete_record": "記録を削除",
+    "confirm_delete_record": "この記録を履歴から削除しますか？ローカルファイルはディスクに残ります。",
+    "disk_synced": "{{checked}} 件を確認し、見つからないファイル {{removed}} 件を削除しました。",
+    "platform_all": "すべて"
   },
   "tray": {
     "quit": "Quit",

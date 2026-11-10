@@ -5376,7 +5376,19 @@
     "clear_cookies_file": "Clear cookies file",
     "cookies_hint": "Cookies are only required for downloading Stories and Highlights.",
     "saving": "Saving...",
-    "save_settings": "Save Settings"
+    "save_settings": "Save Settings",
+    "tab_history": "Histórico",
+    "desc_history": "Navegue pelas mídias baixadas e sincronize o disco com o registro local.",
+    "sync_disk": "Reconciliar disco",
+    "syncing_disk": "Reconciliando...",
+    "search_history_placeholder": "Filtrar por criador, arquivo ou ID do post...",
+    "no_history_yet": "Nenhuma mídia gravada no histórico ainda.",
+    "open_file": "Abrir arquivo",
+    "open_folder": "Abrir pasta",
+    "delete_record": "Excluir registro",
+    "confirm_delete_record": "Remover este item do histórico? O arquivo local permanecerá no disco.",
+    "disk_synced": "Verificados {{checked}} itens, removidos {{removed}} arquivos ausentes.",
+    "platform_all": "Todos"
   },
   "tray": {
     "quit": "Quit",

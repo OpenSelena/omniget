@@ -5376,7 +5376,19 @@
     "clear_cookies_file": "Clear cookies file",
     "cookies_hint": "Cookies are only required for downloading Stories and Highlights.",
     "saving": "Saving...",
-    "save_settings": "Save Settings"
+    "save_settings": "Save Settings",
+    "tab_history": "تاریخچه",
+    "desc_history": "رسانه‌های بارگیری‌شده را مرور کرده و دیسک را با دفتر کل محلی همگام‌سازی کنید.",
+    "sync_disk": "تطبیق دیسک",
+    "syncing_disk": "در حال تطبیق...",
+    "search_history_placeholder": "فیلتر بر اساس سازنده، نام فایل یا شناسه پست...",
+    "no_history_yet": "هنوز سابقه رسانه‌ای ثبت نشده است.",
+    "open_file": "باز کردن فایل",
+    "open_folder": "باز کردن پوشه",
+    "delete_record": "حذف رکورد",
+    "confirm_delete_record": "این مورد از تاریخچه حذف شود؟ فایل محلی در دیسک باقی خواهد ماند.",
+    "disk_synced": "{{checked}} مورد بررسی شد، {{removed}} فایل ناموجود پاکسازی شد.",
+    "platform_all": "همه"
   },
   "tray": {
     "quit": "Quit",

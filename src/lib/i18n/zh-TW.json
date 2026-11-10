@@ -5376,7 +5376,19 @@
     "clear_cookies_file": "Clear cookies file",
     "cookies_hint": "Cookies are only required for downloading Stories and Highlights.",
     "saving": "Saving...",
-    "save_settings": "Save Settings"
+    "save_settings": "Save Settings",
+    "tab_history": "歷史記錄",
+    "desc_history": "瀏覽下載的媒體並將磁碟與本機記錄同步。",
+    "sync_disk": "校準磁碟",
+    "syncing_disk": "校準中...",
+    "search_history_placeholder": "依創作者、檔案名稱或貼文ID篩選...",
+    "no_history_yet": "尚無下載的媒體記錄。",
+    "open_file": "開啟檔案",
+    "open_folder": "開啟資料夾",
+    "delete_record": "刪除記錄",
+    "confirm_delete_record": "從歷史記錄中移除此項目？本機檔案將保留在磁碟上。",
+    "disk_synced": "已檢查 {{checked}} 個項目，清理了 {{removed}} 個遺失的檔案。",
+    "platform_all": "全部"
   },
   "tray": {
     "quit": "Quit",

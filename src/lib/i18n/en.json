@@ -5315,9 +5315,11 @@
     "sections_aria": "Nami sections",
     "tab_download": "Download",
     "tab_profiles": "Profiles",
+    "tab_history": "History",
     "tab_settings": "Settings",
     "desc_download": "Save posts and media from your connected social profiles.",
     "desc_profiles": "Manage the profiles you use most often.",
+    "desc_history": "Browse downloaded media and synchronize your disk with the local ledger.",
     "desc_settings": "Choose where Nami saves downloaded media.",
     "view_log": "View log",
     "saved_profiles_aria": "Saved profiles",
@@ -5384,6 +5386,16 @@
     "clear_cookies_file": "Clear cookies file",
     "cookies_hint": "Cookies are only required for downloading Stories and Highlights.",
     "saving": "Saving...",
-    "save_settings": "Save Settings"
+    "save_settings": "Save Settings",
+    "sync_disk": "Reconcile Disk",
+    "syncing_disk": "Reconciling...",
+    "search_history_placeholder": "Filter by creator, filename, or post ID...",
+    "no_history_yet": "No downloaded media recorded yet.",
+    "open_file": "Open File",
+    "open_folder": "Open Folder",
+    "delete_record": "Delete Record",
+    "confirm_delete_record": "Remove this record from history? The file will remain on disk.",
+    "disk_synced": "Checked {{checked}} items, pruned {{removed}} missing files.",
+    "platform_all": "All"
   }
 }

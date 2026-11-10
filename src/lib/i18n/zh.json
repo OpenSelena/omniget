@@ -5376,7 +5376,19 @@
     "clear_cookies_file": "清除 cookies 文件",
     "cookies_hint": "只有下载快拍和精选时才需要 Cookies。",
     "saving": "保存中...",
-    "save_settings": "保存设置"
+    "save_settings": "保存设置",
+    "tab_history": "历史记录",
+    "desc_history": "浏览下载的媒体并将磁盘与本地记录同步。",
+    "sync_disk": "校准磁盘",
+    "syncing_disk": "校准中...",
+    "search_history_placeholder": "按创作者、文件名或帖子ID筛选...",
+    "no_history_yet": "暂无下载的媒体记录。",
+    "open_file": "打开文件",
+    "open_folder": "打开文件夹",
+    "delete_record": "删除记录",
+    "confirm_delete_record": "从历史记录中移除此项？本地文件将保留在磁盘上。",
+    "disk_synced": "已检查 {{checked}} 项，清理了 {{removed}} 个丢失的文件。",
+    "platform_all": "全部"
   },
   "tray": {
     "quit": "退出",
