@@ -336,7 +336,17 @@ impl DownloadQueue {
         scheduled_at_ms: Option<u64>,
         stop_at_ms: Option<u64>,
     ) {
-        let computed_kind = Some(kind_from_platform(&platform));
+        let computed_kind = if let Some(ref mi) = media_info {
+            match mi.media_type {
+                omniget_core::models::media::MediaType::Photo
+                | omniget_core::models::media::MediaType::Carousel => Some(QueueKind::Image),
+                omniget_core::models::media::MediaType::Audio => Some(QueueKind::Audio),
+                omniget_core::models::media::MediaType::Video => Some(QueueKind::Video),
+                _ => Some(kind_from_platform(&platform)),
+            }
+        } else {
+            Some(kind_from_platform(&platform))
+        };
         let item = QueueItem {
             id,
             url,
@@ -602,6 +612,71 @@ impl DownloadQueue {
             item.file_size_bytes = file_size_bytes;
             item.speed_bytes_per_sec = 0.0;
             item.eta_seconds = None;
+            if let Some(ref path) = item.file_path {
+                let p = std::path::Path::new(path);
+                let ext = p
+                    .extension()
+                    .and_then(|e| e.to_str())
+                    .unwrap_or("")
+                    .to_lowercase();
+                if matches!(
+                    ext.as_str(),
+                    "jpg" | "jpeg" | "png" | "webp" | "heic" | "gif"
+                ) {
+                    item.kind = Some(QueueKind::Image);
+                } else if matches!(
+                    ext.as_str(),
+                    "mp3" | "m4a" | "flac" | "wav" | "opus" | "ogg"
+                ) {
+                    item.kind = Some(QueueKind::Audio);
+                } else if matches!(
+                    ext.as_str(),
+                    "mp4" | "mkv" | "webm" | "mov" | "avi" | "ts" | "m4v"
+                ) {
+                    item.kind = Some(QueueKind::Video);
+                } else if p.is_dir() {
+                    if let Ok(entries) = std::fs::read_dir(p) {
+                        let mut has_img = false;
+                        let mut has_vid = false;
+                        for entry in entries.flatten() {
+                            let e_ext = entry
+                                .path()
+                                .extension()
+                                .and_then(|e| e.to_str())
+                                .unwrap_or("")
+                                .to_lowercase();
+                            if matches!(
+                                e_ext.as_str(),
+                                "jpg" | "jpeg" | "png" | "webp" | "heic" | "gif"
+                            ) {
+                                has_img = true;
+                            } else if matches!(
+                                e_ext.as_str(),
+                                "mp4" | "mkv" | "webm" | "mov" | "avi"
+                            ) {
+                                has_vid = true;
+                            }
+                        }
+                        if has_img && !has_vid {
+                            item.kind = Some(QueueKind::Image);
+                        } else if has_vid {
+                            item.kind = Some(QueueKind::Video);
+                        }
+                    }
+                }
+            }
+            if let Some(ref m) = item.media_info {
+                match m.media_type {
+                    omniget_core::models::media::MediaType::Photo
+                    | omniget_core::models::media::MediaType::Carousel => {
+                        item.kind = Some(QueueKind::Image);
+                    }
+                    omniget_core::models::media::MediaType::Audio => {
+                        item.kind = Some(QueueKind::Audio);
+                    }
+                    _ => {}
+                }
+            }
             crate::core::recovery::remove(id);
 
             if !item.external {
@@ -1433,6 +1508,19 @@ async fn spawn_download_inner(
             };
             item.file_count = Some(fc);
             item.media_info = Some(info.clone());
+            match info.media_type {
+                omniget_core::models::media::MediaType::Photo
+                | omniget_core::models::media::MediaType::Carousel => {
+                    item.kind = Some(QueueKind::Image);
+                }
+                omniget_core::models::media::MediaType::Audio => {
+                    item.kind = Some(QueueKind::Audio);
+                }
+                omniget_core::models::media::MediaType::Video => {
+                    item.kind = Some(QueueKind::Video);
+                }
+                _ => {}
+            }
         }
         q.get_state()
     };

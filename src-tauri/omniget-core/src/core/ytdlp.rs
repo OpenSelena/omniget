@@ -3347,6 +3347,11 @@ pub async fn download_video(
         base_args.push("mp4".to_string());
     }
 
+    if ffmpeg_available {
+        base_args.push("--postprocessor-args".to_string());
+        base_args.push("ffmpeg:-threads 2".to_string());
+    }
+
     if let Some(ref_url) = referer {
         base_args.push("--referer".to_string());
         base_args.push(ref_url.to_string());
@@ -3401,7 +3406,7 @@ pub async fn download_video(
     } else {
         tuned_fragments
     };
-    let effective_fragments = effective_fragments.max(1);
+    let effective_fragments = effective_fragments.clamp(1, 4);
     remember_concurrency(&tuner_host, effective_fragments);
     base_args.push("-N".to_string());
     base_args.push(effective_fragments.to_string());

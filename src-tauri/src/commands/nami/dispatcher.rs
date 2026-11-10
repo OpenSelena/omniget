@@ -109,6 +109,7 @@ pub fn kill_process_tree(pid: u32) {
         let _ = Command::new("kill")
             .args(["-9", &format!("-{}", pid)])
             .output();
+        let _ = Command::new("kill").args(["-9", &pid.to_string()]).output();
     }
 }
 
@@ -593,6 +594,11 @@ fn run_process_stream(
     {
         use std::os::windows::process::CommandExt;
         cmd.creation_flags(0x08000000); // CREATE_NO_WINDOW
+    }
+    #[cfg(unix)]
+    {
+        use std::os::unix::process::CommandExt;
+        cmd.process_group(0);
     }
 
     let mut child = cmd

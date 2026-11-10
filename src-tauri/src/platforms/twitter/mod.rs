@@ -33,6 +33,7 @@ struct TwitterMediaItem {
     media_type: TwitterMediaType,
     url: String,
     extension: String,
+    thumbnail_url: Option<String>,
 }
 
 enum TwitterMediaType {
@@ -671,10 +672,12 @@ impl TwitterDownloader {
             let raw = m.as_str().trim_end_matches([',', ';', ')', ']']);
             if let Some((url, extension)) = Self::best_photo_url_from_str(raw) {
                 if seen.insert(url.clone()) {
+                    let thumb = Some(url.clone());
                     items.push(TwitterMediaItem {
                         media_type: TwitterMediaType::Photo,
                         url,
                         extension,
+                        thumbnail_url: thumb,
                     });
                 }
             }
@@ -688,14 +691,21 @@ impl TwitterDownloader {
             .filter_map(|m| match Self::infer_media_type(m)? {
                 TwitterMediaType::Photo => {
                     let (url, ext) = Self::best_photo_url(m)?;
+                    let thumb = Some(url.clone());
                     Some(TwitterMediaItem {
                         media_type: TwitterMediaType::Photo,
                         url,
                         extension: ext,
+                        thumbnail_url: thumb,
                     })
                 }
                 TwitterMediaType::Video => {
                     let url = Self::best_video_url(m)?;
+                    let thumb = m
+                        .get("media_url_https")
+                        .or_else(|| m.get("media_url"))
+                        .and_then(|v| v.as_str())
+                        .map(|s| s.to_string());
                     let extension = if url.contains(".m3u8") || url.contains("mpegurl") {
                         "ytdlp"
                     } else {
@@ -705,14 +715,21 @@ impl TwitterDownloader {
                         media_type: TwitterMediaType::Video,
                         url,
                         extension: extension.to_string(),
+                        thumbnail_url: thumb,
                     })
                 }
                 TwitterMediaType::AnimatedGif => {
                     let url = Self::best_video_url(m)?;
+                    let thumb = m
+                        .get("media_url_https")
+                        .or_else(|| m.get("media_url"))
+                        .and_then(|v| v.as_str())
+                        .map(|s| s.to_string());
                     Some(TwitterMediaItem {
                         media_type: TwitterMediaType::AnimatedGif,
                         url,
                         extension: "mp4".to_string(),
+                        thumbnail_url: thumb,
                     })
                 }
             })
@@ -739,17 +756,25 @@ impl TwitterDownloader {
 
     fn media_info_from_twitter_media(
         filename_base: String,
+        author: String,
         twitter_media: TwitterMedia,
     ) -> MediaInfo {
         match twitter_media {
             TwitterMedia::Single(item) => {
                 let media_type = Self::media_type_for_item(&item);
+                let thumbnail_url = item.thumbnail_url.clone().or_else(|| {
+                    if matches!(item.media_type, TwitterMediaType::Photo) {
+                        Some(item.url.clone())
+                    } else {
+                        None
+                    }
+                });
                 MediaInfo {
                     title: filename_base,
-                    author: String::new(),
+                    author,
                     platform: "twitter".to_string(),
                     duration_seconds: None,
-                    thumbnail_url: None,
+                    thumbnail_url,
                     available_qualities: vec![VideoQuality {
                         label: "original".to_string(),
                         width: 0,
@@ -762,6 +787,15 @@ impl TwitterDownloader {
                 }
             }
             TwitterMedia::Multiple(items) => {
+                let thumbnail_url = items.first().and_then(|item| {
+                    item.thumbnail_url.clone().or_else(|| {
+                        if matches!(item.media_type, TwitterMediaType::Photo) {
+                            Some(item.url.clone())
+                        } else {
+                            None
+                        }
+                    })
+                });
                 let qualities: Vec<VideoQuality> = items
                     .iter()
                     .enumerate()
@@ -776,10 +810,10 @@ impl TwitterDownloader {
 
                 MediaInfo {
                     title: filename_base,
-                    author: String::new(),
+                    author,
                     platform: "twitter".to_string(),
                     duration_seconds: None,
-                    thumbnail_url: None,
+                    thumbnail_url,
                     available_qualities: qualities,
                     media_type: MediaType::Carousel,
                     file_size_bytes: None,
@@ -1027,8 +1061,20 @@ impl TwitterDownloader {
 
         let twitter_media = Self::parse_media_items(&media_items)?;
 
+        let author = if let Ok(parsed) = url::Url::parse(url) {
+            let segments: Vec<&str> = parsed.path().split('/').filter(|s| !s.is_empty()).collect();
+            if segments.len() >= 2 && segments[1] == "status" && segments[0] != "i" {
+                segments[0].to_string()
+            } else {
+                String::new()
+            }
+        } else {
+            String::new()
+        };
+
         Ok(Self::media_info_from_twitter_media(
             filename_base,
+            author,
             twitter_media,
         ))
     }

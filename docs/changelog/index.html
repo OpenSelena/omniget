@@ -1415,7 +1415,7 @@
           <li>
             <a href="../courses/" class="sidebar-link">
               <span>36 Course Platforms</span>
-              <span class="sidebar-tag">v0.16.0</span>
+              <span class="sidebar-tag">v0.16.1</span>
             </a>
           </li>
         </ul>
@@ -1502,12 +1502,44 @@
         Release notes, feature changes, and system patches for OmniGet. All desktop releases are signed, reproducible, and published with SHA-256 binary validation.
       </p>
 
-            <!-- v0.16.0 Release -->
+            <!-- v0.16.1 Release -->
+      <article class="release-box" id="v0-16-1">
+        <div class="release-header">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="release-tag-pill">v0.16.1 Latest Stable</span>
+              <span class="release-date">Released November 2026</span>
+            </div>
+            <h2 class="release-title">Platform Media Stability Patch: Queue Kind Refinement, Thumbnail Resolution, Unix Process Group Termination &amp; CPU Throttling</h2>
+          </div>
+          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.16.1" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+            <span>GitHub Tag</span>
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+
+        <div class="release-section">
+          <h3 class="release-section-title">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Bug Fixes &amp; Stability Patches
+          </h3>
+          <ul class="release-list">
+            <li><strong>Photo Post Media Kind Refinement</strong>: Corrected download queue kind categorization so photo and carousel items from Instagram and Twitter correctly display photo icons and card badges rather than defaulting to video.</li>
+            <li><strong>Instagram Photo Post Thumbnails</strong>: Populated thumbnail URLs and extracted creator usernames for single-image and carousel posts in the native Instagram extractor.</li>
+            <li><strong>Twitter / X Preview Shimmer Guard</strong>: Propagated high-resolution image URLs to thumbnail metadata and added a fallback container in the omnibox preview to prevent infinite skeleton shimmer when thumbnails are unavailable.</li>
+            <li><strong>Unix Process Group Termination</strong>: Assigned dedicated POSIX process groups (<code>process_group(0)</code>) to child engine processes in Nami and added direct PID termination fallback, ensuring the Stop button reliably kills background tasks.</li>
+            <li><strong>CPU Usage Throttling</strong>: Capped yt-dlp concurrent fragment downloads to 4, constrained ffmpeg postprocessor threads to 2, and added debouncing to omnibox metadata prefetching.</li>
+            <li><strong>Threads Share URL Resolution</strong>: Followed HTTP 301/302 redirects on <code>threads.net/share/</code> and <code>threads.com/share/</code> tokens to canonical post URLs before ID extraction.</li>
+          </ul>
+        </div>
+      </article>
+
+      <!-- v0.16.0 Release -->
       <article class="release-box" id="v0-16-0">
         <div class="release-header">
           <div>
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span class="release-tag-pill">v0.16.0 Latest Stable</span>
+              <span class="sidebar-tag">v0.16.0</span>
               <span class="release-date">Released November 2026</span>
             </div>
             <h2 class="release-title">Nami Core Overhaul: SQLite Media Ledger, History Grid, Incremental Creator Sync &amp; Zero-Extension Cookie Bridge</h2>
@@ -2347,7 +2379,8 @@
         <span>On this page</span>
       </div>
       <ul class="toc-list" id="tocList">
-        <li><a href="#v0-16-0" class="toc-link">v0.16.0 (Latest Stable)</a></li>
+        <li><a href="#v0-16-1" class="toc-link">v0.16.1 (Latest Stable)</a></li>
+        <li><a href="#v0-16-0" class="toc-link">v0.16.0</a></li>
         <li><a href="#v0-15-1" class="toc-link">v0.15.1</a></li>
         <li><a href="#v0-15-0" class="toc-link">v0.15.0</a></li>
         <li><a href="#v0-14-3" class="toc-link">v0.14.3</a></li>

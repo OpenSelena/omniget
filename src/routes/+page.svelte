@@ -441,7 +441,11 @@
       if (result.supported) {
         omniState = { kind: "detected", info: result };
         if (!COURSE_PLATFORMS.has(result.platform)) {
-          invoke("prefetch_media_info", { url: value }).catch(() => {});
+          setTimeout(() => {
+            if (url === value) {
+              invoke("prefetch_media_info", { url: value }).catch(() => {});
+            }
+          }, 400);
         }
         loadCookieAccounts(value);
         if (result.content_type === "playlist") {

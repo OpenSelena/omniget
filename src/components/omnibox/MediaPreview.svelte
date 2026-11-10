@@ -16,7 +16,7 @@
 {#if mediaPreview}
   <div class="preview-container">
     <div class="preview-thumbnail-wrapper">
-      {#if imageLoading}
+      {#if imageLoading && mediaPreview.thumbnail_url}
         <div class="preview-skeleton"></div>
       {/if}
       {#if mediaPreview.thumbnail_url}
@@ -29,6 +29,10 @@
           onload={() => { imageLoading = false; }}
           onerror={() => { imageLoading = false; }}
         />
+      {:else}
+        <div class="preview-fallback-art">
+          <img class="preview-art" src="/emoji/package.png" alt="" width="32" height="32" draggable="false" />
+        </div>
       {/if}
     </div>
     <div class="preview-info">
@@ -65,6 +69,16 @@
     border-radius: calc(var(--border-radius) - 4px);
     background: var(--button-elevated);
     animation: skeleton-shimmer 2s infinite;
+  }
+
+  .preview-fallback-art {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 120px;
+    height: 67.5px;
+    border-radius: calc(var(--border-radius) - 4px);
+    background: var(--button-elevated);
   }
 
   @keyframes skeleton-shimmer {

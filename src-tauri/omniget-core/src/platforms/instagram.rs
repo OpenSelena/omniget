@@ -705,11 +705,11 @@ impl PlatformDownloader for InstagramDownloader {
         let filename_base = format!("instagram_{}", post_id);
 
         let embed_result = self.request_embed(&post_id).await;
-        let media = match embed_result {
-            Ok(data) => Self::extract_media_from_embed(&data),
-            Err(_embed_err) => match self.request_gql(&post_id).await {
+        let media = match &embed_result {
+            Ok(data) => Self::extract_media_from_embed(data),
+            Err(_) => match self.request_gql(&post_id).await {
                 Ok(data) => Self::extract_media_from_gql(&data),
-                Err(_gql_err) => {
+                Err(_) => {
                     return self.fallback_ytdlp(url, &post_id).await;
                 }
             },
@@ -740,6 +740,18 @@ impl PlatformDownloader for InstagramDownloader {
             return self.fallback_ytdlp(url, &post_id).await;
         }
 
+        let author = embed_result
+            .as_ref()
+            .ok()
+            .and_then(|d| {
+                d.pointer("/owner/username")
+                    .or_else(|| d.pointer("/user/username"))
+                    .or_else(|| d.get("author_name"))
+                    .and_then(|v| v.as_str())
+            })
+            .unwrap_or("")
+            .to_string();
+
         match media {
             InstagramMedia::Single { url, is_video } => {
                 let (media_type, format) = if is_video {
@@ -748,12 +760,14 @@ impl PlatformDownloader for InstagramDownloader {
                     (MediaType::Photo, "jpg")
                 };
 
+                let thumbnail_url = Some(url.clone());
+
                 Ok(MediaInfo {
                     title: filename_base,
-                    author: String::new(),
+                    author,
                     platform: "instagram".to_string(),
                     duration_seconds: None,
-                    thumbnail_url: None,
+                    thumbnail_url,
                     available_qualities: vec![VideoQuality {
                         label: "original".to_string(),
                         width: 0,
@@ -766,6 +780,7 @@ impl PlatformDownloader for InstagramDownloader {
                 })
             }
             InstagramMedia::Carousel { items } => {
+                let thumbnail_url = items.first().map(|it| it.url.clone());
                 let qualities: Vec<VideoQuality> = items
                     .iter()
                     .enumerate()
@@ -783,10 +798,10 @@ impl PlatformDownloader for InstagramDownloader {
 
                 Ok(MediaInfo {
                     title: filename_base,
-                    author: String::new(),
+                    author,
                     platform: "instagram".to_string(),
                     duration_seconds: None,
-                    thumbnail_url: None,
+                    thumbnail_url,
                     available_qualities: qualities,
                     media_type: MediaType::Carousel,
                     file_size_bytes: None,

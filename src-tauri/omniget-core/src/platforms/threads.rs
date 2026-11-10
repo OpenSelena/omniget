@@ -15,6 +15,7 @@ const GOOGLEBOT_UA: &str =
 
 pub struct ThreadsDownloader {
     client: reqwest::Client,
+    redirect_client: reqwest::Client,
 }
 
 pub(crate) enum ThreadsMedia {
@@ -56,7 +57,37 @@ impl ThreadsDownloader {
         }
 
         let client = builder.build().unwrap_or_default();
-        Self { client }
+
+        let redirect_client =
+            crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
+                .user_agent("curl/7.88.1")
+                .timeout(std::time::Duration::from_secs(120))
+                .connect_timeout(std::time::Duration::from_secs(15))
+                .build()
+                .unwrap_or_default();
+
+        Self {
+            client,
+            redirect_client,
+        }
+    }
+
+    pub fn extract_share_id(url: &str) -> Option<String> {
+        let parsed = url::Url::parse(url).ok()?;
+        let segments: Vec<&str> = parsed.path().split('/').filter(|s| !s.is_empty()).collect();
+        if segments.first() == Some(&"share") {
+            return segments.get(1).map(|s| s.to_string());
+        }
+        None
+    }
+
+    pub async fn resolve_share_link(&self, url: &str) -> anyhow::Result<String> {
+        let response = self.redirect_client.get(url).send().await?;
+        let final_url = response.url().to_string();
+        if final_url.contains("/share/") || final_url == url {
+            return Err(anyhow!("Could not resolve Threads share link"));
+        }
+        Ok(final_url)
     }
 
     /// Estrae il post ID da vari formati URL di Threads
@@ -379,13 +410,20 @@ impl PlatformDownloader for ThreadsDownloader {
     }
 
     async fn get_media_info(&self, url: &str) -> anyhow::Result<MediaInfo> {
-        let post_id = Self::extract_post_id(url)
+        let canonical_url = if Self::extract_share_id(url).is_some() || url.contains("/share/") {
+            self.resolve_share_link(url)
+                .await
+                .unwrap_or_else(|_| url.to_string())
+        } else {
+            url.to_string()
+        };
+
+        let post_id = Self::extract_post_id(&canonical_url)
             .ok_or_else(|| anyhow!("Could not extract post ID from Threads URL"))?;
 
         let filename_base = format!("threads_{}", post_id);
 
-        // Fetch della pagina e ricerca del post nel JSON bootstrap
-        let post = self.fetch_post(url, &post_id).await?;
+        let post = self.fetch_post(&canonical_url, &post_id).await?;
 
         // Per post share/repost il media vive in un contenitore annidato
         let container = Self::resolve_media_container(&post);
@@ -585,6 +623,22 @@ mod tests {
         assert_eq!(
             ThreadsDownloader::extract_post_id(url),
             Some("ABC123".to_string())
+        );
+    }
+
+    #[test]
+    fn extract_share_id_from_share_url() {
+        assert_eq!(
+            ThreadsDownloader::extract_share_id("https://www.threads.com/share/F-xXv0jj3"),
+            Some("F-xXv0jj3".to_string())
+        );
+        assert_eq!(
+            ThreadsDownloader::extract_share_id("https://www.threads.net/share/EGBilPGDv?xmt=123"),
+            Some("EGBilPGDv".to_string())
+        );
+        assert_eq!(
+            ThreadsDownloader::extract_share_id("https://www.threads.com/@user/post/ABC123"),
+            None
         );
     }
 
