@@ -5393,7 +5393,15 @@
     "sync_all_creators": "Συγχρονισμός όλων",
     "syncing_creator": "Συγχρονισμός...",
     "pull_success": "Συγχρονίστηκε {{name}}: {{count}} νέα αρχεία",
-    "pull_all_success": "Συγχρονίστηκαν {{total}} δημιουργοί: {{count}} νέα αρχεία"
+    "pull_all_success": "Συγχρονίστηκαν {{total}} δημιουργοί: {{count}} νέα αρχεία",
+    "browser_cookies_label": "Cookies Προγράμματος Περιήγησης",
+    "browser_cookies_aria": "Επιλέξτε πρόγραμμα περιήγησης για αυτόματη εξαγωγή cookies",
+    "browser_cookies_auto": "Αυτόματο (Προεπιλεγμένο Πρόγραμμα Περιήγησης)",
+    "browser_cookies_manual": "Χειροκίνητο Αρχείο Cookies (.txt)",
+    "browser_cookies_disabled": "Απενεργοποιημένο",
+    "test_extract_cookies": "Δοκιμή Γέφυρας",
+    "testing_cookies": "Δοκιμή...",
+    "cookies_bridge_hint": "Αυτόματη ανάγνωση cookies σύνδεσης από το πρόγραμμα περιήγησης χωρίς επεκτάσεις."
   },
   "tray": {
     "quit": "Quit",

@@ -53,11 +53,46 @@ vi.mock('@tauri-apps/api/core', () => ({
         ],
       };
     }
+    if (cmd === 'nami_detect_browsers') {
+      return [
+        {
+          id: 'chrome',
+          name: 'Google Chrome',
+          engine: 'chrome',
+          profile_dir: '/path/to/chrome',
+          available: true,
+          is_default: true,
+        },
+        {
+          id: 'firefox',
+          name: 'Mozilla Firefox',
+          engine: 'firefox',
+          profile_dir: '/path/to/firefox',
+          available: false,
+          is_default: false,
+        },
+      ];
+    }
+    if (cmd === 'nami_extract_browser_cookies') {
+      return 'Successfully extracted 8 cookies from Mozilla Firefox';
+    }
+    if (cmd === 'nami_save_app_settings') {
+      return 'Settings saved successfully';
+    }
     return null;
   })
 }));
 
-import { loadNamiHistory, reconcileNamiDisk, deleteNamiHistoryRecord, pullCreator, pullAllCreators } from './nami';
+import {
+  loadNamiHistory,
+  reconcileNamiDisk,
+  deleteNamiHistoryRecord,
+  pullCreator,
+  pullAllCreators,
+  detectBrowsers,
+  extractBrowserCookies,
+  saveAppSettings,
+} from './nami';
 
 describe('nami api history and ledger', () => {
   it('calls nami_get_history and returns records', async () => {
@@ -90,5 +125,22 @@ describe('nami api history and ledger', () => {
     expect(summary.total).toBe(1);
     expect(summary.succeeded).toBe(1);
     expect(summary.total_downloaded).toBe(2);
+  });
+
+  it('calls nami_detect_browsers and returns detected browsers', async () => {
+    const browsers = await detectBrowsers();
+    expect(browsers.length).toBe(2);
+    expect(browsers[0].id).toBe('chrome');
+    expect(browsers[0].is_default).toBe(true);
+  });
+
+  it('calls nami_extract_browser_cookies and returns result string', async () => {
+    const res = await extractBrowserCookies('firefox', 'instagram');
+    expect(res).toContain('extracted 8 cookies');
+  });
+
+  it('calls nami_save_app_settings with browserCookies', async () => {
+    const res = await saveAppSettings('/downloads', null, 'chrome');
+    expect(res).toBe('Settings saved successfully');
   });
 });

@@ -5393,7 +5393,15 @@
     "sync_all_creators": "同步全部",
     "syncing_creator": "同步中...",
     "pull_success": "已同步 {{name}}：{{count}} 个新文件",
-    "pull_all_success": "已同步 {{total}} 位创作者：{{count}} 个新文件"
+    "pull_all_success": "已同步 {{total}} 位创作者：{{count}} 个新文件",
+    "browser_cookies_label": "浏览器 Cookie",
+    "browser_cookies_aria": "选择用于自动提取 Cookie 的浏览器",
+    "browser_cookies_auto": "自动（默认浏览器）",
+    "browser_cookies_manual": "手动 Cookie 文件 (.txt)",
+    "browser_cookies_disabled": "已禁用",
+    "test_extract_cookies": "测试桥接",
+    "testing_cookies": "正在测试...",
+    "cookies_bridge_hint": "无插件桥接会自动从您的浏览器读取会话 Cookie，用于下载快拍与精选。"
   },
   "tray": {
     "quit": "退出",

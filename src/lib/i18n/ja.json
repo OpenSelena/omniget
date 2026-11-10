@@ -5393,7 +5393,15 @@
     "sync_all_creators": "すべて同期",
     "syncing_creator": "同期中...",
     "pull_success": "{{name}} を同期しました: {{count}} 件の新規ファイル",
-    "pull_all_success": "{{total}} 名のクリエイターを同期しました: {{count}} 件の新規ファイル"
+    "pull_all_success": "{{total}} 名のクリエイターを同期しました: {{count}} 件の新規ファイル",
+    "browser_cookies_label": "ブラウザ Cookie",
+    "browser_cookies_aria": "Cookie 自動抽出用のブラウザを選択",
+    "browser_cookies_auto": "自動（既定のブラウザ）",
+    "browser_cookies_manual": "手動 Cookie ファイル (.txt)",
+    "browser_cookies_disabled": "無効",
+    "test_extract_cookies": "ブリッジをテスト",
+    "testing_cookies": "テスト中...",
+    "cookies_bridge_hint": "拡張機能なしでブラウザからセッション Cookie を自動的に読み込みます。"
   },
   "tray": {
     "quit": "Quit",

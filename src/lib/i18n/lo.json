@@ -5393,7 +5393,15 @@
     "sync_all_creators": "ຊິງຄ໌ທັງໝົດ",
     "syncing_creator": "ກຳລັງຊິງຄ໌...",
     "pull_success": "ຊິງຄ໌ {{name}} ແລ້ວ: {{count}} ໄຟລ໌ໃໝ່",
-    "pull_all_success": "ຊິງຄ໌ {{total}} ຜູ້ສ້າງແລ້ວ: {{count}} ໄຟລ໌ໃໝ່"
+    "pull_all_success": "ຊິງຄ໌ {{total}} ຜູ້ສ້າງແລ້ວ: {{count}} ໄຟລ໌ໃໝ່",
+    "browser_cookies_label": "ຄຸກກີ້ຂອງບຣາວເຊີ",
+    "browser_cookies_aria": "ເລືອກບຣາວເຊີສຳລັບການດຶງຄຸກກີ້ອັດຕະໂນມັດ",
+    "browser_cookies_auto": "ອັດຕະໂນມັດ (ບຣາວເຊີເລີ່ມຕົ້ນ)",
+    "browser_cookies_manual": "ໄຟລ໌ຄຸກກີ້ດ້ວຍຕົນເອງ (.txt)",
+    "browser_cookies_disabled": "ປິດໃຊ້ງານ",
+    "test_extract_cookies": "ທົດສອບການເຊື່ອມຕໍ່",
+    "testing_cookies": "ກຳລັງທົດສອບ...",
+    "cookies_bridge_hint": "ລະບົບຈະອ່ານຄຸກກີ້ເຊດຊັນຈາກບຣາວເຊີຂອງທ່ານໂດຍອັດຕະໂນມັດ."
   },
   "tray": {
     "quit": "Quit",

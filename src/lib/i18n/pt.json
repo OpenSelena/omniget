@@ -5393,7 +5393,15 @@
     "sync_all_creators": "Sincronizar todos",
     "syncing_creator": "Sincronizando...",
     "pull_success": "Sincronizado {{name}}: {{count}} novos arquivos",
-    "pull_all_success": "Sincronizados {{total}} criadores: {{count}} novos arquivos"
+    "pull_all_success": "Sincronizados {{total}} criadores: {{count}} novos arquivos",
+    "browser_cookies_label": "Cookies do Navegador",
+    "browser_cookies_aria": "Selecione o navegador para extração automática de cookies",
+    "browser_cookies_auto": "Automático (Navegador Padrão)",
+    "browser_cookies_manual": "Arquivo Manual de Cookies (.txt)",
+    "browser_cookies_disabled": "Desativado",
+    "test_extract_cookies": "Testar Ponte",
+    "testing_cookies": "Testando...",
+    "cookies_bridge_hint": "A ponte sem extensão lê automaticamente cookies de sessão do seu navegador."
   },
   "tray": {
     "quit": "Quit",

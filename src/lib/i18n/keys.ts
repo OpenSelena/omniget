@@ -546,6 +546,11 @@ export type TranslationKeys =
 
   | 'nami.add'
   | 'nami.add_one'
+  | 'nami.browser_cookies_aria'
+  | 'nami.browser_cookies_auto'
+  | 'nami.browser_cookies_disabled'
+  | 'nami.browser_cookies_label'
+  | 'nami.browser_cookies_manual'
   | 'nami.cancelling'
   | 'nami.choose'
   | 'nami.choose_cookies_placeholder'
@@ -558,6 +563,7 @@ export type TranslationKeys =
   | 'nami.content_stories'
   | 'nami.content_type_aria'
   | 'nami.content_videos'
+  | 'nami.cookies_bridge_hint'
   | 'nami.cookies_file_aria'
   | 'nami.cookies_hint'
   | 'nami.cookies_label'
@@ -634,6 +640,8 @@ export type TranslationKeys =
   | 'nami.tab_history'
   | 'nami.tab_profiles'
   | 'nami.tab_settings'
+  | 'nami.test_extract_cookies'
+  | 'nami.testing_cookies'
   | 'nami.view_log'
 
   | 'nav.about'

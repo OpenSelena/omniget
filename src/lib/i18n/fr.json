@@ -5393,7 +5393,15 @@
     "sync_all_creators": "Synchroniser tout",
     "syncing_creator": "Synchronisation...",
     "pull_success": "Synchronisé {{name}} : {{count}} nouveaux fichiers",
-    "pull_all_success": "Synchronisé {{total}} créateurs : {{count}} nouveaux fichiers"
+    "pull_all_success": "Synchronisé {{total}} créateurs : {{count}} nouveaux fichiers",
+    "browser_cookies_label": "Cookies du Navigateur",
+    "browser_cookies_aria": "Sélectionnez le navigateur pour l'extraction automatique des cookies",
+    "browser_cookies_auto": "Automatique (Navigateur par défaut)",
+    "browser_cookies_manual": "Fichier Cookie Manuel (.txt)",
+    "browser_cookies_disabled": "Désactivé",
+    "test_extract_cookies": "Tester le pont",
+    "testing_cookies": "Test en cours...",
+    "cookies_bridge_hint": "La passerelle sans extension lit automatiquement les cookies de session depuis votre navigateur."
   },
   "tray": {
     "quit": "Quit",

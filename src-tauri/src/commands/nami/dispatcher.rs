@@ -4,7 +4,7 @@
 use super::args::{
     build_gallery_dl_args, build_yt_dlp_args, GalleryDlArgsOptions, YtDlpArgsOptions,
 };
-use super::cookies::{find_candidate_cookie, SafeCookieSandbox};
+use super::cookies::{find_candidate_cookie, resolve_active_cookies, SafeCookieSandbox};
 use super::fetcher::{ensure_latest_gallery_dl, resolve_gallery_dl, resolve_yt_dlp};
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, VecDeque};
@@ -290,16 +290,26 @@ pub async fn execute_download_workflow(
 
     // 2. Discover and create ephemeral cookie sandbox if cookies exist
     let platform_name = detect_platform_name(&url);
-    let resolved_cookie_path =
-        find_candidate_cookie(platform_name, cookies_file.as_deref(), &app_data_dir);
-    let temp_base = app_data_dir.join("nami").join("temp");
-    let cookie_sandbox = resolved_cookie_path
-        .as_deref()
-        .and_then(|p| SafeCookieSandbox::create(p, &temp_base).ok());
 
-    let active_cookie_str = cookie_sandbox
-        .as_ref()
-        .map(|s| s.path().to_string_lossy().to_string());
+    let browser_setting: Option<String> = {
+        let settings_path = app_data_dir.join("app_settings.json");
+        fs::read_to_string(&settings_path)
+            .ok()
+            .and_then(|c| serde_json::from_str::<super::AppSettings>(&c).ok())
+            .and_then(|s| s.browser_cookies)
+    };
+
+    let resolved_cookies = resolve_active_cookies(
+        platform_name,
+        cookies_file.as_deref(),
+        browser_setting.as_deref(),
+        &app_data_dir,
+    );
+
+    let active_cookie_str = resolved_cookies
+        .cookie_file_path()
+        .map(|p| p.to_string_lossy().to_string());
+    let active_browser_arg = resolved_cookies.browser_arg().map(|s| s.to_string());
 
     // 3. Plan stages
     let mut sub_types: Vec<&str> = match content_type.as_str() {
@@ -310,7 +320,7 @@ pub async fn execute_download_workflow(
         _ => vec!["photos", "videos"],
     };
 
-    if platform_name == "Instagram" && active_cookie_str.is_some() && content_type == "all" {
+    if platform_name == "Instagram" && resolved_cookies.has_cookies() && content_type == "all" {
         sub_types.push("stories");
         sub_types.push("highlights");
     }
@@ -356,6 +366,7 @@ pub async fn execute_download_workflow(
             &url,
             &output_dir,
             active_cookie_str.as_deref(),
+            active_browser_arg.as_deref(),
             sub_type,
             &reg,
             platform_name,
@@ -429,6 +440,7 @@ fn run_single_stage(
     url: &str,
     output_dir: &str,
     cookie_path: Option<&str>,
+    browser_cookie_arg: Option<&str>,
     content_type: &str,
     reg: &DownloadRegistration,
     platform_name: &str,
@@ -486,6 +498,7 @@ fn run_single_stage(
         clean_url: url,
         username: &username,
         cookie_path,
+        browser_cookie_arg,
         custom_ua: None,
         proxy: None,
         skip_replies,
@@ -533,6 +546,7 @@ fn run_single_stage(
                 platform: platform_name,
                 clean_url: url,
                 cookie_path,
+                browser_cookie_arg,
                 proxy: None,
                 skip_replies,
                 break_on_existing: early_exit_threshold.map(|t| t > 0),

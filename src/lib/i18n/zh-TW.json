@@ -5393,7 +5393,15 @@
     "sync_all_creators": "同步全部",
     "syncing_creator": "同步中...",
     "pull_success": "已同步 {{name}}：{{count}} 個新檔案",
-    "pull_all_success": "已同步 {{total}} 位創作者：{{count}} 個新檔案"
+    "pull_all_success": "已同步 {{total}} 位創作者：{{count}} 個新檔案",
+    "browser_cookies_label": "瀏覽器 Cookie",
+    "browser_cookies_aria": "選取用於自動擷取 Cookie 的瀏覽器",
+    "browser_cookies_auto": "自動（預設瀏覽器）",
+    "browser_cookies_manual": "手動 Cookie 檔案 (.txt)",
+    "browser_cookies_disabled": "已停用",
+    "test_extract_cookies": "測試橋接",
+    "testing_cookies": "測試中...",
+    "cookies_bridge_hint": "無擴充功能橋接會自動從您的瀏覽器讀取工作階段 Cookie，用於下載限時動態與精選。"
   },
   "tray": {
     "quit": "Quit",

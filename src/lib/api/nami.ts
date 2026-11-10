@@ -27,6 +27,16 @@ export interface DownloadProgress {
 export interface AppSettings {
   output_directory: string | null;
   cookies_file: string | null;
+  browser_cookies?: string | null;
+}
+
+export interface DetectedBrowser {
+  id: string;
+  name: string;
+  engine: string;
+  profile_dir: string;
+  available: boolean;
+  is_default: boolean;
 }
 
 export interface DependencyStatus {
@@ -98,11 +108,27 @@ export async function listenToDownloadProgress(
 
 export async function saveAppSettings(
   outputDirectory: string | null,
-  cookiesFile: string | null
+  cookiesFile: string | null,
+  browserCookies?: string | null
 ): Promise<string> {
   return await invoke<string>('nami_save_app_settings', {
     outputDirectory,
-    cookiesFile
+    cookiesFile,
+    browserCookies: browserCookies ?? null
+  });
+}
+
+export async function detectBrowsers(): Promise<DetectedBrowser[]> {
+  return await invoke<DetectedBrowser[]>('nami_detect_browsers');
+}
+
+export async function extractBrowserCookies(
+  browserId: string,
+  platform: string
+): Promise<string | null> {
+  return await invoke<string | null>('nami_extract_browser_cookies', {
+    browserId,
+    platform
   });
 }
 

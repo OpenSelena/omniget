@@ -5401,6 +5401,14 @@
     "sync_all_creators": "Сверить все",
     "syncing_creator": "Сверка...",
     "pull_success": "Сверено {{name}}: {{count}} новых файлов",
-    "pull_all_success": "Сверено {{total}} авторов: {{count}} новых файлов"
+    "pull_all_success": "Сверено {{total}} авторов: {{count}} новых файлов",
+    "browser_cookies_label": "Куки браузера",
+    "browser_cookies_aria": "Выберите браузер для автоизвлечения куки",
+    "browser_cookies_auto": "Авто (браузер по умолчанию)",
+    "browser_cookies_manual": "Файл куки вручную (.txt)",
+    "browser_cookies_disabled": "Отключено",
+    "test_extract_cookies": "Проверить мост",
+    "testing_cookies": "Проверка...",
+    "cookies_bridge_hint": "Мост без расширений автоматически читает сессионные куки из браузера для историй и хайлайтс."
   }
 }

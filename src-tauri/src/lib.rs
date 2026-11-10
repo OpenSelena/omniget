@@ -1297,6 +1297,8 @@ pub fn run() {
             commands::nami::nami_delete_history_record,
             commands::nami::nami_pull_creator,
             commands::nami::nami_pull_all_creators,
+            commands::nami::nami_detect_browsers,
+            commands::nami::nami_extract_browser_cookies,
         ])
         .build(tauri::generate_context!())
         .expect("error while building tauri application")

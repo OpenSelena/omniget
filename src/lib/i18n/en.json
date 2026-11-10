@@ -5401,6 +5401,14 @@
     "sync_all_creators": "Sync All",
     "syncing_creator": "Syncing...",
     "pull_success": "Synced {{name}}: {{count}} new files",
-    "pull_all_success": "Synced {{total}} creators: {{count}} new files"
+    "pull_all_success": "Synced {{total}} creators: {{count}} new files",
+    "browser_cookies_label": "Browser Cookies",
+    "browser_cookies_aria": "Select browser for automatic cookie extraction",
+    "browser_cookies_auto": "Auto (Default Browser)",
+    "browser_cookies_manual": "Manual Cookie File (.txt)",
+    "browser_cookies_disabled": "Disabled / None",
+    "test_extract_cookies": "Test Bridge",
+    "testing_cookies": "Testing...",
+    "cookies_bridge_hint": "Zero-extension bridge automatically reads session cookies from your browser for private stories and highlights."
   }
 }

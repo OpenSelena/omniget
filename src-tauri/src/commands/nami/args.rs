@@ -19,6 +19,7 @@ pub struct GalleryDlArgsOptions<'a> {
     pub clean_url: &'a str,
     pub username: &'a str,
     pub cookie_path: Option<&'a str>,
+    pub browser_cookie_arg: Option<&'a str>,
     pub custom_ua: Option<&'a str>,
     pub proxy: Option<&'a str>,
     pub skip_replies: Option<bool>,
@@ -31,6 +32,7 @@ pub struct YtDlpArgsOptions<'a> {
     pub platform: &'a str,
     pub clean_url: &'a str,
     pub cookie_path: Option<&'a str>,
+    pub browser_cookie_arg: Option<&'a str>,
     pub proxy: Option<&'a str>,
     pub skip_replies: Option<bool>,
     pub break_on_existing: Option<bool>,
@@ -156,6 +158,11 @@ pub fn build_gallery_dl_args(options: &GalleryDlArgsOptions) -> Vec<String> {
             args.push("--cookies".to_string());
             args.push(cookie_path.to_string());
         }
+    } else if let Some(browser_cookie) = options.browser_cookie_arg {
+        if !browser_cookie.trim().is_empty() {
+            args.push("--cookies-from-browser".to_string());
+            args.push(browser_cookie.to_string());
+        }
     }
 
     if options.platform.eq_ignore_ascii_case("x") && options.skip_replies == Some(true) {
@@ -235,6 +242,11 @@ pub fn build_yt_dlp_args(options: &YtDlpArgsOptions) -> Vec<String> {
             args.push("--cookies".to_string());
             args.push(cookie_path.to_string());
         }
+    } else if let Some(browser_cookie) = options.browser_cookie_arg {
+        if !browser_cookie.trim().is_empty() {
+            args.push("--cookies-from-browser".to_string());
+            args.push(browser_cookie.to_string());
+        }
     }
 
     if options.platform.eq_ignore_ascii_case("x") && options.skip_replies == Some(true) {
@@ -264,6 +276,7 @@ mod tests {
             clean_url: "https://www.instagram.com/test/",
             username: "test",
             cookie_path: Some("C:/cookies/ig.txt"),
+            browser_cookie_arg: None,
             custom_ua: None,
             proxy: None,
             skip_replies: None,
@@ -292,6 +305,7 @@ mod tests {
             clean_url: "https://x.com/test",
             username: "test",
             cookie_path: None,
+            browser_cookie_arg: None,
             custom_ua: None,
             proxy: None,
             skip_replies: Some(true),
@@ -311,6 +325,7 @@ mod tests {
             platform: "tiktok",
             clean_url: "https://www.tiktok.com/@creator",
             cookie_path: None,
+            browser_cookie_arg: None,
             proxy: None,
             skip_replies: None,
             break_on_existing: None,
@@ -338,6 +353,7 @@ mod tests {
             clean_url: "https://www.tiktok.com/@creator",
             username: "creator",
             cookie_path: None,
+            browser_cookie_arg: None,
             custom_ua: None,
             proxy: None,
             skip_replies: None,
@@ -360,6 +376,7 @@ mod tests {
             clean_url: "https://www.instagram.com/creator/",
             username: "creator",
             cookie_path: None,
+            browser_cookie_arg: None,
             custom_ua: None,
             proxy: None,
             skip_replies: None,
@@ -380,6 +397,7 @@ mod tests {
             platform: "tiktok",
             clean_url: "https://www.tiktok.com/@creator",
             cookie_path: None,
+            browser_cookie_arg: None,
             proxy: None,
             skip_replies: None,
             break_on_existing: Some(true),
@@ -387,5 +405,48 @@ mod tests {
 
         let args = build_yt_dlp_args(&opts);
         assert!(args.contains(&"--break-on-existing".to_string()));
+    }
+
+    #[test]
+    fn test_gallery_dl_args_cookies_from_browser() {
+        let dest = PathBuf::from("C:/downloads/Nami/instagram/creator/all");
+        let opts = GalleryDlArgsOptions {
+            dest_dir: &dest,
+            content_type: "all",
+            platform: "instagram",
+            clean_url: "https://www.instagram.com/creator/",
+            username: "creator",
+            cookie_path: None,
+            browser_cookie_arg: Some("chrome"),
+            custom_ua: None,
+            proxy: None,
+            skip_replies: None,
+            abort_after_duplicates: None,
+        };
+
+        let args = build_gallery_dl_args(&opts);
+        let browser_cookie_pos = args.iter().position(|r| r == "--cookies-from-browser");
+        assert!(browser_cookie_pos.is_some());
+        assert_eq!(args[browser_cookie_pos.unwrap() + 1], "chrome");
+    }
+
+    #[test]
+    fn test_yt_dlp_args_cookies_from_browser() {
+        let dest = PathBuf::from("C:/downloads/Nami/tiktok/creator/videos");
+        let opts = YtDlpArgsOptions {
+            dest_dir: &dest,
+            platform: "tiktok",
+            clean_url: "https://www.tiktok.com/@creator",
+            cookie_path: None,
+            browser_cookie_arg: Some("firefox:/profiles/default"),
+            proxy: None,
+            skip_replies: None,
+            break_on_existing: None,
+        };
+
+        let args = build_yt_dlp_args(&opts);
+        let browser_cookie_pos = args.iter().position(|r| r == "--cookies-from-browser");
+        assert!(browser_cookie_pos.is_some());
+        assert_eq!(args[browser_cookie_pos.unwrap() + 1], "firefox:/profiles/default");
     }
 }

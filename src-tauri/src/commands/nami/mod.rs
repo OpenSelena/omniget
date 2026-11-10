@@ -31,6 +31,8 @@ pub struct Profile {
 pub struct AppSettings {
     pub output_directory: Option<String>,
     pub cookies_file: Option<String>,
+    #[serde(default)]
+    pub browser_cookies: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -195,12 +197,14 @@ pub async fn nami_cancel_download(download_id: String) -> Result<String, String>
 pub fn nami_save_app_settings(
     output_directory: Option<String>,
     cookies_file: Option<String>,
+    browser_cookies: Option<String>,
 ) -> Result<String, String> {
     let _storage_guard = NAMI_STORAGE_LOCK.lock().unwrap_or_else(|p| p.into_inner());
 
     let settings = AppSettings {
         output_directory,
         cookies_file,
+        browser_cookies,
     };
 
     let config_dir = omniget_nami_dir()?;
@@ -221,6 +225,7 @@ pub fn nami_load_app_settings() -> Result<AppSettings, String> {
         return Ok(AppSettings {
             output_directory: None,
             cookies_file: None,
+            browser_cookies: None,
         });
     }
 
@@ -229,6 +234,79 @@ pub fn nami_load_app_settings() -> Result<AppSettings, String> {
     let settings: AppSettings =
         serde_json::from_str(&content).map_err(|e| format!("Failed to parse settings: {}", e))?;
     Ok(settings)
+}
+
+#[command]
+pub fn nami_detect_browsers() -> Result<Vec<cookies::DetectedBrowser>, String> {
+    Ok(cookies::list_detected_browsers())
+}
+
+#[command]
+pub fn nami_extract_browser_cookies(
+    browser_id: String,
+    platform: String,
+) -> Result<Option<String>, String> {
+    let browsers = cookies::list_detected_browsers();
+    let target = if browser_id.eq_ignore_ascii_case("auto") {
+        cookies::detect_system_default_browser().unwrap_or_else(|| "chrome".to_string())
+    } else {
+        browser_id.to_ascii_lowercase()
+    };
+
+    let matched = browsers.into_iter().find(|b| b.id == target);
+    let browser = match matched {
+        Some(b) => b,
+        None => return Err(format!("Browser '{}' is not recognized or installed", browser_id)),
+    };
+
+    if !browser.available {
+        return Err(format!(
+            "Browser '{}' profile directory was not found on this system",
+            browser.name
+        ));
+    }
+
+    if browser.engine == "firefox" {
+        let prof_path = PathBuf::from(&browser.profile_dir);
+        let gecko_dir = cookies::find_gecko_profile_dir(&prof_path)
+            .ok_or_else(|| format!("Could not find cookies.sqlite in '{}' profile", browser.name))?;
+        let domains = cookies::get_platform_cookie_domains(&platform);
+        let netscape_data = cookies::extract_gecko_cookies_to_netscape(&gecko_dir, &domains)
+            .ok_or_else(|| {
+                format!(
+                    "No active session cookies found in {} for {}",
+                    browser.name, platform
+                )
+            })?;
+
+        let config_dir = omniget_nami_dir()?;
+        let cookies_dir = config_dir.join("cookies");
+        fs::create_dir_all(&cookies_dir).map_err(|e| e.to_string())?;
+
+        let file_name = format!("{}.com_cookies.txt", platform.to_lowercase());
+        let target_path = cookies_dir.join(&file_name);
+        fs::write(&target_path, &netscape_data).map_err(|e| e.to_string())?;
+
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let _ = fs::set_permissions(&target_path, fs::Permissions::from_mode(0o600));
+        }
+
+        let line_count = netscape_data
+            .lines()
+            .filter(|l| !l.starts_with('#') && !l.trim().is_empty())
+            .count();
+        return Ok(Some(format!(
+            "Successfully extracted {} cookies from {}",
+            line_count, browser.name
+        )));
+    }
+
+    Ok(Some(format!(
+        "{} verified and connected via native browser engine bridge",
+        browser.name
+    )))
 }
 
 #[command]

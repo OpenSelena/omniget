@@ -5393,7 +5393,15 @@
     "sync_all_creators": "همگام‌سازی همه",
     "syncing_creator": "در حال همگام‌سازی...",
     "pull_success": "همگام‌سازی {{name}}: {{count}} فایل جدید",
-    "pull_all_success": "همگام‌سازی {{total}} سازنده: {{count}} فایل جدید"
+    "pull_all_success": "همگام‌سازی {{total}} سازنده: {{count}} فایل جدید",
+    "browser_cookies_label": "کوکی‌های مرورگر",
+    "browser_cookies_aria": "انتخاب مرورگر برای استخراج خودکار کوکی",
+    "browser_cookies_auto": "خودکار (مرورگر پیش‌فرض)",
+    "browser_cookies_manual": "فایل کوکی دستی (.txt)",
+    "browser_cookies_disabled": "غیرفعال",
+    "test_extract_cookies": "آزمایش پل",
+    "testing_cookies": "در حال آزمایش...",
+    "cookies_bridge_hint": "پل بدون افزونه کوکی‌های نشست را برای استوری‌ها خودکار می‌خواند."
   },
   "tray": {
     "quit": "Quit",

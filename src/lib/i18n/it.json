@@ -5393,7 +5393,15 @@
     "sync_all_creators": "Sincronizza tutti",
     "syncing_creator": "Sincronizzazione...",
     "pull_success": "Sincronizzato {{name}}: {{count}} nuovi file",
-    "pull_all_success": "Sincronizzati {{total}} autori: {{count}} nuovi file"
+    "pull_all_success": "Sincronizzati {{total}} autori: {{count}} nuovi file",
+    "browser_cookies_label": "Cookie del Browser",
+    "browser_cookies_aria": "Seleziona il browser per l'estrazione automatica dei cookie",
+    "browser_cookies_auto": "Automatico (Browser Predefinito)",
+    "browser_cookies_manual": "File Cookie Manuale (.txt)",
+    "browser_cookies_disabled": "Disattivato",
+    "test_extract_cookies": "Testa Bridge",
+    "testing_cookies": "Test in corso...",
+    "cookies_bridge_hint": "Il bridge zero-estensioni legge automaticamente i cookie di sessione dal browser."
   },
   "tray": {
     "quit": "Quit",
