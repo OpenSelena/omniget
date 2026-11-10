@@ -5388,7 +5388,12 @@
     "delete_record": "Διαγραφή εγγραφής",
     "confirm_delete_record": "Κατάργηση αυτής της εγγραφής από το ιστορικό; Το τοπικό αρχείο θα παραμείνει στο δίσκο.",
     "disk_synced": "Ελέγχθηκαν {{checked}} στοιχεία, εκκαθαρίστηκαν {{removed}} αρχεία που έλειπαν.",
-    "platform_all": "Όλα"
+    "platform_all": "Όλα",
+    "sync_creator": "Συγχρονισμός νέων",
+    "sync_all_creators": "Συγχρονισμός όλων",
+    "syncing_creator": "Συγχρονισμός...",
+    "pull_success": "Συγχρονίστηκε {{name}}: {{count}} νέα αρχεία",
+    "pull_all_success": "Συγχρονίστηκαν {{total}} δημιουργοί: {{count}} νέα αρχεία"
   },
   "tray": {
     "quit": "Quit",

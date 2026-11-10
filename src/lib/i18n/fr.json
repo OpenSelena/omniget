@@ -5388,7 +5388,12 @@
     "delete_record": "Supprimer l'enregistrement",
     "confirm_delete_record": "Supprimer cet élément de l'historique ? Le fichier local restera sur le disque.",
     "disk_synced": "{{checked}} éléments vérifiés, {{removed}} fichiers manquants purgés.",
-    "platform_all": "Tous"
+    "platform_all": "Tous",
+    "sync_creator": "Synchroniser nouveaux",
+    "sync_all_creators": "Synchroniser tout",
+    "syncing_creator": "Synchronisation...",
+    "pull_success": "Synchronisé {{name}} : {{count}} nouveaux fichiers",
+    "pull_all_success": "Synchronisé {{total}} créateurs : {{count}} nouveaux fichiers"
   },
   "tray": {
     "quit": "Quit",

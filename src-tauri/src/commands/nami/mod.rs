@@ -7,6 +7,7 @@ pub mod dispatcher;
 pub mod fetcher;
 pub mod http;
 pub mod ledger;
+pub mod pull;
 
 use chrono::Utc;
 pub use dispatcher::{DownloadProgress, DownloadResult};
@@ -23,6 +24,7 @@ pub struct Profile {
     pub username: Option<String>,
     pub platform: String,
     pub added_at: i64,
+    pub last_pulled_at: Option<i64>,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -179,6 +181,7 @@ pub async fn nami_run_gallery_dl_download(
         download_id,
         app_dir,
         skip_replies,
+        None,
     )
     .await
 }
@@ -390,6 +393,72 @@ pub async fn nami_reconcile_disk() -> Result<ledger::ReconcileResult, String> {
 #[command]
 pub async fn nami_delete_history_record(id: String) -> Result<bool, String> {
     ledger::delete_record(&id)
+}
+
+pub fn update_profile_last_pulled(platform: &str, profile_url: &str, timestamp: i64) -> Result<(), String> {
+    let _storage_guard = NAMI_STORAGE_LOCK.lock().unwrap_or_else(|p| p.into_inner());
+    let profiles_file = omniget_nami_dir()?.join("profiles.json");
+    if !profiles_file.exists() {
+        return Ok(());
+    }
+
+    let content = fs::read_to_string(&profiles_file)
+        .map_err(|e| format!("Failed to read profiles: {}", e))?;
+    let mut all_profiles: serde_json::Value =
+        serde_json::from_str(&content).map_err(|e| format!("Failed to parse profiles: {}", e))?;
+
+    let normalized_target = normalize_profile_url(platform, profile_url);
+
+    if let Some(arr) = all_profiles
+        .as_object_mut()
+        .and_then(|obj| obj.get_mut(platform))
+        .and_then(|v| v.as_array_mut())
+    {
+        for p in arr.iter_mut() {
+            let u = p.get("url").and_then(|u| u.as_str()).unwrap_or("");
+            if u == profile_url || normalize_profile_url(platform, u) == normalized_target {
+                if let Some(obj) = p.as_object_mut() {
+                    obj.insert("last_pulled_at".to_string(), serde_json::json!(timestamp));
+                }
+                break;
+            }
+        }
+    }
+
+    let serialized = serde_json::to_string_pretty(&all_profiles)
+        .map_err(|e| format!("Failed to serialize: {}", e))?;
+    atomic_write(&profiles_file, &serialized)?;
+    Ok(())
+}
+
+#[command]
+pub async fn nami_pull_creator(
+    app: AppHandle,
+    profile_url: String,
+    platform: String,
+    content_type: Option<String>,
+    early_exit_threshold: Option<u32>,
+    download_id: Option<String>,
+) -> Result<pull::PullResult, String> {
+    pull::pull_single_creator(
+        app,
+        profile_url,
+        platform,
+        content_type,
+        early_exit_threshold,
+        download_id,
+    )
+    .await
+}
+
+#[command]
+pub async fn nami_pull_all_creators(
+    app: AppHandle,
+    platform: Option<String>,
+    content_type: Option<String>,
+    early_exit_threshold: Option<u32>,
+) -> Result<pull::PullBatchSummary, String> {
+    pull::pull_all_creators(app, platform, content_type, early_exit_threshold).await
 }
 
 #[cfg(test)]

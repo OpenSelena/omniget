@@ -22,6 +22,7 @@ pub struct GalleryDlArgsOptions<'a> {
     pub custom_ua: Option<&'a str>,
     pub proxy: Option<&'a str>,
     pub skip_replies: Option<bool>,
+    pub abort_after_duplicates: Option<u32>,
 }
 
 #[derive(Debug, Clone)]
@@ -32,6 +33,7 @@ pub struct YtDlpArgsOptions<'a> {
     pub cookie_path: Option<&'a str>,
     pub proxy: Option<&'a str>,
     pub skip_replies: Option<bool>,
+    pub break_on_existing: Option<bool>,
 }
 
 pub fn get_platform_sleep(platform: &str) -> &'static str {
@@ -66,6 +68,13 @@ pub fn build_gallery_dl_args(options: &GalleryDlArgsOptions) -> Vec<String> {
         "--Print".to_string(),
         "after:FILE_OK:{filename}.{extension}".to_string(),
     ];
+
+    if let Some(threshold) = options.abort_after_duplicates {
+        if threshold > 0 {
+            args.push("--abort".to_string());
+            args.push(threshold.to_string());
+        }
+    }
 
     if let Some(proxy) = options.proxy {
         if !proxy.trim().is_empty() {
@@ -192,6 +201,10 @@ pub fn build_yt_dlp_args(options: &YtDlpArgsOptions) -> Vec<String> {
         "chrome".to_string(),
     ];
 
+    if options.break_on_existing.unwrap_or(false) {
+        args.push("--break-on-existing".to_string());
+    }
+
     let plat_lower = options.platform.to_lowercase();
     if plat_lower == "tiktok" {
         args.push("--sleep-requests".to_string());
@@ -254,6 +267,7 @@ mod tests {
             custom_ua: None,
             proxy: None,
             skip_replies: None,
+            abort_after_duplicates: None,
         };
 
         let args = build_gallery_dl_args(&opts);
@@ -281,6 +295,7 @@ mod tests {
             custom_ua: None,
             proxy: None,
             skip_replies: Some(true),
+            abort_after_duplicates: None,
         };
 
         let args = build_gallery_dl_args(&opts);
@@ -298,6 +313,7 @@ mod tests {
             cookie_path: None,
             proxy: None,
             skip_replies: None,
+            break_on_existing: None,
         };
 
         let args = build_yt_dlp_args(&opts);
@@ -325,11 +341,51 @@ mod tests {
             custom_ua: None,
             proxy: None,
             skip_replies: None,
+            abort_after_duplicates: None,
         };
 
         let args = build_gallery_dl_args(&opts);
         let format_pos = args.iter().position(|r| r == "format=best");
         assert!(format_pos.is_some(), "gallery-dl must include format=best for TikTok to prevent silent DASH streams");
         assert_eq!(args[format_pos.unwrap() - 1], "-o");
+    }
+
+    #[test]
+    fn test_gallery_dl_args_abort_after_duplicates() {
+        let dest = PathBuf::from("C:/downloads/Nami/instagram/creator/all");
+        let opts = GalleryDlArgsOptions {
+            dest_dir: &dest,
+            content_type: "all",
+            platform: "instagram",
+            clean_url: "https://www.instagram.com/creator/",
+            username: "creator",
+            cookie_path: None,
+            custom_ua: None,
+            proxy: None,
+            skip_replies: None,
+            abort_after_duplicates: Some(5),
+        };
+
+        let args = build_gallery_dl_args(&opts);
+        let abort_pos = args.iter().position(|r| r == "--abort");
+        assert!(abort_pos.is_some(), "gallery-dl must include --abort flag");
+        assert_eq!(args[abort_pos.unwrap() + 1], "5");
+    }
+
+    #[test]
+    fn test_yt_dlp_args_break_on_existing() {
+        let dest = PathBuf::from("C:/downloads/Nami/tiktok/creator/videos");
+        let opts = YtDlpArgsOptions {
+            dest_dir: &dest,
+            platform: "tiktok",
+            clean_url: "https://www.tiktok.com/@creator",
+            cookie_path: None,
+            proxy: None,
+            skip_replies: None,
+            break_on_existing: Some(true),
+        };
+
+        let args = build_yt_dlp_args(&opts);
+        assert!(args.contains(&"--break-on-existing".to_string()));
     }
 }

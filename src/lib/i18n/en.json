@@ -5396,6 +5396,11 @@
     "delete_record": "Delete Record",
     "confirm_delete_record": "Remove this record from history? The file will remain on disk.",
     "disk_synced": "Checked {{checked}} items, pruned {{removed}} missing files.",
-    "platform_all": "All"
+    "platform_all": "All",
+    "sync_creator": "Sync New",
+    "sync_all_creators": "Sync All",
+    "syncing_creator": "Syncing...",
+    "pull_success": "Synced {{name}}: {{count}} new files",
+    "pull_all_success": "Synced {{total}} creators: {{count}} new files"
   }
 }

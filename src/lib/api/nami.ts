@@ -6,6 +6,7 @@ export interface Profile {
   username?: string;
   platform: string;
   added_at: number;
+  last_pulled_at?: number | null;
 }
 
 export interface DownloadResult {
@@ -160,4 +161,60 @@ export async function reconcileNamiDisk(): Promise<ReconcileResult> {
 
 export async function deleteNamiHistoryRecord(id: string): Promise<boolean> {
   return await invoke<boolean>('nami_delete_history_record', { id });
+}
+
+export interface PullResult {
+  success: boolean;
+  profile_url: string;
+  platform: string;
+  username?: string | null;
+  files_downloaded: number;
+  message: string;
+  early_exited: boolean;
+}
+
+export interface PullBatchProgress {
+  current_index: number;
+  total: number;
+  profile_url: string;
+  platform: string;
+  username?: string | null;
+  files_downloaded: number;
+  status: string;
+}
+
+export interface PullBatchSummary {
+  total: number;
+  succeeded: number;
+  failed: number;
+  total_downloaded: number;
+  results: PullResult[];
+}
+
+export async function pullCreator(
+  profileUrl: string,
+  platform: string,
+  contentType = 'all',
+  earlyExitThreshold = 5,
+  downloadId?: string
+): Promise<PullResult> {
+  return await invoke<PullResult>('nami_pull_creator', {
+    profileUrl,
+    platform,
+    contentType,
+    earlyExitThreshold,
+    downloadId: downloadId ?? null,
+  });
+}
+
+export async function pullAllCreators(
+  platform?: string | null,
+  contentType = 'all',
+  earlyExitThreshold = 5
+): Promise<PullBatchSummary> {
+  return await invoke<PullBatchSummary>('nami_pull_all_creators', {
+    platform: platform ?? null,
+    contentType,
+    earlyExitThreshold,
+  });
 }

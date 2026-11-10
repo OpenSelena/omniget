@@ -5388,7 +5388,12 @@
     "delete_record": "Elimina record",
     "confirm_delete_record": "Rimuovere questa voce dalla cronologia? Il file rimarrà sul disco.",
     "disk_synced": "Controllati {{checked}} elementi, rimossi {{removed}} file mancanti.",
-    "platform_all": "Tutti"
+    "platform_all": "Tutti",
+    "sync_creator": "Sincronizza nuovi",
+    "sync_all_creators": "Sincronizza tutti",
+    "syncing_creator": "Sincronizzazione...",
+    "pull_success": "Sincronizzato {{name}}: {{count}} nuovi file",
+    "pull_all_success": "Sincronizzati {{total}} autori: {{count}} nuovi file"
   },
   "tray": {
     "quit": "Quit",

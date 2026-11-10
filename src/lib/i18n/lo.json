@@ -5388,7 +5388,12 @@
     "delete_record": "ລຶບບັນທຶກ",
     "confirm_delete_record": "ລຶບລາຍການນີ້ອອກຈາກປະຫວັດບໍ? ໄຟລ໌ທ້ອງຖິ່ນຈະຍັງຄົງຢູ່ໃນດິສກ໌.",
     "disk_synced": "ກວດສອບແລ້ວ {{checked}} ລາຍການ, ລຶບໄຟລ໌ທີ່ຂາດຫາຍ {{removed}} ໄຟລ໌.",
-    "platform_all": "ທັງໝົດ"
+    "platform_all": "ທັງໝົດ",
+    "sync_creator": "ຊິງຄ໌ໃໝ່",
+    "sync_all_creators": "ຊິງຄ໌ທັງໝົດ",
+    "syncing_creator": "ກຳລັງຊິງຄ໌...",
+    "pull_success": "ຊິງຄ໌ {{name}} ແລ້ວ: {{count}} ໄຟລ໌ໃໝ່",
+    "pull_all_success": "ຊິງຄ໌ {{total}} ຜູ້ສ້າງແລ້ວ: {{count}} ໄຟລ໌ໃໝ່"
   },
   "tray": {
     "quit": "Quit",

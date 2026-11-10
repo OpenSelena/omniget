@@ -264,6 +264,7 @@ pub async fn execute_download_workflow(
     download_id: String,
     app_data_dir: PathBuf,
     skip_replies: Option<bool>,
+    early_exit_threshold: Option<u32>,
 ) -> Result<DownloadResult, String> {
     let reg = DownloadRegistration::new(&download_id)?;
 
@@ -362,6 +363,7 @@ pub async fn execute_download_workflow(
             stage_index,
             stage_total,
             skip_replies,
+            early_exit_threshold,
         ) {
             Ok(result) => {
                 total_files += result.files_count;
@@ -434,6 +436,7 @@ fn run_single_stage(
     stage_index: u32,
     stage_total: u32,
     skip_replies: Option<bool>,
+    early_exit_threshold: Option<u32>,
 ) -> Result<DownloadResult, String> {
     if reg.is_cancelled() {
         return Ok(DownloadResult {
@@ -486,6 +489,7 @@ fn run_single_stage(
         custom_ua: None,
         proxy: None,
         skip_replies,
+        abort_after_duplicates: early_exit_threshold,
     };
     let gdl_args = build_gallery_dl_args(&gdl_opts);
 
@@ -531,6 +535,7 @@ fn run_single_stage(
                 cookie_path,
                 proxy: None,
                 skip_replies,
+                break_on_existing: early_exit_threshold.map(|t| t > 0),
             };
             let yt_args = build_yt_dlp_args(&yt_opts);
 

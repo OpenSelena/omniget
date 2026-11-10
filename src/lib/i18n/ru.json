@@ -5396,6 +5396,11 @@
     "delete_record": "Удалить запись",
     "confirm_delete_record": "Удалить эту запись из истории? Локальный файл останется на диске.",
     "disk_synced": "Проверено {{checked}} записей, очищено {{removed}} отсутствующих файлов.",
-    "platform_all": "Все"
+    "platform_all": "Все",
+    "sync_creator": "Сверить новые",
+    "sync_all_creators": "Сверить все",
+    "syncing_creator": "Сверка...",
+    "pull_success": "Сверено {{name}}: {{count}} новых файлов",
+    "pull_all_success": "Сверено {{total}} авторов: {{count}} новых файлов"
   }
 }

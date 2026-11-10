@@ -5388,7 +5388,12 @@
     "delete_record": "Eliminar registro",
     "confirm_delete_record": "¿Eliminar este registro del historial? El archivo local permanecerá en el disco.",
     "disk_synced": "Revisados {{checked}} elementos, eliminados {{removed}} archivos faltantes.",
-    "platform_all": "Todos"
+    "platform_all": "Todos",
+    "sync_creator": "Sincronizar nuevos",
+    "sync_all_creators": "Sincronizar todo",
+    "syncing_creator": "Sincronizando...",
+    "pull_success": "Sincronizado {{name}}: {{count}} nuevos archivos",
+    "pull_all_success": "Sincronizados {{total}} creadores: {{count}} nuevos archivos"
   },
   "tray": {
     "quit": "Quit",

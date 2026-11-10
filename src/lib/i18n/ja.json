@@ -5388,7 +5388,12 @@
     "delete_record": "記録を削除",
     "confirm_delete_record": "この記録を履歴から削除しますか？ローカルファイルはディスクに残ります。",
     "disk_synced": "{{checked}} 件を確認し、見つからないファイル {{removed}} 件を削除しました。",
-    "platform_all": "すべて"
+    "platform_all": "すべて",
+    "sync_creator": "新着を同期",
+    "sync_all_creators": "すべて同期",
+    "syncing_creator": "同期中...",
+    "pull_success": "{{name}} を同期しました: {{count}} 件の新規ファイル",
+    "pull_all_success": "{{total}} 名のクリエイターを同期しました: {{count}} 件の新規ファイル"
   },
   "tray": {
     "quit": "Quit",

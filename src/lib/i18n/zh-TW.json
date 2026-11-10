@@ -5388,7 +5388,12 @@
     "delete_record": "刪除記錄",
     "confirm_delete_record": "從歷史記錄中移除此項目？本機檔案將保留在磁碟上。",
     "disk_synced": "已檢查 {{checked}} 個項目，清理了 {{removed}} 個遺失的檔案。",
-    "platform_all": "全部"
+    "platform_all": "全部",
+    "sync_creator": "同步新內容",
+    "sync_all_creators": "同步全部",
+    "syncing_creator": "同步中...",
+    "pull_success": "已同步 {{name}}：{{count}} 個新檔案",
+    "pull_all_success": "已同步 {{total}} 位創作者：{{count}} 個新檔案"
   },
   "tray": {
     "quit": "Quit",

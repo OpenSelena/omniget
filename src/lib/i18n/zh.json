@@ -5388,7 +5388,12 @@
     "delete_record": "删除记录",
     "confirm_delete_record": "从历史记录中移除此项？本地文件将保留在磁盘上。",
     "disk_synced": "已检查 {{checked}} 项，清理了 {{removed}} 个丢失的文件。",
-    "platform_all": "全部"
+    "platform_all": "全部",
+    "sync_creator": "同步新内容",
+    "sync_all_creators": "同步全部",
+    "syncing_creator": "同步中...",
+    "pull_success": "已同步 {{name}}：{{count}} 个新文件",
+    "pull_all_success": "已同步 {{total}} 位创作者：{{count}} 个新文件"
   },
   "tray": {
     "quit": "退出",

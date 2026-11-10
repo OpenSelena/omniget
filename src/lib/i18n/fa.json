@@ -5388,7 +5388,12 @@
     "delete_record": "حذف رکورد",
     "confirm_delete_record": "این مورد از تاریخچه حذف شود؟ فایل محلی در دیسک باقی خواهد ماند.",
     "disk_synced": "{{checked}} مورد بررسی شد، {{removed}} فایل ناموجود پاکسازی شد.",
-    "platform_all": "همه"
+    "platform_all": "همه",
+    "sync_creator": "همگام‌سازی جدید",
+    "sync_all_creators": "همگام‌سازی همه",
+    "syncing_creator": "در حال همگام‌سازی...",
+    "pull_success": "همگام‌سازی {{name}}: {{count}} فایل جدید",
+    "pull_all_success": "همگام‌سازی {{total}} سازنده: {{count}} فایل جدید"
   },
   "tray": {
     "quit": "Quit",

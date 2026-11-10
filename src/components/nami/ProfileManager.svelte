@@ -1,6 +1,13 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { loadProfiles, saveProfile, deleteProfile, type Profile } from '$lib/api/nami';
+  import {
+    loadProfiles,
+    saveProfile,
+    deleteProfile,
+    pullCreator,
+    pullAllCreators,
+    type Profile,
+  } from '$lib/api/nami';
   import { t } from '$lib/i18n';
 
   interface Props {
@@ -22,6 +29,9 @@
   let loading = $state(false);
   let error = $state('');
   let confirmDeleteUrl = $state<string | null>(null);
+  let syncingProfileUrl = $state<string | null>(null);
+  let syncingAll = $state(false);
+  let syncFeedback = $state<string | null>(null);
 
   let requestId = 0;
   let dialogEl: HTMLDialogElement | null = $state(null);
@@ -98,6 +108,53 @@
     return source.charAt(0).toUpperCase() || '?';
   }
 
+  function formatSynced(timestamp?: number | null): string {
+    if (!timestamp) return '';
+    const d = new Date(timestamp * 1000);
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+  }
+
+  async function handlePull(profile: Profile) {
+    syncingProfileUrl = profile.url;
+    syncFeedback = null;
+    error = '';
+    try {
+      const res = await pullCreator(profile.url, activePlatform);
+      if (res.success) {
+        syncFeedback = $t('nami.pull_success', {
+          name: profile.username || profile.url,
+          count: res.files_downloaded,
+        }) as string;
+        await loadPlatformProfiles();
+      } else {
+        error = res.message || 'Sync failed';
+      }
+    } catch (err) {
+      error = errorMessage(err, 'Failed to sync profile');
+    } finally {
+      syncingProfileUrl = null;
+    }
+  }
+
+  async function handlePullAll() {
+    if (profiles.length === 0 || syncingAll) return;
+    syncingAll = true;
+    syncFeedback = null;
+    error = '';
+    try {
+      const summary = await pullAllCreators(activePlatform);
+      syncFeedback = $t('nami.pull_all_success', {
+        total: summary.succeeded,
+        count: summary.total_downloaded,
+      }) as string;
+      await loadPlatformProfiles();
+    } catch (err) {
+      error = errorMessage(err, 'Failed to sync all creators');
+    } finally {
+      syncingAll = false;
+    }
+  }
+
   function switchPlatform(p: string) {
     activePlatform = p;
     loadPlatformProfiles(p);
@@ -125,6 +182,13 @@
 
   {#if error}
     <div class="pm-alert" role="alert">{error}</div>
+  {/if}
+
+  {#if syncFeedback}
+    <div class="pm-alert info" role="status">
+      <span>{syncFeedback}</span>
+      <button type="button" class="pm-alert-dismiss" onclick={() => (syncFeedback = null)}>×</button>
+    </div>
   {/if}
 
   <div class="pm-group">
@@ -155,17 +219,76 @@
   {:else if profiles.length === 0}
     <p class="pm-empty">{$t('nami.no_profiles_yet')}</p>
   {:else}
+    <div class="pm-header-actions">
+      <span class="pm-count">{profiles.length} {profiles.length === 1 ? 'profile' : 'profiles'}</span>
+      <button
+        type="button"
+        class="pm-sync-all-btn"
+        onclick={handlePullAll}
+        disabled={syncingAll}
+      >
+        <svg
+          class="pm-btn-icon"
+          class:spin={syncingAll}
+          viewBox="0 0 16 16"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.4"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M1.5 8a6.5 6.5 0 0 1 11.1-4.6L14 5" />
+          <path d="M14 2v3h-3" />
+          <path d="M14.5 8a6.5 6.5 0 0 1-11.1 4.6L2 11" />
+          <path d="M2 14v-3h3" />
+        </svg>
+        <span>{syncingAll ? $t('nami.syncing_creator') : $t('nami.sync_all_creators')}</span>
+      </button>
+    </div>
+
     <div class="pm-group">
       {#each profiles as profile (profile.url)}
         <div class="pm-row pm-profile-row">
           <div class="pm-avatar" aria-hidden="true">{initials(profile)}</div>
           <div class="pm-info">
-            <p class="pm-name">{profile.username || profile.url}</p>
+            <p class="pm-name">
+              {profile.username || profile.url}
+              {#if profile.last_pulled_at}
+                <span class="pm-synced">• {formatSynced(profile.last_pulled_at)}</span>
+              {/if}
+            </p>
             {#if profile.username}
               <p class="pm-url">{profile.url}</p>
             {/if}
           </div>
           <div class="pm-actions">
+            <button
+              type="button"
+              class="pm-sync-btn"
+              onclick={() => handlePull(profile)}
+              disabled={syncingProfileUrl === profile.url}
+              aria-label={$t('nami.sync_creator')}
+              title={$t('nami.sync_creator')}
+            >
+              <svg
+                class="pm-btn-icon"
+                class:spin={syncingProfileUrl === profile.url}
+                viewBox="0 0 16 16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+              >
+                <path d="M1.5 8a6.5 6.5 0 0 1 11.1-4.6L14 5" />
+                <path d="M14 2v3h-3" />
+                <path d="M14.5 8a6.5 6.5 0 0 1-11.1 4.6L2 11" />
+                <path d="M2 14v-3h3" />
+              </svg>
+              <span>{syncingProfileUrl === profile.url ? $t('nami.syncing_creator') : $t('nami.sync_creator')}</span>
+            </button>
             {#if onSelectProfileForDownload}
               <button
                 type="button"
@@ -348,6 +471,114 @@
     display: flex;
     align-items: center;
     gap: 6px;
+  }
+
+  .pm-sync-btn {
+    min-height: 30px;
+    padding: 4px 10px;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--oo-text);
+    background: color-mix(in srgb, var(--oo-text) 8%, transparent);
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: background 150ms ease;
+  }
+
+  .pm-sync-btn:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--oo-text) 14%, transparent);
+  }
+
+  .pm-sync-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .pm-sync-all-btn {
+    min-height: 30px;
+    padding: 4px 12px;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: var(--oo-text);
+    background: var(--oo-group-bg);
+    border: 1px solid var(--oo-border);
+    border-radius: var(--oo-radius-sm, 7px);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 150ms ease;
+  }
+
+  .pm-sync-all-btn:hover:not(:disabled) {
+    background: color-mix(in srgb, var(--oo-text) 6%, var(--oo-group-bg));
+  }
+
+  .pm-sync-all-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  .pm-btn-icon {
+    width: 13px;
+    height: 13px;
+  }
+
+  .pm-btn-icon.spin {
+    animation: pm-spin 1s linear infinite;
+  }
+
+  @keyframes pm-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .pm-synced {
+    font-size: 10.5px;
+    color: var(--oo-text-secondary);
+    margin-left: 6px;
+    font-weight: normal;
+  }
+
+  .pm-header-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2px;
+  }
+
+  .pm-count {
+    font-size: 12px;
+    color: var(--oo-text-secondary);
+  }
+
+  .pm-alert.info {
+    background: color-mix(in srgb, var(--oo-accent) 15%, var(--oo-group-bg));
+    border: 1px solid var(--oo-accent);
+    color: var(--oo-text);
+    padding: 8px 12px;
+    border-radius: var(--oo-radius, 9px);
+    font-size: 12.5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .pm-alert-dismiss {
+    background: transparent;
+    border: none;
+    font-size: 15px;
+    cursor: pointer;
+    color: inherit;
+    padding: 0 4px;
   }
 
   .pm-download-btn {
