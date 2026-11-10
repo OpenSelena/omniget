@@ -294,74 +294,70 @@ impl TikTokDownloader {
         Some(urls)
     }
 
-    async fn fallback_ytdlp(&self, url: &str) -> anyhow::Result<MediaInfo> {
+    pub fn parse_ytdlp_media_info(
+        json: &serde_json::Value,
+        post_id: Option<&str>,
+        fallback_url: &str,
+    ) -> anyhow::Result<MediaInfo> {
+        let mut info =
+            crate::platforms::generic_ytdlp::GenericYtdlpDownloader::parse_video_info(json)?;
+
+        if info.title.trim().is_empty() || info.title == "unknown" {
+            if let Some(id) = post_id {
+                info.title = format!("tiktok_{}", id);
+            }
+        }
+        info.platform = "tiktok".to_string();
+
+        let target_url = if !info.available_qualities.is_empty()
+            && !info.available_qualities[0].url.is_empty()
+        {
+            info.available_qualities[0].url.clone()
+        } else {
+            fallback_url.to_string()
+        };
+
+        for q in &mut info.available_qualities {
+            q.url = target_url.clone();
+            q.format = "ytdlp".to_string();
+        }
+
+        Ok(info)
+    }
+
+    async fn fallback_ytdlp(&self, url: &str, post_id: Option<&str>) -> anyhow::Result<MediaInfo> {
         let ytdlp_path = crate::core::ytdlp::ensure_ytdlp().await?;
         let extra_flags = vec![
             "--referer".to_string(),
             "https://www.tiktok.com/".to_string(),
         ];
         let json = crate::core::ytdlp::get_video_info(&ytdlp_path, url, &extra_flags).await?;
-        let mut info =
-            crate::platforms::generic_ytdlp::GenericYtdlpDownloader::parse_video_info(&json)?;
-        for q in &mut info.available_qualities {
-            q.url = url.to_string();
-            q.format = "ytdlp".to_string();
-        }
-        Ok(info)
+        Self::parse_ytdlp_media_info(&json, post_id, url)
     }
 
-    async fn get_media_info_via_ytdlp(
-        &self,
-        url: &str,
-        post_id: &str,
-    ) -> anyhow::Result<MediaInfo> {
-        let ytdlp_path = crate::core::ytdlp::find_ytdlp_cached()
-            .await
-            .ok_or_else(|| anyhow!("yt-dlp not found — install it in Settings"))?;
-
-        let extra_flags = vec![
-            "--referer".to_string(),
-            "https://www.tiktok.com/".to_string(),
-        ];
-
-        let json = crate::core::ytdlp::get_video_info(&ytdlp_path, url, &extra_flags).await?;
-
-        let title = json
-            .get("title")
+    fn extract_thumbnail(detail: &serde_json::Value) -> Option<String> {
+        detail
+            .pointer("/video/cover")
+            .or_else(|| detail.pointer("/video/originCover"))
+            .or_else(|| detail.pointer("/video/dynamicCover"))
             .and_then(|v| v.as_str())
-            .map(|s| format!("tiktok_{}", sanitize_filename::sanitize(s)))
-            .unwrap_or_else(|| format!("tiktok_{}", post_id));
+            .map(|s| s.to_string())
+    }
 
-        let author = json
-            .get("uploader")
-            .or_else(|| json.get("creator"))
+    fn extract_title(detail: &serde_json::Value, post_id: &str, author: &str) -> String {
+        detail
+            .get("desc")
             .and_then(|v| v.as_str())
-            .unwrap_or("unknown")
-            .to_string();
-
-        let duration = json.get("duration").and_then(|v| v.as_f64());
-
-        let thumbnail = json
-            .get("thumbnail")
-            .and_then(|v| v.as_str())
-            .map(String::from);
-
-        Ok(MediaInfo {
-            title,
-            author,
-            platform: "tiktok".to_string(),
-            duration_seconds: duration,
-            thumbnail_url: thumbnail,
-            available_qualities: vec![VideoQuality {
-                label: "original".to_string(),
-                width: 0,
-                height: 0,
-                url: url.to_string(),
-                format: "ytdlp".to_string(),
-            }],
-            media_type: MediaType::Video,
-            file_size_bytes: None,
-        })
+            .map(|s| s.trim())
+            .filter(|s| !s.is_empty())
+            .map(|s| s.to_string())
+            .unwrap_or_else(|| {
+                format!(
+                    "tiktok_{}_{}",
+                    sanitize_filename::sanitize(author),
+                    post_id
+                )
+            })
     }
 
     fn extract_music_url(detail: &serde_json::Value) -> Option<String> {
@@ -397,33 +393,32 @@ impl PlatformDownloader for TikTokDownloader {
         let original_url = url.to_string();
 
         let post_id = match Self::extract_post_id(url) {
-            Some(id) => id,
+            Some(id) => Some(id),
             None => {
                 let canonical = self
                     .resolve_short_link(url)
                     .await
                     .unwrap_or_else(|_| url.to_string());
-                Self::extract_post_id(&canonical).unwrap_or_else(|| "unknown".to_string())
+                Self::extract_post_id(&canonical)
             }
         };
 
-        let detail = match self.fetch_detail(&post_id).await {
+        if let Ok(info) = self.fallback_ytdlp(&original_url, post_id.as_deref()).await {
+            return Ok(info);
+        }
+
+        let pid = post_id.unwrap_or_else(|| "unknown".to_string());
+        let detail = match self.fetch_detail(&pid).await {
             Ok(d) => d,
             Err(first_err) => {
-                tracing::warn!("[tiktok] native failed: {}, trying yt-dlp", first_err);
-                return self
-                    .get_media_info_via_ytdlp(&original_url, &post_id)
-                    .await
-                    .or_else(|_| Err(first_err));
+                tracing::warn!("[tiktok] native scraper failed: {}", first_err);
+                return Err(first_err);
             }
         };
 
         let author = Self::extract_author(&detail);
-        let filename_base = format!(
-            "tiktok_{}_{}",
-            sanitize_filename::sanitize(&author),
-            post_id
-        );
+        let title = Self::extract_title(&detail, &pid, &author);
+        let thumbnail = Self::extract_thumbnail(&detail);
 
         if let Some(image_urls) = Self::extract_image_urls(&detail) {
             let media_type = if image_urls.len() == 1 {
@@ -445,11 +440,11 @@ impl PlatformDownloader for TikTokDownloader {
                 .collect();
 
             return Ok(MediaInfo {
-                title: filename_base,
+                title,
                 author,
                 platform: "tiktok".to_string(),
                 duration_seconds: None,
-                thumbnail_url: None,
+                thumbnail_url: thumbnail.or_else(|| image_urls.first().cloned()),
                 available_qualities: qualities,
                 media_type,
                 file_size_bytes: None,
@@ -458,11 +453,11 @@ impl PlatformDownloader for TikTokDownloader {
 
         if let Some(video_url) = Self::extract_video_url(&detail) {
             return Ok(MediaInfo {
-                title: filename_base,
+                title,
                 author,
                 platform: "tiktok".to_string(),
                 duration_seconds: Self::extract_duration(&detail),
-                thumbnail_url: None,
+                thumbnail_url: thumbnail,
                 available_qualities: vec![VideoQuality {
                     label: "best".to_string(),
                     width: 0,
@@ -477,11 +472,11 @@ impl PlatformDownloader for TikTokDownloader {
 
         if let Some(music_url) = Self::extract_music_url(&detail) {
             return Ok(MediaInfo {
-                title: filename_base,
+                title,
                 author,
                 platform: "tiktok".to_string(),
                 duration_seconds: None,
-                thumbnail_url: None,
+                thumbnail_url: thumbnail,
                 available_qualities: vec![VideoQuality {
                     label: "audio".to_string(),
                     width: 0,
@@ -494,8 +489,7 @@ impl PlatformDownloader for TikTokDownloader {
             });
         }
 
-        tracing::warn!("[tiktok] no media extracted natively, trying yt-dlp fallback");
-        self.fallback_ytdlp(&original_url).await
+        Err(anyhow!("No media found in TikTok post"))
     }
 
     async fn download(
@@ -504,28 +498,31 @@ impl PlatformDownloader for TikTokDownloader {
         opts: &DownloadOptions,
         progress: mpsc::Sender<ProgressUpdate>,
     ) -> anyhow::Result<DownloadResult> {
-        if let Some(quality) = info.available_qualities.first() {
-            if quality.format == "ytdlp" {
-                let ytdlp_path = crate::core::ytdlp::ensure_ytdlp().await?;
-                return crate::core::ytdlp::download_video(
-                    &ytdlp_path,
-                    &quality.url,
-                    &opts.output_dir,
-                    None,
-                    progress,
-                    opts.download_mode.as_deref(),
-                    opts.format_id.as_deref(),
-                    opts.filename_template.as_deref(),
-                    opts.referer.as_deref().or(Some("https://www.tiktok.com/")),
-                    opts.cancel_token.clone(),
-                    None,
-                    opts.concurrent_fragments,
-                    false,
-                    &[],
-                    opts.audio_format.as_deref(),
-                )
-                .await;
-            }
+        if info.available_qualities.iter().any(|q| q.format == "ytdlp") {
+            let quality = info
+                .available_qualities
+                .iter()
+                .find(|q| q.format == "ytdlp")
+                .unwrap();
+            let ytdlp_path = crate::core::ytdlp::ensure_ytdlp().await?;
+            return crate::core::ytdlp::download_video(
+                &ytdlp_path,
+                &quality.url,
+                &opts.output_dir,
+                None,
+                progress,
+                opts.download_mode.as_deref(),
+                opts.format_id.as_deref(),
+                opts.filename_template.as_deref(),
+                opts.referer.as_deref().or(Some("https://www.tiktok.com/")),
+                opts.cancel_token.clone(),
+                None,
+                opts.concurrent_fragments,
+                false,
+                &[],
+                opts.audio_format.as_deref(),
+            )
+            .await;
         }
 
         let cookies = self.captured_cookies.lock().await.clone();
@@ -668,5 +665,101 @@ impl PlatformDownloader for TikTokDownloader {
             }
             _ => Err(anyhow!("Unsupported media type for download")),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_ytdlp_media_info_preserves_caption_and_thumbnail() {
+        let json = serde_json::json!({
+            "title": "Baby Monster Choom Dance Challenge #fyp",
+            "uploader": "sanjida_afrin_official",
+            "thumbnail": "https://p16-sign.tiktokcdn.com/obj/tos-alisg-p-0037/thumb.jpeg",
+            "duration": 38.0,
+            "webpage_url": "https://www.tiktok.com/@sanjida_afrin_official/video/7665813104273394952",
+            "extractor_key": "TikTok",
+            "formats": [
+                {
+                    "format_id": "download_addr-0",
+                    "height": 1080,
+                    "width": 1080,
+                    "vcodec": "h264"
+                }
+            ]
+        });
+
+        let info = TikTokDownloader::parse_ytdlp_media_info(
+            &json,
+            Some("7665813104273394952"),
+            "https://www.tiktok.com/@sanjida_afrin_official/video/7665813104273394952",
+        )
+        .expect("parse should succeed");
+
+        assert_eq!(info.title, "Baby Monster Choom Dance Challenge #fyp");
+        assert_eq!(info.author, "sanjida_afrin_official");
+        assert_eq!(info.platform, "tiktok");
+        assert_eq!(
+            info.thumbnail_url.as_deref(),
+            Some("https://p16-sign.tiktokcdn.com/obj/tos-alisg-p-0037/thumb.jpeg")
+        );
+        assert_eq!(info.duration_seconds, Some(38.0));
+        assert_eq!(info.available_qualities[0].format, "ytdlp");
+    }
+
+    #[test]
+    fn parse_ytdlp_media_info_falls_back_to_post_id_when_title_unknown() {
+        let json = serde_json::json!({
+            "title": "unknown",
+            "uploader": "sanjida_afrin_official",
+            "thumbnail": "https://p16-sign.tiktokcdn.com/thumb.jpeg",
+            "extractor_key": "TikTok"
+        });
+
+        let info = TikTokDownloader::parse_ytdlp_media_info(
+            &json,
+            Some("7665813104273394952"),
+            "https://www.tiktok.com/@user/video/7665813104273394952",
+        )
+        .expect("parse should succeed");
+
+        assert_eq!(info.title, "tiktok_7665813104273394952");
+    }
+
+    #[test]
+    fn extract_thumbnail_from_detail() {
+        let detail = serde_json::json!({
+            "video": {
+                "cover": "https://p16-sign.tiktokcdn.com/cover.jpg"
+            }
+        });
+        assert_eq!(
+            TikTokDownloader::extract_thumbnail(&detail).as_deref(),
+            Some("https://p16-sign.tiktokcdn.com/cover.jpg")
+        );
+    }
+
+    #[test]
+    fn extract_title_from_detail_prefers_desc() {
+        let detail = serde_json::json!({
+            "desc": "Amazing performance in Seoul"
+        });
+        assert_eq!(
+            TikTokDownloader::extract_title(&detail, "123456", "artist"),
+            "Amazing performance in Seoul"
+        );
+    }
+
+    #[test]
+    fn extract_title_from_detail_falls_back_to_slug() {
+        let detail = serde_json::json!({
+            "desc": "   "
+        });
+        assert_eq!(
+            TikTokDownloader::extract_title(&detail, "123456", "artist"),
+            "tiktok_artist_123456"
+        );
     }
 }

@@ -563,6 +563,12 @@ fn platform_extra_flags(url: &str) -> Vec<String> {
 fn platform_referer(url: &str) -> Option<&'static str> {
     let lower = url.to_lowercase();
 
+    if lower.contains("tiktok.com") {
+        return Some("https://www.tiktok.com/");
+    }
+    if lower.contains("instagram.com") || lower.contains("ddinstagram.com") {
+        return Some("https://www.instagram.com/");
+    }
     if lower.contains("douyin.com") || lower.contains("iesdouyin.com") {
         return Some("https://www.douyin.com/");
     }
@@ -658,5 +664,90 @@ mod tests {
     #[test]
     fn hls_referer_empty_for_unparseable_url() {
         assert_eq!(build_hls_referer(None, None, "not a url"), "");
+    }
+
+    #[test]
+    fn platform_referer_supports_tiktok_and_instagram() {
+        assert_eq!(
+            platform_referer("https://www.tiktok.com/@user/video/123"),
+            Some("https://www.tiktok.com/")
+        );
+        assert_eq!(
+            platform_referer("https://www.instagram.com/p/ABC123/"),
+            Some("https://www.instagram.com/")
+        );
+    }
+
+    #[test]
+    fn parse_video_info_extracts_tiktok_metadata() {
+        let json = serde_json::json!({
+            "title": "Sanjida Afrin Dance #fyp",
+            "uploader": "sanjida_afrin",
+            "thumbnail": "https://p16-sign.tiktokcdn.com/thumb.jpg",
+            "duration": 38.0,
+            "webpage_url": "https://www.tiktok.com/@sanjida_afrin/video/123456",
+            "extractor_key": "TikTok",
+            "formats": [
+                {
+                    "format_id": "download_addr-0",
+                    "height": 1080,
+                    "width": 1920,
+                    "vcodec": "h264"
+                },
+                {
+                    "format_id": "play_addr-0",
+                    "height": 720,
+                    "width": 1280,
+                    "vcodec": "h264"
+                }
+            ]
+        });
+
+        let info = GenericYtdlpDownloader::parse_video_info(&json).expect("parse should succeed");
+        assert_eq!(info.title, "Sanjida Afrin Dance #fyp");
+        assert_eq!(info.author, "sanjida_afrin");
+        assert_eq!(info.platform, "tiktok");
+        assert_eq!(
+            info.thumbnail_url.as_deref(),
+            Some("https://p16-sign.tiktokcdn.com/thumb.jpg")
+        );
+        assert_eq!(info.duration_seconds, Some(38.0));
+        assert_eq!(info.available_qualities.len(), 2);
+        assert_eq!(info.available_qualities[0].label, "1080p");
+        assert_eq!(info.available_qualities[0].format, "ytdlp");
+        assert_eq!(info.available_qualities[1].label, "720p");
+    }
+
+    #[test]
+    fn parse_video_info_extracts_instagram_metadata() {
+        let json = serde_json::json!({
+            "title": "LISA at Coachella 2026",
+            "uploader": "lalalalisa_m",
+            "thumbnail": "https://scontent.cdninstagram.com/t.jpg",
+            "duration": 60.0,
+            "webpage_url": "https://www.instagram.com/p/ABC123/",
+            "extractor_key": "Instagram",
+            "formats": [
+                {
+                    "format_id": "0",
+                    "height": 1080,
+                    "width": 1080,
+                    "vcodec": "h264"
+                }
+            ]
+        });
+
+        let info = GenericYtdlpDownloader::parse_video_info(&json).expect("parse should succeed");
+        assert_eq!(info.title, "LISA at Coachella 2026");
+        assert_eq!(info.author, "lalalalisa_m");
+        assert_eq!(info.platform, "instagram");
+        assert_eq!(
+            info.thumbnail_url.as_deref(),
+            Some("https://scontent.cdninstagram.com/t.jpg")
+        );
+        assert_eq!(info.duration_seconds, Some(60.0));
+        assert_eq!(info.available_qualities.len(), 1);
+        assert_eq!(info.available_qualities[0].label, "1080p");
+        assert_eq!(info.available_qualities[0].format, "ytdlp");
     }
 }

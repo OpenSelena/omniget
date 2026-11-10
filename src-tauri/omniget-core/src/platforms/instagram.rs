@@ -479,13 +479,16 @@ impl InstagramDownloader {
         Err(anyhow!("Could not extract data from embed"))
     }
 
-    async fn fallback_ytdlp(&self, url: &str, post_id: &str) -> anyhow::Result<MediaInfo> {
-        let ytdlp_path = crate::core::ytdlp::ensure_ytdlp().await?;
-        let json = crate::core::ytdlp::get_video_info(&ytdlp_path, url, &[]).await?;
+    pub fn parse_ytdlp_media_info(
+        json: &serde_json::Value,
+        post_id: &str,
+    ) -> anyhow::Result<MediaInfo> {
         let mut info =
-            crate::platforms::generic_ytdlp::GenericYtdlpDownloader::parse_video_info(&json)?;
+            crate::platforms::generic_ytdlp::GenericYtdlpDownloader::parse_video_info(json)?;
 
-        info.title = format!("instagram_{}", post_id);
+        if info.title.trim().is_empty() || info.title == "unknown" {
+            info.title = format!("instagram_{}", post_id);
+        }
         info.platform = "instagram".to_string();
 
         let post_url = format!("https://www.instagram.com/p/{}/", post_id);
@@ -495,6 +498,16 @@ impl InstagramDownloader {
         }
 
         Ok(info)
+    }
+
+    async fn fallback_ytdlp(&self, url: &str, post_id: &str) -> anyhow::Result<MediaInfo> {
+        let ytdlp_path = crate::core::ytdlp::ensure_ytdlp().await?;
+        let extra_flags = vec![
+            "--referer".to_string(),
+            "https://www.instagram.com/".to_string(),
+        ];
+        let json = crate::core::ytdlp::get_video_info(&ytdlp_path, url, &extra_flags).await?;
+        Self::parse_ytdlp_media_info(&json, post_id)
     }
 
     fn extract_media_from_gql(data: &serde_json::Value) -> anyhow::Result<InstagramMedia> {
@@ -685,6 +698,10 @@ impl PlatformDownloader for InstagramDownloader {
             Self::extract_post_id(url).ok_or_else(|| anyhow!("Could not extract post ID"))?
         };
 
+        if let Ok(info) = self.fallback_ytdlp(url, &post_id).await {
+            return Ok(info);
+        }
+
         let filename_base = format!("instagram_{}", post_id);
 
         let embed_result = self.request_embed(&post_id).await;
@@ -784,14 +801,21 @@ impl PlatformDownloader for InstagramDownloader {
         opts: &DownloadOptions,
         progress: mpsc::Sender<ProgressUpdate>,
     ) -> anyhow::Result<DownloadResult> {
+        if info.available_qualities.iter().any(|q| q.format == "ytdlp") {
+            let target_url = info
+                .available_qualities
+                .iter()
+                .find(|q| q.format == "ytdlp")
+                .map(|q| q.url.as_str())
+                .or(opts.page_url.as_deref())
+                .unwrap_or("");
+            return Self::ytdlp_download_post(target_url, opts, progress).await;
+        }
+
         let count = info.available_qualities.len();
 
         if count == 1 {
             let quality = info.available_qualities.first().unwrap();
-
-            if quality.format == "ytdlp" {
-                return Self::ytdlp_download_post(&quality.url, opts, progress).await;
-            }
 
             let filename = format!(
                 "{}.{}",
@@ -1047,5 +1071,54 @@ mod tests {
     fn is_html_block_error_rejects_unrelated_error() {
         let err = anyhow!("HTTP 404 downloading url");
         assert!(!InstagramDownloader::is_html_block_error(&err));
+    }
+
+    #[test]
+    fn parse_ytdlp_media_info_preserves_rich_title_and_thumbnail() {
+        let json = serde_json::json!({
+            "title": "Lisa performing Swalla live in concert",
+            "uploader": "lalalalisa_m",
+            "thumbnail": "https://scontent.cdninstagram.com/swalla.jpg",
+            "duration": 45.0,
+            "webpage_url": "https://www.instagram.com/reel/Dfjdjncqs9Z/",
+            "extractor_key": "Instagram",
+            "formats": [
+                {
+                    "format_id": "0",
+                    "height": 1080,
+                    "width": 1080,
+                    "vcodec": "h264"
+                }
+            ]
+        });
+
+        let info = InstagramDownloader::parse_ytdlp_media_info(&json, "Dfjdjncqs9Z")
+            .expect("parse should succeed");
+        assert_eq!(info.title, "Lisa performing Swalla live in concert");
+        assert_eq!(info.author, "lalalalisa_m");
+        assert_eq!(info.platform, "instagram");
+        assert_eq!(
+            info.thumbnail_url.as_deref(),
+            Some("https://scontent.cdninstagram.com/swalla.jpg")
+        );
+        assert_eq!(info.available_qualities[0].format, "ytdlp");
+        assert_eq!(
+            info.available_qualities[0].url,
+            "https://www.instagram.com/p/Dfjdjncqs9Z/"
+        );
+    }
+
+    #[test]
+    fn parse_ytdlp_media_info_falls_back_to_post_id_when_title_unknown() {
+        let json = serde_json::json!({
+            "title": "unknown",
+            "uploader": "lalalalisa_m",
+            "thumbnail": "https://scontent.cdninstagram.com/swalla.jpg",
+            "extractor_key": "Instagram"
+        });
+
+        let info = InstagramDownloader::parse_ytdlp_media_info(&json, "Dfjdjncqs9Z")
+            .expect("parse should succeed");
+        assert_eq!(info.title, "instagram_Dfjdjncqs9Z");
     }
 }
