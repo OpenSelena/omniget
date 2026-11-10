@@ -32,6 +32,7 @@
   import { isYtdlpAvailable, isDepsChecked, refreshYtdlpStatus } from "$lib/stores/dependency-store.svelte";
   import { showToast } from "$lib/stores/toast-store.svelte";
   import { t, locale, isRtlLocale, loadTranslations } from "$lib/i18n";
+  import { syncTrayLabels } from "$lib/tray-labels";
   import { get } from "svelte/store";
   import { CORE_NAV_ITEMS, pluginIconForRoute, type NavItem } from "$lib/nav-config";
   import { TOOLS, toolHref } from "$lib/tools/catalog";
