@@ -362,7 +362,10 @@ mod tests {
 
         let args = build_gallery_dl_args(&opts);
         let format_pos = args.iter().position(|r| r == "format=best");
-        assert!(format_pos.is_some(), "gallery-dl must include format=best for TikTok to prevent silent DASH streams");
+        assert!(
+            format_pos.is_some(),
+            "gallery-dl must include format=best for TikTok to prevent silent DASH streams"
+        );
         assert_eq!(args[format_pos.unwrap() - 1], "-o");
     }
 
@@ -447,6 +450,9 @@ mod tests {
         let args = build_yt_dlp_args(&opts);
         let browser_cookie_pos = args.iter().position(|r| r == "--cookies-from-browser");
         assert!(browser_cookie_pos.is_some());
-        assert_eq!(args[browser_cookie_pos.unwrap() + 1], "firefox:/profiles/default");
+        assert_eq!(
+            args[browser_cookie_pos.unwrap() + 1],
+            "firefox:/profiles/default"
+        );
     }
 }

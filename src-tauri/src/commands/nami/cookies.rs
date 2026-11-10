@@ -151,9 +151,7 @@ pub fn map_prog_id_to_browser_id(prog_id: &str, command_output: Option<&str>) ->
             engine: "chrome".to_string(),
         };
     }
-    if p_lower.starts_with("chromehtml")
-        || p_lower.contains("chrome")
-        || cmd.contains("chrome.exe")
+    if p_lower.starts_with("chromehtml") || p_lower.contains("chrome") || cmd.contains("chrome.exe")
     {
         return BrowserIdentity {
             id: "chrome".to_string(),
@@ -179,9 +177,7 @@ pub fn map_prog_id_to_browser_id(prog_id: &str, command_output: Option<&str>) ->
             engine: "brave".to_string(),
         };
     }
-    if p_lower.starts_with("firefox")
-        || p_lower.contains("firefox")
-        || cmd.contains("firefox.exe")
+    if p_lower.starts_with("firefox") || p_lower.contains("firefox") || cmd.contains("firefox.exe")
     {
         return BrowserIdentity {
             id: "firefox".to_string(),
@@ -510,12 +506,8 @@ pub fn list_detected_browsers() -> Vec<DetectedBrowser> {
             id: "chrome",
             name: "Google Chrome",
             engine: "chrome",
-            win_dirs: &[
-                "Google/Chrome/User Data",
-            ],
-            mac_dirs: &[
-                "Library/Application Support/Google/Chrome",
-            ],
+            win_dirs: &["Google/Chrome/User Data"],
+            mac_dirs: &["Library/Application Support/Google/Chrome"],
             linux_dirs: &[
                 ".config/google-chrome",
                 ".var/app/com.google.Chrome/config/google-chrome",
@@ -528,12 +520,8 @@ pub fn list_detected_browsers() -> Vec<DetectedBrowser> {
             id: "edge",
             name: "Microsoft Edge",
             engine: "edge",
-            win_dirs: &[
-                "Microsoft/Edge/User Data",
-            ],
-            mac_dirs: &[
-                "Library/Application Support/Microsoft Edge",
-            ],
+            win_dirs: &["Microsoft/Edge/User Data"],
+            mac_dirs: &["Library/Application Support/Microsoft Edge"],
             linux_dirs: &[
                 ".config/microsoft-edge",
                 ".var/app/com.microsoft.Edge/config/microsoft-edge",
@@ -543,12 +531,8 @@ pub fn list_detected_browsers() -> Vec<DetectedBrowser> {
             id: "brave",
             name: "Brave Browser",
             engine: "brave",
-            win_dirs: &[
-                "BraveSoftware/Brave-Browser/User Data",
-            ],
-            mac_dirs: &[
-                "Library/Application Support/BraveSoftware/Brave-Browser",
-            ],
+            win_dirs: &["BraveSoftware/Brave-Browser/User Data"],
+            mac_dirs: &["Library/Application Support/BraveSoftware/Brave-Browser"],
             linux_dirs: &[
                 ".config/BraveSoftware/Brave-Browser",
                 ".var/app/com.brave.Browser/config/BraveSoftware/Brave-Browser",
@@ -558,10 +542,7 @@ pub fn list_detected_browsers() -> Vec<DetectedBrowser> {
             id: "firefox",
             name: "Mozilla Firefox",
             engine: "firefox",
-            win_dirs: &[
-                "Mozilla/Firefox/Profiles",
-                "Mozilla/Firefox",
-            ],
+            win_dirs: &["Mozilla/Firefox/Profiles", "Mozilla/Firefox"],
             mac_dirs: &[
                 "Library/Application Support/Firefox/Profiles",
                 "Library/Application Support/Firefox",
@@ -576,59 +557,35 @@ pub fn list_detected_browsers() -> Vec<DetectedBrowser> {
             id: "zen",
             name: "Zen Browser",
             engine: "firefox",
-            win_dirs: &[
-                "zen/Profiles",
-                "zen",
-            ],
+            win_dirs: &["zen/Profiles", "zen"],
             mac_dirs: &[
                 "Library/Application Support/zen/Profiles",
                 "Library/Application Support/zen",
             ],
-            linux_dirs: &[
-                ".zen",
-                ".var/app/app.zen_browser.zen/.zen",
-            ],
+            linux_dirs: &[".zen", ".var/app/app.zen_browser.zen/.zen"],
         },
         BrowserCandidateDef {
             id: "helium",
             name: "Helium",
             engine: "chrome",
-            win_dirs: &[
-                "imput/Helium/User Data",
-            ],
-            mac_dirs: &[
-                "Library/Application Support/net.imput.Helium",
-            ],
-            linux_dirs: &[
-                ".config/helium",
-                ".var/app/net.imput.Helium/config/helium",
-            ],
+            win_dirs: &["imput/Helium/User Data"],
+            mac_dirs: &["Library/Application Support/net.imput.Helium"],
+            linux_dirs: &[".config/helium", ".var/app/net.imput.Helium/config/helium"],
         },
         BrowserCandidateDef {
             id: "opera",
             name: "Opera",
             engine: "opera",
-            win_dirs: &[
-                "Opera Software/Opera Stable",
-            ],
-            mac_dirs: &[
-                "Library/Application Support/com.operasoftware.Opera",
-            ],
-            linux_dirs: &[
-                ".config/opera",
-                ".var/app/com.opera.Opera/config/opera",
-            ],
+            win_dirs: &["Opera Software/Opera Stable"],
+            mac_dirs: &["Library/Application Support/com.operasoftware.Opera"],
+            linux_dirs: &[".config/opera", ".var/app/com.opera.Opera/config/opera"],
         },
         BrowserCandidateDef {
             id: "vivaldi",
             name: "Vivaldi",
             engine: "vivaldi",
-            win_dirs: &[
-                "Vivaldi/User Data",
-            ],
-            mac_dirs: &[
-                "Library/Application Support/Vivaldi",
-            ],
+            win_dirs: &["Vivaldi/User Data"],
+            mac_dirs: &["Library/Application Support/Vivaldi"],
             linux_dirs: &[
                 ".config/vivaldi",
                 ".var/app/com.vivaldi.Vivaldi/config/vivaldi",
@@ -638,12 +595,8 @@ pub fn list_detected_browsers() -> Vec<DetectedBrowser> {
             id: "librewolf",
             name: "LibreWolf",
             engine: "firefox",
-            win_dirs: &[
-                "librewolf/Profiles",
-            ],
-            mac_dirs: &[
-                "Library/Application Support/librewolf/Profiles",
-            ],
+            win_dirs: &["librewolf/Profiles"],
+            mac_dirs: &["Library/Application Support/librewolf/Profiles"],
             linux_dirs: &[
                 ".librewolf",
                 ".var/app/io.gitlab.librewolf-community/.librewolf",
@@ -911,10 +864,7 @@ pub fn extract_gecko_cookies_to_netscape(
     }
 }
 
-pub fn resolve_browser_cookie_arg(
-    browser_id: &str,
-    profile_dir: Option<&str>,
-) -> Option<String> {
+pub fn resolve_browser_cookie_arg(browser_id: &str, profile_dir: Option<&str>) -> Option<String> {
     let trimmed = browser_id.trim();
     if trimmed.is_empty() || trimmed.eq_ignore_ascii_case("none") {
         return None;
@@ -1131,13 +1081,22 @@ mod tests {
     #[test]
     fn test_parse_windows_default_browser_prog_id() {
         let chrome_raw = "HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\Shell\\Associations\\UrlAssociations\\https\\UserChoice\r\n    ProgId    REG_SZ    ChromeHTML\r\n";
-        assert_eq!(parse_windows_default_browser_prog_id(chrome_raw), Some("ChromeHTML".to_string()));
+        assert_eq!(
+            parse_windows_default_browser_prog_id(chrome_raw),
+            Some("ChromeHTML".to_string())
+        );
 
         let helium_raw = "    ProgId    REG_SZ    HeliumHTM\r\n";
-        assert_eq!(parse_windows_default_browser_prog_id(helium_raw), Some("HeliumHTM".to_string()));
+        assert_eq!(
+            parse_windows_default_browser_prog_id(helium_raw),
+            Some("HeliumHTM".to_string())
+        );
 
         let firefox_raw = "    ProgId    REG_SZ    FirefoxURL-308046B0AF4A39CB\r\n";
-        assert_eq!(parse_windows_default_browser_prog_id(firefox_raw), Some("FirefoxURL-308046B0AF4A39CB".to_string()));
+        assert_eq!(
+            parse_windows_default_browser_prog_id(firefox_raw),
+            Some("FirefoxURL-308046B0AF4A39CB".to_string())
+        );
 
         let injection_raw = "    ProgId    REG_SZ    ChromeHTML & calc.exe\r\n";
         assert_eq!(parse_windows_default_browser_prog_id(injection_raw), None);
@@ -1163,7 +1122,8 @@ mod tests {
         let firefox = map_prog_id_to_browser_id("FirefoxURL-308046B0AF4A39CB", None);
         assert_eq!(firefox.id, "firefox");
 
-        let helium = map_prog_id_to_browser_id("CustomProgId", Some("\"C:\\imput\\Helium\\chrome.exe\" %1"));
+        let helium =
+            map_prog_id_to_browser_id("CustomProgId", Some("\"C:\\imput\\Helium\\chrome.exe\" %1"));
         assert_eq!(helium.id, "helium");
 
         let zen = map_prog_id_to_browser_id("ZenURL", Some("\"C:\\Zen\\zen.exe\" %1"));
@@ -1180,12 +1140,18 @@ mod tests {
             }
         )
         "#;
-        assert_eq!(parse_mac_default_browser_bundle_id(mac_output), Some("com.google.chrome".to_string()));
+        assert_eq!(
+            parse_mac_default_browser_bundle_id(mac_output),
+            Some("com.google.chrome".to_string())
+        );
         let mac_browser = map_bundle_id_to_browser_id("com.google.chrome");
         assert_eq!(mac_browser.id, "chrome");
 
         let linux_output = "google-chrome.desktop\n";
-        assert_eq!(parse_linux_default_browser_desktop(linux_output), Some("google-chrome.desktop".to_string()));
+        assert_eq!(
+            parse_linux_default_browser_desktop(linux_output),
+            Some("google-chrome.desktop".to_string())
+        );
         let linux_browser = map_linux_desktop_to_browser_id("google-chrome.desktop");
         assert_eq!(linux_browser.id, "chrome");
 
@@ -1196,8 +1162,14 @@ mod tests {
 
     #[test]
     fn test_resolve_browser_cookie_arg() {
-        assert_eq!(resolve_browser_cookie_arg("chrome", None), Some("chrome".to_string()));
-        assert_eq!(resolve_browser_cookie_arg("firefox", None), Some("firefox".to_string()));
+        assert_eq!(
+            resolve_browser_cookie_arg("chrome", None),
+            Some("chrome".to_string())
+        );
+        assert_eq!(
+            resolve_browser_cookie_arg("firefox", None),
+            Some("firefox".to_string())
+        );
         assert_eq!(resolve_browser_cookie_arg("none", None), None);
         assert_eq!(resolve_browser_cookie_arg("", None), None);
 
@@ -1207,7 +1179,8 @@ mod tests {
 
     #[test]
     fn test_gecko_profile_detection_and_sqlite_cookie_extraction() {
-        let temp_dir = std::env::temp_dir().join(format!("nami_gecko_test_{}", rand::random::<u32>()));
+        let temp_dir =
+            std::env::temp_dir().join(format!("nami_gecko_test_{}", rand::random::<u32>()));
         let _ = fs::create_dir_all(&temp_dir);
 
         let profile_dir = temp_dir.join("profile.default-release");
@@ -1228,7 +1201,8 @@ mod tests {
                     isHttpOnly INTEGER
                 )",
                 [],
-            ).unwrap();
+            )
+            .unwrap();
 
             conn.execute(
                 "INSERT INTO moz_cookies (host, path, isSecure, expiry, name, value, isHttpOnly)
@@ -1240,7 +1214,8 @@ mod tests {
                 "INSERT INTO moz_cookies (host, path, isSecure, expiry, name, value, isHttpOnly)
                  VALUES ('.facebook.com', '/', 1, 1750000000, 'c_user', '10002345', 0)",
                 [],
-            ).unwrap();
+            )
+            .unwrap();
         }
 
         let resolved_profile = find_gecko_profile_dir(&temp_dir);

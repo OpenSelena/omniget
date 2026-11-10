@@ -1,6 +1,6 @@
-use std::path::Path;
 use rusqlite::{params, Connection};
 use serde::{Deserialize, Serialize};
+use std::path::Path;
 
 use crate::core::db;
 
@@ -73,9 +73,8 @@ pub fn record_media(record: &NamiMediaRecord) -> Result<(), String> {
 
 pub fn has_media_on(conn: &Connection, platform: &str, post_id: &str) -> rusqlite::Result<bool> {
     init_schema_on(conn)?;
-    let mut stmt = conn.prepare_cached(
-        "SELECT 1 FROM nami_media WHERE platform = ?1 AND post_id = ?2 LIMIT 1",
-    )?;
+    let mut stmt = conn
+        .prepare_cached("SELECT 1 FROM nami_media WHERE platform = ?1 AND post_id = ?2 LIMIT 1")?;
     let exists = stmt.exists(params![platform.to_lowercase(), post_id])?;
     Ok(exists)
 }

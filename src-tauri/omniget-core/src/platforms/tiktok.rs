@@ -352,11 +352,7 @@ impl TikTokDownloader {
             .filter(|s| !s.is_empty())
             .map(|s| s.to_string())
             .unwrap_or_else(|| {
-                format!(
-                    "tiktok_{}_{}",
-                    sanitize_filename::sanitize(author),
-                    post_id
-                )
+                format!("tiktok_{}_{}", sanitize_filename::sanitize(author), post_id)
             })
     }
 

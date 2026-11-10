@@ -256,7 +256,12 @@ pub fn nami_extract_browser_cookies(
     let matched = browsers.into_iter().find(|b| b.id == target);
     let browser = match matched {
         Some(b) => b,
-        None => return Err(format!("Browser '{}' is not recognized or installed", browser_id)),
+        None => {
+            return Err(format!(
+                "Browser '{}' is not recognized or installed",
+                browser_id
+            ))
+        }
     };
 
     if !browser.available {
@@ -268,8 +273,12 @@ pub fn nami_extract_browser_cookies(
 
     if browser.engine == "firefox" {
         let prof_path = PathBuf::from(&browser.profile_dir);
-        let gecko_dir = cookies::find_gecko_profile_dir(&prof_path)
-            .ok_or_else(|| format!("Could not find cookies.sqlite in '{}' profile", browser.name))?;
+        let gecko_dir = cookies::find_gecko_profile_dir(&prof_path).ok_or_else(|| {
+            format!(
+                "Could not find cookies.sqlite in '{}' profile",
+                browser.name
+            )
+        })?;
         let domains = cookies::get_platform_cookie_domains(&platform);
         let netscape_data = cookies::extract_gecko_cookies_to_netscape(&gecko_dir, &domains)
             .ok_or_else(|| {
@@ -460,7 +469,11 @@ pub async fn nami_get_history(
     limit: Option<u32>,
     offset: Option<u32>,
 ) -> Result<Vec<ledger::NamiMediaRecord>, String> {
-    ledger::get_history(platform.as_deref(), limit.unwrap_or(50), offset.unwrap_or(0))
+    ledger::get_history(
+        platform.as_deref(),
+        limit.unwrap_or(50),
+        offset.unwrap_or(0),
+    )
 }
 
 #[command]
@@ -473,7 +486,11 @@ pub async fn nami_delete_history_record(id: String) -> Result<bool, String> {
     ledger::delete_record(&id)
 }
 
-pub fn update_profile_last_pulled(platform: &str, profile_url: &str, timestamp: i64) -> Result<(), String> {
+pub fn update_profile_last_pulled(
+    platform: &str,
+    profile_url: &str,
+    timestamp: i64,
+) -> Result<(), String> {
     let _storage_guard = NAMI_STORAGE_LOCK.lock().unwrap_or_else(|p| p.into_inner());
     let profiles_file = omniget_nami_dir()?.join("profiles.json");
     if !profiles_file.exists() {
