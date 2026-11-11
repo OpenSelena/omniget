@@ -199,12 +199,12 @@ OmniGet は、よく使われるプラットフォーム向けのネイティブ
 
 | カテゴリ | サイトと形式 |
 |---|---|
-| <img src="https://api.iconify.design/ph:graduation-cap.svg?color=%23F28500" width="18" height="18" align="center" alt="オンライン講座" /> オンライン講座 | 組み込みの Courses プラグインを通じて 38 のプラットフォーム（Hotmart、Udemy、Kiwify、Rocketseat、Coursera、Domestika、Skillshare など）に対応しています。すべてのレッスン、セクションの選択、添付ファイル、中断したところからの再開に対応しています。 |
-| <img src="https://api.iconify.design/ph:film-slate.svg?color=%238E3FD8" width="18" height="18" align="center" alt="動画と音声" /> 動画と音声 | YouTube（動画、プレイリスト、チャンネル、ライブの最初から、チャプター、SponsorBlock）、Instagram、TikTok、X/Twitter、Reddit、Twitch（VOD、クリップ、ライブ）、Vimeo、Bluesky、Threads、Pinterest、Douyin |
+| <img src="https://api.iconify.design/ph/graduation-cap.svg?color=%23F28500" width="18" height="18" align="center" alt="オンライン講座" /> オンライン講座 | 組み込みの Courses プラグインを通じて 38 のプラットフォーム（Hotmart、Udemy、Kiwify、Rocketseat、Coursera、Domestika、Skillshare など）に対応しています。すべてのレッスン、セクションの選択、添付ファイル、中断したところからの再開に対応しています。 |
+| <img src="https://api.iconify.design/ph/film-slate.svg?color=%238E3FD8" width="18" height="18" align="center" alt="動画と音声" /> 動画と音声 | YouTube（動画、プレイリスト、チャンネル、ライブの最初から、チャプター、SponsorBlock）、Instagram、TikTok、X/Twitter、Reddit、Twitch（VOD、クリップ、ライブ）、Vimeo、Bluesky、Threads、Pinterest、Douyin |
 | <img src="https://cdn.simpleicons.org/bilibili/00A1D6" width="18" height="18" align="center" alt="Bilibili" /> Bilibili（ログイン時） | ご利用のサブスクリプションに応じて 4K、HDR、Dolby Vision、Hi-Res ロスレス、Dolby Atmos に対応。弾幕コメントを XML、ASS、JSON で保存、Kodi や Jellyfin 向けの NFO ファイル、カスタムの命名テンプレート、番組、講座、お気に入り、後で見る、履歴を含む 11 種類の URL に対応 |
-| <img src="https://api.iconify.design/ph:images.svg?color=%23E0A800" width="18" height="18" align="center" alt="画像ギャラリー" /> 画像ギャラリー | gallery-dl を通じて 250 以上のサイト（DeviantArt、Pixiv、ArtStation、Flickr、Tumblr、Imgur、Kemono など）からギャラリーやプロフィールを丸ごと取得 |
-| <img src="https://api.iconify.design/ph:stack.svg?color=%23FFB340" width="18" height="18" align="center" alt="一括" /> 一括 | 多数のリンクを貼り付けるか `.txt` を読み込み、サブレディット全体、Reddit や X のプロフィール、Instagram や Pinterest のプロフィール、Facebook のアルバムをダウンロード |
-| <img src="https://api.iconify.design/ph:folder-simple.svg?color=%23A66A24" width="18" height="18" align="center" alt="ファイルと転送" /> ファイルと転送 | 内蔵の BitTorrent クライアントによる `.torrent` ファイルとマグネットリンク、HTTP による直接のファイル、HLS と DASH のマニフェスト、短い単語コードを使った 2 つの OmniGet 間での個人間転送 |
+| <img src="https://api.iconify.design/ph/images.svg?color=%23E0A800" width="18" height="18" align="center" alt="画像ギャラリー" /> 画像ギャラリー | gallery-dl を通じて 250 以上のサイト（DeviantArt、Pixiv、ArtStation、Flickr、Tumblr、Imgur、Kemono など）からギャラリーやプロフィールを丸ごと取得 |
+| <img src="https://api.iconify.design/ph/stack.svg?color=%23FFB340" width="18" height="18" align="center" alt="一括" /> 一括 | 多数のリンクを貼り付けるか `.txt` を読み込み、サブレディット全体、Reddit や X のプロフィール、Instagram や Pinterest のプロフィール、Facebook のアルバムをダウンロード |
+| <img src="https://api.iconify.design/ph/folder-simple.svg?color=%23A66A24" width="18" height="18" align="center" alt="ファイルと転送" /> ファイルと転送 | 内蔵の BitTorrent クライアントによる `.torrent` ファイルとマグネットリンク、HTTP による直接のファイル、HLS と DASH のマニフェスト、短い単語コードを使った 2 つの OmniGet 間での個人間転送 |
 | <img src="https://cdn.simpleicons.org/telegram/2CA5E0" width="18" height="18" align="center" alt="Telegram" /> Telegram | 組み込みの Telegram プラグインを通じて、参加しているチャンネルやグループの写真、動画、ファイル、音声を、チャンネルごとに整理されたフォルダー（`OmniGram/<channel>/`）に保存 |
 
 一度設定すれば忘れてよいオプション：デフォルトの画質、音声のみの形式（MP3、M4A、Opus、FLAC、WAV）、字幕の言語と形式（SRT、VTT、ASS、埋め込みまたは別ファイル）、サムネイルとメタデータの埋め込み、ファイル名のテンプレート、プラットフォームごとの整理、既存ファイルのスキップ、チャプターごとの分割、速度制限、同時ダウンロード数、プロキシ。ルールを使えば、特定のチャンネルやホストを、毎回確認することなく、指定したフォルダーと画質に振り分けられます。フォロー中のチャンネルはバックグラウンドでチェックされ、新しいアップロードをトレイ通知付きで自動的にダウンロードすることもできます。
@@ -296,7 +296,7 @@ Firefox：Firefox の横にある **Settings → Plugins → Browser extension �
 - **本当のサムネイル。** 釣り目的のカバー画像ではなく、CDN がすでに持っている 25%、50%、75% 地点のフレームを表示します。
 - **Force H.264.** ブラウザ拡張機能のスイッチで、YouTube を VP9 や AV1 ではなく H.264 で再生させます。新しいコーデックでカクつくマシン向けです。
 
-### <img src="https://api.iconify.design/ph:waveform.svg?color=%23FF5E7A" width="20" height="20" align="center" alt="音声と字幕" /> 音声と字幕 (8)
+### <img src="https://api.iconify.design/ph/waveform.svg?color=%23FF5E7A" width="20" height="20" align="center" alt="音声と字幕" /> 音声と字幕 (8)
 
 - **文字起こし。** whisper.cpp を使って、音声や動画をオフラインで字幕にします。モデルは必要に応じてダウンロードされ、macOS では Metal によるアクセラレーションが使われます。
 - **テキスト読み上げ。** Microsoft Edge の自然な音声を無料で使い、同期した字幕ファイルも作成します。
@@ -305,7 +305,7 @@ Firefox：Firefox の横にある **Settings → Plugins → Browser extension �
 - マシン上で動作する VoiceStudio を通じて、**声のクローン**、**声のデザイン**、**ボーカルの分離** が行えます。*beta*
 - **音声入力。** グローバルショートカットを押して話すと、whisper がカーソルの位置にテキストを入力します。*beta*
 
-### <img src="https://api.iconify.design/ph:film-slate.svg?color=%238E3FD8" width="20" height="20" align="center" alt="動画編集" /> 動画編集 (14)
+### <img src="https://api.iconify.design/ph/film-slate.svg?color=%238E3FD8" width="20" height="20" align="center" alt="動画編集" /> 動画編集 (14)
 
 - **クリップの切り出し。** ディスク上の動画を選んで、一部分を切り出します。結果はダウンロードキューに追加されます。
 - **変換。** Convert プラグインを通じて、コンテナ、コーデック、解像度を変更したり、圧縮したりします。
@@ -321,7 +321,7 @@ Firefox：Firefox の横にある **Settings → Plugins → Browser extension �
 - **画面の録画。** FFmpeg を通じて画面とシステム音声を録画し、直前の出来事を保存できるリプレイバッファーも備えています。*beta*
 - **タイムラインエディター。** *planned*
 
-### <img src="https://api.iconify.design/ph:speaker-high.svg?color=%23E0203F" width="20" height="20" align="center" alt="オーディオ" /> オーディオ (2)
+### <img src="https://api.iconify.design/ph/speaker-high.svg?color=%23E0203F" width="20" height="20" align="center" alt="オーディオ" /> オーディオ (2)
 
 - **ラウドネスの正規化。** 2 パスの EBU R128 で、ストリーミング、ポッドキャスト、放送が求める音量に合わせます。
 - **ノイズ除去。** 録音からヒスノイズ、ファンの音、室内の雑音を取り除きます。追加のダウンロードは不要です。
@@ -413,13 +413,13 @@ Bilibili の動画のダウンロードはホーム画面から行います。�
 - **テーマとカラー。** Spicetify のテーマで Spotify クライアントをカスタマイズします。*beta*
 - **拡張機能。** Spicetify の Marketplace から拡張機能やカスタムアプリをインストールします。*beta*
 
-### <img src="https://api.iconify.design/ph:music-notes.svg?color=%23FF5E7A" width="20" height="20" align="center" alt="音楽" /> 音楽 (3)
+### <img src="https://api.iconify.design/ph/music-notes.svg?color=%23FF5E7A" width="20" height="20" align="center" alt="音楽" /> 音楽 (3)
 
 - **プレイリストから M3U へ。** エクスポートしたプレイリストを手持ちの音声ファイルと照合し、任意のローカルプレイヤー向けに `.m3u8` と `.pls` を書き出します。
 - **同期歌詞。** LRCLIB から歌詞を取得し、各トラックの隣に `.lrc` を保存します。
 - **Spotify の履歴。** 完全なデータエクスポートを開き、Wrapped では表示されないすべてを確認します。
 
-### <img src="https://api.iconify.design/simple-icons:linkedin.svg?color=%230A66C2" width="20" height="20" align="center" alt="LinkedIn" /> LinkedIn (4)
+### <img src="https://api.iconify.design/simple-icons/linkedin.svg?color=%230A66C2" width="20" height="20" align="center" alt="LinkedIn" /> LinkedIn (4)
 
 4 つとも、LinkedIn にリクエストできる公式のデータエクスポートを、あなたのマシン上で読み取ります。ログインは一切行いません。
 
@@ -428,13 +428,13 @@ Bilibili の動画のダウンロードはホーム画面から行います。�
 - **メッセージ。** チャット履歴を閲覧し、ローカルのページとして保存します。
 - **プロフィールスコア。** オフラインでプロフィールの充実度をチェックし、足りないものを表示します。
 
-### <img src="https://api.iconify.design/ph:game-controller.svg?color=%233D5BF0" width="20" height="20" align="center" alt="ゲーム" /> ゲーム (3)
+### <img src="https://api.iconify.design/ph/game-controller.svg?color=%233D5BF0" width="20" height="20" align="center" alt="ゲーム" /> ゲーム (3)
 
 - **Switch のアルバム。** Switch の SD カードからスクリーンショットとクリップを取り込み、ゲーム名と日付で名前を付けます。
 - **クリップの整理。** Game Bar、ShadowPlay、OBS、Steam のキャプチャを、ゲームごとのフォルダーに振り分けます。
 - **Linux で動く？** 1 つのゲーム、または Steam ライブラリ全体の ProtonDB のティアを表示します。
 
-### <img src="https://api.iconify.design/ph:file-pdf.svg?color=%23E0303A" width="20" height="20" align="center" alt="PDF" /> PDF (13)
+### <img src="https://api.iconify.design/ph/file-pdf.svg?color=%23E0303A" width="20" height="20" align="center" alt="PDF" /> PDF (13)
 
 - **結合。** 複数の PDF を、選んだ順序で 1 つにまとめます。
 - **分割。** ページを抽出するか、PDF を複数に分割します。
@@ -450,7 +450,7 @@ Bilibili の動画のダウンロードはホーム画面から行います。�
 - **安全な PDF。** PDF をピクセルから再構築し、スクリプトやフォームを取り除きます。
 - **PDF から Markdown へ。** 見出し、リスト、表を含むきれいな Markdown にし、そのまま LLM に貼り付けられるようにします。
 
-### <img src="https://api.iconify.design/ph:file-text.svg?color=%231E6FE8" width="20" height="20" align="center" alt="ドキュメント" /> ドキュメント (5)
+### <img src="https://api.iconify.design/ph/file-text.svg?color=%231E6FE8" width="20" height="20" align="center" alt="ドキュメント" /> ドキュメント (5)
 
 - **SlideShare から PDF へ。** すべてのスライドを最大サイズで取得し、1 つの PDF にまとめます。
 - **Google ドキュメントのエクスポート。** 公開されている Docs、Slides、Sheets を PDF、DOCX、PPTX、XLSX で保存します。
@@ -458,7 +458,7 @@ Bilibili の動画のダウンロードはホーム画面から行います。�
 - **画像ギャラリー。** gallery-dl を使って、250 以上のサイトからギャラリーやプロフィールを丸ごと取得します。
 - **Scribd.** あなた自身のセッションを使って、閲覧可能な書籍を PDF で保存します。*planned*
 
-### <img src="https://api.iconify.design/ph:images.svg?color=%23E0A800" width="20" height="20" align="center" alt="画像" /> 画像 (9)
+### <img src="https://api.iconify.design/ph/images.svg?color=%23E0A800" width="20" height="20" align="center" alt="画像" /> 画像 (9)
 
 - **アップスケール。** 任意の Vulkan GPU 上の Real-ESRGAN で、2 倍、3 倍、4 倍に拡大します。*beta*
 - **画像のリサイズ。** 幅、高さ、フィット、パーセントで一括リサイズし、必要に応じて形式も変換します。
@@ -470,7 +470,7 @@ Bilibili の動画のダウンロードはホーム画面から行います。�
 - **スプライトシート。** シートをフレームに切り分ける、フレームをアトラス付きでシートにまとめ直す、フォルダー内の画像をルールに従ってリサイズする、のいずれかを行います。
 - **OCR.** 画像やスライドからテキストをコピーします。*beta*
 
-### <img src="https://api.iconify.design/ph:broom.svg?color=%231A9EB5" width="20" height="20" align="center" alt="システム" /> システム (10、Windows 専用の項目は明記)
+### <img src="https://api.iconify.design/ph/broom.svg?color=%231A9EB5" width="20" height="20" align="center" alt="システム" /> システム (10、Windows 専用の項目は明記)
 
 - **キャッシュのクリーンアップ。** OS ごとのルールで、一時ファイル、ログ、アプリのキャッシュを削除します。削除の前に一覧を確認できます。
 - **ディスクアナライザー。** 容量を占めているものをツリーマップと最大のファイルの一覧で表示し、ゴミ箱に送るボタンも備えています。
@@ -483,7 +483,7 @@ Bilibili の動画のダウンロードはホーム画面から行います。�
 - **レジストリクリーナー。** 孤立したエントリーを、削除前に `.reg` でバックアップしてから削除します。Windows。*beta*
 - **ソフトウェアアップデーター。** winget、Chocolatey、Scoop を通じて、プログラムを一括で更新します。Windows。*beta*
 
-### <img src="https://api.iconify.design/ph:folder-simple.svg?color=%23A66A24" width="20" height="20" align="center" alt="ファイル" /> ファイル (5)
+### <img src="https://api.iconify.design/ph/folder-simple.svg?color=%23A66A24" width="20" height="20" align="center" alt="ファイル" /> ファイル (5)
 
 - **重複。** ハッシュで同一のファイルを見つけ、安全に空き容量を確保します。
 - **一括リネーム。** 正規表現、連番、大文字・小文字の変換を、適用前のプレビュー付きで行います。
@@ -491,20 +491,20 @@ Bilibili の動画のダウンロードはホーム画面から行います。�
 - **ファイル検索。** Windows では Everything、macOS では Spotlight、Linux では fd を使って瞬時に検索します。
 - **スリープ防止。** 長い処理の間、コンピューターがスリープしないようにします。
 
-### <img src="https://api.iconify.design/ph:cloud-arrow-down.svg?color=%231E6FE8" width="20" height="20" align="center" alt="ダウンロード" /> ダウンロード (2)
+### <img src="https://api.iconify.design/ph/cloud-arrow-down.svg?color=%231E6FE8" width="20" height="20" align="center" alt="ダウンロード" /> ダウンロード (2)
 
 - **高速ダウンロード。** aria2 を使い、16 本の接続、再開、チェックサムで大きなファイルをダウンロードします。
 - **HLS / DASH マニフェスト。** Referer と Cookie を付けて `.m3u8` または `.mpd` を貼り付けると、FFmpeg が MP4 で保存します。
 
-### <img src="https://api.iconify.design/ph:cursor-click.svg?color=%23F28500" width="20" height="20" align="center" alt="自動化" /> 自動化 (1)
+### <img src="https://api.iconify.design/ph/cursor-click.svg?color=%23F28500" width="20" height="20" align="center" alt="自動化" /> 自動化 (1)
 
 - **オートクリッカー。** グローバルホットキー、上限、ランダムな範囲を設定して、指定したとおりの速度でクリックします。Windows、macOS、Linux。*beta*
 
-### <img src="https://api.iconify.design/ph:device-mobile.svg?color=%232AA845" width="20" height="20" align="center" alt="スマートフォン" /> スマートフォン (1)
+### <img src="https://api.iconify.design/ph/device-mobile.svg?color=%232AA845" width="20" height="20" align="center" alt="スマートフォン" /> スマートフォン (1)
 
 - **スマートフォンに送信。** ペアリングした KDE Connect デバイスに、ファイル、リンク、テキストを送ります。
 
-### <img src="https://api.iconify.design/ph:sparkle.svg?color=%233D5BF0" width="20" height="20" align="center" alt="AI" /> AI (6)
+### <img src="https://api.iconify.design/ph/sparkle.svg?color=%233D5BF0" width="20" height="20" align="center" alt="AI" /> AI (6)
 
 - **価格の比較。** LiteLLM と models.dev の価格をもとに、同じモデルのプロバイダーごとのコストを比較します。
 - **AI の支出。** OmniGet が AI に使った金額を、ローカルの台帳から日別、モデル別、タスク別に表示します。
@@ -513,7 +513,7 @@ Bilibili の動画のダウンロードはホーム画面から行います。�
 - **API キー。** キーとアカウントのためのローカルの保管庫です。接続テスト、OpenRouter、DeepSeek、SiliconFlow、New API の残高表示、Claude Code、Codex、Cherry Studio、opencode、`.env` ファイルへのエクスポートに対応しています。
 - **MCP サーバー。** OmniGet のツールをローカルブリッジ上の Model Context Protocol で公開します。拡張機能と同じトークンで保護された 37 のツールがあり、Claude Code、Claude Desktop、Cursor、VS Code、Goose、Codex 向けのすぐに使える設定スニペットも用意されています。[AI エージェント向けの OmniGet](#ai-エージェント向けの-omniget-mcp-サーバーと-claude-code-プラグイン) をご覧ください。*beta*
 
-### <img src="https://api.iconify.design/ph:sword.svg?color=%236F6F75" width="20" height="20" align="center" alt="CTF と解析" /> CTF と解析 (6)
+### <img src="https://api.iconify.design/ph/sword.svg?color=%236F6F75" width="20" height="20" align="center" alt="CTF と解析" /> CTF と解析 (6)
 
 CTF（capture-the-flag）の問題、フォレンジックの課題、「このファイルは何？」という場面のための、6 つの小さなオフラインユーティリティです。
 
@@ -562,7 +562,7 @@ AI と通信するツールはすべて、**Settings → AI** で設定したプ
   <img src="assets/readme/marketplace.png" alt="Courses、Telegram、Convert の各プラグインを、バージョン、作者、権限、有効化スイッチとともに一覧表示している OmniGet の Marketplace" width="900" />
 </p>
 
-### <img src="https://api.iconify.design/ph:graduation-cap.svg?color=%23F28500" width="20" height="20" align="center" alt="Courses" /> Courses
+### <img src="https://api.iconify.design/ph/graduation-cap.svg?color=%23F28500" width="20" height="20" align="center" alt="Courses" /> Courses
 
 組み込みの Courses プラグインは、**Hotmart**、**Udemy**、**Kiwify**、**Rocketseat**、**Coursera**、**Domestika**、**Skillshare**、**Alura**、**Ebac** を含む 38 の学習プラットフォームに対応しています。アプリ内の Web ビューからログインするか、拡張機能で保存した Cookie を使うか、利用可能な場合はアカウントの認証情報でログインします。OmniGet は購入済みの講座を一覧表示し、講座のアウトラインを開いて必要なセクションを選べるようにし（DRM で保護された講義はスキップされ、報告されます）、レッスンと添付ファイルを、必要に応じて通し番号を付けてダウンロードします。
 
@@ -570,7 +570,7 @@ AI と通信するツールはすべて、**Settings → AI** で設定したプ
 
 QR コードまたは電話番号でログインします。参加しているすべてのチャンネルとグループを閲覧し、写真、動画、ドキュメント、音声で絞り込み、ファイルを検索し、個別のメディアやチャットのアーカイブ全体を、進捗リスト付きでダウンロードできます。メディアのダウンロードは、サニタイズされたフォルダー名で `{download_dir}/OmniGram/{channel_name}/` に整理されます。
 
-### <img src="https://api.iconify.design/ph:arrows-clockwise.svg?color=%232AA845" width="20" height="20" align="center" alt="Convert" /> Convert
+### <img src="https://api.iconify.design/ph/arrows-clockwise.svg?color=%232AA845" width="20" height="20" align="center" alt="Convert" /> Convert
 
 マシンが対応していれば GPU アクセラレーションを使って FFmpeg で変換します：動画と音声のコンテナ、コーデック、解像度、ビットレート、圧縮を変更でき、インターネット接続は不要です。
 
