@@ -991,7 +991,7 @@
     </div>
   {:else}
   <div class="home-mac-workspace" class:home-mac-workspace--idle={omniState.kind === "idle"}>
-    <div class="home-mac-hero" class:home-mac-hero--blurred={omniState.kind === "detecting" || omniState.kind === "detected"}>
+    <div class="home-mac-hero">
       <HomeHero
         emotion={mascotEmotion}
         compact={mascotCompact}
