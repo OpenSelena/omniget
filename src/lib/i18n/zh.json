@@ -81,7 +81,6 @@
   "home": {
     "inspector_title": "下载选项",
     "hero_title": "粘贴链接，拿到文件。",
-    "hero_subtitle": "Paste a link or search. We'll take it from there.",
     "action_batch": "一次粘贴多个链接",
     "action_torrent": "打开 .torrent 文件",
     "action_p2p": "把文件发给别人",
@@ -5302,14 +5301,24 @@
       "tracking_desc": "在一处跟踪 8 家巴西承运商的包裹，自动刷新。"
     }
   },
+  "tray": {
+    "quit": "退出",
+    "no_active_downloads": "没有进行中的下载",
+    "active_suffix": " 进行中",
+    "speed_unit_kb": "KB/s",
+    "speed_unit_mb": "MB/s",
+    "decimal_separator": "."
+  },
   "nami": {
     "page_title": "Open Nami - 社交媒体下载器",
     "sections_aria": "Open Nami 分区",
     "tab_download": "下载",
     "tab_profiles": "资料",
+    "tab_history": "历史记录",
     "tab_settings": "设置",
     "desc_download": "保存你已连接的社交账号中的帖子和媒体。",
     "desc_profiles": "管理你最常用的账号资料。",
+    "desc_history": "浏览下载的媒体并将磁盘与本地记录同步。",
     "desc_settings": "选择 Open Nami 将下载的媒体保存到哪里。",
     "view_log": "查看日志",
     "saved_profiles_aria": "已保存的资料",
@@ -5377,8 +5386,6 @@
     "cookies_hint": "只有下载快拍和精选时才需要 Cookies。",
     "saving": "保存中...",
     "save_settings": "保存设置",
-    "tab_history": "历史记录",
-    "desc_history": "浏览下载的媒体并将磁盘与本地记录同步。",
     "sync_disk": "校准磁盘",
     "syncing_disk": "校准中...",
     "search_history_placeholder": "按创作者、文件名或帖子ID筛选...",
@@ -5402,13 +5409,5 @@
     "test_extract_cookies": "测试桥接",
     "testing_cookies": "正在测试...",
     "cookies_bridge_hint": "无插件桥接会自动从您的浏览器读取会话 Cookie，用于下载快拍与精选。"
-  },
-  "tray": {
-    "quit": "退出",
-    "no_active_downloads": "没有进行中的下载",
-    "active_suffix": " 进行中",
-    "speed_unit_kb": "KB/s",
-    "speed_unit_mb": "MB/s",
-    "decimal_separator": "."
   }
 }

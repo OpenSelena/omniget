@@ -81,7 +81,6 @@
   "home": {
     "inspector_title": "Download options",
     "hero_title": "OmniGet",
-    "hero_subtitle": "Cole um link ou pesquise. A gente cuida do resto.",
     "action_batch": "Many links at once",
     "action_torrent": "Open a .torrent file",
     "action_p2p": "Send a file to someone",
@@ -5302,14 +5301,24 @@
       "tracking_desc": "Follow packages from 8 Brazilian carriers in one place, refreshed automatically."
     }
   },
+  "tray": {
+    "quit": "Quit",
+    "no_active_downloads": "No active downloads",
+    "active_suffix": " active",
+    "speed_unit_kb": "KB/s",
+    "speed_unit_mb": "MB/s",
+    "decimal_separator": "."
+  },
   "nami": {
     "page_title": "Nami - Social Media Downloader",
     "sections_aria": "Nami sections",
     "tab_download": "Download",
     "tab_profiles": "Profiles",
+    "tab_history": "Histórico",
     "tab_settings": "Settings",
     "desc_download": "Save posts and media from your connected social profiles.",
     "desc_profiles": "Manage the profiles you use most often.",
+    "desc_history": "Navegue pelas mídias baixadas e sincronize o disco com o registro local.",
     "desc_settings": "Choose where Nami saves downloaded media.",
     "view_log": "View log",
     "saved_profiles_aria": "Saved profiles",
@@ -5377,8 +5386,6 @@
     "cookies_hint": "Cookies are only required for downloading Stories and Highlights.",
     "saving": "Saving...",
     "save_settings": "Save Settings",
-    "tab_history": "Histórico",
-    "desc_history": "Navegue pelas mídias baixadas e sincronize o disco com o registro local.",
     "sync_disk": "Reconciliar disco",
     "syncing_disk": "Reconciliando...",
     "search_history_placeholder": "Filtrar por criador, arquivo ou ID do post...",
@@ -5402,13 +5409,5 @@
     "test_extract_cookies": "Testar Ponte",
     "testing_cookies": "Testando...",
     "cookies_bridge_hint": "A ponte sem extensão lê automaticamente cookies de sessão do seu navegador."
-  },
-  "tray": {
-    "quit": "Quit",
-    "no_active_downloads": "No active downloads",
-    "active_suffix": " active",
-    "speed_unit_kb": "KB/s",
-    "speed_unit_mb": "MB/s",
-    "decimal_separator": "."
   }
 }

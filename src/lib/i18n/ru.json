@@ -81,7 +81,6 @@
   "home": {
     "inspector_title": "Параметры загрузки",
     "hero_title": "Вставьте ссылку — получите файл.",
-    "hero_subtitle": "Видео, аудио, картинки, курсы и торренты с 1000+ сайтов — сразу в вашу папку. Без аккаунта и рекламы.",
     "action_batch": "Много ссылок сразу",
     "action_torrent": "Открыть файл .torrent",
     "action_p2p": "Отправить файл кому-то",
@@ -3644,6 +3643,7 @@
   },
   "settings": {
     "title": "Настройки",
+    "manage_preferences": "Управление настройками приложения и конфигурациями системы",
     "general": {
       "title": "Общие",
       "start_with_system": "Запускать с системой",
@@ -4238,7 +4238,6 @@
         "login_webview_loading": "Открытие окна входа…"
       }
     },
-    "manage_preferences": "Управление настройками приложения и конфигурациями системы",
     "hero_desc_appearance": "Настройка темы приложения, цветовых акцентов и прозрачности окон",
     "hero_desc_typography": "Выбор шрифтов интерфейса, масштаба текста и типографических пресетов",
     "hero_desc_downloads": "Настройка папки сохранения, шаблонов имен файлов и качества загрузок",
@@ -4758,6 +4757,7 @@
   },
   "courses": {
     "title": "Курсы",
+    "subtitle": "Учебные материалы, видеоуроки и платформы курсов",
     "search_placeholder": "Поиск платформ…",
     "not_connected": "Не подключено",
     "connection_failed": "Ошибка подключения",
@@ -4795,8 +4795,7 @@
     "use_saved_cookies": "Использовать сохранённые cookies ({{account}})",
     "saved_cookies_empty": "В сохранённом аккаунте нет cookies.",
     "cookies_paste_label": "Cookies (JSON или cookies.txt)",
-    "cookies_paste_placeholder": "Вставьте JSON с cookies или экспорт Netscape cookies.txt...",
-    "subtitle": "Учебные материалы, видеоуроки и платформы курсов"
+    "cookies_paste_placeholder": "Вставьте JSON с cookies или экспорт Netscape cookies.txt..."
   },
   "hotmart": {
     "title": "Hotmart",
@@ -5315,9 +5314,11 @@
     "sections_aria": "Разделы Nami",
     "tab_download": "Загрузка",
     "tab_profiles": "Профили",
+    "tab_history": "История",
     "tab_settings": "Настройки",
     "desc_download": "Сохраняйте посты и медиа из подключённых профилей.",
     "desc_profiles": "Управляйте профилями, которые используете чаще всего.",
+    "desc_history": "Просмотр загруженных медиафайлов и синхронизация диска с локальным журналом.",
     "desc_settings": "Выберите, куда Nami сохраняет скачанное.",
     "view_log": "Показать журнал",
     "saved_profiles_aria": "Сохранённые профили",
@@ -5385,8 +5386,6 @@
     "cookies_hint": "Cookies требуются только для скачивания историй и актуального.",
     "saving": "Сохранение...",
     "save_settings": "Сохранить настройки",
-    "tab_history": "История",
-    "desc_history": "Просмотр загруженных медиафайлов и синхронизация диска с локальным журналом.",
     "sync_disk": "Сверить диск",
     "syncing_disk": "Сверка...",
     "search_history_placeholder": "Фильтр по автору, файлу или ID публикации...",

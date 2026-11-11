@@ -423,7 +423,6 @@ export type TranslationKeys =
   | 'home.action_p2p'
   | 'home.action_simple'
   | 'home.action_torrent'
-  | 'home.hero_subtitle'
   | 'home.hero_title'
   | 'home.inspector_title'
   | 'home.value_first'

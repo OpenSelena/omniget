@@ -81,7 +81,6 @@
   "home": {
     "inspector_title": "گزینه‌های دانلود",
     "hero_title": "OmniGet",
-    "hero_subtitle": "Paste a link or search. We'll take it from there.",
     "action_batch": "Many links at once",
     "action_torrent": "Open a .torrent file",
     "action_p2p": "Send a file to someone",
@@ -5302,14 +5301,24 @@
       "tracking_desc": "Follow packages from 8 Brazilian carriers in one place, refreshed automatically."
     }
   },
+  "tray": {
+    "quit": "Quit",
+    "no_active_downloads": "No active downloads",
+    "active_suffix": " active",
+    "speed_unit_kb": "KB/s",
+    "speed_unit_mb": "MB/s",
+    "decimal_separator": "."
+  },
   "nami": {
     "page_title": "Nami - Social Media Downloader",
     "sections_aria": "Nami sections",
     "tab_download": "Download",
     "tab_profiles": "Profiles",
+    "tab_history": "تاریخچه",
     "tab_settings": "Settings",
     "desc_download": "Save posts and media from your connected social profiles.",
     "desc_profiles": "Manage the profiles you use most often.",
+    "desc_history": "رسانه‌های بارگیری‌شده را مرور کرده و دیسک را با دفتر کل محلی همگام‌سازی کنید.",
     "desc_settings": "Choose where Nami saves downloaded media.",
     "view_log": "View log",
     "saved_profiles_aria": "Saved profiles",
@@ -5377,8 +5386,6 @@
     "cookies_hint": "Cookies are only required for downloading Stories and Highlights.",
     "saving": "Saving...",
     "save_settings": "Save Settings",
-    "tab_history": "تاریخچه",
-    "desc_history": "رسانه‌های بارگیری‌شده را مرور کرده و دیسک را با دفتر کل محلی همگام‌سازی کنید.",
     "sync_disk": "تطبیق دیسک",
     "syncing_disk": "در حال تطبیق...",
     "search_history_placeholder": "فیلتر بر اساس سازنده، نام فایل یا شناسه پست...",
@@ -5402,13 +5409,5 @@
     "test_extract_cookies": "آزمایش پل",
     "testing_cookies": "در حال آزمایش...",
     "cookies_bridge_hint": "پل بدون افزونه کوکی‌های نشست را برای استوری‌ها خودکار می‌خواند."
-  },
-  "tray": {
-    "quit": "Quit",
-    "no_active_downloads": "No active downloads",
-    "active_suffix": " active",
-    "speed_unit_kb": "KB/s",
-    "speed_unit_mb": "MB/s",
-    "decimal_separator": "."
   }
 }

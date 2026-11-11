@@ -81,7 +81,6 @@
   "home": {
     "inspector_title": "ຕົວເລືອກການດາວໂຫຼດ",
     "hero_title": "ວາງລິ້ງ. ຮັບໄຟລ໌.",
-    "hero_subtitle": "ວິດີໂອ, ສຽງ, ຮູບພາບ, ຄອສຮຽນ ແລະ ທໍເຣນຈາກກວ່າ 1,000 ເວັບໄຊ, ບັນທຶກລົງໂຟລເດີຂອງທ່ານໂດຍກົງ. ບໍ່ຕ້ອງມີບັນຊີ, ບໍ່ມີໂຄສະນາ.",
     "action_batch": "ຫຼາຍລິ້ງພ້ອມກັນ",
     "action_torrent": "ເປີດໄຟລ໌ .torrent",
     "action_p2p": "ສົ່ງໄຟລ໌ໃຫ້ຄົນອື່ນ",
@@ -5302,14 +5301,24 @@
       "tracking_desc": "ຕິດຕາມພັດສະດຸຈາກ 8 ບໍລິສັດຂົນສົ່ງຂອງບຣາຊິວໃນບ່ອນດຽວ, ອັບເດດອັດຕະໂນມັດ."
     }
   },
+  "tray": {
+    "quit": "Quit",
+    "no_active_downloads": "No active downloads",
+    "active_suffix": " active",
+    "speed_unit_kb": "KB/s",
+    "speed_unit_mb": "MB/s",
+    "decimal_separator": "."
+  },
   "nami": {
     "page_title": "Nami - Social Media Downloader",
     "sections_aria": "Nami sections",
     "tab_download": "Download",
     "tab_profiles": "Profiles",
+    "tab_history": "ປະຫວັດ",
     "tab_settings": "Settings",
     "desc_download": "Save posts and media from your connected social profiles.",
     "desc_profiles": "Manage the profiles you use most often.",
+    "desc_history": "ເບິ່ງສື່ທີ່ດາວໂຫລດ ແລະ ຊິງຄ໌ດິສກັບບັນທຶກທ້ອງຖິ່ນ.",
     "desc_settings": "Choose where Nami saves downloaded media.",
     "view_log": "View log",
     "saved_profiles_aria": "Saved profiles",
@@ -5377,8 +5386,6 @@
     "cookies_hint": "Cookies are only required for downloading Stories and Highlights.",
     "saving": "Saving...",
     "save_settings": "Save Settings",
-    "tab_history": "ປະຫວັດ",
-    "desc_history": "ເບິ່ງສື່ທີ່ດາວໂຫລດ ແລະ ຊິງຄ໌ດິສກັບບັນທຶກທ້ອງຖິ່ນ.",
     "sync_disk": "ກວດສອບດິສກ໌",
     "syncing_disk": "ກຳລັງກວດສອບ...",
     "search_history_placeholder": "ກັ່ນຕອງຕາມຜູ້ສ້າງ, ຊື່ໄຟລ໌ ຫຼື ID ໂພສ...",
@@ -5402,13 +5409,5 @@
     "test_extract_cookies": "ທົດສອບການເຊື່ອມຕໍ່",
     "testing_cookies": "ກຳລັງທົດສອບ...",
     "cookies_bridge_hint": "ລະບົບຈະອ່ານຄຸກກີ້ເຊດຊັນຈາກບຣາວເຊີຂອງທ່ານໂດຍອັດຕະໂນມັດ."
-  },
-  "tray": {
-    "quit": "Quit",
-    "no_active_downloads": "No active downloads",
-    "active_suffix": " active",
-    "speed_unit_kb": "KB/s",
-    "speed_unit_mb": "MB/s",
-    "decimal_separator": "."
   }
 }

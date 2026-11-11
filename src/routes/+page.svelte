@@ -969,10 +969,7 @@
   {#if isStage}
     <div class="home-stage">
       <HomeHero emotion={mascotEmotion} stage celebrate={mascotEmotion === "amazed"} />
-      <div class="home-stage-head">
-        <h1 class="home-stage-title">{$t('home.hero_title')}</h1>
-        <p class="home-stage-copy">{$t('home.hero_subtitle')}</p>
-      </div>
+      <h1 class="home-stage-title">{$t('home.hero_title')}</h1>
       <HomeUrlBar
         variant="stage"
         bind:url
