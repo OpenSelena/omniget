@@ -1415,7 +1415,7 @@
           <li>
             <a href="../courses/" class="sidebar-link">
               <span>36 Course Platforms</span>
-              <span class="sidebar-tag">v0.16.2</span>
+              <span class="sidebar-tag">v0.16.3</span>
             </a>
           </li>
         </ul>
@@ -1502,12 +1502,41 @@
         Release notes, feature changes, and system patches for OmniGet. All desktop releases are signed, reproducible, and published with SHA-256 binary validation.
       </p>
 
+      <!-- v0.16.3 Release -->
+      <article class="release-box" id="v0-16-3">
+        <div class="release-header">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="release-tag-pill">v0.16.3 Latest Stable</span>
+              <span class="release-date">Released November 2026</span>
+            </div>
+            <h2 class="release-title">V1 Shell Polish: Clean Home Stage, Sharp Mascot Inspection &amp; Route-Scoped Toolbar Cleanup</h2>
+          </div>
+          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.16.3" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+            <span>GitHub Tag</span>
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+
+        <div class="release-section">
+          <h3 class="release-section-title">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            Interface &amp; Shell Fixes
+          </h3>
+          <ul class="release-list">
+            <li><strong>Route-Scoped Toolbar Cleanup</strong>: Switched <code>toolbar-store.svelte.ts</code> to <code>$state.raw</code> with a monotonic registration token so <code>Downloads | History | Tools</code> and <code>Installed | Browse</code> toolbar segments and action buttons clear immediately when leaving <code>/downloads</code> or <code>/marketplace</code>.</li>
+            <li><strong>Minimal Home Stage</strong>: Removed the secondary hero subtitle copy on the idle Home stage while keeping the primary <code>Grab a link, get the file.</code> headline, Omnibox, and top-right <code>Search Ctrl+K</code> bar.</li>
+            <li><strong>Sharp Mascot During Link Inspection</strong>: Removed the CSS filter blur on the Penguin mascot and speech bubble when pasting or inspecting media links on the Home screen.</li>
+          </ul>
+        </div>
+      </article>
+
       <!-- v0.16.2 Release -->
       <article class="release-box" id="v0-16-2">
         <div class="release-header">
           <div>
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span class="release-tag-pill">v0.16.2 Latest Stable</span>
+              <span class="sidebar-tag">v0.16.2</span>
               <span class="release-date">Released November 2026</span>
             </div>
             <h2 class="release-title">V1 UI Upgrade: Omnibox Action Popover, Clickable Paste Pill, Thumbnail Duration Badge &amp; Global Download Dock</h2>
@@ -2409,7 +2438,8 @@
         <span>On this page</span>
       </div>
       <ul class="toc-list" id="tocList">
-        <li><a href="#v0-16-2" class="toc-link">v0.16.2 (Latest Stable)</a></li>
+        <li><a href="#v0-16-3" class="toc-link">v0.16.3 (Latest Stable)</a></li>
+        <li><a href="#v0-16-2" class="toc-link">v0.16.2</a></li>
         <li><a href="#v0-16-1" class="toc-link">v0.16.1</a></li>
         <li><a href="#v0-16-0" class="toc-link">v0.16.0</a></li>
         <li><a href="#v0-15-1" class="toc-link">v0.15.1</a></li>
@@ -2483,7 +2513,7 @@
         </li>
         <li class="search-result-item" onclick="location.href='../changelog/'">
           <span class="search-result-title">Release Notes &amp; Changelog</span>
-          <span class="search-result-desc">Version v0.16.2 updates, omnibox action popover, global download dock, Nami SQLite ledger, and history grid</span>
+          <span class="search-result-desc">Version v0.16.3 updates, route-scoped toolbar cleanup, clean home stage, omnibox action popover, and global download dock</span>
         </li>
       </ul>
     </div>
