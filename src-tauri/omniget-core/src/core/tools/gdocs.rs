@@ -110,7 +110,8 @@ pub async fn download(
         .map(|ct| ct.to_ascii_lowercase().starts_with("text/html") && format != "html")
         .unwrap_or(false);
 
-    if (!status.is_success() || is_html_redirect) && info.kind == "presentation" && format == "pdf" {
+    if (!status.is_success() || is_html_redirect) && info.kind == "presentation" && format == "pdf"
+    {
         if let Ok(res) =
             super::gslides::download_presentation(url, "pdf", dest_dir, progress.clone()).await
         {

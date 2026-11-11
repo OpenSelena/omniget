@@ -774,9 +774,14 @@ async fn download_deno() -> anyhow::Result<PathBuf> {
 
     tracing::info!("Downloading Deno JS runtime from {}", url);
 
+    let asset_name = url.rsplit('/').next().unwrap_or("deno.zip");
+    let sums_url = format!("{url}.sha256sum");
+
     let client = crate::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .timeout(std::time::Duration::from_secs(300))
         .build()?;
+
+    let expected_sha256 = integrity::expected_from_sums_url(&client, &sums_url, asset_name).await?;
 
     let response = client.get(url).send().await?;
     if !response.status().is_success() {
@@ -787,6 +792,7 @@ async fn download_deno() -> anyhow::Result<PathBuf> {
     }
 
     let bytes = response.bytes().await?;
+    integrity::verify_sha256(&bytes, &expected_sha256, "deno")?;
     let data = bytes.to_vec();
     let bin_dir_clone = bin_dir.clone();
     let deno_name_clone = deno_name.clone();

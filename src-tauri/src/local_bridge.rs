@@ -604,13 +604,19 @@ struct PairResponse {
 
 fn is_allowed_pair_origin(origin: &str) -> bool {
     let o = origin.trim();
-    o.starts_with("chrome-extension://")
+    if o.starts_with("chrome-extension://")
         || o.starts_with("moz-extension://")
         || o.starts_with("safari-web-extension://")
         || o.starts_with("tauri://")
-        || o.starts_with("http://localhost")
-        || o.starts_with("http://127.0.0.1")
-        || o.starts_with("https://localhost")
+    {
+        return true;
+    }
+    if let Ok(parsed) = url::Url::parse(o) {
+        if matches!(parsed.scheme(), "http" | "https") {
+            return matches!(parsed.host_str(), Some("localhost" | "127.0.0.1"));
+        }
+    }
+    false
 }
 
 async fn pair(State(state): State<BridgeState>, headers: HeaderMap) -> Response {
@@ -944,6 +950,7 @@ pub struct SlidesBridgeStatus {
 pub fn slides_bridge_status() -> SlidesBridgeStatus {
     let port = BOUND_PORT.load(Ordering::SeqCst);
     let effective_port = if port == 0 { 47720 } else { port };
+    let token = active_token().unwrap_or_default();
     let (slide_count, last_output) = slides_buffer()
         .lock()
         .ok()
@@ -953,7 +960,10 @@ pub fn slides_bridge_status() -> SlidesBridgeStatus {
         port: effective_port,
         slide_count,
         last_output,
-        script: omniget_core::core::tools::gslides::browser_extractor_script(effective_port),
+        script: omniget_core::core::tools::gslides::browser_extractor_script(
+            effective_port,
+            &token,
+        ),
     }
 }
 
@@ -973,11 +983,17 @@ struct SlideReceiveBody {
 
 async fn slides_reset(
     State(state): State<BridgeState>,
+    headers: HeaderMap,
     body: Option<Json<SlideResetBody>>,
 ) -> Response {
+    if !check_bearer(&headers, &state.token) {
+        return unauthorized();
+    }
     if let Ok(mut guard) = slides_buffer().lock() {
         guard.slides.clear();
-        guard.title = body.and_then(|b| b.0.title).filter(|t| !t.trim().is_empty());
+        guard.title = body
+            .and_then(|b| b.0.title)
+            .filter(|t| !t.trim().is_empty());
     }
     let _ = state.app.emit(
         "gslides-bridge-progress",
@@ -992,8 +1008,12 @@ async fn slides_reset(
 
 async fn slides_receive(
     State(state): State<BridgeState>,
+    headers: HeaderMap,
     Json(data): Json<SlideReceiveBody>,
 ) -> Response {
+    if !check_bearer(&headers, &state.token) {
+        return unauthorized();
+    }
     let count = if let Ok(mut guard) = slides_buffer().lock() {
         if let Some(t) = data.title.filter(|t| !t.trim().is_empty()) {
             guard.title = Some(t);
@@ -1020,11 +1040,18 @@ async fn slides_receive(
 
 async fn slides_compile(
     State(state): State<BridgeState>,
+    headers: HeaderMap,
     body: Option<Json<SlideResetBody>>,
 ) -> Response {
+    if !check_bearer(&headers, &state.token) {
+        return unauthorized();
+    }
     let (mut indexed_svgs, title) = match slides_buffer().lock() {
         Ok(mut guard) => {
-            if let Some(t) = body.and_then(|b| b.0.title).filter(|t| !t.trim().is_empty()) {
+            if let Some(t) = body
+                .and_then(|b| b.0.title)
+                .filter(|t| !t.trim().is_empty())
+            {
                 guard.title = Some(t);
             }
             (
@@ -1169,6 +1196,24 @@ mod tests {
     #[test]
     fn build_pairing_url_uses_loopback_address() {
         assert_eq!(build_pairing_url(47720), "http://127.0.0.1:47720");
+    }
+
+    #[test]
+    fn allowed_pair_origin_rejects_spoofed_subdomains() {
+        assert!(is_allowed_pair_origin(
+            "chrome-extension://abcdefghijklmnop"
+        ));
+        assert!(is_allowed_pair_origin("moz-extension://1234-5678"));
+        assert!(is_allowed_pair_origin("tauri://localhost"));
+        assert!(is_allowed_pair_origin("http://localhost:1420"));
+        assert!(is_allowed_pair_origin("https://localhost:47720"));
+        assert!(is_allowed_pair_origin("http://127.0.0.1:47720"));
+        assert!(!is_allowed_pair_origin("https://localhost.evil.com"));
+        assert!(!is_allowed_pair_origin(
+            "http://localhost.attacker.tld:8080"
+        ));
+        assert!(!is_allowed_pair_origin("http://127.0.0.1.evil.com"));
+        assert!(!is_allowed_pair_origin("https://evil.com"));
     }
 
     #[test]

@@ -212,9 +212,7 @@ impl Platform {
             Some(Platform::Other("mgtv".to_string()))
         } else if matches("youku.com") {
             Some(Platform::Other("youku".to_string()))
-        } else if host == "docs.google.com"
-            && crate::core::tools::gdocs::parse(url_str).is_some()
-        {
+        } else if host == "docs.google.com" && crate::core::tools::gdocs::parse(url_str).is_some() {
             Some(Platform::Other("gdocs".to_string()))
         } else if is_direct_file_url(url_str) {
             Some(Platform::Other("direct_file".to_string()))

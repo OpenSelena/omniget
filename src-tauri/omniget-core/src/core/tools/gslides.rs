@@ -209,17 +209,9 @@ pub fn normalize_slide_svg_geometry(svg: &str) -> String {
     let mut cleaned = width_re.replace_all(open_tag, "").into_owned();
     cleaned = height_re.replace_all(&cleaned, "").into_owned();
     if !viewbox_re.is_match(&cleaned) {
-        cleaned = cleaned.replacen(
-            "<svg",
-            r#"<svg viewBox="0 0 1280 720""#,
-            1,
-        );
+        cleaned = cleaned.replacen("<svg", r#"<svg viewBox="0 0 1280 720""#, 1);
     }
-    cleaned = cleaned.replacen(
-        "<svg",
-        r#"<svg width="1280px" height="720px""#,
-        1,
-    );
+    cleaned = cleaned.replacen("<svg", r#"<svg width="1280px" height="720px""#, 1);
 
     let mut result = String::with_capacity(trimmed.len() + 48);
     result.push_str(&trimmed[..svg_start]);
@@ -264,8 +256,8 @@ pub fn extract_title_from_viewer_html(html: &str) -> String {
     static VIEWER_TITLE_RE: OnceLock<Regex> = OnceLock::new();
     static HTML_TITLE_RE: OnceLock<Regex> = OnceLock::new();
 
-    let viewer_re = VIEWER_TITLE_RE
-        .get_or_init(|| Regex::new(r"title:\s*'((?:\\.|[^'])*)'").unwrap());
+    let viewer_re =
+        VIEWER_TITLE_RE.get_or_init(|| Regex::new(r"title:\s*'((?:\\.|[^'])*)'").unwrap());
     let head_slice = &html[..html.len().min(350_000)];
     if let Some(c) = viewer_re.captures(head_slice) {
         let decoded = unescape_js_string(&c[1]);
@@ -274,8 +266,8 @@ pub fn extract_title_from_viewer_html(html: &str) -> String {
         }
     }
 
-    let html_re = HTML_TITLE_RE
-        .get_or_init(|| Regex::new(r"(?is)<title[^>]*>(.*?)</title>").unwrap());
+    let html_re =
+        HTML_TITLE_RE.get_or_init(|| Regex::new(r"(?is)<title[^>]*>(.*?)</title>").unwrap());
     if let Some(c) = html_re.captures(head_slice) {
         let raw = c[1].trim();
         if !raw.is_empty() {
@@ -289,8 +281,7 @@ pub fn extract_title_from_viewer_html(html: &str) -> String {
 /// Extrae todos los bloques `SK_svgData` en el orden exacto de las diapositivas.
 pub fn extract_viewer_slides(html: &str) -> ExtractedPresentation {
     static SVG_DATA_RE: OnceLock<Regex> = OnceLock::new();
-    let re = SVG_DATA_RE
-        .get_or_init(|| Regex::new(r"SK_svgData\s*=\s*'((?:\\.|[^'])*)'").unwrap());
+    let re = SVG_DATA_RE.get_or_init(|| Regex::new(r"SK_svgData\s*=\s*'((?:\\.|[^'])*)'").unwrap());
 
     let title = extract_title_from_viewer_html(html);
     let mut svgs = Vec::new();
@@ -467,8 +458,13 @@ pub fn render_svg_to_jpeg(svg_str: &str) -> anyhow::Result<Vec<u8>> {
     let target_w = RENDER_WIDTH_PX;
     let target_h = RENDER_HEIGHT_PX;
 
-    let mut pixmap = tiny_skia::Pixmap::new(target_w, target_h)
-        .ok_or_else(|| anyhow!("No se pudo reservar memoria para el pixmap {}x{}", target_w, target_h))?;
+    let mut pixmap = tiny_skia::Pixmap::new(target_w, target_h).ok_or_else(|| {
+        anyhow!(
+            "No se pudo reservar memoria para el pixmap {}x{}",
+            target_w,
+            target_h
+        )
+    })?;
 
     // Fondo blanco por defecto para evitar transparencias negras al pasar a JPEG
     pixmap.fill(tiny_skia::Color::WHITE);
@@ -488,18 +484,16 @@ pub fn render_svg_to_jpeg(svg_str: &str) -> anyhow::Result<Vec<u8>> {
             rgb.push(px[0]);
             rgb.push(px[1]);
             rgb.push(px[2]);
-        } else if a == 0 {
-            rgb.push(255);
-            rgb.push(255);
-            rgb.push(255);
+        } else if let Some(r) = (px[0] as u16 * 255).checked_div(a) {
+            let g = (px[1] as u16 * 255) / a;
+            let b = (px[2] as u16 * 255) / a;
+            rgb.push(r.min(255) as u8);
+            rgb.push(g.min(255) as u8);
+            rgb.push(b.min(255) as u8);
         } else {
-            // Des-premultiplicar sobre fondo blanco
-            let r = ((px[0] as u16 * 255) / a).min(255) as u8;
-            let g = ((px[1] as u16 * 255) / a).min(255) as u8;
-            let b = ((px[2] as u16 * 255) / a).min(255) as u8;
-            rgb.push(r);
-            rgb.push(g);
-            rgb.push(b);
+            rgb.push(255);
+            rgb.push(255);
+            rgb.push(255);
         }
     }
 
@@ -618,7 +612,11 @@ pub async fn compile_svg_dir_to_pdf(
             let p = PathBuf::from(custom);
             if p.is_dir() {
                 p.join(format!("{}.pdf", super::sanitize_name(&dir_title)))
-            } else if p.extension().map(|e| e.eq_ignore_ascii_case("pdf")).unwrap_or(false) {
+            } else if p
+                .extension()
+                .map(|e| e.eq_ignore_ascii_case("pdf"))
+                .unwrap_or(false)
+            {
                 p
             } else {
                 p.with_extension("pdf")
@@ -678,9 +676,8 @@ pub async fn download_presentation(
     dest_dir: &str,
     progress: super::ProgressFn,
 ) -> anyhow::Result<GslidesDownloadResult> {
-    let target = parse_gslides_url(url).ok_or_else(|| {
-        anyhow!("Enlace de Google Slides no válido: {}", url)
-    })?;
+    let target = parse_gslides_url(url)
+        .ok_or_else(|| anyhow!("Enlace de Google Slides no válido: {}", url))?;
 
     let client = build_google_client(Some(url))?;
     let progress_id = format!("gslides:{}", target.id);
@@ -756,10 +753,9 @@ pub async fn download_presentation(
     let svgs = extracted.svgs;
     let progress_clone = progress.clone();
     let pid = progress_id.clone();
-    let pdf_bytes = tokio::task::spawn_blocking(move || {
-        compile_svgs_to_pdf(&svgs, &progress_clone, &pid)
-    })
-    .await??;
+    let pdf_bytes =
+        tokio::task::spawn_blocking(move || compile_svgs_to_pdf(&svgs, &progress_clone, &pid))
+            .await??;
 
     let pdf_path = base_dir.join(format!("{}.pdf", safe_title));
     tokio::fs::write(&pdf_path, &pdf_bytes).await?;
@@ -773,10 +769,11 @@ pub async fn download_presentation(
 }
 
 /// Genera el script JavaScript / Bookmarklet adaptado para enviar diapositivas al
-/// `local_bridge` de OmniGet en `http://127.0.0.1:<port>/api`.
-pub fn browser_extractor_script(port: u16) -> String {
+/// `local_bridge` de OmniGet en `http://127.0.0.1:<port>/api` autenticado con token Bearer.
+pub fn browser_extractor_script(port: u16, token: &str) -> String {
     let tpl = r##"javascript:(function(){
   const SERVER_URL = "http://127.0.0.1:__PORT__/api";
+  const AUTH_HEADERS = { "Content-Type": "application/json", "Authorization": "Bearer __TOKEN__" };
   let count = 1;
   let lastSvgSignature = "";
   let duplicateCount = 0;
@@ -784,7 +781,7 @@ pub fn browser_extractor_script(port: u16) -> String {
 
   fetch(`${SERVER_URL}/reset`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: AUTH_HEADERS,
     body: JSON.stringify({ title: deckTitle })
   });
 
@@ -844,7 +841,7 @@ pub fn browser_extractor_script(port: u16) -> String {
           btn.textContent = "⚙️ Compilando PDF 16:9 en OmniGet...";
           let r = await fetch(`${SERVER_URL}/compile`, {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
+            headers: AUTH_HEADERS,
             body: JSON.stringify({ title: deckTitle })
           });
           let j = await r.json().catch(() => ({}));
@@ -868,7 +865,7 @@ pub fn browser_extractor_script(port: u16) -> String {
       let xml = new XMLSerializer().serializeToString(clone);
       await fetch(`${SERVER_URL}/slide`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: AUTH_HEADERS,
         body: JSON.stringify({ index: count++, svg_content: xml, title: deckTitle })
       });
 
@@ -882,6 +879,7 @@ pub fn browser_extractor_script(port: u16) -> String {
   setTimeout(stepCapture, 1200);
 })();"##;
     tpl.replace("__PORT__", &port.to_string())
+        .replace("__TOKEN__", token)
 }
 
 #[cfg(test)]

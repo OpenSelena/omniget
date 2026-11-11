@@ -56,7 +56,7 @@ async fn fetch_presentation_title(url: &str) -> Option<String> {
     }
 }
 
-fn compute_path_size(path: & std::path::Path) -> u64 {
+fn compute_path_size(path: &std::path::Path) -> u64 {
     if let Ok(meta) = std::fs::metadata(path) {
         if meta.is_file() {
             return meta.len();
@@ -85,15 +85,12 @@ impl PlatformDownloader for GdocsDownloader {
     }
 
     async fn get_media_info(&self, url: &str) -> anyhow::Result<MediaInfo> {
-        let parsed = gdocs::parse(url)
-            .ok_or_else(|| anyhow!("Enlace de Google Docs/Slides no válido"))?;
+        let parsed =
+            gdocs::parse(url).ok_or_else(|| anyhow!("Enlace de Google Docs/Slides no válido"))?;
 
         let title = if parsed.kind == "presentation" {
             fetch_presentation_title(url).await.unwrap_or_else(|| {
-                format!(
-                    "Google Slides ({})",
-                    &parsed.id[..parsed.id.len().min(12)]
-                )
+                format!("Google Slides ({})", &parsed.id[..parsed.id.len().min(12)])
             })
         } else {
             format!(
@@ -108,8 +105,16 @@ impl PlatformDownloader for GdocsDownloader {
             .iter()
             .map(|fmt| VideoQuality {
                 label: fmt.to_uppercase(),
-                width: if parsed.kind == "presentation" { 1280 } else { 0 },
-                height: if parsed.kind == "presentation" { 720 } else { 0 },
+                width: if parsed.kind == "presentation" {
+                    1280
+                } else {
+                    0
+                },
+                height: if parsed.kind == "presentation" {
+                    720
+                } else {
+                    0
+                },
                 url: url.to_string(),
                 format: fmt.clone(),
             })
