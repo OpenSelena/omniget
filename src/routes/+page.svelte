@@ -3,7 +3,6 @@
   import { open } from "@tauri-apps/plugin-dialog";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
-  import SupportedServices from "$components/services/SupportedServices.svelte";
   import BilibiliPreviewExtras from "$components/omnibox/BilibiliPreviewExtras.svelte";
   import DownloadModeSelector from "$components/omnibox/DownloadModeSelector.svelte";
   import QualityPicker from "$components/omnibox/QualityPicker.svelte";
@@ -989,11 +988,10 @@
           {$t('home.value_first')}
         {/if}
       </p>
-      <SupportedServices />
     </div>
   {:else}
   <div class="home-mac-workspace" class:home-mac-workspace--idle={omniState.kind === "idle"}>
-    <div class="home-mac-hero">
+    <div class="home-mac-hero" class:home-mac-hero--blurred={omniState.kind === "detecting" || omniState.kind === "detected"}>
       <HomeHero
         emotion={mascotEmotion}
         compact={mascotCompact}
@@ -1092,10 +1090,6 @@
       </div>
     {/if}
     {/if}
-
-      {#if omniState.kind === "idle"}
-        <SupportedServices />
-      {/if}
 
     <HomeInspector open={showInspector} title={$t('home.inspector_title')}>
       {#if omniState.kind === "detected"}

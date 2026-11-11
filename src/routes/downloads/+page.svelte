@@ -555,13 +555,31 @@
   <div class="downloads-page downloads-mac">
     {#if viewMode === "active"}
     <div class="downloads-header">
-      <div class="downloads-hero-left">
-        <img src="/icons/downloads-64.png" alt="" class="downloads-head-icon" width="32" height="32" draggable="false" />
+      <div class="filter-pills segmented" role="tablist" aria-label={$t('downloads.filter_label')}>
+        {#each [
+          { value: 'all', labelKey: 'downloads.filter.all', count: filterCounts.all },
+          { value: 'active', labelKey: 'downloads.filter.active', count: filterCounts.active },
+          { value: 'queued', labelKey: 'downloads.filter.queued', count: filterCounts.queued },
+          { value: 'completed', labelKey: 'downloads.filter.completed', count: filterCounts.completed },
+          { value: 'failed', labelKey: 'downloads.filter.failed', count: filterCounts.failed },
+        ] as pill}
+          <button
+            type="button"
+            class="filter-pill segmented-btn"
+            class:active={statusFilter === pill.value}
+            role="tab"
+            aria-selected={statusFilter === pill.value}
+            onclick={() => { statusFilter = pill.value as StatusFilter; finishedVisibleCount = FINISHED_PAGE_SIZE; }}
+          >
+            <span>{$t(pill.labelKey)}</span>
+            <span class="filter-count">{pill.count}</span>
+          </button>
+        {/each}
+      </div>
+      <div class="bulk-actions">
         {#if dlStats.totalDownloads > 0}
           <span class="downloads-stats">{$t('downloads.stats_line', { count: String(dlStats.totalDownloads), size: formatBytes(dlStats.totalBytes) })}</span>
         {/if}
-      </div>
-      <div class="bulk-actions">
         <label class="speed-limit-field">
           <span class="speed-limit-label">{$t('settings.download.speed_limit')}</span>
           <select
@@ -573,6 +591,7 @@
             }}
           >
             <option value="unlimited">{$t('downloads.speed_unlimited')}</option>
+            <option value="500K">500 KB/s</option>
             <option value="1M">1 MB/s</option>
             <option value="2M">2 MB/s</option>
             <option value="5M">5 MB/s</option>
@@ -580,30 +599,6 @@
           </select>
         </label>
       </div>
-    </div>
-    {/if}
-
-    {#if viewMode === "active"}
-    <div class="filter-pills segmented" role="tablist" aria-label={$t('downloads.filter_label')}>
-      {#each [
-        { value: 'all', labelKey: 'downloads.filter.all', count: filterCounts.all },
-        { value: 'active', labelKey: 'downloads.filter.active', count: filterCounts.active },
-        { value: 'queued', labelKey: 'downloads.filter.queued', count: filterCounts.queued },
-        { value: 'completed', labelKey: 'downloads.filter.completed', count: filterCounts.completed },
-        { value: 'failed', labelKey: 'downloads.filter.failed', count: filterCounts.failed },
-      ] as pill}
-        <button
-          type="button"
-          class="filter-pill segmented-btn"
-          class:active={statusFilter === pill.value}
-          role="tab"
-          aria-selected={statusFilter === pill.value}
-          onclick={() => { statusFilter = pill.value as StatusFilter; finishedVisibleCount = FINISHED_PAGE_SIZE; }}
-        >
-          <span>{$t(pill.labelKey)}</span>
-          <span class="filter-count">{pill.count}</span>
-        </button>
-      {/each}
     </div>
 
     <div class="download-list">
@@ -1281,24 +1276,11 @@
 
   .downloads-header {
     display: flex;
+    flex-wrap: wrap;
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
     min-height: 28px;
-  }
-
-  .downloads-hero-left {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-  }
-
-  .downloads-head-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    object-fit: contain;
-    flex-shrink: 0;
   }
 
   .history-hero-head {
@@ -1344,10 +1326,10 @@
   }
 
   .speed-limit-selector {
-    height: 24px;
+    height: var(--control-h);
     font-size: var(--text-sm);
     padding-left: var(--space-2);
-    border-radius: 5px;
+    border-radius: var(--radius-sm);
   }
 
   .section-label {

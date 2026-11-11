@@ -34,16 +34,16 @@
           <img class="preview-art" src="/emoji/package.png" alt="" width="32" height="32" draggable="false" />
         </div>
       {/if}
+      {#if mediaPreview.duration_seconds}
+        <span class="preview-duration-badge">
+          {formatDuration(mediaPreview.duration_seconds)}
+        </span>
+      {/if}
     </div>
     <div class="preview-info">
       <p class="preview-title">{mediaPreview.title}</p>
       {#if mediaPreview.author}
         <p class="preview-author">{mediaPreview.author}</p>
-      {/if}
-      {#if mediaPreview.duration_seconds}
-        <p class="preview-duration">
-          {formatDuration(mediaPreview.duration_seconds)}
-        </p>
       {/if}
     </div>
   </div>
@@ -128,7 +128,7 @@
 
   .preview-author {
     margin: 0;
-    font-size: 11.5px;
+    font-size: var(--text-xs);
     font-weight: 500;
     color: var(--gray);
     overflow: hidden;
@@ -136,11 +136,19 @@
     white-space: nowrap;
   }
 
-  .preview-duration {
-    margin: 0;
-    font-size: 11.5px;
+  .preview-duration-badge {
+    position: absolute;
+    bottom: 4px;
+    right: 4px;
+    padding: 1px 5px;
+    font-size: var(--text-xs);
     font-weight: 500;
-    color: var(--gray);
+    line-height: 1.3;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.75);
+    border-radius: var(--radius-xs);
+    font-variant-numeric: tabular-nums;
+    pointer-events: none;
   }
 
   @media (max-width: 535px) {

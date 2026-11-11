@@ -208,6 +208,11 @@
     justify-content: center;
   }
 
+  .mac-search-glyph {
+    width: 12px;
+    height: 12px;
+  }
+
   .mac-search-label,
   .mac-search-field .kbd {
     display: none;
@@ -862,10 +867,6 @@
   gap: var(--space-3);
 }
 
-.downloads-mac .downloads-header:not(:has(.downloads-stats)) {
-  justify-content: flex-end;
-}
-
 .downloads-mac .downloads-stats {
   font-size: var(--text-sm);
   color: var(--text-dim);
@@ -1082,6 +1083,12 @@
   justify-content: flex-start;
   background: transparent;
   overflow: visible;
+  transition: filter var(--duration-base) var(--ease-out), opacity var(--duration-base) var(--ease-out);
+}
+
+.home-mac-hero--blurred {
+  filter: blur(4px);
+  opacity: 0.65;
 }
 
 .home-mac-hero .mascot-bubble {

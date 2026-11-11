@@ -15,6 +15,7 @@
   import AppSidebar from "$components/shell/AppSidebar.svelte";
   import AppToolbar from "$components/shell/AppToolbar.svelte";
   import CommandPalette from "$components/shell/CommandPalette.svelte";
+  import GlobalDownloadBar from "$components/download/GlobalDownloadBar.svelte";
   import { setCommandPaletteItems } from "$lib/stores/command-palette-store.svelte";
   import {
     refreshUpdateInfo,
@@ -425,6 +426,7 @@
           </div>
         {/if}
       </div>
+      <GlobalDownloadBar />
     </main>
   </div>
 </div>
