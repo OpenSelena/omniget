@@ -570,7 +570,22 @@ fn resolve_url(base: &str, relative: &str) -> String {
         None => (base, None),
     };
 
-    let resolved = if let Some(pos) = base_path.rfind('/') {
+    // Protocol-relative (`//host/path`): only the playlist's scheme carries over.
+    if let Some(rest) = relative.strip_prefix("//") {
+        return match base_path.split_once("://") {
+            Some((scheme, _)) => format!("{}://{}", scheme, rest),
+            None => relative.to_string(),
+        };
+    }
+
+    let resolved = if relative.starts_with('/') {
+        // Root-relative (`/path`): resolved against the playlist's origin,
+        // not its directory.
+        match url_origin(base_path) {
+            Some(origin) => format!("{}{}", origin, relative),
+            None => relative.to_string(),
+        }
+    } else if let Some(pos) = base_path.rfind('/') {
         format!("{}/{}", &base_path[..pos], relative)
     } else {
         relative.to_string()
@@ -946,6 +961,43 @@ mod tests {
                 "segment0.ts?key=123"
             ),
             "https://cdn.example.com/path/segment0.ts?key=123"
+        );
+    }
+
+    #[test]
+    fn resolve_url_root_relative() {
+        assert_eq!(
+            resolve_url(
+                "https://cdn.example.com/path/master.m3u8",
+                "/hls/v1/segment0.ts"
+            ),
+            "https://cdn.example.com/hls/v1/segment0.ts"
+        );
+        assert_eq!(
+            resolve_url("http://localhost:8080/live/a/index.m3u8", "/keys/1.key"),
+            "http://localhost:8080/keys/1.key"
+        );
+    }
+
+    #[test]
+    fn resolve_url_root_relative_propagates_query() {
+        assert_eq!(
+            resolve_url(
+                "https://cdn.example.com/path/master.m3u8?token=abc",
+                "/hls/v1/segment0.ts"
+            ),
+            "https://cdn.example.com/hls/v1/segment0.ts?token=abc"
+        );
+    }
+
+    #[test]
+    fn resolve_url_protocol_relative() {
+        assert_eq!(
+            resolve_url(
+                "https://cdn.example.com/path/master.m3u8?token=abc",
+                "//cdn2.example.com/v1/segment0.ts"
+            ),
+            "https://cdn2.example.com/v1/segment0.ts"
         );
     }
 
