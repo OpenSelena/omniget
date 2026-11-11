@@ -35,7 +35,8 @@ export type ToolbarState = {
   actions?: ToolbarAction[];
 };
 
-let state = $state<ToolbarState>({});
+let state = $state.raw<ToolbarState>({});
+let activeToken = 0;
 
 export function getToolbar(): ToolbarState {
   return state;
@@ -43,12 +44,14 @@ export function getToolbar(): ToolbarState {
 
 /** Replace the toolbar contents. Returns a cleanup that clears them. */
 export function setToolbar(next: ToolbarState): () => void {
+  const token = ++activeToken;
   state = next;
   return () => {
-    if (state === next) state = {};
+    if (activeToken === token) state = {};
   };
 }
 
 export function clearToolbar(): void {
+  activeToken++;
   state = {};
 }
