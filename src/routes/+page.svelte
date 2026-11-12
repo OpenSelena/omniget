@@ -192,6 +192,8 @@
   let lastCompletionAt = $state(0);
   let firstCompletionOfSession = $state(false);
   let completionSeenIds = new Set<string | number>();
+  let addedNoticeActive = $state(false);
+  let addedNoticeTimer: ReturnType<typeof setTimeout> | null = null;
 
   $effect(() => {
     for (const [id, item] of downloads.entries()) {
@@ -242,6 +244,10 @@
   let mascotEmotion = $derived.by((): "idle" | "downloading" | "error" | "stalled" | "queue" | "complete" | "amazed" => {
     void stallTick;
 
+    if (addedNoticeActive) {
+      return "complete";
+    }
+
     if (lastCompletionAt > 0 && Date.now() - lastCompletionAt < 5000) {
       return firstCompletionOfSession && completionSeenIds.size === 1 ? "amazed" : "complete";
     }
@@ -269,8 +275,8 @@
     return "idle";
   });
 
-  let mascotCompact = $derived(omniState.kind !== "idle");
-  let isStage = $derived(omniState.kind === "idle" && !advancedMode);
+  let mascotCompact = $derived(advancedMode);
+  let isStage = $derived(!advancedMode);
 
   function pickRandom(raw: string): string {
     if (raw.includes("|")) {
@@ -369,6 +375,11 @@
 
   function handleInput() {
     if (debounceTimer) clearTimeout(debounceTimer);
+    if (addedNoticeTimer) {
+      clearTimeout(addedNoticeTimer);
+      addedNoticeTimer = null;
+    }
+    addedNoticeActive = false;
     clearMediaPreview();
     clipStart = "";
     clipEnd = "";
@@ -385,10 +396,15 @@
     const saved = currentSettings?.last_download_options;
     const savedMode = saved?.mode;
     const settingsQuality = currentSettings?.download.video_quality;
-    selectedQuality = settingsQuality && typeof settingsQuality === "string"
-      ? settingsQuality
-      : "best";
-    downloadMode = savedMode === "audio" || savedMode === "mute" ? savedMode : "auto";
+    if (settingsQuality === "audio") {
+      selectedQuality = "best";
+      downloadMode = "audio";
+    } else {
+      selectedQuality = settingsQuality && typeof settingsQuality === "string"
+        ? settingsQuality
+        : "best";
+      downloadMode = savedMode === "audio" || savedMode === "mute" ? savedMode : "auto";
+    }
     selectedFormatId = null;
     formats = [];
     loadingFormats = false;
@@ -420,7 +436,7 @@
       }
       debounceTimer = setTimeout(() => {
         detectPlatform(targetUrl);
-      }, 500);
+      }, 120);
       return;
     }
 
@@ -437,15 +453,8 @@
   async function detectPlatform(value: string) {
     try {
       const result = await invoke<PlatformInfo>("detect_platform", { url: value });
+      if (url.trim() !== value) return;
       if (result.supported) {
-        omniState = { kind: "detected", info: result };
-        if (!COURSE_PLATFORMS.has(result.platform)) {
-          setTimeout(() => {
-            if (url === value) {
-              invoke("prefetch_media_info", { url: value }).catch(() => {});
-            }
-          }, 400);
-        }
         loadCookieAccounts(value);
         if (result.content_type === "playlist") {
           loadPlaylistEntries(value);
@@ -453,11 +462,31 @@
         if (isTorrentUrl(value)) {
           loadTorrentContents(value);
         }
+        const shouldPrefetch =
+          !COURSE_PLATFORMS.has(result.platform) &&
+          result.platform !== "direct_file" &&
+          result.platform !== "p2p" &&
+          !isTorrentUrl(value);
+        if (shouldPrefetch) {
+          invoke("prefetch_media_info", { url: value }).catch(() => {});
+          const startedAt = Date.now();
+          while (
+            url.trim() === value &&
+            getMediaPreview()?.url !== value &&
+            Date.now() - startedAt < 2200
+          ) {
+            await new Promise((r) => setTimeout(r, 50));
+          }
+        }
+        if (url.trim() !== value) return;
+        omniState = { kind: "detected", info: result };
       } else {
         omniState = { kind: "unsupported" };
       }
     } catch {
-      omniState = { kind: "unsupported" };
+      if (url.trim() === value) {
+        omniState = { kind: "unsupported" };
+      }
     }
   }
 
@@ -768,7 +797,13 @@
         stopAt: toEpochMs(scheduleStop),
       });
       persistLastDownloadOptions();
+      clearMediaPreview();
       omniState = { kind: "idle" };
+      addedNoticeActive = true;
+      if (addedNoticeTimer) clearTimeout(addedNoticeTimer);
+      addedNoticeTimer = setTimeout(() => {
+        addedNoticeActive = false;
+      }, 3000);
     } catch (e: any) {
       const msg = typeof e === "string" ? e : e.message ?? $t("omnibox.error");
       omniState = {
@@ -964,304 +999,295 @@
 </script>
 
 <div class="home-mac" class:home-mac--stage={isStage}>
-
-
-  {#if isStage}
-    <div class="home-stage">
-      <HomeHero emotion={mascotEmotion} stage celebrate={mascotEmotion === "amazed"} />
-      <h1 class="home-stage-title">{$t('home.hero_title')}</h1>
-      <HomeUrlBar
-        variant="stage"
-        bind:url
-        bind:mode={homeInputMode}
-        onInput={handleInput}
-        onModeChange={handleHomeModeChange}
-        onAdvanced={() => { advancedMode = true; }}
-      />
-      <p class="home-value">
-        {#if dlStats.totalDownloads > 0}
-          {@html $t('home.value_line', { count: `<strong>${dlStats.totalDownloads.toLocaleString()}</strong>`, size: `<strong>${formatBytes(dlStats.totalBytes)}</strong>` })}
-        {:else}
-          {$t('home.value_first')}
-        {/if}
-      </p>
-    </div>
-  {:else}
-  <div class="home-mac-workspace" class:home-mac-workspace--idle={omniState.kind === "idle"}>
-    <div class="home-mac-hero">
-      <HomeHero
-        emotion={mascotEmotion}
-        compact={mascotCompact}
-        bubbleText={bubbleText || undefined}
-        celebrate={mascotEmotion === "amazed"}
-      />
-    </div>
-    <div class="home-mac-main">
-      {#if advancedMode}
+  {#if advancedMode}
+    <div class="home-mac-workspace">
+      <div class="home-mac-hero">
+        <HomeHero
+          emotion={mascotEmotion}
+          compact={mascotCompact}
+          celebrate={mascotEmotion === "amazed"}
+        />
+      </div>
+      <div class="home-mac-main">
         <div class="home-secondary home-secondary--start">
           <button type="button" class="home-secondary-link" onclick={() => { advancedMode = false; }}>
             {$t('home.action_simple')}
           </button>
         </div>
         <OmniboxAdvanced />
-      {:else}
-    {#if externalNotice}
-      <div class="feedback-card feedback-enter external-url-card">
-        <div class="card-row">
-          <svg class="card-status-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 5v14" />
-            <path d="M5 12h14" />
-          </svg>
-          <span class="card-title">{$t('omnibox.external_url_ready')}</span>
-          <button class="dismiss-btn" onclick={() => { externalNotice = null; }} aria-label={$t('common.close')}>
-            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M18 6L6 18M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
-        <div class="card-row">
-          <span class="card-subtext external-url-text">{externalNotice.url}</span>
-        </div>
       </div>
-    {/if}
-
-
-    {#if omniState.kind === "detecting"}
-      <div class="feedback feedback-enter">
-        <span class="feedback-spinner"></span>
-      </div>
-
-    {:else if omniState.kind === "detected"}
-      <div class="feedback feedback-enter" data-supported="true">
-        <span class="feedback-text">
-          {platformDisplayName(omniState.info.platform)}
-          {#if omniState.info.content_type}
-            <span class="feedback-sep">&middot;</span>
-            {getContentTypeLabel(omniState.info.content_type)}
-          {/if}
-        </span>
-      </div>
-    {/if}
-
-    {#if showOmnibox}
-      <HomeUrlBar
-        bind:url
-        bind:mode={homeInputMode}
-        onInput={handleInput}
-        onModeChange={handleHomeModeChange}
-        onAdvanced={() => { advancedMode = true; }}
-      />
-    {/if}
-
-    {#if omniState.kind === "batch"}
-      <div class="batch-options">
-        <DownloadModeSelector bind:downloadMode />
-        <BatchDownload count={omniState.urls.length} onDownload={handleBatchDownload} />
-      </div>
-
-    {:else if omniState.kind === "searching"}
-      <div class="feedback feedback-enter">
-        <span class="feedback-spinner"></span>
-        <span class="feedback-text search-hint">{$t('omnibox.searching')}</span>
-      </div>
-
-    {:else if omniState.kind === "search-results"}
-      <SearchResults results={omniState.results} onSelect={selectSearchResult} />
-
-    {:else if omniState.kind === "search-empty"}
-      <div class="feedback feedback-enter" data-supported="false">
-        <svg class="feedback-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="11" cy="11" r="8" />
-          <path d="M21 21l-4.35-4.35" />
-        </svg>
-        <span class="feedback-text">{$t('omnibox.search_empty')}</span>
-      </div>
-
-    {:else if omniState.kind === "unsupported"}
-      <div class="feedback feedback-enter" data-supported="false">
-        <svg class="feedback-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="10" />
-          <path d="M12 8v4m0 4h.01" />
-        </svg>
-        <span class="feedback-text">{$t('omnibox.unsupported')}</span>
-      </div>
-    {/if}
-    {/if}
-
-    <HomeInspector open={showInspector} title={$t('home.inspector_title')}>
-      {#if omniState.kind === "detected"}
-        <MediaPreview bind:mediaPreview bind:imageLoading={previewImageLoading} />
-        {#if omniState.info.content_type === "playlist"}
-          <div class="playlist-picker">
-            <div class="playlist-head">
-              <span class="playlist-count">
-                {$t('omnibox.playlist_selected', { selected: selectedPlaylistItems.size, total: playlistEntries.length })}
-              </span>
-              {#if !playlistLoading && playlistEntries.length > 0}
-                <div class="playlist-bulk">
-                  <button type="button" class="playlist-link" onclick={selectAllPlaylist}>{$t('omnibox.playlist_all')}</button>
-                  <button type="button" class="playlist-link" onclick={selectNonePlaylist}>{$t('omnibox.playlist_none')}</button>
-                </div>
-              {/if}
-            </div>
-            {#if playlistLoading}
-              <div class="playlist-status"><span class="feedback-spinner"></span> {$t('omnibox.playlist_loading')}</div>
-            {:else if playlistEntries.length === 0}
-              <span class="playlist-status">{$t('omnibox.playlist_empty')}</span>
-            {:else}
-              <ul class="playlist-list">
-                {#each playlistEntries as entry (entry.index)}
-                  <li>
-                    <label class="playlist-item">
-                      <input type="checkbox" checked={selectedPlaylistItems.has(entry.index)} onchange={() => togglePlaylistItem(entry.index)} />
-                      <span class="playlist-idx">{entry.index}.</span>
-                      <span class="playlist-title">{entry.title}</span>
-                    </label>
-                  </li>
-                {/each}
-              </ul>
-            {/if}
-          </div>
-        {/if}
-        {#if torrentLoading || torrentEntries.length > 0}
-          <div class="playlist-picker">
-            <div class="playlist-head">
-              <span class="playlist-count">
-                {$t('omnibox.torrent_selected', { selected: selectedTorrentFiles.size, total: torrentEntries.length })}
-              </span>
-              {#if !torrentLoading && torrentEntries.length > 0}
-                <div class="playlist-bulk">
-                  <button type="button" class="playlist-link" onclick={selectAllTorrent}>{$t('omnibox.playlist_all')}</button>
-                  <button type="button" class="playlist-link" onclick={selectNoneTorrent}>{$t('omnibox.playlist_none')}</button>
-                </div>
-              {/if}
-            </div>
-            {#if torrentLoading}
-              <div class="playlist-status"><span class="feedback-spinner"></span> {$t('omnibox.torrent_loading')}</div>
-            {:else}
-              <ul class="playlist-list">
-                {#each torrentEntries as entry (entry.index)}
-                  <li>
-                    <label class="playlist-item">
-                      <input type="checkbox" checked={selectedTorrentFiles.has(entry.index)} onchange={() => toggleTorrentFile(entry.index)} />
-                      <span class="playlist-title">{entry.path}</span>
-                      <span class="torrent-size">{formatBytes(entry.size_bytes)}</span>
-                    </label>
-                  </li>
-                {/each}
-              </ul>
-            {/if}
-          </div>
-        {/if}
-        {#if cookieHint}
-          <p class="cookie-hint" class:expired={cookieHint === "expired"} role="status">
-            <span>{cookieHint === "expired" ? $t("omnibox.cookie_hint_expired") : $t("omnibox.cookie_hint_stale")}</span>
-            <button type="button" class="cookie-hint-link" onclick={() => goto("/settings?tab=cookies")}>{$t("omnibox.cookie_hint_action")}</button>
-          </p>
-        {/if}
-        {#if COURSE_PLATFORMS.has(omniState.info.platform)}
-          {#if coursesPluginInstalled === false}
-            <p class="course-upsell">{$t('omnibox.courses_plugin_needed')}</p>
-            <button class="download-primary-btn" onclick={() => goto("/marketplace")}>{$t('omnibox.install_courses_plugin')}</button>
-          {:else}
-            <p class="course-upsell">{$t('omnibox.courses_plugin_ready')}</p>
-            <button class="download-primary-btn" onclick={handleAction}>{$t(omniState.info.platform === "udemy" ? 'omnibox.go_to_udemy' : 'omnibox.go_to_hotmart')}</button>
-          {/if}
-        {:else}
-          {@const playlistBlocked = omniState.info.content_type === "playlist" && playlistEntries.length > 0 && selectedPlaylistItems.size === 0}
-          {@const torrentBlocked = torrentEntries.length > 0 && selectedTorrentFiles.size === 0}
-          {#if omniState.info.platform === "bilibili"}
-            <BilibiliPreviewExtras {url} accountSlug={selectedCookieSlug && selectedCookieSlug !== "_anonymous" ? selectedCookieSlug : null} />
-          {/if}
-          <button class="download-primary-btn" disabled={playlistBlocked || torrentBlocked} onclick={handleAction}>{$t('omnibox.download')}</button>
-          {#if omniState.info.platform !== "direct_file"}
-            <details class="options-panel">
-              <summary class="options-toggle">{$t('omnibox.options')}</summary>
-              <div class="options-content">
-                <DownloadModeSelector bind:downloadMode onChange={() => { selectedFormatId = null; }} />
-                <QualityPicker bind:selectedQuality selectedFormatId {availableHeights} {hasAudioOnly} />
-                {#if cookieAccounts.length > 1}
-                  <CookieAccountPicker accounts={cookieAccounts} bind:selectedSlug={selectedCookieSlug} />
-                {/if}
-                <details class="options-panel">
-                  <summary class="options-toggle">{$t('omnibox.advanced')}</summary>
-                  <div class="options-content">
-                    {#if omniState.info.platform === "vimeo" || omniState.info.platform === "generic"}
-                      <div class="referer-input-wrapper">
-                        <label class="referer-label" for="referer-input">{$t('omnibox.referer_label')}</label>
-                        <input id="referer-input" class="referer-input" type="text" placeholder={$t('omnibox.referer_placeholder')} bind:value={referer} spellcheck="false" />
-                      </div>
-                    {/if}
-                    {#if omniState.info.content_type !== "playlist"}
-                      <div class="timerange-wrapper">
-                        <span class="timerange-label">{$t('omnibox.timerange_label')}</span>
-                        <div class="timerange-inputs">
-                          <input class="timerange-input" type="text" placeholder={$t('omnibox.timerange_start')} bind:value={clipStart} spellcheck="false" inputmode="numeric" aria-label={$t('omnibox.timerange_start') as string} />
-                          <span class="timerange-sep" aria-hidden="true">—</span>
-                          <input class="timerange-input" type="text" placeholder={$t('omnibox.timerange_end')} bind:value={clipEnd} spellcheck="false" inputmode="numeric" aria-label={$t('omnibox.timerange_end') as string} />
-                        </div>
-                        <span class="timerange-hint">{$t('omnibox.timerange_hint')}</span>
-                      </div>
-                    {/if}
-                    <div class="timerange-wrapper">
-                      <span class="timerange-label">{$t('omnibox.schedule_label')}</span>
-                      <div class="schedule-presets">
-                        <button type="button" class="schedule-preset" onclick={() => setSchedulePreset('1h')}>{$t('omnibox.schedule_1h')}</button>
-                        <button type="button" class="schedule-preset" onclick={() => setSchedulePreset('tonight')}>{$t('omnibox.schedule_tonight')}</button>
-                        <button type="button" class="schedule-preset" onclick={() => setSchedulePreset('1d')}>{$t('omnibox.schedule_1d')}</button>
-                        {#if scheduleAt || scheduleStop}
-                          <button type="button" class="schedule-preset" onclick={() => { scheduleAt = ""; scheduleStop = ""; }}>{$t('omnibox.schedule_clear')}</button>
-                        {/if}
-                      </div>
-                      <div class="timerange-inputs schedule-row">
-                        <input class="timerange-input schedule-date" type="date" value={schedulePart(scheduleAt, "date")} oninput={(e) => { scheduleAt = withSchedulePart(scheduleAt, "date", e.currentTarget.value); }} aria-label={$t('omnibox.schedule_start') as string} />
-                        <input class="timerange-input schedule-time" type="time" step="60" value={schedulePart(scheduleAt, "time")} oninput={(e) => { scheduleAt = withSchedulePart(scheduleAt, "time", e.currentTarget.value); }} aria-label={$t('omnibox.schedule_start') as string} />
-                        <span class="timerange-sep" aria-hidden="true">—</span>
-                        <input class="timerange-input schedule-date" type="date" value={schedulePart(scheduleStop, "date")} oninput={(e) => { scheduleStop = withSchedulePart(scheduleStop, "date", e.currentTarget.value); }} aria-label={$t('omnibox.schedule_stop') as string} />
-                        <input class="timerange-input schedule-time" type="time" step="60" value={schedulePart(scheduleStop, "time")} oninput={(e) => { scheduleStop = withSchedulePart(scheduleStop, "time", e.currentTarget.value); }} aria-label={$t('omnibox.schedule_stop') as string} />
-                      </div>
-                      <span class="timerange-hint">{$t('omnibox.schedule_hint')}</span>
-                    </div>
-                    <FormatSelector
-                      platform={omniState.info.platform}
-                      isPlaylist={omniState.info.content_type === "playlist"}
-                      bind:formats
-                      bind:selectedFormatId
-                      {loadingFormats}
-                      {formatError}
-                      onLoadFormats={loadFormats}
-                      onSelectFormat={selectFormat}
-                      onClearFormat={clearFormatSelection}
-                      onPresetBest={presetBest}
-                      onPresetMusic={presetMusic}
-                    />
-                  </div>
-                </details>
-              </div>
-            </details>
-          {/if}
-        {/if}
-      {:else if omniState.kind === "preparing"}
-        <div class="feedback-card feedback-enter">
-          <div class="card-row">
-            <span class="feedback-spinner"></span>
-            <span class="card-text">{$t('omnibox.preparing')}</span>
-          </div>
-        </div>
-      {:else if omniState.kind === "error"}
-        <div class="feedback-card feedback-enter" data-status="error">
-          <div class="card-row">
-            <span class="card-title card-error-text">{omniState.message}</span>
-          </div>
-          <div class="card-row card-actions">
-            <button class="button card-action-btn" onclick={handleRetry}>{$t('omnibox.retry')}</button>
-          </div>
-        </div>
-      {/if}
-    </HomeInspector>
     </div>
+  {:else}
+    <div class="home-stage">
+      <div class="home-stage-inner">
+        <div class="home-stage-hero" class:home-stage-hero--detecting={omniState.kind === "detecting"}>
+          <HomeHero
+            emotion={mascotEmotion}
+            stage
+            celebrate={mascotEmotion === "amazed" || addedNoticeActive}
+          />
+        </div>
 
-  </div>
+        <div class="home-mac-main">
+          {#if externalNotice}
+            <div class="feedback-card feedback-enter external-url-card">
+              <div class="card-row">
+                <svg class="card-status-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 5v14" />
+                  <path d="M5 12h14" />
+                </svg>
+                <span class="card-title">{$t('omnibox.external_url_ready')}</span>
+                <button class="dismiss-btn" onclick={() => { externalNotice = null; }} aria-label={$t('common.close')}>
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 6L6 18M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+              <div class="card-row">
+                <span class="card-subtext external-url-text">{externalNotice.url}</span>
+              </div>
+            </div>
+          {/if}
+
+          {#if showOmnibox}
+            <HomeUrlBar
+              variant="stage"
+              bind:url
+              bind:mode={homeInputMode}
+              onInput={handleInput}
+              onModeChange={handleHomeModeChange}
+              onAdvanced={() => { advancedMode = true; }}
+            />
+          {/if}
+
+          {#if omniState.kind === "detecting"}
+            <div class="feedback feedback-enter">
+              <span class="feedback-text">{$t('omnibox.detecting')}</span>
+            </div>
+
+          {:else if omniState.kind === "detected"}
+            <div class="feedback feedback-enter" data-supported="true">
+              <span class="feedback-text">{platformDisplayName(omniState.info.platform)}</span>
+            </div>
+
+          {:else if omniState.kind === "idle" && addedNoticeActive}
+            <div class="feedback feedback-enter added-notice">
+              <strong class="added-notice-title">{$t('omnibox.added_to_downloads')}</strong>
+              <button type="button" class="added-notice-link" onclick={() => goto("/downloads")}>
+                {$t('omnibox.open_downloads')}
+              </button>
+            </div>
+
+          {:else if omniState.kind === "batch"}
+            <div class="batch-options">
+              <DownloadModeSelector bind:downloadMode />
+              <BatchDownload count={omniState.urls.length} onDownload={handleBatchDownload} />
+            </div>
+
+          {:else if omniState.kind === "searching"}
+            <div class="feedback feedback-enter">
+              <span class="feedback-spinner"></span>
+              <span class="feedback-text search-hint">{$t('omnibox.searching')}</span>
+            </div>
+
+          {:else if omniState.kind === "search-results"}
+            <SearchResults results={omniState.results} onSelect={selectSearchResult} />
+
+          {:else if omniState.kind === "search-empty"}
+            <div class="feedback feedback-enter" data-supported="false">
+              <svg class="feedback-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="11" cy="11" r="8" />
+                <path d="M21 21l-4.35-4.35" />
+              </svg>
+              <span class="feedback-text">{$t('omnibox.search_empty')}</span>
+            </div>
+
+          {:else if omniState.kind === "unsupported"}
+            <div class="feedback feedback-enter" data-supported="false">
+              <svg class="feedback-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10" />
+                <path d="M12 8v4m0 4h.01" />
+              </svg>
+              <span class="feedback-text">{$t('omnibox.unsupported')}</span>
+            </div>
+          {/if}
+
+          <HomeInspector open={showInspector} title={$t('home.inspector_title')}>
+            {#if omniState.kind === "detected"}
+              <MediaPreview bind:mediaPreview bind:imageLoading={previewImageLoading} />
+              {#if omniState.info.content_type === "playlist"}
+                <div class="playlist-picker">
+                  <div class="playlist-head">
+                    <span class="playlist-count">
+                      {$t('omnibox.playlist_selected', { selected: selectedPlaylistItems.size, total: playlistEntries.length })}
+                    </span>
+                    {#if !playlistLoading && playlistEntries.length > 0}
+                      <div class="playlist-bulk">
+                        <button type="button" class="playlist-link" onclick={selectAllPlaylist}>{$t('omnibox.playlist_all')}</button>
+                        <button type="button" class="playlist-link" onclick={selectNonePlaylist}>{$t('omnibox.playlist_none')}</button>
+                      </div>
+                    {/if}
+                  </div>
+                  {#if playlistLoading}
+                    <div class="playlist-status"><span class="feedback-spinner"></span> {$t('omnibox.playlist_loading')}</div>
+                  {:else if playlistEntries.length === 0}
+                    <span class="playlist-status">{$t('omnibox.playlist_empty')}</span>
+                  {:else}
+                    <ul class="playlist-list">
+                      {#each playlistEntries as entry (entry.index)}
+                        <li>
+                          <label class="playlist-item">
+                            <input type="checkbox" checked={selectedPlaylistItems.has(entry.index)} onchange={() => togglePlaylistItem(entry.index)} />
+                            <span class="playlist-idx">{entry.index}.</span>
+                            <span class="playlist-title">{entry.title}</span>
+                          </label>
+                        </li>
+                      {/each}
+                    </ul>
+                  {/if}
+                </div>
+              {/if}
+              {#if torrentLoading || torrentEntries.length > 0}
+                <div class="playlist-picker">
+                  <div class="playlist-head">
+                    <span class="playlist-count">
+                      {$t('omnibox.torrent_selected', { selected: selectedTorrentFiles.size, total: torrentEntries.length })}
+                    </span>
+                    {#if !torrentLoading && torrentEntries.length > 0}
+                      <div class="playlist-bulk">
+                        <button type="button" class="playlist-link" onclick={selectAllTorrent}>{$t('omnibox.playlist_all')}</button>
+                        <button type="button" class="playlist-link" onclick={selectNoneTorrent}>{$t('omnibox.playlist_none')}</button>
+                      </div>
+                    {/if}
+                  </div>
+                  {#if torrentLoading}
+                    <div class="playlist-status"><span class="feedback-spinner"></span> {$t('omnibox.torrent_loading')}</div>
+                  {:else}
+                    <ul class="playlist-list">
+                      {#each torrentEntries as entry (entry.index)}
+                        <li>
+                          <label class="playlist-item">
+                            <input type="checkbox" checked={selectedTorrentFiles.has(entry.index)} onchange={() => toggleTorrentFile(entry.index)} />
+                            <span class="playlist-title">{entry.path}</span>
+                            <span class="torrent-size">{formatBytes(entry.size_bytes)}</span>
+                          </label>
+                        </li>
+                      {/each}
+                    </ul>
+                  {/if}
+                </div>
+              {/if}
+              {#if cookieHint}
+                <p class="cookie-hint" class:expired={cookieHint === "expired"} role="status">
+                  <span>{cookieHint === "expired" ? $t("omnibox.cookie_hint_expired") : $t("omnibox.cookie_hint_stale")}</span>
+                  <button type="button" class="cookie-hint-link" onclick={() => goto("/settings?tab=cookies")}>{$t("omnibox.cookie_hint_action")}</button>
+                </p>
+              {/if}
+              {#if COURSE_PLATFORMS.has(omniState.info.platform)}
+                {#if coursesPluginInstalled === false}
+                  <p class="course-upsell">{$t('omnibox.courses_plugin_needed')}</p>
+                  <button class="download-primary-btn" onclick={() => goto("/marketplace")}>{$t('omnibox.install_courses_plugin')}</button>
+                {:else}
+                  <p class="course-upsell">{$t('omnibox.courses_plugin_ready')}</p>
+                  <button class="download-primary-btn" onclick={handleAction}>{$t(omniState.info.platform === "udemy" ? 'omnibox.go_to_udemy' : 'omnibox.go_to_hotmart')}</button>
+                {/if}
+              {:else}
+                {@const playlistBlocked = omniState.info.content_type === "playlist" && playlistEntries.length > 0 && selectedPlaylistItems.size === 0}
+                {@const torrentBlocked = torrentEntries.length > 0 && selectedTorrentFiles.size === 0}
+                {#if omniState.info.platform === "bilibili"}
+                  <BilibiliPreviewExtras {url} accountSlug={selectedCookieSlug && selectedCookieSlug !== "_anonymous" ? selectedCookieSlug : null} />
+                {/if}
+                <button class="download-primary-btn" disabled={playlistBlocked || torrentBlocked} onclick={handleAction}>{$t('omnibox.download')}</button>
+                {#if omniState.info.platform !== "direct_file"}
+                  <details class="options-panel">
+                    <summary class="options-toggle">{$t('omnibox.options')}</summary>
+                    <div class="options-content">
+                      <DownloadModeSelector bind:downloadMode onChange={() => { selectedFormatId = null; }} />
+                      {#if downloadMode !== "audio"}
+                        <QualityPicker bind:selectedQuality {selectedFormatId} {availableHeights} {hasAudioOnly} />
+                      {/if}
+                      {#if cookieAccounts.length > 1}
+                        <CookieAccountPicker accounts={cookieAccounts} bind:selectedSlug={selectedCookieSlug} />
+                      {/if}
+                      <details class="options-panel">
+                        <summary class="options-toggle">{$t('omnibox.advanced')}</summary>
+                        <div class="options-content">
+                          {#if omniState.info.platform === "vimeo" || omniState.info.platform === "generic"}
+                            <div class="referer-input-wrapper">
+                              <label class="referer-label" for="referer-input">{$t('omnibox.referer_label')}</label>
+                              <input id="referer-input" class="referer-input" type="text" placeholder={$t('omnibox.referer_placeholder')} bind:value={referer} spellcheck="false" />
+                            </div>
+                          {/if}
+                          {#if omniState.info.content_type !== "playlist"}
+                            <div class="timerange-wrapper">
+                              <span class="timerange-label">{$t('omnibox.timerange_label')}</span>
+                              <div class="timerange-inputs">
+                                <input class="timerange-input" type="text" placeholder={$t('omnibox.timerange_start')} bind:value={clipStart} spellcheck="false" inputmode="numeric" aria-label={$t('omnibox.timerange_start') as string} />
+                                <span class="timerange-sep" aria-hidden="true">—</span>
+                                <input class="timerange-input" type="text" placeholder={$t('omnibox.timerange_end')} bind:value={clipEnd} spellcheck="false" inputmode="numeric" aria-label={$t('omnibox.timerange_end') as string} />
+                              </div>
+                              <span class="timerange-hint">{$t('omnibox.timerange_hint')}</span>
+                            </div>
+                          {/if}
+                          <div class="timerange-wrapper">
+                            <span class="timerange-label">{$t('omnibox.schedule_label')}</span>
+                            <div class="schedule-presets">
+                              <button type="button" class="schedule-preset" onclick={() => setSchedulePreset('1h')}>{$t('omnibox.schedule_1h')}</button>
+                              <button type="button" class="schedule-preset" onclick={() => setSchedulePreset('tonight')}>{$t('omnibox.schedule_tonight')}</button>
+                              <button type="button" class="schedule-preset" onclick={() => setSchedulePreset('1d')}>{$t('omnibox.schedule_1d')}</button>
+                              {#if scheduleAt || scheduleStop}
+                                <button type="button" class="schedule-preset" onclick={() => { scheduleAt = ""; scheduleStop = ""; }}>{$t('omnibox.schedule_clear')}</button>
+                              {/if}
+                            </div>
+                            <div class="timerange-inputs schedule-row">
+                              <input class="timerange-input schedule-date" type="date" value={schedulePart(scheduleAt, "date")} oninput={(e) => { scheduleAt = withSchedulePart(scheduleAt, "date", e.currentTarget.value); }} aria-label={$t('omnibox.schedule_start') as string} />
+                              <input class="timerange-input schedule-time" type="time" step="60" value={schedulePart(scheduleAt, "time")} oninput={(e) => { scheduleAt = withSchedulePart(scheduleAt, "time", e.currentTarget.value); }} aria-label={$t('omnibox.schedule_start') as string} />
+                              <span class="timerange-sep" aria-hidden="true">—</span>
+                              <input class="timerange-input schedule-date" type="date" value={schedulePart(scheduleStop, "date")} oninput={(e) => { scheduleStop = withSchedulePart(scheduleStop, "date", e.currentTarget.value); }} aria-label={$t('omnibox.schedule_stop') as string} />
+                              <input class="timerange-input schedule-time" type="time" step="60" value={schedulePart(scheduleStop, "time")} oninput={(e) => { scheduleStop = withSchedulePart(scheduleStop, "time", e.currentTarget.value); }} aria-label={$t('omnibox.schedule_stop') as string} />
+                            </div>
+                            <span class="timerange-hint">{$t('omnibox.schedule_hint')}</span>
+                          </div>
+                          <FormatSelector
+                            platform={omniState.info.platform}
+                            isPlaylist={omniState.info.content_type === "playlist"}
+                            bind:formats
+                            bind:selectedFormatId
+                            {loadingFormats}
+                            {formatError}
+                            onLoadFormats={loadFormats}
+                            onSelectFormat={selectFormat}
+                            onClearFormat={clearFormatSelection}
+                            onPresetBest={presetBest}
+                            onPresetMusic={presetMusic}
+                          />
+                        </div>
+                      </details>
+                    </div>
+                  </details>
+                {/if}
+              {/if}
+            {:else if omniState.kind === "preparing"}
+              <div class="feedback-card feedback-enter">
+                <div class="card-row">
+                  <span class="feedback-spinner"></span>
+                  <span class="card-text">{$t('omnibox.preparing')}</span>
+                </div>
+              </div>
+            {:else if omniState.kind === "error"}
+              <div class="feedback-card feedback-enter" data-status="error">
+                <div class="card-row">
+                  <span class="card-title card-error-text">{omniState.message}</span>
+                </div>
+                <div class="card-row card-actions">
+                  <button class="button card-action-btn" onclick={handleRetry}>{$t('omnibox.retry')}</button>
+                </div>
+              </div>
+            {/if}
+          </HomeInspector>
+        </div>
+      </div>
+    </div>
   {/if}
 
   {#if showP2pSendDialog}
@@ -1275,11 +1301,6 @@
       onReject={handleP2pReject}
     />
   {/if}
-
-  <div class="terms-note">
-    {$t('terms_note.agreement')}
-    <a href="/about/terms" class="terms-link">{$t('terms_note.link')}</a>
-  </div>
 </div>
 
 <style>
@@ -1299,9 +1320,12 @@
   .feedback {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 6px;
     min-height: 20px;
     padding: 0 var(--space-1);
+    color: var(--text-muted);
+    width: 100%;
   }
 
   .feedback-icon {
@@ -1310,7 +1334,7 @@
   }
 
   .feedback[data-supported="true"] {
-    color: var(--success);
+    color: var(--text-muted);
   }
 
   .feedback[data-supported="false"] {
@@ -1322,9 +1346,30 @@
     font-weight: 500;
   }
 
-  .feedback-sep {
-    opacity: 0.5;
-    margin: 0 2px;
+  .added-notice {
+    gap: var(--space-2);
+    font-size: var(--text-sm);
+  }
+
+  .added-notice-title {
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .added-notice-link {
+    background: none;
+    border: none;
+    padding: 0;
+    font: inherit;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--accent-hi);
+    cursor: pointer;
+  }
+
+  .added-notice-link:hover {
+    text-decoration: underline;
+    text-underline-offset: 2px;
   }
 
   .feedback-spinner {
@@ -1787,20 +1832,6 @@
 
   .search-hint {
     color: var(--text-dim);
-  }
-
-  .terms-note {
-    flex-shrink: 0;
-    font-size: var(--text-xs);
-    color: var(--text-faint);
-    text-align: center;
-    padding: var(--space-2) var(--space-1) var(--space-3);
-  }
-
-  .terms-link {
-    color: var(--text-dim);
-    text-decoration: underline;
-    text-underline-offset: 2px;
   }
 
   @media (prefers-reduced-motion: reduce) {

@@ -953,11 +953,33 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: var(--space-5);
+  justify-content: flex-start;
+  gap: var(--space-4);
   position: relative;
   padding: var(--space-6) var(--space-5) var(--space-8);
+  overflow-y: auto;
   isolation: isolate;
+}
+
+.home-stage-inner {
+  margin: auto 0;
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.home-stage-hero {
+  display: flex;
+  justify-content: center;
+  transition: filter var(--duration-base) var(--ease-out), opacity var(--duration-base) var(--ease-out);
+}
+
+.home-stage-hero--detecting {
+  filter: blur(6px);
+  opacity: 0.78;
 }
 
 /* one warm light behind the mascot — the single decorative moment of the page */
@@ -1080,9 +1102,10 @@
   flex-shrink: 0;
   width: 100%;
   min-width: 0;
-  max-width: 640px;
+  max-width: 560px;
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--space-3);
 }
 

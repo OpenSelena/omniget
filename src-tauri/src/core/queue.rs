@@ -1549,6 +1549,15 @@ async fn spawn_download_inner(
         final_output_dir = final_output_dir.join(&platform_name);
     }
     let torrent_id_slot = Arc::new(tokio::sync::Mutex::new(None));
+    let raw_quality = quality.or_else(|| Some(settings.download.video_quality.clone()));
+    let (effective_quality, download_mode) = if raw_quality.as_deref() == Some("audio") {
+        (
+            Some("best".to_string()),
+            download_mode.or_else(|| Some("audio".to_string())),
+        )
+    } else {
+        (raw_quality, download_mode)
+    };
     let audio_format = if download_mode.as_deref() == Some("audio") {
         Some(settings.download.music_audio_format.clone())
     } else {
@@ -1565,7 +1574,7 @@ async fn spawn_download_inner(
         args
     };
     let opts = crate::models::media::DownloadOptions {
-        quality: quality.or_else(|| Some(settings.download.video_quality.clone())),
+        quality: effective_quality,
         output_dir: final_output_dir,
         filename_template: Some(tmpl),
         download_subtitles: settings.download.download_subtitles,

@@ -3245,6 +3245,8 @@
     "speed_unlimited": "ບໍ່ຈຳກັດຄວາມໄວ",
     "error_details": "ລາຍລະອຽດທາງເທັກນິກ",
     "view_queue": "ການດາວໂຫຼດ",
+    "view_downloads": "View downloads",
+    "eta_left": "About {{eta}} left",
     "view_history": "ປະຫວັດ",
     "view_tools": "ເຄື່ອງມື"
   },
@@ -4256,6 +4258,9 @@
     "go_to_hotmart": "ໄປທີ່ Hotmart",
     "go_to_udemy": "ໄປທີ່ Udemy",
     "download": "ດາວໂຫຼດ",
+    "detecting": "Checking link...",
+    "added_to_downloads": "Added to Downloads",
+    "open_downloads": "Open Downloads",
     "options": "ຕົວເລືອກ",
     "advanced": "ຂັ້ນສູງ",
     "preparing": "ກຳລັງກຽມດາວໂຫຼດ...",

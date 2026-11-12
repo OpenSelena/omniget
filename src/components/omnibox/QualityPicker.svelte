@@ -19,16 +19,12 @@
     { value: "360p", key: "omnibox.quality_360p", height: 360 },
   ];
 
-  // Derive which resolution pills to show.
-  // Before formats load: show standard set (Best + 1080p + 720p + 480p + 360p).
-  // After formats load: show only resolutions actually available, plus Best always.
   let visibleOptions = $derived.by(() => {
     if (!availableHeights) {
-      // Pre-fetch fallback: strip 2K / 4K from hardcoded list to keep UI tidy
-      return RESOLUTION_OPTIONS.filter(o => o.height === Infinity || o.height <= 1080);
+      return RESOLUTION_OPTIONS;
     }
     return RESOLUTION_OPTIONS.filter(o => {
-      if (o.height === Infinity) return true; // "Best" always shown
+      if (o.height === Infinity || o.value === selectedQuality) return true;
       return availableHeights!.some(h => h === o.height);
     });
   });

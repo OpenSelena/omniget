@@ -297,6 +297,15 @@ impl PlatformDownloader for TwitchClipsDownloader {
         opts: &DownloadOptions,
         progress: mpsc::Sender<ProgressUpdate>,
     ) -> anyhow::Result<DownloadResult> {
+        let requested_height = opts.quality.as_deref().and_then(|s| {
+            let trimmed = s.trim().to_lowercase();
+            if trimmed == "best" || trimmed == "highest" {
+                None
+            } else {
+                trimmed.trim_end_matches('p').parse::<u32>().ok()
+            }
+        });
+
         if let Some(quality) = info.available_qualities.first() {
             if quality.format == "ytdlp" {
                 let ytdlp_path = crate::core::ytdlp::ensure_ytdlp().await?;
@@ -304,7 +313,7 @@ impl PlatformDownloader for TwitchClipsDownloader {
                     &ytdlp_path,
                     &quality.url,
                     &opts.output_dir,
-                    None,
+                    requested_height,
                     progress,
                     opts.download_mode.as_deref(),
                     opts.format_id.as_deref(),
@@ -326,13 +335,23 @@ impl PlatformDownloader for TwitchClipsDownloader {
             .first()
             .ok_or_else(|| anyhow!("No media URL available"))?;
 
-        let selected = if let Some(ref wanted) = opts.quality {
-            info.available_qualities
+        let selected = match requested_height {
+            Some(h) => info
+                .available_qualities
                 .iter()
-                .find(|q| q.label == *wanted)
-                .unwrap_or(first)
-        } else {
-            first
+                .filter(|q| q.height > 0 && q.height <= h)
+                .max_by_key(|q| q.height)
+                .unwrap_or(first),
+            None => {
+                if let Some(ref wanted) = opts.quality {
+                    info.available_qualities
+                        .iter()
+                        .find(|q| q.label == *wanted)
+                        .unwrap_or(first)
+                } else {
+                    first
+                }
+            }
         };
 
         let filename = format!(

@@ -3245,6 +3245,8 @@
     "speed_unlimited": "No speed limit",
     "error_details": "Technical details",
     "view_queue": "Downloads",
+    "view_downloads": "View downloads",
+    "eta_left": "About {{eta}} left",
     "view_history": "History",
     "view_tools": "Tools"
   },
@@ -4256,6 +4258,9 @@
     "go_to_hotmart": "Go to Hotmart",
     "go_to_udemy": "Go to Udemy",
     "download": "Download",
+    "detecting": "Checking link...",
+    "added_to_downloads": "Added to Downloads",
+    "open_downloads": "Open Downloads",
     "options": "Options",
     "advanced": "Advanced",
     "preparing": "Preparing download...",

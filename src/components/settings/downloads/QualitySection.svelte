@@ -55,6 +55,8 @@
       </div>
       <select class="select" value={settings.download.video_quality} onchange={changeQuality}>
         <option value="best">{$t('omnibox.quality_best')}</option>
+        <option value="2160p">{$t('omnibox.quality_2160p')}</option>
+        <option value="1440p">{$t('omnibox.quality_1440p')}</option>
         <option value="1080p">{$t('omnibox.quality_1080p')}</option>
         <option value="720p">{$t('omnibox.quality_720p')}</option>
         <option value="480p">{$t('omnibox.quality_480p')}</option>

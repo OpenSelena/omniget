@@ -7,7 +7,7 @@
     getSpeedHistory,
     type DownloadItem,
   } from "$lib/stores/download-store.svelte";
-  import { formatBytes, formatSpeed } from "$lib/download-format";
+  import { formatBytes, formatSpeed, formatEta } from "$lib/download-format";
 
   const downloadsMap = $derived(getDownloads());
 
@@ -65,6 +65,15 @@
     return `${formatBytes(downloaded)}`;
   });
 
+  const primaryEta = $derived.by(() => {
+    for (const item of activeItems) {
+      if (item.kind === "generic" && item.etaSeconds && item.etaSeconds > 0) {
+        return formatEta(item.etaSeconds);
+      }
+    }
+    return "";
+  });
+
   const sparklinePaths = $derived.by(() => {
     const primary = activeItems[0];
     if (!primary) return { line: "", area: "" };
@@ -117,25 +126,30 @@
         <span class="dock-sep">&middot;</span>
         <span>{bytesSummary}</span>
         <span class="dock-speed">{formatSpeed(totalSpeed)}</span>
+        {#if primaryEta}
+          <span class="dock-eta">{$t('downloads.eta_left', { eta: primaryEta })}</span>
+        {/if}
       </span>
 
-      <svg
-        class="dock-sparkline"
-        viewBox="0 0 64 18"
-        width="64"
-        height="18"
-        aria-hidden="true"
-      >
-        <path class="dock-sparkline-area" d={sparklinePaths.area} />
-        <path class="dock-sparkline-line" d={sparklinePaths.line} />
-      </svg>
+      <span class="dock-sparkline-box" aria-hidden="true">
+        <svg
+          class="dock-sparkline"
+          viewBox="0 0 64 18"
+          width="64"
+          height="18"
+          aria-hidden="true"
+        >
+          <path class="dock-sparkline-area" d={sparklinePaths.area} />
+          <path class="dock-sparkline-line" d={sparklinePaths.line} />
+        </svg>
+      </span>
 
       <button
         type="button"
         class="dock-view-btn"
         onclick={() => goto("/downloads")}
       >
-        {$t('downloads.view_queue')}
+        {$t('downloads.view_downloads')}
       </button>
     </div>
   </div>
@@ -228,6 +242,23 @@
   .dock-speed {
     margin-left: var(--space-1);
     color: var(--text-dim);
+  }
+
+  .dock-eta {
+    margin-left: var(--space-1);
+    color: var(--text-dim);
+  }
+
+  .dock-sparkline-box {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 24px;
+    padding: 0 6px;
+    border-radius: var(--radius-xs);
+    background: var(--fill-1);
+    box-shadow: inset 0 0 0 var(--hairline) var(--content-border);
+    flex-shrink: 0;
   }
 
   .dock-sparkline {

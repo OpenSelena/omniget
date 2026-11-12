@@ -152,16 +152,32 @@ impl PlatformDownloader for VimeoDownloader {
             .first()
             .ok_or_else(|| anyhow!("No quality available"))?;
 
-        let selected = if let Some(ref wanted) = opts.quality {
-            info.available_qualities
+        let requested_height = opts
+            .quality
+            .as_deref()
+            .and_then(Self::extract_quality_height);
+
+        let selected = match requested_height {
+            Some(h) => info
+                .available_qualities
                 .iter()
-                .find(|q| q.label == *wanted)
-                .unwrap_or(first)
-        } else {
-            first
+                .filter(|q| q.height > 0 && q.height <= h)
+                .max_by_key(|q| q.height)
+                .unwrap_or(first),
+            None => {
+                if let Some(ref wanted) = opts.quality {
+                    info.available_qualities
+                        .iter()
+                        .find(|q| q.label == *wanted)
+                        .unwrap_or(first)
+                } else {
+                    first
+                }
+            }
         };
 
-        let quality_height = Self::extract_quality_height(&selected.label);
+        let quality_height =
+            requested_height.or_else(|| Self::extract_quality_height(&selected.label));
         let video_url = &selected.url;
 
         ytdlp::download_video(

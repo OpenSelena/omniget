@@ -3245,6 +3245,8 @@
     "speed_unlimited": "Без ограничения скорости",
     "error_details": "Технические детали",
     "view_queue": "Загрузки",
+    "view_downloads": "View downloads",
+    "eta_left": "About {{eta}} left",
     "view_history": "История",
     "view_tools": "Инструменты"
   },
@@ -4256,6 +4258,9 @@
     "go_to_hotmart": "Перейти в Hotmart",
     "go_to_udemy": "Перейти в Udemy",
     "download": "Скачать",
+    "detecting": "Checking link...",
+    "added_to_downloads": "Added to Downloads",
+    "open_downloads": "Open Downloads",
     "options": "Опции",
     "advanced": "Дополнительно",
     "preparing": "Подготовка к скачиванию…",

@@ -149,16 +149,32 @@ impl PlatformDownloader for VimeoDownloader {
             .first()
             .ok_or_else(|| anyhow!("No quality available"))?;
 
-        let selected = if let Some(ref wanted) = opts.quality {
-            info.available_qualities
+        let requested_height = opts
+            .quality
+            .as_deref()
+            .and_then(Self::extract_quality_height);
+
+        let selected = match requested_height {
+            Some(h) => info
+                .available_qualities
                 .iter()
-                .find(|q| q.label == *wanted)
-                .unwrap_or(first)
-        } else {
-            first
+                .filter(|q| q.height > 0 && q.height <= h)
+                .max_by_key(|q| q.height)
+                .unwrap_or(first),
+            None => {
+                if let Some(ref wanted) = opts.quality {
+                    info.available_qualities
+                        .iter()
+                        .find(|q| q.label == *wanted)
+                        .unwrap_or(first)
+                } else {
+                    first
+                }
+            }
         };
 
-        let quality_height = Self::extract_quality_height(&selected.label);
+        let quality_height =
+            requested_height.or_else(|| Self::extract_quality_height(&selected.label));
         let video_url = &selected.url;
 
         ytdlp::download_video(
@@ -179,5 +195,46 @@ impl PlatformDownloader for VimeoDownloader {
             opts.audio_format.as_deref(),
         )
         .await
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::VimeoDownloader;
+    use crate::models::media::VideoQuality;
+
+    #[test]
+    fn extract_quality_height_parses_4k_and_2k_and_best() {
+        assert_eq!(VimeoDownloader::extract_quality_height("2160p"), Some(2160));
+        assert_eq!(VimeoDownloader::extract_quality_height("1440p"), Some(1440));
+        assert_eq!(VimeoDownloader::extract_quality_height("1080p"), Some(1080));
+        assert_eq!(VimeoDownloader::extract_quality_height("best"), None);
+    }
+
+    #[test]
+    fn upper_bound_selection_falls_back_to_max_available_when_video_is_1080p() {
+        let qualities = vec![
+            VideoQuality {
+                label: "1080p".to_string(),
+                width: 1920,
+                height: 1080,
+                url: "https://vimeo.com/1".to_string(),
+                format: "ytdlp".to_string(),
+            },
+            VideoQuality {
+                label: "720p".to_string(),
+                width: 1280,
+                height: 720,
+                url: "https://vimeo.com/1".to_string(),
+                format: "ytdlp".to_string(),
+            },
+        ];
+        let requested_height = VimeoDownloader::extract_quality_height("2160p").unwrap();
+        let selected = qualities
+            .iter()
+            .filter(|q| q.height > 0 && q.height <= requested_height)
+            .max_by_key(|q| q.height)
+            .unwrap();
+        assert_eq!(selected.height, 1080);
     }
 }
