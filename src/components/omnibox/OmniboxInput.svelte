@@ -123,7 +123,7 @@
       type="button"
       class="omnibox-plus-btn"
       class:open={menuOpen}
-      aria-label={$t('omnibox.options')}
+      aria-label={$t('omnibox.more_actions')}
       aria-expanded={menuOpen}
       aria-haspopup="menu"
       onclick={(e) => {
@@ -228,8 +228,8 @@
 
   .omnibox-wrapper.prominent {
     height: 52px;
-    padding: 0 var(--space-3);
-    border-radius: var(--radius-xl);
+    padding: 0 10px;
+    border-radius: var(--radius-full);
     background: var(--surface);
     box-shadow:
       inset 0 0 0 var(--hairline) var(--content-border),
@@ -267,6 +267,7 @@
     position: relative;
     display: flex;
     align-items: center;
+    height: 100%;
     flex-shrink: 0;
   }
 
@@ -323,7 +324,7 @@
   .omnibox-plus-menu {
     position: absolute;
     top: calc(100% + var(--space-2));
-    left: 0;
+    inset-inline-start: 0;
     min-width: 220px;
     padding: var(--space-1);
     display: flex;
@@ -351,7 +352,7 @@
     color: var(--text);
     font-size: var(--text-base);
     font-weight: 500;
-    text-align: left;
+    text-align: start;
     cursor: pointer;
     transition: background var(--duration-fast) var(--ease-out);
   }
@@ -423,9 +424,9 @@
   }
 
   .omnibox-wrapper.prominent .omnibox-paste-btn {
-    height: 30px;
+    height: 32px;
     padding: 0 var(--space-3);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-full);
   }
 
   .omnibox-paste-label {
@@ -463,6 +464,11 @@
     cursor: pointer;
     padding: 0;
     flex-shrink: 0;
+  }
+
+  .omnibox-wrapper.prominent .clear-btn {
+    width: 32px;
+    height: 32px;
   }
 
   .clear-btn :global(svg) {

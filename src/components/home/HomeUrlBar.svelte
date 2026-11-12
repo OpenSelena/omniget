@@ -49,7 +49,6 @@
 
   .home-url-bar.stage {
     align-items: center;
-    gap: var(--space-3);
-    max-width: 680px;
+    max-width: 560px;
   }
 </style>

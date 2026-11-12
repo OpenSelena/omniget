@@ -512,7 +512,8 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
-    margin: 0 var(--pane-inset) var(--space-2) 0;
+    margin-block: 0 var(--space-2);
+    margin-inline: 0 var(--pane-inset);
     padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
     background: var(--accent);
     color: var(--on-accent);
@@ -599,7 +600,8 @@
     align-items: center;
     justify-content: space-between;
     gap: var(--space-3);
-    margin: 0 var(--pane-inset) var(--space-2) 0;
+    margin-block: 0 var(--space-2);
+    margin-inline: 0 var(--pane-inset);
     padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
     background: color-mix(in srgb, var(--warning) 16%, var(--pane-bg));
     color: var(--text);

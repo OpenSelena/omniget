@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { untrack } from "svelte";
+
   type MascotEmotion = "idle" | "downloading" | "error" | "stalled" | "queue" | "complete" | "amazed";
 
   function emotionToSrc(e: MascotEmotion): string {
@@ -18,33 +20,39 @@
   } = $props();
 
   let currentSrc = $state("/mascot/idle.png");
-  let nextSrc = $state("");
   let showCurrent = $state(false);
-  let showNext = $state(false);
   let errored = $state(false);
-  let transitioning = $state(false);
+  let transitionTimer: ReturnType<typeof setTimeout> | null = null;
 
   $effect(() => {
     const target = emotionToSrc(emotion);
-    if (target === currentSrc && !transitioning) return;
-    if (transitioning) return;
+    if (target === currentSrc) {
+      if (!untrack(() => errored)) showCurrent = true;
+      return;
+    }
 
-    if (!showCurrent) {
+    if (transitionTimer) {
+      clearTimeout(transitionTimer);
+      transitionTimer = null;
+    }
+
+    if (!untrack(() => showCurrent)) {
       currentSrc = target;
       return;
     }
 
-    transitioning = true;
-    nextSrc = target;
-    showNext = false;
     showCurrent = false;
-
-    setTimeout(() => {
+    transitionTimer = setTimeout(() => {
+      transitionTimer = null;
       currentSrc = target;
-      nextSrc = "";
-      showCurrent = false;
-      transitioning = false;
     }, 200);
+
+    return () => {
+      if (transitionTimer) {
+        clearTimeout(transitionTimer);
+        transitionTimer = null;
+      }
+    };
   });
 
   function onCurrentLoad() {
@@ -73,8 +81,6 @@
     <svg
       class="mascot-fallback"
       viewBox="0 0 64 64"
-      width="100"
-      height="100"
       fill="none"
       stroke="currentColor"
       stroke-width="1.5"
@@ -99,38 +105,44 @@
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    height: 100px;
+    min-height: 100px;
     position: relative;
-    transition: height 0.2s ease;
+    transition: min-height 0.2s ease;
   }
 
   .mascot.compact {
-    height: 72px;
+    min-height: 72px;
   }
 
   .mascot.stage {
-    height: 128px;
+    min-height: 128px;
   }
 
   .mascot-img {
+    width: 100px;
     height: 100px;
-    width: auto;
-    border-radius: var(--radius-xl);
+    aspect-ratio: 1;
+    object-fit: contain;
     opacity: 0;
     transform: scale(0.9);
     transition:
       opacity var(--duration-base) var(--ease-out),
       transform var(--duration-bounce) var(--ease-spring),
+      width var(--duration-base) var(--ease-out),
       height var(--duration-base) var(--ease-out);
     pointer-events: none;
     user-select: none;
   }
 
-  .mascot.compact .mascot-img {
+  .mascot.compact .mascot-img,
+  .mascot.compact .mascot-fallback {
+    width: 72px;
     height: 72px;
   }
 
-  .mascot.stage .mascot-img {
+  .mascot.stage .mascot-img,
+  .mascot.stage .mascot-fallback {
+    width: 128px;
     height: 128px;
   }
 
@@ -140,6 +152,8 @@
   }
 
   .mascot-fallback {
+    width: 100px;
+    height: 100px;
     color: var(--gray);
     opacity: 0.5;
     pointer-events: none;

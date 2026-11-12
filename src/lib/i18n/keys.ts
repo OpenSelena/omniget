@@ -753,6 +753,7 @@ export type TranslationKeys =
   | 'omnibox.mode_auto'
   | 'omnibox.mode_mute'
   | 'omnibox.mode_normal'
+  | 'omnibox.more_actions'
   | 'omnibox.no_formats'
   | 'omnibox.open_downloads'
   | 'omnibox.options'
