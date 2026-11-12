@@ -1415,7 +1415,7 @@
           <li>
             <a href="../courses/" class="sidebar-link">
               <span>36 Course Platforms</span>
-              <span class="sidebar-tag">v0.16.4</span>
+              <span class="sidebar-tag">v0.16.5</span>
             </a>
           </li>
         </ul>
@@ -1502,12 +1502,42 @@
         Release notes, feature changes, and system patches for OmniGet. All desktop releases are signed, reproducible, and published with SHA-256 binary validation.
       </p>
 
+      <!-- v0.16.5 Release -->
+      <article class="release-box" id="v0-16-5">
+        <div class="release-header">
+          <div>
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <span class="release-tag-pill">v0.16.5 Latest Stable</span>
+              <span class="release-date">Released November 2026</span>
+            </div>
+            <h2 class="release-title">Home Geometry &amp; Asset Alignment: Centered Titlebar, Concentric Pill Omnibox &amp; Lossless Mascot Frames</h2>
+          </div>
+          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.16.5" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+            <span>GitHub Tag</span>
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+
+        <div class="release-section">
+          <h3 class="release-section-title">
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            Fixes
+          </h3>
+          <ul class="release-list">
+            <li><strong>Shell &amp; Titlebar Alignment</strong>: Matched <code>.mac-titlebar</code> right inset and banner margins to <code>--pane-inset</code> so titlebar controls align vertically with the content pane center, and normalized the backend window title casing from <code>omniget</code> to <code>OmniGet</code>.</li>
+            <li><strong>Lossless Mascot Framing</strong>: Normalized all 7 mascot PNGs onto a square <code>1320x1320</code> canvas with stripped edge halos, centered body anatomy, a shared baseline, square CSS sizing (<code>aspect-ratio: 1; object-fit: contain</code>), and an image load-race guard in <code>Mascot.svelte</code>.</li>
+            <li><strong>Concentric Home Aura</strong>: Anchored the warm radial glow inside <code>.home-stage-hero</code> instead of the full scroll stage so it stays centered behind the mascot across all viewport heights.</li>
+            <li><strong>Omnibox Pill &amp; Action Menu</strong>: Switched the Home Omnibox wrapper to full pill rounding (<code>9999px</code>), equalized the left <code>+</code>, clear, and paste endcap heights to <code>32px</code>, aligned the <code>+</code> popover flush with the left inset (<code>8px</code> gap), and added localized <code>omnibox.more_actions</code> ARIA labels across all 12 locales.</li>
+          </ul>
+        </div>
+      </article>
+
       <!-- v0.16.4 Release -->
       <article class="release-box" id="v0-16-4">
         <div class="release-header">
           <div>
             <div style="display: flex; align-items: center; gap: 8px;">
-              <span class="release-tag-pill">v0.16.4 Latest Stable</span>
+              <span class="sidebar-tag">v0.16.4</span>
               <span class="release-date">Released November 2026</span>
             </div>
             <h2 class="release-title">Home Stage Parity: 4K &amp; 2K Quality Selection, Video Mode &amp; Immediate Media Preview</h2>
@@ -2470,7 +2500,8 @@
         <span>On this page</span>
       </div>
       <ul class="toc-list" id="tocList">
-        <li><a href="#v0-16-4" class="toc-link">v0.16.4 (Latest Stable)</a></li>
+        <li><a href="#v0-16-5" class="toc-link">v0.16.5 (Latest Stable)</a></li>
+        <li><a href="#v0-16-4" class="toc-link">v0.16.4</a></li>
         <li><a href="#v0-16-3" class="toc-link">v0.16.3</a></li>
         <li><a href="#v0-16-2" class="toc-link">v0.16.2</a></li>
         <li><a href="#v0-16-1" class="toc-link">v0.16.1</a></li>
@@ -2546,7 +2577,7 @@
         </li>
         <li class="search-result-item" onclick="location.href='../changelog/'">
           <span class="search-result-title">Release Notes &amp; Changelog</span>
-          <span class="search-result-desc">Version v0.16.4 updates, 4K/2K resolution options, Video mode selector, unified home stage, immediate media preview, and post-download confirmation</span>
+          <span class="search-result-desc">Version v0.16.5 updates, home stage and titlebar alignment, concentric pill omnibox, and lossless mascot frame normalization</span>
         </li>
       </ul>
     </div>

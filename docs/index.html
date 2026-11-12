@@ -1415,7 +1415,7 @@
           <li>
             <a href="./courses/" class="sidebar-link">
               <span>36 Course Platforms</span>
-              <span class="sidebar-tag">v0.16.4</span>
+              <span class="sidebar-tag">v0.16.5</span>
             </a>
           </li>
         </ul>
@@ -1950,12 +1950,44 @@
         Track every update and bugfix shipped in OmniGet. OmniGet follows Semantic Versioning and publishes signed artifacts with SHA-256 checksums for every desktop release.
       </p>
 
+      <!-- v0.16.5 Release -->
+      <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span class="sidebar-tag" style="background: var(--primary); color: var(--text-inverse); font-weight: 600; padding: 3px 8px; border-radius: 6px;">v0.16.5 Latest Release</span>
+              <span style="font-size: 13px; color: var(--text-subtle);">Released November 2026</span>
+            </div>
+            <h3 style="font-size: 18px; font-weight: 700; color: var(--text); margin-top: 6px;">Home Geometry &amp; Asset Alignment: Centered Titlebar, Concentric Pill Omnibox &amp; Lossless Mascot Frames</h3>
+          </div>
+          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.16.5" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+            <span>View Release on GitHub</span>
+            <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+
+        <div style="display: grid; gap: 18px;">
+          <div>
+            <h4 style="font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              Fixes
+            </h4>
+            <ul style="margin-left: 20px; color: var(--text-muted); font-size: 14px; line-height: 1.6; display: grid; gap: 4px;">
+              <li><strong>Shell &amp; Titlebar Alignment</strong>: Aligned <code>.mac-titlebar</code> right inset and banner margins with <code>--pane-inset</code> so titlebar controls share the pane centerline, and capitalized the backend window title to <code>OmniGet</code>.</li>
+              <li><strong>Lossless Mascot Framing</strong>: Centered all 7 mascot PNGs on a square <code>1320x1320</code> canvas without edge halos or baseline drift, enforced square rendering, and fixed the image load race in <code>Mascot.svelte</code>.</li>
+              <li><strong>Concentric Home Aura</strong>: Moved the warm radial glow into <code>.home-stage-hero</code> so it tracks the mascot center across all window heights.</li>
+              <li><strong>Omnibox Pill &amp; Action Menu</strong>: Updated the Omnibox wrapper to full pill radius (<code>9999px</code>), uniform <code>32px</code> endcap controls, a flush <code>8px</code> menu gap, and localized <code>omnibox.more_actions</code> labels.</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
       <!-- v0.16.4 Release -->
       <div style="background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin-bottom: 24px;">
         <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; border-bottom: 1px solid var(--border); padding-bottom: 14px;">
           <div>
             <div style="display: flex; align-items: center; gap: 10px;">
-              <span class="sidebar-tag" style="background: var(--primary); color: var(--text-inverse); font-weight: 600; padding: 3px 8px; border-radius: 6px;">v0.16.4 Latest Release</span>
+              <span class="sidebar-tag">v0.16.4</span>
               <span style="font-size: 13px; color: var(--text-subtle);">Released November 2026</span>
             </div>
             <h3 style="font-size: 18px; font-weight: 700; color: var(--text); margin-top: 6px;">Home Stage Parity: 4K &amp; 2K Quality Selection, Video Mode &amp; Immediate Media Preview</h3>
