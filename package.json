@@ -1,6 +1,6 @@
 {
   "name": "omniget",
-  "version": "0.16.5",
+  "version": "0.16.6",
   "description": "",
   "type": "module",
   "packageManager": "pnpm@10.29.3",
