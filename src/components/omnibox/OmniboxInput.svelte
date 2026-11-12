@@ -228,8 +228,8 @@
 
   .omnibox-wrapper.prominent {
     height: 52px;
-    padding: 0 10px;
-    border-radius: var(--radius-full);
+    padding: 0 var(--space-3);
+    border-radius: var(--radius-xl);
     background: var(--surface);
     box-shadow:
       inset 0 0 0 var(--hairline) var(--content-border),
@@ -426,7 +426,7 @@
   .omnibox-wrapper.prominent .omnibox-paste-btn {
     height: 32px;
     padding: 0 var(--space-3);
-    border-radius: var(--radius-full);
+    border-radius: var(--radius-md);
   }
 
   .omnibox-paste-label {
