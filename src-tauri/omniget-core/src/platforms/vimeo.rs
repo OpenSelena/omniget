@@ -213,7 +213,7 @@ mod tests {
 
     #[test]
     fn upper_bound_selection_falls_back_to_max_available_when_video_is_1080p() {
-        let qualities = vec![
+        let qualities = [
             VideoQuality {
                 label: "1080p".to_string(),
                 width: 1920,
