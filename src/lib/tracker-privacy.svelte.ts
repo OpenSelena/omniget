@@ -1,9 +1,11 @@
-const STORAGE_KEY = "omniget.tracking.privacy";
+const STORAGE_KEY = "libreget.tracking.privacy";
+const LEGACY_STORAGE_KEY = "omniget.tracking.privacy";
 
 function readInitial(): boolean {
   if (typeof localStorage === "undefined") return false;
   try {
-    return localStorage.getItem(STORAGE_KEY) === "1";
+    const val = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY);
+    return val === "1";
   } catch {
     return false;
   }

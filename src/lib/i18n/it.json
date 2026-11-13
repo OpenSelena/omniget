@@ -24,8 +24,8 @@
     "confirm": "Chiudi comunque"
   },
   "legal": {
-    "title": "Usa OmniGet in modo responsabile",
-    "body_paragraph_1": "OmniGet è uno strumento per scaricare contenuti multimediali. Sei responsabile di come lo utilizzi.",
+    "title": "Usa LibreGet in modo responsabile",
+    "body_paragraph_1": "LibreGet è uno strumento per scaricare contenuti multimediali. Sei responsabile di come lo utilizzi.",
     "body_paragraph_2": "Prima di continuare, ricorda:",
     "rule_copyright": "Rispetta il diritto d'autore e la proprietà intellettuale dei creatori.",
     "rule_tos": "Segui i termini di servizio di ogni piattaforma da cui scarichi.",
@@ -34,7 +34,7 @@
   },
   "recovery": {
     "title": "Download non completati",
-    "message": "OmniGet ha trovato {{count}} download non completati dalla sessione precedente. Vuoi riprenderli?",
+    "message": "LibreGet ha trovato {{count}} download non completati dalla sessione precedente. Vuoi riprenderli?",
     "more": "e altri {{count}}...",
     "restore": "Riprendi download",
     "discard": "Scarta",
@@ -80,13 +80,13 @@
   },
   "home": {
     "inspector_title": "Download options",
-    "hero_title": "OmniGet",
+    "hero_title": "LibreGet",
     "action_batch": "Many links at once",
     "action_torrent": "Open a .torrent file",
     "action_p2p": "Send a file to someone",
     "action_advanced": "Advanced options",
     "action_simple": "Back to the simple view",
-    "value_line": "{{count}} files · {{size}} saved with OmniGet",
+    "value_line": "{{count}} files · {{size}} saved with LibreGet",
     "value_first": "Your first download takes about a minute. Private content only needs your browser cookies."
   },
   "tools": {
@@ -134,7 +134,7 @@
     "lc_exported": "Esportato {{name}}",
     "hub": {
       "title": "Tools",
-      "subtitle": "Everything OmniGet does beyond downloading, in one place.",
+      "subtitle": "Everything LibreGet does beyond downloading, in one place.",
       "search_placeholder": "Search tools, categories or platforms…",
       "filter_label": "Platform",
       "categories": "Categories",
@@ -159,7 +159,7 @@
       "empty_desc": "Try another word, or change the platform filter.",
       "not_on_this_os": "This tool does not run on your system ({{os}}).",
       "soon_title": "In development",
-      "soon_desc": "This tool is on OmniGet's roadmap and does not work yet. It is listed so you know what is coming."
+      "soon_desc": "This tool is on LibreGet's roadmap and does not work yet. It is listed so you know what is coming."
     },
     "categories": {
       "youtube": {
@@ -168,7 +168,7 @@
       },
       "video": {
         "name": "Video editing",
-        "desc": "Cut, convert, record and assemble videos without leaving OmniGet."
+        "desc": "Cut, convert, record and assemble videos without leaving LibreGet."
       },
       "instagram": {
         "name": "Instagram",
@@ -414,11 +414,11 @@
       },
       "ai-usage": {
         "name": "AI spending",
-        "desc": "How much OmniGet spent on AI, by day, model and task."
+        "desc": "How much LibreGet spent on AI, by day, model and task."
       },
       "ai-mcp": {
         "name": "MCP server",
-        "desc": "Let Claude, Goose or Cursor drive OmniGet's tools."
+        "desc": "Let Claude, Goose or Cursor drive LibreGet's tools."
       },
       "yt-sponsorblock": {
         "name": "SponsorBlock",
@@ -690,7 +690,7 @@
       },
       "ig-schedule": {
         "name": "Schedule posts",
-        "desc": "Queue posts for a date and time; OmniGet publishes them while open."
+        "desc": "Queue posts for a date and time; LibreGet publishes them while open."
       },
       "video-compress": {
         "name": "Compress to a size",
@@ -889,7 +889,7 @@
       "title": "Spicetify",
       "cli_row": "Spicetify CLI",
       "cli_missing": "Not installed",
-      "cli_source_managed": "managed by OmniGet",
+      "cli_source_managed": "managed by LibreGet",
       "cli_source_system": "found on this system",
       "cli_source_custom": "custom path",
       "install": "Install",
@@ -1034,7 +1034,7 @@
       "daemon": "Service",
       "running": "running",
       "stopped": "not running",
-      "stopped_hint": "Install Ollama and open it; OmniGet talks to it on port 11434.",
+      "stopped_hint": "Install Ollama and open it; LibreGet talks to it on port 11434.",
       "get": "Get Ollama",
       "use_hint": "In Settings → AI pick the local provider with base URL",
       "installed": "Installed models",
@@ -1056,7 +1056,7 @@
     },
     "usage": {
       "calls": "calls",
-      "intro": "Every AI call OmniGet makes is logged locally; cost uses the current price table.",
+      "intro": "Every AI call LibreGet makes is logged locally; cost uses the current price table.",
       "unknown_price": "without a known price",
       "by_day": "By day",
       "by_model": "By model",
@@ -1158,7 +1158,7 @@
     "awake": {
       "on": "Keeping the computer awake",
       "off": "Not active",
-      "intro": "Blocks sleep and the screen saver until you stop it or close OmniGet.",
+      "intro": "Blocks sleep and the screen saver until you stop it or close LibreGet.",
       "start": "Keep awake",
       "stop": "Stop",
       "note": "Downloads already keep the computer awake when the option is on in Settings."
@@ -1175,7 +1175,7 @@
     },
     "wintweaks": {
       "only_windows": "These settings only exist on Windows. The list is shown so you know what the tool does.",
-      "admin_hint": "Rules marked admin need OmniGet running as administrator.",
+      "admin_hint": "Rules marked admin need LibreGet running as administrator.",
       "restart": "Sign out or restart to see the change.",
       "group_privacy": "Privacy & telemetry",
       "group_ui": "Interface",
@@ -1590,7 +1590,7 @@
         "label": "Instagram account",
         "checking": "Checking session…",
         "none_title": "No Instagram session",
-        "none_desc": "Open instagram.com logged in, in a browser with the OmniGet extension: the cookies are captured automatically. You can also paste a cookies.txt in Settings → Cookies.",
+        "none_desc": "Open instagram.com logged in, in a browser with the LibreGet extension: the cookies are captured automatically. You can also paste a cookies.txt in Settings → Cookies.",
         "open_site": "Open instagram.com",
         "cookies": "Cookies"
       },
@@ -1841,7 +1841,7 @@
         "beta": "Beta. Test with a photo first. Videos are transcoded by Instagram after upload; the app waits for confirmation.",
         "queue": "Queue",
         "queue_empty": "Nothing scheduled.",
-        "queue_hint": "The queue runs only while OmniGet is open.",
+        "queue_hint": "The queue runs only while LibreGet is open.",
         "status_pending": "pending",
         "status_running": "publishing",
         "status_done": "published",
@@ -2006,8 +2006,8 @@
       "test": "Test",
       "balance": "Balance",
       "models": "models",
-      "use": "Use in OmniGet",
-      "used": "OmniGet now uses this key (Settings → AI).",
+      "use": "Use in LibreGet",
+      "used": "LibreGet now uses this key (Settings → AI).",
       "edit": "Edit",
       "none": "No accounts yet. Add an OpenAI, Anthropic, OpenRouter, DeepSeek, Gemini, Groq, xAI, Mistral, SiliconFlow, New API relay, Ollama or any OpenAI-compatible endpoint.",
       "export": "Export",
@@ -2054,7 +2054,7 @@
       "grab": "Use cursor position",
       "delay": "Start delay",
       "delay_hint": "Seconds before the first click, so you can move the cursor.",
-      "perm": "macOS asks for Accessibility permission for OmniGet the first time. On Wayland synthetic clicks may not work."
+      "perm": "macOS asks for Accessibility permission for LibreGet the first time. On Wayland synthetic clicks may not work."
     },
     "dictation": {
       "phase_idle": "Ready",
@@ -2101,14 +2101,14 @@
       "quality": "Quality",
       "quality_hint": "Lower CRF = better and bigger. 23 is the x264 default.",
       "cursor": "cursor",
-      "default_dir": "Videos/OmniGet",
-      "perm": "macOS asks for Screen Recording permission for OmniGet the first time; if the recording ends at once, grant it in Privacy and try again."
+      "default_dir": "Videos/LibreGet",
+      "perm": "macOS asks for Screen Recording permission for LibreGet the first time; if the recording ends at once, grant it in Privacy and try again."
     },
     "vs": {
       "running": "running",
       "not_running": "installed, not running",
       "engine": "engine",
-      "hint": "VoiceStudio (open source, local) does the heavy lifting: OmniGet talks to its API on port 3900.",
+      "hint": "VoiceStudio (open source, local) does the heavy lifting: LibreGet talks to its API on port 3900.",
       "launching": "Opening VoiceStudio; the backend takes a few seconds.",
       "base_url": "Backend address",
       "base_url_hint": "Change only if VoiceStudio runs on another port or machine.",
@@ -2145,7 +2145,7 @@
       "what": "What it does",
       "what_hint": "Makes YouTube serve H.264 instead of VP9/AV1. Old or weak machines decode H.264 in hardware, so playback stops stuttering and the fan quiets down. Quality above 1080p may become unavailable.",
       "how": "How to turn it on",
-      "step1": "Install the OmniGet browser extension and pair it in Settings.",
+      "step1": "Install the LibreGet browser extension and pair it in Settings.",
       "step2": "Open the extension popup on any tab and turn on the H.264 toggle (third switch in the header).",
       "step3": "Reload YouTube. The setting persists until you turn it off.",
       "extension": "Browser extension",
@@ -2889,7 +2889,7 @@
       "extra_hint": "Your own domains, one per space",
       "dry_run": "Preview only",
       "dry_run_hint": "Count everything without writing a byte",
-      "safety": "Only the OmniGet block changes — everything else stays byte for byte",
+      "safety": "Only the LibreGet block changes — everything else stays byte for byte",
       "export": "Save to a file",
       "preview": "Preview",
       "run": "Apply",
@@ -3649,9 +3649,9 @@
     "general": {
       "title": "Generali",
       "start_with_system": "Avvia con il sistema",
-      "start_with_system_desc": "Avvia OmniGet automaticamente all'avvio del sistema",
+      "start_with_system_desc": "Avvia LibreGet automaticamente all'avvio del sistema",
       "start_minimized": "Avvia solo nella tray",
-      "start_minimized_desc": "Apri OmniGet nella tray di sistema senza mostrare la finestra. Clicca sull'icona della tray per aprire.",
+      "start_minimized_desc": "Apri LibreGet nella tray di sistema senza mostrare la finestra. Clicca sull'icona della tray per aprire.",
       "reset_hints": "Ripristina suggerimenti",
       "reset_hints_desc": "Mostra di nuovo tutti i suggerimenti nascosti",
       "restore": "Ripristina",
@@ -3812,7 +3812,7 @@
       "filename_template_desc": "Modello di output yt-dlp per i file scaricati",
       "filename_template_preview": "Anteprima: {{preview}}"
     },
-    "update_available": "OmniGet {{version}} è disponibile",
+    "update_available": "LibreGet {{version}} è disponibile",
     "update_button": "aggiorna ora",
     "update_downloading": "download aggiornamento...",
     "telegram": {
@@ -3823,7 +3823,7 @@
     },
     "browser_ext": {
       "title": "Estensione del browser",
-      "description": "L'estensione invia cookie e URL dal tuo browser a OmniGet. Non è ancora sugli store ufficiali, quindi usa i pulsanti qui sotto per estrarre la versione attuale e installarla manualmente.",
+      "description": "L'estensione invia cookie e URL dal tuo browser a LibreGet. Non è ancora sugli store ufficiali, quindi usa i pulsanti qui sotto per estrarre la versione attuale e installarla manualmente.",
       "bundled_version": "Versione inclusa: v{{version}}",
       "extracting": "Estrazione…",
       "update_install": "Aggiorna / Installa",
@@ -3831,7 +3831,7 @@
       "unavailable": "Non disponibile",
       "hint_chrome": "chrome://extensions → Modalità sviluppatore → \"Carica estensione non pacchettizzata\" → seleziona la cartella estratta.",
       "hint_firefox": "about:debugging#/runtime/this-firefox → \"Carica componente aggiuntivo temporaneo\" → seleziona manifest.json nella cartella estratta. Firefox rimuove i componenti temporanei al riavvio, quindi va ripetuto finché non pubblichiamo su AMO.",
-      "hint_safari": "Dal Safari 14 le estensioni devono passare dal Mac App Store. Una versione Safari dell'estensione OmniGet non è ancora pubblicata."
+      "hint_safari": "Dal Safari 14 le estensioni devono passare dal Mac App Store. Una versione Safari dell'estensione LibreGet non è ancora pubblicata."
     },
     "rules": {
       "title": "Regole",
@@ -3882,8 +3882,8 @@
       "silence_none": "Quasi nessun silenzio in questo file",
       "silence_done": "{{saved}} di silenzio trovato — il player può saltarlo",
       "portable_label": "Portable Mode",
-      "portable_active": "Portable mode is active. OmniGet's data is stored in {{dir}}.",
-      "portable_macos_notice": "On macOS the WebView still stores its session data under ~/Library, and portable mode cannot redirect it. Only OmniGet's own data is portable here — see github.com/OpenSelena/omniget/issues/227."
+      "portable_active": "Portable mode is active. LibreGet's data is stored in {{dir}}.",
+      "portable_macos_notice": "On macOS the WebView still stores its session data under ~/Library, and portable mode cannot redirect it. Only LibreGet's own data is portable here — see github.com/OpenSelena/libreget/issues/227."
     },
     "dependencies": {
       "title": "Dipendenze",
@@ -3938,7 +3938,9 @@
       "spacing_desc": "Moltiplica i token di spazio (padding, gap, margin). 1,0× = default. 0,85× compatta tutta l'UI; 1,25× la rende più ariosa.",
       "preview_title": "Anteprima",
       "preview_desc": "Tempo reale. Il tema attivo viene rispettato.",
-      "preset_omniget_default_name": "Omniget predefinito",
+      "preset_libreget_default_name": "LibreGet predefinito",
+      "preset_omniget_default_name": "LibreGet predefinito",
+      "preset_libreget_default_desc": "Bricolage display, Inter body, Plex Mono. Standard della casa.",
       "preset_omniget_default_desc": "Bricolage display, Inter body, Plex Mono. Standard della casa.",
       "preset_notion_like_name": "Stile Notion",
       "preset_notion_like_desc": "Inter per display + body. Gerarchia per dimensione+peso, non cambio di famiglia.",
@@ -4046,7 +4048,7 @@
     },
     "bridge": {
       "title": "Estensione del browser",
-      "intro": "Associa l'estensione OmniGet a questa app tramite una connessione locale privata. Apri la pagina delle opzioni dell'estensione, incolla URL e token qui sotto, poi clicca Salva.",
+      "intro": "Associa l'estensione LibreGet a questa app tramite una connessione locale privata. Apri la pagina delle opzioni dell'estensione, incolla URL e token qui sotto, poi clicca Salva.",
       "pair_label": "Abbina l'estensione",
       "pair_hint": "Un clic qui e l'estensione installata si collega da sola — niente copia-incolla.",
       "pair": "Abbina estensione",
@@ -4137,7 +4139,7 @@
       "capture_via_extension": "Capture via extension",
       "open_folder": "Open folder",
       "dir_label": "Folder:",
-      "hint_use_extension": "On any logged-in site, click the omniget extension icon in your browser. The cookies show up here in seconds.",
+      "hint_use_extension": "On any logged-in site, click the libreget extension icon in your browser. The cookies show up here in seconds.",
       "empty_title": "No cookies here yet",
       "empty_body": "Use the browser extension to capture cookies from sites where you're logged in, or import a file manually.",
       "status_fresh": "Fresh cookies",
@@ -4400,18 +4402,18 @@
     "card_project_title": "The project",
     "card_project_desc": "Roadmap, philosophy and how to contribute.",
     "card_terms_title": "Terms & ethics",
-    "card_terms_desc": "What OmniGet expects from you, and what you can expect back.",
+    "card_terms_desc": "What LibreGet expects from you, and what you can expect back.",
     "description": "il tuo media downloader. open source e gratuito.",
     "terms_title": "termini di utilizzo",
-    "terms_text": "OmniGet è software libero e open source fornito \"così com'è\" sotto licenza GPL-3.0 senza garanzie di alcun tipo. L'applicazione viene eseguita strettamente sul tuo computer locale, senza telemetria né server intermedi. Gli sviluppatori declinano ogni responsabilità per l'uso dell'app o per i file scaricati.",
+    "terms_text": "LibreGet è software libero e open source fornito \"così com'è\" sotto licenza GPL-3.0 senza garanzie di alcun tipo. L'applicazione viene eseguita strettamente sul tuo computer locale, senza telemetria né server intermedi. Gli sviluppatori declinano ogni responsabilità per l'uso dell'app o per i file scaricati.",
     "legal_title": "base legale e copia privata",
-    "legal_text": "OmniGet è progettato per l'archiviazione personale e lo studio offline nel rispetto dei principi internazionali di fair use e di copia privata. Salva solo i contenuti accessibili dalla tua sessione e non elude mai DRM o paywall. I file scaricati non devono essere ridistribuiti né commercializzati.",
+    "legal_text": "LibreGet è progettato per l'archiviazione personale e lo studio offline nel rispetto dei principi internazionali di fair use e di copia privata. Salva solo i contenuti accessibili dalla tua sessione e non elude mai DRM o paywall. I file scaricati non devono essere ridistribuiti né commercializzati.",
     "responsibility_title": "responsabilità dell'utente",
-    "responsibility_text": "Sei l'unico responsabile dell'uso di OmniGet e dei file che conservi. Rispetta i titolari del copyright e i termini di servizio delle piattaforme a cui accedi. Non utilizzare questo strumento per ridistribuzione non autorizzata o sfruttamento commerciale.",
+    "responsibility_text": "Sei l'unico responsabile dell'uso di LibreGet e dei file che conservi. Rispetta i titolari del copyright e i termini di servizio delle piattaforme a cui accedi. Non utilizzare questo strumento per ridistribuzione non autorizzata o sfruttamento commerciale.",
     "mascot_title": "linee guida della mascotte",
-    "mascot_text": "Il pinguino mascotte e le illustrazioni di OmniGet sono risorse del progetto. Fan art e personalizzazioni della community sono benvenute. I design della mascotte e il marchio ufficiale non possono essere utilizzati per prodotti commerciali né inclusi in fork ingannevoli.",
+    "mascot_text": "Il pinguino mascotte e le illustrazioni di LibreGet sono risorse del progetto. Fan art e personalizzazioni della community sono benvenute. I design della mascotte e il marchio ufficiale non possono essere utilizzati per prodotti commerciali né inclusi in fork ingannevoli.",
     "license_title": "licenza",
-    "license_text": "OmniGet è open source e distribuito sotto licenza GPL-3.0, con codice sorgente pubblico su GitHub. Il nome \"OmniGet\", i loghi e la grafica della mascotte sono risorse riservate per identificare le versioni autentiche.",
+    "license_text": "LibreGet è open source e distribuito sotto licenza GPL-3.0, con codice sorgente pubblico su GitHub. Il nome \"LibreGet\", i loghi e la grafica della mascotte sono risorse riservate per identificare le versioni autentiche.",
     "star_button": "stella su GitHub",
     "star_description": "se ti piace il progetto, lascia una stella!",
     "version": "versione",
@@ -4423,7 +4425,7 @@
     "feature_themes": "11 temi: Dark, Light, Catppuccin (4 varianti), One Dark Pro, Dracula, NyxVamp (3 varianti)",
     "feature_i18n": "disponibile in inglese, portoghese, cinese, giapponese, italiano e francese",
     "feature_tech": "realizzato con Tauri + Rust. veloce e leggero",
-    "roadmap_intro": "cosa è previsto per le prossime versioni di OmniGet.",
+    "roadmap_intro": "cosa è previsto per le prossime versioni di LibreGet.",
     "roadmap_platforms_title": "integrazioni",
     "roadmap_features_title": "funzionalità",
     "roadmap_feature_telegram_multi_account": "Telegram account multipli",
@@ -4452,10 +4454,10 @@
     "version": "v{{version}}",
     "by_author": "di {{author}}",
     "uninstall": "Disinstalla",
-    "restart_required": "Riavvia OmniGet per applicare",
+    "restart_required": "Riavvia LibreGet per applicare",
     "browse_loading": "Caricamento plugin...",
     "browse_error": "Impossibile caricare i plugin",
-    "browse_error_hint": "OmniGet non è riuscito a raggiungere il registro dei plugin. Se GitHub è bloccato sulla tua rete, configura un proxy in Impostazioni → Rete e riprova.",
+    "browse_error_hint": "LibreGet non è riuscito a raggiungere il registro dei plugin. Se GitHub è bloccato sulla tua rete, configura un proxy in Impostazioni → Rete e riprova.",
     "browse_retry": "Riprova",
     "install_network_error": "Impossibile raggiungere GitHub per scaricare questo plugin. Configura un proxy in Impostazioni → Rete e riprova.",
     "browse_empty": "Nessun plugin disponibile",
@@ -4476,11 +4478,11 @@
     "plugin_not_installed": "Plugin non installato",
     "plugin_install_hint": "Installa questo plugin dal Marketplace.",
     "go_to_marketplace": "Vai al Marketplace",
-    "plugin_restart_hint": "Riavvia OmniGet per caricare questo plugin.",
+    "plugin_restart_hint": "Riavvia LibreGet per caricare questo plugin.",
     "plugin_incompatible_title": "Plugin incompatibile con questa versione",
-    "plugin_incompatible_hint": "Questo plugin e stato compilato per una versione precedente di OmniGet e non puo essere caricato. Reinstallalo dal Marketplace per ottenere una build compatibile — riavviare non risolvera il problema.",
+    "plugin_incompatible_hint": "Questo plugin e stato compilato per una versione precedente di LibreGet e non puo essere caricato. Reinstallalo dal Marketplace per ottenere una build compatibile — riavviare non risolvera il problema.",
     "plugin_load_failed_title": "Caricamento del plugin non riuscito",
-    "plugin_load_failed_hint": "OmniGet non e riuscito a caricare questo plugin. Prova a reinstallarlo dal Marketplace.",
+    "plugin_load_failed_hint": "LibreGet non e riuscito a caricare questo plugin. Prova a reinstallarlo dal Marketplace.",
     "plugin_load_error_details": "Dettagli: {{error}}",
     "reinstall": "Reinstalla"
   },
@@ -4541,7 +4543,7 @@
     "empty": "Nessuna nota di rilascio disponibile."
   },
   "onboarding": {
-    "welcome_title": "Benvenuto su OmniGet!",
+    "welcome_title": "Benvenuto su LibreGet!",
     "welcome_desc": "Ti aiuto a scaricare qualsiasi video o corso da Internet. Semplice, veloce e gratuito.",
     "next": "Avanti",
     "skip": "Salta",
@@ -4705,12 +4707,12 @@
     "drm_protected": "I flussi scaricati sono protetti da DRM e non possono essere uniti. Questo contenuto non è supportato.",
     "output_missing": "Il download è terminato, ma nessun file è apparso nella cartella (o è vuoto). Controlla lo spazio su disco e l'antivirus, poi riprova.",
     "course_platform_url": "Le piattaforme di corsi non possono essere scaricate da un URL. Apri la pagina Corsi (richiede il plugin Corsi e un account connesso).",
-    "plugin_outdated": "This plugin is outdated and doesn't support this action. Update it in the Marketplace, then restart OmniGet."
+    "plugin_outdated": "This plugin is outdated and doesn't support this action. Update it in the Marketplace, then restart LibreGet."
   },
   "debug": {
     "title": "Registro attività",
     "enable": "Registro attività",
-    "enable_desc": "Visualizza cosa sta facendo OmniGet dietro le quinte",
+    "enable_desc": "Visualizza cosa sta facendo LibreGet dietro le quinte",
     "filter_all": "Tutto",
     "filter_downloads": "Download",
     "filter_network": "Rete",
@@ -4728,7 +4730,7 @@
   "p2p": {
     "send_file": "Invia file",
     "send_title": "Invia file tramite P2P",
-    "send_description": "Invia un file a un altro utente OmniGet. Verrà generato un codice di condivisione — il destinatario lo incolla nella omnibox per scaricarlo.",
+    "send_description": "Invia un file a un altro utente LibreGet. Verrà generato un codice di condivisione — il destinatario lo incolla nella omnibox per scaricarlo.",
     "select_file": "Seleziona file",
     "share_code": "Codice di condivisione",
     "click_to_copy": "Clicca per copiare",
@@ -4833,7 +4835,7 @@
     "refresh": "Aggiorna",
     "unknown_error": "Errore sconosciuto",
     "captcha_detected": "Captcha rilevato — risolvilo nella finestra di accesso.",
-    "external_platform_hint": "This course is delivered outside Hotmart Club, so OmniGet cannot download it from here. Open it on the creator's platform; if that platform is Udemy or Kiwify, sign in to it in Courses.",
+    "external_platform_hint": "This course is delivered outside Hotmart Club, so LibreGet cannot download it from here. Open it on the creator's platform; if that platform is Udemy or Kiwify, sign in to it in Courses.",
     "open_external": "Open on the platform"
   },
   "torrent": {
@@ -5275,7 +5277,7 @@
       "test_failed": "Impossibile inviare la notifica",
       "permission_denied_toast": "Le notifiche sono disattivate a livello di sistema. Attivale nelle impostazioni del SO.",
       "permission_denied_banner": "Notifiche di sistema disattivate",
-      "permission_denied_hint": "Consenti le notifiche di Omniget nelle impostazioni del sistema operativo per ricevere aggiornamenti sui pacchi.",
+      "permission_denied_hint": "Consenti le notifiche di LibreGet nelle impostazioni del sistema operativo per ricevere aggiornamenti sui pacchi.",
       "request_permission": "Richiedi autorizzazione"
     },
     "notification": {

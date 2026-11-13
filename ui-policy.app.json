@@ -1,6 +1,6 @@
 {
   "fonts": [
-    "OmniGet Lao",
+    "LibreGet Lao",
     "-apple-system",
     "BlinkMacSystemFont",
     "SF Pro Text",
@@ -95,7 +95,7 @@
     {
       "selector": "button[aria-label], button[title], a[aria-label], a[title], [role=button][aria-label], [role=button][title]",
       "rules": ["icon-button-tooltip"],
-      "reason": "OmniGet uses native aria-label and title attributes on icon buttons; accessible-name rule enforces labeling"
+      "reason": "LibreGet uses native aria-label and title attributes on icon buttons; accessible-name rule enforces labeling"
     }
   ]
 }

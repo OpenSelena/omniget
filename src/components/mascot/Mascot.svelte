@@ -69,7 +69,7 @@
   {#if !errored}
     <img
       src={currentSrc}
-      alt="OmniGet mascot"
+      alt="LibreGet mascot"
       class="mascot-img"
       class:visible={showCurrent}
       onload={onCurrentLoad}

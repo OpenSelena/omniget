@@ -29,7 +29,7 @@
 
     async function openProjectGithub(e: Event) {
         e.preventDefault();
-        await open("https://github.com/OpenSelena/omniget");
+        await open("https://github.com/OpenSelena/libreget");
     }
 
     async function openTelegram(e: Event) {
@@ -43,7 +43,7 @@
         <img src="/icons/about-64.png" alt="" class="about-app-icon" width="64" height="64" draggable="false" />
         <div class="about-identity">
             <div class="about-name-row">
-                <h1>OmniGet</h1>
+                <h1>LibreGet</h1>
                 {#if version}
                     <span class="tag about-version">{$t("about.version")} {version}</span>
                 {/if}
@@ -71,7 +71,7 @@
     </div>
 
     <div class="about-external">
-        <a href="https://github.com/OpenSelena/omniget" target="_blank" rel="noopener" class="btn about-ext-link" onclick={openProjectGithub}>
+        <a href="https://github.com/OpenSelena/libreget" target="_blank" rel="noopener" class="btn about-ext-link" onclick={openProjectGithub}>
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/>
             </svg>

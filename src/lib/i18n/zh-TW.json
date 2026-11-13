@@ -24,8 +24,8 @@
     "confirm": "仍然關閉"
   },
   "legal": {
-    "title": "請負責任地使用 OmniGet",
-    "body_paragraph_1": "OmniGet 是一個媒體下載工具。您需要為使用方式負責。",
+    "title": "請負責任地使用 LibreGet",
+    "body_paragraph_1": "LibreGet 是一個媒體下載工具。您需要為使用方式負責。",
     "body_paragraph_2": "在繼續之前，請記住：",
     "rule_copyright": "尊重創作者的著作權和智慧財產權。",
     "rule_tos": "遵守您下載內容的每個平台的服務條款。",
@@ -34,7 +34,7 @@
   },
   "recovery": {
     "title": "未完成的下載",
-    "message": "OmniGet 發現上次工作階段有 {{count}} 個未完成的下載。要恢復嗎？",
+    "message": "LibreGet 發現上次工作階段有 {{count}} 個未完成的下載。要恢復嗎？",
     "more": "還有 {{count}} 個...",
     "restore": "恢復下載",
     "discard": "捨棄",
@@ -80,13 +80,13 @@
   },
   "home": {
     "inspector_title": "Download options",
-    "hero_title": "OmniGet",
+    "hero_title": "LibreGet",
     "action_batch": "Many links at once",
     "action_torrent": "Open a .torrent file",
     "action_p2p": "Send a file to someone",
     "action_advanced": "Advanced options",
     "action_simple": "Back to the simple view",
-    "value_line": "{{count}} files · {{size}} saved with OmniGet",
+    "value_line": "{{count}} files · {{size}} saved with LibreGet",
     "value_first": "Your first download takes about a minute. Private content only needs your browser cookies."
   },
   "tools": {
@@ -134,7 +134,7 @@
     "lc_exported": "已匯出 {{name}}",
     "hub": {
       "title": "Tools",
-      "subtitle": "Everything OmniGet does beyond downloading, in one place.",
+      "subtitle": "Everything LibreGet does beyond downloading, in one place.",
       "search_placeholder": "Search tools, categories or platforms…",
       "filter_label": "Platform",
       "categories": "Categories",
@@ -159,7 +159,7 @@
       "empty_desc": "Try another word, or change the platform filter.",
       "not_on_this_os": "This tool does not run on your system ({{os}}).",
       "soon_title": "In development",
-      "soon_desc": "This tool is on OmniGet's roadmap and does not work yet. It is listed so you know what is coming."
+      "soon_desc": "This tool is on LibreGet's roadmap and does not work yet. It is listed so you know what is coming."
     },
     "categories": {
       "youtube": {
@@ -168,7 +168,7 @@
       },
       "video": {
         "name": "Video editing",
-        "desc": "Cut, convert, record and assemble videos without leaving OmniGet."
+        "desc": "Cut, convert, record and assemble videos without leaving LibreGet."
       },
       "instagram": {
         "name": "Instagram",
@@ -414,11 +414,11 @@
       },
       "ai-usage": {
         "name": "AI spending",
-        "desc": "How much OmniGet spent on AI, by day, model and task."
+        "desc": "How much LibreGet spent on AI, by day, model and task."
       },
       "ai-mcp": {
         "name": "MCP server",
-        "desc": "Let Claude, Goose or Cursor drive OmniGet's tools."
+        "desc": "Let Claude, Goose or Cursor drive LibreGet's tools."
       },
       "yt-sponsorblock": {
         "name": "SponsorBlock",
@@ -690,7 +690,7 @@
       },
       "ig-schedule": {
         "name": "Schedule posts",
-        "desc": "Queue posts for a date and time; OmniGet publishes them while open."
+        "desc": "Queue posts for a date and time; LibreGet publishes them while open."
       },
       "video-compress": {
         "name": "Compress to a size",
@@ -889,7 +889,7 @@
       "title": "Spicetify",
       "cli_row": "Spicetify CLI",
       "cli_missing": "Not installed",
-      "cli_source_managed": "managed by OmniGet",
+      "cli_source_managed": "managed by LibreGet",
       "cli_source_system": "found on this system",
       "cli_source_custom": "custom path",
       "install": "Install",
@@ -1034,7 +1034,7 @@
       "daemon": "Service",
       "running": "running",
       "stopped": "not running",
-      "stopped_hint": "Install Ollama and open it; OmniGet talks to it on port 11434.",
+      "stopped_hint": "Install Ollama and open it; LibreGet talks to it on port 11434.",
       "get": "Get Ollama",
       "use_hint": "In Settings → AI pick the local provider with base URL",
       "installed": "Installed models",
@@ -1056,7 +1056,7 @@
     },
     "usage": {
       "calls": "calls",
-      "intro": "Every AI call OmniGet makes is logged locally; cost uses the current price table.",
+      "intro": "Every AI call LibreGet makes is logged locally; cost uses the current price table.",
       "unknown_price": "without a known price",
       "by_day": "By day",
       "by_model": "By model",
@@ -1158,7 +1158,7 @@
     "awake": {
       "on": "Keeping the computer awake",
       "off": "Not active",
-      "intro": "Blocks sleep and the screen saver until you stop it or close OmniGet.",
+      "intro": "Blocks sleep and the screen saver until you stop it or close LibreGet.",
       "start": "Keep awake",
       "stop": "Stop",
       "note": "Downloads already keep the computer awake when the option is on in Settings."
@@ -1175,7 +1175,7 @@
     },
     "wintweaks": {
       "only_windows": "These settings only exist on Windows. The list is shown so you know what the tool does.",
-      "admin_hint": "Rules marked admin need OmniGet running as administrator.",
+      "admin_hint": "Rules marked admin need LibreGet running as administrator.",
       "restart": "Sign out or restart to see the change.",
       "group_privacy": "Privacy & telemetry",
       "group_ui": "Interface",
@@ -1590,7 +1590,7 @@
         "label": "Instagram account",
         "checking": "Checking session…",
         "none_title": "No Instagram session",
-        "none_desc": "Open instagram.com logged in, in a browser with the OmniGet extension: the cookies are captured automatically. You can also paste a cookies.txt in Settings → Cookies.",
+        "none_desc": "Open instagram.com logged in, in a browser with the LibreGet extension: the cookies are captured automatically. You can also paste a cookies.txt in Settings → Cookies.",
         "open_site": "Open instagram.com",
         "cookies": "Cookies"
       },
@@ -1841,7 +1841,7 @@
         "beta": "Beta. Test with a photo first. Videos are transcoded by Instagram after upload; the app waits for confirmation.",
         "queue": "Queue",
         "queue_empty": "Nothing scheduled.",
-        "queue_hint": "The queue runs only while OmniGet is open.",
+        "queue_hint": "The queue runs only while LibreGet is open.",
         "status_pending": "pending",
         "status_running": "publishing",
         "status_done": "published",
@@ -2006,8 +2006,8 @@
       "test": "Test",
       "balance": "Balance",
       "models": "models",
-      "use": "Use in OmniGet",
-      "used": "OmniGet now uses this key (Settings → AI).",
+      "use": "Use in LibreGet",
+      "used": "LibreGet now uses this key (Settings → AI).",
       "edit": "Edit",
       "none": "No accounts yet. Add an OpenAI, Anthropic, OpenRouter, DeepSeek, Gemini, Groq, xAI, Mistral, SiliconFlow, New API relay, Ollama or any OpenAI-compatible endpoint.",
       "export": "Export",
@@ -2054,7 +2054,7 @@
       "grab": "Use cursor position",
       "delay": "Start delay",
       "delay_hint": "Seconds before the first click, so you can move the cursor.",
-      "perm": "macOS asks for Accessibility permission for OmniGet the first time. On Wayland synthetic clicks may not work."
+      "perm": "macOS asks for Accessibility permission for LibreGet the first time. On Wayland synthetic clicks may not work."
     },
     "dictation": {
       "phase_idle": "Ready",
@@ -2101,14 +2101,14 @@
       "quality": "Quality",
       "quality_hint": "Lower CRF = better and bigger. 23 is the x264 default.",
       "cursor": "cursor",
-      "default_dir": "Videos/OmniGet",
-      "perm": "macOS asks for Screen Recording permission for OmniGet the first time; if the recording ends at once, grant it in Privacy and try again."
+      "default_dir": "Videos/LibreGet",
+      "perm": "macOS asks for Screen Recording permission for LibreGet the first time; if the recording ends at once, grant it in Privacy and try again."
     },
     "vs": {
       "running": "running",
       "not_running": "installed, not running",
       "engine": "engine",
-      "hint": "VoiceStudio (open source, local) does the heavy lifting: OmniGet talks to its API on port 3900.",
+      "hint": "VoiceStudio (open source, local) does the heavy lifting: LibreGet talks to its API on port 3900.",
       "launching": "Opening VoiceStudio; the backend takes a few seconds.",
       "base_url": "Backend address",
       "base_url_hint": "Change only if VoiceStudio runs on another port or machine.",
@@ -2145,7 +2145,7 @@
       "what": "What it does",
       "what_hint": "Makes YouTube serve H.264 instead of VP9/AV1. Old or weak machines decode H.264 in hardware, so playback stops stuttering and the fan quiets down. Quality above 1080p may become unavailable.",
       "how": "How to turn it on",
-      "step1": "Install the OmniGet browser extension and pair it in Settings.",
+      "step1": "Install the LibreGet browser extension and pair it in Settings.",
       "step2": "Open the extension popup on any tab and turn on the H.264 toggle (third switch in the header).",
       "step3": "Reload YouTube. The setting persists until you turn it off.",
       "extension": "Browser extension",
@@ -2889,7 +2889,7 @@
       "extra_hint": "Your own domains, one per space",
       "dry_run": "Preview only",
       "dry_run_hint": "Count everything without writing a byte",
-      "safety": "Only the OmniGet block changes — everything else stays byte for byte",
+      "safety": "Only the LibreGet block changes — everything else stays byte for byte",
       "export": "Save to a file",
       "preview": "Preview",
       "run": "Apply",
@@ -3649,9 +3649,9 @@
     "general": {
       "title": "一般",
       "start_with_system": "與系統一同啟動",
-      "start_with_system_desc": "當系統啟動時自動啟動 OmniGet",
+      "start_with_system_desc": "當系統啟動時自動啟動 LibreGet",
       "start_minimized": "僅工作列啟動",
-      "start_minimized_desc": "在系統工作列中開啟 OmniGet 而不顯示視窗。點擊工作列圖示開啟。",
+      "start_minimized_desc": "在系統工作列中開啟 LibreGet 而不顯示視窗。點擊工作列圖示開啟。",
       "reset_hints": "重置提示",
       "reset_hints_desc": "重新显示所有已关闭的提示",
       "restore": "恢复",
@@ -3812,7 +3812,7 @@
       "filename_template_desc": "下載檔案使用的 yt-dlp 輸出範本",
       "filename_template_preview": "預覽: {{preview}}"
     },
-    "update_available": "OmniGet {{version}} 可供更新",
+    "update_available": "LibreGet {{version}} 可供更新",
     "update_button": "立即更新",
     "update_downloading": "正在下載更新...",
     "telegram": {
@@ -3823,7 +3823,7 @@
     },
     "browser_ext": {
       "title": "瀏覽器擴充功能",
-      "description": "擴充功能會將瀏覽器中的 Cookie 與網址傳送給 OmniGet。目前尚未上架官方商店，請使用下方按鈕匯出目前版本並手動安裝。",
+      "description": "擴充功能會將瀏覽器中的 Cookie 與網址傳送給 LibreGet。目前尚未上架官方商店，請使用下方按鈕匯出目前版本並手動安裝。",
       "bundled_version": "內建版本：v{{version}}",
       "extracting": "正在匯出…",
       "update_install": "更新 / 安裝",
@@ -3831,7 +3831,7 @@
       "unavailable": "無法使用",
       "hint_chrome": "chrome://extensions → 開發人員模式 → 「載入未封裝項目」 → 選擇匯出的資料夾。",
       "hint_firefox": "about:debugging#/runtime/this-firefox → 「載入暫時附加元件」 → 選擇匯出資料夾中的 manifest.json。Firefox 重新啟動後會移除暫時附加元件，因此在我們上架 AMO 之前需要重複此步驟。",
-      "hint_safari": "自 Safari 14 起，擴充功能必須透過 Mac App Store 發佈。OmniGet 擴充功能的 Safari 版本尚未發佈。"
+      "hint_safari": "自 Safari 14 起，擴充功能必須透過 Mac App Store 發佈。LibreGet 擴充功能的 Safari 版本尚未發佈。"
     },
     "rules": {
       "title": "規則",
@@ -3882,8 +3882,8 @@
       "silence_none": "這個檔案幾乎沒有靜音",
       "silence_done": "發現 {{saved}} 的靜音 —— 播放時可以略過",
       "portable_label": "Portable Mode",
-      "portable_active": "Portable mode is active. OmniGet's data is stored in {{dir}}.",
-      "portable_macos_notice": "On macOS the WebView still stores its session data under ~/Library, and portable mode cannot redirect it. Only OmniGet's own data is portable here — see github.com/OpenSelena/omniget/issues/227."
+      "portable_active": "Portable mode is active. LibreGet's data is stored in {{dir}}.",
+      "portable_macos_notice": "On macOS the WebView still stores its session data under ~/Library, and portable mode cannot redirect it. Only LibreGet's own data is portable here — see github.com/OpenSelena/libreget/issues/227."
     },
     "dependencies": {
       "title": "相依元件",
@@ -3938,7 +3938,9 @@
       "spacing_desc": "乘上間距標記 (padding、gap、margin)。1.0× 為預設。0.85× 緊湊整個 UI;1.25× 更寬鬆。",
       "preview_title": "預覽",
       "preview_desc": "即時顯示。遵循目前主題。",
-      "preset_omniget_default_name": "Omniget 預設",
+      "preset_libreget_default_name": "LibreGet 預設",
+      "preset_omniget_default_name": "LibreGet 預設",
+      "preset_libreget_default_desc": "Bricolage display、Inter body、Plex Mono。標準配置。",
       "preset_omniget_default_desc": "Bricolage display、Inter body、Plex Mono。標準配置。",
       "preset_notion_like_name": "Notion 風格",
       "preset_notion_like_desc": "display + body 皆用 Inter。透過大小+粗細呈現層級,而非切換字族。",
@@ -4046,7 +4048,7 @@
     },
     "bridge": {
       "title": "瀏覽器擴充功能",
-      "intro": "透過私有的本機連線將 OmniGet 瀏覽器擴充功能與此應用程式配對。打開擴充功能的選項頁面，貼上下方的端點 URL 與權杖，然後按下儲存。",
+      "intro": "透過私有的本機連線將 LibreGet 瀏覽器擴充功能與此應用程式配對。打開擴充功能的選項頁面，貼上下方的端點 URL 與權杖，然後按下儲存。",
       "pair_label": "配對擴充功能",
       "pair_hint": "在此點一下，已安裝的擴充功能會自動連線——免複製貼上。",
       "pair": "配對擴充功能",
@@ -4137,7 +4139,7 @@
       "capture_via_extension": "Capture via extension",
       "open_folder": "Open folder",
       "dir_label": "Folder:",
-      "hint_use_extension": "On any logged-in site, click the omniget extension icon in your browser. The cookies show up here in seconds.",
+      "hint_use_extension": "On any logged-in site, click the libreget extension icon in your browser. The cookies show up here in seconds.",
       "empty_title": "No cookies here yet",
       "empty_body": "Use the browser extension to capture cookies from sites where you're logged in, or import a file manually.",
       "status_fresh": "Fresh cookies",
@@ -4400,18 +4402,18 @@
     "card_project_title": "The project",
     "card_project_desc": "Roadmap, philosophy and how to contribute.",
     "card_terms_title": "Terms & ethics",
-    "card_terms_desc": "What OmniGet expects from you, and what you can expect back.",
+    "card_terms_desc": "What LibreGet expects from you, and what you can expect back.",
     "description": "您的媒體下載好幫手。開源且免費。",
     "terms_title": "使用條款",
-    "terms_text": "OmniGet 是在 GPL-3.0 授權下按「現況」提供的自由開源軟體，不提供任何明示或暗示的保證。應用程式完全在您的本機電腦上運作，絕無任何遙測數據收集或中介代理伺服器。開發者不對使用者的操作或下載的媒體內容承擔責任。",
+    "terms_text": "LibreGet 是在 GPL-3.0 授權下按「現況」提供的自由開源軟體，不提供任何明示或暗示的保證。應用程式完全在您的本機電腦上運作，絕無任何遙測數據收集或中介代理伺服器。開發者不對使用者的操作或下載的媒體內容承擔責任。",
     "legal_title": "法律依據與私用複製",
-    "legal_text": "OmniGet 專為個人非商業存檔與離線學習設計，遵循國際著作權架構下的合理使用與私用複製原則。本工具僅儲存您當前連線工作階段有權存取的公開串流，絕不繞過任何數位權利管理 (DRM) 或付費驗證門檻。下載內容不得轉售或散布。",
+    "legal_text": "LibreGet 專為個人非商業存檔與離線學習設計，遵循國際著作權架構下的合理使用與私用複製原則。本工具僅儲存您當前連線工作階段有權存取的公開串流，絕不繞過任何數位權利管理 (DRM) 或付費驗證門檻。下載內容不得轉售或散布。",
     "responsibility_title": "使用者責任",
-    "responsibility_text": "您對 OmniGet 的使用方式以及儲存的檔案負全責。請尊重著作權所有者以及所存取網站的服務條款。嚴禁將本工具用於未經授權的散布或侵權商業行為。",
+    "responsibility_text": "您對 LibreGet 的使用方式以及儲存的檔案負全責。請尊重著作權所有者以及所存取網站的服務條款。嚴禁將本工具用於未經授權的散布或侵權商業行為。",
     "mascot_title": "吉祥物準則",
-    "mascot_text": "OmniGet 的企鵝吉祥物與介面美術資源為專案專屬視覺資產。歡迎社群進行同人創作與個人主題自訂。吉祥物形象與官方品牌不得用於商業販售或打包至具誤導性的第三方衍生版本中。",
+    "mascot_text": "LibreGet 的企鵝吉祥物與介面美術資源為專案專屬視覺資產。歡迎社群進行同人創作與個人主題自訂。吉祥物形象與官方品牌不得用於商業販售或打包至具誤導性的第三方衍生版本中。",
     "license_title": "授權條款",
-    "license_text": "OmniGet 為開源軟體，採用 GPL-3.0 授權，全部原始碼公開發布於 GitHub。「OmniGet」名稱、標誌與吉祥物圖稿均為保留資產，用以識別正版官方發布版本。",
+    "license_text": "LibreGet 為開源軟體，採用 GPL-3.0 授權，全部原始碼公開發布於 GitHub。「LibreGet」名稱、標誌與吉祥物圖稿均為保留資產，用以識別正版官方發布版本。",
     "star_button": "在 GitHub 上加星",
     "star_description": "如果您喜歡這個專案，歡迎留下星星！",
     "version": "版本",
@@ -4423,7 +4425,7 @@
     "feature_themes": "11 個主題：Dark、Light、Catppuccin（4 種風味）、One Dark Pro、Dracula、NyxVamp（3 種變體）",
     "feature_i18n": "提供英文、葡萄牙文、中文、日文、義大利文、法文",
     "feature_tech": "使用 Tauri + Rust 建構，快速且輕量",
-    "roadmap_intro": "以下是 OmniGet 未來版本的開發計畫。",
+    "roadmap_intro": "以下是 LibreGet 未來版本的開發計畫。",
     "roadmap_platforms_title": "整合",
     "roadmap_features_title": "功能",
     "roadmap_feature_telegram_multi_account": "Telegram 多帳戶",
@@ -4452,10 +4454,10 @@
     "version": "v{{version}}",
     "by_author": "由 {{author}} 开发",
     "uninstall": "卸载",
-    "restart_required": "重启 OmniGet 以应用更改",
+    "restart_required": "重启 LibreGet 以应用更改",
     "browse_loading": "正在加载插件...",
     "browse_error": "无法加载插件列表",
-    "browse_error_hint": "OmniGet 無法連線到外掛註冊表。如果你的網路無法存取 GitHub，請在 設定 → 網路 中設定代理後重試。",
+    "browse_error_hint": "LibreGet 無法連線到外掛註冊表。如果你的網路無法存取 GitHub，請在 設定 → 網路 中設定代理後重試。",
     "browse_retry": "重試",
     "install_network_error": "無法連線 GitHub 下載此外掛。請在 設定 → 網路 中設定代理後重試。",
     "browse_empty": "暂无可用插件",
@@ -4476,11 +4478,11 @@
     "plugin_not_installed": "插件未安装",
     "plugin_install_hint": "从 Marketplace 安装此插件即可使用。",
     "go_to_marketplace": "前往 Marketplace",
-    "plugin_restart_hint": "重启 OmniGet 以加载此插件。",
+    "plugin_restart_hint": "重启 LibreGet 以加载此插件。",
     "plugin_incompatible_title": "外掛與此版本不相容",
-    "plugin_incompatible_hint": "此外掛是為舊版 OmniGet 建置的,無法載入。請從 Marketplace 重新安裝以取得相容版本——重新啟動無法解決此問題。",
+    "plugin_incompatible_hint": "此外掛是為舊版 LibreGet 建置的,無法載入。請從 Marketplace 重新安裝以取得相容版本——重新啟動無法解決此問題。",
     "plugin_load_failed_title": "外掛載入失敗",
-    "plugin_load_failed_hint": "OmniGet 無法載入此外掛。請嘗試從 Marketplace 重新安裝。",
+    "plugin_load_failed_hint": "LibreGet 無法載入此外掛。請嘗試從 Marketplace 重新安裝。",
     "plugin_load_error_details": "詳細資訊: {{error}}",
     "reinstall": "重新安裝"
   },
@@ -4541,7 +4543,7 @@
     "empty": "沒有可用的版本說明。"
   },
   "onboarding": {
-    "welcome_title": "歡迎使用 OmniGet",
+    "welcome_title": "歡迎使用 LibreGet",
     "welcome_desc": "您的媒體下載好幫手。開源且免費。",
     "next": "下一步",
     "skip": "略過",
@@ -4554,7 +4556,7 @@
     "theme_light": "浅色",
     "theme_dark": "深色",
     "deps_title": "相依元件",
-    "deps_desc": "OmniGet 使用 yt-dlp 與 FFmpeg 下載並處理媒體。",
+    "deps_desc": "LibreGet 使用 yt-dlp 與 FFmpeg 下載並處理媒體。",
     "deps_install_all": "全部安裝",
     "deps_ready": "Everything is installed. You're ready to download.",
     "done_title": "設定完成！",
@@ -4705,12 +4707,12 @@
     "drm_protected": "下載的串流受 DRM 保護，無法合併。不支援此內容。",
     "output_missing": "下載已完成，但資料夾中沒有出現檔案（或檔案為空）。請檢查磁碟空間與防毒軟體設定後重試。",
     "course_platform_url": "課程平台無法透過 URL 下載。請開啟課程頁面（需要課程外掛並登入帳號）。",
-    "plugin_outdated": "This plugin is outdated and doesn't support this action. Update it in the Marketplace, then restart OmniGet."
+    "plugin_outdated": "This plugin is outdated and doesn't support this action. Update it in the Marketplace, then restart LibreGet."
   },
   "debug": {
     "title": "活動記錄",
     "enable": "活動記錄",
-    "enable_desc": "檢視 OmniGet 在背景執行的操作",
+    "enable_desc": "檢視 LibreGet 在背景執行的操作",
     "filter_all": "全部",
     "filter_downloads": "下載",
     "filter_network": "網路",
@@ -4728,7 +4730,7 @@
   "p2p": {
     "send_file": "傳送檔案",
     "send_title": "透過 P2P 傳送檔案",
-    "send_description": "將任何檔案傳送給另一位 OmniGet 使用者。系統會產生分享碼 — 接收者只需貼到輸入欄位即可下載。",
+    "send_description": "將任何檔案傳送給另一位 LibreGet 使用者。系統會產生分享碼 — 接收者只需貼到輸入欄位即可下載。",
     "select_file": "選取檔案",
     "share_code": "分享碼",
     "click_to_copy": "點選以複製",
@@ -4833,7 +4835,7 @@
     "refresh": "重新整理",
     "unknown_error": "未知錯誤",
     "captcha_detected": "偵測到 Captcha — 請在登入視窗中完成驗證。",
-    "external_platform_hint": "This course is delivered outside Hotmart Club, so OmniGet cannot download it from here. Open it on the creator's platform; if that platform is Udemy or Kiwify, sign in to it in Courses.",
+    "external_platform_hint": "This course is delivered outside Hotmart Club, so LibreGet cannot download it from here. Open it on the creator's platform; if that platform is Udemy or Kiwify, sign in to it in Courses.",
     "open_external": "Open on the platform"
   },
   "torrent": {
@@ -5275,7 +5277,7 @@
       "test_failed": "無法傳送通知",
       "permission_denied_toast": "系統層級已停用通知。請至作業系統設定中啟用。",
       "permission_denied_banner": "系統通知已停用",
-      "permission_denied_hint": "請至作業系統設定中允許 Omniget 傳送通知，以接收包裹更新。",
+      "permission_denied_hint": "請至作業系統設定中允許 LibreGet 傳送通知，以接收包裹更新。",
       "request_permission": "請求權限"
     },
     "notification": {

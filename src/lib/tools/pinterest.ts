@@ -1,6 +1,6 @@
 /**
  * Tipos e utilidades da categoria Pinterest (estudo 67). Espelham os
- * structs de `omniget-core/src/core/tools/pinterest/` e dos comandos
+ * structs de `libreget-core/src/core/tools/pinterest/` e dos comandos
  * `tool_pin_*`; tudo que a UI repete (filtros, opções, rótulos) mora aqui.
  */
 
@@ -132,10 +132,11 @@ export function paletteCss(sw: Swatch[]): string {
   return `:root {\n${sw.map((s, i) => `  --color-${i + 1}: ${s.hex};`).join("\n")}\n}`;
 }
 
-const COOKIES_KEY = "omniget.pinterest.cookies";
+const COOKIES_KEY = "libreget.pinterest.cookies";
+const LEGACY_COOKIES_KEY = "omniget.pinterest.cookies";
 export function loadCookies(): string {
   try {
-    return localStorage.getItem(COOKIES_KEY) ?? "";
+    return localStorage.getItem(COOKIES_KEY) ?? localStorage.getItem(LEGACY_COOKIES_KEY) ?? "";
   } catch {
     return "";
   }

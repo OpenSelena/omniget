@@ -6,7 +6,7 @@
 
 /* Lao script only (unicode-range), so Latin text keeps the chosen UI font. */
 @font-face {
-  font-family: 'OmniGet Lao';
+  font-family: 'LibreGet Lao';
   font-style: normal;
   font-display: swap;
   font-weight: 100 900;
@@ -15,7 +15,7 @@
 }
 
 /*
- * OmniGet design tokens — Apple-first.
+ * LibreGet design tokens — Apple-first.
  *
  * Three layers:
  *   1. Global scale (spacing, type, radius, rows, motion). Never changes per theme.
@@ -77,8 +77,8 @@
   --ease-spring: cubic-bezier(0.32, 1.4, 0.5, 1);
   --ease-in-out: cubic-bezier(0.45, 0, 0.25, 1);
 
-  --font-display: 'OmniGet Lao', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro', system-ui, 'Segoe UI Variable Display', 'Segoe UI', sans-serif;
-  --font-body: 'OmniGet Lao', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro', system-ui, 'Segoe UI Variable Text', 'Segoe UI', sans-serif;
+  --font-display: 'LibreGet Lao', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro', system-ui, 'Segoe UI Variable Display', 'Segoe UI', sans-serif;
+  --font-body: 'LibreGet Lao', -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro', system-ui, 'Segoe UI Variable Text', 'Segoe UI', sans-serif;
   --font-mono: ui-monospace, 'SF Mono', Menlo, 'Cascadia Mono', Consolas, 'DejaVu Sans Mono', monospace;
   --font-system: var(--font-body);
 

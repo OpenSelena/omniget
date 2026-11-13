@@ -1,6 +1,6 @@
 /**
  * Tipos e utilidades da categoria X / Twitter (estudo 67). Espelham os
- * structs de `omniget-core/src/core/tools/x/`.
+ * structs de `libreget-core/src/core/tools/x/`.
  */
 import { invoke } from "@tauri-apps/api/core";
 import { get } from "svelte/store";
@@ -126,7 +126,7 @@ export async function loginToX(): Promise<boolean> {
     session: false,
     expirationDate: Math.floor(Date.now() / 1000) + 3600 * 24 * 365,
   }));
-  await invoke("cookies_import", { request: { content: JSON.stringify(payload), source_url: "https://x.com", source_label: "OmniGet login", alias: null } });
+  await invoke("cookies_import", { request: { content: JSON.stringify(payload), source_url: "https://x.com", source_label: "LibreGet login", alias: null } });
   return true;
 }
 

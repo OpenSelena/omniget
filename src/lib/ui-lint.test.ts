@@ -8,7 +8,7 @@ describe("UI Lint Policies & Target Runner", () => {
   const appPolicyPath = path.join(rootDir, "ui-policy.app.json");
   const docsPolicyPath = path.join(rootDir, "ui-policy.docs.json");
 
-  it("validates ui-policy.app.json against lintapple and OmniGet desktop tokens", () => {
+  it("validates ui-policy.app.json against lintapple and LibreGet desktop tokens", () => {
     const raw = JSON.parse(fs.readFileSync(appPolicyPath, "utf-8"));
     const validated = validatePolicy(raw);
 

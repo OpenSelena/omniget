@@ -23,9 +23,12 @@
 
   let updateInfo = $derived(getUpdateInfo());
 
-  const PLUGINS_KEY = "omniget.sidebar.plugins_expanded";
+  const PLUGINS_KEY = "libreget.sidebar.plugins_expanded";
+  const LEGACY_PLUGINS_KEY = "omniget.sidebar.plugins_expanded";
   let pluginsExpanded = $state(
-    typeof localStorage === "undefined" ? true : localStorage.getItem(PLUGINS_KEY) !== "0",
+    typeof localStorage === "undefined"
+      ? true
+      : (localStorage.getItem(PLUGINS_KEY) ?? localStorage.getItem(LEGACY_PLUGINS_KEY)) !== "0",
   );
 
   function togglePlugins() {

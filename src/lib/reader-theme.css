@@ -1,6 +1,6 @@
 /*
  * Reader-only helpers: paper filter, focus mode, cursor line.
- * Theme-color overrides moved to omniget core (app.css eink-day/sepia/night).
+ * Theme-color overrides moved to libreget core (app.css eink-day/sepia/night).
  * Keeping everything behind the main `data-theme` avoids a dual theme system.
  */
 

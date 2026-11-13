@@ -24,7 +24,7 @@
   });
 </script>
 
-<header class="mac-titlebar" data-tauri-drag-region aria-label={pageTitle || "OmniGet"}>
+<header class="mac-titlebar" data-tauri-drag-region aria-label={pageTitle || "LibreGet"}>
   <div class="mac-titlebar-leading" data-tauri-drag-region>
     {#if pageTitle}
       <h1 class="mac-titlebar-title" data-tauri-drag-region>{pageTitle}</h1>

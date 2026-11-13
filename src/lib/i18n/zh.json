@@ -24,8 +24,8 @@
     "confirm": "仍然关闭"
   },
   "legal": {
-    "title": "请负责任地使用 OmniGet",
-    "body_paragraph_1": "OmniGet 是用于下载您有权访问的媒体的工具。您有责任尊重您下载的每个平台的版权和服务条款。",
+    "title": "请负责任地使用 LibreGet",
+    "body_paragraph_1": "LibreGet 是用于下载您有权访问的媒体的工具。您有责任尊重您下载的每个平台的版权和服务条款。",
     "body_paragraph_2": "继续即表示您确认：",
     "rule_copyright": "我只会下载我拥有、有许可或明确允许再利用的内容。",
     "rule_tos": "我会遵守来源平台的服务条款。",
@@ -34,7 +34,7 @@
   },
   "recovery": {
     "title": "未完成的下载",
-    "message": "OmniGet 发现上一次会话有 {{count}} 个下载未完成。是否要恢复？",
+    "message": "LibreGet 发现上一次会话有 {{count}} 个下载未完成。是否要恢复？",
     "more": "还有 {{count}} 个...",
     "restore": "恢复下载",
     "discard": "丢弃",
@@ -86,7 +86,7 @@
     "action_p2p": "把文件发给别人",
     "action_advanced": "高级选项",
     "action_simple": "回到简洁视图",
-    "value_line": "已用 OmniGet 保存 {{count}} 个文件 · {{size}}",
+    "value_line": "已用 LibreGet 保存 {{count}} 个文件 · {{size}}",
     "value_first": "你的第一次下载大约需要一分钟。私有内容只需你的浏览器 cookies。"
   },
   "tools": {
@@ -134,7 +134,7 @@
     "lc_exported": "已导出 {{name}}",
     "hub": {
       "title": "工具",
-      "subtitle": "OmniGet 除下载之外的全部功能，都集中在这里。",
+      "subtitle": "LibreGet 除下载之外的全部功能，都集中在这里。",
       "search_placeholder": "搜索工具、分类或平台…",
       "filter_label": "平台",
       "categories": "分类",
@@ -159,7 +159,7 @@
       "empty_desc": "换个关键词试试，或更改平台筛选。",
       "not_on_this_os": "此工具无法在你的系统（{{os}}）上运行。",
       "soon_title": "开发中",
-      "soon_desc": "此工具在 OmniGet 的规划中，尚不可用。列在这里是让你提前了解即将推出的功能。"
+      "soon_desc": "此工具在 LibreGet 的规划中，尚不可用。列在这里是让你提前了解即将推出的功能。"
     },
     "categories": {
       "youtube": {
@@ -168,7 +168,7 @@
       },
       "video": {
         "name": "视频编辑",
-        "desc": "不用离开 OmniGet 即可剪辑、转换、录制和组装视频。"
+        "desc": "不用离开 LibreGet 即可剪辑、转换、录制和组装视频。"
       },
       "instagram": {
         "name": "Instagram",
@@ -414,11 +414,11 @@
       },
       "ai-usage": {
         "name": "AI 花费",
-        "desc": "OmniGet 在 AI 上花了多少钱，按天、模型和任务统计。"
+        "desc": "LibreGet 在 AI 上花了多少钱，按天、模型和任务统计。"
       },
       "ai-mcp": {
         "name": "MCP 服务器",
-        "desc": "让 Claude、Goose 或 Cursor 来调用 OmniGet 的工具。"
+        "desc": "让 Claude、Goose 或 Cursor 来调用 LibreGet 的工具。"
       },
       "yt-sponsorblock": {
         "name": "SponsorBlock",
@@ -690,7 +690,7 @@
       },
       "ig-schedule": {
         "name": "定时发布",
-        "desc": "把帖子排到指定日期时间发布；OmniGet 打开期间会按时发出。"
+        "desc": "把帖子排到指定日期时间发布；LibreGet 打开期间会按时发出。"
       },
       "video-compress": {
         "name": "压缩到指定大小",
@@ -889,7 +889,7 @@
       "title": "Spicetify",
       "cli_row": "Spicetify CLI",
       "cli_missing": "未安装",
-      "cli_source_managed": "由 OmniGet 管理",
+      "cli_source_managed": "由 LibreGet 管理",
       "cli_source_system": "在本机找到",
       "cli_source_custom": "自定义路径",
       "install": "安装",
@@ -1034,7 +1034,7 @@
       "daemon": "服务",
       "running": "运行中",
       "stopped": "未运行",
-      "stopped_hint": "安装 Ollama 并打开它；OmniGet 通过 11434 端口与它通信。",
+      "stopped_hint": "安装 Ollama 并打开它；LibreGet 通过 11434 端口与它通信。",
       "get": "获取 Ollama",
       "use_hint": "在「设置 → AI」中选择带有基础 URL 的本地服务商",
       "installed": "已安装的模型",
@@ -1056,7 +1056,7 @@
     },
     "usage": {
       "calls": "次调用",
-      "intro": "OmniGet 的每次 AI 调用都会记录在本地；费用按当前价格表计算。",
+      "intro": "LibreGet 的每次 AI 调用都会记录在本地；费用按当前价格表计算。",
       "unknown_price": "价格未知",
       "by_day": "按天",
       "by_model": "按模型",
@@ -1158,7 +1158,7 @@
     "awake": {
       "on": "正在保持电脑唤醒",
       "off": "未启用",
-      "intro": "阻止系统睡眠和屏幕保护程序，直到你停止它或关闭 OmniGet。",
+      "intro": "阻止系统睡眠和屏幕保护程序，直到你停止它或关闭 LibreGet。",
       "start": "保持唤醒",
       "stop": "停止",
       "note": "开启设置中的选项后，下载期间本来就会保持电脑唤醒。"
@@ -1175,7 +1175,7 @@
     },
     "wintweaks": {
       "only_windows": "这些设置只存在于 Windows。这里列出来是让你了解这个工具的功能。",
-      "admin_hint": "标为 admin 的规则需要以管理员身份运行 OmniGet。",
+      "admin_hint": "标为 admin 的规则需要以管理员身份运行 LibreGet。",
       "restart": "注销或重启后生效。",
       "group_privacy": "隐私与遥测",
       "group_ui": "界面",
@@ -1590,7 +1590,7 @@
         "label": "Instagram 账户",
         "checking": "正在检查会话…",
         "none_title": "没有 Instagram 会话",
-        "none_desc": "在装有 OmniGet 扩展的浏览器中打开已登录的 instagram.com：Cookies 会被自动捕获。你也可以在“设置 → Cookies”中粘贴 cookies.txt。",
+        "none_desc": "在装有 LibreGet 扩展的浏览器中打开已登录的 instagram.com：Cookies 会被自动捕获。你也可以在“设置 → Cookies”中粘贴 cookies.txt。",
         "open_site": "打开 instagram.com",
         "cookies": "Cookies"
       },
@@ -1841,7 +1841,7 @@
         "beta": "测试版。先用一张照片试试。视频上传后由 Instagram 转码；应用会等待确认。",
         "queue": "队列",
         "queue_empty": "暂无定时发布。",
-        "queue_hint": "队列仅在 OmniGet 打开时运行。",
+        "queue_hint": "队列仅在 LibreGet 打开时运行。",
         "status_pending": "待处理",
         "status_running": "发布中",
         "status_done": "已发布",
@@ -2006,8 +2006,8 @@
       "test": "测试",
       "balance": "余额",
       "models": "个模型",
-      "use": "在 OmniGet 中使用",
-      "used": "OmniGet 现在使用此密钥（设置 → AI）。",
+      "use": "在 LibreGet 中使用",
+      "used": "LibreGet 现在使用此密钥（设置 → AI）。",
       "edit": "编辑",
       "none": "还没有账号。添加 OpenAI、Anthropic、OpenRouter、DeepSeek、Gemini、Groq、xAI、Mistral、SiliconFlow、New API 中转、Ollama 或任何 OpenAI 兼容的端点。",
       "export": "导出",
@@ -2054,7 +2054,7 @@
       "grab": "使用光标位置",
       "delay": "启动延迟",
       "delay_hint": "第一次点击前的等待秒数，方便你移动光标。",
-      "perm": "首次使用时，macOS 会要求为 OmniGet 授予辅助功能权限。在 Wayland 下，模拟点击可能无法工作。"
+      "perm": "首次使用时，macOS 会要求为 LibreGet 授予辅助功能权限。在 Wayland 下，模拟点击可能无法工作。"
     },
     "dictation": {
       "phase_idle": "就绪",
@@ -2101,14 +2101,14 @@
       "quality": "质量",
       "quality_hint": "CRF 越低画质越好、文件越大。23 是 x264 的默认值。",
       "cursor": "光标",
-      "default_dir": "Videos/OmniGet",
-      "perm": "首次录制时 macOS 会向 OmniGet 请求屏幕录制权限；如果录制立即结束，请在隐私设置中授权后重试。"
+      "default_dir": "Videos/LibreGet",
+      "perm": "首次录制时 macOS 会向 LibreGet 请求屏幕录制权限；如果录制立即结束，请在隐私设置中授权后重试。"
     },
     "vs": {
       "running": "运行中",
       "not_running": "已安装，未运行",
       "engine": "引擎",
-      "hint": "重活由 VoiceStudio（开源、本地运行）完成：OmniGet 通过 3900 端口调用它的 API。",
+      "hint": "重活由 VoiceStudio（开源、本地运行）完成：LibreGet 通过 3900 端口调用它的 API。",
       "launching": "正在打开 VoiceStudio，后端需要几秒钟启动。",
       "base_url": "后端地址",
       "base_url_hint": "仅当 VoiceStudio 运行在其他端口或机器上时才修改。",
@@ -2145,7 +2145,7 @@
       "what": "作用",
       "what_hint": "让 YouTube 提供 H.264 而不是 VP9/AV1。老旧或性能较弱的机器能以硬件方式解码 H.264，播放不再卡顿，风扇也会安静下来。1080p 以上的画质可能无法使用。",
       "how": "如何开启",
-      "step1": "安装 OmniGet 浏览器扩展，并在设置中完成配对。",
+      "step1": "安装 LibreGet 浏览器扩展，并在设置中完成配对。",
       "step2": "在任意标签页打开扩展弹窗，开启 H.264 开关（顶部的第三个开关）。",
       "step3": "重新加载 YouTube。该设置会一直保留，直到你关闭它。",
       "extension": "浏览器扩展",
@@ -2889,7 +2889,7 @@
       "extra_hint": "你自己的域名，以空格分隔",
       "dry_run": "仅预览",
       "dry_run_hint": "统计全部内容，不写入任何数据",
-      "safety": "只有 OmniGet 的屏蔽段会改变——其余内容逐字节保持不变",
+      "safety": "只有 LibreGet 的屏蔽段会改变——其余内容逐字节保持不变",
       "export": "保存到文件",
       "preview": "预览",
       "run": "应用",
@@ -3649,9 +3649,9 @@
     "general": {
       "title": "通用",
       "start_with_system": "开机自启",
-      "start_with_system_desc": "系统启动时自动运行 OmniGet",
+      "start_with_system_desc": "系统启动时自动运行 LibreGet",
       "start_minimized": "仅托盘启动",
-      "start_minimized_desc": "在系统托盘中打开 OmniGet 而不显示窗口。点击托盘图标打开。",
+      "start_minimized_desc": "在系统托盘中打开 LibreGet 而不显示窗口。点击托盘图标打开。",
       "reset_hints": "重置提示",
       "reset_hints_desc": "重新显示所有已关闭的提示",
       "restore": "恢复",
@@ -3812,7 +3812,7 @@
       "filename_template_desc": "yt-dlp 下载文件的输出模板",
       "filename_template_preview": "预览：{{preview}}"
     },
-    "update_available": "OmniGet {{version}} 可用",
+    "update_available": "LibreGet {{version}} 可用",
     "update_button": "立即更新",
     "update_downloading": "正在下载更新...",
     "telegram": {
@@ -3823,7 +3823,7 @@
     },
     "browser_ext": {
       "title": "浏览器扩展",
-      "description": "扩展会将浏览器中的 Cookie 和网址发送给 OmniGet。它尚未上架官方商店，请使用下方按钮导出当前版本并手动安装。",
+      "description": "扩展会将浏览器中的 Cookie 和网址发送给 LibreGet。它尚未上架官方商店，请使用下方按钮导出当前版本并手动安装。",
       "bundled_version": "内置版本：v{{version}}",
       "extracting": "正在导出…",
       "update_install": "更新 / 安装",
@@ -3831,7 +3831,7 @@
       "unavailable": "不可用",
       "hint_chrome": "chrome://extensions → 开发者模式 → “加载已解压的扩展程序” → 选择导出的文件夹。",
       "hint_firefox": "about:debugging#/runtime/this-firefox → “临时载入附加组件” → 选择导出文件夹中的 manifest.json。Firefox 重启后会移除临时附加组件，因此在我们上架 AMO 之前需要重复此操作。",
-      "hint_safari": "自 Safari 14 起，扩展必须通过 Mac App Store 分发。OmniGet 扩展的 Safari 版本尚未发布。"
+      "hint_safari": "自 Safari 14 起，扩展必须通过 Mac App Store 分发。LibreGet 扩展的 Safari 版本尚未发布。"
     },
     "rules": {
       "title": "规则",
@@ -3882,8 +3882,8 @@
       "silence_none": "这个文件几乎没有静音",
       "silence_done": "发现 {{saved}} 的静音 —— 播放时可以跳过",
       "portable_label": "便携模式",
-      "portable_active": "便携模式已启用，OmniGet 的数据存储在 {{dir}} 中。",
-      "portable_macos_notice": "在 macOS 上，WebView 仍会把会话数据存储在 ~/Library 下，便携模式无法将其重定向。此处只有 OmniGet 自身的数据是便携的——详见 github.com/OpenSelena/omniget/issues/227。"
+      "portable_active": "便携模式已启用，LibreGet 的数据存储在 {{dir}} 中。",
+      "portable_macos_notice": "在 macOS 上，WebView 仍会把会话数据存储在 ~/Library 下，便携模式无法将其重定向。此处只有 LibreGet 自身的数据是便携的——详见 github.com/OpenSelena/libreget/issues/227。"
     },
     "dependencies": {
       "title": "依赖项",
@@ -3938,7 +3938,9 @@
       "spacing_desc": "乘以间距标记 (padding、gap、margin)。1.0× 为默认。0.85× 紧凑整个 UI;1.25× 更宽松。",
       "preview_title": "预览",
       "preview_desc": "实时显示。遵循当前主题。",
-      "preset_omniget_default_name": "Omniget 默认",
+      "preset_libreget_default_name": "LibreGet 默认",
+      "preset_omniget_default_name": "LibreGet 默认",
+      "preset_libreget_default_desc": "Bricolage display、Inter body、Plex Mono。家用标准。",
       "preset_omniget_default_desc": "Bricolage display、Inter body、Plex Mono。家用标准。",
       "preset_notion_like_name": "Notion 风格",
       "preset_notion_like_desc": "display + body 都用 Inter。通过大小+粗细体现层级,而非切换字体家族。",
@@ -4046,7 +4048,7 @@
     },
     "bridge": {
       "title": "浏览器扩展",
-      "intro": "通过私有的本地连接将 OmniGet 浏览器扩展与此应用配对。打开扩展的选项页面，粘贴下方的端点 URL 与令牌，然后点击保存。",
+      "intro": "通过私有的本地连接将 LibreGet 浏览器扩展与此应用配对。打开扩展的选项页面，粘贴下方的端点 URL 与令牌，然后点击保存。",
       "pair_label": "配对扩展",
       "pair_hint": "在此点击一次，已安装的扩展会自动连接——无需复制粘贴。",
       "pair": "配对扩展",
@@ -4137,7 +4139,7 @@
       "capture_via_extension": "通过扩展捕获",
       "open_folder": "打开文件夹",
       "dir_label": "文件夹：",
-      "hint_use_extension": "在任何已登录的站点上，点击浏览器中的 OmniGet 扩展图标。几秒钟后，cookies 就会出现在这里。",
+      "hint_use_extension": "在任何已登录的站点上，点击浏览器中的 LibreGet 扩展图标。几秒钟后，cookies 就会出现在这里。",
       "empty_title": "这里还没有 cookies",
       "empty_body": "使用浏览器扩展从你已登录的站点捕获 cookies，或手动导入文件。",
       "status_fresh": "Cookie 较新",
@@ -4400,18 +4402,18 @@
     "card_project_title": "关于项目",
     "card_project_desc": "路线图、理念与参与方式。",
     "card_terms_title": "条款与道德规范",
-    "card_terms_desc": "OmniGet 对你的要求，以及它对你的承诺。",
+    "card_terms_desc": "LibreGet 对你的要求，以及它对你的承诺。",
     "description": "你的媒体下载器。开源且免费。",
     "terms_title": "使用条款",
-    "terms_text": "OmniGet 按原样提供，不作任何保证。本应用方便你下载互联网上公开可用的内容，但我们对你下载的内容及其用途不承担任何责任。使用 OmniGet 即表示你同意上述条款。",
+    "terms_text": "LibreGet 按原样提供，不作任何保证。本应用方便你下载互联网上公开可用的内容，但我们对你下载的内容及其用途不承担任何责任。使用 LibreGet 即表示你同意上述条款。",
     "legal_title": "法律依据",
-    "legal_text": "OmniGet 的个人使用受到巴西《刑法典》第 184 条第 4 款的支持，该条款规定：出于个人私用目的、单份复制、不以营利为目的的作品复制不构成犯罪。但这并不意味着你可以分发、转售或将下载的内容用于商业用途。民事领域的著作权法仍然适用。",
+    "legal_text": "LibreGet 的个人使用受到巴西《刑法典》第 184 条第 4 款的支持，该条款规定：出于个人私用目的、单份复制、不以营利为目的的作品复制不构成犯罪。但这并不意味着你可以分发、转售或将下载的内容用于商业用途。民事领域的著作权法仍然适用。",
     "responsibility_title": "用户责任",
-    "responsibility_text": "你（用户）对使用 OmniGet 及通过其获取的内容负全责。请尊重著作权和各平台的服务条款。始终注明原创作者。不要将其用于任何非法或侵犯他人权利的商业用途。如果将内容用于教育目的，请注明来源。",
+    "responsibility_text": "你（用户）对使用 LibreGet 及通过其获取的内容负全责。请尊重著作权和各平台的服务条款。始终注明原创作者。不要将其用于任何非法或侵犯他人权利的商业用途。如果将内容用于教育目的，请注明来源。",
     "mascot_title": "Loop 吉祥物使用指南",
-    "mascot_text": "Loop 是 OmniGet 的吉祥物，一个会实时对你的下载做出反应的可爱小生物。为了保护 Loop，这里有一些规则：你可以自由创作 Loop 的同人画作，但不可将其设计或图稿用于商业用途、用于你自己的项目，或修改和重新分发项目中的原始图稿。",
+    "mascot_text": "Loop 是 LibreGet 的吉祥物，一个会实时对你的下载做出反应的可爱小生物。为了保护 Loop，这里有一些规则：你可以自由创作 Loop 的同人画作，但不可将其设计或图稿用于商业用途、用于你自己的项目，或修改和重新分发项目中的原始图稿。",
     "license_title": "许可证",
-    "license_text": "OmniGet 是开源软件，采用 GPL-3.0 许可证。源代码托管在 GitHub 上。「OmniGet」名称、标志和 Loop 是项目商标，不受代码许可证约束。",
+    "license_text": "LibreGet 是开源软件，采用 GPL-3.0 许可证。源代码托管在 GitHub 上。「LibreGet」名称、标志和 Loop 是项目商标，不受代码许可证约束。",
     "star_button": "在 GitHub 上加星",
     "star_description": "如果你喜欢这个项目，请给我们一个星标！",
     "version": "版本",
@@ -4423,7 +4425,7 @@
     "feature_themes": "11 个主题：Dark、Light、Catppuccin（4 种风味）、One Dark Pro、Dracula、NyxVamp（3 种变体）",
     "feature_i18n": "支持英语、葡萄牙语、中文、日语、意大利语和法语",
     "feature_tech": "使用 Tauri + Rust 构建，快速且轻量",
-    "roadmap_intro": "以下是 OmniGet 后续版本的规划。",
+    "roadmap_intro": "以下是 LibreGet 后续版本的规划。",
     "roadmap_platforms_title": "集成",
     "roadmap_features_title": "功能",
     "roadmap_feature_telegram_multi_account": "Telegram 多账号支持",
@@ -4452,10 +4454,10 @@
     "version": "v{{version}}",
     "by_author": "由 {{author}} 开发",
     "uninstall": "卸载",
-    "restart_required": "重启 OmniGet 以应用更改",
+    "restart_required": "重启 LibreGet 以应用更改",
     "browse_loading": "正在加载插件...",
     "browse_error": "无法加载插件列表",
-    "browse_error_hint": "OmniGet 无法连接插件注册表。如果你的网络无法访问 GitHub，请在 设置 → 网络 中配置代理后重试。",
+    "browse_error_hint": "LibreGet 无法连接插件注册表。如果你的网络无法访问 GitHub，请在 设置 → 网络 中配置代理后重试。",
     "browse_retry": "重试",
     "install_network_error": "无法连接 GitHub 下载该插件。请在 设置 → 网络 中配置代理后重试。",
     "browse_empty": "暂无可用插件",
@@ -4476,11 +4478,11 @@
     "plugin_not_installed": "插件未安装",
     "plugin_install_hint": "从 Marketplace 安装此插件即可使用。",
     "go_to_marketplace": "前往 Marketplace",
-    "plugin_restart_hint": "重启 OmniGet 以加载此插件。",
+    "plugin_restart_hint": "重启 LibreGet 以加载此插件。",
     "plugin_incompatible_title": "插件与当前版本不兼容",
-    "plugin_incompatible_hint": "此插件是为旧版 OmniGet 构建的,无法加载。请从 Marketplace 重新安装以获取兼容版本——重启无法解决此问题。",
+    "plugin_incompatible_hint": "此插件是为旧版 LibreGet 构建的,无法加载。请从 Marketplace 重新安装以获取兼容版本——重启无法解决此问题。",
     "plugin_load_failed_title": "插件加载失败",
-    "plugin_load_failed_hint": "OmniGet 无法加载此插件。请尝试从 Marketplace 重新安装。",
+    "plugin_load_failed_hint": "LibreGet 无法加载此插件。请尝试从 Marketplace 重新安装。",
     "plugin_load_error_details": "详情: {{error}}",
     "reinstall": "重新安装"
   },
@@ -4541,7 +4543,7 @@
     "empty": "暂无发行说明。"
   },
   "onboarding": {
-    "welcome_title": "欢迎使用 OmniGet！",
+    "welcome_title": "欢迎使用 LibreGet！",
     "welcome_desc": "我会帮你从互联网下载任何视频或课程。简单、快速、免费。",
     "next": "下一步",
     "skip": "跳过",
@@ -4705,12 +4707,12 @@
     "drm_protected": "下载的流受 DRM 保护，无法合并。不支持此内容。",
     "output_missing": "下载已完成，但文件夹中没有出现文件（或文件为空）。请检查磁盘空间和杀毒软件设置后重试。",
     "course_platform_url": "课程平台无法通过 URL 下载。请打开课程页面（需要课程插件并登录账号）。",
-    "plugin_outdated": "此插件版本过旧，不支持此操作。在应用市场更新它，然后重启 OmniGet。"
+    "plugin_outdated": "此插件版本过旧，不支持此操作。在应用市场更新它，然后重启 LibreGet。"
   },
   "debug": {
     "title": "活动日志",
     "enable": "活动日志",
-    "enable_desc": "查看 OmniGet 在后台执行的操作",
+    "enable_desc": "查看 LibreGet 在后台执行的操作",
     "filter_all": "全部",
     "filter_downloads": "下载",
     "filter_network": "网络",
@@ -4728,7 +4730,7 @@
   "p2p": {
     "send_file": "发送文件",
     "send_title": "通过 P2P 发送文件",
-    "send_description": "向另一位 OmniGet 用户发送文件。系统将生成一个共享码 — 接收方将其粘贴到输入框即可下载。",
+    "send_description": "向另一位 LibreGet 用户发送文件。系统将生成一个共享码 — 接收方将其粘贴到输入框即可下载。",
     "select_file": "选择文件",
     "share_code": "共享码",
     "click_to_copy": "点击复制",
@@ -4833,7 +4835,7 @@
     "refresh": "刷新",
     "unknown_error": "未知错误",
     "captcha_detected": "检测到验证码 — 请在登录窗口中完成验证。",
-    "external_platform_hint": "这门课程在 Hotmart Club 之外提供，OmniGet 无法从这里下载。请在创作者的平台上打开它；如果该平台是 Udemy 或 Kiwify，请在「课程」中登录该平台。",
+    "external_platform_hint": "这门课程在 Hotmart Club 之外提供，LibreGet 无法从这里下载。请在创作者的平台上打开它；如果该平台是 Udemy 或 Kiwify，请在「课程」中登录该平台。",
     "open_external": "在平台上打开"
   },
   "torrent": {
@@ -5275,7 +5277,7 @@
       "test_failed": "无法发送通知",
       "permission_denied_toast": "系统级别已禁用通知。请在操作系统设置中启用。",
       "permission_denied_banner": "系统通知已禁用",
-      "permission_denied_hint": "请在操作系统设置中允许 Omniget 发送通知，以接收包裹更新。",
+      "permission_denied_hint": "请在操作系统设置中允许 LibreGet 发送通知，以接收包裹更新。",
       "request_permission": "请求权限"
     },
     "notification": {

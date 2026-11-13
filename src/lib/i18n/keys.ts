@@ -1478,6 +1478,8 @@ export type TranslationKeys =
   | 'settings.typography.preset_compact_name'
   | 'settings.typography.preset_notion_like_desc'
   | 'settings.typography.preset_notion_like_name'
+  | 'settings.typography.preset_libreget_default_desc'
+  | 'settings.typography.preset_libreget_default_name'
   | 'settings.typography.preset_omniget_default_desc'
   | 'settings.typography.preset_omniget_default_name'
   | 'settings.typography.preset_reading_desc'

@@ -1,6 +1,6 @@
 /**
  * Tipos e utilidades da categoria Instagram (espelham
- * `omniget-core/src/core/tools/instagram/`). A conta escolhida fica em
+ * `libreget-core/src/core/tools/instagram/`). A conta escolhida fica em
  * localStorage para todas as tools da categoria usarem a mesma sessão.
  */
 import { invoke } from "@tauri-apps/api/core";

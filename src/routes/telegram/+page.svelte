@@ -14,7 +14,7 @@
   import TelegramCloneWizard from "$lib/telegram-components/TelegramCloneWizard.svelte";
   import TelegramAccountPanel from "$lib/telegram-components/TelegramAccountPanel.svelte";
   import TelegramSyncIndicator from "$lib/telegram-components/TelegramSyncIndicator.svelte";
-  import { telegramCreateFolder, isOmnigetFolder, type TelegramGlobalSearchHit } from "$lib/telegram-bridge";
+  import { telegramCreateFolder, isLibregetFolder, type TelegramGlobalSearchHit } from "$lib/telegram-bridge";
   import { onMount } from "svelte";
   import { t } from "$lib/i18n";
 
@@ -218,7 +218,7 @@
     (() => {
       let base = chats;
       if (chatViewMode === "drive") {
-        base = base.filter((c) => isOmnigetFolder(c as any));
+        base = base.filter((c) => isLibregetFolder(c as any));
       }
       const q = chatSearch.trim().toLowerCase();
       if (q) base = base.filter((c) => c.title.toLowerCase().includes(q));
@@ -1286,7 +1286,7 @@
             onclick={() => (chatViewMode = "drive")}
           >
             {$t("telegram.nav.tab_drive")}
-            <span class="view-tab-count">{chats.filter((c) => isOmnigetFolder(c as any)).length}</span>
+            <span class="view-tab-count">{chats.filter((c) => isLibregetFolder(c as any)).length}</span>
           </button>
         </div>
         {#if chatViewMode === "drive"}

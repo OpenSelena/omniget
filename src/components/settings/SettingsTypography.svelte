@@ -22,16 +22,16 @@
 
   const PRESETS: Preset[] = [
     {
-      id: "omniget-default",
-      nameKey: "settings.typography.preset_omniget_default_name",
-      descKey: "settings.typography.preset_omniget_default_desc",
+      id: "libreget-default",
+      nameKey: "settings.typography.preset_libreget_default_name",
+      descKey: "settings.typography.preset_libreget_default_desc",
       values: {
         font_display: "Bricolage Grotesque Variable",
         font_body: "Inter",
         font_mono: "IBM Plex Mono",
         line_height_base: 1.55,
         spacing_scale: 1.0,
-        preset_name: "omniget-default",
+        preset_name: "libreget-default",
       },
     },
     {
@@ -102,12 +102,14 @@
     font_mono: "IBM Plex Mono",
     line_height_base: 1.55,
     spacing_scale: 1.0,
-    preset_name: "omniget-default",
+    preset_name: "libreget-default",
   };
 
   let settings = $derived(getSettings());
   let typo = $derived(settings?.typography ?? DEFAULTS);
-  let activePresetId = $derived(typo.preset_name ?? null);
+  let activePresetId = $derived(
+    typo.preset_name === "omniget-default" ? "libreget-default" : (typo.preset_name ?? null)
+  );
   let isModified = $derived.by(() => {
     if (!activePresetId) return true;
     const p = PRESETS.find((x) => x.id === activePresetId);

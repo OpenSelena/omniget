@@ -1,6 +1,7 @@
 import { formatBytes } from "./download-store.svelte";
 
-const STORAGE_KEY = "omniget_download_stats";
+const STORAGE_KEY = "libreget_download_stats";
+const LEGACY_STORAGE_KEY = "omniget_download_stats";
 
 type Stats = {
   totalDownloads: number;
@@ -9,7 +10,7 @@ type Stats = {
 
 function load(): Stats {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY);
     if (raw) return JSON.parse(raw);
   } catch {}
   return { totalDownloads: 0, totalBytes: 0 };

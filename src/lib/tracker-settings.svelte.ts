@@ -1,4 +1,5 @@
-const STORAGE_KEY = "omniget.tracking.settings";
+const STORAGE_KEY = "libreget.tracking.settings";
+const LEGACY_STORAGE_KEY = "omniget.tracking.settings";
 
 export type TrackerSettings = {
   notificationsEnabled: boolean;
@@ -11,7 +12,7 @@ const DEFAULTS: TrackerSettings = {
 function readInitial(): TrackerSettings {
   if (typeof localStorage === "undefined") return { ...DEFAULTS };
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem(LEGACY_STORAGE_KEY);
     if (!raw) return { ...DEFAULTS };
     const parsed = JSON.parse(raw) as Partial<TrackerSettings>;
     return { ...DEFAULTS, ...parsed };

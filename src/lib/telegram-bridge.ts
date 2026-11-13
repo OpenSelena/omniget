@@ -662,10 +662,11 @@ export function telegramSyncSettingsSet(args: { enabled?: boolean; intervalMin?:
   return pluginInvoke<TelegramSyncState>("telegram", "telegram_sync_settings_set", args);
 }
 
-export function isOmnigetFolder(chat: TelegramChat): boolean {
+export function isLibregetFolder(chat: TelegramChat): boolean {
   if (chat.chat_type !== "channel") return false;
-  return /\[og\]\s*$/i.test(chat.title);
+  return /\[(og|lg)\]\s*$/i.test(chat.title);
 }
+export const isOmnigetFolder = isLibregetFolder;
 
 export function studyChatsCacheGet(): Promise<{ chats: StudyCachedChat[] }> {
   return pluginInvoke<{ chats: StudyCachedChat[] }>(

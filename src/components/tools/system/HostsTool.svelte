@@ -1,5 +1,5 @@
 <script lang="ts">
-  /** Bloquear anúncio e telemetria pelo arquivo hosts, só dentro do bloco do OmniGet. */
+  /** Bloquear anúncio e telemetria pelo arquivo hosts, só dentro do bloco do LibreGet. */
   import { invoke } from "@tauri-apps/api/core";
   import { onDestroy, onMount } from "svelte";
   import { t } from "$lib/i18n";

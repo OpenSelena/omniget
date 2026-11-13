@@ -178,7 +178,7 @@
         <div class="group-row">
           <div class="group-row-content"><div class="group-row-title">{$t("tools.sticker.pack_name")}</div></div>
           <div class="group-row-trailing btn-row">
-            <input class="input" bind:value={packName} placeholder="OmniGet" />
+            <input class="input" bind:value={packName} placeholder="LibreGet" />
             <input class="input" bind:value={packAuthor} placeholder={$t("tools.sticker.pack_author")} />
             <input class="input" bind:value={emoji} style:width="4em" />
           </div>
