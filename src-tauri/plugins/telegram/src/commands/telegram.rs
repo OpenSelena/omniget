@@ -5,7 +5,7 @@ use tokio::sync::{mpsc, Semaphore};
 use tokio_util::sync::CancellationToken;
 
 use base64::Engine;
-use omniget_plugin_sdk::PluginHost;
+use libreget_plugin_sdk::PluginHost;
 
 use crate::platforms::telegram::api::{self, TelegramChat, TelegramMediaItem};
 use crate::platforms::telegram::auth::{self, QrPollStatus, VerifyError};
@@ -292,7 +292,7 @@ pub async fn telegram_download_media(
             },
         );
 
-        let (tx, mut rx) = mpsc::channel::<omniget_core::models::progress::ProgressUpdate>(32);
+        let (tx, mut rx) = mpsc::channel::<libreget_core::models::progress::ProgressUpdate>(32);
 
         let host_progress = host.clone();
         let file_name_progress = file_name_clone.clone();
@@ -550,7 +550,7 @@ pub async fn telegram_download_batch(
                 );
 
                 let (tx, mut rx) =
-                    mpsc::channel::<omniget_core::models::progress::ProgressUpdate>(32);
+                    mpsc::channel::<libreget_core::models::progress::ProgressUpdate>(32);
 
                 let host_progress = host.clone();
                 let progress_forwarder = tokio::spawn(async move {

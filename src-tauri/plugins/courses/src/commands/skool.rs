@@ -54,9 +54,9 @@ pub async fn skool_login_token(
     *state.skool_session_validated_at.lock().await = None;
     *state.skool_courses_cache.lock().await = None;
 
-    let mut parsed = omniget_core::core::cookie_parser::parse_cookie_input(&token, "auth_token");
+    let mut parsed = libreget_core::core::cookie_parser::parse_cookie_input(&token, "auth_token");
     if parsed.token.is_empty() {
-        parsed = omniget_core::core::cookie_parser::parse_cookie_input(&token, "skooltok");
+        parsed = libreget_core::core::cookie_parser::parse_cookie_input(&token, "skooltok");
     }
 
     let cookie_val = if !parsed.token.is_empty() {

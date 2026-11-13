@@ -44,7 +44,7 @@ pub struct PortableInfo {
 /// `portable.txt`, so there is a single source of truth for the mode.
 #[tauri::command]
 pub fn get_portable_info() -> PortableInfo {
-    let is_portable = std::env::var("OMNIGET_PORTABLE").ok().as_deref() == Some("1");
+    let is_portable = std::env::var("LIBREGET_PORTABLE").ok().as_deref() == Some("1");
 
     PortableInfo {
         is_portable,

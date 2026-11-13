@@ -59,12 +59,12 @@ pub async fn memberkit_login_cookie(
 
     let trimmed_url = site_url.trim_end_matches('/').to_string();
     let parsed =
-        omniget_core::core::cookie_parser::parse_cookie_input(&cookie, "_memberkit_session");
+        libreget_core::core::cookie_parser::parse_cookie_input(&cookie, "_memberkit_session");
 
     let session = MemberkitSession {
         cookies: parsed.token.clone(),
         site_url: trimmed_url.clone(),
-        client: omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+        client: libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
             .user_agent(
                 "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0",
             )

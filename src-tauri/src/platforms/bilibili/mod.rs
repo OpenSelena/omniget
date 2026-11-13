@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use omniget_core::models::progress::ProgressUpdate;
+use libreget_core::models::progress::ProgressUpdate;
 
 use anyhow::anyhow;
 use async_trait::async_trait;
@@ -47,7 +47,7 @@ pub fn active_account_slug() -> Option<String> {
     let registry = crate::cookies::load_registry();
     let bucket = registry.buckets.get("bilibili.com")?;
 
-    if let Some(selected) = omniget_core::core::log_hook::current_cookie_slug() {
+    if let Some(selected) = libreget_core::core::log_hook::current_cookie_slug() {
         if bucket
             .accounts
             .iter()

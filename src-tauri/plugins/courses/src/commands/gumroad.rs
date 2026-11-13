@@ -55,12 +55,12 @@ pub async fn gumroad_login_token(
     *state.gumroad_session_validated_at.lock().await = None;
     *state.gumroad_courses_cache.lock().await = None;
 
-    let parsed_token = omniget_core::core::cookie_parser::parse_bearer_input(&token);
+    let parsed_token = libreget_core::core::cookie_parser::parse_bearer_input(&token);
 
     let session = GumroadSession {
         token: parsed_token.clone(),
         email: String::new(),
-        client: omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+        client: libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
             .user_agent("okhttp/4.8.1")
             .default_headers({
                 let mut h = reqwest::header::HeaderMap::new();

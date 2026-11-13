@@ -30,7 +30,7 @@ pub async fn thinkific_login(
     *state.thinkific_courses_cache.lock().await = None;
 
     let parsed =
-        omniget_core::core::cookie_parser::parse_cookie_input(&cookies, "thinkific_session");
+        libreget_core::core::cookie_parser::parse_cookie_input(&cookies, "thinkific_session");
 
     let session = api::create_session(&parsed.cookie_string, &site_url)
         .map_err(|e| format!("Failed to create session: {}", e))?;

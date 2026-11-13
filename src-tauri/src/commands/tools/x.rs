@@ -1,6 +1,6 @@
 //! Comandos da categoria X / Twitter (estudo 67).
 
-use omniget_core::core::tools::x::{
+use libreget_core::core::tools::x::{
     self, archive, bookmarks, follows, grok, media, profile, search, thread, XPost, XUser,
 };
 use serde::Serialize;
@@ -275,7 +275,7 @@ pub async fn tool_x_grok_ask(request: grok::GrokRequest) -> Result<grok::GrokAns
 #[tauri::command]
 pub async fn tool_x_data_url(url: String) -> Result<String, String> {
     use base64::Engine;
-    let client = omniget_core::core::tools::client().map_err(err)?;
+    let client = libreget_core::core::tools::client().map_err(err)?;
     let resp = client
         .get(&url)
         .header("Referer", "https://x.com/")

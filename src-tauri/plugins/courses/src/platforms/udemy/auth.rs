@@ -104,7 +104,7 @@ pub fn build_client_from_saved(saved: &SavedSession) -> anyhow::Result<reqwest::
     }
     default_headers.insert("accept-language", HeaderValue::from_static("en_US"));
 
-    let client = omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+    let client = libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent(UDEMY_API_USER_AGENT)
         .default_headers(default_headers)
         .redirect(reqwest::redirect::Policy::limited(10))
@@ -155,7 +155,7 @@ fn build_enterprise_client(saved: &SavedSession) -> anyhow::Result<reqwest::Clie
     );
     default_headers.insert("accept-language", HeaderValue::from_static("en_US"));
 
-    let client = omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+    let client = libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent(UDEMY_API_USER_AGENT)
         .default_headers(default_headers)
         .redirect(reqwest::redirect::Policy::limited(10))

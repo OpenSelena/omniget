@@ -61,9 +61,9 @@ pub async fn teachable_login_token(
     *state.teachable_session_validated_at.lock().await = None;
     *state.teachable_courses_cache.lock().await = None;
 
-    let parsed_token = omniget_core::core::cookie_parser::parse_bearer_input(&token);
+    let parsed_token = libreget_core::core::cookie_parser::parse_bearer_input(&token);
 
-    let client = omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+    let client = libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent("ktor-client")
         .default_headers({
             let mut h = reqwest::header::HeaderMap::new();

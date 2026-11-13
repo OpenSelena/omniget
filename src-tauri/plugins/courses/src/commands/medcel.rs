@@ -56,7 +56,7 @@ pub async fn medcel_login_token(
     *state.medcel_session_validated_at.lock().await = None;
     *state.medcel_courses_cache.lock().await = None;
 
-    let parsed_token = omniget_core::core::cookie_parser::parse_bearer_input(&token);
+    let parsed_token = libreget_core::core::cookie_parser::parse_bearer_input(&token);
 
     let client =
         api::build_client_with_origin(&parsed_token, &api_key, "https://areaaluno.medcel.com.br")

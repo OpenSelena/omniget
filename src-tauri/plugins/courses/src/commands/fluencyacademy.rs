@@ -55,12 +55,12 @@ pub async fn fluency_login_token(
     *state.fluency_session_validated_at.lock().await = None;
     *state.fluency_courses_cache.lock().await = None;
 
-    let parsed_token = omniget_core::core::cookie_parser::parse_bearer_input(&token);
+    let parsed_token = libreget_core::core::cookie_parser::parse_bearer_input(&token);
 
     let session = FluencySession {
         token: parsed_token.clone(),
         email: String::new(),
-        client: omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+        client: libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
             .user_agent(
                 "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0",
             )

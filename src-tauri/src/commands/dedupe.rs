@@ -190,7 +190,7 @@ mod tests {
     use super::*;
 
     fn tempdir(tag: &str) -> PathBuf {
-        let d = std::env::temp_dir().join(format!("omniget-dedupe-{tag}-{}", std::process::id()));
+        let d = std::env::temp_dir().join(format!("libreget-dedupe-{tag}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&d);
         std::fs::create_dir_all(&d).expect("cria");
         d

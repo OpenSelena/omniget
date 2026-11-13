@@ -1,5 +1,5 @@
-use omniget_core::core::subtitle_merge::{cues_to_srt, parse_cues};
-use omniget_core::core::tools::{dub, edge_tts, srt_translate, whisper};
+use libreget_core::core::subtitle_merge::{cues_to_srt, parse_cues};
+use libreget_core::core::tools::{dub, edge_tts, srt_translate, whisper};
 use serde::Serialize;
 
 use super::{err, progress};

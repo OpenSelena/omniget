@@ -40,8 +40,8 @@ use crate::core::ffmpeg::{self, MetadataEmbed};
 use crate::models::media::MediaInfo;
 use crate::platforms::traits::PlatformDownloader;
 use crate::storage::config;
-use omniget_core::core::ytdlp::CommandRecord;
-use omniget_core::models::progress::StreamInfo;
+use libreget_core::core::ytdlp::CommandRecord;
+use libreget_core::models::progress::StreamInfo;
 
 struct CachedInfo {
     info: MediaInfo,
@@ -120,7 +120,7 @@ pub fn is_retryable_error_message(message: &str) -> bool {
     if lower.contains("cancel") {
         return false;
     }
-    let (category, _) = omniget_core::core::errors::classify_download_error(message);
+    let (category, _) = libreget_core::core::errors::classify_download_error(message);
     matches!(category, "unknown" | "rate_limited")
 }
 
@@ -265,7 +265,7 @@ impl QueueItem {
             fragment_index: self.fragment_index,
             fragment_count: self.fragment_count,
             started_at_ms: self.started_at_ms,
-            command: omniget_core::core::ytdlp::get_command(self.id),
+            command: libreget_core::core::ytdlp::get_command(self.id),
         }
     }
 
@@ -338,10 +338,10 @@ impl DownloadQueue {
     ) {
         let computed_kind = if let Some(ref mi) = media_info {
             match mi.media_type {
-                omniget_core::models::media::MediaType::Photo
-                | omniget_core::models::media::MediaType::Carousel => Some(QueueKind::Image),
-                omniget_core::models::media::MediaType::Audio => Some(QueueKind::Audio),
-                omniget_core::models::media::MediaType::Video => Some(QueueKind::Video),
+                libreget_core::models::media::MediaType::Photo
+                | libreget_core::models::media::MediaType::Carousel => Some(QueueKind::Image),
+                libreget_core::models::media::MediaType::Audio => Some(QueueKind::Audio),
+                libreget_core::models::media::MediaType::Video => Some(QueueKind::Video),
                 _ => Some(kind_from_platform(&platform)),
             }
         } else {
@@ -667,11 +667,11 @@ impl DownloadQueue {
             }
             if let Some(ref m) = item.media_info {
                 match m.media_type {
-                    omniget_core::models::media::MediaType::Photo
-                    | omniget_core::models::media::MediaType::Carousel => {
+                    libreget_core::models::media::MediaType::Photo
+                    | libreget_core::models::media::MediaType::Carousel => {
                         item.kind = Some(QueueKind::Image);
                     }
-                    omniget_core::models::media::MediaType::Audio => {
+                    libreget_core::models::media::MediaType::Audio => {
                         item.kind = Some(QueueKind::Audio);
                     }
                     _ => {}
@@ -758,7 +758,7 @@ impl DownloadQueue {
         if let Some(item) = self.items.iter_mut().find(|i| i.id == id) {
             if item.status == QueueStatus::Active {
                 if item.platform != "magnet"
-                    && !omniget_core::core::ytdlp::pause_download_process(id)
+                    && !libreget_core::core::ytdlp::pause_download_process(id)
                 {
                     return false;
                 }
@@ -775,7 +775,7 @@ impl DownloadQueue {
         if let Some(item) = self.items.iter_mut().find(|i| i.id == id) {
             if item.status == QueueStatus::Paused {
                 if item.platform != "magnet"
-                    && !omniget_core::core::ytdlp::resume_download_process(id)
+                    && !libreget_core::core::ytdlp::resume_download_process(id)
                 {
                     return false;
                 }
@@ -791,7 +791,7 @@ impl DownloadQueue {
         for item in self.items.iter_mut() {
             if item.status == QueueStatus::Active {
                 if item.platform != "magnet"
-                    && !omniget_core::core::ytdlp::pause_download_process(item.id)
+                    && !libreget_core::core::ytdlp::pause_download_process(item.id)
                 {
                     continue;
                 }
@@ -810,7 +810,7 @@ impl DownloadQueue {
             if item.status == QueueStatus::Paused {
                 let tid = item.torrent_id;
                 if item.platform != "magnet"
-                    && !omniget_core::core::ytdlp::resume_download_process(item.id)
+                    && !libreget_core::core::ytdlp::resume_download_process(item.id)
                 {
                     continue;
                 }
@@ -974,7 +974,7 @@ impl DownloadQueue {
         ) {
             return Err("Download is still running".to_string());
         }
-        if omniget_core::core::ytdlp::get_command(id).is_none() {
+        if libreget_core::core::ytdlp::get_command(id).is_none() {
             return Err(
                 "This download did not run yt-dlp; there is no command to edit".to_string(),
             );
@@ -999,7 +999,7 @@ impl DownloadQueue {
         if result.is_some() {
             crate::core::recovery::remove(id);
             crate::core::queue_history::remove(id);
-            omniget_core::core::ytdlp::clear_command(id);
+            libreget_core::core::ytdlp::clear_command(id);
         }
         result
     }
@@ -1132,9 +1132,9 @@ pub fn emit_queue_state_from_state(app: &tauri::AppHandle, state: Vec<QueueItemI
 
     if let Some(window) = app.get_webview_window("main") {
         let title = if total > 0 {
-            format!("({}) OmniGet", total)
+            format!("({}) LibreGet", total)
         } else {
-            "OmniGet".into()
+            "LibreGet".into()
         };
         let _ = window.set_title(&title);
     }
@@ -1354,7 +1354,7 @@ async fn spawn_download_inner(
                 &app,
                 item_id,
                 format!(
-                    "[omniget] using cached video info: platform={} title=\"{}\"",
+                    "[libreget] using cached video info: platform={} title=\"{}\"",
                     platform_name, i.title
                 ),
             );
@@ -1369,7 +1369,7 @@ async fn spawn_download_inner(
                 &app,
                 item_id,
                 format!(
-                    "[omniget] fetching video info: platform={} url={}",
+                    "[libreget] fetching video info: platform={} url={}",
                     platform_name, url
                 ),
             );
@@ -1398,19 +1398,19 @@ async fn spawn_download_inner(
 
             let info_future =
                 fetch_and_cache_info(&url, &*downloader, &platform_name, ytdlp_path.as_deref());
-            let scoped_info_future = omniget_core::core::log_hook::CURRENT_COOKIE_SLUG.scope(
+            let scoped_info_future = libreget_core::core::log_hook::CURRENT_COOKIE_SLUG.scope(
                 cookie_slug.clone(),
-                omniget_core::core::log_hook::CURRENT_DOWNLOAD_ID.scope(item_id, info_future),
+                libreget_core::core::log_hook::CURRENT_DOWNLOAD_ID.scope(item_id, info_future),
             );
             let info_timeout_secs = if platform_name == "youtube"
                 || url.to_ascii_lowercase().contains("youtube.com")
                 || url.to_ascii_lowercase().contains("youtu.be")
             {
-                omniget_core::core::ytdlp::YOUTUBE_VIDEO_INFO_TOTAL_TIMEOUT_SECS
+                libreget_core::core::ytdlp::YOUTUBE_VIDEO_INFO_TOTAL_TIMEOUT_SECS
             } else if platform_name == "douyin" {
                 30
             } else {
-                omniget_core::core::ytdlp::DEFAULT_VIDEO_INFO_TOTAL_TIMEOUT_SECS
+                libreget_core::core::ytdlp::DEFAULT_VIDEO_INFO_TOTAL_TIMEOUT_SECS
             };
             let info_result = tokio::time::timeout(
                 std::time::Duration::from_secs(info_timeout_secs),
@@ -1424,7 +1424,7 @@ async fn spawn_download_inner(
                         &app,
                         item_id,
                         format!(
-                            "[omniget] video info fetched in {:.1}s: title=\"{}\"",
+                            "[libreget] video info fetched in {:.1}s: title=\"{}\"",
                             info_start.elapsed().as_secs_f64(),
                             i.title
                         ),
@@ -1436,7 +1436,7 @@ async fn spawn_download_inner(
                         &app,
                         item_id,
                         format!(
-                            "[omniget] failed fetching video info after {:.1}s: {}",
+                            "[libreget] failed fetching video info after {:.1}s: {}",
                             info_start.elapsed().as_secs_f64(),
                             e
                         ),
@@ -1460,7 +1460,7 @@ async fn spawn_download_inner(
                         &app,
                         item_id,
                         format!(
-                            "[omniget] video info timed out after {}s",
+                            "[libreget] video info timed out after {}s",
                             info_timeout_secs
                         ),
                     );
@@ -1490,7 +1490,7 @@ async fn spawn_download_inner(
 
     let mut info = info;
     if is_generic_title(&info.title) {
-        let pokemon = omniget_core::core::pokemon_names::random_pokemon_name();
+        let pokemon = libreget_core::core::pokemon_names::random_pokemon_name();
         info.title = format!("video_{}", pokemon);
     }
 
@@ -1509,14 +1509,14 @@ async fn spawn_download_inner(
             item.file_count = Some(fc);
             item.media_info = Some(info.clone());
             match info.media_type {
-                omniget_core::models::media::MediaType::Photo
-                | omniget_core::models::media::MediaType::Carousel => {
+                libreget_core::models::media::MediaType::Photo
+                | libreget_core::models::media::MediaType::Carousel => {
                     item.kind = Some(QueueKind::Image);
                 }
-                omniget_core::models::media::MediaType::Audio => {
+                libreget_core::models::media::MediaType::Audio => {
                     item.kind = Some(QueueKind::Audio);
                 }
-                omniget_core::models::media::MediaType::Video => {
+                libreget_core::models::media::MediaType::Video => {
                     item.kind = Some(QueueKind::Video);
                 }
                 _ => {}
@@ -1601,7 +1601,7 @@ async fn spawn_download_inner(
     let item_title = info.title.clone();
     let log_title = item_title.clone();
     let item_platform = platform_name.clone();
-    let (tx, mut rx) = mpsc::channel::<omniget_core::models::progress::ProgressUpdate>(32);
+    let (tx, mut rx) = mpsc::channel::<libreget_core::models::progress::ProgressUpdate>(32);
 
     let app_progress = app.clone();
     let queue_progress = queue.clone();
@@ -1757,7 +1757,7 @@ async fn spawn_download_inner(
 
             let eta_seconds = update
                 .eta_seconds
-                .or_else(|| omniget_core::core::ytdlp::get_eta(item_id))
+                .or_else(|| libreget_core::core::ytdlp::get_eta(item_id))
                 .or_else(|| {
                     if current_speed > 0.0 {
                         resolved_total.and_then(|total| {
@@ -1809,14 +1809,14 @@ async fn spawn_download_inner(
                 },
             );
         }
-        omniget_core::core::ytdlp::clear_eta(item_id);
+        libreget_core::core::ytdlp::clear_eta(item_id);
     });
 
     if let Some(ua) = opts.user_agent.clone() {
-        omniget_core::core::ytdlp::register_ext_user_agent(url.clone(), ua);
+        libreget_core::core::ytdlp::register_ext_user_agent(url.clone(), ua);
     }
     if let Some(hdrs) = opts.extra_headers.clone() {
-        omniget_core::core::ytdlp::register_ext_headers(url.clone(), hdrs);
+        libreget_core::core::ytdlp::register_ext_headers(url.clone(), hdrs);
     }
 
     let dl_start = std::time::Instant::now();
@@ -1824,7 +1824,7 @@ async fn spawn_download_inner(
         &app,
         item_id,
         format!(
-            "[omniget] starting download: platform={} title=\"{}\" url={}",
+            "[libreget] starting download: platform={} title=\"{}\" url={}",
             platform_name, log_title, url
         ),
     );
@@ -1841,22 +1841,22 @@ async fn spawn_download_inner(
             &app,
             item_id,
             format!(
-                "[omniget] running user-edited command ({} args), single attempt",
+                "[libreget] running user-edited command ({} args), single attempt",
                 argv.len()
             ),
         );
     }
-    let result = omniget_core::core::log_hook::CURRENT_ARGV_OVERRIDE
+    let result = libreget_core::core::log_hook::CURRENT_ARGV_OVERRIDE
         .scope(
             argv_override.clone(),
-            omniget_core::core::log_hook::CURRENT_COOKIE_SLUG.scope(
+            libreget_core::core::log_hook::CURRENT_COOKIE_SLUG.scope(
                 cookie_slug.clone(),
-                omniget_core::core::log_hook::CURRENT_DOWNLOAD_ID.scope(item_id, dl_future),
+                libreget_core::core::log_hook::CURRENT_DOWNLOAD_ID.scope(item_id, dl_future),
             ),
         )
         .await;
-    omniget_core::core::ytdlp::clear_ext_user_agent(&url);
-    omniget_core::core::ytdlp::clear_ext_headers(&url);
+    libreget_core::core::ytdlp::clear_ext_user_agent(&url);
+    libreget_core::core::ytdlp::clear_ext_headers(&url);
     tracing::info!(
         "[queue] download {} completed in {:?}",
         item_id,
@@ -1890,7 +1890,7 @@ async fn spawn_download_inner(
                 &app,
                 item_id,
                 format!(
-                    "[omniget] download finished: path={} size={} bytes",
+                    "[libreget] download finished: path={} size={} bytes",
                     dl.file_path.to_string_lossy(),
                     dl.file_size_bytes
                 ),
@@ -1907,7 +1907,7 @@ async fn spawn_download_inner(
                         &app,
                         item_id,
                         format!(
-                            "[omniget] download reported success but output missing or empty: {}",
+                            "[libreget] download reported success but output missing or empty: {}",
                             dl.file_path.to_string_lossy()
                         ),
                     );
@@ -1952,7 +1952,7 @@ async fn spawn_download_inner(
                     Ok(path) => append_download_log(
                         &app,
                         item_id,
-                        format!("[omniget] wrote NFO sidecar: {}", path.to_string_lossy()),
+                        format!("[libreget] wrote NFO sidecar: {}", path.to_string_lossy()),
                     ),
                     Err(e) => tracing::warn!("NFO sidecar failed for '{}': {}", info.title, e),
                 }
@@ -2004,9 +2004,9 @@ async fn spawn_download_inner(
             append_download_log(
                 &app,
                 item_id,
-                format!("[omniget] download failed: {}", raw_err),
+                format!("[libreget] download failed: {}", raw_err),
             );
-            let (category, hint) = omniget_core::core::errors::classify_download_error(&raw_err);
+            let (category, hint) = libreget_core::core::errors::classify_download_error(&raw_err);
             let user_msg = if category != "unknown" {
                 format!("{} ({})", hint, raw_err)
             } else {
@@ -2154,7 +2154,7 @@ async fn fetch_and_cache_info(
     let info = if let Some(ytdlp) = ytdlp_path {
         match platform {
             "youtube" => {
-                omniget_core::platforms::YouTubeDownloader::fetch_with_ytdlp(url, ytdlp).await?
+                libreget_core::platforms::YouTubeDownloader::fetch_with_ytdlp(url, ytdlp).await?
             }
             "generic" => {
                 if crate::platforms::generic_ytdlp::is_direct_media_url(url).is_some() {

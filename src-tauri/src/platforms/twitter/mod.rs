@@ -1,4 +1,4 @@
-use omniget_core::models::progress::ProgressUpdate;
+use libreget_core::models::progress::ProgressUpdate;
 use regex::Regex;
 use std::sync::Arc;
 
@@ -68,7 +68,7 @@ impl TwitterDownloader {
 
     fn managed_cookie_string() -> Option<String> {
         for domain in ["x.com", "twitter.com"] {
-            let slug = omniget_core::core::log_hook::current_cookie_slug();
+            let slug = libreget_core::core::log_hook::current_cookie_slug();
             let path = crate::cookies::account_path_for_consumer(domain, slug.as_deref())
                 .or_else(|| crate::cookies::account_path_for_consumer(domain, None));
             let Some(path) = path else {

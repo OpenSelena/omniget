@@ -52,7 +52,7 @@ fn build_client(cookies: &str) -> anyhow::Result<reqwest::Client> {
     headers.insert("Cookie", HeaderValue::from_str(cookies)?);
     headers.insert("Accept", HeaderValue::from_static("application/json"));
 
-    let client = omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+    let client = libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent(USER_AGENT)
         .default_headers(headers)
         .redirect(reqwest::redirect::Policy::limited(10))

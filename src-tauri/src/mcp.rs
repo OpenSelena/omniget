@@ -4,7 +4,7 @@
 //! que é o que Claude Code, Cursor, Goose e o `mcp-remote` do Claude Desktop
 //! aceitam. Sem crate de MCP: o protocolo aqui é JSON-RPC com quatro métodos.
 
-use omniget_core::core::tools::{
+use libreget_core::core::tools::{
     self as tools, ai_keys, disk, dupes, edge_tts, file_search, humanize, image_resize, ocr, pdf,
     pricing, ryd, sponsorblock, startup, sysclean, uninstall, whisper, x,
 };
@@ -33,7 +33,7 @@ pub fn tools() -> Vec<ToolDef> {
         input_schema,
     };
     vec![
-        t("download_url", "Queue a URL (video, audio, playlist, course, image) in the OmniGet Downloads panel. Same as pasting it in the app.", obj(json!({ "url": { "type": "string" } }), &["url"])),
+        t("download_url", "Queue a URL (video, audio, playlist, course, image) in the LibreGet Downloads panel. Same as pasting it in the app.", obj(json!({ "url": { "type": "string" } }), &["url"])),
         t("youtube_sponsorblock", "SponsorBlock segments (sponsor, intro, outro, selfpromo…) of a YouTube video.", obj(json!({ "url": { "type": "string" }, "categories": { "type": "array", "items": { "type": "string" } } }), &["url"])),
         t("youtube_dislikes", "Return YouTube Dislike estimates for a video.", obj(json!({ "url": { "type": "string" } }), &["url"])),
         t("pdf_info", "Pages, size, title, author and whether the PDF has a text layer.", obj(json!({ "path": { "type": "string" } }), &["path"])),
@@ -55,7 +55,7 @@ pub fn tools() -> Vec<ToolDef> {
         t("x_profile", "Profile analytics for an X/Twitter user (engagement, best hours, top posts).", obj(json!({ "handle": { "type": "string" }, "limit": { "type": "integer" } }), &["handle"])),
         t("x_search", "Search X/Twitter posts (advanced operators supported).", obj(json!({ "query": { "type": "string" }, "feed": { "type": "string", "enum": ["latest", "top"] } }), &["query"])),
         t("x_trends", "Current X/Twitter trends.", obj(json!({}), &[])),
-        t("instagram_profile", "Public info of an Instagram profile, using the cookies captured by the OmniGet extension.", obj(json!({ "username": { "type": "string" }, "account": { "type": "string", "description": "cookie slot, default _default" } }), &["username"])),
+        t("instagram_profile", "Public info of an Instagram profile, using the cookies captured by the LibreGet extension.", obj(json!({ "username": { "type": "string" }, "account": { "type": "string", "description": "cookie slot, default _default" } }), &["username"])),
         t("gallery_download", "Download a gallery/profile with gallery-dl (Pinterest, ArtStation, DeviantArt, Reddit…).", obj(json!({ "url": { "type": "string" }, "dest": { "type": "string" } }), &["url", "dest"])),
         t("aria2_download", "Download a large file with aria2 (multi-connection).", obj(json!({ "url": { "type": "string" }, "dest_dir": { "type": "string" }, "connections": { "type": "integer" } }), &["url", "dest_dir"])),
         t("disk_volumes", "Mounted volumes with total and free space.", obj(json!({}), &[])),
@@ -499,7 +499,7 @@ pub async fn call(app: &AppHandle, name: &str, a: Value) -> Result<Value, String
         "download_status" => {
             let id = need_id(&a, "download_id")?;
             let item = queue_item(app, id).await?;
-            let command = omniget_core::core::ytdlp::get_command(id);
+            let command = libreget_core::core::ytdlp::get_command(id);
             let log = crate::core::download_log::get(id);
             let log: Vec<String> = log.into_iter().rev().take(20).rev().collect();
             to_json(json!({ "item": item, "command": command, "log": log }))
@@ -570,8 +570,8 @@ pub async fn handle(app: &AppHandle, msg: &Value) -> Option<Value> {
                 json!({
                     "protocolVersion": version,
                     "capabilities": { "tools": { "listChanged": false } },
-                    "serverInfo": { "name": "OmniGet", "version": env!("CARGO_PKG_VERSION") },
-                    "instructions": "OmniGet desktop tools: downloads, PDF, speech, images, files, X/Twitter, Instagram, system. Paths are local to this machine."
+                    "serverInfo": { "name": "LibreGet", "version": env!("CARGO_PKG_VERSION") },
+                    "instructions": "LibreGet desktop tools: downloads, PDF, speech, images, files, X/Twitter, Instagram, system. Paths are local to this machine."
                 }),
             )
         }
@@ -628,26 +628,26 @@ pub async fn handle_body(app: &AppHandle, body: &Value) -> Option<Value> {
 pub fn client_snippets(url: &str, token: &str) -> Vec<(String, String)> {
     let auth = format!("Authorization: Bearer {}", token);
     vec![
-        ("Claude Code".into(), format!("claude mcp add --transport http omniget {} --header \"{}\"", url, auth)),
+        ("Claude Code".into(), format!("claude mcp add --transport http libreget {} --header \"{}\"", url, auth)),
         (
             "Cursor".into(),
-            serde_json::to_string_pretty(&json!({ "mcpServers": { "omniget": { "url": url, "headers": { "Authorization": format!("Bearer {}", token) } } } })).unwrap_or_default(),
+            serde_json::to_string_pretty(&json!({ "mcpServers": { "libreget": { "url": url, "headers": { "Authorization": format!("Bearer {}", token) } } } })).unwrap_or_default(),
         ),
         (
             "VS Code".into(),
-            serde_json::to_string_pretty(&json!({ "servers": { "omniget": { "type": "http", "url": url, "headers": { "Authorization": format!("Bearer {}", token) } } } })).unwrap_or_default(),
+            serde_json::to_string_pretty(&json!({ "servers": { "libreget": { "type": "http", "url": url, "headers": { "Authorization": format!("Bearer {}", token) } } } })).unwrap_or_default(),
         ),
         (
             "Goose".into(),
-            format!("extensions:\n  omniget:\n    enabled: true\n    type: streamable_http\n    name: omniget\n    uri: {}\n    headers:\n      Authorization: Bearer {}\n    timeout: 300", url, token),
+            format!("extensions:\n  omniget:\n    enabled: true\n    type: streamable_http\n    name: libreget\n    uri: {}\n    headers:\n      Authorization: Bearer {}\n    timeout: 300", url, token),
         ),
         (
             "Claude Desktop".into(),
-            serde_json::to_string_pretty(&json!({ "mcpServers": { "omniget": { "command": "npx", "args": ["-y", "mcp-remote", url, "--header", auth] } } })).unwrap_or_default(),
+            serde_json::to_string_pretty(&json!({ "mcpServers": { "libreget": { "command": "npx", "args": ["-y", "mcp-remote", url, "--header", auth] } } })).unwrap_or_default(),
         ),
         (
             "Codex".into(),
-            format!("[mcp_servers.omniget]\nurl = \"{}\"\nhttp_headers = {{ Authorization = \"Bearer {}\" }}", url, token),
+            format!("[mcp_servers.libreget]\nurl = \"{}\"\nhttp_headers = {{ Authorization = \"Bearer {}\" }}", url, token),
         ),
     ]
 }

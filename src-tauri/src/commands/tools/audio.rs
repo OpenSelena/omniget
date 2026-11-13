@@ -1,7 +1,7 @@
 //! Tools de áudio: normalizar loudness (EBU R128), tirar ruído e etiquetar
 //! metadados de música (ID3 / Vorbis / MP4).
 
-use omniget_core::core::tools::{audio_clean, audio_tag};
+use libreget_core::core::tools::{audio_clean, audio_tag};
 
 use super::{err, progress};
 

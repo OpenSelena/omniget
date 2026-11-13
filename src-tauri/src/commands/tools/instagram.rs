@@ -6,7 +6,7 @@
 use std::sync::atomic::AtomicBool;
 use std::sync::{Arc, OnceLock};
 
-use omniget_core::core::tools::instagram::{
+use libreget_core::core::tools::instagram::{
     self as ig, analytics, follow, media, profile, publish, social, IgClient, Session,
 };
 use serde::Serialize;
@@ -115,7 +115,7 @@ async fn resolve_items(
     client: &IgClient,
     url: &str,
     flag: &AtomicBool,
-    p: &omniget_core::core::tools::ProgressFn,
+    p: &libreget_core::core::tools::ProgressFn,
     job: &str,
 ) -> Result<Vec<media::MediaItem>, String> {
     match ig::parse_target(url) {
@@ -223,7 +223,7 @@ pub async fn tool_ig_download_bulk(
         if url.is_empty() {
             continue;
         }
-        omniget_core::core::tools::report(
+        libreget_core::core::tools::report(
             &p,
             &format!("ig:{}", job),
             "resolve",
@@ -301,7 +301,7 @@ pub async fn tool_ig_profile_media(
                 if ig::cancelled(&j.flag) {
                     break;
                 }
-                omniget_core::core::tools::report(
+                libreget_core::core::tools::report(
                     &p,
                     &format!("ig:{}", job),
                     "highlights",

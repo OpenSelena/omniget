@@ -3,7 +3,7 @@
 
 use super::dispatcher::{self, DownloadResult};
 use super::{
-    nami_load_app_settings, nami_load_profiles, omniget_nami_dir, update_profile_last_pulled,
+    nami_load_app_settings, nami_load_profiles, libreget_nami_dir, update_profile_last_pulled,
     Profile,
 };
 use chrono::Utc;
@@ -66,7 +66,7 @@ pub async fn pull_single_creator(
         )
     });
 
-    let app_dir = omniget_nami_dir()?;
+    let app_dir = libreget_nami_dir()?;
     let username = dispatcher::extract_username_generic(&profile_url);
 
     let dl_result = dispatcher::execute_download_workflow(

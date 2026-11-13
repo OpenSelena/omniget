@@ -53,7 +53,7 @@ fn build_client(token: &str) -> anyhow::Result<reqwest::Client> {
     );
     headers.insert("Accept", HeaderValue::from_static("application/json"));
 
-    let client = omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+    let client = libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent(USER_AGENT)
         .default_headers(headers)
         .redirect(reqwest::redirect::Policy::limited(10))
@@ -71,7 +71,7 @@ fn session_file_path() -> anyhow::Result<PathBuf> {
 
 pub async fn authenticate(email: &str, password: &str) -> anyhow::Result<WondriumSession> {
     let temp_client =
-        omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+        libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
             .user_agent(USER_AGENT)
             .connect_timeout(Duration::from_secs(30))
             .timeout(Duration::from_secs(60))

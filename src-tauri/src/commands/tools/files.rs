@@ -1,6 +1,6 @@
 use std::sync::{Mutex, OnceLock};
 
-use omniget_core::core::tools::{dupes, file_search, rename, shred};
+use libreget_core::core::tools::{dupes, file_search, rename, shred};
 use serde::Serialize;
 
 use super::{err, progress};
@@ -78,7 +78,7 @@ pub fn tool_awake_set(active: bool) -> Result<bool, String> {
             .display(true)
             .idle(true)
             .sleep(true)
-            .app_name("OmniGet")
+            .app_name("LibreGet")
             .reason("Tools: keep awake")
             .create()
             .map_err(|e| e.to_string())?;

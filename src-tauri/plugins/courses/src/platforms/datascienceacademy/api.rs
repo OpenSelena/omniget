@@ -53,7 +53,7 @@ fn build_client(token: &str) -> anyhow::Result<reqwest::Client> {
     headers.insert("Origin", HeaderValue::from_static(API_BASE));
     headers.insert("Referer", HeaderValue::from_str(&format!("{}/", API_BASE))?);
 
-    let client = omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+    let client = libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent(USER_AGENT)
         .default_headers(headers)
         .redirect(reqwest::redirect::Policy::limited(10))

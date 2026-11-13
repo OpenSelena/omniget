@@ -81,7 +81,7 @@ pub fn build_client(cookie_token: &str) -> anyhow::Result<reqwest::Client> {
         HeaderValue::from_static("https://www.skool.com/"),
     );
 
-    let client = omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+    let client = libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent(USER_AGENT)
         .default_headers(headers)
         .redirect(reqwest::redirect::Policy::limited(10))
@@ -113,7 +113,7 @@ pub async fn fetch_build_id(client: &reqwest::Client) -> anyhow::Result<String> 
 
 pub async fn authenticate(email: &str, password: &str) -> anyhow::Result<SkoolSession> {
     let temp_client =
-        omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+        libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
             .user_agent(USER_AGENT)
             .cookie_store(true)
             .connect_timeout(Duration::from_secs(30))

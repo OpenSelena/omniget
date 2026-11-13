@@ -2,7 +2,7 @@ use anyhow::anyhow;
 use async_trait::async_trait;
 use tokio::sync::mpsc;
 
-use omniget_core::models::progress::ProgressUpdate;
+use libreget_core::models::progress::ProgressUpdate;
 
 use crate::core::direct_downloader;
 use crate::core::http_client;
@@ -63,7 +63,7 @@ impl PlatformDownloader for DirectFileDownloader {
     }
 
     fn can_handle(&self, url: &str) -> bool {
-        omniget_core::platforms::is_direct_file_url(url)
+        libreget_core::platforms::is_direct_file_url(url)
     }
 
     async fn get_media_info(&self, url: &str) -> anyhow::Result<MediaInfo> {

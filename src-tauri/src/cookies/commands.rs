@@ -537,7 +537,7 @@ pub async fn cookies_test(request: CookieTestRequest) -> Result<CookieTestRespon
         .ok_or_else(|| "yt-dlp unavailable".to_string())?;
     let url = request.url.clone();
     let flags = vec!["--no-warnings".to_string()];
-    let result = omniget_core::core::log_hook::CURRENT_COOKIE_SLUG
+    let result = libreget_core::core::log_hook::CURRENT_COOKIE_SLUG
         .scope(request.slug.clone(), async move {
             crate::core::ytdlp::get_video_info(&ytdlp, &url, &flags).await
         })

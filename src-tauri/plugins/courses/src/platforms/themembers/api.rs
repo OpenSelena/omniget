@@ -90,7 +90,7 @@ fn build_client(
         HeaderValue::from_str(&format!("https://{}/", domain))?,
     );
 
-    let client = omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+    let client = libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent(USER_AGENT)
         .default_headers(headers)
         .redirect(reqwest::redirect::Policy::limited(10))
@@ -108,7 +108,7 @@ fn session_file_path() -> anyhow::Result<PathBuf> {
 
 pub async fn resolve_tenant(domain: &str) -> anyhow::Result<(String, String)> {
     let temp_client =
-        omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+        libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
             .user_agent(USER_AGENT)
             .connect_timeout(Duration::from_secs(30))
             .timeout(Duration::from_secs(60))
@@ -165,7 +165,7 @@ pub async fn authenticate(
     let (tenant_id, org_id) = resolve_tenant(domain).await?;
 
     let temp_client =
-        omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+        libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
             .user_agent(USER_AGENT)
             .connect_timeout(Duration::from_secs(30))
             .timeout(Duration::from_secs(60))
@@ -492,7 +492,7 @@ async fn resolve_the_player_ai_url(video_url: &str) -> anyhow::Result<String> {
         .unwrap_or(video_url);
 
     let temp_client =
-        omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+        libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
             .user_agent(USER_AGENT)
             .connect_timeout(Duration::from_secs(30))
             .timeout(Duration::from_secs(60))

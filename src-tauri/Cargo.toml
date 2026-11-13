@@ -1,9 +1,9 @@
 [workspace]
 members = [
     ".",
-    "omniget-core",
-    "omniget-plugin-sdk",
-    "omniget-cli",
+    "libreget-core",
+    "libreget-plugin-sdk",
+    "libreget-cli",
     "plugins/convert",
     "plugins/telegram",
     "plugins/courses",
@@ -12,14 +12,14 @@ members = [
 resolver = "2"
 
 [package]
-name = "omniget"
+name = "libreget"
 version = "0.16.6"
-description = "OmniGet — Universal Downloader & Media Player"
+description = "LibreGet — Universal Downloader & Media Player"
 authors = ["OpenSelena"]
 edition = "2021"
 
 [lib]
-name = "omniget_lib"
+name = "libreget_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
 [build-dependencies]
@@ -75,11 +75,11 @@ thiserror = "1"
 hmac = "0.12"
 qrcode = { version = "0.14", default-features = false, features = ["svg"] }
 open = "5"
-omniget-core = { path = "omniget-core", features = ["desktop"] }
-omniget-plugin-sdk = { path = "omniget-plugin-sdk" }
-omniget-plugin-convert = { path = "plugins/convert" }
-omniget-plugin-telegram = { path = "plugins/telegram" }
-omniget-plugin-courses = { path = "plugins/courses" }
+libreget-core = { path = "libreget-core", features = ["desktop"] }
+libreget-plugin-sdk = { path = "libreget-plugin-sdk" }
+libreget-plugin-convert = { path = "plugins/convert" }
+libreget-plugin-telegram = { path = "plugins/telegram" }
+libreget-plugin-courses = { path = "plugins/courses" }
 libloading = "0.8"
 which = "8"
 librqbit = "8.1.1"

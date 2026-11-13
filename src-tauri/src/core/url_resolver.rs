@@ -9,8 +9,8 @@
 
 use std::sync::Arc;
 
-use omniget_core::core::registry::PlatformRegistry;
-use omniget_core::platforms::{direct_file, Platform, PlatformDownloader};
+use libreget_core::core::registry::PlatformRegistry;
+use libreget_core::platforms::{direct_file, Platform, PlatformDownloader};
 
 pub struct Resolved {
     pub downloader: Arc<dyn PlatformDownloader>,

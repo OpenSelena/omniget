@@ -30,12 +30,12 @@ pub async fn areademembros_login_token(
     *state.areademembros_courses_cache.lock().await = None;
 
     let clean_url = site_url.trim_end_matches('/').to_string();
-    let parsed = omniget_core::core::cookie_parser::parse_cookie_input(&cookies, "session");
+    let parsed = libreget_core::core::cookie_parser::parse_cookie_input(&cookies, "session");
 
     let session = AreaDeMembrosSession {
         cookies: parsed.cookie_string.clone(),
         site_url: clean_url.clone(),
-        client: omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+        client: libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
             .user_agent(
                 "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0",
             )

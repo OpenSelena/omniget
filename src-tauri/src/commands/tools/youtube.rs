@@ -1,4 +1,4 @@
-use omniget_core::core::tools::{ryd, sponsorblock};
+use libreget_core::core::tools::{ryd, sponsorblock};
 
 use super::err;
 
@@ -25,7 +25,7 @@ pub fn tool_yt_video_id(url: String) -> Option<String> {
 /// Baixa uma URL simples (thumbnail, frame) para um arquivo.
 #[tauri::command]
 pub async fn tool_save_url(url: String, dest: String) -> Result<String, String> {
-    let client = omniget_core::core::tools::client().map_err(err)?;
+    let client = libreget_core::core::tools::client().map_err(err)?;
     let resp = client.get(&url).send().await.map_err(err)?;
     if !resp.status().is_success() {
         return Err(format!("HTTP {}", resp.status()));
@@ -40,7 +40,7 @@ pub async fn tool_save_url(url: String, dest: String) -> Result<String, String> 
 
 // ── Arquivo, notas e capítulos (rodada 3) ──────────────────────────────
 
-use omniget_core::core::tools::{yt_archive, yt_chapters, yt_notes};
+use libreget_core::core::tools::{yt_archive, yt_chapters, yt_notes};
 
 use super::progress;
 

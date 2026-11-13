@@ -1,4 +1,4 @@
-use omniget_core::core::tools::kdeconnect;
+use libreget_core::core::tools::kdeconnect;
 
 use super::err;
 

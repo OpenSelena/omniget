@@ -128,7 +128,7 @@ fn build_client(token: &str, cookie_string: &str) -> anyhow::Result<reqwest::Cli
     headers.insert("x-vertical", HeaderValue::from_static("militares"));
     headers.insert("x-requester-id", HeaderValue::from_static("front-student"));
 
-    let client = omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+    let client = libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent(USER_AGENT)
         .default_headers(headers)
         .redirect(reqwest::redirect::Policy::limited(10))

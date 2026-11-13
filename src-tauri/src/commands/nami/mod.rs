@@ -46,9 +46,9 @@ pub struct DependencyStatus {
 
 static NAMI_STORAGE_LOCK: LazyLock<Mutex<()>> = LazyLock::new(|| Mutex::new(()));
 
-pub fn omniget_nami_dir() -> Result<PathBuf, String> {
+pub fn libreget_nami_dir() -> Result<PathBuf, String> {
     let base =
-        omniget_core::core::paths::app_data_dir().ok_or("Could not find app data directory")?;
+        libreget_core::core::paths::app_data_dir().ok_or("Could not find app data directory")?;
     let dir = base.join("nami");
 
     fs::create_dir_all(&dir).map_err(|e| format!("Failed to create config dir: {}", e))?;
@@ -135,7 +135,7 @@ fn normalize_profile_url(platform: &str, raw_input: &str) -> String {
 
 #[command]
 pub async fn nami_check_python_dependencies() -> Result<DependencyStatus, String> {
-    let app_dir = omniget_nami_dir().unwrap_or_else(|_| PathBuf::from("."));
+    let app_dir = libreget_nami_dir().unwrap_or_else(|_| PathBuf::from("."));
     let status = fetcher::check_engines_status(&app_dir);
 
     let ok = status.ready;
@@ -156,7 +156,7 @@ pub async fn nami_check_python_dependencies() -> Result<DependencyStatus, String
 
 #[command]
 pub async fn nami_ensure_binaries() -> Result<DependencyStatus, String> {
-    let app_dir = omniget_nami_dir()?;
+    let app_dir = libreget_nami_dir()?;
     let _ = fetcher::ensure_latest_gallery_dl(&app_dir).await;
     let _ = fetcher::ensure_latest_yt_dlp(&app_dir).await;
 
@@ -173,7 +173,7 @@ pub async fn nami_run_gallery_dl_download(
     download_id: String,
     skip_replies: Option<bool>,
 ) -> Result<DownloadResult, String> {
-    let app_dir = omniget_nami_dir()?;
+    let app_dir = libreget_nami_dir()?;
     dispatcher::execute_download_workflow(
         app,
         url,
@@ -207,7 +207,7 @@ pub fn nami_save_app_settings(
         browser_cookies,
     };
 
-    let config_dir = omniget_nami_dir()?;
+    let config_dir = libreget_nami_dir()?;
     let settings_file = config_dir.join("app_settings.json");
     let content = serde_json::to_string_pretty(&settings)
         .map_err(|e| format!("Failed to serialize settings: {}", e))?;
@@ -220,7 +220,7 @@ pub fn nami_save_app_settings(
 pub fn nami_load_app_settings() -> Result<AppSettings, String> {
     let _storage_guard = NAMI_STORAGE_LOCK.lock().unwrap_or_else(|p| p.into_inner());
 
-    let settings_file = omniget_nami_dir()?.join("app_settings.json");
+    let settings_file = libreget_nami_dir()?.join("app_settings.json");
     if !settings_file.exists() {
         return Ok(AppSettings {
             output_directory: None,
@@ -288,7 +288,7 @@ pub fn nami_extract_browser_cookies(
                 )
             })?;
 
-        let config_dir = omniget_nami_dir()?;
+        let config_dir = libreget_nami_dir()?;
         let cookies_dir = config_dir.join("cookies");
         fs::create_dir_all(&cookies_dir).map_err(|e| e.to_string())?;
 
@@ -323,7 +323,7 @@ pub fn nami_load_profiles(platform: String) -> Result<Vec<Profile>, String> {
     validate_profile_platform(&platform)?;
     let _storage_guard = NAMI_STORAGE_LOCK.lock().unwrap_or_else(|p| p.into_inner());
 
-    let profiles_file = omniget_nami_dir()?.join("profiles.json");
+    let profiles_file = libreget_nami_dir()?.join("profiles.json");
     if !profiles_file.exists() {
         return Ok(vec![]);
     }
@@ -357,7 +357,7 @@ pub fn nami_save_profile(platform: String, url: String) -> Result<String, String
     }
 
     let url = normalize_profile_url(&platform, &raw_input);
-    let config_dir = omniget_nami_dir()?;
+    let config_dir = libreget_nami_dir()?;
     let profiles_file = config_dir.join("profiles.json");
 
     let mut all_profiles: serde_json::Value = if profiles_file.exists() {
@@ -426,7 +426,7 @@ pub fn nami_delete_profile(platform: String, profile_url: String) -> Result<Stri
     validate_profile_platform(&platform)?;
     let _storage_guard = NAMI_STORAGE_LOCK.lock().unwrap_or_else(|p| p.into_inner());
 
-    let profiles_file = omniget_nami_dir()?.join("profiles.json");
+    let profiles_file = libreget_nami_dir()?.join("profiles.json");
     if !profiles_file.exists() {
         return Err("Profiles file not found".to_string());
     }
@@ -492,7 +492,7 @@ pub fn update_profile_last_pulled(
     timestamp: i64,
 ) -> Result<(), String> {
     let _storage_guard = NAMI_STORAGE_LOCK.lock().unwrap_or_else(|p| p.into_inner());
-    let profiles_file = omniget_nami_dir()?.join("profiles.json");
+    let profiles_file = libreget_nami_dir()?.join("profiles.json");
     if !profiles_file.exists() {
         return Ok(());
     }

@@ -350,7 +350,7 @@ pub fn read_extension_metadata(url: &str) -> Option<ExtensionMetadata> {
 /// best we can do is delete the files and let Chrome / Firefox skip them
 /// silently the next time they look for a host.
 pub fn cleanup_legacy_native_messaging() {
-    let host_names = ["com.openselena.omniget"];
+    let host_names = ["com.openselena.libreget"];
 
     if let Some(data_dir) = crate::core::paths::app_data_dir() {
         let dir = data_dir.join("chrome-native-host");

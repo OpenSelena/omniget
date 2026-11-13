@@ -1,6 +1,6 @@
 use anyhow::anyhow;
 use async_trait::async_trait;
-use omniget_core::models::progress::ProgressUpdate;
+use libreget_core::models::progress::ProgressUpdate;
 use tokio::sync::mpsc;
 
 use crate::core::direct_downloader;

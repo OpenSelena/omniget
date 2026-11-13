@@ -3,7 +3,7 @@
 //! arquivar uma thread inteira com os comentários e ler o export oficial de
 //! dados do usuário (esse último sem tocar na rede).
 
-use omniget_core::core::tools::reddit::{download, gdpr, thread};
+use libreget_core::core::tools::reddit::{download, gdpr, thread};
 
 use super::{err, progress};
 

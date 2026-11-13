@@ -3,13 +3,13 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
-use omniget_plugin_sdk::{InstalledPlugin, OmnigetPlugin, PluginHost, PluginManifest, ABI_VERSION};
+use libreget_plugin_sdk::{InstalledPlugin, LibregetPlugin, PluginHost, PluginManifest, ABI_VERSION};
 use serde::Serialize;
 use tracing;
 
 pub struct LoadedPlugin {
     _lib: Option<libloading::Library>,
-    pub plugin: Box<dyn OmnigetPlugin>,
+    pub plugin: Box<dyn LibregetPlugin>,
     pub manifest: PluginManifest,
 }
 
@@ -99,7 +99,7 @@ impl PluginManager {
     pub fn register_builtin(
         &mut self,
         manifest: PluginManifest,
-        mut plugin: Box<dyn OmnigetPlugin>,
+        mut plugin: Box<dyn LibregetPlugin>,
         host: Arc<dyn PluginHost>,
     ) -> Result<(), PluginLoadError> {
         let id = manifest.id.clone();
@@ -354,18 +354,19 @@ fn load_single_plugin(
         )
     })?;
 
-    let abi_fn: libloading::Symbol<extern "C" fn() -> u32> =
-        unsafe { lib.get(b"omniget_plugin_abi_version") }.map_err(|_| {
-            PluginLoadError {
-                message: format!(
-                    "This plugin was built for an older version of OmniGet (no ABI handshake; this version requires ABI v{}). Update the plugin: reinstall it from the Marketplace to get a compatible build.",
-                    ABI_VERSION
-                ),
-                kind: "missing_abi_symbol".to_string(),
-                plugin_abi: None,
-                expected_abi: Some(ABI_VERSION),
-            }
-        })?;
+    let abi_fn: libloading::Symbol<extern "C" fn() -> u32> = unsafe {
+        lib.get(b"libreget_plugin_abi_version")
+            .or_else(|_| lib.get(b"omniget_plugin_abi_version"))
+    }
+    .map_err(|_| PluginLoadError {
+        message: format!(
+            "This plugin was built for an older version of LibreGet (no ABI handshake; this version requires ABI v{}). Update the plugin: reinstall it from the Marketplace to get a compatible build.",
+            ABI_VERSION
+        ),
+        kind: "missing_abi_symbol".to_string(),
+        plugin_abi: None,
+        expected_abi: Some(ABI_VERSION),
+    })?;
 
     let plugin_abi = abi_fn();
     if plugin_abi != ABI_VERSION {
@@ -392,9 +393,13 @@ fn load_single_plugin(
     // export_plugin! macro also exports a build-info symbol; require it and
     // require the plugin's rustc fingerprint to match ours exactly.
     let build_info_fn: libloading::Symbol<extern "C" fn() -> *const std::os::raw::c_char> =
-        unsafe { lib.get(b"omniget_plugin_build_info") }.map_err(|_| PluginLoadError {
+        unsafe {
+            lib.get(b"libreget_plugin_build_info")
+                .or_else(|_| lib.get(b"omniget_plugin_build_info"))
+        }
+        .map_err(|_| PluginLoadError {
             message: format!(
-                "This plugin was built for an older version of OmniGet (missing toolchain handshake; this version requires ABI v{}). Update the plugin: reinstall it from the Marketplace to get a compatible build.",
+                "This plugin was built for an older version of LibreGet (missing toolchain handshake; this version requires ABI v{}). Update the plugin: reinstall it from the Marketplace to get a compatible build.",
                 ABI_VERSION
             ),
             kind: "abi_mismatch".to_string(),
@@ -414,9 +419,9 @@ fn load_single_plugin(
                 .into_owned()
         }
     };
-    let host_info = omniget_plugin_sdk::build_info_str();
-    let host_rustc = omniget_plugin_sdk::rustc_component(host_info);
-    let plugin_rustc = omniget_plugin_sdk::rustc_component(&plugin_build_info);
+    let host_info = libreget_plugin_sdk::build_info_str();
+    let host_rustc = libreget_plugin_sdk::rustc_component(host_info);
+    let plugin_rustc = libreget_plugin_sdk::rustc_component(&plugin_build_info);
     if plugin_rustc.is_none() || plugin_rustc != host_rustc {
         return Err(PluginLoadError {
             message: format!(
@@ -435,10 +440,13 @@ fn load_single_plugin(
         host_info
     );
 
-    let init_fn: libloading::Symbol<extern "C" fn() -> *mut dyn OmnigetPlugin> =
-        unsafe { lib.get(b"omniget_plugin_init") }.map_err(|_| {
-            PluginLoadError::simple("missing_init_symbol", "Missing omniget_plugin_init symbol")
-        })?;
+    let init_fn: libloading::Symbol<extern "C" fn() -> *mut dyn LibregetPlugin> = unsafe {
+        lib.get(b"libreget_plugin_init")
+            .or_else(|_| lib.get(b"omniget_plugin_init"))
+    }
+    .map_err(|_| {
+        PluginLoadError::simple("missing_init_symbol", "Missing libreget_plugin_init symbol")
+    })?;
 
     // A plugin's init entrypoint runs arbitrary foreign code; convert panics
     // into load errors instead of aborting the whole app.
@@ -507,7 +515,7 @@ fn load_error_hint(detail: &str) -> Option<&'static str> {
         return None;
     }
     if detail.contains("os error 126") {
-        Some("A library this plugin depends on is missing, usually the Microsoft Visual C++ Redistributable (x64). Install it from https://aka.ms/vs/17/release/vc_redist.x64.exe and restart OmniGet")
+        Some("A library this plugin depends on is missing, usually the Microsoft Visual C++ Redistributable (x64). Install it from https://aka.ms/vs/17/release/vc_redist.x64.exe and restart LibreGet")
     } else if detail.contains("os error 5") || detail.contains("os error 225") {
         Some("Windows blocked the file. Check Windows Security > Protection history for the plugin DLL and allow it, then reinstall the plugin from the Marketplace")
     } else if detail.contains("os error 193") {

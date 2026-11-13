@@ -7,13 +7,13 @@ use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use futures::StreamExt;
-use omniget_core::core::tools::pinterest::analysis::{self, DupeGroup, Swatch};
-use omniget_core::core::tools::pinterest::api::Feed;
-use omniget_core::core::tools::pinterest::media::{self, DownloadOptions};
-use omniget_core::core::tools::pinterest::{
+use libreget_core::core::tools::pinterest::analysis::{self, DupeGroup, Swatch};
+use libreget_core::core::tools::pinterest::api::Feed;
+use libreget_core::core::tools::pinterest::media::{self, DownloadOptions};
+use libreget_core::core::tools::pinterest::{
     export, parse_target, Board, Pin, PinClient, Section, Target, User,
 };
-use omniget_core::core::tools::{report, ProgressFn};
+use libreget_core::core::tools::{report, ProgressFn};
 use serde::{Deserialize, Serialize};
 
 use super::{err, progress};
@@ -359,7 +359,7 @@ async fn download_many(
             }
             let dir = match (&pin.section, opts.section_folders) {
                 (Some(s), true) if !s.is_empty() => {
-                    root.join(omniget_core::core::tools::sanitize_name(s))
+                    root.join(libreget_core::core::tools::sanitize_name(s))
                 }
                 _ => root.clone(),
             };
@@ -557,7 +557,7 @@ async fn write_outputs(
     if gallery {
         let p = dest.join("index.html");
         let sub = format!(
-            "{} pins · OmniGet · {}",
+            "{} pins · LibreGet · {}",
             pins.len(),
             chrono::Local::now().format("%Y-%m-%d %H:%M")
         );
@@ -632,7 +632,7 @@ pub async fn tool_pin_backup(
                 .into_iter()
                 .filter(|x| keep(x, &opts.filters))
                 .map(|mut x| {
-                    x.board = Some(omniget_core::core::tools::pinterest::api::BoardRef {
+                    x.board = Some(libreget_core::core::tools::pinterest::api::BoardRef {
                         id: Some(b.id.clone()),
                         name: Some(b.name.clone()),
                         url: Some(b.url.clone()),
@@ -642,7 +642,7 @@ pub async fn tool_pin_backup(
                 .collect();
             agg.hidden += before - pins.len();
             agg.total += pins.len();
-            let bdir = root.join(omniget_core::core::tools::sanitize_name(&b.name));
+            let bdir = root.join(libreget_core::core::tools::sanitize_name(&b.name));
             std::fs::create_dir_all(&bdir).map_err(err)?;
             let (files, out) =
                 download_many(c.clone(), pins.clone(), &opts.download, &bdir, pid, &p).await;
@@ -1046,7 +1046,7 @@ pub async fn tool_pin_export(
     }
     let dest = PathBuf::from(&opts.dest);
     std::fs::create_dir_all(&dest).map_err(err)?;
-    let stem = omniget_core::core::tools::sanitize_name(&title);
+    let stem = libreget_core::core::tools::sanitize_name(&title);
     let path = match opts.format.as_str() {
         "csv" => {
             let path = dest.join(format!("{}.csv", stem));
@@ -1063,7 +1063,7 @@ pub async fn tool_pin_export(
             path
         }
         "pdf" => {
-            let work = omniget_core::core::tools::temp_dir()
+            let work = libreget_core::core::tools::temp_dir()
                 .join(format!("pinterest-pdf-{}", uuid::Uuid::new_v4()));
             std::fs::create_dir_all(&work).map_err(err)?;
             let mut images: Vec<Vec<u8>> = Vec::new();
@@ -1082,7 +1082,7 @@ pub async fn tool_pin_export(
                 let Ok((bytes, _)) = media::fetch_image(&c, &m.url).await else {
                     continue;
                 };
-                let jpeg = omniget_core::core::tools::pinterest::export::to_jpeg(bytes, &work, i)
+                let jpeg = libreget_core::core::tools::pinterest::export::to_jpeg(bytes, &work, i)
                     .await
                     .map_err(err)?;
                 images.push(jpeg);
@@ -1091,7 +1091,7 @@ pub async fn tool_pin_export(
             if images.is_empty() {
                 return Err("nenhuma imagem baixada para o PDF".into());
             }
-            let pdf = omniget_core::core::tools::jpeg_pdf::build_pdf(&images).map_err(err)?;
+            let pdf = libreget_core::core::tools::jpeg_pdf::build_pdf(&images).map_err(err)?;
             let path = dest.join(format!("{}.pdf", stem));
             tokio::fs::write(&path, pdf).await.map_err(err)?;
             path
@@ -1115,7 +1115,7 @@ pub async fn tool_pin_export(
                 files = f;
             }
             let sub = format!(
-                "{} pins · OmniGet · {}",
+                "{} pins · LibreGet · {}",
                 pins.len(),
                 chrono::Local::now().format("%Y-%m-%d %H:%M")
             );
@@ -1253,7 +1253,7 @@ pub struct SourceOut {
 }
 
 async fn check_link(url: &str) -> LinkCheck {
-    let Ok(client) = omniget_core::core::tools::client() else {
+    let Ok(client) = libreget_core::core::tools::client() else {
         return LinkCheck {
             url: url.into(),
             status: None,
@@ -1289,7 +1289,7 @@ async fn check_link(url: &str) -> LinkCheck {
 }
 
 async fn wayback(url: &str) -> Option<String> {
-    let client = omniget_core::core::tools::client().ok()?;
+    let client = libreget_core::core::tools::client().ok()?;
     let r = client
         .get("https://archive.org/wayback/available")
         .query(&[("url", url)])

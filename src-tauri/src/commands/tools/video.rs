@@ -1,9 +1,9 @@
 //! Tools de edição de vídeo que não são gravação de tela: comprimir para um
 //! alvo de tamanho, virar GIF/WebP ou figurinha, cortar silêncio e mexer em
 //! legenda.
-//! A lógica mora em `omniget_core::core::tools`.
+//! A lógica mora em `libreget_core::core::tools`.
 
-use omniget_core::core::tools::{
+use libreget_core::core::tools::{
     silence_cut, sticker, subtitle, video_compress, video_gif, video_restore,
 };
 

@@ -770,7 +770,7 @@ async fn enqueue(
     // the shortcut, never the enqueue.
     if let Some(text) = payload.manifest_text.as_deref() {
         if !text.trim().is_empty() {
-            match omniget_core::core::extension_manifest::store_manifest(&payload.url, text) {
+            match libreget_core::core::extension_manifest::store_manifest(&payload.url, text) {
                 Ok(()) => tracing::info!(
                     "stored extension-captured playlist ({} bytes) for {}",
                     text.len(),

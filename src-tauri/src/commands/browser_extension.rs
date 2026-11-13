@@ -3,7 +3,7 @@ use std::path::{Path, PathBuf};
 use serde::Serialize;
 use tauri::{AppHandle, Manager};
 
-const FIREFOX_STORE_URL: &str = "https://addons.mozilla.org/firefox/addon/omniget/";
+const FIREFOX_STORE_URL: &str = "https://addons.mozilla.org/firefox/addon/libreget/";
 
 #[derive(Debug, Clone, Serialize)]
 pub struct BrowserExtensionStatus {

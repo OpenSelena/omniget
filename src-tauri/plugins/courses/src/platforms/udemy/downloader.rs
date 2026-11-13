@@ -7,7 +7,7 @@ use futures::StreamExt;
 use tokio::sync::{mpsc, Mutex};
 use tokio_util::sync::CancellationToken;
 
-use omniget_core::core::media_processor::MediaProcessor;
+use libreget_core::core::media_processor::MediaProcessor;
 
 use super::api::{self, UdemyCourse};
 use super::auth::UdemySession;
@@ -53,7 +53,7 @@ impl UdemyDownloader {
         max_retries: u32,
     ) -> Self {
         let hls_client =
-            omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+            libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
                 .user_agent(USER_AGENT)
                 .connect_timeout(Duration::from_secs(30))
                 .timeout(Duration::from_secs(300))

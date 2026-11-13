@@ -1,8 +1,8 @@
 //! PDF (juntar, dividir, comprimir, converter, OCR, sanitizar). A lógica mora
-//! em `omniget_core::core::tools::pdf`; aqui só se despacha para uma thread
+//! em `libreget_core::core::tools::pdf`; aqui só se despacha para uma thread
 //! de bloqueio porque o PDFium é síncrono e não é thread-safe.
 
-use omniget_core::core::tools::{pdf, pdf_markdown, pdf_repair, pdf_write};
+use libreget_core::core::tools::{pdf, pdf_markdown, pdf_repair, pdf_write};
 
 use super::{err, progress};
 
@@ -249,7 +249,7 @@ pub async fn tool_pdf_markdown(
 
 // ── Tarja, tabela e formulário ─────────────────────────────────────────
 
-use omniget_core::core::tools::{pdf_form, pdf_redact, pdf_table};
+use libreget_core::core::tools::{pdf_form, pdf_redact, pdf_table};
 
 #[tauri::command]
 pub async fn tool_pdf_redact(

@@ -1,4 +1,4 @@
-use omniget_core::core::ai::{self, AiConfigView, AiHistoryEntry, AiProvider, KeyAction};
+use libreget_core::core::ai::{self, AiConfigView, AiHistoryEntry, AiProvider, KeyAction};
 use serde::Serialize;
 
 const MAX_TRANSCRIPT_CHARS: usize = 12000;
@@ -63,7 +63,7 @@ async fn transcribe_via_audio(
     tmp: &std::path::Path,
 ) -> Result<String, String> {
     let audio_tmpl = tmp.join("audio.%(ext)s");
-    let _ = omniget_core::core::ytdlp::ytdlp_command(ytdlp)
+    let _ = libreget_core::core::ytdlp::ytdlp_command(ytdlp)
         .arg("-f")
         .arg("bestaudio/best")
         .arg("--no-warnings")
@@ -91,11 +91,11 @@ async fn transcribe_via_audio(
     }
     let (_, src_path) = src.ok_or_else(|| "no audio".to_string())?;
 
-    let ffmpeg = omniget_core::core::dependencies::find_tool("ffmpeg")
+    let ffmpeg = libreget_core::core::dependencies::find_tool("ffmpeg")
         .await
         .ok_or_else(|| "ffmpeg unavailable".to_string())?;
     let small = tmp.join("a16.mp3");
-    let status = omniget_core::core::process::command(&ffmpeg)
+    let status = libreget_core::core::process::command(&ffmpeg)
         .arg("-y")
         .arg("-i")
         .arg(src_path.to_string_lossy().to_string())
@@ -113,7 +113,7 @@ async fn transcribe_via_audio(
         return Err("ffmpeg transcode failed".to_string());
     }
 
-    omniget_core::core::ai::transcribe(&small).await
+    libreget_core::core::ai::transcribe(&small).await
 }
 
 #[cfg(not(target_os = "android"))]
@@ -126,14 +126,14 @@ async fn fetch_transcript(url: &str) -> Result<(String, String), String> {
         .duration_since(std::time::UNIX_EPOCH)
         .map(|d| d.as_millis())
         .unwrap_or(0);
-    let tmp = std::env::temp_dir().join(format!("omniget-ai-{stamp}"));
+    let tmp = std::env::temp_dir().join(format!("libreget-ai-{stamp}"));
     tokio::fs::create_dir_all(&tmp)
         .await
         .map_err(|e| e.to_string())?;
 
     let out_template = tmp.join("t.%(ext)s");
     let result: Result<(String, String), String> = (|| async {
-        let output = omniget_core::core::ytdlp::ytdlp_command(&ytdlp)
+        let output = libreget_core::core::ytdlp::ytdlp_command(&ytdlp)
             .arg("--skip-download")
             .arg("--write-subs")
             .arg("--write-auto-subs")
@@ -178,7 +178,7 @@ async fn fetch_transcript(url: &str) -> Result<(String, String), String> {
             let content = tokio::fs::read_to_string(&sub_path)
                 .await
                 .map_err(|e| e.to_string())?;
-            let transcript = omniget_core::core::subtitle_merge::extract_transcript(&content);
+            let transcript = libreget_core::core::subtitle_merge::extract_transcript(&content);
             if !transcript.trim().is_empty() {
                 return Ok((title, transcript));
             }
@@ -244,7 +244,7 @@ pub async fn whisper_generate(url: String) -> Result<String, String> {
         .duration_since(std::time::UNIX_EPOCH)
         .map(|d| d.as_millis())
         .unwrap_or(0);
-    let tmp = std::env::temp_dir().join(format!("omniget-whisper-{stamp}"));
+    let tmp = std::env::temp_dir().join(format!("libreget-whisper-{stamp}"));
     tokio::fs::create_dir_all(&tmp)
         .await
         .map_err(|e| e.to_string())?;

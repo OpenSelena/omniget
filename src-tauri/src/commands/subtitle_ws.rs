@@ -1,4 +1,4 @@
-use omniget_core::core::subtitle_merge::{self, Cue};
+use libreget_core::core::subtitle_merge::{self, Cue};
 
 #[cfg(not(target_os = "android"))]
 #[tauri::command]
@@ -29,7 +29,7 @@ pub async fn subtitle_save(path: String, cues: Vec<Cue>, format: String) -> Resu
 #[cfg(not(target_os = "android"))]
 #[tauri::command]
 pub async fn subtitle_translate(cues: Vec<Cue>, target_lang: String) -> Result<Vec<Cue>, String> {
-    if !omniget_core::core::ai::get().is_configured() {
+    if !libreget_core::core::ai::get().is_configured() {
         return Err("ai_not_configured".to_string());
     }
     if cues.is_empty() {
@@ -49,7 +49,7 @@ line count. Preserve the \u{2424} markers as line breaks. Output ONLY the \
 translated numbered lines, nothing else.",
         target_lang
     );
-    let out = omniget_core::core::ai::chat(&system, &joined).await?;
+    let out = libreget_core::core::ai::chat(&system, &joined).await?;
 
     let mut map: std::collections::HashMap<usize, String> = std::collections::HashMap::new();
     for line in out.lines() {
@@ -78,7 +78,7 @@ translated numbered lines, nothing else.",
 #[cfg(not(target_os = "android"))]
 #[tauri::command]
 pub async fn subtitle_grammar_fix(cues: Vec<Cue>, style: String) -> Result<Vec<Cue>, String> {
-    if !omniget_core::core::ai::get().is_configured() {
+    if !libreget_core::core::ai::get().is_configured() {
         return Err("ai_not_configured".to_string());
     }
     if cues.is_empty() {
@@ -102,7 +102,7 @@ Preserve the \u{2424} markers as line breaks. Output ONLY the corrected \
 numbered lines, nothing else.",
         tone
     );
-    let out = omniget_core::core::ai::chat(&system, &joined).await?;
+    let out = libreget_core::core::ai::chat(&system, &joined).await?;
 
     let mut map: std::collections::HashMap<usize, String> = std::collections::HashMap::new();
     for line in out.lines() {

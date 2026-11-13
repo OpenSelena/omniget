@@ -1,3 +1,3 @@
-pub use omniget_core::platforms::traits;
+pub use libreget_core::platforms::traits;
 
 pub mod telegram;

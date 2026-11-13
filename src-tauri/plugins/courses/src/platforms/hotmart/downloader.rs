@@ -10,10 +10,10 @@ use tokio::sync::{mpsc, Mutex};
 use tokio_util::sync::CancellationToken;
 
 use crate::platforms::traits::PlatformDownloader;
-use omniget_core::core::filename;
-use omniget_core::core::media_processor::MediaProcessor;
-use omniget_core::models::media::{DownloadOptions, DownloadResult, MediaInfo, MediaType};
-use omniget_core::models::settings::{self, DownloadSettings};
+use libreget_core::core::filename;
+use libreget_core::core::media_processor::MediaProcessor;
+use libreget_core::models::media::{DownloadOptions, DownloadResult, MediaInfo, MediaType};
+use libreget_core::models::settings::{self, DownloadSettings};
 
 use super::api::{self, Course, Lesson};
 use super::auth::HotmartSession;
@@ -46,7 +46,7 @@ struct DoneManifest {
 fn done_path(file_path: &str) -> PathBuf {
     let p = PathBuf::from(file_path);
     let file_name = p.file_name().unwrap_or_default().to_string_lossy();
-    let manifest_name = format!("{}.omniget.done", file_name);
+    let manifest_name = format!("{}.libreget.done", file_name);
     p.with_file_name(manifest_name)
 }
 
@@ -110,7 +110,7 @@ impl HotmartDownloader {
         concurrent_fragments: u32,
     ) -> Self {
         let hls_client =
-            omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+            libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
                 .connect_timeout(Duration::from_secs(30))
                 .timeout(Duration::from_secs(300))
                 .pool_max_idle_per_host(50)
@@ -338,13 +338,13 @@ impl HotmartDownloader {
                                     }
                                 }
 
-                                match omniget_core::core::ytdlp::ensure_ytdlp().await {
+                                match libreget_core::core::ytdlp::ensure_ytdlp().await {
                                     Ok(ytdlp_path) => {
                                         let out_dir = std::path::Path::new(&out)
                                             .parent()
                                             .unwrap_or(std::path::Path::new("."));
                                         let (vtx, _vrx) = mpsc::channel(8);
-                                        match omniget_core::core::ytdlp::download_video(
+                                        match libreget_core::core::ytdlp::download_video(
                                             &ytdlp_path,
                                             &embed_url,
                                             out_dir,
@@ -435,13 +435,13 @@ impl HotmartDownloader {
 
                                 let yt_url =
                                     format!("https://www.youtube.com/watch?v={}", video_id);
-                                match omniget_core::core::ytdlp::ensure_ytdlp().await {
+                                match libreget_core::core::ytdlp::ensure_ytdlp().await {
                                     Ok(ytdlp_path) => {
                                         let out_dir = std::path::Path::new(&out)
                                             .parent()
                                             .unwrap_or(std::path::Path::new("."));
                                         let (ytx, _yrx) = mpsc::channel(8);
-                                        match omniget_core::core::ytdlp::download_video(
+                                        match libreget_core::core::ytdlp::download_video(
                                             &ytdlp_path,
                                             &yt_url,
                                             out_dir,
@@ -826,7 +826,7 @@ async fn retry_hls_download(
     max_retries: u32,
     max_attempts: u32,
     hls_client: Option<reqwest::Client>,
-) -> anyhow::Result<omniget_core::core::hls_downloader::HlsDownloadResult> {
+) -> anyhow::Result<libreget_core::core::hls_downloader::HlsDownloadResult> {
     let mut last_err = None;
     for attempt in 0..max_attempts {
         if cancel_token.is_cancelled() {
@@ -999,7 +999,7 @@ impl PlatformDownloader for HotmartDownloader {
         &self,
         _info: &MediaInfo,
         _opts: &DownloadOptions,
-        _progress: tokio::sync::mpsc::Sender<omniget_core::models::progress::ProgressUpdate>,
+        _progress: tokio::sync::mpsc::Sender<libreget_core::models::progress::ProgressUpdate>,
     ) -> anyhow::Result<DownloadResult> {
         Err(anyhow!(
             "Hotmart downloads use start_course_download, not the generic download trait"

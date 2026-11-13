@@ -7,10 +7,10 @@ pub mod settings_helper;
 pub mod state;
 
 pub mod models {
-    pub use omniget_core::models::*;
+    pub use libreget_core::models::*;
 }
 
-use omniget_plugin_sdk::{OmnigetPlugin, PluginHost};
+use libreget_plugin_sdk::{LibregetPlugin, PluginHost};
 use state::CoursesState;
 use std::sync::Arc;
 
@@ -71,11 +71,11 @@ impl CoursesPlugin {
     }
 }
 
-pub fn manifest() -> omniget_plugin_sdk::PluginManifest {
+pub fn manifest() -> libreget_plugin_sdk::PluginManifest {
     serde_json::from_str(include_str!("../plugin.json")).expect("valid courses manifest")
 }
 
-impl OmnigetPlugin for CoursesPlugin {
+impl LibregetPlugin for CoursesPlugin {
     fn id(&self) -> &str {
         "courses"
     }

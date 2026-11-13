@@ -28,7 +28,7 @@ pub async fn rocketseat_login_token(
     *state.rocketseat_session_validated_at.lock().await = None;
     *state.rocketseat_courses_cache.lock().await = None;
 
-    let parsed = omniget_core::core::cookie_parser::parse_cookie_input(
+    let parsed = libreget_core::core::cookie_parser::parse_cookie_input(
         &token,
         "skylab_next_access_token_v4",
     );
@@ -41,7 +41,7 @@ pub async fn rocketseat_login_token(
     );
 
     let parsed_token = if parsed.token.is_empty() {
-        let bearer = omniget_core::core::cookie_parser::parse_bearer_input(&token);
+        let bearer = libreget_core::core::cookie_parser::parse_bearer_input(&token);
         tracing::info!(
             "[rocketseat] fallback to parse_bearer_input: len={}",
             bearer.len()

@@ -1,7 +1,7 @@
-use omniget_core::models::settings::AppSettings;
+use libreget_core::models::settings::AppSettings;
 
 pub fn load_settings() -> AppSettings {
-    if let Some(data_dir) = omniget_core::core::paths::app_data_dir() {
+    if let Some(data_dir) = libreget_core::core::paths::app_data_dir() {
         let path = data_dir.join("settings.json");
         if let Ok(content) = std::fs::read_to_string(path) {
             if let Ok(val) = serde_json::from_str::<serde_json::Value>(&content) {

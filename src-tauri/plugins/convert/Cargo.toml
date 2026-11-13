@@ -1,5 +1,5 @@
 [package]
-name = "omniget-plugin-convert"
+name = "libreget-plugin-convert"
 version = "1.0.3"
 edition = "2021"
 
@@ -11,5 +11,5 @@ serde_json = "1"
 anyhow = "1"
 tracing = "0.1"
 tokio-util = { version = "0.7", features = ["rt"] }
-omniget-core = { path = "../../omniget-core", features = ["desktop"] }
-omniget-plugin-sdk = { path = "../../omniget-plugin-sdk" }
+libreget-core = { path = "../../libreget-core", features = ["desktop"] }
+libreget-plugin-sdk = { path = "../../libreget-plugin-sdk" }

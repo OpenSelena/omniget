@@ -1,5 +1,5 @@
 [package]
-name = "omniget-plugin-courses"
+name = "libreget-plugin-courses"
 version = "1.4.1"
 edition = "2021"
 
@@ -31,8 +31,8 @@ urlencoding = "2"
 base64 = "0.22.1"
 sha2 = "0.10"
 filetime = "0.2.27"
-omniget-core = { path = "../../omniget-core", features = ["desktop"] }
-omniget-plugin-sdk = { path = "../../omniget-plugin-sdk" }
+libreget-core = { path = "../../libreget-core", features = ["desktop"] }
+libreget-plugin-sdk = { path = "../../libreget-plugin-sdk" }
 
 [target.'cfg(windows)'.dependencies]
 webview2-com = "0.39"

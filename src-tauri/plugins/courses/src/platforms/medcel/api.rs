@@ -74,7 +74,7 @@ fn build_client(token: &str, api_key: &str, origin: &str) -> anyhow::Result<reqw
         HeaderValue::from_static("application/json, text/plain, */*"),
     );
 
-    let client = omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+    let client = libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent(USER_AGENT)
         .default_headers(headers)
         .redirect(reqwest::redirect::Policy::limited(10))
@@ -104,7 +104,7 @@ pub async fn authenticate(
     api_key: &str,
 ) -> anyhow::Result<MedcelSession> {
     let temp_client =
-        omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+        libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
             .user_agent(USER_AGENT)
             .connect_timeout(Duration::from_secs(30))
             .timeout(Duration::from_secs(60))

@@ -7,7 +7,7 @@ use tauri::Emitter;
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 
-use omniget_core::core::filename;
+use libreget_core::core::filename;
 
 use super::api::{self, GumroadProduct, GumroadSession};
 
@@ -46,7 +46,7 @@ pub async fn download_product(
     );
     tokio::fs::create_dir_all(&product_dir).await?;
 
-    if omniget_core::core::course_utils::is_course_complete(&product_dir) {
+    if libreget_core::core::course_utils::is_course_complete(&product_dir) {
         return Ok(());
     }
 
@@ -184,7 +184,7 @@ pub async fn download_product(
         return Err(anyhow!("Download cancelled by user"));
     }
 
-    omniget_core::core::course_utils::mark_course_complete(&product_dir)
+    libreget_core::core::course_utils::mark_course_complete(&product_dir)
         .await
         .ok();
 
@@ -197,7 +197,7 @@ async fn download_with_ytdlp(
     token: &str,
     cancel_token: &CancellationToken,
 ) -> anyhow::Result<u64> {
-    let ytdlp_path = omniget_core::core::ytdlp::ensure_ytdlp().await?;
+    let ytdlp_path = libreget_core::core::ytdlp::ensure_ytdlp().await?;
     let out_dir = Path::new(output_dir);
     let (tx, _rx) = mpsc::channel(8);
 
@@ -209,7 +209,7 @@ async fn download_with_ytdlp(
         "User-Agent: okhttp/4.8.1".to_string(),
     ];
 
-    let result = omniget_core::core::ytdlp::download_video(
+    let result = libreget_core::core::ytdlp::download_video(
         &ytdlp_path,
         url,
         out_dir,
@@ -240,6 +240,6 @@ async fn download_file_direct(
     let out = Path::new(output_path);
     let (tx, _rx) = mpsc::channel(8);
 
-    omniget_core::core::direct_downloader::download_direct(client, url, out, tx, Some(cancel_token))
+    libreget_core::core::direct_downloader::download_direct(client, url, out, tx, Some(cancel_token))
         .await
 }

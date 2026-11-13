@@ -5,7 +5,7 @@
 //! para conta privada e para o site não tratar a gente como robô. Os
 //! favoritos, esses, não existem sem a sessão do usuário.
 
-use omniget_core::core::tools::tiktok::{download, favorites, sound};
+use libreget_core::core::tools::tiktok::{download, favorites, sound};
 
 use super::{err, progress};
 

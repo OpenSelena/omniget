@@ -8,7 +8,7 @@
 use std::path::PathBuf;
 
 use anyhow::{anyhow, Result};
-use omniget_core::core::tools::{report, ProgressFn};
+use libreget_core::core::tools::{report, ProgressFn};
 use serde::{Deserialize, Serialize};
 
 use super::super::api::{ApiClient, BilibiliError};
@@ -440,7 +440,7 @@ mod tests {
             style: AssRenderOptions::default(),
             output_dir: dir.to_string_lossy().to_string(),
         };
-        let res = run(&opts, &omniget_core::core::tools::noop_progress())
+        let res = run(&opts, &libreget_core::core::tools::noop_progress())
             .await
             .unwrap();
         eprintln!(
@@ -471,7 +471,7 @@ mod tests {
             },
             ..opts
         };
-        let res2 = run(&filtrado, &omniget_core::core::tools::noop_progress())
+        let res2 = run(&filtrado, &libreget_core::core::tools::noop_progress())
             .await
             .unwrap();
         assert_eq!(res2.files.len(), 1);

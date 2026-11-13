@@ -1,1 +1,1 @@
-pub use omniget_core::models::{download, media, settings};
+pub use libreget_core::models::{download, media, settings};

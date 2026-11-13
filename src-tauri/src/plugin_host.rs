@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use omniget_plugin_sdk::{PluginHost, ProxyConfig};
+use libreget_plugin_sdk::{PluginHost, ProxyConfig};
 use tauri::{AppHandle, Emitter, Runtime};
 
 pub struct PluginHostImpl<R: Runtime> {
@@ -126,8 +126,8 @@ impl<R: Runtime + 'static> PluginHost for PluginHostImpl<R> {
 
         // portable installs keep every file next to the app, so the cache
         // lives under the app data dir instead of the OS cache dir
-        let base = if std::env::var("OMNIGET_PORTABLE").is_ok() {
-            omniget_core::core::paths::app_data_dir()
+        let base = if std::env::var("LIBREGET_PORTABLE").is_ok() {
+            libreget_core::core::paths::app_data_dir()
                 .ok_or_else(|| anyhow::anyhow!("external_data_cache: app data dir unavailable"))?
                 .join("cache")
         } else {
@@ -137,7 +137,7 @@ impl<R: Runtime + 'static> PluginHost for PluginHostImpl<R> {
                         "external_data_cache: OS cache dir unavailable on this platform"
                     )
                 })?
-                .join("com.openselena.omniget")
+                .join("com.openselena.libreget")
         };
         let dir = base.join("external-cache").join(plugin_id).join(namespace);
         std::fs::create_dir_all(&dir).map_err(|e| {
@@ -154,22 +154,22 @@ impl<R: Runtime + 'static> PluginHost for PluginHostImpl<R> {
         crate::cookies::account_path_for_consumer(domain, account)
     }
 
-    fn cookie_status(&self, domain: &str) -> omniget_plugin_sdk::CookieStatus {
+    fn cookie_status(&self, domain: &str) -> libreget_plugin_sdk::CookieStatus {
         let registry = crate::cookies::load_registry();
         let root = crate::cookies::root_domain_of(domain);
         let bucket = match registry.buckets.get(&root) {
             Some(b) => b,
-            None => return omniget_plugin_sdk::CookieStatus::Missing,
+            None => return libreget_plugin_sdk::CookieStatus::Missing,
         };
         let primary = match bucket.accounts.iter().find(|a| a.slug == "_default") {
             Some(a) => a,
-            None => return omniget_plugin_sdk::CookieStatus::Missing,
+            None => return libreget_plugin_sdk::CookieStatus::Missing,
         };
         let path = match crate::cookies::account_path_for_consumer(&root, None) {
             Some(p) => p,
-            None => return omniget_plugin_sdk::CookieStatus::Missing,
+            None => return libreget_plugin_sdk::CookieStatus::Missing,
         };
-        omniget_plugin_sdk::CookieStatus::Available {
+        libreget_plugin_sdk::CookieStatus::Available {
             path,
             last_modified_secs: primary.captured_at_ms / 1000,
             cookie_count: primary.cookie_count,
@@ -177,6 +177,6 @@ impl<R: Runtime + 'static> PluginHost for PluginHostImpl<R> {
     }
 
     fn emit_download_log(&self, download_id: u64, line: &str) {
-        omniget_core::core::log_hook::emit_log(download_id, line);
+        libreget_core::core::log_hook::emit_log(download_id, line);
     }
 }

@@ -1,7 +1,7 @@
 use async_trait::async_trait;
 
 use crate::platforms::traits::PlatformDownloader;
-use omniget_core::models::media::{DownloadOptions, DownloadResult, MediaInfo};
+use libreget_core::models::media::{DownloadOptions, DownloadResult, MediaInfo};
 
 pub struct NoopDownloader;
 
@@ -37,7 +37,7 @@ impl PlatformDownloader for NoopDownloader {
         &self,
         _info: &MediaInfo,
         _opts: &DownloadOptions,
-        _progress: tokio::sync::mpsc::Sender<omniget_core::models::progress::ProgressUpdate>,
+        _progress: tokio::sync::mpsc::Sender<libreget_core::models::progress::ProgressUpdate>,
     ) -> anyhow::Result<DownloadResult> {
         Err(anyhow::anyhow!(
             "NoopDownloader cannot drive download; this item is driven by an external plugin"

@@ -3,7 +3,7 @@ use tauri::Emitter;
 use tokio_util::sync::CancellationToken;
 
 use crate::{AppState, P2pSendHandle};
-use omniget_core::platforms::p2p;
+use libreget_core::platforms::p2p;
 
 #[derive(Clone, Serialize)]
 pub struct P2pSendStarted {

@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use omniget_core::models::progress::ProgressUpdate;
+use libreget_core::models::progress::ProgressUpdate;
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 

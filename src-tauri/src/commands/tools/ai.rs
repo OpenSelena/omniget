@@ -1,4 +1,4 @@
-use omniget_core::core::tools::{ai_keys, ollama, pricing, usage};
+use libreget_core::core::tools::{ai_keys, ollama, pricing, usage};
 use serde::Serialize;
 
 use super::{err, progress};
@@ -166,7 +166,7 @@ pub async fn tool_mcp_selftest(app: tauri::AppHandle) -> Result<String, String> 
         .timeout(std::time::Duration::from_secs(10))
         .build()
         .map_err(err)?;
-    let init = serde_json::json!({ "jsonrpc": "2.0", "id": 1, "method": "initialize", "params": { "protocolVersion": crate::mcp::PROTOCOL, "capabilities": {}, "clientInfo": { "name": "omniget-selftest", "version": "1" } } });
+    let init = serde_json::json!({ "jsonrpc": "2.0", "id": 1, "method": "initialize", "params": { "protocolVersion": crate::mcp::PROTOCOL, "capabilities": {}, "clientInfo": { "name": "libreget-selftest", "version": "1" } } });
     let r: serde_json::Value = client
         .post(&url)
         .bearer_auth(&settings.bridge.token)
@@ -203,7 +203,7 @@ pub async fn tool_mcp_selftest(app: tauri::AppHandle) -> Result<String, String> 
 
 // ── Contagem de tokens e custo por modelo (estende ai-prices) ──
 
-use omniget_core::core::tools::{ai_tokens, arxiv};
+use libreget_core::core::tools::{ai_tokens, arxiv};
 
 /// As famílias de tokenizador que a heurística conhece, com o fator de cada uma.
 #[tauri::command]

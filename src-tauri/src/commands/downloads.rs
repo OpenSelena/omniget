@@ -84,7 +84,7 @@ pub async fn detect_platform(url: String) -> Result<PlatformInfo, String> {
                 .map(|u| u.scheme() == "http" || u.scheme() == "https")
                 .unwrap_or(false);
             if is_valid_url
-                && omniget_core::platforms::direct_file::looks_like_direct_file(&url).await
+                && libreget_core::platforms::direct_file::looks_like_direct_file(&url).await
             {
                 tracing::debug!("[perf] detect_platform took {:?}", _timer_start.elapsed());
                 return Ok(PlatformInfo {
@@ -233,7 +233,7 @@ pub async fn torrent_contents(url: String) -> Result<Vec<TorrentFileEntry>, Stri
         }
     };
 
-    let tmp_dir = std::env::temp_dir().join("omniget-torrent-list");
+    let tmp_dir = std::env::temp_dir().join("libreget-torrent-list");
     let session = librqbit::Session::new(tmp_dir)
         .await
         .map_err(|e| format!("Failed to init torrent session: {}", e))?;
@@ -582,9 +582,9 @@ pub async fn subtitles_merge(
     let secondary = fetch_text(&client, &secondary_url).await?;
     let is_vtt = format.eq_ignore_ascii_case("vtt");
     let merged = if is_vtt {
-        omniget_core::core::subtitle_merge::merge_bilingual_vtt(&primary, &secondary)
+        libreget_core::core::subtitle_merge::merge_bilingual_vtt(&primary, &secondary)
     } else {
-        omniget_core::core::subtitle_merge::merge_bilingual_srt(&primary, &secondary)
+        libreget_core::core::subtitle_merge::merge_bilingual_srt(&primary, &secondary)
     };
     let dir = std::path::Path::new(&output_dir);
     tokio::fs::create_dir_all(dir)
@@ -760,7 +760,7 @@ pub async fn tools_save_text(
 #[derive(Clone, Serialize)]
 pub struct LiveChatResult {
     pub count: usize,
-    pub messages: Vec<omniget_core::core::livechat::LiveChatMessage>,
+    pub messages: Vec<libreget_core::core::livechat::LiveChatMessage>,
 }
 
 #[cfg(not(target_os = "android"))]
@@ -774,14 +774,14 @@ pub async fn livechat_fetch(url: String) -> Result<LiveChatResult, String> {
         .duration_since(std::time::UNIX_EPOCH)
         .map(|d| d.as_millis())
         .unwrap_or(0);
-    let tmp = std::env::temp_dir().join(format!("omniget-livechat-{stamp}"));
+    let tmp = std::env::temp_dir().join(format!("libreget-livechat-{stamp}"));
     tokio::fs::create_dir_all(&tmp)
         .await
         .map_err(|e| e.to_string())?;
 
     let out_template = tmp.join("chat.%(ext)s");
     let result = (|| async {
-        let output = omniget_core::core::ytdlp::ytdlp_command(&ytdlp_path)
+        let output = libreget_core::core::ytdlp::ytdlp_command(&ytdlp_path)
             .arg("--skip-download")
             .arg("--write-subs")
             .arg("--sub-langs")
@@ -821,7 +821,7 @@ pub async fn livechat_fetch(url: String) -> Result<LiveChatResult, String> {
         let body = tokio::fs::read_to_string(&chat_file)
             .await
             .map_err(|e| e.to_string())?;
-        let messages = omniget_core::core::livechat::parse_live_chat(&body);
+        let messages = libreget_core::core::livechat::parse_live_chat(&body);
         Ok(LiveChatResult {
             count: messages.len(),
             messages,
@@ -1364,8 +1364,8 @@ pub async fn remove_download(
 /// Último comando yt-dlp rodado para este download (argv redigido). `None`
 /// quando o item nunca chegou a rodar o yt-dlp (arquivo direto, torrent…).
 #[tauri::command]
-pub fn get_download_command(download_id: u64) -> Option<omniget_core::core::ytdlp::CommandRecord> {
-    omniget_core::core::ytdlp::get_command(download_id)
+pub fn get_download_command(download_id: u64) -> Option<libreget_core::core::ytdlp::CommandRecord> {
+    libreget_core::core::ytdlp::get_command(download_id)
 }
 
 /// "Editar e tentar de novo": recebe o comando como texto, tokeniza como um
@@ -1377,7 +1377,7 @@ pub async fn retry_download_with_command(
     download_id: u64,
     command: String,
 ) -> Result<String, String> {
-    let argv = omniget_core::core::shell_words::split(&command)
+    let argv = libreget_core::core::shell_words::split(&command)
         .map_err(|e| format!("Invalid command: {}", e))?;
     if argv.is_empty() {
         return Err("Command is empty".to_string());

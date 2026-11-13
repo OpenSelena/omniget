@@ -102,10 +102,10 @@ pub fn detect_with_query(url: &str, query: Option<&str>) -> Result<UrlKind> {
 }
 
 fn detect_internal(url: &str, query_override: Option<&str>) -> Result<UrlKind> {
-    if url == "omniget://bilibili/watch-later" {
+    if url == "libreget://bilibili/watch-later" {
         return Ok(UrlKind::WatchLater);
     }
-    if url == "omniget://bilibili/history" {
+    if url == "libreget://bilibili/history" {
         return Ok(UrlKind::History);
     }
 
@@ -470,11 +470,11 @@ mod tests {
     #[test]
     fn detects_internal_schemas() {
         assert_eq!(
-            detect("omniget://bilibili/watch-later").unwrap(),
+            detect("libreget://bilibili/watch-later").unwrap(),
             UrlKind::WatchLater
         );
         assert_eq!(
-            detect("omniget://bilibili/history").unwrap(),
+            detect("libreget://bilibili/history").unwrap(),
             UrlKind::History
         );
     }

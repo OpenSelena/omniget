@@ -3,10 +3,10 @@ use grammers_client::types::Peer;
 
 use super::auth::TelegramSessionHandle;
 use crate::platforms::traits::PlatformDownloader;
-use omniget_core::models::media::{
+use libreget_core::models::media::{
     DownloadOptions, DownloadResult, MediaInfo, MediaType, VideoQuality,
 };
-use omniget_core::models::settings::default_filename_template;
+use libreget_core::models::settings::default_filename_template;
 
 pub struct TelegramDownloader {
     session: TelegramSessionHandle,
@@ -170,7 +170,7 @@ impl PlatformDownloader for TelegramDownloader {
         &self,
         info: &MediaInfo,
         opts: &DownloadOptions,
-        progress: tokio::sync::mpsc::Sender<omniget_core::models::progress::ProgressUpdate>,
+        progress: tokio::sync::mpsc::Sender<libreget_core::models::progress::ProgressUpdate>,
     ) -> anyhow::Result<DownloadResult> {
         let _t = std::time::Instant::now();
         let quality = info
@@ -272,7 +272,7 @@ impl PlatformDownloader for TelegramDownloader {
                 Ok(size) => {
                     tokio::fs::rename(&tmp_path, &output_path).await?;
                     let _ = progress
-                        .send(omniget_core::models::progress::ProgressUpdate::percent(
+                        .send(libreget_core::models::progress::ProgressUpdate::percent(
                             100.0,
                         ))
                         .await;

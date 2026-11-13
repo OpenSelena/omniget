@@ -1,6 +1,6 @@
 use serde::Serialize;
 
-use omniget_core::core::tools::yt_search::{self, SearchHit, SearchOptions};
+use libreget_core::core::tools::yt_search::{self, SearchHit, SearchOptions};
 
 /// Teto da tela de busca; a CLI pede mais direto ao core.
 const UI_MAX_RESULTS: u32 = 20;

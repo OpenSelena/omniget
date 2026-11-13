@@ -7,11 +7,11 @@ use async_trait::async_trait;
 use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::sync::mpsc;
 
-use omniget_core::models::media::{
+use libreget_core::models::media::{
     DownloadOptions, DownloadResult, MediaInfo, MediaType, VideoQuality,
 };
-use omniget_core::models::progress::ProgressUpdate;
-use omniget_core::platforms::traits::PlatformDownloader;
+use libreget_core::models::progress::ProgressUpdate;
+use libreget_core::platforms::traits::PlatformDownloader;
 
 const GALLERY_HOSTS: &[&str] = &[
     "deviantart.com",
@@ -197,7 +197,7 @@ impl PlatformDownloader for GalleryDlDownloader {
             .map(|q| q.url.clone())
             .ok_or_else(|| anyhow!("No gallery URL available"))?;
 
-        let bin = omniget_core::core::dependencies::ensure_gallerydl()
+        let bin = libreget_core::core::dependencies::ensure_gallerydl()
             .await
             .ok_or_else(|| {
                 anyhow!(
@@ -208,14 +208,14 @@ impl PlatformDownloader for GalleryDlDownloader {
         std::fs::create_dir_all(&opts.output_dir)?;
         let _ = progress.send(ProgressUpdate::percent(-2.0)).await;
 
-        let mut cmd = omniget_core::core::process::command(&bin);
+        let mut cmd = libreget_core::core::process::command(&bin);
         cmd.arg("--no-colors")
             .arg("-D")
             .arg(&opts.output_dir)
             .stdout(Stdio::piped())
             .stderr(Stdio::piped());
 
-        if let Some(data_dir) = omniget_core::core::paths::app_data_dir() {
+        if let Some(data_dir) = libreget_core::core::paths::app_data_dir() {
             let archive_dir = data_dir.join("archive");
             if std::fs::create_dir_all(&archive_dir).is_ok() {
                 cmd.arg("--download-archive")

@@ -28,9 +28,9 @@ pub async fn estrategia_ldi_login_token(
     *state.estrategia_ldi_session_validated_at.lock().await = None;
     *state.estrategia_ldi_courses_cache.lock().await = None;
 
-    let parsed = omniget_core::core::cookie_parser::parse_cookie_input(&token, "__Secure-SID");
+    let parsed = libreget_core::core::cookie_parser::parse_cookie_input(&token, "__Secure-SID");
 
-    let client = omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+    let client = libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent(
             "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0",
         )

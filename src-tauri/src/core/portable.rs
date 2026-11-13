@@ -26,7 +26,7 @@ pub fn portable_webview_dir(data_dir: Option<&Path>) -> Option<PathBuf> {
 /// acontece uma vez so, antes de qualquer coisa subir, e duplicar a regra aqui
 /// criaria duas fontes de verdade que divergem no primeiro ajuste.
 pub fn portable_webview_dir_from_env() -> Option<PathBuf> {
-    if std::env::var("OMNIGET_PORTABLE").ok().as_deref() != Some("1") {
+    if std::env::var("LIBREGET_PORTABLE").ok().as_deref() != Some("1") {
         return None;
     }
     let data_dir = std::env::var("OMNIGET_DATA_DIR").ok()?;
@@ -69,11 +69,11 @@ mod tests {
         // rodam em paralelo. Nenhum outro teste toca estas duas variaveis, mas
         // dividir isto em varios seria corrida garantida.
         let restore = (
-            std::env::var("OMNIGET_PORTABLE").ok(),
+            std::env::var("LIBREGET_PORTABLE").ok(),
             std::env::var("OMNIGET_DATA_DIR").ok(),
         );
 
-        std::env::remove_var("OMNIGET_PORTABLE");
+        std::env::remove_var("LIBREGET_PORTABLE");
         std::env::remove_var("OMNIGET_DATA_DIR");
         assert_eq!(
             portable_webview_dir_from_env(),
@@ -81,7 +81,7 @@ mod tests {
             "sem env nao e portatil"
         );
 
-        std::env::set_var("OMNIGET_PORTABLE", "1");
+        std::env::set_var("LIBREGET_PORTABLE", "1");
         assert_eq!(
             portable_webview_dir_from_env(),
             None,
@@ -101,7 +101,7 @@ mod tests {
             Some(PathBuf::from("/tmp/omniget-portatil/data/webview"))
         );
 
-        std::env::set_var("OMNIGET_PORTABLE", "0");
+        std::env::set_var("LIBREGET_PORTABLE", "0");
         assert_eq!(
             portable_webview_dir_from_env(),
             None,
@@ -109,8 +109,8 @@ mod tests {
         );
 
         match restore.0 {
-            Some(v) => std::env::set_var("OMNIGET_PORTABLE", v),
-            None => std::env::remove_var("OMNIGET_PORTABLE"),
+            Some(v) => std::env::set_var("LIBREGET_PORTABLE", v),
+            None => std::env::remove_var("LIBREGET_PORTABLE"),
         }
         match restore.1 {
             Some(v) => std::env::set_var("OMNIGET_DATA_DIR", v),

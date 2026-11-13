@@ -1,8 +1,8 @@
 //! Sistema: ajustes do Windows, limpeza de caches, analisador de disco,
 //! inicialização, desinstalador, bloqueio por `hosts` e (só Windows) debloat,
-//! registro e atualizador. A lógica mora em `omniget_core::core::tools`.
+//! registro e atualizador. A lógica mora em `libreget_core::core::tools`.
 
-use omniget_core::core::tools::{
+use libreget_core::core::tools::{
     disk, hosts_block, startup, sysclean, uninstall, win_apps, win_registry, win_tweaks,
     win_updater,
 };

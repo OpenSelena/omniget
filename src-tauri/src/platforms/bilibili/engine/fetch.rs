@@ -1,8 +1,8 @@
 use std::path::Path;
 use std::time::Duration;
 
-use omniget_core::core::http_fetcher::{HttpFetcher, HttpFetcherConfig, HttpFetcherResult};
-use omniget_core::models::progress::ProgressUpdate;
+use libreget_core::core::http_fetcher::{HttpFetcher, HttpFetcherConfig, HttpFetcherResult};
+use libreget_core::models::progress::ProgressUpdate;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue, COOKIE, REFERER, USER_AGENT};
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
@@ -19,7 +19,7 @@ pub struct FetchOptions<'a> {
 }
 
 fn build_client() -> Result<reqwest::Client> {
-    omniget_core::core::http_client::apply_global_proxy(
+    libreget_core::core::http_client::apply_global_proxy(
         reqwest::Client::builder()
             .timeout(Duration::from_secs(60 * 30))
             .connect_timeout(Duration::from_secs(15)),

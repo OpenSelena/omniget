@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use omniget_plugin_sdk::{PluginHost, PluginManifest, RegistryEntry};
+use libreget_plugin_sdk::{PluginHost, PluginManifest, RegistryEntry};
 use serde::{Deserialize, Serialize};
 use tauri::Emitter;
 
@@ -72,8 +72,8 @@ pub fn list_plugins(
                             label: n.label.clone(),
                             icon_svg: n.icon_svg.clone(),
                             group: match n.group {
-                                omniget_plugin_sdk::NavGroup::Primary => "primary".into(),
-                                omniget_plugin_sdk::NavGroup::Secondary => "secondary".into(),
+                                libreget_plugin_sdk::NavGroup::Primary => "primary".into(),
+                                libreget_plugin_sdk::NavGroup::Secondary => "secondary".into(),
                             },
                             order: n.order,
                         })
@@ -83,7 +83,7 @@ pub fn list_plugins(
                 None => {
                     let load_error = manager.load_error(&entry.id).cloned();
                     let manifest_path = manager.plugins_dir().join(&entry.id).join("plugin.json");
-                    let manifest: Option<omniget_plugin_sdk::PluginManifest> =
+                    let manifest: Option<libreget_plugin_sdk::PluginManifest> =
                         std::fs::read_to_string(&manifest_path)
                             .ok()
                             .and_then(|s| serde_json::from_str(&s).ok());
@@ -105,8 +105,8 @@ pub fn list_plugins(
                                     label: n.label.clone(),
                                     icon_svg: n.icon_svg.clone(),
                                     group: match n.group {
-                                        omniget_plugin_sdk::NavGroup::Primary => "primary".into(),
-                                        omniget_plugin_sdk::NavGroup::Secondary => {
+                                        libreget_plugin_sdk::NavGroup::Primary => "primary".into(),
+                                        libreget_plugin_sdk::NavGroup::Secondary => {
                                             "secondary".into()
                                         }
                                     },
@@ -238,7 +238,7 @@ pub async fn plugin_command(
                 || (lower.contains("command") && lower.contains("not found"));
             if unknown_command && !lower.contains("not loaded") && !is_builtin {
                 format!(
-                    "ERR_PLUGIN_OUTDATED: The installed '{}' plugin is outdated and doesn't support '{}'. Update it in the Marketplace, then restart OmniGet. ({})",
+                    "ERR_PLUGIN_OUTDATED: The installed '{}' plugin is outdated and doesn't support '{}'. Update it in the Marketplace, then restart LibreGet. ({})",
                     plugin_id, command, e
                 )
             } else {
@@ -273,7 +273,7 @@ pub async fn fetch_marketplace_registry(
 ) -> Result<Vec<MarketplaceEntry>, String> {
     let client = crate::core::http_client::apply_global_proxy(
         reqwest::Client::builder()
-            .user_agent("OmniGet")
+            .user_agent("LibreGet")
             .timeout(std::time::Duration::from_secs(15)),
     )
     .build()
@@ -400,7 +400,7 @@ pub async fn install_plugin_zip_from_repo(
 
     let client = crate::core::http_client::apply_global_proxy(
         reqwest::Client::builder()
-            .user_agent("OmniGet")
+            .user_agent("LibreGet")
             .timeout(std::time::Duration::from_secs(60))
             .connect_timeout(std::time::Duration::from_secs(15)),
     )
@@ -468,7 +468,7 @@ pub async fn install_plugin_zip_from_repo(
 
     let mut manager = state.write().await;
     manager
-        .register_installed(omniget_plugin_sdk::InstalledPlugin {
+        .register_installed(libreget_plugin_sdk::InstalledPlugin {
             id: plugin_id.clone(),
             version: version.clone(),
             installed_at: chrono::Utc::now().to_rfc3339(),
@@ -506,7 +506,7 @@ pub async fn install_plugin_from_registry(
 async fn fetch_registry_entries() -> Result<Vec<RegistryEntry>, String> {
     let client = crate::core::http_client::apply_global_proxy(
         reqwest::Client::builder()
-            .user_agent("OmniGet")
+            .user_agent("LibreGet")
             .timeout(std::time::Duration::from_secs(15)),
     )
     .build()
@@ -574,7 +574,7 @@ pub async fn auto_update_plugins(state: Arc<tokio::sync::RwLock<PluginManager>>)
 
     let client = match crate::core::http_client::apply_global_proxy(
         reqwest::Client::builder()
-            .user_agent("OmniGet")
+            .user_agent("LibreGet")
             .timeout(std::time::Duration::from_secs(15)),
     )
     .build()
@@ -631,7 +631,7 @@ pub async fn check_plugin_updates(
 
     let client = crate::core::http_client::apply_global_proxy(
         reqwest::Client::builder()
-            .user_agent("OmniGet")
+            .user_agent("LibreGet")
             .timeout(std::time::Duration::from_secs(15)),
     )
     .build()

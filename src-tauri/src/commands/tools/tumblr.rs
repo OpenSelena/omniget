@@ -2,7 +2,7 @@
 //! likes, espelho offline de um blog e índice unificado de DeviantArt,
 //! ArtStation e Flickr. A leitura é toda pós-processamento do gallery-dl.
 
-use omniget_core::core::tools::tumblr::{art, backup, gdl, likes};
+use libreget_core::core::tools::tumblr::{art, backup, gdl, likes};
 
 use super::{err, progress};
 

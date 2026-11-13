@@ -1,7 +1,7 @@
 //! Utilitários de CTF e análise de arquivo: hash, tipo de arquivo, cifras
 //! clássicas, XOR, codificações e análise de frequência. Tudo local.
 
-use omniget_core::core::tools::ctf;
+use libreget_core::core::tools::ctf;
 
 use super::err;
 

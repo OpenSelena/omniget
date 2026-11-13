@@ -5,7 +5,7 @@
 //! extensão capturou, cada um no seu bucket de cookie. O Trakt tem API
 //! oficial e usa o device flow, com credenciais que o próprio usuário cria.
 
-use omniget_core::core::tools::lists::{goodreads, letterboxd, merge, trakt};
+use libreget_core::core::tools::lists::{goodreads, letterboxd, merge, trakt};
 
 use super::{err, progress};
 

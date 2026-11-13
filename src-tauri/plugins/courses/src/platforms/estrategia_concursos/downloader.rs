@@ -7,7 +7,7 @@ use tauri::Emitter;
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 
-use omniget_core::core::filename;
+use libreget_core::core::filename;
 
 use super::api::{self, EstrategiaConcursosCourse, EstrategiaConcursosSession};
 
@@ -51,7 +51,7 @@ pub async fn download_full_course(
     );
     tokio::fs::create_dir_all(&course_dir).await?;
 
-    if omniget_core::core::course_utils::is_course_complete(&course_dir) {
+    if libreget_core::core::course_utils::is_course_complete(&course_dir) {
         tracing::info!("[estrategia_concursos] course already complete, skipping");
         return Ok(());
     }
@@ -144,7 +144,7 @@ pub async fn download_full_course(
             if !detail.description.is_empty() {
                 let desc_dir = format!("{}/{}. {}", mod_dir, li + 1, lesson_name);
                 tokio::fs::create_dir_all(&desc_dir).await.ok();
-                omniget_core::core::course_utils::save_description(
+                libreget_core::core::course_utils::save_description(
                     &desc_dir,
                     &detail.description,
                     "html",
@@ -345,7 +345,7 @@ pub async fn download_full_course(
         return Err(anyhow!("Download cancelled by user"));
     }
 
-    omniget_core::core::course_utils::mark_course_complete(&course_dir)
+    libreget_core::core::course_utils::mark_course_complete(&course_dir)
         .await
         .ok();
 
@@ -361,6 +361,6 @@ async fn download_file_direct(
     let out = Path::new(output_path);
     let (tx, _rx) = mpsc::channel(8);
 
-    omniget_core::core::direct_downloader::download_direct(client, url, out, tx, Some(cancel_token))
+    libreget_core::core::direct_downloader::download_direct(client, url, out, tx, Some(cancel_token))
         .await
 }

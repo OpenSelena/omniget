@@ -1,4 +1,4 @@
-use omniget_core::core::tools::{aria2, manifest_dl};
+use libreget_core::core::tools::{aria2, manifest_dl};
 
 use super::{err, progress};
 

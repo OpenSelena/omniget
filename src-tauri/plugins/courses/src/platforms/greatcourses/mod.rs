@@ -6,7 +6,7 @@ use async_trait::async_trait;
 use tokio::sync::mpsc;
 
 use crate::platforms::traits::PlatformDownloader;
-use omniget_core::models::media::{
+use libreget_core::models::media::{
     DownloadOptions, DownloadResult, MediaInfo, MediaType, VideoQuality,
 };
 
@@ -66,7 +66,7 @@ impl PlatformDownloader for GreatCoursesDownloader {
         &self,
         _info: &MediaInfo,
         _opts: &DownloadOptions,
-        _progress: tokio::sync::mpsc::Sender<omniget_core::models::progress::ProgressUpdate>,
+        _progress: tokio::sync::mpsc::Sender<libreget_core::models::progress::ProgressUpdate>,
     ) -> anyhow::Result<DownloadResult> {
         Err(anyhow!(
             "Use the courses interface to download Wondrium courses"

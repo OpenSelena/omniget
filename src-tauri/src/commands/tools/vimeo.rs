@@ -4,7 +4,7 @@
 //! A sessão do gerenciador de cookies entra aqui e só aqui — o front nunca
 //! manda cookie, e a senha nunca volta em nada que o front receba.
 
-use omniget_core::core::tools::vimeo;
+use libreget_core::core::tools::vimeo;
 
 use super::{err, progress};
 

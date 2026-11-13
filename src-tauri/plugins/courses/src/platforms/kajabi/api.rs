@@ -78,7 +78,7 @@ fn build_client(token: &str, site_id: &str) -> anyhow::Result<reqwest::Client> {
     headers.insert("KJB-SITE-ID", HeaderValue::from_str(site_id)?);
     headers.insert("Accept", HeaderValue::from_static("application/json"));
 
-    let client = omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+    let client = libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent(USER_AGENT)
         .default_headers(headers)
         .redirect(reqwest::redirect::Policy::limited(10))
@@ -99,7 +99,7 @@ fn build_auth_client(token: &str) -> anyhow::Result<reqwest::Client> {
     headers.insert("KJB-DP", HeaderValue::from_static("ANDROID"));
     headers.insert("Accept", HeaderValue::from_static("application/json"));
 
-    let client = omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+    let client = libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent(USER_AGENT)
         .default_headers(headers)
         .redirect(reqwest::redirect::Policy::limited(10))
@@ -117,7 +117,7 @@ fn session_file_path() -> anyhow::Result<PathBuf> {
 
 pub async fn request_login_link(email: &str) -> anyhow::Result<String> {
     let temp_client =
-        omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+        libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
             .user_agent(USER_AGENT)
             .connect_timeout(Duration::from_secs(30))
             .timeout(Duration::from_secs(60))
@@ -162,7 +162,7 @@ pub async fn verify_login(
     login_token: &str,
 ) -> anyhow::Result<String> {
     let temp_client =
-        omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+        libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
             .user_agent(USER_AGENT)
             .connect_timeout(Duration::from_secs(30))
             .timeout(Duration::from_secs(60))

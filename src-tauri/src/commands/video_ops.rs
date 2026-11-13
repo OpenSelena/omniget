@@ -1,4 +1,4 @@
-use omniget_core::core::ffmpeg_ops;
+use libreget_core::core::ffmpeg_ops;
 use serde::Serialize;
 use std::path::{Path, PathBuf};
 use tauri::Emitter;
@@ -38,13 +38,13 @@ async fn run_ffmpeg(
     args: &[String],
     output: &Path,
 ) -> Result<(), String> {
-    let ffmpeg = omniget_core::core::dependencies::find_tool("ffmpeg")
+    let ffmpeg = libreget_core::core::dependencies::find_tool("ffmpeg")
         .await
         .ok_or_else(|| "ffmpeg unavailable".to_string())?;
 
     let _ = app.emit("video-op-progress", "running");
 
-    let mut cmd = omniget_core::core::process::command(&ffmpeg);
+    let mut cmd = libreget_core::core::process::command(&ffmpeg);
     cmd.arg("-y")
         .arg("-i")
         .arg(input.to_string_lossy().to_string());
@@ -73,11 +73,11 @@ pub async fn detect_shot_changes(
     threshold: Option<f64>,
 ) -> Result<Vec<f64>, String> {
     let input_path = ensure_input(&input)?;
-    let ffmpeg = omniget_core::core::dependencies::find_tool("ffmpeg")
+    let ffmpeg = libreget_core::core::dependencies::find_tool("ffmpeg")
         .await
         .ok_or_else(|| "ffmpeg unavailable".to_string())?;
     let thr = threshold.unwrap_or(0.4).clamp(0.1, 0.9);
-    let output = omniget_core::core::process::command(&ffmpeg)
+    let output = libreget_core::core::process::command(&ffmpeg)
         .arg("-i")
         .arg(input_path.to_string_lossy().to_string())
         .arg("-filter:v")
@@ -97,11 +97,11 @@ pub async fn detect_shot_changes(
 #[tauri::command]
 pub async fn waveform_peaks(input: String, buckets: Option<usize>) -> Result<Vec<f32>, String> {
     let input_path = ensure_input(&input)?;
-    let ffmpeg = omniget_core::core::dependencies::find_tool("ffmpeg")
+    let ffmpeg = libreget_core::core::dependencies::find_tool("ffmpeg")
         .await
         .ok_or_else(|| "ffmpeg unavailable".to_string())?;
     let n = buckets.unwrap_or(2000).clamp(100, 20000);
-    let output = omniget_core::core::process::command(&ffmpeg)
+    let output = libreget_core::core::process::command(&ffmpeg)
         .arg("-i")
         .arg(input_path.to_string_lossy().to_string())
         .arg("-ac")
@@ -135,16 +135,16 @@ pub struct SilenceEstimate {
 #[tauri::command]
 pub async fn video_op_silence_estimate(input: String) -> Result<SilenceEstimate, String> {
     let input_path = ensure_input(&input)?;
-    let ffmpeg = omniget_core::core::dependencies::find_tool("ffmpeg")
+    let ffmpeg = libreget_core::core::dependencies::find_tool("ffmpeg")
         .await
         .ok_or_else(|| "ffmpeg unavailable".to_string())?;
 
-    let total_us = omniget_core::core::ffmpeg::get_duration_us(&input_path)
+    let total_us = libreget_core::core::ffmpeg::get_duration_us(&input_path)
         .await
         .map_err(|e| format!("could not read duration: {}", e))?;
     let total_secs = total_us as f64 / 1_000_000.0;
 
-    let mut cmd = omniget_core::core::process::command(&ffmpeg);
+    let mut cmd = libreget_core::core::process::command(&ffmpeg);
     cmd.arg("-i").arg(input_path.to_string_lossy().to_string());
     for arg in ffmpeg_ops::silence_probe_args() {
         cmd.arg(arg);
@@ -196,14 +196,14 @@ pub async fn video_op_preset(
 #[cfg(not(target_os = "android"))]
 #[tauri::command]
 pub async fn video_op_propose(instruction: String) -> Result<VideoOpProposal, String> {
-    let cfg = omniget_core::core::ai::get();
+    let cfg = libreget_core::core::ai::get();
     if !cfg.is_configured() {
         return Err("ai_not_configured".to_string());
     }
     let system = "You convert a user's video-editing request into a single-line ffmpeg command. \
 Use exactly 'ffmpeg -i input <options> output.<ext>'. Choose a sensible output extension. \
 Only use codec/filter/trim options. No shell operators, no extra text, output ONLY the command.";
-    let raw = omniget_core::core::ai::chat(system, &instruction).await?;
+    let raw = libreget_core::core::ai::chat(system, &instruction).await?;
     let args = ffmpeg_ops::sanitize_ai_command(&raw)?;
     // Best-effort extension guess from the model's output line.
     let out_ext = raw

@@ -58,12 +58,12 @@ pub async fn cademi_login_cookie(
     *state.cademi_courses_cache.lock().await = None;
 
     let trimmed_url = site_url.trim_end_matches('/').to_string();
-    let parsed = omniget_core::core::cookie_parser::parse_cookie_input(&cookie, "app_v4_session");
+    let parsed = libreget_core::core::cookie_parser::parse_cookie_input(&cookie, "app_v4_session");
 
     let session = CademiSession {
         cookies: parsed.token.clone(),
         site_url: trimmed_url.clone(),
-        client: omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+        client: libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
             .user_agent(
                 "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0",
             )

@@ -1,6 +1,6 @@
 pub mod words;
 
-use omniget_core::models::progress::ProgressUpdate;
+use libreget_core::models::progress::ProgressUpdate;
 use std::path::PathBuf;
 use std::sync::Arc;
 

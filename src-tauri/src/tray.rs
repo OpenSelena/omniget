@@ -92,7 +92,7 @@ fn format_speed(bps: f64, labels: &TrayLabels) -> String {
 
 fn tooltip_for(labels: &TrayLabels, count: u32, speed_bps: Option<f64>) -> String {
     if count == 0 {
-        return "OmniGet".into();
+        return "LibreGet".into();
     }
     let mut tooltip = format!("OmniGet — {}{}", count, labels.active_suffix);
     if let Some(bps) = speed_bps.filter(|bps| *bps > 0.0) {

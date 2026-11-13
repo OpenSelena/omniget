@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use omniget_core::core::process;
+use libreget_core::core::process;
 
 use super::super::api::{BilibiliError, Result};
 

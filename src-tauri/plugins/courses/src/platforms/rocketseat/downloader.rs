@@ -7,7 +7,7 @@ use tauri::Emitter;
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 
-use omniget_core::core::filename;
+use libreget_core::core::filename;
 
 use super::api::{self, RocketseatCourse, RocketseatSession};
 
@@ -51,7 +51,7 @@ pub async fn download_full_course(
     );
     tokio::fs::create_dir_all(&course_dir).await?;
 
-    if omniget_core::core::course_utils::is_course_complete(&course_dir) {
+    if libreget_core::core::course_utils::is_course_complete(&course_dir) {
         tracing::info!("[rocketseat] course already complete, skipping");
         return Ok(());
     }
@@ -160,7 +160,7 @@ pub async fn download_full_course(
         return Err(anyhow!("Download cancelled by user"));
     }
 
-    omniget_core::core::course_utils::mark_course_complete(&course_dir)
+    libreget_core::core::course_utils::mark_course_complete(&course_dir)
         .await
         .ok();
 
@@ -172,11 +172,11 @@ async fn download_with_ytdlp(
     output_dir: &str,
     cancel_token: &CancellationToken,
 ) -> anyhow::Result<u64> {
-    let ytdlp_path = omniget_core::core::ytdlp::ensure_ytdlp().await?;
+    let ytdlp_path = libreget_core::core::ytdlp::ensure_ytdlp().await?;
     let out_dir = Path::new(output_dir);
     let (tx, _rx) = mpsc::channel(8);
 
-    let result = omniget_core::core::ytdlp::download_video(
+    let result = libreget_core::core::ytdlp::download_video(
         &ytdlp_path,
         url,
         out_dir,

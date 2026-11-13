@@ -98,7 +98,7 @@ fn build_client(
     headers.insert("device-id", HeaderValue::from_str(device_id)?);
     headers.insert("os", HeaderValue::from_str(os_value)?);
 
-    let client = omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+    let client = libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent(USER_AGENT)
         .default_headers(headers)
         .redirect(reqwest::redirect::Policy::limited(10))

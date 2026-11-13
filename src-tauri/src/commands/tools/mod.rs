@@ -1,6 +1,6 @@
 //! Comandos Tauri da seção Tools. Cada submódulo é um grupo da UI
 //! (fala, IA, YouTube, documentos, imagens, arquivos, downloads, sistema,
-//! celular); a lógica mora em `omniget_core::core::tools`. Progresso sai
+//! celular); a lógica mora em `libreget_core::core::tools`. Progresso sai
 //! pelo evento `tool-progress` com o payload `ToolProgress`.
 
 pub mod ai;
@@ -35,7 +35,7 @@ pub mod youtube;
 
 use std::sync::Arc;
 
-use omniget_core::core::tools::ProgressFn;
+use libreget_core::core::tools::ProgressFn;
 use tauri::Emitter;
 
 pub(crate) fn progress(app: &tauri::AppHandle) -> ProgressFn {

@@ -462,9 +462,9 @@ async fn extract_cookies_js(window: &tauri::WebviewWindow, default_domain: &str)
                 }
             }
         } catch(e) {}
-        document.title = '__OMNIGET_COOKIES__' + JSON.stringify(result);
+        document.title = '__LIBREGET_COOKIES__' + JSON.stringify(result);
     } catch(err) {
-        document.title = '__OMNIGET_COOKIES__{"cookies":"","storage":{}}';
+        document.title = '__LIBREGET_COOKIES__{"cookies":"","storage":{}}';
     }
 })()
 "#;
@@ -488,7 +488,7 @@ async fn extract_cookies_js(window: &tauri::WebviewWindow, default_domain: &str)
         tokio::time::sleep(std::time::Duration::from_millis(delay_ms)).await;
 
         if let Ok(title) = window.title() {
-            if let Some(data_str) = title.strip_prefix("__OMNIGET_COOKIES__") {
+            if let Some(data_str) = title.strip_prefix("__LIBREGET_COOKIES__") {
                 return parse_cookie_data(data_str, default_domain);
             }
         }

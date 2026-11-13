@@ -28,14 +28,14 @@ pub mod tray;
 
 struct DesktopCookieProvider;
 
-impl omniget_core::platforms::cookie_provider::CookieProvider for DesktopCookieProvider {
+impl libreget_core::platforms::cookie_provider::CookieProvider for DesktopCookieProvider {
     fn cookie_path_for(&self, domain: &str) -> Option<std::path::PathBuf> {
         let root = crate::cookies::root_domain_of(domain);
         if root.is_empty() {
             return None;
         }
 
-        let slug = omniget_core::core::log_hook::current_cookie_slug();
+        let slug = libreget_core::core::log_hook::current_cookie_slug();
         let path = crate::cookies::account_path_for_consumer(&root, slug.as_deref())
             .or_else(|| crate::cookies::account_path_for_consumer(&root, None))?;
         crate::cookies::touch_last_used(&root, slug.as_deref().unwrap_or("_default"));
@@ -77,12 +77,12 @@ impl omniget_core::platforms::cookie_provider::CookieProvider for DesktopCookieP
 
 struct DesktopBilibiliRuntimeProvider;
 
-impl omniget_core::platforms::bilibili::BilibiliRuntimeProvider for DesktopBilibiliRuntimeProvider {
+impl libreget_core::platforms::bilibili::BilibiliRuntimeProvider for DesktopBilibiliRuntimeProvider {
     fn active_account_slug(&self) -> Option<String> {
         let registry = crate::cookies::load_registry();
         let bucket = registry.buckets.get("bilibili.com")?;
 
-        if let Some(selected) = omniget_core::core::log_hook::current_cookie_slug() {
+        if let Some(selected) = libreget_core::core::log_hook::current_cookie_slug() {
             if bucket
                 .accounts
                 .iter()
@@ -110,17 +110,17 @@ impl omniget_core::platforms::bilibili::BilibiliRuntimeProvider for DesktopBilib
             .map(|a| a.slug.clone())
     }
 
-    fn settings(&self) -> omniget_core::models::settings::AppSettings {
+    fn settings(&self) -> libreget_core::models::settings::AppSettings {
         storage::config::load_settings_standalone()
     }
 
     fn persist_account(
         &self,
-        cookies: &[omniget_core::platforms::bilibili::BilibiliAuthCookie],
+        cookies: &[libreget_core::platforms::bilibili::BilibiliAuthCookie],
         uname: &str,
         source_label: &str,
     ) -> Result<String, String> {
-        let slug = omniget_core::platforms::bilibili::auth::slug_from_uname(uname);
+        let slug = libreget_core::platforms::bilibili::auth::slug_from_uname(uname);
         let entries: Vec<crate::extension_storage::ExtensionCookie> = cookies
             .iter()
             .map(|cookie| crate::extension_storage::ExtensionCookie {
@@ -215,7 +215,7 @@ pub fn run() {
         core::portable::startup_banner(
             env!("CARGO_PKG_VERSION"),
             std::process::id(),
-            std::env::var("OMNIGET_PORTABLE").ok().as_deref() == Some("1"),
+            std::env::var("LIBREGET_PORTABLE").ok().as_deref() == Some("1"),
             core::paths::app_data_dir().as_deref(),
         )
     );
@@ -224,28 +224,28 @@ pub fn run() {
     // gallery-dl first: it claims bulk-listing URLs (profiles, subreddits)
     // that the single-post Twitter/Reddit downloaders would otherwise match
     registry.register(Arc::new(platforms::gallerydl::GalleryDlDownloader::new()));
-    registry.register(Arc::new(omniget_core::platforms::InstagramDownloader::new()));
-    registry.register(Arc::new(omniget_core::platforms::ThreadsDownloader::new()));
-    registry.register(Arc::new(omniget_core::platforms::PinterestDownloader::new()));
-    registry.register(Arc::new(omniget_core::platforms::TikTokDownloader::new()));
-    registry.register(Arc::new(omniget_core::platforms::TwitterDownloader::new()));
+    registry.register(Arc::new(libreget_core::platforms::InstagramDownloader::new()));
+    registry.register(Arc::new(libreget_core::platforms::ThreadsDownloader::new()));
+    registry.register(Arc::new(libreget_core::platforms::PinterestDownloader::new()));
+    registry.register(Arc::new(libreget_core::platforms::TikTokDownloader::new()));
+    registry.register(Arc::new(libreget_core::platforms::TwitterDownloader::new()));
     registry.register(Arc::new(
-        omniget_core::platforms::TwitchClipsDownloader::new(),
+        libreget_core::platforms::TwitchClipsDownloader::new(),
     ));
-    registry.register(Arc::new(omniget_core::platforms::BlueskyDownloader::new()));
-    registry.register(Arc::new(omniget_core::platforms::RedditDownloader::new()));
-    registry.register(Arc::new(omniget_core::platforms::YouTubeDownloader::new()));
-    registry.register(Arc::new(omniget_core::platforms::VimeoDownloader::new()));
-    registry.register(Arc::new(omniget_core::platforms::BilibiliDownloader::new()));
-    registry.register(Arc::new(omniget_core::platforms::DouyinDownloader::new()));
+    registry.register(Arc::new(libreget_core::platforms::BlueskyDownloader::new()));
+    registry.register(Arc::new(libreget_core::platforms::RedditDownloader::new()));
+    registry.register(Arc::new(libreget_core::platforms::YouTubeDownloader::new()));
+    registry.register(Arc::new(libreget_core::platforms::VimeoDownloader::new()));
+    registry.register(Arc::new(libreget_core::platforms::BilibiliDownloader::new()));
+    registry.register(Arc::new(libreget_core::platforms::DouyinDownloader::new()));
     let torrent_session: Arc<tokio::sync::Mutex<Option<Arc<librqbit::Session>>>> =
         Arc::new(tokio::sync::Mutex::new(None));
     registry.register(Arc::new(platforms::magnet::MagnetDownloader::new(
         torrent_session.clone(),
     )));
-    registry.register(Arc::new(omniget_core::platforms::P2pDownloader::new()));
+    registry.register(Arc::new(libreget_core::platforms::P2pDownloader::new()));
     registry.register(Arc::new(
-        omniget_core::platforms::DirectFileDownloader::new(),
+        libreget_core::platforms::DirectFileDownloader::new(),
     ));
     registry.register(Arc::new(
         platforms::generic_ytdlp::GenericYtdlpDownloader::new(),
@@ -332,7 +332,7 @@ pub fn run() {
                 // Nao e so Windows. No Linux o wry usa este caminho para
                 // `base_data_directory`, `base_cache_directory` e os cookies do
                 // WebKitGTK; sem ele o modo portatil deixa
-                // `XDG_DATA_HOME/com.openselena.omniget` no perfil do usuario — a
+                // `XDG_DATA_HOME/com.openselena.libreget` no perfil do usuario — a
                 // mesma #209, fora do Windows. Foi o smoke test do B55 que
                 // pegou isso, na primeira vez que rodou.
                 //
@@ -383,7 +383,7 @@ pub fn run() {
             // Modo smoke: sobe, prova que a janela existe, e sai sozinho com 0.
             // So existe para o CI conseguir responder "abre?", que e a pergunta
             // que compilar nunca responde.
-            if let Ok(raw) = std::env::var("OMNIGET_SMOKE_EXIT_MS") {
+            if let Ok(raw) = std::env::var("LIBREGET_SMOKE_EXIT_MS") {
                 if let Ok(ms) = raw.trim().parse::<u64>() {
                     let handle = app.handle().clone();
                     std::thread::spawn(move || {
@@ -406,7 +406,7 @@ pub fn run() {
             }
             {
                 let handle = app.handle().clone();
-                omniget_core::platforms::bilibili::notify::set_emitter(Box::new(
+                libreget_core::platforms::bilibili::notify::set_emitter(Box::new(
                     move |event: &str, payload: serde_json::Value| {
                         use tauri::Emitter;
                         let _ = handle.emit(event, payload);
@@ -418,10 +418,10 @@ pub fn run() {
             core::http_fetcher::set_global_max_concurrent_segments(
                 settings.advanced.max_concurrent_segments as usize,
             );
-            omniget_core::platforms::cookie_provider::set_cookie_provider(Arc::new(
+            libreget_core::platforms::cookie_provider::set_cookie_provider(Arc::new(
                 DesktopCookieProvider,
             ));
-            omniget_core::platforms::bilibili::set_runtime_provider(Arc::new(
+            libreget_core::platforms::bilibili::set_runtime_provider(Arc::new(
                 DesktopBilibiliRuntimeProvider,
             ));
             core::ytdlp::set_per_domain_cookie_fn(|url| {
@@ -431,7 +431,7 @@ pub fn run() {
                 if root.is_empty() {
                     return None;
                 }
-                let slug = omniget_core::core::log_hook::current_cookie_slug();
+                let slug = libreget_core::core::log_hook::current_cookie_slug();
                 let path = crate::cookies::account_path_for_consumer(&root, slug.as_deref())?;
                 crate::cookies::touch_last_used(&root, slug.as_deref().unwrap_or("_default"));
                 Some(path)
@@ -574,7 +574,7 @@ pub fn run() {
             });
             {
                 let app_handle = app.handle().clone();
-                omniget_core::core::log_hook::set_log_sink(std::sync::Arc::new(move |id, line| {
+                libreget_core::core::log_hook::set_log_sink(std::sync::Arc::new(move |id, line| {
                     // B33: caixa-preta. Toda linha de log de download passa por
                     // aqui, e o `record` redige antes de guardar — e o unico
                     // ponto onde da para capturar o historico sem instrumentar
@@ -642,14 +642,14 @@ pub fn run() {
                     }
                 });
             }
-            // Make sure the OS routes `omniget://` to this binary even when the
+            // Make sure the OS routes `libreget://` to this binary even when the
             // package didn't ship a desktop file with `MimeType=x-scheme-handler/omniget;`
             // or when the user is running from an AppImage / unpacked build.
             // No-op on macOS (which uses Info.plist registered by the bundler).
             #[cfg(any(target_os = "linux", target_os = "windows"))]
             {
                 if let Err(error) = app.deep_link().register_all() {
-                    tracing::warn!("Failed to register omniget:// scheme: {}", error);
+                    tracing::warn!("Failed to register libreget:// scheme: {}", error);
                 }
             }
             tray::setup(app.handle())?;
@@ -710,7 +710,7 @@ pub fn run() {
                 let plugins_dir = core::paths::app_data_dir()
                     .unwrap_or_else(|| std::path::PathBuf::from("."))
                     .join("plugins");
-                let host: std::sync::Arc<dyn omniget_plugin_sdk::PluginHost> = std::sync::Arc::new(
+                let host: std::sync::Arc<dyn libreget_plugin_sdk::PluginHost> = std::sync::Arc::new(
                     plugin_host::PluginHostImpl::new(app.handle().clone(), plugins_dir),
                 );
                 let plugin_mgr = app
@@ -729,19 +729,19 @@ pub fn run() {
                         {
                             let mut mgr = mgr_for_plugins.blocking_write();
                             let _ = mgr.register_builtin(
-                                omniget_plugin_convert::manifest(),
-                                Box::new(omniget_plugin_convert::ConvertPlugin::new()),
+                                libreget_plugin_convert::manifest(),
+                                Box::new(libreget_plugin_convert::ConvertPlugin::new()),
                                 std::sync::Arc::clone(&host),
                             );
                             let _ = mgr.register_builtin(
-                                omniget_plugin_telegram::manifest(),
-                                Box::new(omniget_plugin_telegram::TelegramPlugin::new()),
+                                libreget_plugin_telegram::manifest(),
+                                Box::new(libreget_plugin_telegram::TelegramPlugin::new()),
                                 std::sync::Arc::clone(&host),
                             );
                             let _ = mgr.register_builtin(
-                                omniget_plugin_courses::manifest(),
+                                libreget_plugin_courses::manifest(),
                                 Box::new(
-                                    omniget_plugin_courses::CoursesPlugin::new()
+                                    libreget_plugin_courses::CoursesPlugin::new()
                                         .with_app(app_emit.clone()),
                                 ),
                                 std::sync::Arc::clone(&host),

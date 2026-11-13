@@ -69,7 +69,7 @@ fn build_client(token: &str) -> anyhow::Result<reqwest::Client> {
     headers.insert("Accept", HeaderValue::from_static("application/json"));
     headers.insert("FrontVersion", HeaderValue::from_static("1458"));
 
-    let client = omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+    let client = libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent(USER_AGENT)
         .default_headers(headers)
         .redirect(reqwest::redirect::Policy::limited(10))
@@ -92,7 +92,7 @@ pub async fn refresh_token(session: &NutrorSession) -> anyhow::Result<NutrorSess
         .ok_or_else(|| anyhow!("No refresh token available"))?;
 
     let temp_client =
-        omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+        libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
             .user_agent(USER_AGENT)
             .connect_timeout(Duration::from_secs(30))
             .timeout(Duration::from_secs(60))

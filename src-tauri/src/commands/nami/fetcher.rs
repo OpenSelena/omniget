@@ -128,7 +128,7 @@ pub async fn download_binary(url: &str, target_path: &Path) -> Result<PathBuf, S
     }
 
     let client = reqwest::Client::builder()
-        .user_agent("omniget-nami/1.0")
+        .user_agent("libreget-nami/1.0")
         .build()
         .map_err(|e| format!("Client builder error: {}", e))?;
 

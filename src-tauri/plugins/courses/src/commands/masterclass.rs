@@ -28,7 +28,7 @@ pub async fn masterclass_login_cookies(
     *state.masterclass_session_validated_at.lock().await = None;
     *state.masterclass_courses_cache.lock().await = None;
 
-    let parsed = omniget_core::core::cookie_parser::parse_cookie_input(&cookies, "access_token");
+    let parsed = libreget_core::core::cookie_parser::parse_cookie_input(&cookies, "access_token");
 
     let session = api::authenticate_cookies(&parsed.cookie_string)
         .await

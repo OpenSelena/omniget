@@ -761,11 +761,11 @@ pub fn extract_gecko_cookies_to_netscape(
         .unwrap_or(0);
     let rand_suffix: u32 = rand::random();
     let temp_db = std::env::temp_dir().join(format!(
-        "omniget_gecko_{}_{:x}.sqlite",
+        "libreget_gecko_{}_{:x}.sqlite",
         timestamp, rand_suffix
     ));
     let temp_wal = std::env::temp_dir().join(format!(
-        "omniget_gecko_{}_{:x}.sqlite-wal",
+        "libreget_gecko_{}_{:x}.sqlite-wal",
         timestamp, rand_suffix
     ));
     let src_wal = profile_dir.join("cookies.sqlite-wal");

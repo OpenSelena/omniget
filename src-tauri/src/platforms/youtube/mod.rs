@@ -1,4 +1,4 @@
-use omniget_core::models::progress::ProgressUpdate;
+use libreget_core::models::progress::ProgressUpdate;
 use std::collections::HashSet;
 
 use anyhow::anyhow;

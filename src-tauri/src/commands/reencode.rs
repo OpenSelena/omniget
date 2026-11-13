@@ -2,9 +2,9 @@ use std::path::{Path, PathBuf};
 
 use serde::{Deserialize, Serialize};
 
-use omniget_core::core::ffmpeg;
-use omniget_core::core::hwaccel;
-use omniget_core::core::process;
+use libreget_core::core::ffmpeg;
+use libreget_core::core::hwaccel;
+use libreget_core::core::process;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]

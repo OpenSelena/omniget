@@ -9,7 +9,7 @@ pub struct DependencyStatus {
     pub name: String,
     pub installed: bool,
     pub version: Option<String>,
-    /// Where the binary was found: "managed" (downloaded by OmniGet),
+    /// Where the binary was found: "managed" (downloaded by LibreGet),
     /// "system" (found on the user's PATH), "flatpak", or "missing".
     pub source: String,
     /// Resolved absolute path to the binary, if found.
@@ -177,7 +177,7 @@ pub async fn install_dependency(
 /// render, so that turned a UI refresh into a process storm (#281).
 async fn managed_binary_path(name: &str) -> Option<PathBuf> {
     match name {
-        "yt-dlp" => omniget_core::core::ytdlp::managed_ytdlp_path(),
+        "yt-dlp" => libreget_core::core::ytdlp::managed_ytdlp_path(),
         _ => None,
     }
 }
@@ -300,7 +300,7 @@ pub async fn set_dependency_path(name: String, source_path: String) -> Result<St
     // Issue #222: referenciar no lugar, nao copiar. Uma copia dentro do
     // diretorio do app envelhece sozinha — o usuario atualiza o binario dele e
     // o OmniGet segue usando a versao velha sem avisar.
-    omniget_core::core::binary_overrides::set(&name, &src)?;
+    libreget_core::core::binary_overrides::set(&name, &src)?;
 
     if name == "yt-dlp" {
         crate::core::ytdlp::reset_ytdlp_cache();
@@ -320,13 +320,13 @@ pub async fn set_dependency_path(name: String, source_path: String) -> Result<St
     )
 }
 
-/// Volta a usar o binario gerenciado pelo OmniGet.
+/// Volta a usar o binario gerenciado pelo LibreGet.
 ///
 /// Existe porque escolher um caminho tem que ser reversivel com o mesmo esforco
 /// de escolher — sem isso, o usuario que apontou o arquivo errado fica preso.
 #[tauri::command]
 pub async fn clear_dependency_path(name: String) -> Result<(), String> {
-    omniget_core::core::binary_overrides::clear(&name)?;
+    libreget_core::core::binary_overrides::clear(&name)?;
     if name == "yt-dlp" {
         crate::core::ytdlp::reset_ytdlp_cache();
     }
@@ -340,5 +340,5 @@ pub async fn clear_dependency_path(name: String) -> Result<(), String> {
 /// Caminho customizado em uso, se houver.
 #[tauri::command]
 pub fn dependency_custom_path(name: String) -> Option<String> {
-    omniget_core::core::binary_overrides::get(&name).map(|p| p.to_string_lossy().to_string())
+    libreget_core::core::binary_overrides::get(&name).map(|p| p.to_string_lossy().to_string())
 }

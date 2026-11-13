@@ -23,7 +23,7 @@ pub fn sync(active: bool) {
         match keepawake::Builder::default()
             .idle(true)
             .sleep(true)
-            .app_name("OmniGet")
+            .app_name("LibreGet")
             .reason("Active downloads")
             .create()
         {

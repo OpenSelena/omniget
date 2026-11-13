@@ -1,7 +1,7 @@
 //! Grupo Games: importar o álbum do Switch, organizar clipes do PC e
-//! consultar o ProtonDB. A lógica mora em `omniget_core::core::tools::games`.
+//! consultar o ProtonDB. A lógica mora em `libreget_core::core::tools::games`.
 
-use omniget_core::core::tools::games::{clip_organizer, protondb, switch_album};
+use libreget_core::core::tools::games::{clip_organizer, protondb, switch_album};
 
 use super::{err, progress};
 

@@ -7,7 +7,7 @@ use tauri::Emitter;
 use tokio::sync::mpsc;
 use tokio_util::sync::CancellationToken;
 
-use omniget_core::core::filename;
+use libreget_core::core::filename;
 
 use super::api::{self, CademiCourse, CademiSession};
 
@@ -51,7 +51,7 @@ pub async fn download_full_course(
     );
     tokio::fs::create_dir_all(&course_dir).await?;
 
-    if omniget_core::core::course_utils::is_course_complete(&course_dir) {
+    if libreget_core::core::course_utils::is_course_complete(&course_dir) {
         tracing::info!("[cademi] course already complete, skipping");
         return Ok(());
     }
@@ -124,7 +124,7 @@ pub async fn download_full_course(
             if let Some(ref desc) = detail.description {
                 let lesson_desc_dir = format!("{}/{}. {}", mod_dir, li + 1, lesson_name);
                 tokio::fs::create_dir_all(&lesson_desc_dir).await?;
-                omniget_core::core::course_utils::save_description(&lesson_desc_dir, desc, "html")
+                libreget_core::core::course_utils::save_description(&lesson_desc_dir, desc, "html")
                     .await
                     .ok();
             }
@@ -212,7 +212,7 @@ pub async fn download_full_course(
         return Err(anyhow!("Download cancelled by user"));
     }
 
-    omniget_core::core::course_utils::mark_course_complete(&course_dir)
+    libreget_core::core::course_utils::mark_course_complete(&course_dir)
         .await
         .ok();
 
@@ -224,11 +224,11 @@ async fn download_with_ytdlp(
     output_dir: &str,
     cancel_token: &CancellationToken,
 ) -> anyhow::Result<u64> {
-    let ytdlp_path = omniget_core::core::ytdlp::ensure_ytdlp().await?;
+    let ytdlp_path = libreget_core::core::ytdlp::ensure_ytdlp().await?;
     let out_dir = Path::new(output_dir);
     let (tx, _rx) = mpsc::channel(8);
 
-    let result = omniget_core::core::ytdlp::download_video(
+    let result = libreget_core::core::ytdlp::download_video(
         &ytdlp_path,
         url,
         out_dir,
@@ -259,6 +259,6 @@ async fn download_file_direct(
     let out = Path::new(output_path);
     let (tx, _rx) = mpsc::channel(8);
 
-    omniget_core::core::direct_downloader::download_direct(client, url, out, tx, Some(cancel_token))
+    libreget_core::core::direct_downloader::download_direct(client, url, out, tx, Some(cancel_token))
         .await
 }

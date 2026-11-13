@@ -29,7 +29,7 @@ pub async fn alpaclass_login(
     *state.alpaclass_session_validated_at.lock().await = None;
     *state.alpaclass_courses_cache.lock().await = None;
 
-    let parsed_token = omniget_core::core::cookie_parser::parse_bearer_input(&token);
+    let parsed_token = libreget_core::core::cookie_parser::parse_bearer_input(&token);
 
     match api::authenticate(&parsed_token, &platform_url).await {
         Ok(session) => {

@@ -109,7 +109,7 @@ pub async fn compute_silence_map(
     let stderr = tokio::task::spawn_blocking(move || {
         let mut cmd = crate::core::process::std_command(&ffmpeg);
         cmd.arg("-i").arg(&alvo);
-        for a in omniget_core::core::ffmpeg_ops::silence_probe_args() {
+        for a in libreget_core::core::ffmpeg_ops::silence_probe_args() {
             cmd.arg(a);
         }
         cmd.arg("-")

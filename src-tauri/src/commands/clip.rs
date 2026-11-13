@@ -4,8 +4,8 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use serde::{Deserialize, Serialize};
 use tauri::AppHandle;
 
-use omniget_core::core::ffmpeg;
-use omniget_core::core::process;
+use libreget_core::core::ffmpeg;
+use libreget_core::core::process;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ClipRequest {

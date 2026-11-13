@@ -1,6 +1,6 @@
 use std::path::{Path, PathBuf};
 
-use omniget_core::models::media::{MediaInfo, MediaType};
+use libreget_core::models::media::{MediaInfo, MediaType};
 
 pub fn applies(info: &MediaInfo) -> bool {
     matches!(info.media_type, MediaType::Video | MediaType::Audio)

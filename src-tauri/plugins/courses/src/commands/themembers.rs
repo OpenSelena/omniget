@@ -57,7 +57,7 @@ pub async fn themembers_login_token(
     *state.themembers_session_validated_at.lock().await = None;
     *state.themembers_courses_cache.lock().await = None;
 
-    let parsed_token = omniget_core::core::cookie_parser::parse_bearer_input(&token);
+    let parsed_token = libreget_core::core::cookie_parser::parse_bearer_input(&token);
 
     match api::authenticate_token(&parsed_token, &domain).await {
         Ok(session) => {

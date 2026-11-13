@@ -4,7 +4,7 @@
 
 use std::collections::HashMap;
 
-use omniget_core::core::tools::{autoclick, dictation, screen_record, voicestudio};
+use libreget_core::core::tools::{autoclick, dictation, screen_record, voicestudio};
 use serde::{Deserialize, Serialize};
 use tauri::Emitter;
 use tauri_plugin_clipboard_manager::ClipboardExt;
@@ -15,7 +15,7 @@ use super::{err, progress};
 // ── Atalhos globais das tools ──────────────────────────────────────────
 
 fn hotkeys_file() -> Option<std::path::PathBuf> {
-    omniget_core::core::tools::tools_dir().map(|d| d.join("hotkeys.json"))
+    libreget_core::core::tools::tools_dir().map(|d| d.join("hotkeys.json"))
 }
 
 pub fn tool_hotkeys() -> HashMap<String, String> {

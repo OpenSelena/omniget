@@ -28,7 +28,7 @@ pub async fn caktomembers_login_token(
     *state.caktomembers_session_validated_at.lock().await = None;
     *state.caktomembers_courses_cache.lock().await = None;
 
-    let parsed = omniget_core::core::cookie_parser::parse_cookie_input(
+    let parsed = libreget_core::core::cookie_parser::parse_cookie_input(
         &cookie,
         "__Secure-better-auth.session_token",
     );
@@ -37,7 +37,7 @@ pub async fn caktomembers_login_token(
         .await
         .map_err(|e| format!("Failed to fetch access token: {}", e))?;
 
-    let client = omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+    let client = libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent(
             "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0",
         )

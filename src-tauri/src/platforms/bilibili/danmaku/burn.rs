@@ -14,7 +14,7 @@
 use std::path::{Path, PathBuf};
 
 use anyhow::{anyhow, Result};
-use omniget_core::core::tools::{report, subtitle, video_compress, ProgressFn};
+use libreget_core::core::tools::{report, subtitle, video_compress, ProgressFn};
 use serde::{Deserialize, Serialize};
 
 /// Id da tool no evento `tool-progress`.
@@ -80,7 +80,7 @@ pub async fn run(opts: &BurnOptions, progress: &ProgressFn) -> Result<BurnResult
     if !sub.is_file() {
         return Err(anyhow!("legenda não encontrada: {}", opts.subtitle));
     }
-    let ffmpeg = omniget_core::core::dependencies::ensure_ffmpeg().await?;
+    let ffmpeg = libreget_core::core::dependencies::ensure_ffmpeg().await?;
 
     report(
         progress,
@@ -90,7 +90,7 @@ pub async fn run(opts: &BurnOptions, progress: &ProgressFn) -> Result<BurnResult
         Some(3),
         Some("lendo o vídeo".into()),
     );
-    let probe = omniget_core::core::ffmpeg::probe(&video).await?;
+    let probe = libreget_core::core::ffmpeg::probe(&video).await?;
     let has_audio = probe.streams.iter().any(|s| s.codec_type == "audio");
     let start = opts.start.max(0.0);
     let window = if opts.duration > 0.0 {
@@ -118,7 +118,7 @@ pub async fn run(opts: &BurnOptions, progress: &ProgressFn) -> Result<BurnResult
             start + window
         ));
     }
-    let work_dir = omniget_core::core::tools::temp_dir();
+    let work_dir = libreget_core::core::tools::temp_dir();
     std::fs::create_dir_all(&work_dir)?;
     let work = work_dir.join(format!("danmaku-{}.ass", uuid::Uuid::new_v4()));
     std::fs::write(&work, &body)?;
@@ -353,7 +353,7 @@ async fn run_ffmpeg(
     pass: Option<(u8, &Path)>,
     tail: &[String],
 ) -> Result<()> {
-    let mut cmd = omniget_core::core::process::command(ffmpeg);
+    let mut cmd = libreget_core::core::process::command(ffmpeg);
     cmd.args(["-y", "-hide_banner", "-loglevel", "error"])
         .args(cut)
         .arg("-i")
@@ -607,13 +607,13 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn live_danmaku_burn_keeps_the_timing() {
-        let ffmpeg = omniget_core::core::dependencies::ensure_ffmpeg()
+        let ffmpeg = libreget_core::core::dependencies::ensure_ffmpeg()
             .await
             .unwrap();
         let dir = std::env::temp_dir().join("omniget-danmaku-burn-live");
         std::fs::create_dir_all(&dir).unwrap();
         let src = dir.join("fonte.mp4");
-        let gen = omniget_core::core::process::command(&ffmpeg)
+        let gen = libreget_core::core::process::command(&ffmpeg)
             .args([
                 "-y",
                 "-hide_banner",
@@ -663,12 +663,12 @@ mod tests {
             output_dir: dir.to_string_lossy().to_string(),
             suffix: String::new(),
         };
-        let res = run(&opts, &omniget_core::core::tools::noop_progress())
+        let res = run(&opts, &libreget_core::core::tools::noop_progress())
             .await
             .unwrap();
         assert_eq!(res.dialogues, 1);
         assert!(res.bytes > 1000, "saiu pequeno demais: {}", res.bytes);
-        let probe = omniget_core::core::ffmpeg::probe(Path::new(&res.output))
+        let probe = libreget_core::core::ffmpeg::probe(Path::new(&res.output))
             .await
             .unwrap();
         assert!(
@@ -685,7 +685,7 @@ mod tests {
             let dir = dir.clone();
             async move {
                 let png = dir.join(format!("f{:.0}.png", at * 10.0));
-                let o = omniget_core::core::process::command(&ffmpeg)
+                let o = libreget_core::core::process::command(&ffmpeg)
                     .args(["-y", "-hide_banner", "-loglevel", "error", "-ss"])
                     .arg(format!("{:.2}", at))
                     .args(["-i", &out, "-frames:v", "1"])
@@ -713,13 +713,13 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn live_danmaku_burn_hits_the_size_target() {
-        let ffmpeg = omniget_core::core::dependencies::ensure_ffmpeg()
+        let ffmpeg = libreget_core::core::dependencies::ensure_ffmpeg()
             .await
             .unwrap();
         let dir = std::env::temp_dir().join("omniget-danmaku-target-live");
         std::fs::create_dir_all(&dir).unwrap();
         let src = dir.join("fonte.mp4");
-        let gen = omniget_core::core::process::command(&ffmpeg)
+        let gen = libreget_core::core::process::command(&ffmpeg)
             .args([
                 "-y",
                 "-hide_banner",
@@ -764,7 +764,7 @@ mod tests {
             output_dir: dir.to_string_lossy().to_string(),
             suffix: "-alvo".into(),
         };
-        let res = run(&opts, &omniget_core::core::tools::noop_progress())
+        let res = run(&opts, &libreget_core::core::tools::noop_progress())
             .await
             .unwrap();
         assert!(res.video_kbps > 0);

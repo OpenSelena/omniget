@@ -62,7 +62,7 @@ fn build_client(cookies: &str, xsrf_token: &str) -> anyhow::Result<reqwest::Clie
     headers.insert("x-xsrf-token", HeaderValue::from_str(xsrf_token)?);
     headers.insert("Accept", HeaderValue::from_static("application/json"));
 
-    let client = omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+    let client = libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent(USER_AGENT)
         .default_headers(headers)
         .redirect(reqwest::redirect::Policy::limited(10))

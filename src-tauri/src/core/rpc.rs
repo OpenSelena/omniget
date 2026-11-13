@@ -6,7 +6,7 @@ use discord_rich_presence::{DiscordIpc, DiscordIpcClient};
 use once_cell::sync::Lazy;
 use serde_json::{json, Value};
 
-pub use omniget_core::models::settings::RpcSettings;
+pub use libreget_core::models::settings::RpcSettings;
 
 const GITHUB_BUTTON_LABEL: &str = "View on GitHub";
 const GITHUB_BUTTON_URL: &str = "https://github.com/OpenSelena/omniget";

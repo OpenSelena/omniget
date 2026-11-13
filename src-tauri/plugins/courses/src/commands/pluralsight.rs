@@ -29,7 +29,7 @@ pub async fn pluralsight_login_cookies(
     *state.pluralsight_courses_cache.lock().await = None;
 
     let parsed =
-        omniget_core::core::cookie_parser::parse_cookie_input(&cookies, "PsJwt-production");
+        libreget_core::core::cookie_parser::parse_cookie_input(&cookies, "PsJwt-production");
 
     let session = api::authenticate_cookies(&parsed.cookie_string)
         .map_err(|e| format!("Authentication failed: {}", e))?;

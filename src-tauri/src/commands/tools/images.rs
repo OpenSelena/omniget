@@ -1,4 +1,4 @@
-use omniget_core::core::tools::{
+use libreget_core::core::tools::{
     exif, icon_pack, image_compress, image_dupes, image_resize, image_sprite, image_stitch, img_bg,
     onnx, upscale,
 };
@@ -32,8 +32,8 @@ pub async fn tool_resize(
 }
 
 #[tauri::command]
-pub async fn tool_ocr_status() -> omniget_core::core::tools::ocr::OcrStatus {
-    omniget_core::core::tools::ocr::status().await
+pub async fn tool_ocr_status() -> libreget_core::core::tools::ocr::OcrStatus {
+    libreget_core::core::tools::ocr::status().await
 }
 
 #[tauri::command]
@@ -41,8 +41,8 @@ pub async fn tool_ocr_run(
     app: tauri::AppHandle,
     inputs: Vec<String>,
     langs: String,
-) -> Result<Vec<omniget_core::core::tools::ocr::OcrResult>, String> {
-    omniget_core::core::tools::ocr::run(&inputs, &langs, progress(&app))
+) -> Result<Vec<libreget_core::core::tools::ocr::OcrResult>, String> {
+    libreget_core::core::tools::ocr::run(&inputs, &langs, progress(&app))
         .await
         .map_err(err)
 }
@@ -148,7 +148,7 @@ pub async fn tool_onnx_runtime_install(
     variant: Option<String>,
 ) -> Result<String, String> {
     let p = progress(&app);
-    omniget_core::core::onnxrt::install_runtime(variant, &p)
+    libreget_core::core::onnxrt::install_runtime(variant, &p)
         .await
         .map(|path| path.to_string_lossy().to_string())
         .map_err(err)
@@ -159,7 +159,7 @@ pub async fn tool_onnx_runtime_install(
 #[tauri::command]
 pub async fn tool_onnx_runtime_install_local(path: String) -> Result<String, String> {
     tokio::task::spawn_blocking(move || {
-        omniget_core::core::onnxrt::install_from_path(std::path::Path::new(&path))
+        libreget_core::core::onnxrt::install_from_path(std::path::Path::new(&path))
     })
     .await
     .map_err(err)?
@@ -169,7 +169,7 @@ pub async fn tool_onnx_runtime_install_local(path: String) -> Result<String, Str
 
 #[tauri::command]
 pub async fn tool_onnx_runtime_remove() -> Result<(), String> {
-    tokio::task::spawn_blocking(omniget_core::core::onnxrt::remove_managed)
+    tokio::task::spawn_blocking(libreget_core::core::onnxrt::remove_managed)
         .await
         .map_err(err)?
         .map_err(err)

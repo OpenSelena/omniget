@@ -6,7 +6,7 @@
 //! entregar os rascunhos. Sem cookie, as duas ainda funcionam no que é
 //! público (arquivo de uma publicação, feed do perfil).
 
-use omniget_core::core::tools::blogs::{medium, substack};
+use libreget_core::core::tools::blogs::{medium, substack};
 
 use super::{err, progress};
 

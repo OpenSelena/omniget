@@ -1,7 +1,7 @@
 use tauri_plugin_autostart::ManagerExt;
 
 pub fn apply_autostart(app: &tauri::AppHandle, enabled: bool) -> Result<(), String> {
-    if std::env::var("OMNIGET_PORTABLE").is_ok() {
+    if std::env::var("LIBREGET_PORTABLE").is_ok() {
         return Ok(());
     }
     let manager = app.autolaunch();

@@ -2,7 +2,7 @@
 //! GraphQL do site com o Client-ID do player web, mais as APIs abertas de
 //! BTTV, FFZ e 7TV. Nenhum login, nenhum token de app.
 
-use omniget_core::core::tools::twitch::{chat, emotes};
+use libreget_core::core::tools::twitch::{chat, emotes};
 
 use super::{err, progress};
 

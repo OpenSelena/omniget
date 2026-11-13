@@ -1,4 +1,4 @@
-use omniget_core::models::progress::ProgressUpdate;
+use libreget_core::models::progress::ProgressUpdate;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 

@@ -1,7 +1,7 @@
 //! Comandos da categoria Música: playlist -> m3u8/pls, letra sincronizada
 //! e análise do histórico do Spotify.
 
-use omniget_core::core::tools::music::{history, lyrics, playlist};
+use libreget_core::core::tools::music::{history, lyrics, playlist};
 
 use super::{err, progress};
 

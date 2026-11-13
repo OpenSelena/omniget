@@ -60,13 +60,13 @@ pub async fn curseduca_login_token(
     *state.curseduca_courses_cache.lock().await = None;
 
     let clean_url = site_url.trim_end_matches('/').to_string();
-    let parsed_token = omniget_core::core::cookie_parser::parse_bearer_input(&token);
+    let parsed_token = libreget_core::core::cookie_parser::parse_bearer_input(&token);
 
     let session = CurseducaSession {
         token: parsed_token.clone(),
         api_key: api_key.clone(),
         site_url: clean_url,
-        client: omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+        client: libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
             .user_agent(
                 "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0",
             )

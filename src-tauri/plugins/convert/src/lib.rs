@@ -1,4 +1,4 @@
-use omniget_plugin_sdk::{OmnigetPlugin, PluginHost};
+use libreget_plugin_sdk::{LibregetPlugin, PluginHost};
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::mpsc;
@@ -18,11 +18,11 @@ impl ConvertPlugin {
     }
 }
 
-pub fn manifest() -> omniget_plugin_sdk::PluginManifest {
+pub fn manifest() -> libreget_plugin_sdk::PluginManifest {
     serde_json::from_str(include_str!("../plugin.json")).expect("valid convert manifest")
 }
 
-impl OmnigetPlugin for ConvertPlugin {
+impl LibregetPlugin for ConvertPlugin {
     fn id(&self) -> &str {
         "convert"
     }
@@ -53,14 +53,14 @@ impl OmnigetPlugin for ConvertPlugin {
                     let path: String =
                         serde_json::from_value(args.get("path").cloned().ok_or("missing 'path'")?)
                             .map_err(|e| e.to_string())?;
-                    let info = omniget_core::core::ffmpeg::probe(std::path::Path::new(&path))
+                    let info = libreget_core::core::ffmpeg::probe(std::path::Path::new(&path))
                         .await
                         .map_err(|e| e.to_string())?;
                     serde_json::to_value(info).map_err(|e| e.to_string())
                 }
 
                 "convert_file" => {
-                    let options: omniget_core::core::ffmpeg::ConversionOptions =
+                    let options: libreget_core::core::ffmpeg::ConversionOptions =
                         serde_json::from_value(
                             args.get("options").cloned().ok_or("missing 'options'")?,
                         )
@@ -82,7 +82,7 @@ impl OmnigetPlugin for ConvertPlugin {
 
                     tokio::spawn(async move {
                         let (tx, mut rx) =
-                            mpsc::channel::<omniget_core::models::progress::ProgressUpdate>(32);
+                            mpsc::channel::<libreget_core::models::progress::ProgressUpdate>(32);
 
                         let host_progress = host.clone();
                         let cid = conversion_id;
@@ -96,7 +96,7 @@ impl OmnigetPlugin for ConvertPlugin {
                         });
 
                         let result =
-                            omniget_core::core::ffmpeg::convert(&options, cancel_token, tx).await;
+                            libreget_core::core::ffmpeg::convert(&options, cancel_token, tx).await;
                         let _ = progress_forwarder.await;
                         active.lock().await.remove(&conversion_id);
 
@@ -149,7 +149,7 @@ impl OmnigetPlugin for ConvertPlugin {
                 }
 
                 "get_hwaccel_info" => {
-                    let info = omniget_core::core::hwaccel::detect_hwaccel().await;
+                    let info = libreget_core::core::hwaccel::detect_hwaccel().await;
                     serde_json::to_value(info).map_err(|e| e.to_string())
                 }
 

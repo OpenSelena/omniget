@@ -1,7 +1,7 @@
 //! Categoria LinkedIn: quatro leitores do export oficial de dados. Tudo roda
 //! em cima de arquivo local, sem nenhuma chamada de rede.
 
-use omniget_core::core::tools::linkedin::{checklist, connections, messages, overview};
+use libreget_core::core::tools::linkedin::{checklist, connections, messages, overview};
 
 use super::{err, progress};
 

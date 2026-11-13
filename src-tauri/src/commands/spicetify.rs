@@ -1,6 +1,6 @@
 //! Comandos da ferramenta "Spotify → Spicetify" da seção Tools.
 
-use omniget_core::core::spicetify::{self, CmdOutput, SpicetifyStatus};
+use libreget_core::core::spicetify::{self, CmdOutput, SpicetifyStatus};
 
 fn err(e: anyhow::Error) -> String {
     e.to_string()
