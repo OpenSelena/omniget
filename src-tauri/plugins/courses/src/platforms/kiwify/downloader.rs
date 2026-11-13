@@ -374,6 +374,7 @@ async fn download_with_ytdlp(
     let out_dir = out_path
         .parent()
         .ok_or_else(|| anyhow!("Invalid video output path"))?;
+    let template = video_filename_template(out_path)?;
     let (tx, _rx) = mpsc::channel(8);
 
     let result = omniget_core::core::ytdlp::download_video(
@@ -384,7 +385,7 @@ async fn download_with_ytdlp(
         tx,
         None,
         None,
-        None,
+        Some(&template),
         Some("https://admin.kiwify.com.br/"),
         cancel_token.clone(),
         None,
@@ -395,10 +396,17 @@ async fn download_with_ytdlp(
     )
     .await?;
 
-    if result.file_path != out_path {
-        tokio::fs::rename(&result.file_path, out_path).await?;
-    }
     Ok(result.file_size_bytes)
+}
+
+fn video_filename_template(output_path: &Path) -> anyhow::Result<String> {
+    let stem = output_path
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .ok_or_else(|| anyhow!("Invalid video filename"))?;
+    // Keep the extractor's actual container extension (e.g. WebM), and escape
+    // literal percent signs in lesson titles for yt-dlp's template language.
+    Ok(format!("{}.%(ext)s", stem.replace('%', "%%")))
 }
 
 async fn download_file_direct(
@@ -417,6 +425,13 @@ async fn download_file_direct(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn extractor_template_preserves_native_format_and_literal_percent_in_titles() {
+        let template = video_filename_template(Path::new("1. A 100% lesson.mp4")).unwrap();
+        assert_eq!(template, "1. A 100%% lesson.%(ext)s");
+        assert!(!template.ends_with(".mp4"));
+    }
 
     #[tokio::test]
     async fn failed_batch_cannot_leave_a_success_marker_and_success_can_resume() {

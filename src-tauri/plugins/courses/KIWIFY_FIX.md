@@ -31,7 +31,8 @@ course ID on modules and lessons.
   CDN requests. Do not include authenticated response bodies in API errors.
 - Recheck the catalog on subsequent runs, continue processing attachments when
   a video already exists, and report failed items instead of marking a failed
-  batch complete. Save the yt-dlp result at the deterministic lesson path.
+  batch complete. Use a deterministic yt-dlp filename while preserving its
+  actual container extension and literal percent signs in lesson titles.
 - Resolve authentication before registering an active download, avoiding a
   stale active-download entry when no session is available.
 
@@ -46,7 +47,7 @@ and a successful retry can write one.
 
 On the Windows validation machine:
 
-- Courses plugin: 39 tests passed, including 16 new regressions.
+- Courses plugin: 41 tests passed, including 18 new regressions.
 - Other workspace crates: 1,689 passed; 63 explicitly ignored by the existing
   test configuration.
 - Frontend: 142 passed. A local CRLF shebang in `scripts/lint-ui.mjs` caused

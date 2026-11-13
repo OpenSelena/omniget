@@ -108,6 +108,18 @@ fn normalized_graph_rejects_dangling_and_cross_course_references() {
 }
 
 #[test]
+fn duplicate_module_in_another_course_cannot_bypass_parent_validation() {
+    let mut payload = normalized_fixture();
+    payload["data"]["all_courses"]["second-course"] = json!({
+        "id": "second-course", "modules": ["module-15"]
+    });
+    assert!(parse_course_modules(&payload)
+        .unwrap_err()
+        .to_string()
+        .contains("mismatched course_id"));
+}
+
+#[test]
 fn normalized_graph_rejects_wrong_shapes_and_accepts_empty_catalog() {
     for field in ["all_courses", "all_modules", "all_lessons"] {
         let mut payload = normalized_fixture();

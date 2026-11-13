@@ -490,11 +490,11 @@ fn parse_normalized_modules(body: &serde_json::Value) -> anyhow::Result<Vec<Kiwi
     for (course_id, _) in course_entries {
         let course = record(courses, course_id, "course")?;
         for module_id in refs(course, "modules")? {
+            let module = record(module_map, module_id, "module")?;
+            check_parent(module, "course_id", course_id)?;
             if !seen_modules.insert(module_id) {
                 continue;
             }
-            let module = record(module_map, module_id, "module")?;
-            check_parent(module, "course_id", course_id)?;
             let mut lessons = Vec::new();
             let mut seen_lessons = HashSet::new();
             for lesson_id in refs(module, "lessons")? {
