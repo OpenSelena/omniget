@@ -1958,7 +1958,7 @@
               <span class="sidebar-tag" style="background: var(--primary); color: var(--text-inverse); font-weight: 600; padding: 3px 8px; border-radius: 6px;">v0.16.6 Latest Release</span>
               <span style="font-size: 13px; color: var(--text-subtle);">Released November 2026</span>
             </div>
-            <h3 style="font-size: 18px; font-weight: 700; color: var(--text); margin-top: 6px;">UI Craft &amp; Build Invariants: Classic Omnibox Card Geometry &amp; Clippy Zero-Regression Gate</h3>
+            <h3 style="font-size: 18px; font-weight: 700; color: var(--text); margin-top: 6px;">Home Stage &amp; Omnibox V1, 4K &amp; 2K Quality Engine &amp; Global Download Dock</h3>
           </div>
           <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.16.6" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>View Release on GitHub</span>
@@ -1970,11 +1970,26 @@
           <div>
             <h4 style="font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
               <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              What's New
+            </h4>
+            <ul style="margin-left: 20px; color: var(--text-muted); font-size: 14px; line-height: 1.6; display: grid; gap: 4px;">
+              <li><strong>4K (2160p) &amp; 2K (1440p) Quality Engine</strong>: Added dedicated 4K and 2K resolution presets in the Home Omnibox popover (<code>Quality and more</code>) and Settings (<code>Quality &amp; format</code>), with upper-bound fallback selection (<code>height &lt;= H</code>) across Rust extractors (<code>vimeo.rs</code>, <code>twitch.rs</code>, <code>ytdlp.rs</code>).</li>
+              <li><strong>V1 Home Stage &amp; Omnibox Geometry</strong>: Restored the Home input wrapper to a <code>16px</code> card radius with an integrated <code>8px</code> concentric <code>Paste</code> button pill, added circular <code>+</code> action popover (batch mode, local <code>.torrent</code>, file transfer, advanced), unified stage transitions, and 3-line media preview card with duration badges.</li>
+              <li><strong>Global Download Dock (<code>GlobalDownloadBar.svelte</code>)</strong>: Introduced a persistent floating bottom dock across all application routes featuring real-time byte counters, ETA, dynamic 60-point SVG throughput sparkline, and consolidated status/speed filter controls in <code>/downloads</code>.</li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 style="font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; display: flex; align-items: center; gap: 8px;">
+              <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
               Fixes
             </h4>
             <ul style="margin-left: 20px; color: var(--text-muted); font-size: 14px; line-height: 1.6; display: grid; gap: 4px;">
-              <li><strong>Omnibox Card Geometry Restoration</strong>: Reverted the Home Omnibox wrapper border radius from <code>9999px</code> back to <code>16px</code> (<code>var(--radius-xl)</code>) with <code>var(--space-3)</code> padding and an <code>8px</code> concentric paste pill, eliminating capsule bloat while preserving mathematical centerline alignment.</li>
-              <li><strong>Clippy Baseline Compliance</strong>: Replaced vector allocations with stack arrays in platform test suites to pass GitHub Actions automated build gates across Linux, macOS, and Windows without baseline drift.</li>
+              <li><strong>Audio-Mode Queue Routing</strong>: Fixed job ingestion in <code>queue.rs</code> so that selecting <code>video_quality = "audio"</code> explicitly promotes the job to <code>download_mode = Some("audio")</code>, skipping video extraction and downloading native audio streams directly.</li>
+              <li><strong>Svelte 5 Toolbar State Leak</strong>: Replaced <code>$state</code> with <code>$state.raw</code> and a monotonic <code>activeToken</code> in <code>toolbar-store.svelte.ts</code>, ensuring section-specific action buttons and tabs are cleanly destroyed upon navigating away.</li>
+              <li><strong>Home Search Retention</strong>: Preserved top-right <code>.mac-search-field</code> (<code>Search Ctrl+K</code>) on Home while scoping section titles (e.g. <code>"Nami"</code>) on secondary routes.</li>
+              <li><strong>Process &amp; Preview Stability</strong>: Configured <code>process_group(0)</code> with direct PID tree kill fallbacks for background extractors, restored Instagram photo thumbnails, and resolved infinite preview skeleton shimmer on Twitter/X.</li>
+              <li><strong>Clippy Baseline Compliance</strong>: Replaced vector allocations with fixed stack arrays in platform test suites to pass GitHub Actions automated build gates across Linux, macOS, and Windows without baseline drift.</li>
             </ul>
           </div>
         </div>
