@@ -1,6 +1,6 @@
 <!--
 Search keywords (kept here so GitHub search, Google and AI assistants can find the project):
-OmniGet is a free open source downloader and media toolbox for Windows, macOS and Linux.
+LibreGet is a free open source downloader and media toolbox for Windows, macOS and Linux.
 udemy downloader, hotmart downloader, kiwify downloader, course downloader, youtube downloader,
 yt-dlp gui, instagram downloader, instagram story downloader, reels downloader, twitter downloader,
 x video downloader, pinterest downloader, pinterest board backup, tiktok downloader, reddit downloader,
@@ -19,10 +19,10 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 -->
 
 <p align="center">
-  <img src="assets/readme/hero.png" alt="OmniGet：リンクを貼り付ければ、ファイルが手に入ります。ペンギンのマスコットが、動画、音楽、PDF、画像、講座、トレントのファイルをフォルダーに送り込みます。講座、動画、音声、画像、トレントを取得し、文字起こし、変換、管理まで行えます。" width="100%" />
+  <img src="assets/readme/hero.png" alt="LibreGet：リンクを貼り付ければ、ファイルが手に入ります。ペンギンのマスコットが、動画、音楽、PDF、画像、講座、トレントのファイルをフォルダーに送り込みます。講座、動画、音声、画像、トレントを取得し、文字起こし、変換、管理まで行えます。" width="100%" />
 </p>
 
-<h1 align="center">OmniGet</h1>
+<h1 align="center">LibreGet</h1>
 
 <p align="center">
   <a href="README.md">English</a>
@@ -37,17 +37,17 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 </p>
 
 <p align="center">
-  <a href="https://omniget.nav.bd/"><img src="https://img.shields.io/badge/Website-omniget.nav.bd-FF7D38?style=for-the-badge" alt="Community Website" /></a>
-  <a href="https://github.com/OpenSelena/omniget/releases/latest"><img src="https://img.shields.io/github/v/release/OpenSelena/omniget?style=for-the-badge&label=release&color=F28500" alt="Latest release" /></a>
-  <a href="https://github.com/OpenSelena/omniget/releases"><img src="https://img.shields.io/github/downloads/OpenSelena/omniget/total?style=for-the-badge&label=downloads&color=1E6FE8" alt="Total downloads" /></a>
-  <a href="https://github.com/OpenSelena/omniget/stargazers"><img src="https://img.shields.io/github/stars/OpenSelena/omniget?style=for-the-badge&color=FFD426" alt="GitHub stars" /></a>
+  <a href="https://libreget.nav.bd/"><img src="https://img.shields.io/badge/Website-libreget.nav.bd-FF7D38?style=for-the-badge" alt="Community Website" /></a>
+  <a href="https://github.com/OpenSelena/libreget/releases/latest"><img src="https://img.shields.io/github/v/release/OpenSelena/libreget?style=for-the-badge&label=release&color=F28500" alt="Latest release" /></a>
+  <a href="https://github.com/OpenSelena/libreget/releases"><img src="https://img.shields.io/github/downloads/OpenSelena/libreget/total?style=for-the-badge&label=downloads&color=1E6FE8" alt="Total downloads" /></a>
+  <a href="https://github.com/OpenSelena/libreget/stargazers"><img src="https://img.shields.io/github/stars/OpenSelena/libreget?style=for-the-badge&color=FFD426" alt="GitHub stars" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-2AA845?style=for-the-badge" alt="License GPL-3.0" /></a>
   <a href="https://t.me/OpenSelena"><img src="https://img.shields.io/badge/Telegram-channel-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram channel" /></a>
-  <a href="https://hosted.weblate.org/engage/omniget-openselena/"><img src="https://hosted.weblate.org/widget/omniget-openselena/frontend/svg-badge.svg" alt="Translation status" /></a>
+  <a href="https://hosted.weblate.org/engage/libreget-openselena/"><img src="https://hosted.weblate.org/widget/libreget-openselena/frontend/svg-badge.svg" alt="Translation status" /></a>
 </p>
 
 <p align="center">
-  <a href="#ダウンロードとインストール"><img src="https://img.shields.io/badge/Download_for_Windows,_macOS_or_Linux-→-F28500?style=for-the-badge" alt="OmniGet をダウンロード" height="40" /></a>
+  <a href="#ダウンロードとインストール"><img src="https://img.shields.io/badge/Download_for_Windows,_macOS_or_Linux-→-F28500?style=for-the-badge" alt="LibreGet をダウンロード" height="40" /></a>
   &nbsp;
   <a href="#ツールセクション-25-カテゴリの-158-ツール"><img src="https://img.shields.io/badge/See_the_158_tools-→-3D5BF0?style=for-the-badge" alt="ツールセクションを見る" height="40" /></a>
 </p>
@@ -58,28 +58,28 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 
 <p align="center">
   <img src="https://img.shields.io/badge/Disclaimer-FF7D38" alt="免責事項" height="20" /><br/>
-  <sub>本プロジェクトは独立したフォークであり、OmniGet または原作者 Tonho との提携・関係はありません。<br/>
+  <sub>本プロジェクトは独立したフォークであり、LibreGet または原作者 Tonho との提携・関係はありません。<br/>
   <a href="https://github.com/igect">igect</a> が GPL-3.0 のもとでメンテナンスしています · <a href="https://github.com/tonhowtf">Tonho</a> によるオリジナルのアーキテクチャに基づいています</sub>
 </p>
 
 <p align="center">
-  <img src="assets/readme/home.png" alt="OmniGet のホーム画面：URL、マグネットリンク、.torrent を貼り付けると、ファイルがフォルダーに保存されます" width="900" />
+  <img src="assets/readme/home.png" alt="LibreGet のホーム画面：URL、マグネットリンク、.torrent を貼り付けると、ファイルがフォルダーに保存されます" width="900" />
 </p>
 
 ---
 
 ## 目次
 
-- [OmniGet を選ぶ理由](#omniget-を選ぶ理由)
+- [LibreGet を選ぶ理由](#libreget-を選ぶ理由)
 - [ダウンロードとインストール](#ダウンロードとインストール)
 - [1 分で最初のダウンロード](#1-分で最初のダウンロード)
-- [OmniGet でダウンロードできるもの](#omniget-でダウンロードできるもの)
+- [LibreGet でダウンロードできるもの](#libreget-でダウンロードできるもの)
 - [ブラウザ拡張機能の導入手順](#ブラウザ拡張機能の導入手順)
 - [ツールセクション: 25 カテゴリの 158 ツール](#ツールセクション-25-カテゴリの-158-ツール)
-- [AI エージェント向けの OmniGet: MCP サーバーと Claude Code プラグイン](#ai-エージェント向けの-omniget-mcp-サーバーと-claude-code-プラグイン)
+- [AI エージェント向けの LibreGet: MCP サーバーと Claude Code プラグイン](#ai-エージェント向けの-libreget-mcp-サーバーと-claude-code-プラグイン)
 - [プラグイン: Courses、Telegram、Convert](#プラグイン-coursestelegramconvert)
 - [その他の機能](#その他の機能)
-- [プライバシーと OmniGet がしないこと](#プライバシーと-omniget-がしないこと)
+- [プライバシーと LibreGet がしないこと](#プライバシーと-libreget-がしないこと)
 - [コード署名ポリシー](#コード署名ポリシー)
 - [よくある質問](#よくある質問)
 - [コマンドライン](#コマンドライン)
@@ -88,19 +88,19 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 
 ---
 
-## OmniGet を選ぶ理由
+## LibreGet を選ぶ理由
 
 講座を購入したら、プラットフォームから削除される前に自分のディスクに保存しておきたいものです。yt-dlp のフラグはどうしても覚えられず、チートシートを手放せません。Instagram のストーリーズ用のサイト、X の動画用の別のサイト、Pinterest 用の Chrome 拡張機能、字幕用の Python スクリプトと使い分けていて、どれもログイン状態を覚えてくれません。
 
-OmniGet は、それらすべてをひとつのテキストボックスにまとめます。リンクを貼り付けて、画質の選択肢付きのプレビューを確認し、ダウンロードをクリックするだけです。同じウィンドウで、講座の再生、PDF の閲覧、音声の文字起こし、Pinterest ボードのバックアップまで行えます。yt-dlp と FFmpeg は自動でインストールされ、常に最新の状態に保たれるので、設定することも、ターミナルを開くこともありません。
+LibreGet は、それらすべてをひとつのテキストボックスにまとめます。リンクを貼り付けて、画質の選択肢付きのプレビューを確認し、ダウンロードをクリックするだけです。同じウィンドウで、講座の再生、PDF の閲覧、音声の文字起こし、Pinterest ボードのバックアップまで行えます。yt-dlp と FFmpeg は自動でインストールされ、常に最新の状態に保たれるので、設定することも、ターミナルを開くこともありません。
 
 <p align="center">
-  <img src="assets/readme/workflow.png" alt="OmniGet の 3 ステップの仕組み：リンクを貼り付けると、OmniGet がサイトを判別してネイティブのエクストラクターか yt-dlp を選び、ファイルがフォルダーに保存されて内蔵プレイヤーで開きます。" width="100%" />
+  <img src="assets/readme/workflow.png" alt="LibreGet の 3 ステップの仕組み：リンクを貼り付けると、LibreGet がサイトを判別してネイティブのエクストラクターか yt-dlp を選び、ファイルがフォルダーに保存されて内蔵プレイヤーで開きます。" width="100%" />
 </p>
 
 ### 他のツールとの比較
 
-| | OmniGet | yt-dlp 単体 | 単一サイト向けの Web ダウンローダー | 有料の講座ダウンローダー |
+| | LibreGet | yt-dlp 単体 | 単一サイト向けの Web ダウンローダー | 有料の講座ダウンローダー |
 |---|---|---|---|---|
 | 対応サイト | 講座、Instagram、X、Pinterest、Bilibili、Telegram、トレントにネイティブ対応し、さらに yt-dlp 経由で 1,800 以上 | 1,800 以上 | 1 つ | 1〜2 つのプラットフォーム |
 | セットアップ | ファイルを 1 つダウンロードして開くだけ | Python、PATH、FFmpeg、フラグ | 不要 | インストーラー、ライセンスキー |
@@ -109,13 +109,13 @@ OmniGet は、それらすべてをひとつのテキストボックスにまと
 | ダウンロード後 | プレイヤー、リーダー、フラッシュカード、ノート、158 のツール | ファイル | ファイル（再エンコードされることが多い） | ファイル |
 | 価格とライセンス | 無料、GPL-3.0 | 無料、Unlicense | 無料（広告あり） | サブスクリプション |
 
-yt-dlp は OmniGet を動かしているエンジンであり、yt-dlp がなければ OmniGet は存在しませんでした。普段からターミナルを使っていて、ファイルだけが欲しいのであれば、yt-dlp 単体が適したツールです。
+yt-dlp は LibreGet を動かしているエンジンであり、yt-dlp がなければ LibreGet は存在しませんでした。普段からターミナルを使っていて、ファイルだけが欲しいのであれば、yt-dlp 単体が適したツールです。
 
 ---
 
 ## ダウンロードとインストール
 
-お使いのシステムを選んでください。すべてのビルドは [Releases ページ](https://github.com/OpenSelena/omniget/releases/latest) で公開されています。アップデートはアプリ内で届きます。
+お使いのシステムを選んでください。すべてのビルドは [Releases ページ](https://github.com/OpenSelena/libreget/releases/latest) で公開されています。アップデートはアプリ内で届きます。
 
 <table>
   <tr>
@@ -125,13 +125,13 @@ yt-dlp は OmniGet を動かしているエンジンであり、yt-dlp がなけ
   </tr>
   <tr>
     <td><b>Windows 10 / 11</b></td>
-    <td><code>omniget_x.y.z_x64-setup.exe</code>（インストーラー）<br/><code>omniget_x.y.z_x64-portable.exe</code>（インストール不要、どこからでも実行可能）<br/><code>omniget_x.y.z_x64_en-US.msi</code>（IT 部門での展開用）</td>
-    <td><code>winget install -e --id OpenSelena.OmniGet</code></td>
+    <td><code>libreget_x.y.z_x64-setup.exe</code>（インストーラー）<br/><code>libreget_x.y.z_x64-portable.exe</code>（インストール不要、どこからでも実行可能）<br/><code>libreget_x.y.z_x64_en-US.msi</code>（IT 部門での展開用）</td>
+    <td><code>winget install -e --id OpenSelena.LibreGet</code></td>
   </tr>
   <tr>
     <td><b>macOS 10.15+</b></td>
-    <td>Apple Silicon（M1 以降）向けの <code>omniget_x.y.z_aarch64.dmg</code><br/>Intel Mac 向けの <code>omniget_x.y.z_x64.dmg</code></td>
-    <td><code>brew install --cask OpenSelena/tap/omniget</code></td>
+    <td>Apple Silicon（M1 以降）向けの <code>libreget_x.y.z_aarch64.dmg</code><br/>Intel Mac 向けの <code>libreget_x.y.z_x64.dmg</code></td>
+    <td><code>brew install --cask OpenSelena/tap/libreget</code></td>
   </tr>
   <tr>
     <td><b>Linux</b></td>
@@ -142,24 +142,24 @@ yt-dlp は OmniGet を動かしているエンジンであり、yt-dlp がなけ
 
 ### 初回起動時の警告と、その解除方法
 
-OmniGet は有料の証明書で署名されていないため、どのシステムでも初回起動時に警告が表示されます。これはオープンソースのデスクトップアプリではよくあることで、対処は一度だけで済みます。
+LibreGet は有料の証明書で署名されていないため、どのシステムでも初回起動時に警告が表示されます。これはオープンソースのデスクトップアプリではよくあることで、対処は一度だけで済みます。
 
 **Windows.** SmartScreen の青いボックスが表示されます。**詳細情報** をクリックし、**実行** をクリックしてください。
 
-**macOS.** Gatekeeper がアプリを開くのを拒否し、「壊れている」と表示されることがあります。OmniGet をアプリケーションフォルダーにドラッグしたあと、ターミナルを開き（Spotlight で「ターミナル」と入力）、次の 2 行を貼り付けてください：
+**macOS.** Gatekeeper がアプリを開くのを拒否し、「壊れている」と表示されることがあります。LibreGet をアプリケーションフォルダーにドラッグしたあと、ターミナルを開き（Spotlight で「ターミナル」と入力）、次の 2 行を貼り付けてください：
 
 ```bash
-xattr -cr /Applications/omniget.app
-codesign --force --deep --sign - /Applications/omniget.app
+xattr -cr /Applications/libreget.app
+codesign --force --deep --sign - /Applications/libreget.app
 ```
 
-その後、いつもどおり Launchpad から OmniGet を開いてください。
+その後、いつもどおり Launchpad から LibreGet を開いてください。
 
-**Linux（Debian 12 以降または Ubuntu 24.04 以降での AppImage）.** これらのリリースには、AppImage に必要な FUSE 2 が含まれていません。libfuse のエラーでファイルが起動しない場合は、`sudo apt install libfuse2` を実行するか、`./omniget.AppImage --appimage-extract-and-run` で起動してください。`.deb` ならこの問題は起きません。
+**Linux（Debian 12 以降または Ubuntu 24.04 以降での AppImage）.** これらのリリースには、AppImage に必要な FUSE 2 が含まれていません。libfuse のエラーでファイルが起動しない場合は、`sudo apt install libfuse2` を実行するか、`./libreget.AppImage --appimage-extract-and-run` で起動してください。`.deb` ならこの問題は起きません。
 
 ### Linux のメディアプラグイン
 
-OmniGet は WebKitGTK でウィンドウを描画しており、WebKitGTK はすべての `<video>` と `<audio>` を GStreamer で再生します。GStreamer のプラグインが不足していると、WebKitGTK はメディアの再生を静かに失敗させるのではなく、プレイヤーが表示された瞬間に自身の Web プロセスを中断してしまい、空のウィンドウだけが残ります。ほとんどのデスクトップディストリビューションには、すでにこれらのプラグインが入っています。Arch や最小構成のサーバーイメージではオプション扱いなので、一度インストールしておいてください：
+LibreGet は WebKitGTK でウィンドウを描画しており、WebKitGTK はすべての `<video>` と `<audio>` を GStreamer で再生します。GStreamer のプラグインが不足していると、WebKitGTK はメディアの再生を静かに失敗させるのではなく、プレイヤーが表示された瞬間に自身の Web プロセスを中断してしまい、空のウィンドウだけが残ります。ほとんどのデスクトップディストリビューションには、すでにこれらのプラグインが入っています。Arch や最小構成のサーバーイメージではオプション扱いなので、一度インストールしておいてください：
 
 ```bash
 sudo apt install gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-libav   # Debian, Ubuntu
@@ -177,25 +177,25 @@ Windows の `.exe` と同じ場所に `portable.txt`（または `.portable`）�
 
 ## 1 分で最初のダウンロード
 
-1. OmniGet を開きます。セットアップ画面で言語とテーマを選ぶと、ワンクリックで yt-dlp と FFmpeg がインストールされます。yt-dlp は実行前に SHA-256 で検証されます。
+1. LibreGet を開きます。セットアップ画面で言語とテーマを選ぶと、ワンクリックで yt-dlp と FFmpeg がインストールされます。yt-dlp は実行前に SHA-256 で検証されます。
 2. 任意のリンクをコピーします：YouTube の動画、Instagram のリール、X の投稿、Pinterest のボード、マグネットリンク、ファイルへの直接の URL など。
-3. ホーム画面のボックスに貼り付けます。OmniGet がサイトを判別し、タイトル、サムネイル、選択可能な画質を表示します。1 つ選んで Enter キーを押してください。
+3. ホーム画面のボックスに貼り付けます。LibreGet がサイトを判別し、タイトル、サムネイル、選択可能な画質を表示します。1 つ選んで Enter キーを押してください。
 
 ダウンロードページには、ダウンローダーから直接読み取った速度、フェーズ、残り時間が表示されるので、止まったダウンロードは「残り 3 秒」で固まって見えるのではなく、止まっているとわかるように表示されます。中断されたダウンロードは、止まったところから再開されます。レート制限のあるサイトではバックオフ付きでリトライし、サイトごとの接続数も自動で調整されるため、YouTube では最大 16 の並列フラグメントを使い、429 を返すサイトでは接続数を減らします。Python 3.10 以降がある場合、yt-dlp はその Python 上で zipapp として動作し、起動のたびに同梱のバイナリを展開する代わりに 1 秒未満で起動します。
 
 <p align="center">
-  <img src="assets/readme/downloads.png" alt="OmniGet のダウンロードページ：進行中の 4K YouTube ダウンロードのフェーズ、速度、残り時間、実行中の yt-dlp コマンドと、キューに入った項目や完了した項目" width="900" />
+  <img src="assets/readme/downloads.png" alt="LibreGet のダウンロードページ：進行中の 4K YouTube ダウンロードのフェーズ、速度、残り時間、実行中の yt-dlp コマンドと、キューに入った項目や完了した項目" width="900" />
 </p>
 
 ### ウィンドウを開かずに済ませる
 
-システム上のどこかでリンクをコピーし、**Ctrl+Shift+D**（macOS では **Cmd+Shift+D**）を押してください。OmniGet がクリップボードを読み取り、バックグラウンドでダウンロードを開始します。2 つ目のホットキー **Ctrl+Shift+M** は音声のみを取得するので、何も開かずに YouTube のリンクを MP3 にできます。この機能は有効にするまでオフになっており、どちらのショートカットも **Settings → Downloads → Clipboard & hotkeys** で割り当てを変更できます。
+システム上のどこかでリンクをコピーし、**Ctrl+Shift+D**（macOS では **Cmd+Shift+D**）を押してください。LibreGet がクリップボードを読み取り、バックグラウンドでダウンロードを開始します。2 つ目のホットキー **Ctrl+Shift+M** は音声のみを取得するので、何も開かずに YouTube のリンクを MP3 にできます。この機能は有効にするまでオフになっており、どちらのショートカットも **Settings → Downloads → Clipboard & hotkeys** で割り当てを変更できます。
 
 ---
 
-## OmniGet でダウンロードできるもの
+## LibreGet でダウンロードできるもの
 
-OmniGet は、よく使われるプラットフォーム向けのネイティブのエクストラクターを備えており、それ以外はすべて、約 1,800 のサイトに対応する [yt-dlp](https://github.com/yt-dlp/yt-dlp) に任せます。
+LibreGet は、よく使われるプラットフォーム向けのネイティブのエクストラクターを備えており、それ以外はすべて、約 1,800 のサイトに対応する [yt-dlp](https://github.com/yt-dlp/yt-dlp) に任せます。
 
 | カテゴリ | サイトと形式 |
 |---|---|
@@ -204,81 +204,81 @@ OmniGet は、よく使われるプラットフォーム向けのネイティブ
 | <img src="https://cdn.simpleicons.org/bilibili/00A1D6" width="18" height="18" align="center" alt="Bilibili" /> Bilibili（ログイン時） | ご利用のサブスクリプションに応じて 4K、HDR、Dolby Vision、Hi-Res ロスレス、Dolby Atmos に対応。弾幕コメントを XML、ASS、JSON で保存、Kodi や Jellyfin 向けの NFO ファイル、カスタムの命名テンプレート、番組、講座、お気に入り、後で見る、履歴を含む 11 種類の URL に対応 |
 | <img src="https://api.iconify.design/ph:images.svg?color=%23E0A800" width="18" height="18" align="center" alt="画像ギャラリー" /> 画像ギャラリー | gallery-dl を通じて 250 以上のサイト（DeviantArt、Pixiv、ArtStation、Flickr、Tumblr、Imgur、Kemono など）からギャラリーやプロフィールを丸ごと取得 |
 | <img src="https://api.iconify.design/ph:stack.svg?color=%23FFB340" width="18" height="18" align="center" alt="一括" /> 一括 | 多数のリンクを貼り付けるか `.txt` を読み込み、サブレディット全体、Reddit や X のプロフィール、Instagram や Pinterest のプロフィール、Facebook のアルバムをダウンロード |
-| <img src="https://api.iconify.design/ph:folder-simple.svg?color=%23A66A24" width="18" height="18" align="center" alt="ファイルと転送" /> ファイルと転送 | 内蔵の BitTorrent クライアントによる `.torrent` ファイルとマグネットリンク、HTTP による直接のファイル、HLS と DASH のマニフェスト、短い単語コードを使った 2 つの OmniGet 間での個人間転送 |
+| <img src="https://api.iconify.design/ph:folder-simple.svg?color=%23A66A24" width="18" height="18" align="center" alt="ファイルと転送" /> ファイルと転送 | 内蔵の BitTorrent クライアントによる `.torrent` ファイルとマグネットリンク、HTTP による直接のファイル、HLS と DASH のマニフェスト、短い単語コードを使った 2 つの LibreGet 間での個人間転送 |
 | <img src="https://cdn.simpleicons.org/telegram/2CA5E0" width="18" height="18" align="center" alt="Telegram" /> Telegram | 組み込みの Telegram プラグインを通じて、参加しているチャンネルやグループの写真、動画、ファイル、音声を、チャンネルごとに整理されたフォルダー（`OmniGram/<channel>/`）に保存 |
 
 一度設定すれば忘れてよいオプション：デフォルトの画質、音声のみの形式（MP3、M4A、Opus、FLAC、WAV）、字幕の言語と形式（SRT、VTT、ASS、埋め込みまたは別ファイル）、サムネイルとメタデータの埋め込み、ファイル名のテンプレート、プラットフォームごとの整理、既存ファイルのスキップ、チャプターごとの分割、速度制限、同時ダウンロード数、プロキシ。ルールを使えば、特定のチャンネルやホストを、毎回確認することなく、指定したフォルダーと画質に振り分けられます。フォロー中のチャンネルはバックグラウンドでチェックされ、新しいアップロードをトレイ通知付きで自動的にダウンロードすることもできます。
 
 <p align="center">
-  <img src="assets/readme/settings.png" alt="OmniGet の設定：Appearance、Downloads、Network、Cookies、Channels、AI、Plugins、Advanced にグループ分けされたサイドバーと、Output、Quality、Subtitles、Clipboard and hotkeys、Per-platform options を含むダウンロードセクション" width="900" />
+  <img src="assets/readme/settings.png" alt="LibreGet の設定：Appearance、Downloads、Network、Cookies、Channels、AI、Plugins、Advanced にグループ分けされたサイドバーと、Output、Quality、Subtitles、Clipboard and hotkeys、Per-platform options を含むダウンロードセクション" width="900" />
 </p>
 
 ---
 
 ## ブラウザ拡張機能の導入手順
 
-拡張機能には 2 つの役割があります。認識できるサイト（YouTube、Instagram、TikTok、X、Reddit、Twitch、Pinterest、Bluesky、Telegram、Vimeo、Udemy、Hotmart、Rocketseat、Bilibili、SoundCloud）では、ワンクリックまたは **Alt+O** でページを OmniGet に送ります。それ以外のサイトでは、ネットワーク通信を監視して MP4、HLS、DASH、WebM、音声のストリームを見つけ、ポップアップに一覧表示します。どちらの場合も Cookie とリファラーを転送するので、Instagram のストーリーズ、有料の講座、メンバー限定の動画など、ログインしている非公開のコンテンツも OmniGet でダウンロードできます。Cookie は実際のサイトごとにまとめられるため、ブラジルの `.com.br` ドメインは、ほかのすべての `.com.br` サイトと 1 つのエントリーを共有するのではなく、独自のエントリーを持ちます。ポップアップには YouTube 用の **Force H.264** スイッチもあり、VP9 や AV1 でカクつくコンピューターに便利です。
+拡張機能には 2 つの役割があります。認識できるサイト（YouTube、Instagram、TikTok、X、Reddit、Twitch、Pinterest、Bluesky、Telegram、Vimeo、Udemy、Hotmart、Rocketseat、Bilibili、SoundCloud）では、ワンクリックまたは **Alt+O** でページを LibreGet に送ります。それ以外のサイトでは、ネットワーク通信を監視して MP4、HLS、DASH、WebM、音声のストリームを見つけ、ポップアップに一覧表示します。どちらの場合も Cookie とリファラーを転送するので、Instagram のストーリーズ、有料の講座、メンバー限定の動画など、ログインしている非公開のコンテンツも LibreGet でダウンロードできます。Cookie は実際のサイトごとにまとめられるため、ブラジルの `.com.br` ドメインは、ほかのすべての `.com.br` サイトと 1 つのエントリーを共有するのではなく、独自のエントリーを持ちます。ポップアップには YouTube 用の **Force H.264** スイッチもあり、VP9 や AV1 でカクつくコンピューターに便利です。
 
 スニッファーが検出できないサイトのために、**Deep search** があります。これはポップアップにあるスイッチで、ページ自体の動画プレイヤーにフックし、ネットワークリクエストとして現れないプレイリストも捕捉します。初回にすべてのサイトへのアクセス許可を求め、それまではオフのままです。さらにスニッファーは、ダウンロード前に HLS ストリームのサイズを見積もり、サイトが別々に配信する動画トラックと音声トラックを組み合わせて 1 つのファイルにし、見つけたものの先頭のバイトをチェックして HTML のエラーページが動画として保存されないようにし、オプションページで取得ルールを編集できるようにします。同じオプションページでは、Chrome が Manifest V2 拡張機能のサポートを終了する前に、インストール済みの拡張機能の一覧をバックアップすることもできます。これにはオプションの「management」権限が必要で、使うときにだけ許可を求めます。
 
 慣れ具合に合わせて、レベルを選んでください。
 
 <p align="center">
-  <img src="assets/readme/extension.png" alt="ペンギンのマスコットがブラウザウィンドウから OmniGet のアプリウィンドウにケーブルを差し込み、そのケーブルに沿って Cookie が運ばれ、上には南京錠と家があります：ペアリングはあなたのマシンの中だけで完結します。" width="100%" />
+  <img src="assets/readme/extension.png" alt="ペンギンのマスコットがブラウザウィンドウから LibreGet のアプリウィンドウにケーブルを差し込み、そのケーブルに沿って Cookie が運ばれ、上には南京錠と家があります：ペアリングはあなたのマシンの中だけで完結します。" width="100%" />
 </p>
 
 ### レベル 1: アプリ内から（ダウンロードも zip ファイルも不要）
 
-1. まだであれば OmniGet をインストールし、一度起動します。
-2. **Settings → Plugins → Browser extension** に移動します。Chrome の横にある **Update / Install** をクリックします。OmniGet に同梱されている拡張機能がフォルダーにコピーされ、そのフォルダーが開きます。
+1. まだであれば LibreGet をインストールし、一度起動します。
+2. **Settings → Plugins → Browser extension** に移動します。Chrome の横にある **Update / Install** をクリックします。LibreGet に同梱されている拡張機能がフォルダーにコピーされ、そのフォルダーが開きます。
 3. Chrome を開き（Edge、Brave などの Chromium 系ブラウザでも同じ手順です）、アドレスバーに `chrome://extensions` と入力します。
 4. 右上のスイッチで **デベロッパー モード** をオンにします。
-5. **パッケージ化されていない拡張機能を読み込む** をクリックし、OmniGet が開いたフォルダーを選択します。
-6. ツールバーに OmniGet のアイコンが表示されます。オプションページが自動で開き、アプリを探していると表示されます。
-7. OmniGet に戻り、**Settings → Plugins → Browser extension** のまま **Pair extension** をクリックします。数秒以内にアプリに「Extension connected」と表示され、オプションページが緑色になります。これで完了です。
+5. **パッケージ化されていない拡張機能を読み込む** をクリックし、LibreGet が開いたフォルダーを選択します。
+6. ツールバーに LibreGet のアイコンが表示されます。オプションページが自動で開き、アプリを探していると表示されます。
+7. LibreGet に戻り、**Settings → Plugins → Browser extension** のまま **Pair extension** をクリックします。数秒以内にアプリに「Extension connected」と表示され、オプションページが緑色になります。これで完了です。
 
-以降は、対応しているページを開いてアイコンをクリックするだけです。ページ、その Cookie、タイトルが OmniGet に送られ、ダウンロードが始まります。Cookie は **Settings → Cookies** にも表示され、Courses プラグインや Instagram、X、Pinterest のツールで再利用されます。
+以降は、対応しているページを開いてアイコンをクリックするだけです。ページ、その Cookie、タイトルが LibreGet に送られ、ダウンロードが始まります。Cookie は **Settings → Cookies** にも表示され、Courses プラグインや Instagram、X、Pinterest のツールで再利用されます。
 
 ### レベル 2: リリースの zip から
 
-すべてのリリースには `omniget-chrome-extension-vX.Y.Z.zip` が含まれています。[最新のリリース](https://github.com/OpenSelena/omniget/releases/latest) からダウンロードして展開し、上記の手順 3〜7 に従って、**パッケージ化されていない拡張機能を読み込む** で展開したフォルダーを指定してください。アプリとブラウザを別々のマシンで使っている場合や、ほかの人のためにインストールする場合はこの方法を使ってください。
+すべてのリリースには `libreget-chrome-extension-vX.Y.Z.zip` が含まれています。[最新のリリース](https://github.com/OpenSelena/libreget/releases/latest) からダウンロードして展開し、上記の手順 3〜7 に従って、**パッケージ化されていない拡張機能を読み込む** で展開したフォルダーを指定してください。アプリとブラウザを別々のマシンで使っている場合や、ほかの人のためにインストールする場合はこの方法を使ってください。
 
 ### レベル 3: Firefox、その他のブラウザ、手動ペアリング
 
 Firefox：Firefox の横にある **Settings → Plugins → Browser extension → Update / Install** をクリックし、`about:debugging#/runtime/this-firefox` を開いて **一時的なアドオンを読み込む** をクリックし、エクスポートされたフォルダー内の `manifest.json` を選択します。Firefox は再起動時に一時的なアドオンを削除するので、拡張機能が AMO で公開されるまでは、この手順を繰り返してください。Safari の拡張機能は App Store を通じて配布する必要があるため、Safari にはまだ対応していません。
 
-手動ペアリング：**Pair extension** がタイムアウトした場合は、拡張機能のオプションページを開き（アイコンを右クリック → オプション）、OmniGet で **Pairing token** を表示してコピーし、オプションページに貼り付けてください。エンドポイントの URL は自動で検出されます。アプリは `127.0.0.1` のポート 47720〜47729 で待ち受けており、トークンはインストールごとに生成されるので、何もあなたのマシンの外には出ません。
+手動ペアリング：**Pair extension** がタイムアウトした場合は、拡張機能のオプションページを開き（アイコンを右クリック → オプション）、LibreGet で **Pairing token** を表示してコピーし、オプションページに貼り付けてください。エンドポイントの URL は自動で検出されます。アプリは `127.0.0.1` のポート 47720〜47729 で待ち受けており、トークンはインストールごとに生成されるので、何もあなたのマシンの外には出ません。
 
-拡張機能がインストールされていても OmniGet が閉じている場合、クリックは `omniget://` リンクスキームにフォールバックします。この場合も URL はキューに追加されますが、Cookie は渡せません。Chrome に初めて確認されたときに「常に許可」にチェックを入れてください。
+拡張機能がインストールされていても LibreGet が閉じている場合、クリックは `libreget://` リンクスキームにフォールバックします。この場合も URL はキューに追加されますが、Cookie は渡せません。Chrome に初めて確認されたときに「常に許可」にチェックを入れてください。
 
 ---
 
 ## ツールセクション: 25 カテゴリの 158 ツール
 
-ツールは、OmniGet がダウンロードの枠を超えて成長した部分です。各タイルは 1 つの仕事を担う独立した Rust コマンドで、JSON を受け取って JSON を返します。これにより、内蔵の MCP サーバーを通じて AI エージェントがツールを操作することもできます。ハブには、英語とポルトガル語を理解する検索ボックス（「legenda」で字幕ツールが見つかります）とプラットフォームフィルターがあり、Windows でしか動かないツールはタイルにその旨が表示され、ほかの OS では非表示になります。以下のツールはすべてあなたのマシン上で動作します。ネットワークにアクセスするのは、名前のとおりのサイトからデータを取得するツールだけです。
+ツールは、LibreGet がダウンロードの枠を超えて成長した部分です。各タイルは 1 つの仕事を担う独立した Rust コマンドで、JSON を受け取って JSON を返します。これにより、内蔵の MCP サーバーを通じて AI エージェントがツールを操作することもできます。ハブには、英語とポルトガル語を理解する検索ボックス（「legenda」で字幕ツールが見つかります）とプラットフォームフィルターがあり、Windows でしか動かないツールはタイルにその旨が表示され、ほかの OS では非表示になります。以下のツールはすべてあなたのマシン上で動作します。ネットワークにアクセスするのは、名前のとおりのサイトからデータを取得するツールだけです。
 
 <p align="center">
   <img src="assets/readme/illustration-tools.png" alt="ペンギンのマスコットが、マイク、字幕、ハサミ、PDF、写真、歯車、フォルダー、マグネット、スマートフォン、AI、音楽、地球儀、キーボード、チャット、レンチのツールタイルでいっぱいの道具箱を開けているところ" width="900" />
 </p>
 
 <p align="center">
-  <img src="assets/readme/tools.png" alt="25 のカテゴリを持つ OmniGet のツールハブ：YouTube、音声と字幕、動画編集、オーディオ、Instagram、X、Facebook、Reddit、Pinterest、Twitch、Bilibili、Spotify、音楽、LinkedIn、ゲーム、PDF、ドキュメント、画像、システム、ファイル、ダウンロード、自動化、スマートフォン、AI、CTF と解析" width="900" />
+  <img src="assets/readme/tools.png" alt="25 のカテゴリを持つ LibreGet のツールハブ：YouTube、音声と字幕、動画編集、オーディオ、Instagram、X、Facebook、Reddit、Pinterest、Twitch、Bilibili、Spotify、音楽、LinkedIn、ゲーム、PDF、ドキュメント、画像、システム、ファイル、ダウンロード、自動化、スマートフォン、AI、CTF と解析" width="900" />
 </p>
 
 ステータスの凡例：印がないものは利用可能、**beta** は動作するもののすべてのアカウント種別ではテストされていないもの、**planned** は今後の方向性がわかるようにタイルだけが存在し、まだ何もしないものを表します。
 
 <table>
   <tr>
-    <td><img src="assets/readme/tools-instagram.png" alt="OmniGet の Instagram ツール：投稿のダウンロード、一括ダウンロード、リールの音声、ストーリーズ、ハイライト、ストーリーの閲覧者、プロフィールビューアー、HD アバター、プロフィールのダウンロード、フォロー解除、ファン、相互フォロー、フォローを外した人、幽霊フォロワー、ホワイトリスト、データエクスポート、分析、プロフィールの比較、ハッシュタグエクスプローラー、コメント、いいねした人、プレゼント抽選、投稿と予約投稿" /></td>
-    <td><img src="assets/readme/tools-x.png" alt="OmniGet の X / Twitter ツール：投稿のダウンロード、スレッドの展開、投稿の画像化、プロフィール X 線、プロフィールのメディア、高度な検索、ブックマークのエクスポート、フォローを返さない人、X のアーカイブ、Grok" /></td>
+    <td><img src="assets/readme/tools-instagram.png" alt="LibreGet の Instagram ツール：投稿のダウンロード、一括ダウンロード、リールの音声、ストーリーズ、ハイライト、ストーリーの閲覧者、プロフィールビューアー、HD アバター、プロフィールのダウンロード、フォロー解除、ファン、相互フォロー、フォローを外した人、幽霊フォロワー、ホワイトリスト、データエクスポート、分析、プロフィールの比較、ハッシュタグエクスプローラー、コメント、いいねした人、プレゼント抽選、投稿と予約投稿" /></td>
+    <td><img src="assets/readme/tools-x.png" alt="LibreGet の X / Twitter ツール：投稿のダウンロード、スレッドの展開、投稿の画像化、プロフィール X 線、プロフィールのメディア、高度な検索、ブックマークのエクスポート、フォローを返さない人、X のアーカイブ、Grok" /></td>
   </tr>
   <tr>
-    <td><img src="assets/readme/tools-pinterest.png" alt="OmniGet の Pinterest ツール：ピンのダウンロード、ボードのバックアップ、プロフィールのバックアップ、AI や広告なしの検索、似ているピン、出典の検索、重複、カラーパレット、オフラインギャラリー、キーワードのアイデア" /></td>
-    <td><img src="assets/readme/tools-pdf.png" alt="OmniGet の PDF ツール：結合、分割、圧縮、変換、OCR、修復、パスワードと権限、透かしと番号付け、余白のトリミング、目次、墨消しのチェック、安全な PDF、PDF から Markdown への変換" /></td>
+    <td><img src="assets/readme/tools-pinterest.png" alt="LibreGet の Pinterest ツール：ピンのダウンロード、ボードのバックアップ、プロフィールのバックアップ、AI や広告なしの検索、似ているピン、出典の検索、重複、カラーパレット、オフラインギャラリー、キーワードのアイデア" /></td>
+    <td><img src="assets/readme/tools-pdf.png" alt="LibreGet の PDF ツール：結合、分割、圧縮、変換、OCR、修復、パスワードと権限、透かしと番号付け、余白のトリミング、目次、墨消しのチェック、安全な PDF、PDF から Markdown への変換" /></td>
   </tr>
   <tr>
-    <td><img src="assets/readme/tools-linkedin.png" alt="OmniGet の LinkedIn ツール：データの概要、つながり、メッセージ、プロフィールスコア。すべて公式のデータエクスポートから読み取ります" /></td>
-    <td><img src="assets/readme/tools-ctf.png" alt="OmniGet の CTF と解析のツール：ハッシュと HMAC、ファイルの正体の判別、古典暗号、XOR、エンコーディング、頻度分析" /></td>
+    <td><img src="assets/readme/tools-linkedin.png" alt="LibreGet の LinkedIn ツール：データの概要、つながり、メッセージ、プロフィールスコア。すべて公式のデータエクスポートから読み取ります" /></td>
+    <td><img src="assets/readme/tools-ctf.png" alt="LibreGet の CTF と解析のツール：ハッシュと HMAC、ファイルの正体の判別、古典暗号、XOR、エンコーディング、頻度分析" /></td>
   </tr>
 </table>
 
@@ -353,7 +353,7 @@ Firefox：Firefox の横にある **Settings → Plugins → Browser extension �
 - **いいねした人。** 投稿にいいねしたアカウントを一覧表示してエクスポートします。
 - **プレゼント抽選。** メンション、キーワード、1 人 1 回などのルールを設定して、コメントの中から当選者を抽選します。
 - **投稿。** あなたのセッションまたは公式の Graph API を通じて、写真、カルーセル、リール、動画、ストーリーを投稿します。*beta*
-- **予約投稿。** 日時を指定して投稿をキューに入れます。OmniGet が起動している間に投稿されます。*beta*
+- **予約投稿。** 日時を指定して投稿をキューに入れます。LibreGet が起動している間に投稿されます。*beta*
 
 ### <img src="https://cdn.simpleicons.org/x/000000/ffffff" width="20" height="20" align="center" alt="X" /> X / Twitter (10)
 
@@ -507,11 +507,11 @@ Bilibili の動画のダウンロードはホーム画面から行います。�
 ### <img src="https://api.iconify.design/ph:sparkle.svg?color=%233D5BF0" width="20" height="20" align="center" alt="AI" /> AI (6)
 
 - **価格の比較。** LiteLLM と models.dev の価格をもとに、同じモデルのプロバイダーごとのコストを比較します。
-- **AI の支出。** OmniGet が AI に使った金額を、ローカルの台帳から日別、モデル別、タスク別に表示します。
+- **AI の支出。** LibreGet が AI に使った金額を、ローカルの台帳から日別、モデル別、タスク別に表示します。
 - **ローカルモデル（Ollama）。** ローカルモデルを確認、ダウンロード、削除し、無料のプロバイダーとして使います。
 - **テキストの人間らしい書き換え。** AI っぽい文章を、内容を変えずに人が書いたように読める文章に書き換えます。設定した AI プロバイダーで動作します。*beta*
 - **API キー。** キーとアカウントのためのローカルの保管庫です。接続テスト、OpenRouter、DeepSeek、SiliconFlow、New API の残高表示、Claude Code、Codex、Cherry Studio、opencode、`.env` ファイルへのエクスポートに対応しています。
-- **MCP サーバー。** OmniGet のツールをローカルブリッジ上の Model Context Protocol で公開します。拡張機能と同じトークンで保護された 37 のツールがあり、Claude Code、Claude Desktop、Cursor、VS Code、Goose、Codex 向けのすぐに使える設定スニペットも用意されています。[AI エージェント向けの OmniGet](#ai-エージェント向けの-omniget-mcp-サーバーと-claude-code-プラグイン) をご覧ください。*beta*
+- **MCP サーバー。** LibreGet のツールをローカルブリッジ上の Model Context Protocol で公開します。拡張機能と同じトークンで保護された 37 のツールがあり、Claude Code、Claude Desktop、Cursor、VS Code、Goose、Codex 向けのすぐに使える設定スニペットも用意されています。[AI エージェント向けの LibreGet](#ai-エージェント向けの-libreget-mcp-サーバーと-claude-code-プラグイン) をご覧ください。*beta*
 
 ### <img src="https://api.iconify.design/ph:sword.svg?color=%236F6F75" width="20" height="20" align="center" alt="CTF と解析" /> CTF と解析 (6)
 
@@ -528,7 +528,7 @@ AI と通信するツールはすべて、**Settings → AI** で設定したプ
 
 ---
 
-## AI エージェント向けの OmniGet: MCP サーバーと Claude Code プラグイン
+## AI エージェント向けの LibreGet: MCP サーバーと Claude Code プラグイン
 
 <p align="center">
   <img src="assets/readme/illustration-agents.png" alt="ターミナルの前にいるペンギンのマスコットが、ファイルの入ったフォルダーを小さなロボットに渡し、ロボットがリンクを返しているところ。画面の上にはマイク、字幕、動画のタイルがあります" width="900" />
@@ -536,21 +536,21 @@ AI と通信するツールはすべて、**Settings → AI** で設定したプ
 
 エージェントがどこで動いているかによって、2 つの入り口があります。
 
-**アプリ内：MCP サーバー。** Tools → AI → MCP server でオンにすると、OmniGet はブラウザ拡張機能と同じローカルブリッジ上で、インストールごとの同じトークンで保護された状態で、37 のツールを Model Context Protocol で公開します。エージェントは、URL をキューに追加してダウンロードパネルで監視、一時停止、再開、キャンセルしたり、PDF の結合、分割、レンダリング、テキスト抽出、サニタイズを行ったり、whisper.cpp でファイルを文字起こししたり、テキスト読み上げや OCR を実行したり、画像をリサイズしたり、重複を見つけたり、ファイルを検索したり、X の投稿、スレッド、プロフィール、検索、トレンドを読んだり、あなたのセッションで Instagram のプロフィールを調べたり、LLM の価格を比較したり、テキストを人間らしく書き換えたり、ディスクやキャッシュをスキャンしたり、スタートアップ項目やインストール済みのアプリを一覧表示したり、aria2 や gallery-dl で大きなファイルやギャラリーを取得したりできます。ページには Claude Code、Claude Desktop、Cursor、VS Code、Goose、Codex 向けの設定スニペットが表示されるので、セットアップは貼り付けるだけです。*beta*
+**アプリ内：MCP サーバー。** Tools → AI → MCP server でオンにすると、LibreGet はブラウザ拡張機能と同じローカルブリッジ上で、インストールごとの同じトークンで保護された状態で、37 のツールを Model Context Protocol で公開します。エージェントは、URL をキューに追加してダウンロードパネルで監視、一時停止、再開、キャンセルしたり、PDF の結合、分割、レンダリング、テキスト抽出、サニタイズを行ったり、whisper.cpp でファイルを文字起こししたり、テキスト読み上げや OCR を実行したり、画像をリサイズしたり、重複を見つけたり、ファイルを検索したり、X の投稿、スレッド、プロフィール、検索、トレンドを読んだり、あなたのセッションで Instagram のプロフィールを調べたり、LLM の価格を比較したり、テキストを人間らしく書き換えたり、ディスクやキャッシュをスキャンしたり、スタートアップ項目やインストール済みのアプリを一覧表示したり、aria2 や gallery-dl で大きなファイルやギャラリーを取得したりできます。ページには Claude Code、Claude Desktop、Cursor、VS Code、Goose、Codex 向けの設定スニペットが表示されるので、セットアップは貼り付けるだけです。*beta*
 
-**Claude Code 内：`omniget` プラグイン。** [`claude-plugin/`](claude-plugin/omniget) フォルダーには、デスクトップアプリをまったく必要としない [Claude Code](https://claude.com/claude-code) 向けのプラグインが含まれています。動画、音声、SNS の投稿の URL をリクエストと一緒に貼り付けると、`omniget-fetch` と `omniget-transcribe` のスキルが自動的に起動します。明示的に指定したいときは、スラッシュコマンドも使えます：
+**Claude Code 内：`libreget` プラグイン。** [`claude-plugin/`](claude-plugin/libreget) フォルダーには、デスクトップアプリをまったく必要としない [Claude Code](https://claude.com/claude-code) 向けのプラグインが含まれています。動画、音声、SNS の投稿の URL をリクエストと一緒に貼り付けると、`libreget-fetch` と `libreget-transcribe` のスキルが自動的に起動します。明示的に指定したいときは、スラッシュコマンドも使えます：
 
 ```
-/plugin marketplace add /path/to/omniget/claude-plugin
-/plugin install omniget
-/omniget:setup                       # installs yt-dlp, ffmpeg and omniget-cli after one confirmation
-/omniget:fetch <url> [--audio]       # the media file, to ~/Downloads/omniget
-/omniget:transcribe <url|file>       # captions, then local whisper.cpp, then Gemini or OpenAI if you added a key
-/omniget:research <url>              # caption plus transcript distilled into a Markdown note with [mm:ss] references
-/omniget:doctor                      # what is installed, what is missing, how to add it
+/plugin marketplace add /path/to/libreget/claude-plugin
+/plugin install libreget
+/libreget:setup                       # installs yt-dlp, ffmpeg and libreget-cli after one confirmation
+/libreget:fetch <url> [--audio]       # the media file, to ~/Downloads/libreget
+/libreget:transcribe <url|file>       # captions, then local whisper.cpp, then Gemini or OpenAI if you added a key
+/libreget:research <url>              # caption plus transcript distilled into a Markdown note with [mm:ss] references
+/libreget:doctor                      # what is installed, what is missing, how to add it
 ```
 
-セットアップでは、お使いの OS 向けのビルド済みの `omniget-cli` がダウンロードされ、スキルが OmniGet のネイティブの Instagram、X、Bilibili、Threads のエクストラクターを使えるようになります。ログインの壁で失敗したダウンロードは、`OMNIGET_COOKIES_FROM_BROWSER` で指定したブラウザの Cookie を使って一度だけリトライされます。API キーはご自身のターミナルから `~/.config/ai-keys.env` に保存され、表示されることはありません。
+セットアップでは、お使いの OS 向けのビルド済みの `libreget-cli` がダウンロードされ、スキルが LibreGet のネイティブの Instagram、X、Bilibili、Threads のエクストラクターを使えるようになります。ログインの壁で失敗したダウンロードは、`LIBREGET_COOKIES_FROM_BROWSER` で指定したブラウザの Cookie を使って一度だけリトライされます。API キーはご自身のターミナルから `~/.config/ai-keys.env` に保存され、表示されることはありません。
 
 ---
 
@@ -559,12 +559,12 @@ AI と通信するツールはすべて、**Settings → AI** で設定したプ
 コアプラグインはアプリケーションのバイナリに直接組み込まれているため、実行時のダウンロードや ABI の互換性エラーが起きません。Marketplace ページでは、有効なプラグインと、各プラグインに許可されている操作（イベント、通知、設定、ダウンロードフォルダー、プロキシ、管理対象のツール、ダウンロードキュー）が表示され、設定やオン・オフの切り替えができます。
 
 <p align="center">
-  <img src="assets/readme/marketplace.png" alt="Courses、Telegram、Convert の各プラグインを、バージョン、作者、権限、有効化スイッチとともに一覧表示している OmniGet の Marketplace" width="900" />
+  <img src="assets/readme/marketplace.png" alt="Courses、Telegram、Convert の各プラグインを、バージョン、作者、権限、有効化スイッチとともに一覧表示している LibreGet の Marketplace" width="900" />
 </p>
 
 ### <img src="https://api.iconify.design/ph:graduation-cap.svg?color=%23F28500" width="20" height="20" align="center" alt="Courses" /> Courses
 
-組み込みの Courses プラグインは、**Hotmart**、**Udemy**、**Kiwify**、**Rocketseat**、**Coursera**、**Domestika**、**Skillshare**、**Alura**、**Ebac** を含む 38 の学習プラットフォームに対応しています。アプリ内の Web ビューからログインするか、拡張機能で保存した Cookie を使うか、利用可能な場合はアカウントの認証情報でログインします。OmniGet は購入済みの講座を一覧表示し、講座のアウトラインを開いて必要なセクションを選べるようにし（DRM で保護された講義はスキップされ、報告されます）、レッスンと添付ファイルを、必要に応じて通し番号を付けてダウンロードします。
+組み込みの Courses プラグインは、**Hotmart**、**Udemy**、**Kiwify**、**Rocketseat**、**Coursera**、**Domestika**、**Skillshare**、**Alura**、**Ebac** を含む 38 の学習プラットフォームに対応しています。アプリ内の Web ビューからログインするか、拡張機能で保存した Cookie を使うか、利用可能な場合はアカウントの認証情報でログインします。LibreGet は購入済みの講座を一覧表示し、講座のアウトラインを開いて必要なセクションを選べるようにし（DRM で保護された講義はスキップされ、報告されます）、レッスンと添付ファイルを、必要に応じて通し番号を付けてダウンロードします。
 
 ### <img src="https://cdn.simpleicons.org/telegram/2CA5E0" width="20" height="20" align="center" alt="Telegram" /> Telegram
 
@@ -581,8 +581,8 @@ QR コードまたは電話番号でログインします。参加している�
 - 任意のページ、設定、ツールにジャンプできるコマンドパレット（**Ctrl+K** または **Cmd+K**）。
 - コピーしたリンクを検出し、トーストからワンクリックでダウンロードを提案するクリップボード検出。
 - 拡張機能で取得するか `cookies.txt` からインポートしたセッションをサイトごとに保持し、ドメインごとにテストボタンを備えた Cookie マネージャー。
-- 動画の要約：**Settings → AI** に URL を貼り付けると、OmniGet が字幕を取得し、指定した長さと言語で要約します。
-- ファイルの送信：ファイルを選んで単語コードを共有すると、相手が自分の OmniGet にそのコードを貼り付けて受け取ります。
+- 動画の要約：**Settings → AI** に URL を貼り付けると、LibreGet が字幕を取得し、指定した長さと言語で要約します。
+- ファイルの送信：ファイルを選んで単語コードを共有すると、相手が自分の LibreGet にそのコードを貼り付けて受け取ります。
 - 聴いているもの、見ているもの、読んでいるものを表示する Discord Rich Presence。ダウンロードは非公開のままです。
 - トレイアイコン、システム起動時の起動、最小化状態での起動、ダウンロード中のスリープ防止。
 - すべてのダウンロードが、実行した yt-dlp コマンドをそのまま保持します。開いてフラグを編集し、リトライできます。
@@ -592,15 +592,15 @@ QR コードまたは電話番号でログインします。参加している�
 
 ---
 
-## プライバシーと OmniGet がしないこと
+## プライバシーと LibreGet がしないこと
 
 <p align="center">
-  <img src="assets/readme/illustration-privacy.png" alt="光る盾の中で、OmniGet のダウンロードアイコンと緑の南京錠が付いたノートパソコンを抱きしめているペンギンのマスコット" width="700" />
+  <img src="assets/readme/illustration-privacy.png" alt="光る盾の中で、LibreGet のダウンロードアイコンと緑の南京錠が付いたノートパソコンを抱きしめているペンギンのマスコット" width="700" />
 </p>
 
-すべてはあなたのコンピューター上で動作します。アカウントはなく、間に私たちのサーバーが入ることもなく、何をダウンロードしたかについてのテレメトリーもありません。Cookie と API キーはローカルのプロフィールに保存されます。OmniGet が自ら行うネットワーク通信は、ダウンロードを依頼したサイト、アップデートとプラグインのための GitHub、そして AI ツールを使うときに設定した AI プロバイダーへの通信だけです。
+すべてはあなたのコンピューター上で動作します。アカウントはなく、間に私たちのサーバーが入ることもなく、何をダウンロードしたかについてのテレメトリーもありません。Cookie と API キーはローカルのプロフィールに保存されます。LibreGet が自ら行うネットワーク通信は、ダウンロードを依頼したサイト、アップデートとプラグインのための GitHub、そして AI ツールを使うときに設定した AI プロバイダーへの通信だけです。
 
-OmniGet がダウンロードするのは、あなた自身のログインセッションですでに開けるものだけです。DRM の回避、ペイウォールの突破、認証情報の共有は行わず、DRM で保護された講義はスキップされ、報告されます。著作権と各プラットフォームの利用規約を守る責任は利用者にあります。全文はアプリ内の **About → Terms and ethics** にあります。
+LibreGet がダウンロードするのは、あなた自身のログインセッションですでに開けるものだけです。DRM の回避、ペイウォールの突破、認証情報の共有は行わず、DRM で保護された講義はスキップされ、報告されます。著作権と各プラットフォームの利用規約を守る責任は利用者にあります。全文はアプリ内の **About → Terms and ethics** にあります。
 
 ---
 
@@ -608,17 +608,17 @@ OmniGet がダウンロードするのは、あなた自身のログインセッ
 
 Windows での無料のコード署名は [SignPath.io](https://about.signpath.io) が提供し、証明書は [SignPath Foundation](https://signpath.org) によるものです。
 
-コードの変更と署名付きのリリースは、OpenSelena のメンテナーがレビューし、承認しています。OmniGet がデータをどのように扱うかについては、[プライバシーと OmniGet がしないこと](#プライバシーと-omniget-がしないこと) と [プライバシーに関するドキュメント](https://omniget.nav.bd/docs/#privacy) をご覧ください。
+コードの変更と署名付きのリリースは、OpenSelena のメンテナーがレビューし、承認しています。LibreGet がデータをどのように扱うかについては、[プライバシーと LibreGet がしないこと](#プライバシーと-libreget-がしないこと) と [プライバシーに関するドキュメント](https://libreget.nav.bd/docs/#privacy) をご覧ください。
 
 ---
 
 ## よくある質問
 
-**OmniGet は無料ですか？**
+**LibreGet は無料ですか？**
 はい。GPL-3.0 で、有料プランも広告もアカウントもありません。
 
-**OmniGet は yt-dlp の GUI ですか？**
-一部はそうです。yt-dlp が数多くのサイトへの対応を担い、OmniGet はそれを同梱し、検証し、更新します。その上に、講座、Instagram、X、Pinterest、Bilibili、Telegram、トレント向けのネイティブのエクストラクター、再開とリトライに対応したキュー、ツールセクション、メディア変換があります。
+**LibreGet は yt-dlp の GUI ですか？**
+一部はそうです。yt-dlp が数多くのサイトへの対応を担い、LibreGet はそれを同梱し、検証し、更新します。その上に、講座、Instagram、X、Pinterest、Bilibili、Telegram、トレント向けのネイティブのエクストラクター、再開とリトライに対応したキュー、ツールセクション、メディア変換があります。
 
 **購入した Udemy や Hotmart の講座をダウンロードできますか？**
 はい。Courses プラグインはアプリに直接組み込まれています。アプリからログインし、講座とセクションを選んでダウンロードしてください。レッスンと添付ファイルは講座ごとに整理されたフォルダーに保存されます。Hotmart、Udemy、Kiwify、Rocketseat、Coursera、Domestika など、38 のプラットフォームに対応しています。
@@ -647,8 +647,8 @@ Windows での無料のコード署名は [SignPath.io](https://about.signpath.i
 **Reddit、LinkedIn、Spotify、X、Instagram のデータエクスポートを読み込めますか？**
 はい。プラットフォームにエクスポートをリクエストし、対応するツールで zip を開いてください。解析はあなたのマシン上で行われ、何もアップロードされません。
 
-**AI エージェントは OmniGet を使えますか？**
-はい、2 つの方法があります。Tools → AI の MCP サーバーは、Claude Code、Claude Desktop、Cursor、VS Code、Goose、Codex に 37 のツールを公開します。また、`claude-plugin/` フォルダーには、デスクトップアプリなしでメディアの取得と文字起こしを行う Claude Code プラグインが含まれています。[AI エージェント向けの OmniGet](#ai-エージェント向けの-omniget-mcp-サーバーと-claude-code-プラグイン) をご覧ください。
+**AI エージェントは LibreGet を使えますか？**
+はい、2 つの方法があります。Tools → AI の MCP サーバーは、Claude Code、Claude Desktop、Cursor、VS Code、Goose、Codex に 37 のツールを公開します。また、`claude-plugin/` フォルダーには、デスクトップアプリなしでメディアの取得と文字起こしを行う Claude Code プラグインが含まれています。[AI エージェント向けの LibreGet](#ai-エージェント向けの-libreget-mcp-サーバーと-claude-code-プラグイン) をご覧ください。
 
 **動画をオフラインで字幕に文字起こしできますか？**
 はい。Tools → Speech and subtitles → Transcribe は、ローカルで whisper.cpp を使います。モデルは必要に応じてダウンロードされます。
@@ -657,31 +657,31 @@ Windows での無料のコード署名は [SignPath.io](https://about.signpath.i
 はい。Windows であれば、実行ファイルの隣に `portable.txt` ファイルを置くことで実行できます。
 
 **Linux ではどのパッケージを選べばよいですか？**
-Debian と Ubuntu は `.deb`、Fedora、openSUSE、RHEL 系は `.rpm`、それ以外は `.AppImage` です。x86_64 版と ARM64 版の両方が公開されています。OmniGet は Flathub にはありません。
+Debian と Ubuntu は `.deb`、Fedora、openSUSE、RHEL 系は `.rpm`、それ以外は `.AppImage` です。x86_64 版と ARM64 版の両方が公開されています。LibreGet は Flathub にはありません。
 
 ---
 
 ## コマンドライン
 
-`omniget-cli` は、Windows、macOS（Intel と Apple Silicon）、Linux 向けのすべてのリリースに含まれています。[最新のリリース](https://github.com/OpenSelena/omniget/releases/latest) から `omniget-cli-<version>-<target>` を入手してください。
+`libreget-cli` は、Windows、macOS（Intel と Apple Silicon）、Linux 向けのすべてのリリースに含まれています。[最新のリリース](https://github.com/OpenSelena/libreget/releases/latest) から `libreget-cli-<version>-<target>` を入手してください。
 
 ```bash
-omniget info <url>                     # title, formats and size, downloads nothing
-omniget download <url> -q 1080 -o ~/Videos
-omniget download <url> --audio-only --subs en,pt
-omniget batch links.txt -m 3           # one URL per line, 3 at a time
-omniget import-cookies cookies.txt     # Netscape format
+libreget info <url>                     # title, formats and size, downloads nothing
+libreget download <url> -q 1080 -o ~/Videos
+libreget download <url> --audio-only --subs en,pt
+libreget batch links.txt -m 3           # one URL per line, 3 at a time
+libreget import-cookies cookies.txt     # Netscape format
 ```
 
 ---
 
 ## ソースからのビルド
 
-OmniGet を使いたいだけであれば、[リリースを入手してください](#ダウンロードとインストール)。ビルドするには、[Rust](https://rustup.rs/)（プラグインの ABI が依存しているため、正確なツールチェーンが `rust-toolchain.toml` で固定されています）、[Node.js](https://nodejs.org/) 18 以上、[pnpm](https://pnpm.io/) が必要です。
+LibreGet を使いたいだけであれば、[リリースを入手してください](#ダウンロードとインストール)。ビルドするには、[Rust](https://rustup.rs/)（プラグインの ABI が依存しているため、正確なツールチェーンが `rust-toolchain.toml` で固定されています）、[Node.js](https://nodejs.org/) 18 以上、[pnpm](https://pnpm.io/) が必要です。
 
 ```bash
-git clone https://github.com/OpenSelena/omniget.git
-cd omniget
+git clone https://github.com/OpenSelena/libreget.git
+cd libreget
 pnpm install
 pnpm tauri dev
 ```
@@ -704,7 +704,7 @@ pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'
 
 リリースでは、メンテナーだけが持つ秘密鍵でアップデーター用の成果物に署名しているため、単純な `pnpm tauri build` は「A public key has been found, but no private key」というエラーで止まります。上記のフラグはローカルビルドでそれらの成果物を無効にするもので、それ以外は何も変わりません。
 
-`courses`、`telegram`、`convert` の各プラグインは `src-tauri/plugins/` の中にあり、メインのバイナリにコンパイルされます。プラグインのレジストリは [omniget-plugins](https://github.com/OpenSelena/omniget-plugins) です。
+`courses`、`telegram`、`convert` の各プラグインは `src-tauri/plugins/` の中にあり、メインのバイナリにコンパイルされます。プラグインのレジストリは [libreget-plugins](https://github.com/OpenSelena/libreget-plugins) です。
 
 技術スタック：Tauri 2、Rust、Svelte 5 を使った SvelteKit、SQLite、yt-dlp、FFmpeg、トレント用の librqbit、whisper.cpp、aria2、gallery-dl。
 
@@ -712,18 +712,18 @@ pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'
 
 ## コントリビュートと翻訳
 
-バグ報告とプルリクエストは [Issues](https://github.com/OpenSelena/omniget/issues) と [Pull requests](https://github.com/OpenSelena/omniget/pulls) にお願いします。質問やちょっとしたヘルプは [Telegram](https://t.me/OpenSelena) で受け付けています。セキュリティに関する問い合わせや脆弱性の報告：[SECURITY.md](SECURITY.md) または [igect@vk.com](mailto:igect@vk.com)。
+バグ報告とプルリクエストは [Issues](https://github.com/OpenSelena/libreget/issues) と [Pull requests](https://github.com/OpenSelena/libreget/pulls) にお願いします。質問やちょっとしたヘルプは [Telegram](https://t.me/OpenSelena) で受け付けています。セキュリティに関する問い合わせや脆弱性の報告：[SECURITY.md](SECURITY.md) または [igect@vk.com](mailto:igect@vk.com)。
 
-翻訳は [Weblate](https://hosted.weblate.org/engage/omniget-openselena/) で管理しています。言語を選んで、ブラウザ上で翻訳してください。新しい文字列は、`main` に取り込まれてから数時間後にそこに表示されます。
+翻訳は [Weblate](https://hosted.weblate.org/engage/libreget-openselena/) で管理しています。言語を選んで、ブラウザ上で翻訳してください。新しい文字列は、`main` に取り込まれてから数時間後にそこに表示されます。
 
-OmniGet は、[yt-dlp](https://github.com/yt-dlp/yt-dlp)、[FFmpeg](https://ffmpeg.org/)、[gallery-dl](https://github.com/mikf/gallery-dl)、[whisper.cpp](https://github.com/ggerganov/whisper.cpp)、[aria2](https://aria2.github.io/)、[SponsorBlock](https://sponsor.ajay.app/)、[Return YouTube Dislike](https://returnyoutubedislike.com/)、[FxTwitter](https://github.com/FixTweet/FxTwitter)、[Spicetify](https://spicetify.app/)、[cat-catch](https://github.com/xifangczy/cat-catch)（拡張機能のメディアスニッファーの一部）、[Tauri](https://tauri.app/) の上に作られています。これらをメンテナンスしているすべての方に感謝します。
+LibreGet は、[yt-dlp](https://github.com/yt-dlp/yt-dlp)、[FFmpeg](https://ffmpeg.org/)、[gallery-dl](https://github.com/mikf/gallery-dl)、[whisper.cpp](https://github.com/ggerganov/whisper.cpp)、[aria2](https://aria2.github.io/)、[SponsorBlock](https://sponsor.ajay.app/)、[Return YouTube Dislike](https://returnyoutubedislike.com/)、[FxTwitter](https://github.com/FixTweet/FxTwitter)、[Spicetify](https://spicetify.app/)、[cat-catch](https://github.com/xifangczy/cat-catch)（拡張機能のメディアスニッファーの一部）、[Tauri](https://tauri.app/) の上に作られています。これらをメンテナンスしているすべての方に感謝します。
 
-ペンギンのマスコットは OmniGet の公式マスコットです。ファンアートは大歓迎です。プロジェクトのブランドアセットを許可なく商用利用したり、誤解を招くサードパーティのフォークに同梱したりすることはできません。
+ペンギンのマスコットは LibreGet の公式マスコットです。ファンアートは大歓迎です。プロジェクトのブランドアセットを許可なく商用利用したり、誤解を招くサードパーティのフォークに同梱したりすることはできません。
 
 <p align="center">
-  <a href="https://star-history.com/#OpenSelena/omniget&Date"><img src="https://api.star-history.com/svg?repos=OpenSelena/omniget&type=Date" alt="OpenSelena/omniget のスター履歴" width="600" /></a>
+  <a href="https://star-history.com/#OpenSelena/libreget&Date"><img src="https://api.star-history.com/svg?repos=OpenSelena/libreget&type=Date" alt="OpenSelena/libreget のスター履歴" width="600" /></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/OpenSelena/omniget/releases/latest"><b>OmniGet をダウンロード</b></a> · <a href="LICENSE">GPL-3.0</a>
+  <a href="https://github.com/OpenSelena/libreget/releases/latest"><b>LibreGet をダウンロード</b></a> · <a href="LICENSE">GPL-3.0</a>
 </p>

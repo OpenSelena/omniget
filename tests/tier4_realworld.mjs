@@ -196,10 +196,10 @@ export function runTier4Tests() {
       }
 
       // 2. Specific rhetorical headings cataloged in Survey 3:
-      // "What is Nami?", "What is the OmniGet MCP Server?", "Why this happens:"
+      // "What is Nami?", "What is the LibreGet MCP Server?", "Why this happens:"
       const knownQuestions = [
         /What is Nami\?/i,
-        /What is the OmniGet MCP Server\?/i,
+        /What is the (LibreGet|OmniGet) MCP Server\?/i,
         /Looking for older releases/i,
         /Why this happens:/i
       ];

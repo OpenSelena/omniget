@@ -16,13 +16,13 @@ Only the latest minor release receives active security updates and patches.
 To report a vulnerability responsibly:
 
 1. **GitHub Private Vulnerability Reporting (Preferred)**:
-   Navigate to the [OmniGet Security Advisories](https://github.com/OpenSelena/omniget/security/advisories/new) page and click **"Report a vulnerability"**. This allows secure, private collaboration and testing of a fix before disclosure.
+   Navigate to the [LibreGet Security Advisories](https://github.com/OpenSelena/libreget/security/advisories/new) page and click **"Report a vulnerability"**. This allows secure, private collaboration and testing of a fix before disclosure.
 
 2. **Email**:
    If you cannot use GitHub advisories, email **igect@vk.com** with:
    - A detailed description of the vulnerability
    - Step-by-step reproduction instructions or proof-of-concept (PoC)
-   - Affected OmniGet version(s) and operating system
+   - Affected LibreGet version(s) and operating system
    - Your assessment of severity and impact
 
 ### Response Timeline

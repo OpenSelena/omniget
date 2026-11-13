@@ -1,13 +1,13 @@
-# OmniGet Domain Glossary
+# LibreGet Domain Glossary
 
-This document serves as the single source of truth for domain vocabulary across OmniGet. Terms defined here represent canonical concepts; avoid synonyms or divergent naming in code, tests, and documentation.
+This document serves as the single source of truth for domain vocabulary across LibreGet. Terms defined here represent canonical concepts; avoid synonyms or divergent naming in code, tests, and documentation.
 
 ---
 
 ### Core Concepts
 
 #### StudyPlugin
-The native Rust plugin crate (`omniget-plugin-study`) statically linked into the OmniGet desktop application. Implements the `OmnigetPlugin` trait to provide local persistence, playback tracking, note indexing, and reading tools for downloaded media.
+The native Rust plugin crate (`libreget-plugin-study`) statically linked into the LibreGet desktop application. Implements the `LibregetPlugin` trait to provide local persistence, playback tracking, note indexing, and reading tools for downloaded media.
 
 #### LessonProgress
 The recorded playback and completion state for a single lecture or media item within a downloaded course. Tracks the current playback position in seconds, total duration, completion flag, and the last accessed timestamp.

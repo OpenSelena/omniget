@@ -3,17 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>System Troubleshooting & Fixes · OmniGet Documentation</title>
+  <title>System Troubleshooting & Fixes · LibreGet Documentation</title>
   <meta name="description" content="Fix guides for macOS Gatekeeper warnings, Linux WebKitGTK and GStreamer crashes, and HTTP 403 and 429 network errors." />
-  <link rel="canonical" href="https://omniget.nav.bd/docs/troubleshooting/" />
+  <link rel="canonical" href="https://libreget.nav.bd/docs/troubleshooting/" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="article" />
-  <meta property="og:site_name" content="OmniGet Documentation" />
+  <meta property="og:site_name" content="LibreGet Documentation" />
   <meta property="og:title" content="System Troubleshooting & Fixes" />
   <meta property="og:description" content="Fix guides for macOS Gatekeeper warnings, Linux WebKitGTK and GStreamer crashes, and HTTP 403 and 429 network errors." />
-  <meta property="og:url" content="https://omniget.nav.bd/docs/troubleshooting/" />
-  <meta property="og:image" content="https://omniget.nav.bd/assets/readme/home.png" />
+  <meta property="og:url" content="https://libreget.nav.bd/docs/troubleshooting/" />
+  <meta property="og:image" content="https://libreget.nav.bd/assets/readme/home.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -26,7 +26,7 @@
   <script>
     (function() {
       try {
-        var saved = localStorage.getItem('omniget_docs_theme') || localStorage.getItem('theme');
+        var saved = (localStorage.getItem('libreget_docs_theme') || localStorage.getItem('omniget_docs_theme')) || localStorage.getItem('theme');
         var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         if (saved === 'dark' || (!saved && prefersDark)) {
           document.documentElement.classList.add('dark');
@@ -46,7 +46,7 @@
 
   <style>
     /* ============================================================
-       OmniGet Documentation — UI skin
+       LibreGet Documentation — UI skin
        Design system: vercel.com/docs (Geist type, Vercel palette)
        ============================================================ */
 
@@ -1263,9 +1263,9 @@
             <line x1="3" y1="18" x2="21" y2="18" />
           </svg>
         </button>
-        <a href="../../" class="brand-logo-link" aria-label="OmniGet Home">
-          <img src="../../static/favicon.png" alt="OmniGet Logo" />
-          <span>OmniGet</span>
+        <a href="../../" class="brand-logo-link" aria-label="LibreGet Home">
+          <img src="../../static/favicon.png" alt="LibreGet Logo" />
+          <span>LibreGet</span>
         </a>
         <span class="brand-badge">DOCS</span>
       </div>
@@ -1303,7 +1303,7 @@
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="themeIconMoon"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" /></svg>
         </button>
 
-        <a class="btn-top-download" href="https://github.com/OpenSelena/omniget/releases/latest">
+        <a class="btn-top-download" href="https://github.com/OpenSelena/libreget/releases/latest">
           <span>Get App</span>
           <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14" />
   <path d="m12 5 7 7-7 7" /></svg>
@@ -1472,13 +1472,13 @@
         </div>
         <ul class="sidebar-nav-list">
           <li>
-            <a href="https://github.com/OpenSelena/omniget" target="_blank" rel="noopener" class="sidebar-link">
+            <a href="https://github.com/OpenSelena/libreget" target="_blank" rel="noopener" class="sidebar-link">
               <span>GitHub Repository</span>
               <svg class="icon icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: auto; opacity: 0.5;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
             </a>
           </li>
           <li>
-            <a href="https://t.me/omniget" target="_blank" rel="noopener" class="sidebar-link">
+            <a href="https://t.me/OpenSelena" target="_blank" rel="noopener" class="sidebar-link">
               <span>Telegram Community</span>
               <svg class="icon icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: auto; opacity: 0.5;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
             </a>
@@ -1501,8 +1501,8 @@
 
 
       <div class="doc-media-card">
-        <img src="../../assets/readme/settings.png" alt="OmniGet Troubleshooting & Settings" />
-        <div class="doc-media-caption">OmniGet Settings: Configure network timeouts, proxy settings, cookie vaults, and inspect diagnostic logs.</div>
+        <img src="../../assets/readme/settings.png" alt="LibreGet Troubleshooting & Settings" />
+        <div class="doc-media-caption">LibreGet Settings: Configure network timeouts, proxy settings, cookie vaults, and inspect diagnostic logs.</div>
       </div>
 
       <p class="doc-p">
@@ -1512,7 +1512,7 @@
       <!-- SECTION 1 -->
       <h2 class="doc-h2" id="logs-paths">1. Diagnostic Log & Data Paths</h2>
       <p class="doc-p">
-        The app stores its database (<code>omniget.db</code>) and settings (<code>settings.json</code>) in the folder for your OS below. OmniGet writes no log file: each download's output is shown in the Downloads panel, and debug logs go to the terminal the app was started from.
+        The app stores its database (<code>libreget.db</code>) and settings (<code>settings.json</code>) in the folder for your OS below. LibreGet writes no log file: each download's output is shown in the Downloads panel, and debug logs go to the terminal the app was started from.
       </p>
 
       <div class="doc-table-wrap">
@@ -1527,7 +1527,7 @@
           <tbody>
             <tr>
               <td><strong>Windows</strong></td>
-              <td><code>%APPDATA%\com.openselena.omniget\</code><br/>(e.g. <code>C:\Users\&lt;Name&gt;\AppData\Roaming\com.openselena.omniget\</code>)</td>
+              <td><code>%APPDATA%\com.openselena.libreget\</code><br/>(e.g. <code>C:\Users\&lt;Name&gt;\AppData\Roaming\com.openselena.libreget\</code>)</td>
               <td>No log file. Download output is shown in the app; debug logs go to the terminal.</td>
             </tr>
             <tr>
@@ -1537,12 +1537,12 @@
             </tr>
             <tr>
               <td><strong>macOS</strong></td>
-              <td><code>~/Library/Application Support/com.openselena.omniget/</code></td>
+              <td><code>~/Library/Application Support/com.openselena.libreget/</code></td>
               <td>No log file. Download output is shown in the app; debug logs go to the terminal.</td>
             </tr>
             <tr>
               <td><strong>Linux</strong></td>
-              <td><code>~/.local/share/com.openselena.omniget/</code></td>
+              <td><code>~/.local/share/com.openselena.libreget/</code></td>
               <td>No log file. Download output is shown in the app; debug logs go to the terminal.</td>
             </tr>
           </tbody>
@@ -1552,7 +1552,7 @@
       <!-- SECTION 2 -->
       <h2 class="doc-h2" id="macos">2. macOS Gatekeeper ("App is damaged") Fix</h2>
       <p class="doc-p">
-        When opening OmniGet for the first time on macOS, Gatekeeper may refuse to launch the binary, displaying a prompt stating the application is "damaged and should be moved to the Trash".
+        When opening LibreGet for the first time on macOS, Gatekeeper may refuse to launch the binary, displaying a prompt stating the application is "damaged and should be moved to the Trash".
       </p>
 
       <div class="callout">
@@ -1561,7 +1561,7 @@
   <path d="M12 17h.01" /></svg>
         <div>
           <strong>Root cause:</strong>
-          OmniGet is distributed as free open-source software and is not signed with a paid Apple Developer certificate. macOS automatically flags downloaded DMG files with the <code>com.apple.quarantine</code> attribute.
+          LibreGet is distributed as free open-source software and is not signed with a paid Apple Developer certificate. macOS automatically flags downloaded DMG files with the <code>com.apple.quarantine</code> attribute.
         </div>
       </div>
 
@@ -1578,18 +1578,18 @@
         <div class="code-body">
 <pre><code><span class="tok-c"># Strip quarantine attribute:
 </span>
-xattr -cr /Applications/omniget.app
+xattr -cr /Applications/libreget.app
 
 <span class="tok-c"># Re-sign the app ad-hoc:
 </span>
-codesign --force --deep --sign - /Applications/omniget.app</code></pre>
+codesign --force --deep --sign - /Applications/libreget.app</code></pre>
         </div>
       </div>
 
       <!-- SECTION 3 -->
       <h2 class="doc-h2" id="linux">3. Linux WebKitGTK & GStreamer Audio Fix</h2>
       <p class="doc-p">
-        On Linux, OmniGet's desktop window uses WebKitGTK. WebKitGTK plays all media through GStreamer. If the required GStreamer audio sinks are missing, WebKitGTK <strong>aborts its own web process</strong> as soon as any video or audio loads, resulting in an empty or crashed window.
+        On Linux, LibreGet's desktop window uses WebKitGTK. WebKitGTK plays all media through GStreamer. If the required GStreamer audio sinks are missing, WebKitGTK <strong>aborts its own web process</strong> as soon as any video or audio loads, resulting in an empty or crashed window.
       </p>
 
       <p class="doc-p">
@@ -1625,7 +1625,7 @@ sudo pacman -S gst-plugins-good gst-plugins-bad gst-libav</code></pre>
 
       <ul style="margin-left: 20px; color: var(--text-muted); display: grid; gap: 10px; margin-bottom: 24px; font-size: 14.5px;">
         <li>
-          <strong>HTTP 403 Forbidden:</strong> The site rejected the download token or session cookie. Open the page in your browser, click the OmniGet Companion Extension icon to push fresh cookies to the desktop app, and retry.
+          <strong>HTTP 403 Forbidden:</strong> The site rejected the download token or session cookie. Open the page in your browser, click the LibreGet Companion Extension icon to push fresh cookies to the desktop app, and retry.
         </li>
         <li>
           <strong>HTTP 429 Too Many Requests:</strong> You have hit the platform's request ceiling. Navigate to <strong>Settings &rarr; Network</strong>, reduce <strong>Concurrent downloads</strong> to <code>1</code> or <code>2</code>, and enable <strong>Adaptive Backoff</strong>.
@@ -1638,24 +1638,24 @@ sudo pacman -S gst-plugins-good gst-plugins-bad gst-libav</code></pre>
       <!-- SECTION 5 -->
       <h2 class="doc-h2" id="extension-pairing">5. Browser Extension Pairing & Port 47720-47729</h2>
       <p class="doc-p">
-        The OmniGet Companion Extension communicates with the desktop app over local loopback ports <code>47720</code> to <code>47729</code> (configured in <code>src-tauri/src/local_bridge.rs</code> with <code>SO_REUSEADDR</code> to survive fast restarts).
+        The LibreGet Companion Extension communicates with the desktop app over local loopback ports <code>47720</code> to <code>47729</code> (configured in <code>src-tauri/src/local_bridge.rs</code> with <code>SO_REUSEADDR</code> to survive fast restarts).
       </p>
 
       <ol style="margin-left: 20px; color: var(--text-muted); display: grid; gap: 8px; margin-bottom: 24px; font-size: 14.5px;">
-        <li>Ensure the OmniGet desktop application is running before syncing. You can verify the local listener in your browser by visiting <code>http://127.0.0.1:47720/v1/health</code>; it will return <code>{"ok":true,"version":"0.12.0"}</code>.</li>
-        <li>If port 47720 is occupied by another application, OmniGet automatically cycles through ports <code>47721</code> to <code>47729</code> and persists the bound port in <code>settings.json</code>.</li>
+        <li>Ensure the LibreGet desktop application is running before syncing. You can verify the local listener in your browser by visiting <code>http://127.0.0.1:47720/v1/health</code>; it will return <code>{"ok":true,"version":"0.12.0"}</code>.</li>
+        <li>If port 47720 is occupied by another application, LibreGet automatically cycles through ports <code>47721</code> to <code>47729</code> and persists the bound port in <code>settings.json</code>.</li>
         <li>Open the extension's Options page (right-click the extension icon in your browser &rarr; <strong>Options</strong>).</li>
-        <li>In OmniGet, navigate to <strong>Settings &rarr; Plugins &rarr; Browser extension</strong>, click <strong>Copy pairing token</strong>, paste it into the extension Options field, and click <strong>Verify Connection</strong>.</li>
+        <li>In LibreGet, navigate to <strong>Settings &rarr; Plugins &rarr; Browser extension</strong>, click <strong>Copy pairing token</strong>, paste it into the extension Options field, and click <strong>Verify Connection</strong>.</li>
       </ol>
 
       <!-- SECTION 6 -->
       <h2 class="doc-h2" id="engine-integrity">6. yt-dlp & FFmpeg Integrity Verification</h2>
       <p class="doc-p">
-        OmniGet installs yt-dlp and FFmpeg on first launch and keeps them updated:
+        LibreGet installs yt-dlp and FFmpeg on first launch and keeps them updated:
       </p>
 
       <div class="doc-media-card">
-        <img src="../../assets/readme/downloads.png" alt="OmniGet Command Inspector" />
+        <img src="../../assets/readme/downloads.png" alt="LibreGet Command Inspector" />
         <div class="doc-media-caption">Downloads Inspector: Click any download card to view and edit the exact yt-dlp command it ran.</div>
       </div>
 
@@ -1703,7 +1703,7 @@ sudo pacman -S gst-plugins-good gst-plugins-bad gst-libav</code></pre>
       </ul>
 
       <div class="toc-community-box">
-        <a href="https://github.com/OpenSelena/omniget" class="toc-community-link" target="_blank" rel="noopener">
+        <a href="https://github.com/OpenSelena/libreget" class="toc-community-link" target="_blank" rel="noopener">
           <svg class="icon icon-fill icon-sm" viewBox="0 0 24 24" fill="currentColor"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
           <span>Edit page on GitHub</span>
         </a>
@@ -1785,7 +1785,7 @@ sudo pacman -S gst-plugins-good gst-plugins-bad gst-libav</code></pre>
         document.documentElement.classList.remove('dark');
         document.documentElement.setAttribute('data-theme', 'light');
       }
-      localStorage.setItem('omniget_docs_theme', target);
+      localStorage.setItem('libreget_docs_theme', target);
       localStorage.setItem('theme', target);
       updateThemeIcons(target);
     }

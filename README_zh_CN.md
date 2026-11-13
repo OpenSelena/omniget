@@ -1,6 +1,6 @@
 <!--
 搜索关键词（放在这里方便 GitHub 搜索、Google 和 AI 助手找到本项目）：
-OmniGet 是一款免费开源的下载器和媒体工具箱，支持 Windows、macOS 和 Linux。
+LibreGet 是一款免费开源的下载器和媒体工具箱，支持 Windows、macOS 和 Linux。
 udemy 课程下载, hotmart 课程下载, 课程下载器, youtube 视频下载, yt-dlp 图形界面, instagram 下载,
 instagram 快拍下载, reels 下载, twitter 视频下载, x 视频下载, pinterest 下载, pinterest 画板备份,
 tiktok 下载, reddit 下载, twitch 录像下载, bilibili 下载, B站下载, telegram 下载, 种子客户端, 磁力链接,
@@ -9,10 +9,10 @@ spicetify, 下载管理器, tauri, rust, svelte.
 -->
 
 <p align="center">
-  <img src="assets/readme/hero.png" alt="OmniGet：粘贴链接，拿到文件。下载、工具和学习库合在一个桌面应用里，支持 Windows、macOS 和 Linux。" width="100%" />
+  <img src="assets/readme/hero.png" alt="LibreGet：粘贴链接，拿到文件。下载、工具和学习库合在一个桌面应用里，支持 Windows、macOS 和 Linux。" width="100%" />
 </p>
 
-<h1 align="center">OmniGet</h1>
+<h1 align="center">LibreGet</h1>
 
 <p align="center">
   <a href="README.md">English</a>
@@ -27,17 +27,17 @@ spicetify, 下载管理器, tauri, rust, svelte.
 </p>
 
 <p align="center">
-  <a href="https://omniget.nav.bd/"><img src="https://img.shields.io/badge/Website-omniget.nav.bd-FF7D38?style=for-the-badge" alt="社区网站" /></a>
-  <a href="https://github.com/OpenSelena/omniget/releases/latest"><img src="https://img.shields.io/github/v/release/OpenSelena/omniget?style=for-the-badge&label=release&color=F28500" alt="最新版本" /></a>
-  <a href="https://github.com/OpenSelena/omniget/releases"><img src="https://img.shields.io/github/downloads/OpenSelena/omniget/total?style=for-the-badge&label=downloads&color=1E6FE8" alt="总下载量" /></a>
-  <a href="https://github.com/OpenSelena/omniget/stargazers"><img src="https://img.shields.io/github/stars/OpenSelena/omniget?style=for-the-badge&color=FFD426" alt="GitHub Star 数" /></a>
+  <a href="https://libreget.nav.bd/"><img src="https://img.shields.io/badge/Website-libreget.nav.bd-FF7D38?style=for-the-badge" alt="社区网站" /></a>
+  <a href="https://github.com/OpenSelena/libreget/releases/latest"><img src="https://img.shields.io/github/v/release/OpenSelena/libreget?style=for-the-badge&label=release&color=F28500" alt="最新版本" /></a>
+  <a href="https://github.com/OpenSelena/libreget/releases"><img src="https://img.shields.io/github/downloads/OpenSelena/libreget/total?style=for-the-badge&label=downloads&color=1E6FE8" alt="总下载量" /></a>
+  <a href="https://github.com/OpenSelena/libreget/stargazers"><img src="https://img.shields.io/github/stars/OpenSelena/libreget?style=for-the-badge&color=FFD426" alt="GitHub Star 数" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-2AA845?style=for-the-badge" alt="GPL-3.0 许可证" /></a>
   <a href="https://t.me/OpenSelena"><img src="https://img.shields.io/badge/Telegram-频道-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram 频道" /></a>
-  <a href="https://hosted.weblate.org/engage/omniget-openselena/"><img src="https://hosted.weblate.org/widget/omniget-openselena/frontend/svg-badge.svg" alt="翻译状态" /></a>
+  <a href="https://hosted.weblate.org/engage/libreget-openselena/"><img src="https://hosted.weblate.org/widget/libreget-openselena/frontend/svg-badge.svg" alt="翻译状态" /></a>
 </p>
 
 <p align="center">
-  <a href="#下载与安装"><img src="https://img.shields.io/badge/下载_Windows、macOS_或_Linux_版-→-F28500?style=for-the-badge" alt="下载 OmniGet" height="40" /></a>
+  <a href="#下载与安装"><img src="https://img.shields.io/badge/下载_Windows、macOS_或_Linux_版-→-F28500?style=for-the-badge" alt="下载 LibreGet" height="40" /></a>
   &nbsp;
   <a href="#tools-工具区16-个分类共-108-个工具"><img src="https://img.shields.io/badge/查看_108_个工具-→-3D5BF0?style=for-the-badge" alt="查看 Tools 工具区" height="40" /></a>
 </p>
@@ -48,27 +48,27 @@ spicetify, 下载管理器, tauri, rust, svelte.
 
 <p align="center">
   <img src="https://img.shields.io/badge/免责声明-FF7D38" alt="免责声明" height="20" /><br/>
-  <sub>本项目为独立分支，与 OmniGet 或原作者 Tonho 无任何关联或隶属关系。<br/>
+  <sub>本项目为独立分支，与 LibreGet 或原作者 Tonho 无任何关联或隶属关系。<br/>
   由 <a href="https://github.com/igect">igect</a> 在 GPL-3.0 协议下维护 · 基于 <a href="https://github.com/tonhowtf">Tonho</a> 的原版架构</sub>
 </p>
 
 <p align="center">
-  <img src="assets/readme/home.png" alt="OmniGet 主界面：粘贴 URL、磁力链接或 .torrent，文件直接落到你的文件夹" width="900" />
+  <img src="assets/readme/home.png" alt="LibreGet 主界面：粘贴 URL、磁力链接或 .torrent，文件直接落到你的文件夹" width="900" />
 </p>
 
 ---
 
 ## 目录
 
-- [为什么用 OmniGet](#为什么用-omniget)
+- [为什么用 LibreGet](#为什么用-libreget)
 - [下载与安装](#下载与安装)
 - [一分钟完成第一次下载](#一分钟完成第一次下载)
-- [OmniGet 能下载什么](#omniget-能下载什么)
+- [LibreGet 能下载什么](#libreget-能下载什么)
 - [浏览器扩展，手把手安装](#浏览器扩展手把手安装)
 - [Tools 工具区：16 个分类共 108 个工具](#tools-工具区16-个分类共-108-个工具)
 - [插件：Courses、Telegram、Convert](#插件coursestelegramconvert)
 - [其他随附功能](#其他随附功能)
-- [隐私，以及 OmniGet 拒绝做的事](#隐私以及-omniget-拒绝做的事)
+- [隐私，以及 LibreGet 拒绝做的事](#隐私以及-libreget-拒绝做的事)
 - [常见问题](#常见问题)
 - [命令行](#命令行)
 - [从源码构建](#从源码构建)
@@ -76,19 +76,19 @@ spicetify, 下载管理器, tauri, rust, svelte.
 
 ---
 
-## 为什么用 OmniGet
+## 为什么用 LibreGet
 
 你买了一门课，想在平台下架之前把它存到硬盘上。你留着一份 yt-dlp 参数小抄，因为那些参数怎么都记不住。你有一个网站下 Instagram 快拍，另一个下 X 的视频，一个 Chrome 扩展下 Pinterest，一个 Python 脚本下字幕，而它们没有一个记得你的登录状态。
 
-OmniGet 把这一切都收进一个输入框。粘贴链接，看到带清晰度选项的预览，点下载。同一个窗口接着还能播放课程、打开 PDF、转写音频、备份 Pinterest 画板。yt-dlp 和 FFmpeg 自己安装、自己更新，没有什么要配置，也不用打开终端。
+LibreGet 把这一切都收进一个输入框。粘贴链接，看到带清晰度选项的预览，点下载。同一个窗口接着还能播放课程、打开 PDF、转写音频、备份 Pinterest 画板。yt-dlp 和 FFmpeg 自己安装、自己更新，没有什么要配置，也不用打开终端。
 
 <p align="center">
-  <img src="assets/readme/workflow.png" alt="OmniGet 的工作方式：粘贴链接或按下快捷键，OmniGet 识别网站并用 yt-dlp 或原生提取器抓取，文件落到你的文件夹，并在内置播放器、阅读器或工具中打开。" width="100%" />
+  <img src="assets/readme/workflow.png" alt="LibreGet 的工作方式：粘贴链接或按下快捷键，LibreGet 识别网站并用 yt-dlp 或原生提取器抓取，文件落到你的文件夹，并在内置播放器、阅读器或工具中打开。" width="100%" />
 </p>
 
 ### 对比
 
-| | OmniGet | 只用 yt-dlp | 单站网页下载器 | 付费课程下载器 |
+| | LibreGet | 只用 yt-dlp | 单站网页下载器 | 付费课程下载器 |
 |---|---|---|---|---|
 | 支持网站 | 课程、Instagram、X、Pinterest、Bilibili、Telegram、种子原生支持，另有 1,800+ 网站通过 yt-dlp | 1,800+ | 一个 | 一两个平台 |
 | 安装 | 下载一个文件，打开 | Python、PATH、FFmpeg、参数 | 无 | 安装程序和许可证密钥 |
@@ -97,13 +97,13 @@ OmniGet 把这一切都收进一个输入框。粘贴链接，看到带清晰度
 | 下载之后 | 播放器、阅读器、记忆卡、笔记、108 个工具 | 文件 | 文件，常常被重新编码 | 文件 |
 | 价格与许可证 | 免费，GPL-3.0 | 免费，Unlicense | 免费带广告 | 订阅 |
 
-yt-dlp 是 OmniGet 运行的引擎，没有它就没有 OmniGet。如果你常年住在终端里，只需要文件，直接用 yt-dlp 更合适。
+yt-dlp 是 LibreGet 运行的引擎，没有它就没有 LibreGet。如果你常年住在终端里，只需要文件，直接用 yt-dlp 更合适。
 
 ---
 
 ## 下载与安装
 
-选择你的系统。所有构建都发布在 [Releases 页面](https://github.com/OpenSelena/omniget/releases/latest)。更新在应用内推送。
+选择你的系统。所有构建都发布在 [Releases 页面](https://github.com/OpenSelena/libreget/releases/latest)。更新在应用内推送。
 
 <table>
   <tr>
@@ -113,13 +113,13 @@ yt-dlp 是 OmniGet 运行的引擎，没有它就没有 OmniGet。如果你常�
   </tr>
   <tr>
     <td><b>Windows 10 / 11</b></td>
-    <td><code>omniget_x.y.z_x64-setup.exe</code>（安装版）<br/><code>omniget_x.y.z_x64-portable.exe</code>（免安装，放哪儿都能跑）<br/><code>omniget_x.y.z_x64_en-US.msi</code>（企业部署用）</td>
-    <td><code>winget install -e --id OpenSelena.OmniGet</code></td>
+    <td><code>libreget_x.y.z_x64-setup.exe</code>（安装版）<br/><code>libreget_x.y.z_x64-portable.exe</code>（免安装，放哪儿都能跑）<br/><code>libreget_x.y.z_x64_en-US.msi</code>（企业部署用）</td>
+    <td><code>winget install -e --id OpenSelena.LibreGet</code></td>
   </tr>
   <tr>
     <td><b>macOS 10.15+</b></td>
-    <td><code>omniget_x.y.z_aarch64.dmg</code>，Apple Silicon（M1 及之后）<br/><code>omniget_x.y.z_x64.dmg</code>，Intel Mac</td>
-    <td><code>brew install --cask OpenSelena/tap/omniget</code></td>
+    <td><code>libreget_x.y.z_aarch64.dmg</code>，Apple Silicon（M1 及之后）<br/><code>libreget_x.y.z_x64.dmg</code>，Intel Mac</td>
+    <td><code>brew install --cask OpenSelena/tap/libreget</code></td>
   </tr>
   <tr>
     <td><b>Linux</b></td>
@@ -130,20 +130,20 @@ yt-dlp 是 OmniGet 运行的引擎，没有它就没有 OmniGet。如果你常�
 
 ### 第一次启动的警告，以及如何解除
 
-OmniGet 没有用付费证书签名，所以每个系统第一次打开时都会弹警告。这对开源桌面应用很正常，处理一次就好。
+LibreGet 没有用付费证书签名，所以每个系统第一次打开时都会弹警告。这对开源桌面应用很正常，处理一次就好。
 
 **Windows。** SmartScreen 显示一个蓝色窗口。点击**更多信息**，再点**仍要运行**。
 
-**macOS。** Gatekeeper 拒绝打开应用，可能提示它「已损坏」。把 OmniGet 拖进「应用程序」之后，打开「终端」（Spotlight 里输入 Terminal），粘贴这两行：
+**macOS。** Gatekeeper 拒绝打开应用，可能提示它「已损坏」。把 LibreGet 拖进「应用程序」之后，打开「终端」（Spotlight 里输入 Terminal），粘贴这两行：
 
 ```bash
-xattr -cr /Applications/omniget.app
-codesign --force --deep --sign - /Applications/omniget.app
+xattr -cr /Applications/libreget.app
+codesign --force --deep --sign - /Applications/libreget.app
 ```
 
-然后像平常一样从启动台打开 OmniGet。
+然后像平常一样从启动台打开 LibreGet。
 
-**Linux，Debian 12+ 或 Ubuntu 24.04+ 上的 AppImage。** 这些版本不带 AppImage 需要的 FUSE 2。如果运行报 libfuse 错误，执行 `sudo apt install libfuse2`，或者用 `./omniget.AppImage --appimage-extract-and-run` 启动。用 `.deb` 就完全没有这个问题。
+**Linux，Debian 12+ 或 Ubuntu 24.04+ 上的 AppImage。** 这些版本不带 AppImage 需要的 FUSE 2。如果运行报 libfuse 错误，执行 `sudo apt install libfuse2`，或者用 `./libreget.AppImage --appimage-extract-and-run` 启动。用 `.deb` 就完全没有这个问题。
 
 ### 便携模式
 
@@ -153,25 +153,25 @@ codesign --force --deep --sign - /Applications/omniget.app
 
 ## 一分钟完成第一次下载
 
-1. 打开 OmniGet。设置向导会问你语言和主题，然后一键安装 yt-dlp 和 FFmpeg。yt-dlp 在运行前会核对 SHA-256。
+1. 打开 LibreGet。设置向导会问你语言和主题，然后一键安装 yt-dlp 和 FFmpeg。yt-dlp 在运行前会核对 SHA-256。
 2. 复制任意链接：YouTube 视频、Instagram Reel、X 帖子、Pinterest 画板、磁力链接、文件直链。
-3. 粘贴到主界面的输入框。OmniGet 识别网站，显示标题、封面和可用清晰度。选一个，按回车。
+3. 粘贴到主界面的输入框。LibreGet 识别网站，显示标题、封面和可用清晰度。选一个，按回车。
 
 「下载」页面直接从下载器读取速度、阶段和剩余时间，所以卡住的下载看起来就是卡住了，而不是一直停在「剩余 3 秒」。中断的下载从断点继续。被限速的网站会以退避方式重试，每个站点的连接数也会自动调整：YouTube 最多 16 个并行分片，返回 429 的站点则减少。机器上有 Python 3.10 或更新版本时，yt-dlp 会以 zipapp 方式在其上运行，启动不到一秒，不用每次都解包内置的二进制文件。
 
 <p align="center">
-  <img src="assets/readme/downloads.png" alt="OmniGet 下载页面，一个 4K YouTube 视频正在下载，显示阶段、速度、剩余时间和精确的 yt-dlp 命令，以及排队和已完成的条目" width="900" />
+  <img src="assets/readme/downloads.png" alt="LibreGet 下载页面，一个 4K YouTube 视频正在下载，显示阶段、速度、剩余时间和精确的 yt-dlp 命令，以及排队和已完成的条目" width="900" />
 </p>
 
 ### 连窗口都不用开
 
-在系统任何地方复制一个链接，按 **Ctrl+Shift+D**（macOS 上是 **Cmd+Shift+D**）。OmniGet 读取剪贴板，在后台开始下载。第二个快捷键 **Ctrl+Shift+M** 只抓音频，一条 YouTube 链接不用打开任何东西就变成 MP3。它默认关闭，需要你手动启用；两个快捷键都可以在**设置 → 下载 → 剪贴板与快捷键**里重新绑定。
+在系统任何地方复制一个链接，按 **Ctrl+Shift+D**（macOS 上是 **Cmd+Shift+D**）。LibreGet 读取剪贴板，在后台开始下载。第二个快捷键 **Ctrl+Shift+M** 只抓音频，一条 YouTube 链接不用打开任何东西就变成 MP3。它默认关闭，需要你手动启用；两个快捷键都可以在**设置 → 下载 → 剪贴板与快捷键**里重新绑定。
 
 ---
 
-## OmniGet 能下载什么
+## LibreGet 能下载什么
 
-OmniGet 为最常用的平台写了原生提取器，其余的交给 [yt-dlp](https://github.com/yt-dlp/yt-dlp)，后者覆盖大约 1,800 个网站。
+LibreGet 为最常用的平台写了原生提取器，其余的交给 [yt-dlp](https://github.com/yt-dlp/yt-dlp)，后者覆盖大约 1,800 个网站。
 
 | 类别 | 网站与格式 |
 |---|---|
@@ -180,71 +180,71 @@ OmniGet 为最常用的平台写了原生提取器，其余的交给 [yt-dlp](ht
 | <img src="https://cdn.simpleicons.org/bilibili/00A1D6" width="18" height="18" align="center" alt="哔哩哔哩" /> 哔哩哔哩，登录后 | 按你的会员等级提供 4K、HDR、杜比视界、Hi-Res 无损和杜比全景声。弹幕导出为 XML、ASS 或 JSON，为 Kodi 和 Jellyfin 生成 NFO，自定义命名模板，支持 11 种链接类型，包括番剧、课程、收藏夹、稍后再看和历史记录 |
 | <img src="https://api.iconify.design/ph:images.svg?color=%23E0A800" width="18" height="18" align="center" alt="图片画廊" /> 图片画廊 | 通过 gallery-dl 下载 250+ 网站的整个画廊和主页（DeviantArt、Pixiv、ArtStation、Flickr、Tumblr、Imgur、Kemono 等） |
 | <img src="https://api.iconify.design/ph:stack.svg?color=%23FFB340" width="18" height="18" align="center" alt="批量" /> 批量 | 粘贴多条链接或载入 `.txt`，下载整个 subreddit、Reddit 和 X 的主页、Instagram 和 Pinterest 的主页 |
-| <img src="https://api.iconify.design/ph:folder-simple.svg?color=%23A66A24" width="18" height="18" align="center" alt="文件与传输" /> 文件与传输 | 用内置 BitTorrent 客户端下载 `.torrent` 和磁力链接，HTTP 直链，HLS 和 DASH 清单，以及两台装了 OmniGet 的电脑之间用一串短口令互传文件 |
+| <img src="https://api.iconify.design/ph:folder-simple.svg?color=%23A66A24" width="18" height="18" align="center" alt="文件与传输" /> 文件与传输 | 用内置 BitTorrent 客户端下载 `.torrent` 和磁力链接，HTTP 直链，HLS 和 DASH 清单，以及两台装了 LibreGet 的电脑之间用一串短口令互传文件 |
 | <img src="https://cdn.simpleicons.org/telegram/2CA5E0" width="18" height="18" align="center" alt="Telegram" /> Telegram | 通过 Telegram 插件下载你所在的任何频道或群组里的照片、视频、文件和音频 |
 
 设置一次就不用再管的选项：默认清晰度、纯音频格式（MP3、M4A、Opus、FLAC 或 WAV）、字幕语言和格式（SRT、VTT、ASS，内嵌或外挂）、封面和元数据嵌入、文件名模板、按平台分文件夹、跳过已有文件、按章节切分、限速、并发数、代理。规则可以把某个频道或域名固定送到指定文件夹和清晰度，不再每次询问。关注的频道会在后台检查，可以自动下载新视频并在托盘通知。
 
 <p align="center">
-  <img src="assets/readme/settings.png" alt="OmniGet 设置：分组侧栏包含外观、下载、网络、Cookie、频道、AI、插件和高级，下载部分包含输出、清晰度、字幕、剪贴板与快捷键、按平台选项" width="900" />
+  <img src="assets/readme/settings.png" alt="LibreGet 设置：分组侧栏包含外观、下载、网络、Cookie、频道、AI、插件和高级，下载部分包含输出、清晰度、字幕、剪贴板与快捷键、按平台选项" width="900" />
 </p>
 
 ---
 
 ## 浏览器扩展，手把手安装
 
-扩展做两件事。在它认识的网站上（YouTube、Instagram、TikTok、X、Reddit、Twitch、Pinterest、Bluesky、Telegram、Vimeo、Udemy、Hotmart、Rocketseat、哔哩哔哩、SoundCloud），点一下或按 **Alt+O** 就把当前页面发给 OmniGet。在其他任何网站上，它监听网络流量，发现 MP4、HLS、DASH、WebM 和音频流，并在弹窗里列出来。两种情况下它都会转发你的 Cookie 和 Referer，正是这一点让 OmniGet 能下载你已登录的私密内容，比如 Instagram 快拍、付费课程或会员专属视频。Cookie 按真实站点分组，所以 `.com.br` 这类域名有自己独立的条目，不会和其他所有 `.com.br` 站点混在一起。弹窗里还有一个针对 YouTube 的 **强制 H.264** 开关，给播放 VP9 和 AV1 会卡顿的电脑用。
+扩展做两件事。在它认识的网站上（YouTube、Instagram、TikTok、X、Reddit、Twitch、Pinterest、Bluesky、Telegram、Vimeo、Udemy、Hotmart、Rocketseat、哔哩哔哩、SoundCloud），点一下或按 **Alt+O** 就把当前页面发给 LibreGet。在其他任何网站上，它监听网络流量，发现 MP4、HLS、DASH、WebM 和音频流，并在弹窗里列出来。两种情况下它都会转发你的 Cookie 和 Referer，正是这一点让 LibreGet 能下载你已登录的私密内容，比如 Instagram 快拍、付费课程或会员专属视频。Cookie 按真实站点分组，所以 `.com.br` 这类域名有自己独立的条目，不会和其他所有 `.com.br` 站点混在一起。弹窗里还有一个针对 YouTube 的 **强制 H.264** 开关，给播放 VP9 和 AV1 会卡顿的电脑用。
 
 按你的熟悉程度选一个级别。
 
 <p align="center">
-  <img src="assets/readme/extension.png" alt="配对流程：在 Chrome 里安装扩展，在 OmniGet 设置里点「配对扩展」，扩展在 localhost 找到应用并连接。之后每次下载都带上你的 Cookie。" width="100%" />
+  <img src="assets/readme/extension.png" alt="配对流程：在 Chrome 里安装扩展，在 LibreGet 设置里点「配对扩展」，扩展在 localhost 找到应用并连接。之后每次下载都带上你的 Cookie。" width="100%" />
 </p>
 
 ### 级别一：在应用里完成（不用另外下载，不用解压）
 
-1. 打开 OmniGet，没装的先装上。至少启动一次。
-2. 进入**设置 → 插件 → 浏览器扩展**。点 Chrome 旁边的**更新 / 安装**。OmniGet 会把内置的扩展复制到一个文件夹，并帮你打开这个文件夹。
+1. 打开 LibreGet，没装的先装上。至少启动一次。
+2. 进入**设置 → 插件 → 浏览器扩展**。点 Chrome 旁边的**更新 / 安装**。LibreGet 会把内置的扩展复制到一个文件夹，并帮你打开这个文件夹。
 3. 打开 Chrome（Edge、Brave 等 Chromium 浏览器操作一样），在地址栏输入 `chrome://extensions`。
 4. 打开右上角的**开发者模式**开关。
-5. 点**加载已解压的扩展程序**，选择 OmniGet 刚打开的那个文件夹。
-6. 工具栏出现 OmniGet 图标。一个选项页面会自动打开，提示正在寻找桌面应用。
-7. 回到 OmniGet，还是在**设置 → 插件 → 浏览器扩展**，点**配对扩展**。几秒钟后应用显示「扩展已连接」，选项页面变绿。完成。
+5. 点**加载已解压的扩展程序**，选择 LibreGet 刚打开的那个文件夹。
+6. 工具栏出现 LibreGet 图标。一个选项页面会自动打开，提示正在寻找桌面应用。
+7. 回到 LibreGet，还是在**设置 → 插件 → 浏览器扩展**，点**配对扩展**。几秒钟后应用显示「扩展已连接」，选项页面变绿。完成。
 
-从此以后，打开任何受支持的页面，点图标即可。页面、Cookie 和标题发给 OmniGet，下载开始。你的 Cookie 也会出现在**设置 → Cookie**里，Courses 插件以及 Instagram、X 和 Pinterest 工具都会复用它们。
+从此以后，打开任何受支持的页面，点图标即可。页面、Cookie 和标题发给 LibreGet，下载开始。你的 Cookie 也会出现在**设置 → Cookie**里，Courses 插件以及 Instagram、X 和 Pinterest 工具都会复用它们。
 
 ### 级别二：从发布包的 zip 安装
 
-每个版本都附带 `omniget-chrome-extension-vX.Y.Z.zip`。从[最新版本](https://github.com/OpenSelena/omniget/releases/latest)下载、解压，然后按上面第 3 到第 7 步操作，把**加载已解压的扩展程序**指向解压出的文件夹。适合应用装在一台电脑、浏览器在另一台的情况，或者你在帮别人安装。
+每个版本都附带 `libreget-chrome-extension-vX.Y.Z.zip`。从[最新版本](https://github.com/OpenSelena/libreget/releases/latest)下载、解压，然后按上面第 3 到第 7 步操作，把**加载已解压的扩展程序**指向解压出的文件夹。适合应用装在一台电脑、浏览器在另一台的情况，或者你在帮别人安装。
 
 ### 级别三：Firefox、其他浏览器和手动配对
 
 Firefox：**设置 → 插件 → 浏览器扩展 → 更新 / 安装**，点 Firefox 旁边的按钮，然后打开 `about:debugging#/runtime/this-firefox`，点**临时载入附加组件**，选择导出文件夹里的 `manifest.json`。Firefox 重启后会丢弃临时附加组件，所以在扩展上架 AMO 之前需要重复这一步。Safari 暂不支持，因为 Safari 扩展必须通过 App Store 分发。
 
-手动配对：如果**配对扩展**超时了，打开扩展的选项页（右键图标 → 选项），然后在 OmniGet 里显示并复制**配对令牌**，粘贴到选项页。端点 URL 会自动检测。应用监听 `127.0.0.1` 的 47720 到 47729 端口，令牌按安装生成，所以什么都不会离开你的电脑。
+手动配对：如果**配对扩展**超时了，打开扩展的选项页（右键图标 → 选项），然后在 LibreGet 里显示并复制**配对令牌**，粘贴到选项页。端点 URL 会自动检测。应用监听 `127.0.0.1` 的 47720 到 47729 端口，令牌按安装生成，所以什么都不会离开你的电脑。
 
-如果扩展已安装但 OmniGet 没开着，点击会回落到 `omniget://` 链接协议，仍然能把 URL 加入队列，但带不上 Cookie。Chrome 第一次询问时勾选「始终允许」。
+如果扩展已安装但 LibreGet 没开着，点击会回落到 `libreget://` 链接协议，仍然能把 URL 加入队列，但带不上 Cookie。Chrome 第一次询问时勾选「始终允许」。
 
 ---
 
 ## Tools 工具区：16 个分类共 108 个工具
 
-Tools 是 OmniGet 里长到下载之外的那部分。每个方块是一项工作：一条独立的 Rust 命令，JSON 进、JSON 出，这也是让 AI 代理通过内置的 MCP 服务器调用它们的基础。工具区有一个能听懂英文和葡萄牙文的搜索框（输入「legenda」能找到字幕工具），还有平台筛选；只能在 Windows 上运行的工具会在方块上注明，在其他系统上隐藏。
+Tools 是 LibreGet 里长到下载之外的那部分。每个方块是一项工作：一条独立的 Rust 命令，JSON 进、JSON 出，这也是让 AI 代理通过内置的 MCP 服务器调用它们的基础。工具区有一个能听懂英文和葡萄牙文的搜索框（输入「legenda」能找到字幕工具），还有平台筛选；只能在 Windows 上运行的工具会在方块上注明，在其他系统上隐藏。
 
 <p align="center">
-  <img src="assets/readme/tools.png" alt="OmniGet 的 Tools 工具区，16 个分类：YouTube、语音与字幕、视频编辑、Instagram、X、Pinterest、Spotify、PDF、文档、图片、系统、文件、下载、自动化、手机和 AI" width="900" />
+  <img src="assets/readme/tools.png" alt="LibreGet 的 Tools 工具区，16 个分类：YouTube、语音与字幕、视频编辑、Instagram、X、Pinterest、Spotify、PDF、文档、图片、系统、文件、下载、自动化、手机和 AI" width="900" />
 </p>
 
 状态标记：无标记表示可用，**beta** 表示能用但没在所有类型账号上测过，**计划中** 表示方块已经放上去让你看到方向，但暂时什么都不做。
 
 <table>
   <tr>
-    <td><img src="assets/readme/tools-instagram.png" alt="OmniGet 的 Instagram 工具：下载帖子、批量下载、Reel 音频、快拍、精选、谁看了我的快拍、查看主页、高清头像、下载整个主页、谁没回关、粉丝、互关、谁取关了我、僵尸粉、白名单、数据导出、主页分析、对比主页、话题探索、评论导出、点赞名单、抽奖、发布和定时发布" /></td>
-    <td><img src="assets/readme/tools-x.png" alt="OmniGet 的 X / Twitter 工具：下载帖子、展开长推、帖子转图片、主页透视、主页媒体、高级搜索、导出书签、谁没回关、你的 X 存档和 Grok" /></td>
+    <td><img src="assets/readme/tools-instagram.png" alt="LibreGet 的 Instagram 工具：下载帖子、批量下载、Reel 音频、快拍、精选、谁看了我的快拍、查看主页、高清头像、下载整个主页、谁没回关、粉丝、互关、谁取关了我、僵尸粉、白名单、数据导出、主页分析、对比主页、话题探索、评论导出、点赞名单、抽奖、发布和定时发布" /></td>
+    <td><img src="assets/readme/tools-x.png" alt="LibreGet 的 X / Twitter 工具：下载帖子、展开长推、帖子转图片、主页透视、主页媒体、高级搜索、导出书签、谁没回关、你的 X 存档和 Grok" /></td>
   </tr>
   <tr>
-    <td><img src="assets/readme/tools-pinterest.png" alt="OmniGet 的 Pinterest 工具：下载 Pin、画板备份、主页备份、无 AI 无广告搜索、相似 Pin、查找来源、重复项、配色、离线画廊和关键词灵感" /></td>
-    <td><img src="assets/readme/tools-speech.png" alt="OmniGet 的语音与字幕工具：用 whisper.cpp 转写、文字转语音、翻译字幕、按字幕配音，以及计划中的声音克隆、声音设计、人声分离和听写" /></td>
+    <td><img src="assets/readme/tools-pinterest.png" alt="LibreGet 的 Pinterest 工具：下载 Pin、画板备份、主页备份、无 AI 无广告搜索、相似 Pin、查找来源、重复项、配色、离线画廊和关键词灵感" /></td>
+    <td><img src="assets/readme/tools-speech.png" alt="LibreGet 的语音与字幕工具：用 whisper.cpp 转写、文字转语音、翻译字幕、按字幕配音，以及计划中的声音克隆、声音设计、人声分离和听写" /></td>
   </tr>
 </table>
 
@@ -306,7 +306,7 @@ Tools 是 OmniGet 里长到下载之外的那部分。每个方块是一项工�
 - **点赞名单。** 列出并导出给帖子点赞的账号。
 - **抽奖。** 在评论中抽取获奖者，支持提及、关键词和每人一次的规则。
 - **发布。** 通过你的会话或官方 Graph API 发布照片、多图、Reel、视频或快拍。*beta*
-- **定时发布。** 按日期和时间排队发帖，OmniGet 开着的时候自动发布。*beta*
+- **定时发布。** 按日期和时间排队发帖，LibreGet 开着的时候自动发布。*beta*
 
 ### <img src="https://cdn.simpleicons.org/x/000000/ffffff" width="20" height="20" align="center" alt="X" /> X / Twitter（10）
 
@@ -401,11 +401,11 @@ Tools 是 OmniGet 里长到下载之外的那部分。每个方块是一项工�
 ### <img src="https://api.iconify.design/ph:sparkle.svg?color=%233D5BF0" width="20" height="20" align="center" alt="AI" /> AI（6）
 
 - **比较价格。** 同一模型在不同服务商的价格，数据来自 LiteLLM 和 models.dev。
-- **AI 花费。** OmniGet 在 AI 上花了多少，按天、模型和任务统计，来自本地账本。
+- **AI 花费。** LibreGet 在 AI 上花了多少，按天、模型和任务统计，来自本地账本。
 - **本地模型（Ollama）。** 查看、下载和删除本地模型，把它们当作免费服务商使用。
 - **去 AI 味。** 把一眼 AI 生成的文字改写得像人写的，不改变原意。运行在你配置的 AI 上。*beta*
 - **API 密钥。** 本地保险库，集中保管密钥和账号，带连接测试，可查看 OpenRouter、DeepSeek、SiliconFlow 和 New API 的余额，并导出到 Claude Code、Codex、Cherry Studio、opencode 或 `.env` 文件。
-- **MCP 服务器。** 通过本地桥接以 Model Context Protocol 暴露 OmniGet 的工具，31 个工具，使用和扩展相同的令牌，附带 Claude Code、Claude Desktop、Cursor、VS Code、Goose 和 Codex 的现成配置片段。*beta*
+- **MCP 服务器。** 通过本地桥接以 Model Context Protocol 暴露 LibreGet 的工具，31 个工具，使用和扩展相同的令牌，附带 Claude Code、Claude Desktop、Cursor、VS Code、Goose 和 Codex 的现成配置片段。*beta*
 
 所有涉及 AI 的工具都使用**设置 → AI** 里配置的服务商：OpenAI、Anthropic，或任何兼容 OpenAI 接口的本地端点，比如 Ollama 或 LM Studio。密钥保存在本地，从不写入日志。自动点击器、听写和回放缓冲都可以各自设置全局快捷键。
 
@@ -413,15 +413,15 @@ Tools 是 OmniGet 里长到下载之外的那部分。每个方块是一项工�
 
 ## 插件：Courses、Telegram、Convert
 
-插件是启动时加载的独立 Rust 库。OmniGet 在第一次启动时安装官方插件集，并自动更新。Marketplace 页面显示已安装的插件、每个插件被允许做什么（事件、通知、设置、下载文件夹、代理、托管工具、下载队列），并且可以隐藏、禁用或卸载任何一个。
+插件是启动时加载的独立 Rust 库。LibreGet 在第一次启动时安装官方插件集，并自动更新。Marketplace 页面显示已安装的插件、每个插件被允许做什么（事件、通知、设置、下载文件夹、代理、托管工具、下载队列），并且可以隐藏、禁用或卸载任何一个。
 
 <p align="center">
-  <img src="assets/readme/marketplace.png" alt="OmniGet 的 Marketplace，列出 Courses、Telegram 和 Convert 插件，显示版本、作者、权限和启用开关" width="900" />
+  <img src="assets/readme/marketplace.png" alt="LibreGet 的 Marketplace，列出 Courses、Telegram 和 Convert 插件，显示版本、作者、权限和启用开关" width="900" />
 </p>
 
 ### <img src="https://api.iconify.design/ph:graduation-cap.svg?color=%23F28500" width="20" height="20" align="center" alt="Courses" /> Courses
 
-通过应用内的浏览器窗口登录 **Hotmart**、**Udemy**、**Kiwify**、**Rocketseat** 或 **Meta-Analysis Academy**，也可以使用扩展保存的 Cookie，或在平台允许时直接用邮箱和密码。OmniGet 列出你购买的课程，打开课程大纲让你勾选想要的章节（并告诉你有多少课时受 DRM 保护、会被跳过），然后下载全部课时和附件，需要的话可以连续编号。Hotmart 使用当前的 OIDC 登录流程，所以在 Hotmart 2026 年更换认证方式之后仍然可用，免费课程和在 Hotmart Club 之外交付的课程也会列出来。
+通过应用内的浏览器窗口登录 **Hotmart**、**Udemy**、**Kiwify**、**Rocketseat** 或 **Meta-Analysis Academy**，也可以使用扩展保存的 Cookie，或在平台允许时直接用邮箱和密码。LibreGet 列出你购买的课程，打开课程大纲让你勾选想要的章节（并告诉你有多少课时受 DRM 保护、会被跳过），然后下载全部课时和附件，需要的话可以连续编号。Hotmart 使用当前的 OIDC 登录流程，所以在 Hotmart 2026 年更换认证方式之后仍然可用，免费课程和在 Hotmart Club 之外交付的课程也会列出来。
 
 ### <img src="https://cdn.simpleicons.org/telegram/2CA5E0" width="20" height="20" align="center" alt="Telegram" /> Telegram
 
@@ -438,8 +438,8 @@ FFmpeg 转换，机器支持时使用 GPU 加速：视频和音频的容器、�
 - 命令面板（**Ctrl+K** 或 **Cmd+K**），跳转到任何页面、设置或工具。
 - 剪贴板检测，复制链接后弹出提示，一键下载。
 - Cookie 管理器，按网站保存会话，来自扩展捕获或导入的 `cookies.txt`，每个域名都有测试按钮。
-- 视频摘要：在**设置 → AI** 里粘贴 URL，OmniGet 抓取字幕并按你选的长度和语言总结。
-- 给别人发文件：选文件，分享口令，对方粘贴到自己的 OmniGet 里。
+- 视频摘要：在**设置 → AI** 里粘贴 URL，LibreGet 抓取字幕并按你选的长度和语言总结。
+- 给别人发文件：选文件，分享口令，对方粘贴到自己的 LibreGet 里。
 - Discord Rich Presence，显示你在听、在看或在读什么。下载内容保持私密。
 - 托盘图标、随系统启动、最小化启动、下载时阻止休眠。
 - 每次下载都保留实际执行的 yt-dlp 命令。打开、改一个参数、重试。
@@ -449,21 +449,21 @@ FFmpeg 转换，机器支持时使用 GPU 加速：视频和音频的容器、�
 
 ---
 
-## 隐私，以及 OmniGet 拒绝做的事
+## 隐私，以及 LibreGet 拒绝做的事
 
-一切都在你的电脑上运行。没有账号，中间没有我们的服务器，也不会上报你下载了什么。Cookie 和 API 密钥保存在你的本地配置里。OmniGet 自己发起的网络请求只有三类：你要求下载的网站、去 GitHub 获取更新和插件、以及你在使用 AI 工具时配置的 AI 服务商。
+一切都在你的电脑上运行。没有账号，中间没有我们的服务器，也不会上报你下载了什么。Cookie 和 API 密钥保存在你的本地配置里。LibreGet 自己发起的网络请求只有三类：你要求下载的网站、去 GitHub 获取更新和插件、以及你在使用 AI 工具时配置的 AI 服务商。
 
-OmniGet 只下载你自己已登录的会话本来就能打开的内容。它不绕过 DRM，不破解付费墙，不共享凭据；有 DRM 保护的课时会被跳过并告知。尊重版权和各平台的服务条款是你的责任。完整条款在应用内的**关于 → 条款与伦理**。
+LibreGet 只下载你自己已登录的会话本来就能打开的内容。它不绕过 DRM，不破解付费墙，不共享凭据；有 DRM 保护的课时会被跳过并告知。尊重版权和各平台的服务条款是你的责任。完整条款在应用内的**关于 → 条款与伦理**。
 
 ---
 
 ## 常见问题
 
-**OmniGet 免费吗？**
+**LibreGet 免费吗？**
 免费。GPL-3.0，没有付费版本，没有广告，不用注册。
 
-**OmniGet 是 yt-dlp 的图形界面吗？**
-一部分是。yt-dlp 负责长尾网站，OmniGet 把它打包、校验并自动更新。在此之上还有课程、Instagram、X、Pinterest、哔哩哔哩、Telegram 和种子的原生提取器，带续传和重试的队列，Tools 工具区，以及媒体转换功能。
+**LibreGet 是 yt-dlp 的图形界面吗？**
+一部分是。yt-dlp 负责长尾网站，LibreGet 把它打包、校验并自动更新。在此之上还有课程、Instagram、X、Pinterest、哔哩哔哩、Telegram 和种子的原生提取器，带续传和重试的队列，Tools 工具区，以及媒体转换功能。
 
 **能下载我买过的 Udemy 或 Hotmart 课程吗？**
 能。安装 Courses 插件（已预装），在应用里登录，选择课程和章节，下载。课时和附件按课程分文件夹保存。Kiwify、Rocketseat 和 Meta-Analysis Academy 的用法相同。
@@ -496,31 +496,31 @@ OmniGet 只下载你自己已登录的会话本来就能打开的内容。它不
 能，在 Windows 上，在可执行文件旁边放一个 `portable.txt`。
 
 **Linux 该选哪个包？**
-Debian 和 Ubuntu：`.deb`。Fedora、openSUSE、RHEL 系：`.rpm`。其他：`.AppImage`。x86_64 和 ARM64 都有发布。OmniGet 不在 Flathub 上。
+Debian 和 Ubuntu：`.deb`。Fedora、openSUSE、RHEL 系：`.rpm`。其他：`.AppImage`。x86_64 和 ARM64 都有发布。LibreGet 不在 Flathub 上。
 
 ---
 
 ## 命令行
 
-`omniget-cli` 随每个版本发布，支持 Windows、macOS（Intel 和 Apple Silicon）和 Linux。从[最新版本](https://github.com/OpenSelena/omniget/releases/latest)下载 `omniget-cli-<版本>-<平台>`。
+`libreget-cli` 随每个版本发布，支持 Windows、macOS（Intel 和 Apple Silicon）和 Linux。从[最新版本](https://github.com/OpenSelena/libreget/releases/latest)下载 `libreget-cli-<版本>-<平台>`。
 
 ```bash
-omniget info <url>                     # 标题、格式和大小，不下载任何东西
-omniget download <url> -q 1080 -o ~/Videos
-omniget download <url> --audio-only --subs en,zh
-omniget batch links.txt -m 3           # 每行一个 URL，同时下 3 个
-omniget import-cookies cookies.txt     # Netscape 格式
+libreget info <url>                     # 标题、格式和大小，不下载任何东西
+libreget download <url> -q 1080 -o ~/Videos
+libreget download <url> --audio-only --subs en,zh
+libreget batch links.txt -m 3           # 每行一个 URL，同时下 3 个
+libreget import-cookies cookies.txt     # Netscape 格式
 ```
 
 ---
 
 ## 从源码构建
 
-如果你只是想用 OmniGet，请[直接下载发布版](#下载与安装)。构建需要 [Rust](https://rustup.rs/)（精确的工具链版本固定在 `rust-toolchain.toml` 里，因为插件 ABI 依赖它）、[Node.js](https://nodejs.org/) 18+ 和 [pnpm](https://pnpm.io/)。
+如果你只是想用 LibreGet，请[直接下载发布版](#下载与安装)。构建需要 [Rust](https://rustup.rs/)（精确的工具链版本固定在 `rust-toolchain.toml` 里，因为插件 ABI 依赖它）、[Node.js](https://nodejs.org/) 18+ 和 [pnpm](https://pnpm.io/)。
 
 ```bash
-git clone https://github.com/OpenSelena/omniget.git
-cd omniget
+git clone https://github.com/OpenSelena/libreget.git
+cd libreget
 pnpm install
 pnpm tauri dev
 ```
@@ -543,7 +543,7 @@ pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'
 
 正式版本用只有维护者持有的私钥签名更新包，所以直接 `pnpm tauri build` 会停在 "A public key has been found, but no private key"。上面的参数在本地构建时关掉这些更新包，其他一切不变。
 
-核心插件（`courses`、`telegram`、`convert`）均作为内置模块静态链接在 `src-tauri/plugins/` 目录中，随主程序一起编译。插件注册表为 [omniget-plugins](https://github.com/OpenSelena/omniget-plugins)。
+核心插件（`courses`、`telegram`、`convert`）均作为内置模块静态链接在 `src-tauri/plugins/` 目录中，随主程序一起编译。插件注册表为 [libreget-plugins](https://github.com/OpenSelena/libreget-plugins)。
 
 技术栈：Tauri 2、Rust、SvelteKit（Svelte 5）、SQLite、yt-dlp、FFmpeg、librqbit（种子）、whisper.cpp、aria2、gallery-dl。
 
@@ -551,18 +551,18 @@ pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'
 
 ## 参与贡献与翻译
 
-Bug 报告和 Pull Request 请提到 [Issues](https://github.com/OpenSelena/omniget/issues) 和 [Pull requests](https://github.com/OpenSelena/omniget/pulls)。提问和快速求助在 [Telegram](https://t.me/OpenSelena)。
+Bug 报告和 Pull Request 请提到 [Issues](https://github.com/OpenSelena/libreget/issues) 和 [Pull requests](https://github.com/OpenSelena/libreget/pulls)。提问和快速求助在 [Telegram](https://t.me/OpenSelena)。
 
-翻译在 [Weblate](https://hosted.weblate.org/engage/omniget-openselena/) 上进行。选择你的语言，直接在浏览器里翻译。新字符串合入 `main` 几小时后就会出现在那里。
+翻译在 [Weblate](https://hosted.weblate.org/engage/libreget-openselena/) 上进行。选择你的语言，直接在浏览器里翻译。新字符串合入 `main` 几小时后就会出现在那里。
 
-OmniGet 建立在 [yt-dlp](https://github.com/yt-dlp/yt-dlp)、[FFmpeg](https://ffmpeg.org/)、[gallery-dl](https://github.com/mikf/gallery-dl)、[whisper.cpp](https://github.com/ggerganov/whisper.cpp)、[aria2](https://aria2.github.io/)、[SponsorBlock](https://sponsor.ajay.app/)、[Return YouTube Dislike](https://returnyoutubedislike.com/)、[FxTwitter](https://github.com/FixTweet/FxTwitter)、[Spicetify](https://spicetify.app/) 和 [Tauri](https://tauri.app/) 之上。感谢所有维护这些项目的人。
+LibreGet 建立在 [yt-dlp](https://github.com/yt-dlp/yt-dlp)、[FFmpeg](https://ffmpeg.org/)、[gallery-dl](https://github.com/mikf/gallery-dl)、[whisper.cpp](https://github.com/ggerganov/whisper.cpp)、[aria2](https://aria2.github.io/)、[SponsorBlock](https://sponsor.ajay.app/)、[Return YouTube Dislike](https://returnyoutubedislike.com/)、[FxTwitter](https://github.com/FixTweet/FxTwitter)、[Spicetify](https://spicetify.app/) 和 [Tauri](https://tauri.app/) 之上。感谢所有维护这些项目的人。
 
-主界面上的企鹅是 OmniGet 的吉祥物。欢迎社区同人创作。项目品牌与美术资源不得用于商业用途或打包进第三方衍生版本。
+主界面上的企鹅是 LibreGet 的吉祥物。欢迎社区同人创作。项目品牌与美术资源不得用于商业用途或打包进第三方衍生版本。
 
 <p align="center">
-  <a href="https://star-history.com/#OpenSelena/omniget&Date"><img src="https://api.star-history.com/svg?repos=OpenSelena/omniget&type=Date" alt="OpenSelena/omniget 的 Star 历史" width="600" /></a>
+  <a href="https://star-history.com/#OpenSelena/libreget&Date"><img src="https://api.star-history.com/svg?repos=OpenSelena/libreget&type=Date" alt="OpenSelena/libreget 的 Star 历史" width="600" /></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/OpenSelena/omniget/releases/latest"><b>下载 OmniGet</b></a> · <a href="LICENSE">GPL-3.0</a>
+  <a href="https://github.com/OpenSelena/libreget/releases/latest"><b>下载 LibreGet</b></a> · <a href="LICENSE">GPL-3.0</a>
 </p>

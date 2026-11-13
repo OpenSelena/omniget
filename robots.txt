@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://omniget.nav.bd/sitemap.xml
+Sitemap: https://libreget.nav.bd/sitemap.xml

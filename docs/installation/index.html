@@ -3,17 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Installation & Binary Packages · OmniGet Documentation</title>
-  <meta name="description" content="Precompiled release binaries, winget/brew setup, macOS Gatekeeper codesign fixes, and Linux GStreamer packages for OmniGet." />
-  <link rel="canonical" href="https://omniget.nav.bd/docs/installation/" />
+  <title>Installation & Binary Packages · LibreGet Documentation</title>
+  <meta name="description" content="Precompiled release binaries, winget/brew setup, macOS Gatekeeper codesign fixes, and Linux GStreamer packages for LibreGet." />
+  <link rel="canonical" href="https://libreget.nav.bd/docs/installation/" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="article" />
-  <meta property="og:site_name" content="OmniGet Documentation" />
+  <meta property="og:site_name" content="LibreGet Documentation" />
   <meta property="og:title" content="Installation & Binary Packages" />
-  <meta property="og:description" content="Precompiled release binaries, winget/brew setup, macOS Gatekeeper codesign fixes, and Linux GStreamer packages for OmniGet." />
-  <meta property="og:url" content="https://omniget.nav.bd/docs/installation/" />
-  <meta property="og:image" content="https://omniget.nav.bd/assets/readme/home.png" />
+  <meta property="og:description" content="Precompiled release binaries, winget/brew setup, macOS Gatekeeper codesign fixes, and Linux GStreamer packages for LibreGet." />
+  <meta property="og:url" content="https://libreget.nav.bd/docs/installation/" />
+  <meta property="og:image" content="https://libreget.nav.bd/assets/readme/home.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -26,7 +26,7 @@
   <script>
     (function() {
       try {
-        var saved = localStorage.getItem('omniget_docs_theme') || localStorage.getItem('theme');
+        var saved = (localStorage.getItem('libreget_docs_theme') || localStorage.getItem('omniget_docs_theme')) || localStorage.getItem('theme');
         var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         if (saved === 'dark' || (!saved && prefersDark)) {
           document.documentElement.classList.add('dark');
@@ -46,7 +46,7 @@
 
   <style>
     /* ============================================================
-       OmniGet Documentation — UI skin
+       LibreGet Documentation — UI skin
        Design system: vercel.com/docs (Geist type, Vercel palette)
        ============================================================ */
 
@@ -1263,9 +1263,9 @@
             <line x1="3" y1="18" x2="21" y2="18" />
           </svg>
         </button>
-        <a href="../../" class="brand-logo-link" aria-label="OmniGet Home">
-          <img src="../../static/favicon.png" alt="OmniGet Logo" />
-          <span>OmniGet</span>
+        <a href="../../" class="brand-logo-link" aria-label="LibreGet Home">
+          <img src="../../static/favicon.png" alt="LibreGet Logo" />
+          <span>LibreGet</span>
         </a>
         <span class="brand-badge">DOCS</span>
       </div>
@@ -1303,7 +1303,7 @@
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="themeIconMoon"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" /></svg>
         </button>
 
-        <a class="btn-top-download" href="https://github.com/OpenSelena/omniget/releases/latest">
+        <a class="btn-top-download" href="https://github.com/OpenSelena/libreget/releases/latest">
           <span>Get App</span>
           <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14" />
   <path d="m12 5 7 7-7 7" /></svg>
@@ -1472,13 +1472,13 @@
         </div>
         <ul class="sidebar-nav-list">
           <li>
-            <a href="https://github.com/OpenSelena/omniget" target="_blank" rel="noopener" class="sidebar-link">
+            <a href="https://github.com/OpenSelena/libreget" target="_blank" rel="noopener" class="sidebar-link">
               <span>GitHub Repository</span>
               <svg class="icon icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: auto; opacity: 0.5;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
             </a>
           </li>
           <li>
-            <a href="https://t.me/omniget" target="_blank" rel="noopener" class="sidebar-link">
+            <a href="https://t.me/OpenSelena" target="_blank" rel="noopener" class="sidebar-link">
               <span>Telegram Community</span>
               <svg class="icon icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: auto; opacity: 0.5;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
             </a>
@@ -1501,12 +1501,12 @@
 
 
       <div class="doc-media-card">
-        <img src="../../assets/readme/downloads.png" alt="OmniGet Binary Packages" />
-        <div class="doc-media-caption">OmniGet multi-platform release packages: standalone installers, portable USB archives, and native Linux packages.</div>
+        <img src="../../assets/readme/downloads.png" alt="LibreGet Binary Packages" />
+        <div class="doc-media-caption">LibreGet multi-platform release packages: standalone installers, portable USB archives, and native Linux packages.</div>
       </div>
 
       <p class="doc-p">
-        OmniGet ships precompiled binaries for Windows, macOS, and Linux under the GPL-3.0 license. No account, no ads, no tracking. The app checks GitHub Releases for updates and installs them with one click.
+        LibreGet ships precompiled binaries for Windows, macOS, and Linux under the GPL-3.0 license. No account, no ads, no tracking. The app checks GitHub Releases for updates and installs them with one click.
       </p>
 
       <!-- SECTION 1 -->
@@ -1529,49 +1529,49 @@
             <tr>
               <td><strong>Windows 10 / 11</strong></td>
               <td>x86_64 (64-bit)</td>
-              <td><code>omniget_x.y.z_x64-setup.exe</code></td>
+              <td><code>libreget_x.y.z_x64-setup.exe</code></td>
               <td>Standard NSIS desktop installer with start menu shortcuts and auto-updater.</td>
             </tr>
             <tr>
               <td><strong>Windows Portable</strong></td>
               <td>x86_64 (64-bit)</td>
-              <td><code>omniget_x.y.z_x64-portable.exe</code></td>
+              <td><code>libreget_x.y.z_x64-portable.exe</code></td>
               <td>Standalone binary that runs without installing. For USB drives, see portable mode below.</td>
             </tr>
             <tr>
               <td><strong>CLI Companion</strong></td>
               <td>x86_64 / aarch64</td>
-              <td><code>omniget-cli</code> / <code>omniget-cli.exe</code></td>
+              <td><code>libreget-cli</code> / <code>libreget-cli.exe</code></td>
               <td>Headless terminal binary. Subcommands: <code>download</code>, <code>info</code>, <code>batch</code>, <code>import-cookies</code>.</td>
             </tr>
             <tr>
               <td><strong>macOS Apple Silicon</strong></td>
               <td>aarch64 (M1 &ndash; M4)</td>
-              <td><code>omniget_x.y.z_aarch64.dmg</code></td>
+              <td><code>libreget_x.y.z_aarch64.dmg</code></td>
               <td>Native ARM64 build for Apple Silicon.</td>
             </tr>
             <tr>
               <td><strong>macOS Intel</strong></td>
               <td>x86_64 (Intel Macs)</td>
-              <td><code>omniget_x.y.z_x64.dmg</code></td>
+              <td><code>libreget_x.y.z_x64.dmg</code></td>
               <td>x86_64 build for Intel Macs (macOS 10.15+).</td>
             </tr>
             <tr>
               <td><strong>Linux (Universal)</strong></td>
               <td>x86_64 / aarch64</td>
-              <td><code>omniget_x.y.z_amd64.AppImage</code></td>
+              <td><code>libreget_x.y.z_amd64.AppImage</code></td>
               <td>Universal standalone package for all Linux distributions. Self-updates via <code>.zsync</code>.</td>
             </tr>
             <tr>
               <td><strong>Debian / Ubuntu</strong></td>
               <td>amd64 / arm64</td>
-              <td><code>omniget_x.y.z_amd64.deb</code></td>
+              <td><code>libreget_x.y.z_amd64.deb</code></td>
               <td>Native Debian package with desktop icon, MIME associations, and apt dependency resolution.</td>
             </tr>
             <tr>
               <td><strong>Fedora / openSUSE / RHEL</strong></td>
               <td>x86_64 / aarch64</td>
-              <td><code>omniget_x.y.z_x86_64.rpm</code></td>
+              <td><code>libreget_x.y.z_x86_64.rpm</code></td>
               <td>Standard Red Hat RPM package with native system integration.</td>
             </tr>
           </tbody>
@@ -1581,7 +1581,7 @@
       <!-- SECTION 2 -->
       <h2 class="doc-h2" id="windows">2. Windows Setup & Winget Package Manager</h2>
       <p class="doc-p">
-        Download <code>omniget_x.y.z_x64-setup.exe</code> and double-click to install. Alternatively, install and update OmniGet directly using the official Windows Package Manager (winget):
+        Download <code>libreget_x.y.z_x64-setup.exe</code> and double-click to install. Alternatively, install and update LibreGet directly using the official Windows Package Manager (winget):
       </p>
 
       <div class="code-container">
@@ -1591,13 +1591,13 @@
   <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg><span>Copy</span></button>
         </div>
         <div class="code-body">
-<pre><code><span class="tok-c"># Install OmniGet via winget:
+<pre><code><span class="tok-c"># Install LibreGet via winget:
 </span>
-winget install -e --id OpenSelena.OmniGet
+winget install -e --id OpenSelena.LibreGet
 
 <span class="tok-c"># Update to latest version:
 </span>
-winget upgrade --id OpenSelena.OmniGet</code></pre>
+winget upgrade --id OpenSelena.LibreGet</code></pre>
         </div>
       </div>
 
@@ -1607,25 +1607,25 @@ winget upgrade --id OpenSelena.OmniGet</code></pre>
   <path d="M12 8h.01" /></svg>
         <div>
           <strong>Windows SmartScreen Notice:</strong>
-          Because OmniGet is free open-source software and does not purchase commercial code-signing certificates ($500+/year), Windows SmartScreen may show a prompt ("Windows protected your PC"). Click <strong>More info</strong> and select <strong>Run anyway</strong>. This prompt appears only once on first run.
+          Because LibreGet is free open-source software and does not purchase commercial code-signing certificates ($500+/year), Windows SmartScreen may show a prompt ("Windows protected your PC"). Click <strong>More info</strong> and select <strong>Run anyway</strong>. This prompt appears only once on first run.
         </div>
       </div>
 
       <h3 id="code-signing-policy" style="font-size: 16px; font-weight: 600; margin: 24px 0 10px; color: var(--text);">Code signing policy</h3>
       <p class="doc-p">
-        Free code signing provided by <a href="https://about.signpath.io" target="_blank" rel="noopener">SignPath.io</a>, certificate by <a href="https://signpath.org" target="_blank" rel="noopener">SignPath Foundation</a>. Code changes and signed releases are reviewed and approved by the OpenSelena maintainers. See our <a href="../#privacy">Privacy Policy</a> for how OmniGet handles data.
+        Free code signing provided by <a href="https://about.signpath.io" target="_blank" rel="noopener">SignPath.io</a>, certificate by <a href="https://signpath.org" target="_blank" rel="noopener">SignPath Foundation</a>. Code changes and signed releases are reviewed and approved by the OpenSelena maintainers. See our <a href="../#privacy">Privacy Policy</a> for how LibreGet handles data.
       </p>
 
       <!-- SECTION 3 -->
       <h2 class="doc-h2" id="portable">3. Windows Portable USB Mode (Zero-Footprint)</h2>
       <p class="doc-p">
-        You can run OmniGet entirely from a USB thumb drive without leaving residual data in Windows <code>%APPDATA%</code> or the Windows Registry:
+        You can run LibreGet entirely from a USB thumb drive without leaving residual data in Windows <code>%APPDATA%</code> or the Windows Registry:
       </p>
 
       <ol style="margin-left: 20px; color: var(--text-muted); display: grid; gap: 10px; margin-bottom: 20px; font-size: 14.5px;">
-        <li>Download <code>omniget_x.y.z_x64-portable.exe</code> and place it in any folder or USB drive.</li>
+        <li>Download <code>libreget_x.y.z_x64-portable.exe</code> and place it in any folder or USB drive.</li>
         <li>In the same directory, create an empty text file named <code>portable.txt</code> (or <code>.portable</code>).</li>
-        <li>Launch the executable. OmniGet automatically redirects all SQLite database records, cookies, caches, plugins, yt-dlp, and FFmpeg binaries into a local <code>data/</code> subfolder.</li>
+        <li>Launch the executable. LibreGet automatically redirects all SQLite database records, cookies, caches, plugins, yt-dlp, and FFmpeg binaries into a local <code>data/</code> subfolder.</li>
       </ol>
 
       <div class="code-container">
@@ -1635,10 +1635,10 @@ winget upgrade --id OpenSelena.OmniGet</code></pre>
   <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg><span>Copy</span></button>
         </div>
         <div class="code-body">
-<pre><code>E:\OmniGet├── omniget_0.12.0_x64-portable.exe
+<pre><code>E:\LibreGet├── libreget_0.12.0_x64-portable.exe
 ├── portable.txt              <-- Triggers portable mode
 └── data\                     <-- All runtime data resides here
-    ├── omniget.db            <-- SQLite downloads & study history
+    ├── libreget.db            <-- SQLite downloads & study history
     ├── cookies.db            <-- Session cookies vault
     ├── bin\ (yt-dlp, ffmpeg) <-- Self-managed media tools
     └── plugins\              <-- Embedded plugins data</code></pre>
@@ -1648,7 +1648,7 @@ winget upgrade --id OpenSelena.OmniGet</code></pre>
       <!-- SECTION 4 -->
       <h2 class="doc-h2" id="macos">4. macOS Gatekeeper & Codesign Fix</h2>
       <p class="doc-p">
-        Download the appropriate DMG for your architecture (Apple Silicon M1-M4 or Intel). Drag <code>omniget.app</code> into your <code>/Applications</code> folder.
+        Download the appropriate DMG for your architecture (Apple Silicon M1-M4 or Intel). Drag <code>libreget.app</code> into your <code>/Applications</code> folder.
       </p>
 
       <div class="callout">
@@ -1657,7 +1657,7 @@ winget upgrade --id OpenSelena.OmniGet</code></pre>
   <path d="M12 17h.01" /></svg>
         <div>
           <strong>Gatekeeper Quarantine Warning:</strong>
-          Because OmniGet is not notarized with an Apple Developer ID, macOS Gatekeeper may display a dialog stating the app is "damaged and cannot be opened". This is standard macOS security behavior for unsigned open-source binaries.
+          Because LibreGet is not notarized with an Apple Developer ID, macOS Gatekeeper may display a dialog stating the app is "damaged and cannot be opened". This is standard macOS security behavior for unsigned open-source binaries.
         </div>
       </div>
 
@@ -1674,16 +1674,16 @@ winget upgrade --id OpenSelena.OmniGet</code></pre>
         <div class="code-body">
 <pre><code><span class="tok-c"># 1. Strip the macOS quarantine extended attribute:
 </span>
-xattr -cr /Applications/omniget.app
+xattr -cr /Applications/libreget.app
 
 <span class="tok-c"># 2. Re-sign the app ad-hoc:
 </span>
-codesign --force --deep --sign - /Applications/omniget.app</code></pre>
+codesign --force --deep --sign - /Applications/libreget.app</code></pre>
         </div>
       </div>
 
       <p class="doc-p">
-        You can now open OmniGet normally from Launchpad or Spotlight. For Homebrew users, a Cask formula is also available:
+        You can now open LibreGet normally from Launchpad or Spotlight. For Homebrew users, a Cask formula is also available:
       </p>
 
       <div class="code-container">
@@ -1693,14 +1693,14 @@ codesign --force --deep --sign - /Applications/omniget.app</code></pre>
   <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg><span>Copy</span></button>
         </div>
         <div class="code-body">
-<pre><code>brew install --cask OpenSelena/tap/omniget</code></pre>
+<pre><code>brew install --cask OpenSelena/tap/libreget</code></pre>
         </div>
       </div>
 
       <!-- SECTION 5 -->
       <h2 class="doc-h2" id="linux">5. Linux Packages & GStreamer Runtime Fix</h2>
       <p class="doc-p">
-        OmniGet renders its desktop interface using WebKitGTK. WebKitGTK plays all video and audio through GStreamer. If the required GStreamer audio sink plugins are missing, WebKitGTK aborts its web process upon player instantiation, resulting in an empty window.
+        LibreGet renders its desktop interface using WebKitGTK. WebKitGTK plays all video and audio through GStreamer. If the required GStreamer audio sink plugins are missing, WebKitGTK aborts its web process upon player instantiation, resulting in an empty window.
       </p>
 
       <p class="doc-p">
@@ -1745,8 +1745,8 @@ sudo apt install libfuse2
 
 <span class="tok-c"># Or launch without root permissions:
 </span>
-chmod +x OmniGet_0.12.0_amd64.AppImage
-./OmniGet_0.12.0_amd64.AppImage --appimage-extract-and-run</code></pre>
+chmod +x LibreGet_0.12.0_amd64.AppImage
+./LibreGet_0.12.0_amd64.AppImage --appimage-extract-and-run</code></pre>
         </div>
       </div>
 
@@ -1757,17 +1757,17 @@ chmod +x OmniGet_0.12.0_amd64.AppImage
       </p>
 
       <ol style="margin-left: 20px; color: var(--text-muted); display: grid; gap: 10px; margin-bottom: 20px; font-size: 14.5px;">
-        <li>Download <code>omniget-chrome-extension-vX.Y.Z.zip</code> from <a href="https://github.com/OpenSelena/omniget/releases" target="_blank" rel="noopener">GitHub Releases</a> (or click <strong>Export extension</strong> in <strong>Settings &rarr; Plugins &rarr; Browser extension</strong>).</li>
+        <li>Download <code>libreget-chrome-extension-vX.Y.Z.zip</code> from <a href="https://github.com/OpenSelena/libreget/releases" target="_blank" rel="noopener">GitHub Releases</a> (or click <strong>Export extension</strong> in <strong>Settings &rarr; Plugins &rarr; Browser extension</strong>).</li>
         <li>Extract the ZIP archive into a permanent folder on your computer.</li>
         <li><strong>Chromium (Chrome, Edge, Brave):</strong> Navigate to <code>chrome://extensions</code> (or <code>edge://extensions</code>), enable <strong>Developer mode</strong> in the top right, click <strong>Load unpacked</strong>, and select the extracted folder.</li>
         <li><strong>Firefox:</strong> Navigate to <code>about:debugging#/runtime/this-firefox</code>, click <strong>Load Temporary Add-on</strong>, and select the extension's <code>manifest.json</code>.</li>
-        <li>Launch OmniGet. The extension communicates via local loopback (port range <code>47720..47729</code>). Click the extension icon on any media tab to push authenticated cookies to OmniGet in one click.</li>
+        <li>Launch LibreGet. The extension communicates via local loopback (port range <code>47720..47729</code>). Click the extension icon on any media tab to push authenticated cookies to LibreGet in one click.</li>
       </ol>
 
       <!-- SECTION 7 -->
       <h2 class="doc-h2" id="build-source">7. Building from Source</h2>
       <p class="doc-p">
-        To compile OmniGet from source, you will need <a href="https://rustup.rs/" target="_blank" rel="noopener">Rust</a> (pinned via <code>rust-toolchain.toml</code>), <a href="https://nodejs.org/" target="_blank" rel="noopener">Node.js 18+</a>, and <a href="https://pnpm.io/" target="_blank" rel="noopener">pnpm</a>:
+        To compile LibreGet from source, you will need <a href="https://rustup.rs/" target="_blank" rel="noopener">Rust</a> (pinned via <code>rust-toolchain.toml</code>), <a href="https://nodejs.org/" target="_blank" rel="noopener">Node.js 18+</a>, and <a href="https://pnpm.io/" target="_blank" rel="noopener">pnpm</a>:
       </p>
 
       <div class="code-container">
@@ -1779,8 +1779,8 @@ chmod +x OmniGet_0.12.0_amd64.AppImage
         <div class="code-body">
 <pre><code><span class="tok-c"># 1. Clone repository:
 </span>
-git clone https://github.com/OpenSelena/omniget.git
-cd omniget
+git clone https://github.com/OpenSelena/libreget.git
+cd libreget
 
 <span class="tok-c"># 2. Install frontend dependencies:
 </span>
@@ -1797,8 +1797,8 @@ pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'</code></
       </div>
 
       <div class="doc-media-card">
-        <img src="../../assets/readme/settings.png" alt="OmniGet Preferences & Settings" />
-        <div class="doc-media-caption">OmniGet configuration panel: Manage download directories, network concurrency, cookie stores, and AI providers.</div>
+        <img src="../../assets/readme/settings.png" alt="LibreGet Preferences & Settings" />
+        <div class="doc-media-caption">LibreGet configuration panel: Manage download directories, network concurrency, cookie stores, and AI providers.</div>
       </div>
 
 
@@ -1840,7 +1840,7 @@ pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'</code></
       </ul>
 
       <div class="toc-community-box">
-        <a href="https://github.com/OpenSelena/omniget" class="toc-community-link" target="_blank" rel="noopener">
+        <a href="https://github.com/OpenSelena/libreget" class="toc-community-link" target="_blank" rel="noopener">
           <svg class="icon icon-fill icon-sm" viewBox="0 0 24 24" fill="currentColor"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
           <span>Edit page on GitHub</span>
         </a>
@@ -1922,7 +1922,7 @@ pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'</code></
         document.documentElement.classList.remove('dark');
         document.documentElement.setAttribute('data-theme', 'light');
       }
-      localStorage.setItem('omniget_docs_theme', target);
+      localStorage.setItem('libreget_docs_theme', target);
       localStorage.setItem('theme', target);
       updateThemeIcons(target);
     }

@@ -3,17 +3,17 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Release Notes &amp; Changelog · OmniGet Documentation</title>
-  <meta name="description" content="Official changelog, release notes, architectural updates, and bug fixes across all versions of OmniGet." />
-  <link rel="canonical" href="https://omniget.nav.bd/docs/changelog/" />
+  <title>Release Notes &amp; Changelog · LibreGet Documentation</title>
+  <meta name="description" content="Official changelog, release notes, architectural updates, and bug fixes across all versions of LibreGet." />
+  <link rel="canonical" href="https://libreget.nav.bd/docs/changelog/" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="article" />
-  <meta property="og:site_name" content="OmniGet Documentation" />
-  <meta property="og:title" content="Release Notes &amp; Changelog · OmniGet Documentation" />
-  <meta property="og:description" content="Official changelog, release notes, architectural updates, and bug fixes across all versions of OmniGet." />
-  <meta property="og:url" content="https://omniget.nav.bd/docs/changelog/" />
-  <meta property="og:image" content="https://omniget.nav.bd/assets/readme/home.png" />
+  <meta property="og:site_name" content="LibreGet Documentation" />
+  <meta property="og:title" content="Release Notes &amp; Changelog · LibreGet Documentation" />
+  <meta property="og:description" content="Official changelog, release notes, architectural updates, and bug fixes across all versions of LibreGet." />
+  <meta property="og:url" content="https://libreget.nav.bd/docs/changelog/" />
+  <meta property="og:image" content="https://libreget.nav.bd/assets/readme/home.png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta name="twitter:card" content="summary_large_image" />
@@ -26,7 +26,7 @@
   <script>
     (function() {
       try {
-        var saved = localStorage.getItem('omniget_docs_theme') || localStorage.getItem('theme');
+        var saved = (localStorage.getItem('libreget_docs_theme') || localStorage.getItem('omniget_docs_theme')) || localStorage.getItem('theme');
         var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         if (saved === 'dark' || (!saved && prefersDark)) {
           document.documentElement.classList.add('dark');
@@ -46,7 +46,7 @@
 
   <style>
     /* ============================================================
-       OmniGet Documentation — UI skin
+       LibreGet Documentation — UI skin
        Design system: vercel.com/docs (Geist type, Vercel palette)
        ============================================================ */
 
@@ -1263,9 +1263,9 @@
             <line x1="3" y1="18" x2="21" y2="18" />
           </svg>
         </button>
-        <a href="../../" class="brand-logo-link" aria-label="OmniGet Home">
-          <img src="../../static/favicon.png" alt="OmniGet Logo" />
-          <span>OmniGet</span>
+        <a href="../../" class="brand-logo-link" aria-label="LibreGet Home">
+          <img src="../../static/favicon.png" alt="LibreGet Logo" />
+          <span>LibreGet</span>
         </a>
         <span class="brand-badge">DOCS</span>
       </div>
@@ -1303,7 +1303,7 @@
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" id="themeIconMoon"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401" /></svg>
         </button>
 
-        <a class="btn-top-download" href="https://github.com/OpenSelena/omniget/releases/latest">
+        <a class="btn-top-download" href="https://github.com/OpenSelena/libreget/releases/latest">
           <span>Get App</span>
           <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14" />
   <path d="m12 5 7 7-7 7" /></svg>
@@ -1472,13 +1472,13 @@
         </div>
         <ul class="sidebar-nav-list">
           <li>
-            <a href="https://github.com/OpenSelena/omniget" target="_blank" rel="noopener" class="sidebar-link">
+            <a href="https://github.com/OpenSelena/libreget" target="_blank" rel="noopener" class="sidebar-link">
               <span>GitHub Repository</span>
               <svg class="icon icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: auto; opacity: 0.5;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
             </a>
           </li>
           <li>
-            <a href="https://t.me/omniget" target="_blank" rel="noopener" class="sidebar-link">
+            <a href="https://t.me/OpenSelena" target="_blank" rel="noopener" class="sidebar-link">
               <span>Telegram Community</span>
               <svg class="icon icon-xs" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-left: auto; opacity: 0.5;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" y1="14" x2="21" y2="3" /></svg>
             </a>
@@ -1499,7 +1499,7 @@
       
       <h1 class="doc-h1" id="changelog">Release Notes &amp; Changelog</h1>
       <p class="doc-lead">
-        Release notes, feature changes, and system patches for OmniGet. All desktop releases are signed, reproducible, and published with SHA-256 binary validation.
+        Release notes, feature changes, and system patches for LibreGet. All desktop releases are signed, reproducible, and published with SHA-256 binary validation.
       </p>
 
       <!-- v0.16.6 Release -->
@@ -1512,7 +1512,7 @@
             </div>
             <h2 class="release-title">Home Stage &amp; Omnibox V1, 4K &amp; 2K Quality Engine &amp; Global Download Dock</h2>
           </div>
-          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.16.6" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+          <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.16.6" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -1555,7 +1555,7 @@
             </div>
             <h2 class="release-title">Home Geometry &amp; Asset Alignment: Centered Titlebar, Concentric Pill Omnibox &amp; Lossless Mascot Frames</h2>
           </div>
-          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.16.5" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+          <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.16.5" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -1567,7 +1567,7 @@
             Fixes
           </h3>
           <ul class="release-list">
-            <li><strong>Shell &amp; Titlebar Alignment</strong>: Matched <code>.mac-titlebar</code> right inset and banner margins to <code>--pane-inset</code> so titlebar controls align vertically with the content pane center, and normalized the backend window title casing from <code>omniget</code> to <code>OmniGet</code>.</li>
+            <li><strong>Shell &amp; Titlebar Alignment</strong>: Matched <code>.mac-titlebar</code> right inset and banner margins to <code>--pane-inset</code> so titlebar controls align vertically with the content pane center, and normalized the backend window title casing from <code>omniget</code> to <code>LibreGet</code>.</li>
             <li><strong>Lossless Mascot Framing</strong>: Normalized all 7 mascot PNGs onto a square <code>1320x1320</code> canvas with stripped edge halos, centered body anatomy, a shared baseline, square CSS sizing (<code>aspect-ratio: 1; object-fit: contain</code>), and an image load-race guard in <code>Mascot.svelte</code>.</li>
             <li><strong>Concentric Home Aura</strong>: Anchored the warm radial glow inside <code>.home-stage-hero</code> instead of the full scroll stage so it stays centered behind the mascot across all viewport heights.</li>
             <li><strong>Omnibox Pill &amp; Action Menu</strong>: Switched the Home Omnibox wrapper to full pill rounding (<code>9999px</code>), equalized the left <code>+</code>, clear, and paste endcap heights to <code>32px</code>, aligned the <code>+</code> popover flush with the left inset (<code>8px</code> gap), and added localized <code>omnibox.more_actions</code> ARIA labels across all 12 locales.</li>
@@ -1585,7 +1585,7 @@
             </div>
             <h2 class="release-title">Home Stage Parity: 4K &amp; 2K Quality Selection, Video Mode &amp; Immediate Media Preview</h2>
           </div>
-          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.16.4" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+          <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.16.4" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -1617,7 +1617,7 @@
             </div>
             <h2 class="release-title">V1 Shell Polish: Clean Home Stage, Sharp Mascot Inspection &amp; Route-Scoped Toolbar Cleanup</h2>
           </div>
-          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.16.3" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+          <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.16.3" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -1646,7 +1646,7 @@
             </div>
             <h2 class="release-title">V1 UI Upgrade: Omnibox Action Popover, Clickable Paste Pill, Thumbnail Duration Badge &amp; Global Download Dock</h2>
           </div>
-          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.16.2" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+          <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.16.2" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -1676,7 +1676,7 @@
             </div>
             <h2 class="release-title">Platform Media Stability Patch: Queue Kind Refinement, Thumbnail Resolution, Unix Process Group Termination &amp; CPU Throttling</h2>
           </div>
-          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.16.1" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+          <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.16.1" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -1708,7 +1708,7 @@
             </div>
             <h2 class="release-title">Nami Core Overhaul: SQLite Media Ledger, History Grid, Incremental Creator Sync &amp; Zero-Extension Cookie Bridge</h2>
           </div>
-          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.16.0" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+          <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.16.0" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -1750,7 +1750,7 @@
             </div>
             <h2 class="release-title">Telegram 67-Command Backend, Localhost Media Streaming &amp; Course/Torrent Fixes</h2>
           </div>
-          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.15.1" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+          <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.15.1" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -1794,7 +1794,7 @@
             </div>
             <h2 class="release-title">Brand Redesign, Local-First Architecture &amp; CLI Dataset Archiving</h2>
           </div>
-          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.15.0" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+          <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.15.0" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -1830,8 +1830,8 @@
             CLI Video Dataset Tools
           </h3>
           <ul class="release-list">
-            <li><strong>Dataset Search</strong>: Added <code>omniget-cli search</code> to query YouTube across multi-lingual terms, duration limits, and keyword exclusions.</li>
-            <li><strong>Resumable Archiving</strong>: Added <code>omniget-cli archive</code> with rate-limit backoff, automatic DASH video-only selection, and resumable session queues.</li>
+            <li><strong>Dataset Search</strong>: Added <code>libreget-cli search</code> to query YouTube across multi-lingual terms, duration limits, and keyword exclusions.</li>
+            <li><strong>Resumable Archiving</strong>: Added <code>libreget-cli archive</code> with rate-limit backoff, automatic DASH video-only selection, and resumable session queues.</li>
             <li><strong>Container Flag Fix</strong>: Fixed <code>--format</code> handling so <code>mp4</code>, <code>mkv</code>, and <code>webm</code> specify the container format without overriding stream quality selections.</li>
           </ul>
         </div>
@@ -1843,7 +1843,7 @@
           </h3>
           <ul class="release-list">
             <li><strong>Linux AppImage Isolation (#147)</strong>: Stripped AppImage <code>$APPDIR</code> from child process <code>LD_LIBRARY_PATH</code> to prevent host glibc symbol collisions.</li>
-            <li><strong>CLI JSON Output (#154)</strong>: Serialized <code>omniget-cli --json</code> progress events as cleanly delimited, valid JSON lines.</li>
+            <li><strong>CLI JSON Output (#154)</strong>: Serialized <code>libreget-cli --json</code> progress events as cleanly delimited, valid JSON lines.</li>
             <li><strong>Smart URL Parsing (#155)</strong>: Enhanced URL parser to extract valid links embedded in raw text shares.</li>
             <li><strong>Download Recency Sorting (#96)</strong>: Finished and failed download queues now sort newest-first.</li>
             <li><strong>Local Stream CSP (#119)</strong>: Adjusted Content Security Policy to allow localhost video stream playback and previews.</li>
@@ -1873,7 +1873,7 @@
             </div>
             <h2 class="release-title">CLI Output Formatting, AppImage Library Isolation &amp; Localization Expansion</h2>
           </div>
-          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.14.3" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+          <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.14.3" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -1885,7 +1885,7 @@
             CLI &amp; Core Engine Fixes
           </h3>
           <ul class="release-list">
-            <li>Fixed CLI progress event serialization so <code>omniget-cli --json</code> emits cleanly delimited, standard JSON objects (#154).</li>
+            <li>Fixed CLI progress event serialization so <code>libreget-cli --json</code> emits cleanly delimited, standard JSON objects (#154).</li>
             <li>Sanitized child process execution under Linux AppImages by purging bundled <code>$APPDIR</code> entries from <code>LD_LIBRARY_PATH</code> (#147).</li>
             <li>Enhanced URL parser across both the Omnibox and CLI to reliably extract links embedded inside raw shared text strings (#155).</li>
             <li>Updated finished and failed download queues to sort by recency (newest-first) instead of initial entry order (#96).</li>
@@ -1925,7 +1925,7 @@
             </div>
             <h2 class="release-title">Penguin Artwork Refresh, Video Dataset CLI &amp; Architecture Cleanups</h2>
           </div>
-          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.14.2" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+          <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.14.2" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -1948,8 +1948,8 @@
             CLI Video Dataset &amp; Archive Commands
           </h3>
           <ul class="release-list">
-            <li>Added <code>omniget-cli search</code> to query YouTube across multi-lingual search terms with duration and keyword filtering.</li>
-            <li>Added <code>omniget-cli archive</code> to stream, download, and archive datasets with rate-limit backoff and automatic session resume.</li>
+            <li>Added <code>libreget-cli search</code> to query YouTube across multi-lingual search terms with duration and keyword filtering.</li>
+            <li>Added <code>libreget-cli archive</code> to stream, download, and archive datasets with rate-limit backoff and automatic session resume.</li>
             <li>Fixed CLI <code>--format</code> container parsing so container specifications (mp4, mkv, webm) preserve stream selectors.</li>
           </ul>
         </div>
@@ -1976,7 +1976,7 @@
             </div>
             <h2 class="release-title">Yoinks Penguin Visual Asset Integration &amp; Brand Refresh</h2>
           </div>
-          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.14.1" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+          <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.14.1" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -2007,7 +2007,7 @@
             </div>
             <h2 class="release-title">Offline Study Module, BitTorrent Telemetry &amp; Course Platform Upgrades</h2>
           </div>
-          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.14.0" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+          <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.14.0" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -2016,7 +2016,7 @@
         <div class="release-section">
           <h3 class="release-section-title">
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
-            Offline Study Module (omniget-plugin-study)
+            Offline Study Module (libreget-plugin-study)
           </h3>
           <ul class="release-list">
             <li>Introduced the native offline study plugin backed by local SQLite storage for structured learning.</li>
@@ -2084,7 +2084,7 @@
             </div>
             <h2 class="release-title">YouTube Stream Muxing, FFmpeg Auto-Download &amp; MosCat Navigation</h2>
           </div>
-          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.13.0" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+          <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.13.0" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -2097,7 +2097,7 @@
           </h3>
           <ul class="release-list">
             <li>Fixed video-only downloads on 1080p, 1440p, and 4K YouTube videos where separate adaptive streams were not muxed together.</li>
-            <li>OmniGet now verifies FFmpeg presence before downloading. If missing, FFmpeg is automatically downloaded and unpacked to cache before starting yt-dlp.</li>
+            <li>LibreGet now verifies FFmpeg presence before downloading. If missing, FFmpeg is automatically downloaded and unpacked to cache before starting yt-dlp.</li>
             <li>Added <code>--merge-output-format mp4</code> to combine separate audio and video streams into standard MP4 files.</li>
             <li>Added fallback search paths for macOS and Linux desktop launchers (<code>/opt/homebrew/bin</code>, <code>/usr/local/bin</code>, <code>/usr/bin</code>, <code>/bin</code>).</li>
             <li>Signed extracted cache binaries on macOS using ad-hoc code signatures (<code>codesign -s - -f</code>) to prevent Apple Mobile File Integrity (AMFI) <code>SIGKILL</code> kills.</li>
@@ -2151,7 +2151,7 @@
             </div>
             <h2 class="release-title">Telegram Core Sync, Cross-DC Bot Avatars &amp; Full 12-Locale Parity</h2>
           </div>
-          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.12.2" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+          <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.12.2" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -2213,7 +2213,7 @@
             </div>
             <h2 class="release-title">Global Update Notification Banner &amp; Dependencies Table Alignment</h2>
           </div>
-          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.12.1" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+          <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.12.1" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -2254,7 +2254,7 @@
             </div>
             <h2 class="release-title">Telegram API Credentials, Official Community Migration &amp; CSP Star Badge Fix</h2>
           </div>
-          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.12.0" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+          <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.12.0" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -2306,7 +2306,7 @@
             </div>
             <h2 class="release-title">36 Course Platforms Wired, Security Hardening &amp; Metadata Polish</h2>
           </div>
-          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.11.0" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+          <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.11.0" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -2345,7 +2345,7 @@
             UI Polish &amp; Metadata Standardization
           </h3>
           <ul class="release-list">
-            <li>Standardized Windows executable and installer metadata: product name is <strong>OmniGet</strong> and publisher is <strong>OpenSelena</strong>.</li>
+            <li>Standardized Windows executable and installer metadata: product name is <strong>LibreGet</strong> and publisher is <strong>OpenSelena</strong>.</li>
             <li>Dynamic version resolution in the About dialog directly from the Tauri runtime.</li>
             <li>Cleaned footer credits and standardized tab titles and terminology across all 12 localized languages.</li>
             <li>Prevented heap out-of-memory errors during frontend bundling by allocating 4GB memory to the build process.</li>
@@ -2363,7 +2363,7 @@
             </div>
             <h2 class="release-title">Telegram OmniGram Directory Isolation &amp; Statically Embedded Plugins</h2>
           </div>
-          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.10.5" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+          <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.10.5" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -2418,7 +2418,7 @@
             </div>
             <h2 class="release-title">Plugin Command Signatures &amp; Telegram Sync Handlers</h2>
           </div>
-          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.10.4" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+          <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.10.4" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -2439,7 +2439,7 @@
             </div>
             <h2 class="release-title">Telegram Datacenter Handshake Fix</h2>
           </div>
-          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.10.3" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+          <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.10.3" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -2459,7 +2459,7 @@
             </div>
             <h2 class="release-title">Windows Core &amp; WebView2 COM Type Alignment</h2>
           </div>
-          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.10.2" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+          <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.10.2" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -2480,7 +2480,7 @@
             </div>
             <h2 class="release-title">OpenSelena Marketplace &amp; Registry Migration</h2>
           </div>
-          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.10.1" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+          <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.10.1" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -2499,9 +2499,9 @@
               <span class="sidebar-tag" style="background: var(--bg-muted); color: var(--text); font-weight: 700; padding: 3px 8px; border-radius: 6px;">v0.10.0</span>
               <span class="release-date">Released September 2026</span>
             </div>
-            <h2 class="release-title">OmniGet v0.10 Milestone Release</h2>
+            <h2 class="release-title">LibreGet v0.10 Milestone Release</h2>
           </div>
-          <a href="https://github.com/OpenSelena/omniget/releases/tag/v0.10.0" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
+          <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.10.0" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
           </a>
@@ -2570,7 +2570,7 @@
       </ul>
 
       <div class="toc-community-box">
-        <a href="https://github.com/OpenSelena/omniget" class="toc-community-link" target="_blank" rel="noopener">
+        <a href="https://github.com/OpenSelena/libreget" class="toc-community-link" target="_blank" rel="noopener">
           <svg class="icon icon-fill icon-sm" viewBox="0 0 24 24" fill="currentColor"><title>GitHub</title><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
           <span>Edit page on GitHub</span>
         </a>
@@ -2652,7 +2652,7 @@
         document.documentElement.classList.remove('dark');
         document.documentElement.setAttribute('data-theme', 'light');
       }
-      localStorage.setItem('omniget_docs_theme', target);
+      localStorage.setItem('libreget_docs_theme', target);
       localStorage.setItem('theme', target);
       updateThemeIcons(target);
     }

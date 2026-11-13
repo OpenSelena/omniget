@@ -285,10 +285,10 @@ export function parseDocPage(relPath) {
     },
     theme: {
       hasToggleBtn: /class\s*=\s*["'][^"']*theme-toggle-btn[^"']*["']/i.test(content),
-      hasEarlyInit: /localStorage\.getItem\(['"](theme|omniget_docs_theme)['"]\)/i.test(content) &&
+      hasEarlyInit: /localStorage\.getItem\(['"](theme|libreget_docs_theme|omniget_docs_theme)['"]\)/i.test(content) &&
                     content.indexOf('localStorage.getItem') < (content.indexOf('</head>') > 0 ? content.indexOf('</head>') : 3000),
       hasToggleFunc: /function\s+toggleTheme\s*\(/i.test(combinedJs),
-      usesDocThemeKey: /omniget_docs_theme/i.test(combinedJs),
+      usesDocThemeKey: /(libreget|omniget)_docs_theme/i.test(combinedJs),
       usesStandardThemeKey: /localStorage\.setItem\(['"]theme['"]/i.test(combinedJs)
     },
     code: {

@@ -6,7 +6,7 @@
 
 ## Context
 
-OmniGet contains an extensive frontend suite (95 routes and 120+ components totaling over 117,000 lines of code) designed for course playback, note-taking, reading, and flashcards. This UI communicates with the backend exclusively via `pluginInvoke("study", <command>, <args>)`.
+LibreGet contains an extensive frontend suite (95 routes and 120+ components totaling over 117,000 lines of code) designed for course playback, note-taking, reading, and flashcards. This UI communicates with the backend exclusively via `pluginInvoke("study", <command>, <args>)`.
 
 However, no backend implementation of `study` existed, forcing the application to hide the entire feature behind hardcoded `false` flags to avoid frontend crashes when unbacked commands were invoked.
 
@@ -18,10 +18,10 @@ We need to establish:
 ## Decision
 
 1. **Embedded Built-in Plugin Crate**:
-   We will implement `omniget-plugin-study` as a native workspace crate in `src-tauri/plugins/study/` and register it statically using `PluginManager::register_builtin` in `src-tauri/src/lib.rs`. We reject distributing Study as a dynamic `.dll`/`.so` download because embedded compilation eliminates ABI drift, avoids runtime download failures, and functions completely offline.
+   We will implement `libreget-plugin-study` as a native workspace crate in `src-tauri/plugins/study/` and register it statically using `PluginManager::register_builtin` in `src-tauri/src/lib.rs`. We reject distributing Study as a dynamic `.dll`/`.so` download because embedded compilation eliminates ABI drift, avoids runtime download failures, and functions completely offline.
 
 2. **Dedicated SQLite Database (`study.db`)**:
-   We will manage all study persistence within a dedicated SQLite file (`~/.local/share/omniget/study.db`) using `rusqlite`. We reject sharing the main download state database to avoid write-lock contention during heavy concurrent torrent/video downloads and to allow straightforward user backup/export of personal study notes.
+   We will manage all study persistence within a dedicated SQLite file (`~/.local/share/libreget/study.db`) using `rusqlite`. We reject sharing the main download state database to avoid write-lock contention during heavy concurrent torrent/video downloads and to allow straightforward user backup/export of personal study notes.
 
 3. **Zero-Crash Catch-All Dispatcher**:
    In `StudyPlugin::handle_command`, any command not yet actively handled by the current development milestone will be caught by a fallback pattern that logs the invocation and returns `Ok(json!({}))`. This guarantees that navigating through the 117k-line UI will not trigger unhandled promise rejections during progressive feature rollouts.

@@ -1,6 +1,6 @@
 <!--
 Search keywords (kept here so GitHub search, Google and AI assistants can find the project):
-OmniGet is a free open source downloader and media toolbox for Windows, macOS and Linux.
+LibreGet is a free open source downloader and media toolbox for Windows, macOS and Linux.
 udemy downloader, hotmart downloader, kiwify downloader, course downloader, youtube downloader,
 yt-dlp gui, instagram downloader, instagram story downloader, reels downloader, twitter downloader,
 x video downloader, pinterest downloader, pinterest board backup, tiktok downloader, reddit downloader,
@@ -19,10 +19,10 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 -->
 
 <p align="center">
-  <img src="assets/readme/hero.png" alt="OmniGet: grab a link, get the file. The mascot sends video, music, PDF, image, course and torrent files into a folder. Courses, video, audio, images and torrents, then transcribe, convert, and manage." width="100%" />
+  <img src="assets/readme/hero.png" alt="LibreGet: grab a link, get the file. The mascot sends video, music, PDF, image, course and torrent files into a folder. Courses, video, audio, images and torrents, then transcribe, convert, and manage." width="100%" />
 </p>
 
-<h1 align="center">OmniGet</h1>
+<h1 align="center">LibreGet</h1>
 
 <p align="center">
   <b>English</b>
@@ -37,17 +37,17 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 </p>
 
 <p align="center">
-  <a href="https://omniget.nav.bd/"><img src="https://img.shields.io/badge/Website-omniget.nav.bd-FF7D38?style=for-the-badge" alt="Community Website" /></a>
-  <a href="https://github.com/OpenSelena/omniget/releases/latest"><img src="https://img.shields.io/github/v/release/OpenSelena/omniget?style=for-the-badge&label=release&color=F28500" alt="Latest release" /></a>
-  <a href="https://github.com/OpenSelena/omniget/releases"><img src="https://img.shields.io/github/downloads/OpenSelena/omniget/total?style=for-the-badge&label=downloads&color=1E6FE8" alt="Total downloads" /></a>
-  <a href="https://github.com/OpenSelena/omniget/stargazers"><img src="https://img.shields.io/github/stars/OpenSelena/omniget?style=for-the-badge&color=FFD426" alt="GitHub stars" /></a>
+  <a href="https://libreget.nav.bd/"><img src="https://img.shields.io/badge/Website-libreget.nav.bd-FF7D38?style=for-the-badge" alt="Community Website" /></a>
+  <a href="https://github.com/OpenSelena/libreget/releases/latest"><img src="https://img.shields.io/github/v/release/OpenSelena/libreget?style=for-the-badge&label=release&color=F28500" alt="Latest release" /></a>
+  <a href="https://github.com/OpenSelena/libreget/releases"><img src="https://img.shields.io/github/downloads/OpenSelena/libreget/total?style=for-the-badge&label=downloads&color=1E6FE8" alt="Total downloads" /></a>
+  <a href="https://github.com/OpenSelena/libreget/stargazers"><img src="https://img.shields.io/github/stars/OpenSelena/libreget?style=for-the-badge&color=FFD426" alt="GitHub stars" /></a>
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-GPL--3.0-2AA845?style=for-the-badge" alt="License GPL-3.0" /></a>
   <a href="https://t.me/OpenSelena"><img src="https://img.shields.io/badge/Telegram-channel-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white" alt="Telegram channel" /></a>
-  <a href="https://hosted.weblate.org/engage/omniget-openselena/"><img src="https://hosted.weblate.org/widget/omniget-openselena/frontend/svg-badge.svg" alt="Translation status" /></a>
+  <a href="https://hosted.weblate.org/engage/libreget-openselena/"><img src="https://hosted.weblate.org/widget/libreget-openselena/frontend/svg-badge.svg" alt="Translation status" /></a>
 </p>
 
 <p align="center">
-  <a href="#download-and-install"><img src="https://img.shields.io/badge/Download_for_Windows,_macOS_or_Linux-→-F28500?style=for-the-badge" alt="Download OmniGet" height="40" /></a>
+  <a href="#download-and-install"><img src="https://img.shields.io/badge/Download_for_Windows,_macOS_or_Linux-→-F28500?style=for-the-badge" alt="Download LibreGet" height="40" /></a>
   &nbsp;
   <a href="#the-tools-section-158-tools-in-25-categories"><img src="https://img.shields.io/badge/See_the_158_tools-→-3D5BF0?style=for-the-badge" alt="See the Tools section" height="40" /></a>
 </p>
@@ -57,29 +57,27 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Disclaimer-FF7D38" alt="Disclaimer" height="20" /><br/>
-  <sub>This project is an independent fork and is not affiliated with OmniGet or with Tonho.<br/>
-  Maintained by <a href="https://github.com/igect">igect</a> under GPL-3.0 · Based on original architecture by <a href="https://github.com/tonhowtf">Tonho</a></sub>
+  <sub>Maintained by <a href="https://github.com/igect">igect</a> under GPL-3.0</sub>
 </p>
 
 <p align="center">
-  <img src="assets/readme/home.png" alt="OmniGet home screen: paste a URL, magnet link or .torrent and the file lands in your folder" width="900" />
+  <img src="assets/readme/home.png" alt="LibreGet home screen: paste a URL, magnet link or .torrent and the file lands in your folder" width="900" />
 </p>
 
 ---
 
 ## Contents
 
-- [Why OmniGet](#why-omniget)
+- [Why LibreGet](#why-libreget)
 - [Download and install](#download-and-install)
 - [Your first download in one minute](#your-first-download-in-one-minute)
-- [What OmniGet downloads](#what-omniget-downloads)
+- [What LibreGet downloads](#what-libreget-downloads)
 - [The browser extension, step by step](#the-browser-extension-step-by-step)
 - [The Tools section: 158 tools in 25 categories](#the-tools-section-158-tools-in-25-categories)
-- [OmniGet for AI agents: MCP server and Claude Code plugin](#omniget-for-ai-agents-mcp-server-and-claude-code-plugin)
+- [LibreGet for AI agents: MCP server and Claude Code plugin](#libreget-for-ai-agents-mcp-server-and-claude-code-plugin)
 - [Plugins: Courses, Telegram, Convert](#plugins-courses-telegram-convert)
 - [Everything else in the box](#everything-else-in-the-box)
-- [Privacy and what OmniGet refuses to do](#privacy-and-what-omniget-refuses-to-do)
+- [Privacy and what LibreGet refuses to do](#privacy-and-what-libreget-refuses-to-do)
 - [Code signing policy](#code-signing-policy)
 - [Frequently asked questions](#frequently-asked-questions)
 - [Command line](#command-line)
@@ -88,19 +86,19 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 
 ---
 
-## Why OmniGet
+## Why LibreGet
 
 You bought a course and want it on your disk before the platform pulls it. You keep a yt-dlp cheat sheet because the flags never stick. You have one site for Instagram stories, another for X videos, a Chrome extension for Pinterest, a Python script for subtitles, and none of them remember your login.
 
-OmniGet puts all of that behind one text box. Paste a link, see a preview with quality options, click download. The same window then plays the course, reads the PDF, transcribes the audio and backs up the Pinterest board. yt-dlp and FFmpeg install themselves and stay updated, so there is nothing to configure and no terminal to open.
+LibreGet puts all of that behind one text box. Paste a link, see a preview with quality options, click download. The same window then plays the course, reads the PDF, transcribes the audio and backs up the Pinterest board. yt-dlp and FFmpeg install themselves and stay updated, so there is nothing to configure and no terminal to open.
 
 <p align="center">
-  <img src="assets/readme/workflow.png" alt="How OmniGet works in three steps: paste a link, OmniGet detects the site and picks a native extractor or yt-dlp, the file lands in your folder and opens in the built-in player." width="100%" />
+  <img src="assets/readme/workflow.png" alt="How LibreGet works in three steps: paste a link, LibreGet detects the site and picks a native extractor or yt-dlp, the file lands in your folder and opens in the built-in player." width="100%" />
 </p>
 
 ### How it compares
 
-| | OmniGet | yt-dlp alone | Single-site web downloaders | Paid course downloaders |
+| | LibreGet | yt-dlp alone | Single-site web downloaders | Paid course downloaders |
 |---|---|---|---|---|
 | Sites | Courses, Instagram, X, Pinterest, Bilibili, Telegram, torrents natively, plus 1,800+ through yt-dlp | 1,800+ | One | One or two platforms |
 | Setup | Download one file, open it | Python, PATH, FFmpeg, flags | None | Installer, license key |
@@ -109,13 +107,13 @@ OmniGet puts all of that behind one text box. Paste a link, see a preview with q
 | After the download | Player, reader, flashcards, notes, 158 tools | Files | Files, often re-encoded | Files |
 | Price and license | Free, GPL-3.0 | Free, Unlicense | Free with ads | Subscription |
 
-yt-dlp is the engine OmniGet runs on, and OmniGet would not exist without it. If you live in a terminal and only want files, yt-dlp alone is the right tool.
+yt-dlp is the engine LibreGet runs on, and LibreGet would not exist without it. If you live in a terminal and only want files, yt-dlp alone is the right tool.
 
 ---
 
 ## Download and install
 
-Pick your system. Every build is published on the [Releases page](https://github.com/OpenSelena/omniget/releases/latest). Updates arrive inside the app.
+Pick your system. Every build is published on the [Releases page](https://github.com/OpenSelena/libreget/releases/latest). Updates arrive inside the app.
 
 <table>
   <tr>
@@ -125,13 +123,13 @@ Pick your system. Every build is published on the [Releases page](https://github
   </tr>
   <tr>
     <td><b>Windows 10 / 11</b></td>
-    <td><code>omniget_x.y.z_x64-setup.exe</code> (installer)<br/><code>omniget_x.y.z_x64-portable.exe</code> (no install, runs from anywhere)<br/><code>omniget_x.y.z_x64_en-US.msi</code> (for IT deployments)</td>
-    <td><code>winget install -e --id OpenSelena.OmniGet</code></td>
+    <td><code>libreget_x.y.z_x64-setup.exe</code> (installer)<br/><code>libreget_x.y.z_x64-portable.exe</code> (no install, runs from anywhere)<br/><code>libreget_x.y.z_x64_en-US.msi</code> (for IT deployments)</td>
+    <td><code>winget install -e --id OpenSelena.LibreGet</code></td>
   </tr>
   <tr>
     <td><b>macOS 10.15+</b></td>
-    <td><code>omniget_x.y.z_aarch64.dmg</code> for Apple Silicon (M1 and later)<br/><code>omniget_x.y.z_x64.dmg</code> for Intel Macs</td>
-    <td><code>brew install --cask OpenSelena/tap/omniget</code></td>
+    <td><code>libreget_x.y.z_aarch64.dmg</code> for Apple Silicon (M1 and later)<br/><code>libreget_x.y.z_x64.dmg</code> for Intel Macs</td>
+    <td><code>brew install --cask OpenSelena/tap/libreget</code></td>
   </tr>
   <tr>
     <td><b>Linux</b></td>
@@ -142,24 +140,24 @@ Pick your system. Every build is published on the [Releases page](https://github
 
 ### The first launch warning, and how to clear it
 
-OmniGet is not signed with a paid certificate, so each system shows a warning the first time. This is normal for open source desktop apps and you handle it once.
+LibreGet is not signed with a paid certificate, so each system shows a warning the first time. This is normal for open source desktop apps and you handle it once.
 
 **Windows.** SmartScreen shows a blue box. Click **More info**, then **Run anyway**.
 
-**macOS.** Gatekeeper refuses to open the app and may say it is "damaged". After you drag OmniGet into Applications, open Terminal (Spotlight, type "Terminal") and paste these two lines:
+**macOS.** Gatekeeper refuses to open the app and may say it is "damaged". After you drag LibreGet into Applications, open Terminal (Spotlight, type "Terminal") and paste these two lines:
 
 ```bash
-xattr -cr /Applications/omniget.app
-codesign --force --deep --sign - /Applications/omniget.app
+xattr -cr /Applications/libreget.app
+codesign --force --deep --sign - /Applications/libreget.app
 ```
 
-Then open OmniGet from Launchpad as usual.
+Then open LibreGet from Launchpad as usual.
 
-**Linux, AppImage on Debian 12+ or Ubuntu 24.04+.** Those releases ship without FUSE 2, which AppImage needs. If the file fails with a libfuse error, run `sudo apt install libfuse2`, or launch it with `./omniget.AppImage --appimage-extract-and-run`. The `.deb` avoids this entirely.
+**Linux, AppImage on Debian 12+ or Ubuntu 24.04+.** Those releases ship without FUSE 2, which AppImage needs. If the file fails with a libfuse error, run `sudo apt install libfuse2`, or launch it with `./libreget.AppImage --appimage-extract-and-run`. The `.deb` avoids this entirely.
 
 ### Linux media plugins
 
-OmniGet draws its window with WebKitGTK, and WebKitGTK plays every `<video>` and `<audio>` through GStreamer. If the GStreamer plugins are missing, WebKitGTK does not fail the media quietly: it aborts its own web process the moment a player appears, and you are left with an empty window. Most desktop distributions already have the plugins. Arch and the minimal server images treat them as optional, so install them once:
+LibreGet draws its window with WebKitGTK, and WebKitGTK plays every `<video>` and `<audio>` through GStreamer. If the GStreamer plugins are missing, WebKitGTK does not fail the media quietly: it aborts its own web process the moment a player appears, and you are left with an empty window. Most desktop distributions already have the plugins. Arch and the minimal server images treat them as optional, so install them once:
 
 ```bash
 sudo apt install gstreamer1.0-plugins-good gstreamer1.0-plugins-bad gstreamer1.0-libav   # Debian, Ubuntu
@@ -177,25 +175,25 @@ Create an empty file named `portable.txt` (or `.portable`) next to the Windows `
 
 ## Your first download in one minute
 
-1. Open OmniGet. The setup screen asks for your language and theme, then installs yt-dlp and FFmpeg with one click. yt-dlp is checked against its SHA-256 before it runs.
+1. Open LibreGet. The setup screen asks for your language and theme, then installs yt-dlp and FFmpeg with one click. yt-dlp is checked against its SHA-256 before it runs.
 2. Copy any link: a YouTube video, an Instagram reel, an X post, a Pinterest board, a magnet, a direct file URL.
-3. Paste it in the box on the home screen. OmniGet detects the site and shows the title, thumbnail and available qualities. Pick one and press Enter.
+3. Paste it in the box on the home screen. LibreGet detects the site and shows the title, thumbnail and available qualities. Pick one and press Enter.
 
 The Downloads page shows speed, phase and ETA read straight from the downloader, so a stalled download looks stalled instead of frozen at "3 seconds left". Interrupted downloads resume where they stopped. Rate-limited sites get retried with backoff, and connections per site adapt on their own, so YouTube gets up to 16 parallel fragments while a site that answers 429 gets fewer. When a Python 3.10 or newer is present, yt-dlp runs as a zipapp on it and starts in under a second instead of unpacking the bundled binary on every launch.
 
 <p align="center">
-  <img src="assets/readme/downloads.png" alt="OmniGet Downloads page with an active 4K YouTube download showing phase, speed, ETA and the exact yt-dlp command, plus queued and finished items" width="900" />
+  <img src="assets/readme/downloads.png" alt="LibreGet Downloads page with an active 4K YouTube download showing phase, speed, ETA and the exact yt-dlp command, plus queued and finished items" width="900" />
 </p>
 
 ### Skip the window entirely
 
-Copy a link anywhere on your system and press **Ctrl+Shift+D** (**Cmd+Shift+D** on macOS). OmniGet reads the clipboard and starts the download in the background. A second hotkey, **Ctrl+Shift+M**, grabs audio only, so a YouTube link becomes an MP3 without opening anything. It is off until you enable it, and both shortcuts can be rebound in **Settings → Downloads → Clipboard & hotkeys**.
+Copy a link anywhere on your system and press **Ctrl+Shift+D** (**Cmd+Shift+D** on macOS). LibreGet reads the clipboard and starts the download in the background. A second hotkey, **Ctrl+Shift+M**, grabs audio only, so a YouTube link becomes an MP3 without opening anything. It is off until you enable it, and both shortcuts can be rebound in **Settings → Downloads → Clipboard & hotkeys**.
 
 ---
 
-## What OmniGet downloads
+## What LibreGet downloads
 
-OmniGet has native extractors for the platforms people use most, and hands everything else to [yt-dlp](https://github.com/yt-dlp/yt-dlp), which covers roughly 1,800 sites.
+LibreGet has native extractors for the platforms people use most, and hands everything else to [yt-dlp](https://github.com/yt-dlp/yt-dlp), which covers roughly 1,800 sites.
 
 | Category | Sites and formats |
 |---|---|
@@ -204,81 +202,81 @@ OmniGet has native extractors for the platforms people use most, and hands every
 | <img src="https://cdn.simpleicons.org/bilibili/00A1D6" width="18" height="18" align="center" alt="Bilibili" /> Bilibili, signed in | 4K, HDR, Dolby Vision, Hi-Res lossless and Dolby Atmos according to your subscription. Danmaku comments as XML, ASS or JSON, NFO files for Kodi and Jellyfin, custom naming templates, 11 URL types including bangumi, courses, favorites, watch later and history |
 | <img src="https://api.iconify.design/ph:images.svg?color=%23E0A800" width="18" height="18" align="center" alt="Image galleries" /> Image galleries | Whole galleries and profiles from 250+ sites through gallery-dl (DeviantArt, Pixiv, ArtStation, Flickr, Tumblr, Imgur, Kemono and more) |
 | <img src="https://api.iconify.design/ph:stack.svg?color=%23FFB340" width="18" height="18" align="center" alt="Bulk" /> Bulk | Paste many links or load a `.txt`, download whole subreddits, Reddit and X profiles, Instagram and Pinterest profiles, Facebook albums |
-| <img src="https://api.iconify.design/ph:folder-simple.svg?color=%23A66A24" width="18" height="18" align="center" alt="Files and transfer" /> Files and transfer | `.torrent` files and magnet links with a built-in BitTorrent client, direct HTTP files, HLS and DASH manifests, and person-to-person transfer between two OmniGet installs with a short word code |
+| <img src="https://api.iconify.design/ph:folder-simple.svg?color=%23A66A24" width="18" height="18" align="center" alt="Files and transfer" /> Files and transfer | `.torrent` files and magnet links with a built-in BitTorrent client, direct HTTP files, HLS and DASH manifests, and person-to-person transfer between two LibreGet installs with a short word code |
 | <img src="https://cdn.simpleicons.org/telegram/2CA5E0" width="18" height="18" align="center" alt="Telegram" /> Telegram | Photos, videos, files and audio from any channel or group you belong to, saved into organized channel folders (`OmniGram/<channel>/`), through the embedded Telegram plugin |
 
 Options you set once and forget: default quality, audio-only format (MP3, M4A, Opus, FLAC or WAV), subtitle languages and format (SRT, VTT, ASS, embedded or sidecar), thumbnail and metadata embedding, filename template, organize by platform, skip existing files, split by chapters, speed limit, concurrent downloads, proxy. Rules send a given channel or host to a folder and quality of your choice without asking again. Followed channels are checked in the background and can download new uploads automatically with a tray notification.
 
 <p align="center">
-  <img src="assets/readme/settings.png" alt="OmniGet settings: grouped sidebar with Appearance, Downloads, Network, Cookies, Channels, AI, Plugins and Advanced, and a download section with Output, Quality, Subtitles, Clipboard and hotkeys, Per-platform options" width="900" />
+  <img src="assets/readme/settings.png" alt="LibreGet settings: grouped sidebar with Appearance, Downloads, Network, Cookies, Channels, AI, Plugins and Advanced, and a download section with Output, Quality, Subtitles, Clipboard and hotkeys, Per-platform options" width="900" />
 </p>
 
 ---
 
 ## The browser extension, step by step
 
-The extension does two jobs. On sites it recognizes (YouTube, Instagram, TikTok, X, Reddit, Twitch, Pinterest, Bluesky, Telegram, Vimeo, Udemy, Hotmart, Rocketseat, Bilibili, SoundCloud) it sends the page to OmniGet with one click or with **Alt+O**. On any other site it watches network traffic for MP4, HLS, DASH, WebM and audio streams and lists them in its popup. In both cases it forwards your cookies and referer, which is what lets OmniGet download private content you are logged into, such as Instagram stories, a paid course, or a members-only video. Cookies are grouped by real site, so a Brazilian `.com.br` domain gets its own entry instead of sharing one with every other `.com.br` site. The popup also has a **Force H.264** switch for YouTube, for computers that stutter on VP9 and AV1.
+The extension does two jobs. On sites it recognizes (YouTube, Instagram, TikTok, X, Reddit, Twitch, Pinterest, Bluesky, Telegram, Vimeo, Udemy, Hotmart, Rocketseat, Bilibili, SoundCloud) it sends the page to LibreGet with one click or with **Alt+O**. On any other site it watches network traffic for MP4, HLS, DASH, WebM and audio streams and lists them in its popup. In both cases it forwards your cookies and referer, which is what lets LibreGet download private content you are logged into, such as Instagram stories, a paid course, or a members-only video. Cookies are grouped by real site, so a Brazilian `.com.br` domain gets its own entry instead of sharing one with every other `.com.br` site. The popup also has a **Force H.264** switch for YouTube, for computers that stutter on VP9 and AV1.
 
 For the sites the sniffer cannot see, there is **Deep search**, a switch in the popup that hooks the page's own video player and catches playlists that never show up as network requests. It asks for permission on all sites the first time and stays off until then. Around it, the sniffer estimates the size of an HLS stream before you download, pairs the separate video and audio tracks a site serves so you get one file, checks the first bytes of what it found so an HTML error page is never saved as a video, and lets you edit the capture rules in the options page. The same options page can back up the list of extensions you have installed, ahead of Chrome dropping Manifest V2 extensions; that needs the optional "management" permission and asks for it only when you use it.
 
 Pick the level that matches how comfortable you are.
 
 <p align="center">
-  <img src="assets/readme/extension.png" alt="Penguin mascot plugging a cable from a browser window into the OmniGet app window, with cookies travelling along it and a padlock and a house above it: the pairing stays on your own machine." width="100%" />
+  <img src="assets/readme/extension.png" alt="Penguin mascot plugging a cable from a browser window into the LibreGet app window, with cookies travelling along it and a padlock and a house above it: the pairing stays on your own machine." width="100%" />
 </p>
 
 ### Level 1: from inside the app (no downloads, no zip files)
 
-1. Open OmniGet and install it if you have not. Launch it once.
-2. Go to **Settings → Plugins → Browser extension**. Click **Update / Install** next to Chrome. OmniGet copies the extension that ships inside it to a folder and opens that folder for you.
+1. Open LibreGet and install it if you have not. Launch it once.
+2. Go to **Settings → Plugins → Browser extension**. Click **Update / Install** next to Chrome. LibreGet copies the extension that ships inside it to a folder and opens that folder for you.
 3. Open Chrome (Edge, Brave and other Chromium browsers work the same way) and type `chrome://extensions` in the address bar.
 4. Turn on **Developer mode** with the switch in the top right corner.
-5. Click **Load unpacked** and pick the folder OmniGet just opened.
-6. The OmniGet icon appears in the toolbar. An options page opens on its own and says it is looking for the app.
-7. Back in OmniGet, still in **Settings → Plugins → Browser extension**, click **Pair extension**. Within a few seconds the app says "Extension connected" and the options page turns green. Done.
+5. Click **Load unpacked** and pick the folder LibreGet just opened.
+6. The LibreGet icon appears in the toolbar. An options page opens on its own and says it is looking for the app.
+7. Back in LibreGet, still in **Settings → Plugins → Browser extension**, click **Pair extension**. Within a few seconds the app says "Extension connected" and the options page turns green. Done.
 
-From now on, visit any supported page and click the icon. The page, its cookies and its title go to OmniGet and the download starts. Your cookies also show up in **Settings → Cookies**, where the Courses plugin and the Instagram, X and Pinterest tools reuse them.
+From now on, visit any supported page and click the icon. The page, its cookies and its title go to LibreGet and the download starts. Your cookies also show up in **Settings → Cookies**, where the Courses plugin and the Instagram, X and Pinterest tools reuse them.
 
 ### Level 2: from the release zip
 
-Every release ships `omniget-chrome-extension-vX.Y.Z.zip`. Download it from the [latest release](https://github.com/OpenSelena/omniget/releases/latest), unzip it, then follow steps 3 to 7 above pointing **Load unpacked** at the unzipped folder. Use this if you keep the app on one machine and the browser on another, or if you are installing for someone else.
+Every release ships `libreget-chrome-extension-vX.Y.Z.zip`. Download it from the [latest release](https://github.com/OpenSelena/libreget/releases/latest), unzip it, then follow steps 3 to 7 above pointing **Load unpacked** at the unzipped folder. Use this if you keep the app on one machine and the browser on another, or if you are installing for someone else.
 
 ### Level 3: Firefox, other browsers and manual pairing
 
 Firefox: **Settings → Plugins → Browser extension → Update / Install** next to Firefox, then open `about:debugging#/runtime/this-firefox`, click **Load Temporary Add-on** and pick `manifest.json` in the exported folder. Firefox drops temporary add-ons on restart, so repeat this until the extension is published on AMO. Safari is not supported yet because Safari extensions must ship through the App Store.
 
-Manual pairing: if **Pair extension** times out, open the extension's options page (right-click the icon → Options), then in OmniGet reveal and copy the **Pairing token** and paste it into the options page. The endpoint URL is detected automatically. The app listens on `127.0.0.1` ports 47720 to 47729 and the token is generated per install, so nothing leaves your machine.
+Manual pairing: if **Pair extension** times out, open the extension's options page (right-click the icon → Options), then in LibreGet reveal and copy the **Pairing token** and paste it into the options page. The endpoint URL is detected automatically. The app listens on `127.0.0.1` ports 47720 to 47729 and the token is generated per install, so nothing leaves your machine.
 
-If the extension is installed but OmniGet is closed, clicks fall back to the `omniget://` link scheme, which still queues the URL but cannot carry cookies. Tick "Always allow" the first time Chrome asks.
+If the extension is installed but LibreGet is closed, clicks fall back to the `libreget://` link scheme, which still queues the URL but cannot carry cookies. Tick "Always allow" the first time Chrome asks.
 
 ---
 
 ## The Tools section: 158 tools in 25 categories
 
-Tools is the part of OmniGet that grew beyond downloading. Each tile is one job: an isolated Rust command with JSON in and JSON out, which is also what lets AI agents drive them through the built-in MCP server. The hub has a search box that understands English and Portuguese ("legenda" finds subtitle tools) and a platform filter, and tools that only run on Windows say so on the tile and stay hidden elsewhere. Everything below runs on your machine; the only tools that touch the network are the ones that fetch from the site they are named after.
+Tools is the part of LibreGet that grew beyond downloading. Each tile is one job: an isolated Rust command with JSON in and JSON out, which is also what lets AI agents drive them through the built-in MCP server. The hub has a search box that understands English and Portuguese ("legenda" finds subtitle tools) and a platform filter, and tools that only run on Windows say so on the tile and stay hidden elsewhere. Everything below runs on your machine; the only tools that touch the network are the ones that fetch from the site they are named after.
 
 <p align="center">
   <img src="assets/readme/illustration-tools.png" alt="Penguin mascot opening a toolbox full of tool tiles: microphone, subtitles, scissors, PDF, photo, gear, folder, magnet, phone, AI, music, globe, keyboard, chat and wrench" width="900" />
 </p>
 
 <p align="center">
-  <img src="assets/readme/tools.png" alt="OmniGet Tools hub with 25 categories: YouTube, Speech and subtitles, Video editing, Audio, Instagram, X, Facebook, Reddit, Pinterest, Twitch, Bilibili, Spotify, Music, LinkedIn, Games, PDF, Documents, Images, System, Files, Downloads, Automation, Phone, AI and CTF and analysis" width="900" />
+  <img src="assets/readme/tools.png" alt="LibreGet Tools hub with 25 categories: YouTube, Speech and subtitles, Video editing, Audio, Instagram, X, Facebook, Reddit, Pinterest, Twitch, Bilibili, Spotify, Music, LinkedIn, Games, PDF, Documents, Images, System, Files, Downloads, Automation, Phone, AI and CTF and analysis" width="900" />
 </p>
 
 Status legend: no mark means ready, **beta** means it works but has not been tested against every account type, **planned** means the tile exists so you can see where things are going and does nothing yet.
 
 <table>
   <tr>
-    <td><img src="assets/readme/tools-instagram.png" alt="Instagram tools in OmniGet: download post, bulk download, reel audio, stories, highlights, story viewers, profile viewer, HD avatar, profile download, unfollowers, fans, mutuals, who unfollowed, ghost followers, whitelist, data export, analytics, compare profiles, hashtag explorer, comments, likers, giveaway picker, publish and schedule" /></td>
-    <td><img src="assets/readme/tools-x.png" alt="X / Twitter tools in OmniGet: download post, unroll thread, post to image, profile X-ray, profile media, advanced search, export bookmarks, who doesn't follow back, your X archive and Grok" /></td>
+    <td><img src="assets/readme/tools-instagram.png" alt="Instagram tools in LibreGet: download post, bulk download, reel audio, stories, highlights, story viewers, profile viewer, HD avatar, profile download, unfollowers, fans, mutuals, who unfollowed, ghost followers, whitelist, data export, analytics, compare profiles, hashtag explorer, comments, likers, giveaway picker, publish and schedule" /></td>
+    <td><img src="assets/readme/tools-x.png" alt="X / Twitter tools in LibreGet: download post, unroll thread, post to image, profile X-ray, profile media, advanced search, export bookmarks, who doesn't follow back, your X archive and Grok" /></td>
   </tr>
   <tr>
-    <td><img src="assets/readme/tools-pinterest.png" alt="Pinterest tools in OmniGet: download pin, board backup, profile backup, search without AI or ads, similar pins, find the source, duplicates, color palette, offline gallery and keyword ideas" /></td>
-    <td><img src="assets/readme/tools-pdf.png" alt="PDF tools in OmniGet: merge, split, compress, convert, OCR, repair, password and permissions, watermark and numbering, crop margins, table of contents, check redaction, safe PDF and PDF to Markdown" /></td>
+    <td><img src="assets/readme/tools-pinterest.png" alt="Pinterest tools in LibreGet: download pin, board backup, profile backup, search without AI or ads, similar pins, find the source, duplicates, color palette, offline gallery and keyword ideas" /></td>
+    <td><img src="assets/readme/tools-pdf.png" alt="PDF tools in LibreGet: merge, split, compress, convert, OCR, repair, password and permissions, watermark and numbering, crop margins, table of contents, check redaction, safe PDF and PDF to Markdown" /></td>
   </tr>
   <tr>
-    <td><img src="assets/readme/tools-linkedin.png" alt="LinkedIn tools in OmniGet: data overview, connections, messages and profile score, all read from the official data export" /></td>
-    <td><img src="assets/readme/tools-ctf.png" alt="CTF and analysis tools in OmniGet: hash and HMAC, what is this file, classic ciphers, XOR, encodings and frequency analysis" /></td>
+    <td><img src="assets/readme/tools-linkedin.png" alt="LinkedIn tools in LibreGet: data overview, connections, messages and profile score, all read from the official data export" /></td>
+    <td><img src="assets/readme/tools-ctf.png" alt="CTF and analysis tools in LibreGet: hash and HMAC, what is this file, classic ciphers, XOR, encodings and frequency analysis" /></td>
   </tr>
 </table>
 
@@ -353,7 +351,7 @@ All of these run on your own Instagram session captured by the browser extension
 - **Who liked.** List and export the accounts that liked a post.
 - **Giveaway picker.** Draw winners among the comments with rules for mentions, keyword and one entry per person.
 - **Publish.** Photo, carousel, reel, video or story through your session or the official Graph API. *beta*
-- **Schedule posts.** Queue posts for a date and time. OmniGet publishes them while it is open. *beta*
+- **Schedule posts.** Queue posts for a date and time. LibreGet publishes them while it is open. *beta*
 
 ### <img src="https://cdn.simpleicons.org/x/000000/ffffff" width="20" height="20" align="center" alt="X" /> X / Twitter (10)
 
@@ -507,11 +505,11 @@ All four read the official data export LinkedIn lets you request, on your own ma
 ### <img src="https://api.iconify.design/ph:sparkle.svg?color=%233D5BF0" width="20" height="20" align="center" alt="AI" /> AI (6)
 
 - **Compare prices.** The cost of the same model across providers, with prices from LiteLLM and models.dev.
-- **AI spending.** How much OmniGet spent on AI, by day, model and task, from a local ledger.
+- **AI spending.** How much LibreGet spent on AI, by day, model and task, from a local ledger.
 - **Local models (Ollama).** See, download and remove local models and use them as a free provider.
 - **Humanize text.** Rewrite AI-sounding text so it reads like a person wrote it, without changing what it says. Runs on the AI provider you configured. *beta*
 - **API keys.** A local vault for keys and accounts, with a connection test, balance for OpenRouter, DeepSeek, SiliconFlow and New API, and export to Claude Code, Codex, Cherry Studio, opencode or a `.env` file.
-- **MCP server.** OmniGet's tools exposed over the Model Context Protocol on the local bridge, 37 tools behind the same token the extension uses, with ready-made config snippets for Claude Code, Claude Desktop, Cursor, VS Code, Goose and Codex. See [OmniGet for AI agents](#omniget-for-ai-agents-mcp-server-and-claude-code-plugin). *beta*
+- **MCP server.** LibreGet's tools exposed over the Model Context Protocol on the local bridge, 37 tools behind the same token the extension uses, with ready-made config snippets for Claude Code, Claude Desktop, Cursor, VS Code, Goose and Codex. See [LibreGet for AI agents](#libreget-for-ai-agents-mcp-server-and-claude-code-plugin). *beta*
 
 ### <img src="https://api.iconify.design/ph:sword.svg?color=%236F6F75" width="20" height="20" align="center" alt="CTF and analysis" /> CTF and analysis (6)
 
@@ -528,7 +526,7 @@ Every tool that talks to an AI uses the provider you set in **Settings → AI**:
 
 ---
 
-## OmniGet for AI agents: MCP server and Claude Code plugin
+## LibreGet for AI agents: MCP server and Claude Code plugin
 
 <p align="center">
   <img src="assets/readme/illustration-agents.png" alt="Penguin mascot at a terminal handing a folder of files to a small robot that hands back a link, with microphone, subtitle and video tiles above the screen" width="900" />
@@ -536,21 +534,21 @@ Every tool that talks to an AI uses the provider you set in **Settings → AI**:
 
 Two doors, depending on where your agent lives.
 
-**Inside the app: the MCP server.** Turn it on in Tools → AI → MCP server and OmniGet exposes 37 of its tools over the Model Context Protocol on the same local bridge the browser extension uses, behind the same per-install token. An agent can queue a URL and watch, pause, resume or cancel it in the Downloads panel, merge, split, render, extract text from or sanitize PDFs, transcribe a file with whisper.cpp, run text to speech and OCR, resize images, find duplicates, search files, read X posts, threads, profiles, searches and trends, look up an Instagram profile through your session, compare LLM prices, humanize text, scan disks and caches, list startup items and installed apps, and pull large files or galleries with aria2 and gallery-dl. The page prints the config snippet for Claude Code, Claude Desktop, Cursor, VS Code, Goose and Codex, so it is a paste, not a setup. *beta*
+**Inside the app: the MCP server.** Turn it on in Tools → AI → MCP server and LibreGet exposes 37 of its tools over the Model Context Protocol on the same local bridge the browser extension uses, behind the same per-install token. An agent can queue a URL and watch, pause, resume or cancel it in the Downloads panel, merge, split, render, extract text from or sanitize PDFs, transcribe a file with whisper.cpp, run text to speech and OCR, resize images, find duplicates, search files, read X posts, threads, profiles, searches and trends, look up an Instagram profile through your session, compare LLM prices, humanize text, scan disks and caches, list startup items and installed apps, and pull large files or galleries with aria2 and gallery-dl. The page prints the config snippet for Claude Code, Claude Desktop, Cursor, VS Code, Goose and Codex, so it is a paste, not a setup. *beta*
 
-**Inside Claude Code: the `omniget` plugin.** The [`claude-plugin/`](claude-plugin/omniget) folder ships a plugin for [Claude Code](https://claude.com/claude-code) that needs no desktop app at all. Paste a video, audio or social post URL with a request and the `omniget-fetch` and `omniget-transcribe` skills trigger on their own. The slash commands are there when you want to be explicit:
+**Inside Claude Code: the `libreget` plugin.** The [`claude-plugin/`](claude-plugin/libreget) folder ships a plugin for [Claude Code](https://claude.com/claude-code) that needs no desktop app at all. Paste a video, audio or social post URL with a request and the `libreget-fetch` and `libreget-transcribe` skills trigger on their own. The slash commands are there when you want to be explicit:
 
 ```
-/plugin marketplace add /path/to/omniget/claude-plugin
-/plugin install omniget
-/omniget:setup                       # installs yt-dlp, ffmpeg and omniget-cli after one confirmation
-/omniget:fetch <url> [--audio]       # the media file, to ~/Downloads/omniget
-/omniget:transcribe <url|file>       # captions, then local whisper.cpp, then Gemini or OpenAI if you added a key
-/omniget:research <url>              # caption plus transcript distilled into a Markdown note with [mm:ss] references
-/omniget:doctor                      # what is installed, what is missing, how to add it
+/plugin marketplace add /path/to/libreget/claude-plugin
+/plugin install libreget
+/libreget:setup                       # installs yt-dlp, ffmpeg and libreget-cli after one confirmation
+/libreget:fetch <url> [--audio]       # the media file, to ~/Downloads/libreget
+/libreget:transcribe <url|file>       # captions, then local whisper.cpp, then Gemini or OpenAI if you added a key
+/libreget:research <url>              # caption plus transcript distilled into a Markdown note with [mm:ss] references
+/libreget:doctor                      # what is installed, what is missing, how to add it
 ```
 
-Setup downloads the prebuilt `omniget-cli` for your OS, which gives the skill OmniGet's native Instagram, X, Bilibili and Threads extractors. A download that fails on a login wall is retried once with the cookies of the browser you name in `OMNIGET_COOKIES_FROM_BROWSER`. API keys go into `~/.config/ai-keys.env` from your own terminal and are never printed back.
+Setup downloads the prebuilt `libreget-cli` for your OS, which gives the skill LibreGet's native Instagram, X, Bilibili and Threads extractors. A download that fails on a login wall is retried once with the cookies of the browser you name in `LIBREGET_COOKIES_FROM_BROWSER`. API keys go into `~/.config/ai-keys.env` from your own terminal and are never printed back.
 
 ---
 
@@ -559,12 +557,12 @@ Setup downloads the prebuilt `omniget-cli` for your OS, which gives the skill Om
 Core plugins are embedded directly into the application binary, eliminating runtime download and ABI compatibility errors. The Marketplace page shows active plugins, what each plugin is allowed to do (events, notifications, settings, download folders, proxy, managed tools, download queue), and lets you configure or toggle them.
 
 <p align="center">
-  <img src="assets/readme/marketplace.png" alt="OmniGet Marketplace listing the Courses, Telegram and Convert plugins with version, author, permissions and enable switches" width="900" />
+  <img src="assets/readme/marketplace.png" alt="LibreGet Marketplace listing the Courses, Telegram and Convert plugins with version, author, permissions and enable switches" width="900" />
 </p>
 
 ### <img src="https://api.iconify.design/ph:graduation-cap.svg?color=%23F28500" width="20" height="20" align="center" alt="Courses" /> Courses
 
-The embedded Courses plugin supports 38 learning platforms, including **Hotmart**, **Udemy**, **Kiwify**, **Rocketseat**, **Coursera**, **Domestika**, **Skillshare**, **Alura**, and **Ebac**. Sign in through a webview inside the app, with saved cookies from the extension, or with account credentials where available. OmniGet lists your purchases, opens the course outline so you can select the sections you want (DRM-protected lectures are skipped and reported), and downloads lessons and attachments with optional continuous numbering.
+The embedded Courses plugin supports 38 learning platforms, including **Hotmart**, **Udemy**, **Kiwify**, **Rocketseat**, **Coursera**, **Domestika**, **Skillshare**, **Alura**, and **Ebac**. Sign in through a webview inside the app, with saved cookies from the extension, or with account credentials where available. LibreGet lists your purchases, opens the course outline so you can select the sections you want (DRM-protected lectures are skipped and reported), and downloads lessons and attachments with optional continuous numbering.
 
 ### <img src="https://cdn.simpleicons.org/telegram/2CA5E0" width="20" height="20" align="center" alt="Telegram" /> Telegram
 
@@ -581,8 +579,8 @@ FFmpeg conversions with GPU acceleration where the machine has it: container, co
 - Command palette (**Ctrl+K** or **Cmd+K**) that jumps to any page, setting or tool.
 - Clipboard detection that offers to download a copied link with one click on a toast.
 - Cookie manager that keeps sessions per site, captured by the extension or imported from a `cookies.txt`, with a test button per domain.
-- Video summaries: paste a URL in **Settings → AI**, OmniGet fetches the subtitles and summarizes them in the length and language you choose.
-- Send a file to someone: pick a file, share the word code, the other person pastes it in their OmniGet.
+- Video summaries: paste a URL in **Settings → AI**, LibreGet fetches the subtitles and summarizes them in the length and language you choose.
+- Send a file to someone: pick a file, share the word code, the other person pastes it in their LibreGet.
 - Discord Rich Presence showing what you are listening to, watching or reading. Downloads stay private.
 - Tray icon, start with system, start minimized, prevent sleep during downloads.
 - Every download keeps the exact yt-dlp command it ran. Open it, edit a flag, retry.
@@ -592,15 +590,15 @@ FFmpeg conversions with GPU acceleration where the machine has it: container, co
 
 ---
 
-## Privacy and what OmniGet refuses to do
+## Privacy and what LibreGet refuses to do
 
 <p align="center">
-  <img src="assets/readme/illustration-privacy.png" alt="Penguin mascot hugging a laptop with the OmniGet download icon and a green padlock, inside a glowing shield" width="700" />
+  <img src="assets/readme/illustration-privacy.png" alt="Penguin mascot hugging a laptop with the LibreGet download icon and a green padlock, inside a glowing shield" width="700" />
 </p>
 
-Everything runs on your computer. There is no account, no server of ours in the middle, and no telemetry about what you download. Cookies and API keys live in your local profile. The only network calls OmniGet makes on its own are to the sites you asked it to download from, to GitHub for updates and plugins, and to the AI provider you configured, when you use an AI tool.
+Everything runs on your computer. There is no account, no server of ours in the middle, and no telemetry about what you download. Cookies and API keys live in your local profile. The only network calls LibreGet makes on its own are to the sites you asked it to download from, to GitHub for updates and plugins, and to the AI provider you configured, when you use an AI tool.
 
-OmniGet downloads what your own logged-in session can already open. It does not bypass DRM, break paywalls, or share credentials, and DRM-protected lectures are skipped and reported. You are responsible for respecting copyright and each platform's terms of service. The full text is in the app under **About → Terms and ethics**.
+LibreGet downloads what your own logged-in session can already open. It does not bypass DRM, break paywalls, or share credentials, and DRM-protected lectures are skipped and reported. You are responsible for respecting copyright and each platform's terms of service. The full text is in the app under **About → Terms and ethics**.
 
 ---
 
@@ -608,19 +606,19 @@ OmniGet downloads what your own logged-in session can already open. It does not 
 
 Free code signing on Windows provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org).
 
-Code changes and signed releases are reviewed and approved by the OpenSelena maintainers. See [Privacy and what OmniGet refuses to do](#privacy-and-what-omniget-refuses-to-do) and the [privacy documentation](https://omniget.nav.bd/docs/#privacy) for how OmniGet handles data.
+Code changes and signed releases are reviewed and approved by the OpenSelena maintainers. See [Privacy and what LibreGet refuses to do](#privacy-and-what-libreget-refuses-to-do) and the [privacy documentation](https://libreget.nav.bd/docs/#privacy) for how LibreGet handles data.
 
 ---
 
 ## Frequently asked questions
 
-**Is OmniGet free?**
+**Is LibreGet free?**
 Yes. GPL-3.0, no paid tier, no ads, no account.
 
-**Is OmniGet a yt-dlp GUI?**
-Partly. yt-dlp handles the long tail of sites and OmniGet bundles it, verifies it and updates it. On top of that sit native extractors for courses, Instagram, X, Pinterest, Bilibili, Telegram and torrents, a queue with resume and retry, the Tools section, and media conversion.
+**Is LibreGet a yt-dlp GUI?**
+Partly. yt-dlp handles the long tail of sites and LibreGet bundles it, verifies it and updates it. On top of that sit native extractors for courses, Instagram, X, Pinterest, Bilibili, Telegram and torrents, a queue with resume and retry, the Tools section, and media conversion.
 
-**Can OmniGet download a Udemy or Hotmart course I bought?**
+**Can LibreGet download a Udemy or Hotmart course I bought?**
 Yes. The Courses plugin is embedded directly in the app. Sign in through the app, pick the course and sections, and download. Lessons and attachments land in an organized folder per course. 38 platforms are supported, including Hotmart, Udemy, Kiwify, Rocketseat, Coursera, Domestika, and more.
 
 **Can it download Instagram stories, close friends or highlights?**
@@ -647,8 +645,8 @@ Run the two commands in [the first launch section](#the-first-launch-warning-and
 **Can it read my Reddit, LinkedIn, Spotify, X or Instagram data export?**
 Yes. Request the export from the platform, then open the zip in the matching tool. It is parsed on your machine and nothing is uploaded.
 
-**Can an AI agent use OmniGet?**
-Yes, two ways. The MCP server in Tools → AI exposes 37 tools to Claude Code, Claude Desktop, Cursor, VS Code, Goose and Codex, and the `claude-plugin/` folder ships a Claude Code plugin that fetches and transcribes media without the desktop app. See [OmniGet for AI agents](#omniget-for-ai-agents-mcp-server-and-claude-code-plugin).
+**Can an AI agent use LibreGet?**
+Yes, two ways. The MCP server in Tools → AI exposes 37 tools to Claude Code, Claude Desktop, Cursor, VS Code, Goose and Codex, and the `claude-plugin/` folder ships a Claude Code plugin that fetches and transcribes media without the desktop app. See [LibreGet for AI agents](#libreget-for-ai-agents-mcp-server-and-claude-code-plugin).
 
 **Can I transcribe a video to subtitles offline?**
 Yes. Tools → Speech and subtitles → Transcribe uses whisper.cpp locally. Models download on demand.
@@ -657,31 +655,31 @@ Yes. Tools → Speech and subtitles → Transcribe uses whisper.cpp locally. Mod
 Yes, on Windows, with a `portable.txt` file next to the executable.
 
 **Which Linux package should I pick?**
-Debian and Ubuntu: `.deb`. Fedora, openSUSE, RHEL family: `.rpm`. Anything else: `.AppImage`. Both x86_64 and ARM64 are published. OmniGet is not on Flathub.
+Debian and Ubuntu: `.deb`. Fedora, openSUSE, RHEL family: `.rpm`. Anything else: `.AppImage`. Both x86_64 and ARM64 are published. LibreGet is not on Flathub.
 
 ---
 
 ## Command line
 
-`omniget-cli` ships with every release for Windows, macOS (Intel and Apple Silicon) and Linux. Grab `omniget-cli-<version>-<target>` from the [latest release](https://github.com/OpenSelena/omniget/releases/latest).
+`libreget-cli` ships with every release for Windows, macOS (Intel and Apple Silicon) and Linux. Grab `libreget-cli-<version>-<target>` from the [latest release](https://github.com/OpenSelena/libreget/releases/latest).
 
 ```bash
-omniget info <url>                     # title, formats and size, downloads nothing
-omniget download <url> -q 1080 -o ~/Videos
-omniget download <url> --audio-only --subs en,pt
-omniget batch links.txt -m 3           # one URL per line, 3 at a time
-omniget import-cookies cookies.txt     # Netscape format
+libreget info <url>                     # title, formats and size, downloads nothing
+libreget download <url> -q 1080 -o ~/Videos
+libreget download <url> --audio-only --subs en,pt
+libreget batch links.txt -m 3           # one URL per line, 3 at a time
+libreget import-cookies cookies.txt     # Netscape format
 ```
 
 ---
 
 ## Build from source
 
-If you only want to use OmniGet, [grab a release](#download-and-install). To build it you need [Rust](https://rustup.rs/) (the exact toolchain is pinned in `rust-toolchain.toml` because the plugin ABI depends on it), [Node.js](https://nodejs.org/) 18+ and [pnpm](https://pnpm.io/).
+If you only want to use LibreGet, [grab a release](#download-and-install). To build it you need [Rust](https://rustup.rs/) (the exact toolchain is pinned in `rust-toolchain.toml` because the plugin ABI depends on it), [Node.js](https://nodejs.org/) 18+ and [pnpm](https://pnpm.io/).
 
 ```bash
-git clone https://github.com/OpenSelena/omniget.git
-cd omniget
+git clone https://github.com/OpenSelena/libreget.git
+cd libreget
 pnpm install
 pnpm tauri dev
 ```
@@ -704,7 +702,7 @@ pnpm tauri build --config '{"bundle":{"createUpdaterArtifacts":false}}'
 
 Releases sign their updater artifacts with a private key only the maintainer holds, so a plain `pnpm tauri build` stops with "A public key has been found, but no private key". The flag above turns those artifacts off for a local build and changes nothing else.
 
-The `courses`, `telegram` and `convert` plugins live inside `src-tauri/plugins/` and compile into the main binary. The plugin registry is [omniget-plugins](https://github.com/OpenSelena/omniget-plugins).
+The `courses`, `telegram` and `convert` plugins live inside `src-tauri/plugins/` and compile into the main binary. The plugin registry is [libreget-plugins](https://github.com/OpenSelena/libreget-plugins).
 
 Stack: Tauri 2, Rust, SvelteKit with Svelte 5, SQLite, yt-dlp, FFmpeg, librqbit for torrents, whisper.cpp, aria2, gallery-dl.
 
@@ -712,18 +710,18 @@ Stack: Tauri 2, Rust, SvelteKit with Svelte 5, SQLite, yt-dlp, FFmpeg, librqbit 
 
 ## Contributing and translations
 
-Bug reports and pull requests go to [Issues](https://github.com/OpenSelena/omniget/issues) and [Pull requests](https://github.com/OpenSelena/omniget/pulls). Questions and quick help live on [Telegram](https://t.me/OpenSelena). Security inquiries and vulnerability reports: [SECURITY.md](SECURITY.md) or [igect@vk.com](mailto:igect@vk.com).
+Bug reports and pull requests go to [Issues](https://github.com/OpenSelena/libreget/issues) and [Pull requests](https://github.com/OpenSelena/libreget/pulls). Questions and quick help live on [Telegram](https://t.me/OpenSelena). Security inquiries and vulnerability reports: [SECURITY.md](SECURITY.md) or [igect@vk.com](mailto:igect@vk.com).
 
-Translations are managed on [Weblate](https://hosted.weblate.org/engage/omniget-openselena/). Pick your language and translate in the browser. New strings appear there a few hours after they land in `main`.
+Translations are managed on [Weblate](https://hosted.weblate.org/engage/libreget-openselena/). Pick your language and translate in the browser. New strings appear there a few hours after they land in `main`.
 
-OmniGet is built on [yt-dlp](https://github.com/yt-dlp/yt-dlp), [FFmpeg](https://ffmpeg.org/), [gallery-dl](https://github.com/mikf/gallery-dl), [whisper.cpp](https://github.com/ggerganov/whisper.cpp), [aria2](https://aria2.github.io/), [SponsorBlock](https://sponsor.ajay.app/), [Return YouTube Dislike](https://returnyoutubedislike.com/), [FxTwitter](https://github.com/FixTweet/FxTwitter), [Spicetify](https://spicetify.app/), [cat-catch](https://github.com/xifangczy/cat-catch) (parts of the extension's media sniffer) and [Tauri](https://tauri.app/). Thank you to everyone who maintains them.
+LibreGet is built on [yt-dlp](https://github.com/yt-dlp/yt-dlp), [FFmpeg](https://ffmpeg.org/), [gallery-dl](https://github.com/mikf/gallery-dl), [whisper.cpp](https://github.com/ggerganov/whisper.cpp), [aria2](https://aria2.github.io/), [SponsorBlock](https://sponsor.ajay.app/), [Return YouTube Dislike](https://returnyoutubedislike.com/), [FxTwitter](https://github.com/FixTweet/FxTwitter), [Spicetify](https://spicetify.app/), [cat-catch](https://github.com/xifangczy/cat-catch) (parts of the extension's media sniffer) and [Tauri](https://tauri.app/). Thank you to everyone who maintains them.
 
-The penguin mascot is OmniGet's project mascot. Community fan art is welcome. Project brand assets may not be used commercially or bundled into misleading third-party forks without permission.
+The penguin mascot is LibreGet's project mascot. Community fan art is welcome. Project brand assets may not be used commercially or bundled into misleading third-party forks without permission.
 
 <p align="center">
-  <a href="https://star-history.com/#OpenSelena/omniget&Date"><img src="https://api.star-history.com/svg?repos=OpenSelena/omniget&type=Date" alt="Star history of OpenSelena/omniget" width="600" /></a>
+  <a href="https://star-history.com/#OpenSelena/libreget&Date"><img src="https://api.star-history.com/svg?repos=OpenSelena/libreget&type=Date" alt="Star history of OpenSelena/libreget" width="600" /></a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/OpenSelena/omniget/releases/latest"><b>Download OmniGet</b></a> · <a href="LICENSE">GPL-3.0</a>
+  <a href="https://github.com/OpenSelena/libreget/releases/latest"><b>Download LibreGet</b></a> · <a href="LICENSE">GPL-3.0</a>
 </p>

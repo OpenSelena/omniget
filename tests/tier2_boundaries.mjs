@@ -145,7 +145,7 @@ export function runTier2Tests() {
     let errorDetail = null;
     try {
       const q = '';
-      const sampleItemText = 'OmniGet Quickstart Guide Installation';
+      const sampleItemText = 'LibreGet Quickstart Guide Installation';
       const isVisible = sampleItemText.toLowerCase().includes(q.toLowerCase().trim());
       algoWorks = isVisible === true;
     } catch (e) {
@@ -166,7 +166,7 @@ export function runTier2Tests() {
     try {
       const q = '   ';
       const trimmed = q.toLowerCase().trim();
-      const sampleItemText = 'OmniGet Quickstart Guide';
+      const sampleItemText = 'LibreGet Quickstart Guide';
       const match = trimmed === '' || sampleItemText.toLowerCase().includes(trimmed);
       handlesWhitespace = match === true;
     } catch (e) {
