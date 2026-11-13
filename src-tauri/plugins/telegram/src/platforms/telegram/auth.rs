@@ -50,7 +50,16 @@ impl TelegramState {
 
 pub fn session_file_path() -> anyhow::Result<PathBuf> {
     let data_dir = dirs::data_dir().ok_or_else(|| anyhow!("Cannot find app data directory"))?;
-    Ok(data_dir.join("omniget").join("telegram.session"))
+    let new_path = data_dir.join("libreget").join("telegram.session");
+    let old_path = data_dir.join("omniget").join("telegram.session");
+    if !new_path.exists() && old_path.exists() {
+        Ok(old_path)
+    } else {
+        if let Some(parent) = new_path.parent() {
+            let _ = std::fs::create_dir_all(parent);
+        }
+        Ok(new_path)
+    }
 }
 
 pub async fn disconnect_and_clear_client(handle: &TelegramSessionHandle) {

@@ -1053,7 +1053,7 @@ pub async fn telegram_clone_start(
             let created = api::create_channel_or_folder(
                 &state.telegram_session,
                 &new_title,
-                "Cloned with OmniGet",
+                "Cloned with LibreGet",
                 false,
             )
             .await

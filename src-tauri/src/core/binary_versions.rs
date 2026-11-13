@@ -16,13 +16,14 @@ use std::path::{Path, PathBuf};
 /// hoje quebrou, volto para a de ontem) sem virar acumulo de 100 MB.
 pub const KEEP_VERSIONS: usize = 3;
 
-const SUFFIX: &str = ".omniget-prev.";
+const SUFFIX: &str = ".libreget-prev.";
+const LEGACY_SUFFIX: &str = ".omniget-prev.";
 
 /// Caminho de arquivamento de `binary`, carimbado.
 ///
 /// O carimbo vai no fim e nao no meio do nome para o `find_tool` continuar
 /// enxergando so o binario ativo: ele procura por nome exato, e um `yt-dlp`
-/// arquivado como `yt-dlp.omniget-prev.123` nao colide.
+/// arquivado como `yt-dlp.libreget-prev.123` nao colide.
 pub fn archive_path(binary: &Path, stamp_ms: u128) -> PathBuf {
     let name = binary
         .file_name()
@@ -34,7 +35,7 @@ pub fn archive_path(binary: &Path, stamp_ms: u128) -> PathBuf {
 /// `Some(carimbo)` quando o arquivo e um arquivamento de `binary_name`.
 pub fn parse_archive(file_name: &str, binary_name: &str) -> Option<u128> {
     let rest = file_name.strip_prefix(binary_name)?;
-    let stamp = rest.strip_prefix(SUFFIX)?;
+    let stamp = rest.strip_prefix(SUFFIX).or_else(|| rest.strip_prefix(LEGACY_SUFFIX))?;
     stamp.parse().ok()
 }
 
@@ -117,7 +118,7 @@ mod tests {
 
     fn tmp(nome: &str) -> PathBuf {
         let d = std::env::temp_dir().join(format!(
-            "omniget-bv-{nome}-{}",
+            "libreget-bv-{nome}-{}",
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap()
@@ -133,14 +134,19 @@ mod tests {
         let p = archive_path(Path::new("/bin/yt-dlp"), 1234);
         assert_eq!(
             p.file_name().unwrap().to_str().unwrap(),
-            "yt-dlp.omniget-prev.1234"
+            "yt-dlp.libreget-prev.1234"
         );
         assert_ne!(p.file_name().unwrap(), "yt-dlp");
+        assert_eq!(
+            parse_archive("yt-dlp.libreget-prev.1234", "yt-dlp"),
+            Some(1234)
+        );
         assert_eq!(
             parse_archive("yt-dlp.omniget-prev.1234", "yt-dlp"),
             Some(1234)
         );
         assert_eq!(parse_archive("yt-dlp", "yt-dlp"), None);
+        assert_eq!(parse_archive("ffmpeg.libreget-prev.1", "yt-dlp"), None);
         assert_eq!(parse_archive("ffmpeg.omniget-prev.1", "yt-dlp"), None);
     }
 

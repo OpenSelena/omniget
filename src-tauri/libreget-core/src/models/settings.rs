@@ -72,7 +72,7 @@ fn default_rpc_app_id() -> String {
 }
 
 fn default_rpc_image_key() -> String {
-    "omniget_music".into()
+    "libreget_music".into()
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]
@@ -464,7 +464,7 @@ impl Default for TypographySettings {
             font_mono: default_font_mono(),
             line_height_base: default_line_height_base(),
             spacing_scale: default_spacing_scale(),
-            preset_name: Some("omniget-default".into()),
+            preset_name: Some("libreget-default".into()),
         }
     }
 }

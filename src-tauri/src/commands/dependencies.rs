@@ -299,7 +299,7 @@ pub async fn set_dependency_path(name: String, source_path: String) -> Result<St
 
     // Issue #222: referenciar no lugar, nao copiar. Uma copia dentro do
     // diretorio do app envelhece sozinha — o usuario atualiza o binario dele e
-    // o OmniGet segue usando a versao velha sem avisar.
+    // o LibreGet segue usando a versao velha sem avisar.
     libreget_core::core::binary_overrides::set(&name, &src)?;
 
     if name == "yt-dlp" {

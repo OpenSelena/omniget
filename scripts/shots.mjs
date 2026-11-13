@@ -239,7 +239,7 @@ function initScript(theme) {
         case "plugin:event|emit_to":
           return null;
         case "plugin:app|version": return "0.7.0";
-        case "plugin:app|name": return "OmniGet";
+        case "plugin:app|name": return "LibreGet";
         case "plugin:updater|check": return null;
         case "get_settings": return F.SETTINGS;
         case "save_settings": return null;
@@ -254,9 +254,9 @@ function initScript(theme) {
         case "rpc_set_idle_stats": return null;
         case "plugin_command": return null;
         case "get_download_log": return args && args.downloadId === 1
-          ? ["[omniget] $ yt-dlp -f 'bv*[height<=1080]+ba' … https://www.youtube.com/watch?v=live1", "[youtube] live1: Downloading webpage", "[info] live1: Downloading 2 format(s): 299+140", "[dashsegments] Total fragments: 25", "[download] Destination: Conference Keynote 2026.f299.mp4"]
+          ? ["[libreget] $ yt-dlp -f 'bv*[height<=1080]+ba' … https://www.youtube.com/watch?v=live1", "[youtube] live1: Downloading webpage", "[info] live1: Downloading 2 format(s): 299+140", "[dashsegments] Total fragments: 25", "[download] Destination: Conference Keynote 2026.f299.mp4"]
           : args && args.downloadId === 4
-            ? ["[omniget] $ yt-dlp -f 'bv*+ba' … https://www.youtube.com/watch?v=priv1", "ERROR: [youtube] priv1: Private video. Sign in if you've been granted access"]
+            ? ["[libreget] $ yt-dlp -f 'bv*+ba' … https://www.youtube.com/watch?v=priv1", "ERROR: [youtube] priv1: Private video. Sign in if you've been granted access"]
             : [];
         case "get_download_command": return null;
         case "retry_download_with_command": return "ok";
@@ -307,7 +307,7 @@ async function main() {
     console.log("starting vite dev...");
     devProc = spawn("pnpm", ["dev"], {
       cwd: process.cwd(),
-      env: { ...process.env, OMNIGET_I18N_STRICT: "0" },
+      env: { ...process.env, LIBREGET_I18N_STRICT: "0", OMNIGET_I18N_STRICT: "0" },
       stdio: "ignore",
       detached: false,
     });

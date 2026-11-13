@@ -3,8 +3,8 @@
   "id": "announcement-openselena-telegram-v2",
   "active": false,
   "title": "Open Selena Telegram",
-  "thumbnail": "https://raw.githubusercontent.com/OpenSelena/omniget/main/assets/announcement-poster.png",
-  "body": "Join the official Telegram channel of OpenSelena, where we share beta updates of OmniGet, new feature announcements, bug fixes, and the latest AI news and leaks.",
+  "thumbnail": "https://raw.githubusercontent.com/OpenSelena/libreget/main/assets/announcement-poster.png",
+  "body": "Join the official Telegram channel of OpenSelena, where we share beta updates of LibreGet, new feature announcements, bug fixes, and the latest AI news and leaks.",
   "cta": {
     "label": "Join Telegram Channel",
     "url": "https://t.me/openselena"

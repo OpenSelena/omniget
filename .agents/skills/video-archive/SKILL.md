@@ -1,8 +1,8 @@
 ---
 name: video-archive
 description: >-
-  Build or grow a local video dataset from YouTube with the OmniGet CLI
-  (`omniget-cli search` + `omniget-cli archive`): many search terms in many
+  Build or grow a local video dataset from YouTube with the LibreGet CLI
+  (`libreget search` + `libreget archive`): many search terms in many
   languages, duration and title filters, low-resolution H.264 files, subtitles
   and `.info.json` metadata, a GB cap, and a queue that resumes after a stop.
   Use when asked to "download every video about X", "build a gameplay/tutorial
@@ -10,10 +10,10 @@ description: >-
   download".
 ---
 
-# Video archive with the OmniGet CLI
+# Video archive with the LibreGet CLI
 
-The CLI binary is `omniget-cli` (installed with
-`cargo install --path src-tauri/omniget-cli --root ~/.local --locked`).
+The CLI binary is `libreget` (installed with
+`cargo install --path src-tauri/libreget-cli --root ~/.local --locked`).
 Everything below runs without the desktop app open. `yt-dlp` is found on PATH
 or in the app's data folder; `ffmpeg` must be on PATH.
 
@@ -24,7 +24,7 @@ or in the app's data folder; `ffmpeg` must be on PATH.
   queries.txt        one search term per line, # for comments
   hits.ndjson        output of search (one video per line)
   videos/            the archive: <uploader>/<title> [<id>].mp4 + .srt + .info.json
-  videos/.omniget-archive.json   queue state (pending/ok/failed/skipped)
+  videos/.libreget-archive.json   queue state (pending/ok/failed/skipped)
   run.log            NDJSON log of the last archive run
 ```
 
@@ -33,7 +33,7 @@ or in the app's data folder; `ffmpeg` must be on PATH.
 1. **Search.** One term per language and theme; filters cut shorts, live
    streams and off-topic results. Results are deduplicated across terms.
    ```bash
-   omniget-cli --json search --queries-file queries.txt -n 100 \
+   libreget --json search --queries-file queries.txt -n 100 \
      --min-duration 120 --max-duration 5400 --title-has "mir4,mir 4" \
      > hits.ndjson 2> search.log
    ```
@@ -41,7 +41,7 @@ or in the app's data folder; `ffmpeg` must be on PATH.
 2. **Seed and download.** `--seed` adds only new ids; what is already done
    stays done.
    ```bash
-   omniget-cli --json archive --dest videos --seed hits.ndjson \
+   libreget --json archive --dest videos --seed hits.ndjson \
      --quality 360 --subs ".*-orig" --info-json --max-gb 30 --sleep 5 \
      >> run.log 2>&1
    ```
@@ -49,11 +49,11 @@ or in the app's data folder; `ffmpeg` must be on PATH.
    passed instead of (or with) `--seed`; it is re-listed on every run so new
    uploads join the queue.
 3. **Check progress** without downloading:
-   `omniget-cli --json archive --dest videos --scan-only | tail -1`
+   `libreget --json archive --dest videos --scan-only | tail -1`
    (the last line is the summary: `done`, `failed`, `pending`, `size_bytes`,
    `cap_reached`).
 4. **Resume** by running the same archive command again. Ctrl+C, or
-   `pkill -INT -f "omniget-cli --json archive"`, stops yt-dlp within a second
+   `pkill -INT -f "libreget --json archive"`, stops yt-dlp within a second
    and puts the current item back in the queue (its `.part` is reused). Wait
    for the process to exit before starting another run on the same folder.
 5. **Retry failures** later with `--retry-failed`. If the network drops, the

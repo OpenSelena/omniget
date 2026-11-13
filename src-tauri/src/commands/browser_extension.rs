@@ -60,7 +60,7 @@ pub async fn browser_extension_status(
     app: AppHandle,
 ) -> Result<Vec<BrowserExtensionStatus>, String> {
     // `installable` used to be a hardcoded `true`. The Windows portable build
-    // is the bare `omniget.exe` with no `resources/` folder beside it, so the
+    // is the bare `libreget.exe` with no `resources/` folder beside it, so the
     // export copied nothing and still reported a path — the user opened an
     // empty folder and had no idea why (issue #310). Ask the bundle whether the
     // extension is actually there; when it is not, the UI falls back to the

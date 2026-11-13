@@ -1,6 +1,6 @@
 //! Quando da para comecar a assistir um torrent que ainda esta baixando.
 //!
-//! B46. O modulo `core::torrent_stream` foi escrito supondo que o OmniGet
+//! B46. O modulo `core::torrent_stream` foi escrito supondo que o LibreGet
 //! escolheria a ordem das pecas. Ao ligar, apareceu que o `librqbit` **ja faz
 //! isso**: `ManagedTorrent::stream(file_id)` devolve um `FileStream` que
 //! prioriza as pecas sob o cursor de leitura sozinho.

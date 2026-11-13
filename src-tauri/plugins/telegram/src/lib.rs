@@ -1242,7 +1242,7 @@ impl LibregetPlugin for TelegramPlugin {
                     let chat = platforms::telegram::api::create_channel_or_folder(
                         &state.telegram_session,
                         &title,
-                        "OmniGet Drive Folder",
+                        "LibreGet Drive Folder",
                         false,
                     )
                     .await

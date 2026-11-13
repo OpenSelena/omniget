@@ -102,7 +102,7 @@ Single-context (`GLOSSARY.md` and `docs/adr/`). See `docs/agents/domain.md`.
 
 ### Video datasets from the CLI
 
-`libreget-cli search` + `omniget-cli archive` build a resumable local video archive (search terms, filters, size cap). See [.agents/skills/video-archive/SKILL.md](.agents/skills/video-archive/SKILL.md).
+`libreget search` + `libreget archive` build a resumable local video archive (search terms, filters, size cap). See [.agents/skills/video-archive/SKILL.md](.agents/skills/video-archive/SKILL.md).
 
 ---
 
