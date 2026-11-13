@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component type="desktop-application">
-  <id>com.openselena.omniget</id>
-  <name>Omniget</name>
+  <id>com.openselena.libreget</id>
+  <name>LibreGet</name>
   <summary>Download media from multiple platforms</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>GPL-3.0-or-later</project_license>
@@ -10,7 +10,7 @@
   </developer>
   <description>
     <p>
-      Omniget is a desktop application to download videos, courses, and media
+      LibreGet is a desktop application to download videos, courses, and media
       from platforms like YouTube, Udemy, Hotmart, Telegram, Instagram, TikTok,
       Twitter, Reddit, Twitch, Pinterest, Bluesky, and Vimeo.
     </p>
@@ -23,17 +23,17 @@
       <li>Queue management with concurrent downloads</li>
     </ul>
   </description>
-  <url type="homepage">https://github.com/OpenSelena/omniget</url>
-  <url type="bugtracker">https://github.com/OpenSelena/omniget/issues</url>
-  <url type="vcs-browser">https://github.com/OpenSelena/omniget</url>
-  <launchable type="desktop-id">com.openselena.omniget.desktop</launchable>
+  <url type="homepage">https://github.com/OpenSelena/libreget</url>
+  <url type="bugtracker">https://github.com/OpenSelena/libreget/issues</url>
+  <url type="vcs-browser">https://github.com/OpenSelena/libreget</url>
+  <launchable type="desktop-id">com.openselena.libreget.desktop</launchable>
   <provides>
-    <binary>omniget</binary>
+    <binary>libreget</binary>
   </provides>
   <screenshots>
     <screenshot type="default">
       <caption>Main download interface</caption>
-      <image>https://raw.githubusercontent.com/OpenSelena/omniget/main/flatpak/screenshots/main.png</image>
+      <image>https://raw.githubusercontent.com/OpenSelena/libreget/main/flatpak/screenshots/main.png</image>
     </screenshot>
   </screenshots>
   <branding>
@@ -63,7 +63,7 @@
     </release>
     <release version="0.9.1" date="2026-09-05">
       <description>
-        <p>OmniGet gains a Tools section: 108 single-purpose tools in 16 categories, each an isolated command with a tile in the app and an entry on the built-in MCP server, so an AI agent can drive them too. Instagram gets 24 tools over your own session (stories without marking them seen, highlights, who does not follow back, ghost followers, analytics, giveaway picker, publishing), X gets 10 (thread unroll, post to image, profile media, bookmarks, your archive, Grok), Pinterest gets 10 (original-quality pins, board and profile backup with incremental sync, search without AI or ads, duplicates, palettes). Speech tools transcribe offline with whisper.cpp, speak with Edge voices, translate and dub subtitles. PDF tools merge, split, compress, convert, OCR and sanitize on the PDFium the app already manages. System tools clean caches, map the disk, manage startup items and uninstall leftovers, with Windows-only debloat, registry, privacy and hardening. AI tools compare model prices, track spending, manage Ollama models and an API key vault.</p>
+        <p>LibreGet gains a Tools section: 108 single-purpose tools in 16 categories, each an isolated command with a tile in the app and an entry on the built-in MCP server, so an AI agent can drive them too. Instagram gets 24 tools over your own session (stories without marking them seen, highlights, who does not follow back, ghost followers, analytics, giveaway picker, publishing), X gets 10 (thread unroll, post to image, profile media, bookmarks, your archive, Grok), Pinterest gets 10 (original-quality pins, board and profile backup with incremental sync, search without AI or ads, duplicates, palettes). Speech tools transcribe offline with whisper.cpp, speak with Edge voices, translate and dub subtitles. PDF tools merge, split, compress, convert, OCR and sanitize on the PDFium the app already manages. System tools clean caches, map the disk, manage startup items and uninstall leftovers, with Windows-only debloat, registry, privacy and hardening. AI tools compare model prices, track spending, manage Ollama models and an API key vault.</p>
         <p>The interface was rebuilt with a single amber accent, a glass sidebar, colored tile icons, a new app icon and a three-step onboarding. The download engine starts yt-dlp as a zipapp on a system Python when one exists, adapts connections per site and halves them on rate limits, segments large direct files properly, stops retrying dead sources and keeps the exact command of every download so it can be edited and rerun. The Courses plugin reaches 1.1.0: Hotmart signs in through its new OIDC flow, Rocketseat validates logins properly and lists the whole catalog, Meta-Analysis Academy is a new platform, and sections can be chosen before downloading. The browser extension groups cookies by real site so Brazilian domains no longer share one bucket, adds Rocketseat and a Force H.264 switch. Two fixes: the interface could show no text when a translation failed to load, and Settings could spin forever after a failed settings load.</p>
       </description>
     </release>
@@ -114,7 +114,7 @@
     </release>
     <release version="0.8.0" date="2026-07-29">
       <description>
-        <p>Six features that shipped as tested-but-unreachable code are now wired to the app: the root cause panel translates a failed download into a cause and one action; yt-dlp retries with browser impersonation when a site blocks by TLS fingerprint, and uses a PO token provider when one is configured and answering; a yt-dlp update now archives the previous binary so it can be rolled back from the dependencies table; segment concurrency is measured per host and the configured number becomes a ceiling instead of a fixed value; a redacted trace of the last download lines is included in the diagnostic report; and batch downloads are checked before queueing, skipping unsupported and repeated links instead of failing them one by one. Portable mode no longer leaves a folder in the user profile on Linux, which was the same bug as the Windows one and had gone unnoticed. The browser extension section of settings was never translated and showed Portuguese in every language; the dependency row menu was clipped by the table and its options could not be reached. Continuous integration now launches the app on Windows and Linux and fails if the window does not open. Accessibility preferences for reduced motion and transparency were added. The omniget-cli binary now ships with releases, and a WebView2 fixed runtime placed beside the executable is detected and used.</p>
+        <p>Six features that shipped as tested-but-unreachable code are now wired to the app: the root cause panel translates a failed download into a cause and one action; yt-dlp retries with browser impersonation when a site blocks by TLS fingerprint, and uses a PO token provider when one is configured and answering; a yt-dlp update now archives the previous binary so it can be rolled back from the dependencies table; segment concurrency is measured per host and the configured number becomes a ceiling instead of a fixed value; a redacted trace of the last download lines is included in the diagnostic report; and batch downloads are checked before queueing, skipping unsupported and repeated links instead of failing them one by one. Portable mode no longer leaves a folder in the user profile on Linux, which was the same bug as the Windows one and had gone unnoticed. The browser extension section of settings was never translated and showed Portuguese in every language; the dependency row menu was clipped by the table and its options could not be reached. Continuous integration now launches the app on Windows and Linux and fails if the window does not open. Accessibility preferences for reduced motion and transparency were added. The libreget-cli binary now ships with releases, and a WebView2 fixed runtime placed beside the executable is detected and used.</p>
       </description>
     </release>
     <release version="0.7.7" date="2026-07-28">

@@ -1,4 +1,4 @@
-app-id: com.openselena.omniget
+app-id: com.openselena.libreget
 runtime: org.gnome.Platform
 runtime-version: '51'
 sdk: org.gnome.Sdk
@@ -6,7 +6,7 @@ sdk-extensions:
   - org.freedesktop.Sdk.Extension.rust-stable
   - org.freedesktop.Sdk.Extension.node22
 
-command: omniget
+command: libreget
 
 finish-args:
   - --share=ipc
@@ -26,7 +26,7 @@ finish-args:
 build-options:
   append-path: /usr/lib/sdk/rust-stable/bin:/usr/lib/sdk/node22/bin
   env:
-    CARGO_HOME: /run/build/omniget/cargo
+    CARGO_HOME: /run/build/libreget/cargo
     npm_config_nodedir: /usr/lib/sdk/node22
 
 cleanup:
@@ -129,24 +129,21 @@ modules:
         only-arches:
           - aarch64
 
-  - name: omniget
+  - name: libreget
     buildsystem: simple
     build-options:
       env:
-        npm_config_cache: /run/build/omniget/flatpak-node/npm-cache
+        npm_config_cache: /run/build/libreget/flatpak-node/npm-cache
     build-commands:
       - npm install --offline
       - npx vite build
       - cargo --offline build --release --manifest-path src-tauri/Cargo.toml
-      - install -Dm755 src-tauri/target/release/omniget /app/bin/omniget
-      - install -Dm644 flatpak/com.openselena.omniget.desktop /app/share/applications/com.openselena.omniget.desktop
-      - install -Dm644 flatpak/com.openselena.omniget.metainfo.xml /app/share/metainfo/com.openselena.omniget.metainfo.xml
-      - install -Dm644 flatpak/com.openselena.omniget.png /app/share/icons/hicolor/128x128/apps/com.openselena.omniget.png
+      - install -Dm755 src-tauri/target/release/libreget /app/bin/libreget
+      - install -Dm644 flatpak/com.openselena.libreget.desktop /app/share/applications/com.openselena.libreget.desktop
+      - install -Dm644 flatpak/com.openselena.libreget.metainfo.xml /app/share/metainfo/com.openselena.libreget.metainfo.xml
+      - install -Dm644 flatpak/com.openselena.libreget.png /app/share/icons/hicolor/128x128/apps/com.openselena.libreget.png
     sources:
-      - type: archive
-        url: https://github.com/OpenSelena/omniget/archive/refs/tags/v0.14.0.tar.gz
-        sha256: e8655a4941104b64802ef47d5297eb7bbaadea1a30419a8b808e977f2e28a829
-      - type: file
-        path: package-lock.json
+      - type: dir
+        path: ..
       - cargo-sources.json
       - node-sources.json

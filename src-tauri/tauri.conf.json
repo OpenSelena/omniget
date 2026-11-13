@@ -1,8 +1,8 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "OmniGet",
+  "productName": "LibreGet",
   "version": "0.16.6",
-  "identifier": "com.openselena.omniget",
+  "identifier": "com.openselena.libreget",
   "build": {
     "beforeDevCommand": "pnpm dev",
     "devUrl": "http://localhost:1420",
@@ -14,7 +14,7 @@
       {
         "label": "main",
         "create": false,
-        "title": "OmniGet",
+        "title": "LibreGet",
         "width": 1100,
         "height": 720,
         "minWidth": 800,
@@ -30,6 +30,7 @@
         "enable": true,
         "scope": {
           "allow": [
+            "$APPDATA/libreget/**",
             "$APPDATA/omniget/**",
             "$DOWNLOAD/**",
             "$TEMP/**"
@@ -49,12 +50,13 @@
     "updater": {
       "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDlCNTZBNUMzRTY2MEIwN0MKUldSOHNHRG13NlZXbTc2N0Z0aTV5elV3MGQ2ci9zUm1jOHpna2ozY2pJRkJMSEdXNU5UeU0rZ0sK",
       "endpoints": [
-        "https://github.com/OpenSelena/omniget/releases/latest/download/latest.json"
+        "https://github.com/OpenSelena/libreget/releases/latest/download/latest.json"
       ]
     },
     "deep-link": {
       "desktop": {
         "schemes": [
+          "libreget",
           "omniget"
         ]
       }
