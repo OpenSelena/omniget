@@ -48,6 +48,7 @@ pub struct KiwifyLesson {
     /// A club can contain several internal courses. Lesson/file endpoints use this ID.
     #[serde(default)]
     pub course_id: Option<String>,
+    /// A catalog candidate; the lesson-detail response makes the final access decision.
     #[serde(default = "default_available")]
     pub available: bool,
 }
@@ -72,7 +73,7 @@ fn content_is_available(value: &serde_json::Value) -> bool {
     !["locked", "expired"].iter().any(|key| {
         value.get(*key).and_then(|v| v.as_bool()) == Some(true)
             || user.get(*key).and_then(|v| v.as_bool()) == Some(true)
-    }) && ["published", "active", "has_access"]
+    }) && ["active", "has_access"]
         .iter()
         .all(|key| value.get(*key).and_then(|v| v.as_bool()) != Some(false))
         && user.get("visible").and_then(|v| v.as_bool()) != Some(false)

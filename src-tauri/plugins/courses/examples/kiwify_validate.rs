@@ -7,12 +7,19 @@ use tokio_util::sync::CancellationToken;
 
 #[tokio::main]
 async fn main() -> std::process::ExitCode {
-    if validate().await.is_err() {
-        // Download engine errors may contain signed URLs. Keep them private.
-        eprintln!("Kiwify validation failed. Check sign-in, course access and the local output directory.");
-        return std::process::ExitCode::FAILURE;
+    match validate().await {
+        Ok(()) => std::process::ExitCode::SUCCESS,
+        Err(error) if error.to_string().starts_with("Partial Kiwify download:") => {
+            // This locally generated summary contains counts and a report filename only.
+            eprintln!("{}", error);
+            std::process::ExitCode::from(2)
+        }
+        Err(_) => {
+            // Download engine errors may contain signed URLs. Keep them private.
+            eprintln!("Kiwify validation failed. Check sign-in, course access and the local output directory.");
+            std::process::ExitCode::FAILURE
+        }
     }
-    std::process::ExitCode::SUCCESS
 }
 
 async fn validate() -> anyhow::Result<()> {
@@ -43,7 +50,7 @@ async fn validate() -> anyhow::Result<()> {
             .filter(|l| l.available)
             .count();
         println!(
-            "course_index={} modules={} contents={} eligible={} unavailable={}",
+            "course_index={} modules={} contents={} candidates={} catalog_restricted={}",
             index,
             modules.len(),
             contents,

@@ -53,7 +53,7 @@ fn normalized_graph_resolves_15_modules_58_contents_in_reference_order() {
             .flat_map(|m| &m.lessons)
             .filter(|l| l.available)
             .count(),
-        21
+        58
     );
     assert_eq!(modules[0].id, "module-15");
     assert_eq!(modules[14].id, "module-1");
@@ -202,6 +202,19 @@ fn locked_lesson_detail_stays_unavailable_even_with_media_fields() {
     assert_eq!(detail.id, "lesson");
 }
 
+#[test]
+fn publication_flag_alone_does_not_replace_authoritative_lesson_access() {
+    let payload = json!({"lesson": {"id": "lesson", "published": false,
+        "locked": false, "expired": false, "video": {"stream_link": "/synthetic/master.m3u8"}}});
+    let detail = parse_lesson_detail(&payload, "fallback");
+    assert!(detail.available);
+    let denied = parse_lesson_detail(
+        &json!({"lesson": {"id":"lesson","published":true,"locked":true}}),
+        "fallback",
+    );
+    assert!(!denied.available);
+}
+
 async fn mock_server(
     responses: Vec<(u16, String)>,
 ) -> (String, tokio::task::JoinHandle<Vec<String>>) {
@@ -251,7 +264,7 @@ async fn http_content_to_download_plan_resolves_normalized_club_graph() {
             .flat_map(|m| &m.lessons)
             .filter(|l| l.available)
             .count(),
-        21
+        58
     );
     let requests = task.await.unwrap();
     assert!(requests[0].starts_with("GET /clubs/club-id/content?caipirinha=true "));
