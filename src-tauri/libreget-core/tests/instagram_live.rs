@@ -2,8 +2,8 @@
 //! por padrão; roda com um cookies.txt (Netscape) do instagram.com:
 //!
 //! ```text
-//! OMNIGET_IG_COOKIES="$HOME/Library/Application Support/com.openselena.libreget/cookies/instagram.com/_default.txt" \
-//!   cargo test -p omniget-core --test instagram_live -- --ignored --nocapture
+//! LIBREGET_IG_COOKIES="$HOME/Library/Application Support/com.openselena.libreget/cookies/instagram.com/_default.txt" \
+//!   cargo test -p libreget-core --test instagram_live -- --ignored --nocapture
 //! ```
 //!
 //! Só faz leituras (perfil, posts, reels, stories, highlights, seguidores,
@@ -17,7 +17,9 @@ use libreget_core::core::tools::noop_progress;
 #[tokio::test]
 #[ignore]
 async fn ig_live_read_only() {
-    let path = std::env::var("OMNIGET_IG_COOKIES").expect("OMNIGET_IG_COOKIES");
+    let path = std::env::var("LIBREGET_IG_COOKIES")
+        .or_else(|_| std::env::var("OMNIGET_IG_COOKIES"))
+        .expect("LIBREGET_IG_COOKIES or OMNIGET_IG_COOKIES");
     let content = std::fs::read_to_string(&path).expect("cookies.txt");
     let session = Session::from_netscape(&content).expect("sessionid + ds_user_id");
     let client = IgClient::new(session).unwrap();

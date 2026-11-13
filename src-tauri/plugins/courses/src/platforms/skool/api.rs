@@ -93,8 +93,7 @@ pub fn build_client(cookie_token: &str) -> anyhow::Result<reqwest::Client> {
 }
 
 fn session_file_path() -> anyhow::Result<PathBuf> {
-    let data_dir = dirs::data_dir().ok_or_else(|| anyhow!("Could not find app data directory"))?;
-    Ok(data_dir.join("omniget").join("skool_session.json"))
+    crate::platforms::session_file("skool_session.json")
 }
 
 pub fn extract_build_id(html: &str) -> anyhow::Result<String> {

@@ -94,8 +94,7 @@ pub fn build_client_with_origin(
 }
 
 fn session_file_path() -> anyhow::Result<PathBuf> {
-    let data_dir = dirs::data_dir().ok_or_else(|| anyhow!("Could not find app data directory"))?;
-    Ok(data_dir.join("omniget").join("medcel_session.json"))
+    crate::platforms::session_file("medcel_session.json")
 }
 
 pub async fn authenticate(

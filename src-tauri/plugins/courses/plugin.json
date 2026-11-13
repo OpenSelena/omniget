@@ -2,11 +2,11 @@
   "id": "courses",
   "name": "Course Downloader",
   "version": "1.4.1",
-  "min_omniget_version": "0.4.0",
+  "min_libreget_version": "0.4.0",
   "description": "Download full courses from 35+ education platforms including Hotmart, Udemy, Kiwify, Teachable, Kajabi, and more.",
   "author": "OpenSelena",
   "license": "GPL-3.0",
-  "homepage": "https://github.com/OpenSelena/omniget-plugin-courses",
+  "homepage": "https://github.com/OpenSelena/libreget-plugin-courses",
   "icon": "assets/icon.png",
   "nav": [
     {

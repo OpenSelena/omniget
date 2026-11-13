@@ -65,8 +65,7 @@ fn build_client(token: &str) -> anyhow::Result<reqwest::Client> {
 }
 
 fn session_file_path() -> anyhow::Result<PathBuf> {
-    let data_dir = dirs::data_dir().ok_or_else(|| anyhow!("Could not find app data directory"))?;
-    Ok(data_dir.join("omniget").join("wondrium_session.json"))
+    crate::platforms::session_file("wondrium_session.json")
 }
 
 pub async fn authenticate(email: &str, password: &str) -> anyhow::Result<WondriumSession> {

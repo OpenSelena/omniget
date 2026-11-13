@@ -16,9 +16,9 @@ use crate::platforms::traits::PlatformDownloader;
 const CHUNK_SIZE: usize = 64 * 1024;
 
 fn relay_addr() -> anyhow::Result<String> {
-    std::env::var("OMNIGET_RELAY").map_err(|_| {
-        anyhow!("P2P relay server not configured. Set OMNIGET_RELAY environment variable.")
-    })
+    std::env::var("LIBREGET_RELAY")
+        .or_else(|_| std::env::var("OMNIGET_RELAY"))
+        .map_err(|_| anyhow!("P2P relay server not configured. Set LIBREGET_RELAY environment variable."))
 }
 
 async fn connect_relay() -> anyhow::Result<TcpStream> {

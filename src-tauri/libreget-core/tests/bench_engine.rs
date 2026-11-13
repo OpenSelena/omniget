@@ -3,7 +3,7 @@
 //!
 //! ```text
 //! BENCH_BASE=http://127.0.0.1:8765 BENCH_FILE=big1g.bin BENCH_MODE=raw \
-//!   cargo test -p omniget-core --features desktop --release --test bench_engine -- --ignored --nocapture
+//!   cargo test -p libreget-core --features desktop --release --test bench_engine -- --ignored --nocapture
 //! ```
 //!
 //! Variáveis: `BENCH_SEGMENTS` (lista, ex. `1,2,4,8,16`), `BENCH_SEGSIZE_MB`
@@ -25,7 +25,7 @@ fn env_list(name: &str, default: &str) -> Vec<u64> {
 }
 
 fn out_dir() -> PathBuf {
-    let d = std::env::temp_dir().join(format!("omniget-bench-{}", std::process::id()));
+    let d = std::env::temp_dir().join(format!("libreget-bench-{}", std::process::id()));
     std::fs::create_dir_all(&d).unwrap();
     d
 }

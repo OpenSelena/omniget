@@ -201,11 +201,11 @@ const QUEUE = [
 ];
 
 const REGISTRY = [
-  { id: "courses", name: "Courses", description: "Download from Hotmart, Udemy, Kiwify and Rocketseat.", author: "OpenSelena", repo: "OpenSelena/omniget-plugin-courses", homepage: null, tags: ["courses", "education"], official: true, capabilities: ["nav"], installed: true, installed_version: "1.4.0" },
-  { id: "study", name: "Study", description: "Reader, player, notes, flashcards and focus tools.", author: "OpenSelena", repo: "OpenSelena/omniget-study", homepage: null, tags: ["study", "reader"], official: true, capabilities: ["nav"], installed: true, installed_version: "2.1.0" },
-  { id: "telegram", name: "Telegram", description: "Browse and batch-download from Telegram chats.", author: "OpenSelena", repo: "OpenSelena/omniget-plugin-telegram", homepage: null, tags: ["telegram"], official: true, capabilities: ["nav"], installed: true, installed_version: "1.2.0" },
-  { id: "convert", name: "Convert", description: "FFmpeg conversions with GPU acceleration.", author: "OpenSelena", repo: "OpenSelena/omniget-plugin-convert", homepage: null, tags: ["ffmpeg", "convert"], official: true, capabilities: ["nav"], installed: true, installed_version: "1.0.3" },
-  { id: "misc", name: "Utilities", description: "Screen recording studio, file clips and media library.", author: "OpenSelena", repo: "OpenSelena/omniget-plugin-misc", homepage: null, tags: ["studio", "library"], official: true, capabilities: ["nav"], installed: false, installed_version: null },
+  { id: "courses", name: "Courses", description: "Download from Hotmart, Udemy, Kiwify and Rocketseat.", author: "OpenSelena", repo: "OpenSelena/libreget-plugin-courses", homepage: null, tags: ["courses", "education"], official: true, capabilities: ["nav"], installed: true, installed_version: "1.4.0" },
+  { id: "study", name: "Study", description: "Reader, player, notes, flashcards and focus tools.", author: "OpenSelena", repo: "OpenSelena/libreget-study", homepage: null, tags: ["study", "reader"], official: true, capabilities: ["nav"], installed: true, installed_version: "2.1.0" },
+  { id: "telegram", name: "Telegram", description: "Browse and batch-download from Telegram chats.", author: "OpenSelena", repo: "OpenSelena/libreget-plugin-telegram", homepage: null, tags: ["telegram"], official: true, capabilities: ["nav"], installed: true, installed_version: "1.2.0" },
+  { id: "convert", name: "Convert", description: "FFmpeg conversions with GPU acceleration.", author: "OpenSelena", repo: "OpenSelena/libreget-plugin-convert", homepage: null, tags: ["ffmpeg", "convert"], official: true, capabilities: ["nav"], installed: true, installed_version: "1.0.3" },
+  { id: "misc", name: "Utilities", description: "Screen recording studio, file clips and media library.", author: "OpenSelena", repo: "OpenSelena/libreget-plugin-misc", homepage: null, tags: ["studio", "library"], official: true, capabilities: ["nav"], installed: false, installed_version: null },
 ];
 
 const DEPS = [

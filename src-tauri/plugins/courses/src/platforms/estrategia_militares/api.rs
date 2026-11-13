@@ -140,10 +140,7 @@ fn build_client(token: &str, cookie_string: &str) -> anyhow::Result<reqwest::Cli
 }
 
 fn session_file_path() -> anyhow::Result<PathBuf> {
-    let data_dir = dirs::data_dir().ok_or_else(|| anyhow!("Could not find app data directory"))?;
-    Ok(data_dir
-        .join("omniget")
-        .join("estrategia_militares_session.json"))
+    crate::platforms::session_file("estrategia_militares_session.json")
 }
 
 pub async fn validate_token(session: &EstrategiaMilitaresSession) -> anyhow::Result<bool> {

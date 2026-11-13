@@ -1,6 +1,6 @@
-//! `omniget search`: busca por texto e imprime um vídeo por linha.
+//! `libreget search`: busca por texto e imprime um vídeo por linha.
 //!
-//! Com `--json` a saída é NDJSON e serve de semente para `omniget archive
+//! Com `--json` a saída é NDJSON e serve de semente para `libreget archive
 //! --seed`, o que permite a um agente montar um acervo a partir de uma lista
 //! de termos sem abrir o app. Progresso e erros vão para o stderr para não
 //! sujar o NDJSON do stdout.

@@ -35,8 +35,7 @@ fn default_portal() -> String {
 }
 
 fn session_file_path() -> anyhow::Result<PathBuf> {
-    let data_dir = dirs::data_dir().ok_or_else(|| anyhow!("Could not find app data directory"))?;
-    Ok(data_dir.join("omniget").join("udemy_session.json"))
+    crate::platforms::session_file("udemy_session.json")
 }
 
 pub fn resolve_client_credentials() -> (String, String) {
@@ -345,7 +344,7 @@ async fn extract_webview_cookies_js(
 
     window
         .eval(
-            "window.location.href = 'https://omniget-udemy-cookie-extract.local/?cookies=' + encodeURIComponent(document.cookie)",
+            "window.location.href = 'https://libreget-udemy-cookie-extract.local/?cookies=' + encodeURIComponent(document.cookie)",
         )
         .map_err(|e| anyhow!("JS eval failed: {}", e))?;
 
@@ -445,7 +444,7 @@ pub async fn authenticate(app: &tauri::AppHandle, email: &str) -> anyhow::Result
 
         #[cfg(not(windows))]
         {
-            if host == "omniget-udemy-cookie-extract.local" {
+            if host == "libreget-udemy-cookie-extract.local" || host == "omniget-udemy-cookie-extract.local" {
                 for (key, value) in url.query_pairs() {
                     if key == "cookies" {
                         *cookie_data_nav.lock().unwrap() = Some(value.to_string());

@@ -7,7 +7,7 @@ const STORE_PATH: &str = "settings.json";
 const STORE_KEY: &str = "app_settings";
 
 /// Absolute path of the settings store, anchored to the app data dir that
-/// honors OMNIGET_DATA_DIR. A relative store path resolves against Tauri's
+/// honors LIBREGET_DATA_DIR. A relative store path resolves against Tauri's
 /// own AppData dir, which ignores the portable-mode override — the store
 /// writers and the standalone readers below would then use different files.
 fn store_path() -> std::path::PathBuf {

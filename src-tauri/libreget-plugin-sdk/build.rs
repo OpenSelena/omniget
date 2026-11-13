@@ -5,7 +5,7 @@ use std::process::Command;
 // may all change between compiler releases, so a plugin dylib is only safe to
 // load into a host built by the *same* rustc. The version string (including
 // the commit hash) is embedded in BUILD_INFO and exchanged through the
-// `omniget_plugin_build_info` handshake symbol at load time.
+// `libreget_plugin_build_info` handshake symbol at load time.
 fn main() {
     // Cargo sets RUSTC to the compiler used for the build.
     let rustc = std::env::var("RUSTC").unwrap_or_else(|_| "rustc".to_string());

@@ -2,11 +2,11 @@
   "id": "convert",
   "name": "Media Converter",
   "version": "1.0.3",
-  "min_omniget_version": "0.4.0",
+  "min_libreget_version": "0.4.0",
   "description": "Convert videos and audio between formats with FFmpeg and GPU hardware acceleration.",
   "author": "OpenSelena",
   "license": "GPL-3.0",
-  "homepage": "https://github.com/OpenSelena/omniget-plugin-convert",
+  "homepage": "https://github.com/OpenSelena/libreget-plugin-convert",
   "icon": "assets/icon.png",
   "nav": [
     {

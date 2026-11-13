@@ -7,6 +7,7 @@ fn check_portable_mode() {
                 let data_dir = dir.join("data");
                 let _ = std::fs::create_dir_all(&data_dir);
                 std::env::set_var("LIBREGET_PORTABLE", "1");
+                std::env::set_var("LIBREGET_DATA_DIR", data_dir.to_string_lossy().to_string());
                 std::env::set_var("OMNIGET_DATA_DIR", data_dir.to_string_lossy().to_string());
 
                 #[cfg(windows)]
@@ -123,7 +124,7 @@ fn check_fixed_webview_runtime() {
     else {
         return;
     };
-    if let Some(runtime) = omniget_lib::core::portable::find_fixed_runtime(&dir) {
+    if let Some(runtime) = libreget_lib::core::portable::find_fixed_runtime(&dir) {
         std::env::set_var("WEBVIEW2_BROWSER_EXECUTABLE_FOLDER", &runtime);
     }
 }

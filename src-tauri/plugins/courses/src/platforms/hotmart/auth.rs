@@ -27,8 +27,7 @@ pub struct SavedSession {
 }
 
 fn session_file_path() -> anyhow::Result<PathBuf> {
-    let data_dir = dirs::data_dir().ok_or_else(|| anyhow!("Could not find app data directory"))?;
-    Ok(data_dir.join("omniget").join("hotmart_session.json"))
+    crate::platforms::session_file("hotmart_session.json")
 }
 
 pub fn build_client_from_saved(saved: &SavedSession) -> anyhow::Result<reqwest::Client> {

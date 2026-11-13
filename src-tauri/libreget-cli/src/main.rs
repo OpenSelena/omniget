@@ -6,7 +6,7 @@ mod output;
 mod reporter;
 
 #[derive(Parser)]
-#[command(name = "omniget", version, about = "Download media from 1800+ sites", long_about = None)]
+#[command(name = "libreget", version, about = "Download media from 1800+ sites", long_about = None)]
 struct Cli {
     #[arg(long, global = true, help = "Output in JSON format")]
     json: bool,
@@ -75,7 +75,7 @@ async fn main() -> anyhow::Result<()> {
     tracing_subscriber::fmt()
         .with_env_filter(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "omniget_cli=info".into()),
+                .unwrap_or_else(|_| "libreget_cli=info".into()),
         )
         .init();
 

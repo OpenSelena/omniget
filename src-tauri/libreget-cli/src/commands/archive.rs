@@ -1,4 +1,4 @@
-//! `omniget archive`: acervo retomável numa pasta, pela linha de comando.
+//! `libreget archive`: acervo retomável numa pasta, pela linha de comando.
 //!
 //! Embrulha `yt_archive` (o mesmo motor da tela "Arquivar" do app) e o
 //! `yt_dataset` (semeadura a partir de buscas). Rodar de novo continua de onde
@@ -24,7 +24,7 @@ pub struct ArchiveArgs {
     #[arg(long, help = "Archive folder (the queue state lives in it)")]
     pub dest: String,
 
-    #[arg(long, help = "NDJSON from `omniget search --json` to add to the queue")]
+    #[arg(long, help = "NDJSON from `libreget search --json` to add to the queue")]
     pub seed: Option<String>,
 
     #[arg(

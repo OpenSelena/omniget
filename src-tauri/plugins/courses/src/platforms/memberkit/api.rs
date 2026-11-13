@@ -80,8 +80,7 @@ fn build_client(cookies: &str, site_url: &str) -> anyhow::Result<reqwest::Client
 }
 
 fn session_file_path() -> anyhow::Result<PathBuf> {
-    let data_dir = dirs::data_dir().ok_or_else(|| anyhow!("Could not find app data directory"))?;
-    Ok(data_dir.join("omniget").join("memberkit_session.json"))
+    crate::platforms::session_file("memberkit_session.json")
 }
 
 pub async fn authenticate(

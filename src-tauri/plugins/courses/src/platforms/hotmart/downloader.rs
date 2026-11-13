@@ -130,7 +130,7 @@ impl HotmartDownloader {
 
     fn filename_prefix(&self) -> &str {
         if self.download_settings.filename_template == settings::default_filename_template() {
-            "omniget-"
+            "libreget-"
         } else {
             ""
         }

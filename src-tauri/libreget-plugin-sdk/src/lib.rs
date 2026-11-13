@@ -7,24 +7,24 @@ pub use manifest::*;
 pub use plugin::*;
 
 /// Plugin ABI generation. The loader refuses to load any plugin whose
-/// `omniget_plugin_abi_version` export does not return exactly this value.
+/// `libreget_plugin_abi_version` export does not return exactly this value.
 ///
 /// History:
 /// - v3 (2026-07-09): invalidates every plugin built before the platform/model
-///   types moved into `omniget-core` (PR #163) and before the toolchain
+///   types moved into `libreget-core` (PR #163) and before the toolchain
 ///   handshake existed. v2 plugins passed the handshake but crashed with
 ///   SIGSEGV at first call because Rust trait objects and std type layouts are
 ///   not ABI-stable across differing crate/compiler versions. v3 plugins must
-///   also export `omniget_plugin_build_info` (added automatically by
+///   also export `libreget_plugin_build_info` (added automatically by
 ///   `export_plugin!`), which the loader uses to reject plugins built by a
 ///   different rustc than the host.
 /// - v2: pre-2026-07 interface.
 pub const ABI_VERSION: u32 = 3;
 
 /// NUL-terminated build fingerprint exported by `export_plugin!` through the
-/// `omniget_plugin_build_info` C symbol and compared by the host at load time.
+/// `libreget_plugin_build_info` C symbol and compared by the host at load time.
 ///
-/// Format: `sdk=<omniget-plugin-sdk version>;rustc=<rustc --version output>`.
+/// Format: `sdk=<libreget-plugin-sdk version>;rustc=<rustc --version output>`.
 /// The rustc component (compiler version + commit hash) is what actually
 /// gates loading: `ABI_VERSION` alone cannot detect two builds of the same
 /// SDK made by different compilers, and Rust makes no ABI-stability promise

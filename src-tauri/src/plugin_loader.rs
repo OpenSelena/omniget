@@ -372,7 +372,7 @@ fn load_single_plugin(
     if plugin_abi != ABI_VERSION {
         return Err(PluginLoadError {
             message: format!(
-                "This plugin was built for an older version of OmniGet (plugin ABI v{}, this version requires v{}). Update the plugin: reinstall it from the Marketplace to get a compatible build.",
+                "This plugin was built for an older version of LibreGet (plugin ABI v{}, this version requires v{}). Update the plugin: reinstall it from the Marketplace to get a compatible build.",
                 plugin_abi, ABI_VERSION
             ),
             kind: "abi_mismatch".to_string(),
@@ -425,7 +425,7 @@ fn load_single_plugin(
     if plugin_rustc.is_none() || plugin_rustc != host_rustc {
         return Err(PluginLoadError {
             message: format!(
-                "This plugin was built with a different Rust toolchain ('{}') than this version of OmniGet ('{}') and cannot be loaded safely. Update the plugin: reinstall it from the Marketplace to get a compatible build.",
+                "This plugin was built with a different Rust toolchain ('{}') than this version of LibreGet ('{}') and cannot be loaded safely. Update the plugin: reinstall it from the Marketplace to get a compatible build.",
                 plugin_rustc.unwrap_or("unknown"),
                 host_rustc.unwrap_or("unknown"),
             ),
@@ -460,7 +460,7 @@ fn load_single_plugin(
             std::mem::forget(lib);
             return Err(PluginLoadError::simple(
                 "initialize",
-                "Plugin panicked in omniget_plugin_init",
+                "Plugin panicked in libreget_plugin_init",
             ));
         }
     };
@@ -468,7 +468,7 @@ fn load_single_plugin(
         std::mem::forget(lib);
         return Err(PluginLoadError::simple(
             "initialize",
-            "omniget_plugin_init returned a null plugin",
+            "libreget_plugin_init returned a null plugin",
         ));
     }
     let mut plugin = unsafe { Box::from_raw(plugin_ptr) };
@@ -693,7 +693,7 @@ mod plugin_id_tests {
 
     #[test]
     fn plugin_dir_nunca_escapa_do_diretorio_base() {
-        let base = std::path::PathBuf::from("/tmp/omniget-plugins");
+        let base = std::path::PathBuf::from("/tmp/libreget-plugins");
         let manager = PluginManager::new(base.clone());
 
         let ok = manager.plugin_dir("courses").expect("id valido");
