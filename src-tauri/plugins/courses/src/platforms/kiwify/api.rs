@@ -45,6 +45,12 @@ pub struct KiwifyLesson {
     pub id: String,
     pub name: String,
     pub order: i64,
+    /// A club can contain several internal courses. Lesson/file endpoints use this ID.
+    #[serde(default)]
+    pub course_id: Option<String>,
+    /// A catalog candidate; the lesson-detail response makes the final access decision.
+    #[serde(default = "default_available")]
+    pub available: bool,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -54,6 +60,23 @@ pub struct KiwifyLessonDetail {
     pub description: Option<String>,
     pub video_url: Option<String>,
     pub files: Vec<KiwifyFile>,
+    #[serde(default = "default_available")]
+    pub available: bool,
+}
+
+fn default_available() -> bool {
+    true
+}
+
+fn content_is_available(value: &serde_json::Value) -> bool {
+    let user = value.get("user_data").unwrap_or(value);
+    !["locked", "expired"].iter().any(|key| {
+        value.get(*key).and_then(|v| v.as_bool()) == Some(true)
+            || user.get(*key).and_then(|v| v.as_bool()) == Some(true)
+    }) && ["active", "has_access"]
+        .iter()
+        .all(|key| value.get(*key).and_then(|v| v.as_bool()) != Some(false))
+        && user.get("visible").and_then(|v| v.as_bool()) != Some(false)
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -63,12 +86,12 @@ pub struct KiwifyFile {
     pub url: Option<String>,
 }
 
-fn build_client(token: &str) -> anyhow::Result<reqwest::Client> {
+pub(crate) fn build_client(token: &str) -> anyhow::Result<reqwest::Client> {
     let mut headers = HeaderMap::new();
-    headers.insert(
-        "Authorization",
-        HeaderValue::from_str(&format!("Bearer {}", token))?,
-    );
+    let mut authorization = HeaderValue::from_str(&format!("Bearer {}", token))
+        .map_err(|_| anyhow!("Invalid Kiwify token header"))?;
+    authorization.set_sensitive(true);
+    headers.insert("Authorization", authorization);
     headers.insert("Accept", HeaderValue::from_static("application/json"));
     headers.insert(
         "Origin",
@@ -88,6 +111,44 @@ fn build_client(token: &str) -> anyhow::Result<reqwest::Client> {
         .build()?;
 
     Ok(client)
+}
+
+/// CDN requests must never inherit the API bearer token.
+pub(crate) fn build_media_client() -> anyhow::Result<reqwest::Client> {
+    Ok(
+        omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
+            .user_agent(USER_AGENT)
+            .referer(true)
+            .default_headers({
+                let mut headers = HeaderMap::new();
+                headers.insert(
+                    "Referer",
+                    HeaderValue::from_static("https://admin.kiwify.com.br/"),
+                );
+                headers
+            })
+            .connect_timeout(Duration::from_secs(30))
+            .timeout(Duration::from_secs(120))
+            .build()?,
+    )
+}
+
+async fn checked_json(
+    resp: reqwest::Response,
+    operation: &str,
+) -> anyhow::Result<serde_json::Value> {
+    let status = resp.status();
+    if !status.is_success() {
+        // Response bodies and request URLs may contain private data or signed links.
+        return Err(anyhow!(
+            "Kiwify {} failed (HTTP {})",
+            operation,
+            status.as_u16()
+        ));
+    }
+    resp.json()
+        .await
+        .map_err(|_| anyhow!("Invalid JSON in Kiwify {} response", operation))
 }
 
 fn session_file_path() -> anyhow::Result<PathBuf> {
@@ -119,11 +180,7 @@ pub async fn authenticate(email: &str, password: &str) -> anyhow::Result<KiwifyS
     let body_text = resp.text().await?;
 
     if !status.is_success() {
-        return Err(anyhow!(
-            "Authentication failed (status {}): {}",
-            status,
-            &body_text[..body_text.len().min(300)]
-        ));
+        return Err(anyhow!("Authentication failed (HTTP {})", status.as_u16()));
     }
 
     let body: serde_json::Value = serde_json::from_str(&body_text)?;
@@ -150,50 +207,43 @@ pub async fn validate_token(session: &KiwifySession) -> anyhow::Result<bool> {
         .send()
         .await?;
 
-    Ok(resp.status().is_success())
+    match resp.status().as_u16() {
+        200..=299 => Ok(true),
+        401 | 403 => Ok(false),
+        status => Err(anyhow!("Kiwify session check failed (HTTP {})", status)),
+    }
 }
 
 pub async fn list_courses(session: &KiwifySession) -> anyhow::Result<Vec<KiwifyCourse>> {
+    list_courses_at(session, "https://admin-api.kiwify.com.br/v1/viewer").await
+}
+
+async fn list_courses_at(session: &KiwifySession, base: &str) -> anyhow::Result<Vec<KiwifyCourse>> {
     let mut all_courses = Vec::new();
+    let mut seen = std::collections::HashSet::new();
     let mut page = 1u32;
 
     loop {
-        let url = format!(
-            "https://admin-api.kiwify.com.br/v1/viewer/schools/courses?page={}&archived=false",
-            page
-        );
+        let url = format!("{}/schools/courses?page={}&archived=false", base, page);
 
         tracing::info!("[kiwify] fetching courses page {}", page);
 
-        let resp = session.client.get(&url).send().await?;
-
-        let status = resp.status();
-        let body_text = resp.text().await?;
-
-        tracing::info!(
-            "[kiwify] page {} status={} body_len={}",
-            page,
-            status,
-            body_text.len()
-        );
-
-        if !status.is_success() {
-            if all_courses.is_empty() {
-                return Err(anyhow!(
-                    "list_courses returned status {}: {}",
-                    status,
-                    &body_text[..body_text.len().min(300)]
-                ));
-            }
-            break;
+        let resp = session
+            .client
+            .get(&url)
+            .send()
+            .await
+            .map_err(|e| e.without_url())?;
+        let body = checked_json(resp, "course list").await?;
+        let body = body.get("data").unwrap_or(&body);
+        if !body.get("courses").is_some_and(|v| v.is_array()) {
+            return Err(anyhow!("Invalid Kiwify course list: missing courses array"));
         }
-
-        let body: serde_json::Value = serde_json::from_str(&body_text)?;
 
         let total_count = body.get("count").and_then(|v| v.as_i64()).unwrap_or(0);
         let page_size = body.get("page_size").and_then(|v| v.as_i64()).unwrap_or(10);
 
-        let page_courses = parse_courses_page(&body);
+        let page_courses = parse_courses_page(body);
         tracing::info!(
             "[kiwify] page {} returned {} courses (total={}, page_size={})",
             page,
@@ -203,17 +253,33 @@ pub async fn list_courses(session: &KiwifySession) -> anyhow::Result<Vec<KiwifyC
         );
 
         if page_courses.is_empty() {
+            if total_count > all_courses.len() as i64 {
+                return Err(anyhow!(
+                    "Kiwify course list ended before the reported total"
+                ));
+            }
             break;
         }
-        all_courses.extend(page_courses);
+        let before = all_courses.len();
+        all_courses.extend(
+            page_courses
+                .into_iter()
+                .filter(|c| !c.id.is_empty() && seen.insert(c.id.clone())),
+        );
+        if all_courses.len() == before {
+            return Err(anyhow!(
+                "Kiwify course list repeated a page without new course IDs"
+            ));
+        }
 
-        if total_count > 0 && (page as i64 * page_size) >= total_count {
+        if total_count > 0 && all_courses.len() as i64 >= total_count {
             break;
         }
 
         if page >= 50 {
-            tracing::warn!("[kiwify] safety limit reached at page 50");
-            break;
+            return Err(anyhow!(
+                "Kiwify course list exceeded the 50-page safety limit"
+            ));
         }
 
         page += 1;
@@ -241,6 +307,7 @@ fn extract_id_string(obj: &serde_json::Value) -> Option<String> {
 }
 
 pub fn parse_courses_page(body: &serde_json::Value) -> Vec<KiwifyCourse> {
+    let body = body.get("data").unwrap_or(body);
     let Some(courses_arr) = body.get("courses").and_then(|v| v.as_array()) else {
         return Vec::new();
     };
@@ -296,39 +363,178 @@ pub async fn get_course_content(
     session: &KiwifySession,
     course_id: &str,
 ) -> anyhow::Result<Vec<KiwifyModule>> {
-    let club_url = format!(
-        "https://admin-api.kiwify.com.br/v1/viewer/clubs/{}/content?caipirinha=true",
-        course_id
-    );
+    get_course_content_at(
+        session,
+        course_id,
+        "https://admin-api.kiwify.com.br/v1/viewer",
+    )
+    .await
+}
 
-    let body = match session.client.get(&club_url).send().await {
-        Ok(resp) if resp.status().is_success() => {
-            let text = resp.text().await?;
-            serde_json::from_str::<serde_json::Value>(&text)?
+async fn get_course_content_at(
+    session: &KiwifySession,
+    course_id: &str,
+    base: &str,
+) -> anyhow::Result<Vec<KiwifyModule>> {
+    let course_id = urlencoding::encode(course_id);
+    let club_url = format!("{}/clubs/{}/content?caipirinha=true", base, course_id);
+
+    let resp = session
+        .client
+        .get(&club_url)
+        .send()
+        .await
+        .map_err(|e| e.without_url())?;
+    let body = match resp.status().as_u16() {
+        404 | 405 => {
+            let fallback_url = format!("{}/courses/{}", base, course_id);
+            let resp = session
+                .client
+                .get(&fallback_url)
+                .send()
+                .await
+                .map_err(|e| e.without_url())?;
+            checked_json(resp, "course content").await?
         }
-        _ => {
-            let fallback_url = format!(
-                "https://admin-api.kiwify.com.br/v1/viewer/courses/{}",
-                course_id
-            );
-            let resp = session.client.get(&fallback_url).send().await?;
-            let status = resp.status();
-            let text = resp.text().await?;
-            if !status.is_success() {
-                return Err(anyhow!(
-                    "get_course_content returned status {}: {}",
-                    status,
-                    &text[..text.len().min(300)]
-                ));
-            }
-            serde_json::from_str::<serde_json::Value>(&text)?
-        }
+        _ => checked_json(resp, "club content").await?,
     };
 
     parse_course_modules(&body)
 }
 
+/// Caipirinha/v3 is a graph, not a nested list. The reference arrays define
+/// membership and display order; map iteration would include orphaned records
+/// and reorder UUIDs alphabetically.
+fn parse_normalized_modules(body: &serde_json::Value) -> anyhow::Result<Vec<KiwifyModule>> {
+    use std::collections::HashSet;
+
+    fn map<'a>(
+        body: &'a serde_json::Value,
+        field: &str,
+    ) -> anyhow::Result<&'a serde_json::Map<String, serde_json::Value>> {
+        body.get(field).and_then(|v| v.as_object()).ok_or_else(|| {
+            anyhow!(
+                "Invalid Kiwify normalized content: {} must be an object",
+                field
+            )
+        })
+    }
+
+    fn refs<'a>(record: &'a serde_json::Value, field: &str) -> anyhow::Result<Vec<&'a str>> {
+        record
+            .get(field)
+            .and_then(|v| v.as_array())
+            .ok_or_else(|| {
+                anyhow!(
+                    "Invalid Kiwify normalized content: missing {} references",
+                    field
+                )
+            })?
+            .iter()
+            .map(|v| {
+                v.as_str().filter(|s| !s.trim().is_empty()).ok_or_else(|| {
+                    anyhow!(
+                        "Invalid Kiwify normalized content: invalid {} reference",
+                        field
+                    )
+                })
+            })
+            .collect()
+    }
+
+    fn record<'a>(
+        map: &'a serde_json::Map<String, serde_json::Value>,
+        id: &str,
+        kind: &str,
+    ) -> anyhow::Result<&'a serde_json::Value> {
+        let value = map.get(id).filter(|v| v.is_object()).ok_or_else(|| {
+            anyhow!(
+                "Invalid Kiwify normalized content: unresolved {} reference",
+                kind
+            )
+        })?;
+        if value
+            .get("id")
+            .and_then(|v| v.as_str())
+            .is_some_and(|v| v != id)
+        {
+            return Err(anyhow!(
+                "Invalid Kiwify normalized content: mismatched {} ID",
+                kind
+            ));
+        }
+        Ok(value)
+    }
+
+    fn check_parent(value: &serde_json::Value, field: &str, parent: &str) -> anyhow::Result<()> {
+        if value
+            .get(field)
+            .and_then(|v| v.as_str())
+            .is_some_and(|v| v != parent)
+        {
+            return Err(anyhow!(
+                "Invalid Kiwify normalized content: mismatched {}",
+                field
+            ));
+        }
+        Ok(())
+    }
+
+    let courses = map(body, "all_courses")?;
+    let module_map = map(body, "all_modules")?;
+    let lesson_map = map(body, "all_lessons")?;
+    let mut course_entries: Vec<_> = courses.iter().collect();
+    course_entries.sort_by_key(|(_, c)| c.get("order").and_then(|v| v.as_i64()).unwrap_or(0));
+    let mut modules = Vec::new();
+    let mut seen_modules = HashSet::new();
+
+    for (course_id, _) in course_entries {
+        let course = record(courses, course_id, "course")?;
+        for module_id in refs(course, "modules")? {
+            let module = record(module_map, module_id, "module")?;
+            check_parent(module, "course_id", course_id)?;
+            if !seen_modules.insert(module_id) {
+                continue;
+            }
+            let mut lessons = Vec::new();
+            let mut seen_lessons = HashSet::new();
+            for lesson_id in refs(module, "lessons")? {
+                if !seen_lessons.insert(lesson_id) {
+                    continue;
+                }
+                let lesson = record(lesson_map, lesson_id, "lesson")?;
+                check_parent(lesson, "module_id", module_id)?;
+                check_parent(lesson, "course_id", course_id)?;
+                lessons.push(KiwifyLesson {
+                    id: lesson_id.to_string(),
+                    name: first_non_empty_str(lesson, &["name", "title", "ref"])
+                        .unwrap_or(lesson_id)
+                        .to_string(),
+                    order: lessons.len() as i64,
+                    course_id: Some(course_id.clone()),
+                    available: content_is_available(course)
+                        && content_is_available(module)
+                        && content_is_available(lesson),
+                });
+            }
+            modules.push(KiwifyModule {
+                id: module_id.to_string(),
+                name: first_non_empty_str(module, &["name", "title"])
+                    .unwrap_or(module_id)
+                    .to_string(),
+                order: modules.len() as i64,
+                lessons,
+            });
+        }
+    }
+    Ok(modules)
+}
+
 pub fn parse_course_modules(body: &serde_json::Value) -> anyhow::Result<Vec<KiwifyModule>> {
+    let body = body.get("data").unwrap_or(body);
+    if body.get("all_modules").is_some() || body.get("all_courses").is_some() {
+        return parse_normalized_modules(body);
+    }
     let modules_obj = body
         .get("course")
         .and_then(|c| c.get("modules"))
@@ -386,6 +592,9 @@ pub fn parse_course_modules(body: &serde_json::Value) -> anyhow::Result<Vec<Kiwi
                             id: lesson_key.clone(),
                             name: lesson_name,
                             order: lesson_order,
+                            course_id: extract_id_string(body.get("course").unwrap_or(body)),
+                            available: content_is_available(module_val)
+                                && content_is_available(lesson_val),
                         });
                     }
                 } else if let Some(serde_json::Value::Array(lessons_arr)) = lessons_obj {
@@ -416,6 +625,9 @@ pub fn parse_course_modules(body: &serde_json::Value) -> anyhow::Result<Vec<Kiwi
                             },
                             name: lesson_name,
                             order: lesson_order,
+                            course_id: extract_id_string(body.get("course").unwrap_or(body)),
+                            available: content_is_available(module_val)
+                                && content_is_available(lesson_val),
                         });
                     }
                 }
@@ -481,6 +693,9 @@ pub fn parse_course_modules(body: &serde_json::Value) -> anyhow::Result<Vec<Kiwi
                             },
                             name: lesson_name,
                             order: lesson_order,
+                            course_id: extract_id_string(body.get("course").unwrap_or(body)),
+                            available: content_is_available(module_val)
+                                && content_is_available(lesson_val),
                         });
                     }
                 }
@@ -520,24 +735,30 @@ pub async fn get_lesson_detail(
         course_id, lesson_id
     );
 
-    let resp = session.client.get(&url).send().await?;
-
-    let status = resp.status();
-    let body_text = resp.text().await?;
-
-    if !status.is_success() {
+    let resp = session
+        .client
+        .get(&url)
+        .send()
+        .await
+        .map_err(|e| e.without_url())?;
+    let body = checked_json(resp, "lesson detail").await?;
+    let lesson_body = body.get("data").unwrap_or(&body);
+    if !lesson_body.get("lesson").unwrap_or(lesson_body).is_object()
+        || !lesson_body
+            .get("lesson")
+            .unwrap_or(lesson_body)
+            .get("id")
+            .is_some_and(|v| v.is_string())
+    {
         return Err(anyhow!(
-            "get_lesson_detail returned status {}: {}",
-            status,
-            &body_text[..body_text.len().min(300)]
+            "Invalid Kiwify lesson detail: missing lesson object or ID"
         ));
     }
-
-    let body: serde_json::Value = serde_json::from_str(&body_text)?;
     Ok(parse_lesson_detail(&body, lesson_id))
 }
 
 pub fn parse_lesson_detail(body: &serde_json::Value, fallback_id: &str) -> KiwifyLessonDetail {
+    let body = body.get("data").unwrap_or(body);
     let lesson = body.get("lesson").unwrap_or(body);
 
     let id = first_non_empty_str(lesson, &["id"])
@@ -606,6 +827,7 @@ pub fn parse_lesson_detail(body: &serde_json::Value, fallback_id: &str) -> Kiwif
         description,
         video_url,
         files,
+        available: content_is_available(lesson),
     }
 }
 
@@ -619,20 +841,14 @@ pub async fn get_file_download_url(
         course_id, file_id
     );
 
-    let resp = session.client.get(&url).send().await?;
-
-    let status = resp.status();
-    let body_text = resp.text().await?;
-
-    if !status.is_success() {
-        return Err(anyhow!(
-            "get_file_download_url returned status {}: {}",
-            status,
-            &body_text[..body_text.len().min(300)]
-        ));
-    }
-
-    let body: serde_json::Value = serde_json::from_str(&body_text)?;
+    let resp = session
+        .client
+        .get(&url)
+        .send()
+        .await
+        .map_err(|e| e.without_url())?;
+    let body = checked_json(resp, "file URL").await?;
+    let body = body.get("data").unwrap_or(&body);
 
     let download_url = body
         .get("url")
@@ -661,7 +877,7 @@ pub async fn save_session(session: &KiwifySession) -> anyhow::Result<()> {
 
     let json = serde_json::to_string_pretty(&saved)?;
     tokio::fs::write(&path, json).await?;
-    tracing::info!("[kiwify] session saved for {}", session.email);
+    tracing::info!("[kiwify] session saved");
     Ok(())
 }
 
@@ -675,7 +891,7 @@ pub async fn load_session() -> anyhow::Result<Option<KiwifySession>> {
     let saved: SavedSession = serde_json::from_str(&json)?;
     let client = build_client(&saved.token)?;
 
-    tracing::info!("[kiwify] session loaded for {}", saved.email);
+    tracing::info!("[kiwify] session loaded");
 
     Ok(Some(KiwifySession {
         token: saved.token,
@@ -691,6 +907,10 @@ pub async fn delete_saved_session() -> anyhow::Result<()> {
     }
     Ok(())
 }
+
+#[cfg(test)]
+#[path = "api_tests.rs"]
+mod regression_tests;
 
 #[cfg(test)]
 mod tests {

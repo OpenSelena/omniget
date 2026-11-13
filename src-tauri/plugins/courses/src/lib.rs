@@ -2293,47 +2293,36 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_all_catalog_commands_dispatched_without_unknown_command() {
+    async fn test_catalog_download_commands_reject_empty_payload_without_auth_side_effects() {
         let plugin = CoursesPlugin::new();
         let platforms = catalog::all_platforms();
 
         let mut unknown_cmds = Vec::new();
 
         for p in &platforms {
-            let mut all_cmds = Vec::new();
-            for m in &p.login_methods {
-                all_cmds.push(m.command.clone());
+            // Calling every catalog handler also calls real logout and session
+            // loading functions against the developer's AppData. Only exercise
+            // the download boundary here: an absent payload must fail before
+            // authentication, filesystem work, or network requests.
+            let cmd = &p.commands.download;
+            let error = plugin
+                .handle_command(cmd.clone(), serde_json::json!({}))
+                .await
+                .expect_err("empty download payload must be rejected");
+            if error.contains("Unknown command") {
+                unknown_cmds.push(format!("[{}] {}", p.id, cmd));
             }
-            all_cmds.push(p.commands.check_session.clone());
-            all_cmds.push(p.commands.logout.clone());
-            all_cmds.push(p.commands.list.clone());
-            all_cmds.push(p.commands.refresh.clone());
-            all_cmds.push(p.commands.download.clone());
-            if let Some(ref c) = p.commands.cancel {
-                all_cmds.push(c.clone());
-            }
-            if let Some(ref s) = p.commands.search {
-                all_cmds.push(s.clone());
-            }
-            if let Some(ref cu) = p.commands.curriculum {
-                all_cmds.push(cu.clone());
-            }
-
-            for cmd in all_cmds {
-                let res = plugin
-                    .handle_command(cmd.clone(), serde_json::json!({}))
-                    .await;
-                if let Err(ref e) = res {
-                    if e.contains("Unknown command") {
-                        unknown_cmds.push(format!("[{}] {}", p.id, cmd));
-                    }
-                }
-            }
+            assert!(
+                error.contains("missing 'course_json'"),
+                "[{}] download reached past the payload boundary: {}",
+                p.id,
+                error
+            );
         }
 
         assert!(
             unknown_cmds.is_empty(),
-            "Catalog commands not dispatched in handle_command (returned Unknown command):\n{}",
+            "Catalog download commands not dispatched in handle_command:\n{}",
             unknown_cmds.join("\n")
         );
     }
