@@ -30,7 +30,7 @@
 </section>
 
 <section class="project-header">
-  <img src="/loop.png" alt="Loop" class="project-logo" width="64" height="64" />
+  <img src="/mascot/penguin.png" alt="LibreGet Mascot" class="project-logo" width="64" height="64" />
   <p class="project-description">{$t('about.description')}</p>
 </section>
 
