@@ -60,24 +60,7 @@ pub async fn kiwify_login_token(
     let session = KiwifySession {
         token: parsed_token.clone(),
         email: String::new(),
-        client: omniget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
-            .user_agent(
-                "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:124.0) Gecko/20100101 Firefox/124.0",
-            )
-            .default_headers({
-                let mut h = reqwest::header::HeaderMap::new();
-                h.insert(
-                    "Authorization",
-                    format!("Bearer {}", parsed_token).parse().unwrap(),
-                );
-                h.insert("Accept", "application/json".parse().unwrap());
-                h.insert("Origin", "https://admin.kiwify.com.br".parse().unwrap());
-                h.insert("Referer", "https://admin.kiwify.com.br/".parse().unwrap());
-                h
-            })
-            .connect_timeout(Duration::from_secs(30))
-            .timeout(Duration::from_secs(120))
-            .build()
+        client: api::build_client(&parsed_token)
             .map_err(|e| format!("Failed to build client: {}", e))?,
     };
 
@@ -231,6 +214,14 @@ pub async fn start_kiwify_course_download(
     };
     let active = state.active_downloads.clone();
 
+    let session = {
+        let guard = state.kiwify_session.lock().await;
+        guard
+            .as_ref()
+            .ok_or_else(|| "Not authenticated. Please log in first.".to_string())?
+            .clone()
+    };
+
     let cancel_token = CancellationToken::new();
 
     {
@@ -240,14 +231,6 @@ pub async fn start_kiwify_course_download(
         }
         map.insert(course_id, cancel_token.clone());
     }
-
-    let session = {
-        let guard = state.kiwify_session.lock().await;
-        guard
-            .as_ref()
-            .ok_or_else(|| "Not authenticated. Please log in first.".to_string())?
-            .clone()
-    };
 
     tokio::spawn(async move {
         let result =
