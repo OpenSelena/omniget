@@ -1,7 +1,7 @@
 ---
 version: alpha
-name: OmniGet Universal Studio & OmniGuard Security Suite
-description: Precision local media workbench and privacy security suite for OmniGet, OmniGuard, and Nami.
+name: LibreGet Universal Studio & OmniGuard Security Suite
+description: Precision local media workbench and privacy security suite for LibreGet, OmniGuard, and Nami.
 colors:
   primary: "#FF7D38"
   primary-container: "#F28500"
@@ -91,9 +91,9 @@ components:
     padding: 16px
 ---
 
-# Design System: OmniGet Universal Studio & OmniGuard Security Suite
+# Design System: LibreGet Universal Studio & OmniGuard Security Suite
 
-Design specification for OmniGet desktop suite, OmniGuard privacy shield, and Nami social archiver.
+Design specification for LibreGet desktop suite, OmniGuard privacy shield, and Nami social archiver.
 
 ## Overview
 - **Core Mental Model**: Precision local media workbench. Unifies high-velocity media extraction with offline reading, Hi-Fi listening, and verifiable system security.

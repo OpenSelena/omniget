@@ -1,6 +1,6 @@
-# OmniGet Agent Instructions & Release Protocol
+# LibreGet Agent Instructions & Release Protocol
 
-Welcome to OmniGet. This file serves as the definitive reference and operating manual for all AI agents working in this repository.
+Welcome to LibreGet. This file serves as the definitive reference and operating manual for all AI agents working in this repository.
 
 ---
 
@@ -20,7 +20,7 @@ Welcome to OmniGet. This file serves as the definitive reference and operating m
 
 > [!IMPORTANT]
 > **NEVER skip writing the release notes, updating the landing page, or updating the documentation when cutting or preparing a release.**
-> The in-app changelog modal (`src/lib/stores/changelog-store.svelte.ts`) fetches the GitHub release body directly from `https://api.github.com/repos/OpenSelena/omniget/releases/tags/v<VERSION>`. Leaving release notes blank breaks the in-app user experience.
+> The in-app changelog modal (`src/lib/stores/changelog-store.svelte.ts`) fetches the GitHub release body directly from `https://api.github.com/repos/OpenSelena/libreget/releases/tags/v<VERSION>`. Leaving release notes blank breaks the in-app user experience.
 
 ### Standard Operating Procedure for Every Release:
 
@@ -66,7 +66,7 @@ Welcome to OmniGet. This file serves as the definitive reference and operating m
 
 5. **Asset Name & Casing Verification**:
    - Check the exact asset filenames uploaded by Tauri (`gh release view vX.Y.Z --json assets`).
-   - Notice casing: e.g. `OmniGet_0.11.0_x64-setup.exe` (capitalized `OmniGet`) vs `omniget_0.11.0_x64-portable.exe` (lowercase `omniget`).
+   - Notice casing: e.g. `LibreGet_0.11.0_x64-setup.exe` (capitalized `OmniGet`) vs `libreget_0.11.0_x64-portable.exe` (lowercase `omniget`).
    - Ensure `index.html` download buttons use the exact asset filenames.
 
 ---
@@ -90,7 +90,7 @@ Before pushing to `dev`:
 
 ### Issue tracker
 
-GitHub Issues at OpenSelena/omniget via the `gh` CLI. See `docs/agents/issue-tracker.md`.
+GitHub Issues at OpenSelena/libreget via the `gh` CLI. See `docs/agents/issue-tracker.md`.
 
 ### Triage labels
 
@@ -102,7 +102,7 @@ Single-context (`GLOSSARY.md` and `docs/adr/`). See `docs/agents/domain.md`.
 
 ### Video datasets from the CLI
 
-`omniget-cli search` + `omniget-cli archive` build a resumable local video archive (search terms, filters, size cap). See [.agents/skills/video-archive/SKILL.md](.agents/skills/video-archive/SKILL.md).
+`libreget-cli search` + `omniget-cli archive` build a resumable local video archive (search terms, filters, size cap). See [.agents/skills/video-archive/SKILL.md](.agents/skills/video-archive/SKILL.md).
 
 ---
 

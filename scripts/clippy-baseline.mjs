@@ -44,7 +44,14 @@ function runClippy() {
     const child = spawn(
       "cargo",
       ["clippy", "--workspace", "--all-targets", "--message-format=json"],
-      { cwd: path.join(root, "src-tauri"), shell: process.platform === "win32" },
+      {
+        cwd: path.join(root, "src-tauri"),
+        shell: process.platform === "win32",
+        env: {
+          ...process.env,
+          PKG_CONFIG_PATH: process.env.PKG_CONFIG_PATH || "/usr/lib64/pkgconfig:/usr/share/pkgconfig",
+        },
+      },
     );
 
     let stdout = "";

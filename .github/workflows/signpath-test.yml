@@ -45,7 +45,7 @@ jobs:
         with:
           workspaces: './src-tauri -> target'
 
-      - name: Build OmniGet Windows application
+      - name: Build LibreGet Windows application
         env:
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
@@ -55,8 +55,8 @@ jobs:
         id: upload-unsigned
         uses: actions/upload-artifact@v4
         with:
-          name: unsigned-omniget-binary
-          path: src-tauri/target/release/omniget.exe
+          name: unsigned-libreget-binary
+          path: src-tauri/target/release/libreget.exe
           if-no-files-found: error
 
       - name: Submit test-signing request to SignPath
@@ -65,7 +65,7 @@ jobs:
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: '773e0b25-f263-45c9-8f29-c7a6a1aed6db'
-          project-slug: 'omniget'
+          project-slug: 'libreget'
           signing-policy-slug: 'test-signing'
           github-artifact-id: ${{ steps.upload-unsigned.outputs.artifact-id }}
           wait-for-completion: true
@@ -92,6 +92,6 @@ jobs:
       - name: Upload signed test artifact
         uses: actions/upload-artifact@v4
         with:
-          name: signed-omniget-test-binary
+          name: signed-libreget-test-binary
           path: signed-output/**
 

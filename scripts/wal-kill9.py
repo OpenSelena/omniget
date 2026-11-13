@@ -15,7 +15,7 @@ Imprime o caminho do WAL gerado. Resultado esperado: N registros integros e
 exatamente 1 truncado.
 """
 import json, os, subprocess, sys, tempfile, signal, time
-d = tempfile.mkdtemp(prefix="omniget-wal-")
+d = tempfile.mkdtemp(prefix="libreget-wal-")
 wal = os.path.join(d, "queue.wal")
 child = f'''
 import json, os, sys, time

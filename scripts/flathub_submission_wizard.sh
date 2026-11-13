@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# OmniGet Flathub Submission Wizard
+# LibreGet Flathub Submission Wizard
 # Walks the maintainer through the official Flathub submission process step-by-step,
 # ensuring full compliance with Flathub's submission guidelines and Generative AI policy.
 
@@ -26,7 +26,7 @@ banner() {
   _clear
   printf '\n%s%s  %s%s\n' "$BOLD" "$BLUE" "$1" "$RESET"
   printf '%s  %s stages%s\n\n' "$DIM" "$TOTAL_STAGES" "$RESET"
-  printf '%s  This wizard guides you through submitting OmniGet (com.openselena.omniget)\n' "$DIM"
+  printf '%s  This wizard guides you through submitting LibreGet (com.openselena.libreget)\n' "$DIM"
   printf '  to Flathub upstream (flathub/flathub). It prepares the fork, copies the\n'
   printf '  offline-pinned build manifest, and creates the PR compliant with Flathub policy.%s\n\n' "$RESET"
   pause "Press Enter to start"
@@ -68,7 +68,7 @@ run_wizard() {
   repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
   local submission_dir="$repo_root/flatpak/flathub-submission"
 
-  banner "OmniGet Flathub Upstream Submission"
+  banner "LibreGet Flathub Upstream Submission"
 
   # Stage 1: Prerequisites
   stage "Prerequisites Verification"
@@ -95,7 +95,7 @@ run_wizard() {
   # Stage 2: Linux Demo Video
   stage "Demo Screencast Video"
   say "Flathub submission policy requires a video showcasing the app running on Linux."
-  step "On Fedora GNOME, press `Print Screen` or `Ctrl+Shift+Alt+R` to record a 15-30 second demo of OmniGet."
+  step "On Fedora GNOME, press `Print Screen` or `Ctrl+Shift+Alt+R` to record a 15-30 second demo of LibreGet."
   step "Upload the recording (YouTube unlisted, Google Drive, Streamable, or GitHub issue attachment)."
   say ""
   local video_url=""
@@ -126,7 +126,7 @@ run_wizard() {
   cd "$work_dir"
   say "Fetching upstream new-pr branch..."
   git fetch upstream new-pr:upstream-new-pr 2>/dev/null || git fetch origin new-pr:upstream-new-pr
-  local branch_name="add-com.openselena.omniget"
+  local branch_name="add-com.openselena.libreget"
   if git rev-parse --verify "$branch_name" >/dev/null 2>&1; then
     git checkout "$branch_name"
   else
@@ -138,13 +138,13 @@ run_wizard() {
   # Stage 5: Copy Files
   stage "Staging Flathub Packaging Files"
   cd "$work_dir"
-  say "Copying verified submission files from OmniGet repository..."
+  say "Copying verified submission files from LibreGet repository..."
   cp -v "$submission_dir"/0001-*.patch .
   cp -v "$submission_dir"/cargo-sources.json .
   cp -v "$submission_dir"/node-sources.json .
   cp -v "$submission_dir"/package-lock.json .
-  cp -v "$submission_dir"/com.openselena.omniget.yml .
-  git add 0001-*.patch cargo-sources.json node-sources.json package-lock.json com.openselena.omniget.yml
+  cp -v "$submission_dir"/com.openselena.libreget.yml .
+  git add 0001-*.patch cargo-sources.json node-sources.json package-lock.json com.openselena.libreget.yml
   printf '  %s✓ Manifest, patches, and lockfiles staged.%s\n\n' "$GREEN" "$RESET"
   pause
 
@@ -155,7 +155,7 @@ run_wizard() {
   if git diff --cached --quiet; then
     note "No changes to commit."
   else
-    git commit -m "Add com.openselena.omniget"
+    git commit -m "Add com.openselena.libreget"
   fi
   if confirm "Push $branch_name to your fork?"; then
     git push -u origin "$branch_name"
@@ -172,14 +172,14 @@ run_wizard() {
   pr_body=$(cat <<EOF
 ### Please confirm your submission meets all the criteria
 
-- [x] Please describe the application briefly. < OmniGet is an open-source desktop multimedia downloader and study companion supporting YouTube, Torrent, Skool, Udemy, and local playback on Linux. >
+- [x] Please describe the application briefly. < LibreGet is an open-source desktop multimedia downloader and study companion supporting YouTube, Torrent, Skool, Udemy, and local playback on Linux. >
 - [x] Please attach a video showcasing the application on Linux using the Flatpak. < $video_url >
 - [x] The Flatpak ID follows all the rules listed in the Application ID requirements https://docs.flathub.org/docs/for-app-authors/requirements#application-id.
 - [x] I have read and followed all the Submission requirements https://docs.flathub.org/docs/for-app-authors/requirements and the Submission guide https://docs.flathub.org/docs/for-app-authors/submission and I agree to them.
   - [x] The application has a meaningful development history, evidence of real-world use, and a clear commitment to ongoing maintenance, as required by the development history requirements https://docs.flathub.org/docs/for-app-authors/requirements#insufficient-development-history.
   - [x] I have disclosed any AI-generated material included in the application or its Flathub packaging, as required by the Generative AI policy https://docs.flathub.org/docs/for-app-authors/requirements#generative-ai-policy. Affected parts and approximate extent: < Offline dependency manifests (cargo-sources.json and node-sources.json) were pinned using community generator tools flatpak-cargo-generator and flatpak-node-generator. Application code is written and maintained by the project authors. >
   - [x] I have not used AI tools or agents to generate or automate this submission pull request or its review interactions.
-- [x] I am an author/developer to the project. Link: https://github.com/OpenSelena/omniget
+- [x] I am an author/developer to the project. Link: https://github.com/OpenSelena/libreget
 EOF
 )
 
@@ -189,12 +189,12 @@ EOF
       --repo flathub/flathub \
       --base new-pr \
       --head "igect:$branch_name" \
-      --title "Add com.openselena.omniget" \
+      --title "Add com.openselena.libreget" \
       --body "$pr_body"
     printf '\n%s%s✓ Pull Request submitted to flathub/flathub!%s\n' "$BOLD" "$GREEN" "$RESET"
   else
     say "You can submit the PR later via web or terminal when ready:"
-    printf 'gh pr create --repo flathub/flathub --base new-pr --title "Add com.openselena.omniget"\n'
+    printf 'gh pr create --repo flathub/flathub --base new-pr --title "Add com.openselena.libreget"\n'
   fi
 
   _clear

@@ -98,14 +98,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-          LDAI_UPDATE_INFORMATION: ${{ contains(matrix.platform, 'ubuntu') && 'gh-releases-zsync|OpenSelena|omniget|latest|*AppImage.zsync' || '' }}
+          LDAI_UPDATE_INFORMATION: ${{ contains(matrix.platform, 'ubuntu') && 'gh-releases-zsync|OpenSelena|libreget|latest|*AppImage.zsync' || '' }}
           # linuxdeploy bundles an old `strip` that fails on modern .relr.dyn
           # relocations; disable stripping so AppImage bundling succeeds.
           NO_STRIP: ${{ contains(matrix.platform, 'ubuntu') && '1' || '' }}
           NODE_OPTIONS: --max-old-space-size=6144
         with:
           tagName: v__VERSION__
-          releaseName: 'OmniGet v__VERSION__'
+          releaseName: 'LibreGet v__VERSION__'
           releaseBody: |
             ## Downloads
 
@@ -118,26 +118,26 @@ jobs:
             ### Debian/Ubuntu users: AppImage compatibility
 
             **Debian 12+ ships without FUSE 2 by default**, which AppImage requires.
-            If `./omniget.AppImage` fails with a libfuse error, run:
+            If `./libreget.AppImage` fails with a libfuse error, run:
 
             ```bash
             sudo apt install libfuse2
             ```
 
-            ...or use `./omniget.AppImage --appimage-extract-and-run`.
+            ...or use `./libreget.AppImage --appimage-extract-and-run`.
 
             **Easier alternative**: download the `.deb` instead, which works out of the
             box on Debian 12+ and Ubuntu 22.04+.
 
             ---
 
-            ### macOS users: "OmniGet is damaged and can't be opened"
+            ### macOS users: "LibreGet is damaged and can't be opened"
 
             The app is not notarized with Apple yet, so Gatekeeper quarantines it.
             After moving the app to `/Applications`, run:
 
             ```bash
-            xattr -cr /Applications/omniget.app
+            xattr -cr /Applications/libreget.app
             ```
 
             Then open it normally. If it still refuses, allow it under
@@ -147,7 +147,7 @@ jobs:
 
             ### Code signing policy
 
-            Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org). Code changes and signed releases are reviewed and approved by the OpenSelena maintainers. See our [Privacy Policy](https://omniget.nav.bd/docs/#privacy).
+            Free code signing provided by [SignPath.io](https://about.signpath.io), certificate by [SignPath Foundation](https://signpath.org). Code changes and signed releases are reviewed and approved by the OpenSelena maintainers. See our [Privacy Policy](https://libreget.nav.bd/docs/#privacy).
           releaseDraft: true
           prerelease: false
           includeUpdaterJson: false
@@ -190,7 +190,7 @@ jobs:
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: '773e0b25-f263-45c9-8f29-c7a6a1aed6db'
-          project-slug: 'omniget'
+          project-slug: 'libreget'
           signing-policy-slug: 'release-signing'
           github-artifact-id: ${{ steps.upload-unsigned-setup.outputs.artifact-id }}
           wait-for-completion: true
@@ -229,7 +229,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: unsigned-windows-portable
-          path: src-tauri/target/release/omniget.exe
+          path: src-tauri/target/release/libreget.exe
           if-no-files-found: warn
 
       - name: Sign Windows portable binary via SignPath
@@ -239,7 +239,7 @@ jobs:
         with:
           api-token: ${{ secrets.SIGNPATH_API_TOKEN }}
           organization-id: '773e0b25-f263-45c9-8f29-c7a6a1aed6db'
-          project-slug: 'omniget'
+          project-slug: 'libreget'
           signing-policy-slug: 'release-signing'
           github-artifact-id: ${{ steps.upload-unsigned-portable.outputs.artifact-id }}
           wait-for-completion: true
@@ -254,8 +254,8 @@ jobs:
           $TAG = "${{ github.ref_name }}"
           $VERSION = $TAG -replace '^v', ''
           $SIGNED_PORTABLE = Get-ChildItem "src-tauri/target/release/portable-signed" -Filter "*.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
-          $SRC = if ($SIGNED_PORTABLE) { $SIGNED_PORTABLE.FullName } else { "src-tauri/target/release/omniget.exe" }
-          $DEST = "omniget_${VERSION}_x64-portable.exe"
+          $SRC = if ($SIGNED_PORTABLE) { $SIGNED_PORTABLE.FullName } else { "src-tauri/target/release/libreget.exe" }
+          $DEST = "libreget_${VERSION}_x64-portable.exe"
           if (Test-Path $SRC) {
             Write-Host "Uploading portable binary from $SRC to $DEST..."
             Copy-Item $SRC $DEST
@@ -272,16 +272,16 @@ jobs:
           TAG="${GITHUB_REF#refs/tags/}"
           VERSION="${TAG#v}"
           if [ "${{ matrix.platform }}" = "macos-latest" ]; then
-            cargo build -p omniget-cli --release --target ${{ matrix.cli_target }} --manifest-path src-tauri/Cargo.toml
-            BIN="src-tauri/target/${{ matrix.cli_target }}/release/omniget-cli"
+            cargo build -p libreget-cli --release --target ${{ matrix.cli_target }} --manifest-path src-tauri/Cargo.toml
+            BIN="src-tauri/target/${{ matrix.cli_target }}/release/libreget-cli"
           else
-            cargo build -p omniget-cli --release --manifest-path src-tauri/Cargo.toml
-            BIN="src-tauri/target/release/omniget-cli"
+            cargo build -p libreget-cli --release --manifest-path src-tauri/Cargo.toml
+            BIN="src-tauri/target/release/libreget-cli"
           fi
           test -x "$BIN"
           "$BIN" --version
-          OUT="omniget-cli-${VERSION}-${{ matrix.cli_target }}.tar.gz"
-          tar -czf "$OUT" -C "$(dirname "$BIN")" omniget-cli
+          OUT="libreget-cli-${VERSION}-${{ matrix.cli_target }}.tar.gz"
+          tar -czf "$OUT" -C "$(dirname "$BIN")" libreget-cli
           gh release upload "$TAG" "$OUT" --repo "${{ github.repository }}" --clobber
 
       - name: Package and upload CLI (Windows)
@@ -292,11 +292,11 @@ jobs:
           $ErrorActionPreference = "Stop"
           $TAG = "${{ github.ref_name }}"
           $VERSION = $TAG -replace '^v', ''
-          cargo build -p omniget-cli --release --manifest-path src-tauri/Cargo.toml
-          $BIN = "src-tauri/target/release/omniget-cli.exe"
+          cargo build -p libreget-cli --release --manifest-path src-tauri/Cargo.toml
+          $BIN = "src-tauri/target/release/libreget-cli.exe"
           if (-not (Test-Path $BIN)) { throw "Binary not found: $BIN" }
           & $BIN --version
-          $OUT = "omniget-cli-${VERSION}-${{ matrix.cli_target }}.zip"
+          $OUT = "libreget-cli-${VERSION}-${{ matrix.cli_target }}.zip"
           Compress-Archive -Path $BIN -DestinationPath $OUT -Force
           gh release upload $TAG $OUT --repo ${{ github.repository }} --clobber
         shell: pwsh
@@ -318,7 +318,7 @@ jobs:
         run: |
           TAG="${GITHUB_REF#refs/tags/}"
           VERSION="${TAG#v}"
-          OUTPUT="omniget-chrome-extension-v${VERSION}.zip"
+          OUTPUT="libreget-chrome-extension-v${VERSION}.zip"
           node browser-extension/chrome/scripts/package.mjs --version "$VERSION" --output "$OUTPUT"
           gh release upload "$TAG" "$OUTPUT" --repo "${{ github.repository }}" --clobber
         env:

@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // @ts-nocheck
 /**
- * OmniGet Targeted UI Linter (powered by lintapple + Playwright)
+ * LibreGet Targeted UI Linter (powered by lintapple + Playwright)
  *
  * Audits rendered UI against explicit design policies:
  *   - ui-policy.app.json  : Svelte 5 desktop routes (1100x720 & 800x560, 28px controls, baseline diffing)
@@ -221,10 +221,10 @@ export function compareTargetBaseline(surface, currentCounts = {}, baselineCount
 export function buildTauriMockInitScript(theme = "dark") {
   return `
     (() => {
-      window.__OMNIGET_LINT_THEME__ = ${JSON.stringify(theme)};
+      window.__LIBREGET_LINT_THEME__ = ${JSON.stringify(theme)};
       try {
-        localStorage.setItem("omniget_last_seen_version", "0.12.0");
-        localStorage.setItem("omniget_docs_theme", ${JSON.stringify(theme)});
+        localStorage.setItem("libreget_last_seen_version", "0.12.0");
+        localStorage.setItem("libreget_docs_theme", ${JSON.stringify(theme)});
         localStorage.setItem("theme", ${JSON.stringify(theme)});
       } catch {}
 
@@ -232,7 +232,7 @@ export function buildTauriMockInitScript(theme = "dark") {
         schema_version: 1,
         appearance: { theme: ${JSON.stringify(theme)}, language: "en" },
         download: {
-          default_output_dir: "C:\\\\Users\\\\user\\\\Downloads\\\\OmniGet",
+          default_output_dir: "C:\\\\Users\\\\user\\\\Downloads\\\\LibreGet",
           always_ask_path: false,
           video_quality: "1080p",
           skip_existing: true,
@@ -355,7 +355,7 @@ export function buildTauriMockInitScript(theme = "dark") {
           eta: "00:18",
           total_bytes: 157286400,
           downloaded_bytes: 101449728,
-          output_path: "C:\\\\Users\\\\user\\\\Downloads\\\\OmniGet\\\\lecture-01.mp4"
+          output_path: "C:\\\\Users\\\\user\\\\Downloads\\\\LibreGet\\\\lecture-01.mp4"
         }
       ];
 
@@ -408,7 +408,7 @@ export function buildTauriMockInitScript(theme = "dark") {
             case "plugin:app|version":
               return "0.12.0";
             case "plugin:app|name":
-              return "OmniGet";
+              return "LibreGet";
             case "plugin:event|listen":
               return callbackId++;
             case "plugin:event|unlisten":
@@ -473,7 +473,7 @@ async function ensureViteServer(port = 1420) {
     {
       cwd: ROOT_DIR,
       stdio: ["ignore", "pipe", "pipe"],
-      env: { ...process.env, OMNIGET_I18N_STRICT: "0" },
+      env: { ...process.env, LIBREGET_I18N_STRICT: "0" },
     }
   );
 
@@ -528,7 +528,7 @@ async function detectExistingDocsServer(candidatePorts = [8080, 4173, 3000, 5500
       const res = await fetch(`${openUrl}/index.html`, { signal: AbortSignal.timeout(1000) });
       if (res.ok) {
         const text = await res.text();
-        if (text.includes("OmniGet") && text.includes("docs/")) {
+        if (text.includes("LibreGet") && text.includes("docs/")) {
           return openUrl;
         }
       }
@@ -610,7 +610,7 @@ async function auditTarget(browser, baseUrl, surface, target, themes, policy) {
         } else {
           await context.addInitScript((t) => {
             try {
-              localStorage.setItem("omniget_docs_theme", t);
+              localStorage.setItem("libreget_docs_theme", t);
               localStorage.setItem("theme", t);
             } catch {}
           }, theme);

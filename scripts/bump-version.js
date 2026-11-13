@@ -121,7 +121,7 @@ const cargoLockPath = path.join(root, "src-tauri", "Cargo.lock");
 if (fs.existsSync(cargoLockPath)) {
   writeText(cargoLockPath, (content) => {
     return content.replace(
-      /(name = "omniget"\nversion = ")([^"]+)(")/,
+      /(name = "libreget"\nversion = ")([^"]+)(")/,
       (_, a, _b, c) => `${a}${version}${c}`
     );
   });
@@ -161,9 +161,9 @@ function updateLandingPageContent(content) {
     .replace(/releases\/tag\/v\d+\.\d+\.\d+\/download\/[^\s"'<>\\]+/g, (m) =>
       m.replace(/v\d+\.\d+\.\d+(?=\/download)/, `v${version}`).replace(/\d+\.\d+\.\d+/g, version)
     )
-    .replace(/OmniGet v\d+\.\d+\.\d+\. Free and open source/g, `OmniGet v${version}. Free and open source`)
+    .replace(/LibreGet v\d+\.\d+\.\d+\. Free and open source/g, `LibreGet v${version}. Free and open source`)
     .replace(/releases\/tag\/v\d+\.\d+\.\d+/g, `releases/tag/v${version}`)
-    .replace(/Get OmniGet v\d+\.\d+\.\d+/g, `Get OmniGet v${version}`);
+    .replace(/Get LibreGet v\d+\.\d+\.\d+/g, `Get LibreGet v${version}`);
 }
 
 const indexPath = path.join(root, "index.html");
@@ -216,7 +216,7 @@ function hasBinary(name) {
   }
 }
 
-const metainfoAbs = path.join(root, "flatpak", "com.openselena.omniget.metainfo.xml");
+const metainfoAbs = path.join(root, "flatpak", "com.openselena.libreget.metainfo.xml");
 if (hasBinary("appstreamcli")) {
   try {
     execSync(`appstreamcli validate "${metainfoAbs}"`, { stdio: "inherit" });

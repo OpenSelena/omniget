@@ -1,5 +1,5 @@
 From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
-From: OmniGet <igect@vk.com>
+From: LibreGet <igect@vk.com>
 Subject: [PATCH] Make GObject introspection configurable
 
 Add ENABLE_INTROSPECTION cmake option so introspection can be disabled

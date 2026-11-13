@@ -1,6 +1,6 @@
 #! /usr/bin/env bash
 
-# Vendored copy of linuxdeploy-plugin-gtk, patched for OmniGet.
+# Vendored copy of linuxdeploy-plugin-gtk, patched for LibreGet.
 #
 # Source:    https://github.com/tauri-apps/linuxdeploy-plugin-gtk
 #            (a fork of https://github.com/linuxdeploy/linuxdeploy-plugin-gtk)

@@ -63,12 +63,12 @@ jobs:
       # Tauri Issue #11028 / #14580: On Windows, standalone test binaries for
       # crates linking tauri/webview without an embedded application manifest
       # fail to load comctl32.dll (0xc0000139 STATUS_ENTRYPOINT_NOT_FOUND).
-      # omniget-plugin-courses is verified on Linux & macOS, and Windows GUI
+      # libreget-plugin-courses is verified on Linux & macOS, and Windows GUI
       # integration is verified in the smoke job.
       - name: Test (Windows)
         if: matrix.platform == 'windows-latest'
         working-directory: src-tauri
-        run: cargo test --workspace --exclude omniget-plugin-courses
+        run: cargo test --workspace --exclude libreget-plugin-courses
 
   rust-debian:
     if: ${{ github.event_name != 'pull_request' || github.event.pull_request.user.login != 'weblate' }}
@@ -180,7 +180,7 @@ jobs:
       - name: Smoke (modo padrao)
         shell: bash
         run: |
-          BIN=src-tauri/target/debug/omniget
+          BIN=src-tauri/target/debug/libreget
           [ "${{ matrix.platform }}" = "windows-latest" ] && BIN="$BIN.exe"
           if [ "${{ matrix.platform }}" = "ubuntu-latest" ]; then
             xvfb-run -a node scripts/smoke-test.mjs "$BIN"
@@ -194,7 +194,7 @@ jobs:
       - name: Smoke (modo portatil)
         shell: bash
         run: |
-          BIN=src-tauri/target/debug/omniget
+          BIN=src-tauri/target/debug/libreget
           [ "${{ matrix.platform }}" = "windows-latest" ] && BIN="$BIN.exe"
           if [ "${{ matrix.platform }}" = "ubuntu-latest" ]; then
             xvfb-run -a node scripts/smoke-test.mjs "$BIN" --portable
@@ -214,4 +214,4 @@ jobs:
           sudo apt-get install -y appstream
 
       - name: Validate flatpak metainfo
-        run: appstreamcli validate flatpak/com.openselena.omniget.metainfo.xml
+        run: appstreamcli validate flatpak/com.openselena.libreget.metainfo.xml

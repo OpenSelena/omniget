@@ -1,4 +1,4 @@
-// WCAG contrast audit for OmniGet themes.
+// WCAG contrast audit for LibreGet themes.
 // Computes ratio for: text-muted/surface, text-muted/surface-hi, text-dim/surface.
 
 const themes = [

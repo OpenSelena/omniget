@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * OmniGet Documentation Suite E2E Test Runner & Verification Harness
+ * LibreGet Documentation Suite E2E Test Runner & Verification Harness
  *
  * Implements a 4-tier opaque-box test architecture validating:
  * - Tier 1: Feature Coverage (Links, Search Modal, Theme, Copy Buttons, Immutability)
@@ -30,7 +30,7 @@ const CYAN = '\x1b[36m';
 const GRAY = '\x1b[90m';
 
 console.log(`${BOLD}${CYAN}========================================================================${RESET}`);
-console.log(`${BOLD}${CYAN}   OmniGet Documentation Suite: Comprehensive E2E Verification Harness  ${RESET}`);
+console.log(`${BOLD}${CYAN}   LibreGet Documentation Suite: Comprehensive E2E Verification Harness  ${RESET}`);
 console.log(`${BOLD}${CYAN}========================================================================${RESET}`);
 console.log(`${GRAY}Mode: Opaque-Box Native Node Harness | Target: 7 Doc Pages + Root Landing Page${RESET}\n`);
 

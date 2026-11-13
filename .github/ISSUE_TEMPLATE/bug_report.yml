@@ -11,8 +11,8 @@ body:
   - type: input
     id: version
     attributes:
-      label: OmniGet version
-      description: Shown in Settings > About, or via `omniget --version`.
+      label: LibreGet version
+      description: Shown in Settings > About, or via `libreget --version`.
       placeholder: "0.4.0"
     validations:
       required: true

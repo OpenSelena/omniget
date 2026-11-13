@@ -97,9 +97,15 @@ fn build_client(token: &str) -> anyhow::Result<reqwest::Client> {
 
 fn session_file_path() -> anyhow::Result<PathBuf> {
     let data_dir = dirs::data_dir().ok_or_else(|| anyhow!("Could not find app data directory"))?;
-    Ok(data_dir
-        .join("omniget")
-        .join("estrategia_concursos_session.json"))
+    let target = data_dir.join("libreget").join("estrategia_concursos_session.json");
+    if target.exists() {
+        return Ok(target);
+    }
+    let legacy = data_dir.join("omniget").join("estrategia_concursos_session.json");
+    if legacy.exists() {
+        return Ok(legacy);
+    }
+    Ok(target)
 }
 
 pub async fn validate_token(session: &EstrategiaConcursosSession) -> anyhow::Result<bool> {

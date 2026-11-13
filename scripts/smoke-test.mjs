@@ -18,7 +18,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, copyFileSync, existsSync, rmSync
 import { tmpdir } from "node:os";
 import { join, basename, resolve } from "node:path";
 
-const BANNER = /OmniGet .* starting — pid \d+, (standard|portable) mode/;
+const BANNER = /(LibreGet|OmniGet) .* starting — pid \d+, (standard|portable) mode/;
 const WINDOW = "[startup] main window created";
 const TIMEOUT_MS = 180_000;
 const EXIT_AFTER_MS = 6000;
@@ -36,7 +36,7 @@ if (!existsSync(binArg)) {
   process.exit(2);
 }
 
-const workdir = mkdtempSync(join(tmpdir(), "omniget-smoke-"));
+const workdir = mkdtempSync(join(tmpdir(), "libreget-smoke-"));
 const fakeProfile = join(workdir, "profile");
 mkdirSync(fakeProfile, { recursive: true });
 
@@ -60,7 +60,7 @@ if (portable) {
 const env = {
   ...process.env,
   RUST_LOG: "info",
-  OMNIGET_SMOKE_EXIT_MS: String(EXIT_AFTER_MS),
+  LIBREGET_SMOKE_EXIT_MS: String(EXIT_AFTER_MS),
   // Perfil limpo para que "a pasta apareceu" seja uma afirmacao sobre esta
   // execucao, e nao sobre lixo de uma anterior.
   LOCALAPPDATA: join(fakeProfile, "Local"),
@@ -70,7 +70,7 @@ const env = {
 };
 if (!portable) {
   // Sem isto o caso padrao escreveria no perfil real do runner.
-  env.OMNIGET_DATA_DIR = join(workdir, "data-padrao");
+  env.LIBREGET_DATA_DIR = join(workdir, "data-padrao");
 }
 
 console.log(`[smoke] modo: ${portable ? "portatil" : "padrao"}`);
@@ -120,10 +120,10 @@ if (code !== 0) {
 
 if (portable) {
   const vazouParaOPerfil = [
-    join(fakeProfile, "Local", "com.openselena.omniget"),
-    join(fakeProfile, "Roaming", "com.openselena.omniget"),
-    join(fakeProfile, "share", "com.openselena.omniget"),
-    join(fakeProfile, "Library", "Application Support", "com.openselena.omniget"),
+    join(fakeProfile, "Local", "com.openselena.libreget"),
+    join(fakeProfile, "Roaming", "com.openselena.libreget"),
+    join(fakeProfile, "share", "com.openselena.libreget"),
+    join(fakeProfile, "Library", "Application Support", "com.openselena.libreget"),
   ].filter((p) => existsSync(p));
 
   if (vazouParaOPerfil.length > 0) {

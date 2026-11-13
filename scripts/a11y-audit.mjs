@@ -107,7 +107,7 @@ async function keyboardPass(browser, route, tabs) {
 async function main() {
   let devProc = null;
   if (!(await waitForServer(BASE, 2000))) {
-    devProc = spawn("pnpm", ["dev"], { env: { ...process.env, OMNIGET_I18N_STRICT: "0" }, stdio: "ignore" });
+    devProc = spawn("pnpm", ["dev"], { env: { ...process.env, LIBREGET_I18N_STRICT: "0" }, stdio: "ignore" });
     if (!(await waitForServer(BASE, 90000))) { console.error("dev server down"); process.exit(1); }
   }
   const browser = await chromium.launch();
