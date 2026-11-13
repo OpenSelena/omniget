@@ -1,4 +1,4 @@
-use omniget_core::core::tools::{calameo, gallery, gdocs, slides};
+use omniget_core::core::tools::{calameo, gallery, gdocs, gslides, slides};
 
 use super::{err, progress};
 
@@ -28,6 +28,22 @@ pub async fn tool_gdocs_download(
     gdocs::download(&url, &format, &dest, progress(&app))
         .await
         .map_err(err)
+}
+
+#[tauri::command]
+pub async fn tool_gslides_compile_dir(
+    app: tauri::AppHandle,
+    svg_dir: String,
+    output_pdf: Option<String>,
+) -> Result<gslides::GslidesDownloadResult, String> {
+    gslides::compile_svg_dir_to_pdf(&svg_dir, output_pdf.as_deref(), progress(&app))
+        .await
+        .map_err(err)
+}
+
+#[tauri::command]
+pub fn tool_gslides_bridge_info() -> crate::local_bridge::SlidesBridgeStatus {
+    crate::local_bridge::slides_bridge_status()
 }
 
 #[tauri::command]

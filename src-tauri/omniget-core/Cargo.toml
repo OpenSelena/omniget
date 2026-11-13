@@ -65,6 +65,8 @@ trash = "5"
 enigo = { version = "0.6", default-features = false, features = ["x11rb"] }
 fs4 = "1"
 image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp", "gif", "ico"] }
+# Renderizado vectorial SVG (Google Slides / Calameo -> PDF 16:9) em Rust puro.
+resvg = "0.44"
 # Tags de audio (ID3/Vorbis/MP4) em Rust puro, sem binario externo.
 lofty = "0.25"
 # HTML -> Markdown para exportar posts (Substack/Medium), mesmo padrao do pdf-to-markdown.

@@ -8,7 +8,7 @@ use omniget_core::core::ytdlp;
 use omniget_core::models::media::{DownloadOptions, MediaInfo};
 use omniget_core::models::settings::ProxySettings;
 use omniget_core::platforms::{
-    BilibiliDownloader, BlueskyDownloader, DirectFileDownloader, DouyinDownloader,
+    BilibiliDownloader, BlueskyDownloader, DirectFileDownloader, DouyinDownloader, GdocsDownloader,
     GenericYtdlpDownloader, InstagramDownloader, P2pDownloader, PinterestDownloader,
     PlatformDownloader, RedditDownloader, ThreadsDownloader, TikTokDownloader,
     TwitchClipsDownloader, TwitterDownloader, VimeoDownloader, YouTubeDownloader,
@@ -93,6 +93,7 @@ pub fn core_platform_registry() -> PlatformRegistry {
     registry.register(Arc::new(BilibiliDownloader::new()));
     registry.register(Arc::new(DouyinDownloader::new()));
     registry.register(Arc::new(P2pDownloader::new()));
+    registry.register(Arc::new(GdocsDownloader::new()));
     registry.register(Arc::new(DirectFileDownloader::new()));
     registry.register(Arc::new(GenericYtdlpDownloader::new()));
     registry

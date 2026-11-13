@@ -341,3 +341,15 @@ test("Bilibili: b23.tv short link", () => {
 test("Bilibili: homepage is unknown", () => {
   assertUnsupported("https://www.bilibili.com/", "bilibili", "unknown");
 });
+
+// ── Google Docs / Slides / Sheets ────────────────────────────────────────
+
+test("Google Slides: standard presentation and pubembed", () => {
+  assertSupported("https://docs.google.com/presentation/d/1AbC_d-e/edit#slide=1", "gdocs", "post");
+  assertSupported(
+    "https://docs.google.com/presentation/d/e/2PACX-1vMockDummyId1234567890abcdefghijklmnopqrstuvwxyz/pubembed?start=false",
+    "gdocs",
+    "post"
+  );
+  assertUnsupported("https://docs.google.com/presentation/u/0/", "gdocs", "unknown");
+});

@@ -23,6 +23,7 @@ pub mod gallery;
 pub mod games;
 pub mod gdocs;
 pub mod github;
+pub mod gslides;
 pub mod hosts_block;
 pub mod humanize;
 pub mod icon_pack;
