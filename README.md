@@ -22,7 +22,7 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
   <img src="assets/readme/hero.png" alt="OmniGet: grab a link, get the file. The mascot sends video, music, PDF, image, course and torrent files into a folder. Courses, video, audio, images and torrents, then transcribe, convert, and manage." width="100%" />
 </p>
 
-<h1 align="center">OmniGet</h1>
+<h1 align="center">LibreGet</h1>
 
 <p align="center">
   <b>English</b>
