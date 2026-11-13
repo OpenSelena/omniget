@@ -105,6 +105,11 @@ zero unprocessed entries; it removed the previous success marker. A completed
 available subset is not described as a complete course. Private course files,
 credentials, response fixtures and signed media URLs are not part of this change.
 
+The user subsequently confirmed in the browser that the missing lessons are
+scheduled for future release. This matches the authoritative locked responses
+and closes the reported discrepancy: currently available content was saved,
+while unreleased lessons remain correctly unavailable.
+
 ## Limits
 
 This change does not renew expired sessions or grant access to scheduled,
