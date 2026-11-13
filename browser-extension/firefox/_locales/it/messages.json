@@ -1,51 +1,51 @@
 {
   "action_title_supported": {
-    "message": "Invia questa pagina multimediale a OmniGet"
+    "message": "Invia questa pagina multimediale a LibreGet"
   },
   "action_title_unsupported": {
     "message": "Nessun contenuto multimediale supportato rilevato in questa pagina"
   },
   "error_page_document_title": {
-    "message": "Estensione OmniGet"
+    "message": "Estensione LibreGet"
   },
   "error_page_eyebrow": {
-    "message": "Estensione OmniGet"
+    "message": "Estensione LibreGet"
   },
   "error_page_install_cta": {
-    "message": "Installa OmniGet"
+    "message": "Installa LibreGet"
   },
   "error_page_open_extensions": {
     "message": "Apri impostazioni dell'estensione"
   },
   "error_host_missing_title": {
-    "message": "Apri OmniGet una volta per completare la configurazione"
+    "message": "Apri LibreGet una volta per completare la configurazione"
   },
   "error_host_missing_body": {
-    "message": "Il browser non riesce ancora a trovare il bridge di OmniGet su questo computer."
+    "message": "Il browser non riesce ancora a trovare il bridge di LibreGet su questo computer."
   },
   "error_host_missing_detail": {
-    "message": "Installa OmniGet se necessario, poi avvia una volta l'app desktop e fai di nuovo clic sull'estensione."
+    "message": "Installa LibreGet se necessario, poi avvia una volta l'app desktop e fai di nuovo clic sull'estensione."
   },
   "error_invalid_url_title": {
-    "message": "L'URL di questa pagina non può essere inviato a OmniGet"
+    "message": "L'URL di questa pagina non può essere inviato a LibreGet"
   },
   "error_invalid_url_body": {
-    "message": "La pagina corrente non è una pagina multimediale supportata dall'estensione OmniGet."
+    "message": "La pagina corrente non è una pagina multimediale supportata dall'estensione LibreGet."
   },
   "error_invalid_url_detail": {
     "message": "Riprova da una pagina diretta di video, reel, post, playlist o corso."
   },
   "error_launch_failed_title": {
-    "message": "OmniGet non è stato avviato dal browser"
+    "message": "LibreGet non è stato avviato dal browser"
   },
   "error_launch_failed_body": {
     "message": "L'estensione ha comunicato con l'host nativo, ma l'app desktop non si è avviata correttamente."
   },
   "error_launch_failed_detail": {
-    "message": "Verifica che OmniGet sia installato e non bloccato dal sistema, poi riprova."
+    "message": "Verifica che LibreGet sia installato e non bloccato dal sistema, poi riprova."
   },
   "popup_send_default": {
-    "message": "Invia a OmniGet"
+    "message": "Invia a LibreGet"
   },
   "popup_send_audio": {
     "message": "Invia audio"
@@ -148,46 +148,46 @@
     }
   },
   "popup_not_running": {
-    "message": "OmniGet non è in esecuzione"
+    "message": "LibreGet non è in esecuzione"
   },
   "popup_try_again": {
     "message": "Riprova"
   },
   "popup_get_app": {
-    "message": "Ottieni OmniGet"
+    "message": "Ottieni LibreGet"
   },
   "popup_lbl_course": {
-    "message": "Invia il corso a OmniGet"
+    "message": "Invia il corso a LibreGet"
   },
   "popup_lbl_playlist": {
-    "message": "Invia la playlist a OmniGet"
+    "message": "Invia la playlist a LibreGet"
   },
   "popup_lbl_video": {
-    "message": "Invia il video a OmniGet"
+    "message": "Invia il video a LibreGet"
   },
   "popup_lbl_reel": {
-    "message": "Invia il reel a OmniGet"
+    "message": "Invia il reel a LibreGet"
   },
   "popup_lbl_post": {
-    "message": "Invia il post a OmniGet"
+    "message": "Invia il post a LibreGet"
   },
   "popup_lbl_short": {
-    "message": "Invia lo short a OmniGet"
+    "message": "Invia lo short a LibreGet"
   },
   "popup_lbl_clip": {
-    "message": "Invia la clip a OmniGet"
+    "message": "Invia la clip a LibreGet"
   },
   "popup_lbl_image": {
-    "message": "Invia l'immagine a OmniGet"
+    "message": "Invia l'immagine a LibreGet"
   },
   "popup_lbl_audio": {
-    "message": "Invia l'audio a OmniGet"
+    "message": "Invia l'audio a LibreGet"
   },
   "popup_lbl_profile": {
-    "message": "Invia il profilo a OmniGet"
+    "message": "Invia il profilo a LibreGet"
   },
   "popup_lbl_page": {
-    "message": "Invia la pagina a OmniGet"
+    "message": "Invia la pagina a LibreGet"
   },
   "popup_ck_saving": {
     "message": "Salvataggio cookie…"
@@ -215,7 +215,7 @@
     }
   },
   "popup_ck_hint": {
-    "message": "Invia i cookie di questo sito al gestore cookie di OmniGet."
+    "message": "Invia i cookie di questo sito al gestore cookie di LibreGet."
   },
   "popup_ckerr_no_url": {
     "message": "Nessuna scheda attiva"
@@ -233,13 +233,13 @@
     "message": "Nessun cookie per questo sito"
   },
   "popup_ckerr_missing_token": {
-    "message": "Abbina prima OmniGet"
+    "message": "Abbina prima LibreGet"
   },
   "popup_ckerr_missing_endpoint": {
-    "message": "OmniGet non rilevato"
+    "message": "LibreGet non rilevato"
   },
   "popup_ckerr_fetch_failed": {
-    "message": "OmniGet non è in esecuzione"
+    "message": "LibreGet non è in esecuzione"
   },
   "popup_ckerr_unauthorized": {
     "message": "Token di abbinamento non valido"

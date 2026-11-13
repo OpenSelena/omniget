@@ -207,7 +207,7 @@ test("summarize counts manifest versions, disabled and sideloaded", () => {
 
 test("buildBackup groups ids and records that the store was not checked", () => {
   const backup = buildBackup([MODERN, OLD_BLOCKER, THEME], { generatedAt: GENERATED_AT });
-  assert.equal(backup.format, "omniget-extension-inventory");
+  assert.equal(backup.format, "libreget-extension-inventory");
   assert.equal(backup.generatedAt, GENERATED_AT);
   assert.equal(backup.storeListingChecked, false);
   assert.deepEqual(backup.groups.mv2, [OLD_BLOCKER.id]);
@@ -233,8 +233,8 @@ test("buildJson round-trips through JSON.parse", () => {
 });
 
 test("backupFileName uses the export day", () => {
-  assert.equal(backupFileName("json", GENERATED_AT), "omniget-extensions-2026-09-09.json");
-  assert.equal(backupFileName("md", GENERATED_AT), "omniget-extensions-2026-09-09.md");
+  assert.equal(backupFileName("json", GENERATED_AT), "libreget-extensions-2026-09-09.json");
+  assert.equal(backupFileName("md", GENERATED_AT), "libreget-extensions-2026-09-09.md");
 });
 
 test("buildMarkdown puts the MV2 section first with store link and permissions", () => {

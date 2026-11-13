@@ -9,7 +9,7 @@ import { formatBytes } from "../src/format-size.js";
 import { isListableMedia } from "../src/media-list.js";
 import { captureCookiesForTab } from "../src/cookie-capture.js";
 
-const APP_URL = "https://github.com/OpenSelena/omniget/releases/latest";
+const APP_URL = "https://github.com/OpenSelena/libreget/releases/latest";
 
 const tr = (k, ...subs) =>
   (chrome.i18n?.getMessage?.(k, subs.length ? subs.map(String) : undefined) || k);
@@ -411,7 +411,7 @@ async function handleBatchDownload(btn, groups) {
 }
 
 function showError(container, reason) {
-  // "OmniGet is not running" is the usual cause, but not the only one, and
+  // "LibreGet is not running" is the usual cause, but not the only one, and
   // showing it for a playlist whose page went away sends the user off to debug
   // the wrong thing.
   const message = reason === "manifest_gone"
@@ -438,7 +438,7 @@ function showError(container, reason) {
 
 function sendToApp(url, platform, mediaEntry) {
   return new Promise((resolve) => {
-    const msg = { type: "sendToOmniGet", url, platform };
+    const msg = { type: "sendToLibreGet", url, platform };
 
     if (pageTitle) msg.title = pageTitle;
     if (pageThumbnail) msg.thumbnail = pageThumbnail;
@@ -500,7 +500,7 @@ async function sendBatch(groups) {
   for (const group of groups) {
     if (!group.master) continue;
 
-    const msg = { type: "sendToOmniGet", url: group.master.url, platform: "generic" };
+    const msg = { type: "sendToLibreGet", url: group.master.url, platform: "generic" };
     if (currentData?.tabUrl) msg.referer = currentData.tabUrl;
     if (group.master.mediaType) msg.mediaType = group.master.mediaType;
     if (group.master.contentType) msg.contentType = group.master.contentType;

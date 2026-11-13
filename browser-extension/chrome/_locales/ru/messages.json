@@ -1,51 +1,51 @@
 {
   "action_title_supported": {
-    "message": "Отправить эту медиа-страницу в OmniGet"
+    "message": "Отправить эту медиа-страницу в LibreGet"
   },
   "action_title_unsupported": {
     "message": "На этой странице не обнаружено поддерживаемых медиа"
   },
   "error_page_document_title": {
-    "message": "Расширение OmniGet"
+    "message": "Расширение LibreGet"
   },
   "error_page_eyebrow": {
-    "message": "Расширение OmniGet"
+    "message": "Расширение LibreGet"
   },
   "error_page_install_cta": {
-    "message": "Установить OmniGet"
+    "message": "Установить LibreGet"
   },
   "error_page_open_extensions": {
     "message": "Открыть настройки расширения"
   },
   "error_host_missing_title": {
-    "message": "Запустите OmniGet один раз, чтобы завершить настройку"
+    "message": "Запустите LibreGet один раз, чтобы завершить настройку"
   },
   "error_host_missing_body": {
-    "message": "Браузер пока не может найти мост OmniGet на этом компьютере."
+    "message": "Браузер пока не может найти мост LibreGet на этом компьютере."
   },
   "error_host_missing_detail": {
-    "message": "Установите OmniGet при необходимости, затем запустите приложение один раз и нажмите на расширение снова."
+    "message": "Установите LibreGet при необходимости, затем запустите приложение один раз и нажмите на расширение снова."
   },
   "error_invalid_url_title": {
-    "message": "URL этой страницы нельзя отправить в OmniGet"
+    "message": "URL этой страницы нельзя отправить в LibreGet"
   },
   "error_invalid_url_body": {
-    "message": "Текущая страница не является поддерживаемой медиа-страницей для расширения OmniGet."
+    "message": "Текущая страница не является поддерживаемой медиа-страницей для расширения LibreGet."
   },
   "error_invalid_url_detail": {
     "message": "Попробуйте снова с прямой страницы видео, рилса, поста, плейлиста или курса."
   },
   "error_launch_failed_title": {
-    "message": "Не удалось запустить OmniGet из браузера"
+    "message": "Не удалось запустить LibreGet из браузера"
   },
   "error_launch_failed_body": {
     "message": "Расширение связалось с нативным хостом, но приложение не запустилось корректно."
   },
   "error_launch_failed_detail": {
-    "message": "Проверьте, установлен ли OmniGet и не блокируется ли он вашей системой, затем повторите попытку."
+    "message": "Проверьте, установлен ли LibreGet и не блокируется ли он вашей системой, затем повторите попытку."
   },
   "popup_send_default": {
-    "message": "Отправить в OmniGet"
+    "message": "Отправить в LibreGet"
   },
   "popup_send_audio": {
     "message": "Отправить аудио"
@@ -148,46 +148,46 @@
     }
   },
   "popup_not_running": {
-    "message": "OmniGet не запущен"
+    "message": "LibreGet не запущен"
   },
   "popup_try_again": {
     "message": "Повторить"
   },
   "popup_get_app": {
-    "message": "Скачать OmniGet"
+    "message": "Скачать LibreGet"
   },
   "popup_lbl_course": {
-    "message": "Отправить курс в OmniGet"
+    "message": "Отправить курс в LibreGet"
   },
   "popup_lbl_playlist": {
-    "message": "Отправить плейлист в OmniGet"
+    "message": "Отправить плейлист в LibreGet"
   },
   "popup_lbl_video": {
-    "message": "Отправить видео в OmniGet"
+    "message": "Отправить видео в LibreGet"
   },
   "popup_lbl_reel": {
-    "message": "Отправить рилс в OmniGet"
+    "message": "Отправить рилс в LibreGet"
   },
   "popup_lbl_post": {
-    "message": "Отправить пост в OmniGet"
+    "message": "Отправить пост в LibreGet"
   },
   "popup_lbl_short": {
-    "message": "Отправить короткое видео в OmniGet"
+    "message": "Отправить короткое видео в LibreGet"
   },
   "popup_lbl_clip": {
-    "message": "Отправить клип в OmniGet"
+    "message": "Отправить клип в LibreGet"
   },
   "popup_lbl_image": {
-    "message": "Отправить изображение в OmniGet"
+    "message": "Отправить изображение в LibreGet"
   },
   "popup_lbl_audio": {
-    "message": "Отправить аудио в OmniGet"
+    "message": "Отправить аудио в LibreGet"
   },
   "popup_lbl_profile": {
-    "message": "Отправить профиль в OmniGet"
+    "message": "Отправить профиль в LibreGet"
   },
   "popup_lbl_page": {
-    "message": "Отправить страницу в OmniGet"
+    "message": "Отправить страницу в LibreGet"
   },
   "popup_ck_saving": {
     "message": "Сохранение cookies…"
@@ -215,7 +215,7 @@
     }
   },
   "popup_ck_hint": {
-    "message": "Отправляет cookies этого сайта в менеджер cookies OmniGet."
+    "message": "Отправляет cookies этого сайта в менеджер cookies LibreGet."
   },
   "popup_ckerr_no_url": {
     "message": "Нет активной вкладки"
@@ -233,13 +233,13 @@
     "message": "Нет cookies для этого сайта"
   },
   "popup_ckerr_missing_token": {
-    "message": "Сначала свяжите OmniGet"
+    "message": "Сначала свяжите LibreGet"
   },
   "popup_ckerr_missing_endpoint": {
-    "message": "OmniGet не обнаружен"
+    "message": "LibreGet не обнаружен"
   },
   "popup_ckerr_fetch_failed": {
-    "message": "OmniGet не запущен"
+    "message": "LibreGet не запущен"
   },
   "popup_ckerr_unauthorized": {
     "message": "Неверный токен связывания"

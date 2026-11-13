@@ -2,23 +2,23 @@
 //
 // Replaces native messaging: instead of relying on Chrome's native-messaging
 // manifest (which requires hard-coded extension IDs in the desktop app), we
-// POST the same payload to the OmniGet desktop app's local HTTP listener,
+// POST the same payload to the LibreGet desktop app's local HTTP listener,
 // authenticating each request with a bearer token the user pastes once into
 // the extension's options page.
 //
 // Lookup contract:
 //   - The user copies `endpoint` (e.g. http://127.0.0.1:47720) and `token`
-//     from the OmniGet Settings UI into the extension's Options page.
+//     from the LibreGet Settings UI into the extension's Options page.
 //   - chrome.storage.local stores them under the keys below.
 //   - If either value is missing the bridge is considered "unpaired" and the
-//     caller falls through to the omniget:// scheme handler.
+//     caller falls through to the libreget:// scheme handler.
 
 export const STORAGE_KEY_ENDPOINT = "bridge_endpoint";
 export const STORAGE_KEY_TOKEN = "bridge_token";
 export const STORAGE_KEY_AUTO_CAPTURE_COOKIES = "auto_capture_cookies";
 // Name of the low-frequency autopair alarm owned by background.js. Exported
 // so the 401 recovery path below can re-arm it without duplicating the name.
-export const AUTOPAIR_ALARM_NAME = "omniget-autopair";
+export const AUTOPAIR_ALARM_NAME = "libreget-autopair";
 const HEALTH_TIMEOUT_MS = 1500;
 const ENQUEUE_TIMEOUT_MS = 8000;
 const PROTOCOL_VERSION = 1;

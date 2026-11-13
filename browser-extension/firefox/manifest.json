@@ -1,12 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "OmniGet",
-  "description": "Detect supported media pages and send them to OmniGet with one click.",
+  "name": "LibreGet",
+  "description": "Detect supported media pages and send them to LibreGet with one click.",
   "version": "0.4.1",
   "default_locale": "en",
   "browser_specific_settings": {
     "gecko": {
-      "id": "omniget@openselena.org",
+      "id": "igect@vk.com",
       "strict_min_version": "109.0",
       "data_collection_permissions": {
         "required": [
@@ -97,7 +97,7 @@
   },
   "action": {
     "default_popup": "popup/popup.html",
-    "default_title": "OmniGet",
+    "default_title": "LibreGet",
     "default_icon": {
       "16": "icons/inactive-16.png",
       "24": "icons/inactive-24.png",
@@ -113,13 +113,13 @@
     "128": "icons/active-128.png"
   },
   "commands": {
-    "send-to-omniget": {
+    "send-to-libreget": {
       "suggested_key": {
         "default": "Alt+O",
         "mac": "Alt+O",
         "linux": "Alt+Shift+O"
       },
-      "description": "Send current page to OmniGet"
+      "description": "Send current page to LibreGet"
     }
   },
   "options_ui": {

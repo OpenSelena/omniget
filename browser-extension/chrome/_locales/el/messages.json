@@ -1,51 +1,51 @@
 {
   "action_title_supported": {
-    "message": "Στείλτε αυτήν τη σελίδα πολυμέσων στο OmniGet"
+    "message": "Στείλτε αυτήν τη σελίδα πολυμέσων στο LibreGet"
   },
   "action_title_unsupported": {
     "message": "Δεν εντοπίστηκαν υποστηριζόμενα πολυμέσα σε αυτήν τη σελίδα"
   },
   "error_page_document_title": {
-    "message": "Επέκταση OmniGet"
+    "message": "Επέκταση LibreGet"
   },
   "error_page_eyebrow": {
-    "message": "Επέκταση OmniGet"
+    "message": "Επέκταση LibreGet"
   },
   "error_page_install_cta": {
-    "message": "Εγκατάσταση του OmniGet"
+    "message": "Εγκατάσταση του LibreGet"
   },
   "error_page_open_extensions": {
     "message": "Άνοιγμα ρυθμίσεων επέκτασης"
   },
   "error_host_missing_title": {
-    "message": "Ανοίξτε το OmniGet μία φορά για να ολοκληρώσετε τη ρύθμιση"
+    "message": "Ανοίξτε το LibreGet μία φορά για να ολοκληρώσετε τη ρύθμιση"
   },
   "error_host_missing_body": {
-    "message": "Το πρόγραμμα περιήγησης δεν μπόρεσε ακόμη να βρει τη γέφυρα OmniGet σε αυτόν τον υπολογιστή."
+    "message": "Το πρόγραμμα περιήγησης δεν μπόρεσε ακόμη να βρει τη γέφυρα LibreGet σε αυτόν τον υπολογιστή."
   },
   "error_host_missing_detail": {
-    "message": "Εγκαταστήστε το OmniGet αν χρειάζεται, έπειτα ανοίξτε μία φορά την εφαρμογή υπολογιστή και πατήστε ξανά την επέκταση."
+    "message": "Εγκαταστήστε το LibreGet αν χρειάζεται, έπειτα ανοίξτε μία φορά την εφαρμογή υπολογιστή και πατήστε ξανά την επέκταση."
   },
   "error_invalid_url_title": {
-    "message": "Η διεύθυνση URL αυτής της σελίδας δεν μπορεί να σταλεί στο OmniGet"
+    "message": "Η διεύθυνση URL αυτής της σελίδας δεν μπορεί να σταλεί στο LibreGet"
   },
   "error_invalid_url_body": {
-    "message": "Η τρέχουσα σελίδα δεν είναι υποστηριζόμενη σελίδα πολυμέσων για την επέκταση OmniGet."
+    "message": "Η τρέχουσα σελίδα δεν είναι υποστηριζόμενη σελίδα πολυμέσων για την επέκταση LibreGet."
   },
   "error_invalid_url_detail": {
     "message": "Δοκιμάστε ξανά από μια άμεση σελίδα βίντεο, reel, ανάρτησης, λίστας αναπαραγωγής ή μαθήματος."
   },
   "error_launch_failed_title": {
-    "message": "Το OmniGet δεν μπόρεσε να εκκινηθεί από το πρόγραμμα περιήγησης"
+    "message": "Το LibreGet δεν μπόρεσε να εκκινηθεί από το πρόγραμμα περιήγησης"
   },
   "error_launch_failed_body": {
     "message": "Η επέκταση επικοινώνησε με το native host, αλλά η εφαρμογή υπολογιστή δεν ξεκίνησε σωστά."
   },
   "error_launch_failed_detail": {
-    "message": "Βεβαιωθείτε ότι το OmniGet είναι εγκατεστημένο και δεν έχει αποκλειστεί από το σύστημά σας και δοκιμάστε ξανά."
+    "message": "Βεβαιωθείτε ότι το LibreGet είναι εγκατεστημένο και δεν έχει αποκλειστεί από το σύστημά σας και δοκιμάστε ξανά."
   },
   "popup_send_default": {
-    "message": "Αποστολή στο OmniGet"
+    "message": "Αποστολή στο LibreGet"
   },
   "popup_send_audio": {
     "message": "Αποστολή ήχου"
@@ -148,46 +148,46 @@
     }
   },
   "popup_not_running": {
-    "message": "Το OmniGet δεν εκτελείται"
+    "message": "Το LibreGet δεν εκτελείται"
   },
   "popup_try_again": {
     "message": "Δοκιμή ξανά"
   },
   "popup_get_app": {
-    "message": "Λήψη OmniGet"
+    "message": "Λήψη LibreGet"
   },
   "popup_lbl_course": {
-    "message": "Αποστολή μαθήματος στο OmniGet"
+    "message": "Αποστολή μαθήματος στο LibreGet"
   },
   "popup_lbl_playlist": {
-    "message": "Αποστολή λίστας στο OmniGet"
+    "message": "Αποστολή λίστας στο LibreGet"
   },
   "popup_lbl_video": {
-    "message": "Αποστολή βίντεο στο OmniGet"
+    "message": "Αποστολή βίντεο στο LibreGet"
   },
   "popup_lbl_reel": {
-    "message": "Αποστολή reel στο OmniGet"
+    "message": "Αποστολή reel στο LibreGet"
   },
   "popup_lbl_post": {
-    "message": "Αποστολή ανάρτησης στο OmniGet"
+    "message": "Αποστολή ανάρτησης στο LibreGet"
   },
   "popup_lbl_short": {
-    "message": "Αποστολή short στο OmniGet"
+    "message": "Αποστολή short στο LibreGet"
   },
   "popup_lbl_clip": {
-    "message": "Αποστολή κλιπ στο OmniGet"
+    "message": "Αποστολή κλιπ στο LibreGet"
   },
   "popup_lbl_image": {
-    "message": "Αποστολή εικόνας στο OmniGet"
+    "message": "Αποστολή εικόνας στο LibreGet"
   },
   "popup_lbl_audio": {
-    "message": "Αποστολή ήχου στο OmniGet"
+    "message": "Αποστολή ήχου στο LibreGet"
   },
   "popup_lbl_profile": {
-    "message": "Αποστολή προφίλ στο OmniGet"
+    "message": "Αποστολή προφίλ στο LibreGet"
   },
   "popup_lbl_page": {
-    "message": "Αποστολή σελίδας στο OmniGet"
+    "message": "Αποστολή σελίδας στο LibreGet"
   },
   "popup_ck_saving": {
     "message": "Αποθήκευση cookies…"
@@ -215,7 +215,7 @@
     }
   },
   "popup_ck_hint": {
-    "message": "Στέλνει τα cookies αυτού του ιστότοπου στον διαχειριστή cookies του OmniGet."
+    "message": "Στέλνει τα cookies αυτού του ιστότοπου στον διαχειριστή cookies του LibreGet."
   },
   "popup_ckerr_no_url": {
     "message": "Καμία ενεργή καρτέλα"
@@ -233,13 +233,13 @@
     "message": "Χωρίς cookies για αυτόν τον ιστότοπο"
   },
   "popup_ckerr_missing_token": {
-    "message": "Σύνδεσε πρώτα το OmniGet"
+    "message": "Σύνδεσε πρώτα το LibreGet"
   },
   "popup_ckerr_missing_endpoint": {
-    "message": "Το OmniGet δεν εντοπίστηκε"
+    "message": "Το LibreGet δεν εντοπίστηκε"
   },
   "popup_ckerr_fetch_failed": {
-    "message": "Το OmniGet δεν εκτελείται"
+    "message": "Το LibreGet δεν εκτελείται"
   },
   "popup_ckerr_unauthorized": {
     "message": "Μη έγκυρο διακριτικό σύνδεσης"

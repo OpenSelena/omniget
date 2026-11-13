@@ -13,7 +13,7 @@ import {
 } from "./deep-search-toggle.js";
 import { loadH264State, isH264Enabled, isBlock60, setH264 } from "./h264-toggle.js";
 import { registerContextMenu, getContextMenuId } from "./context-menu.js";
-import { openOmnigetScheme } from "./send-via-scheme.js";
+import { openLibregetScheme } from "./send-via-scheme.js";
 import { isSyntheticManifestUrl } from "./synthetic-manifest.js";
 import {
   sendViaBridge,
@@ -86,7 +86,7 @@ if (chrome.storage?.onChanged) {
   });
 }
 
-const INSTALL_URL = "https://github.com/OpenSelena/omniget/releases/latest";
+const INSTALL_URL = "https://github.com/OpenSelena/libreget/releases/latest";
 const PROTOCOL_VERSION = 1;
 
 function getIconPath(iconSet) {
@@ -135,7 +135,7 @@ chrome.runtime.onInstalled.addListener(async (details) => {
   // already paired this browser*. Reloading an unpacked extension fires
   // `update`, not `install`, so gating only on `install` would silently
   // skip the onboarding flow for dev builds and users coming from a
-  // pre-bridge OmniGet version.
+  // pre-bridge LibreGet version.
   if (typeof chrome.runtime.openOptionsPage !== "function") return;
   try {
     const stored = await chrome.storage.local.get("bridge_token");
@@ -178,7 +178,7 @@ if (menusApi?.onClicked) {
     if (!url) return;
 
     const result = await handleSendToApp({
-      type: "sendToOmniGet",
+      type: "sendToLibreGet",
       url,
       platform: "generic",
       referer: tab?.url || "",
@@ -199,14 +199,14 @@ chrome.runtime.onStartup.addListener(() => {
 
 if (chrome.commands && chrome.commands.onCommand) {
   chrome.commands.onCommand.addListener(async (command) => {
-    if (command !== "send-to-omniget") return;
+    if (command !== "send-to-libreget") return;
     try {
       const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
       if (!tab?.url) return;
       const detected = detectSupportedMediaUrl(tab.url);
       if (detected?.supported) {
         const result = await handleSendToApp({
-          type: "sendToOmniGet",
+          type: "sendToLibreGet",
           url: tab.url,
           platform: detected.platform,
           referer: tab.url,
@@ -220,7 +220,7 @@ if (chrome.commands && chrome.commands.onCommand) {
         try { await chrome.action.openPopup(); } catch {}
       }
     } catch (error) {
-      console.error("[OmniGet] command handler failed:", error);
+      console.error("[LibreGet] command handler failed:", error);
     }
   });
 }
@@ -237,7 +237,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     return;
   }
   refreshTabAction(tabId, tab).catch((error) => {
-    console.error("[OmniGet] Failed to refresh tab action:", error);
+    console.error("[LibreGet] Failed to refresh tab action:", error);
   });
 });
 
@@ -293,7 +293,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     return true;
   }
 
-  if (msg.type === "sendToOmniGet") {
+  if (msg.type === "sendToLibreGet") {
     handleSendToApp(msg).then(sendResponse);
     return true;
   }
@@ -491,17 +491,17 @@ async function handleSendToApp(msg) {
     return { ok: true, viaBridge: true, cookieSummary };
   }
 
-  // Fallback: omniget:// scheme handler. The desktop app is launched (or
+  // Fallback: libreget:// scheme handler. The desktop app is launched (or
   // brought to focus) and the URL is queued, but cookies aren't forwarded
   // — the user can pair the bridge from the extension's options page to
   // get the full experience.
-  const schemeResult = await openOmnigetScheme(url);
+  const schemeResult = await openLibregetScheme(url);
   if (schemeResult?.ok) {
     return { ok: true, viaScheme: true, cookieSummary, bridgeReason: bridgeResult?.reason };
   }
   return {
     ok: false,
-    error: bridgeResult?.message || schemeResult?.message || "OmniGet is not reachable",
+    error: bridgeResult?.message || schemeResult?.message || "LibreGet is not reachable",
     bridgeReason: bridgeResult?.reason,
     schemeReason: schemeResult?.reason,
   };
@@ -646,12 +646,12 @@ function debounceCookieCapture(platform) {
 
 async function capturePlatformCookies(platform, force = false) {
   if (!(await loadAutoCaptureCookies())) {
-    console.debug("[OmniGet] cookie auto-capture disabled", platform);
+    console.debug("[LibreGet] cookie auto-capture disabled", platform);
     return { ok: false, reason: "disabled" };
   }
   const lastSent = cookieLastSentAt.get(platform) || 0;
   if (!force && Date.now() - lastSent < COOKIE_AUTO_CAPTURE_MIN_INTERVAL_MS) {
-    console.debug("[OmniGet] cookie capture throttled", platform);
+    console.debug("[LibreGet] cookie capture throttled", platform);
     return { ok: false, reason: "throttled" };
   }
   cookieLastSentAt.set(platform, Date.now());
@@ -660,20 +660,20 @@ async function capturePlatformCookies(platform, force = false) {
   try {
     cookies = await extractCookiesForPlatform(platform);
   } catch (e) {
-    console.warn("[OmniGet] cookie extract failed", platform, e);
+    console.warn("[LibreGet] cookie extract failed", platform, e);
     return { ok: false, reason: "extract_failed", error: e.message };
   }
   if (!cookies || cookies.length === 0) {
-    console.debug("[OmniGet] no cookies for platform", platform);
+    console.debug("[LibreGet] no cookies for platform", platform);
     return { ok: false, reason: "no_cookies" };
   }
 
   const response = await sendCookiesViaBridge(cookies);
   if (response.ok) {
-    console.info("[OmniGet] cookies exported", platform, cookies.length, response);
+    console.info("[LibreGet] cookies exported", platform, cookies.length, response);
     return { ok: true, count: cookies.length, response };
   }
-  console.warn("[OmniGet] cookie export failed", platform, response.reason ?? response.message);
+  console.warn("[LibreGet] cookie export failed", platform, response.reason ?? response.message);
   return { ok: false, reason: response.reason ?? "bridge_failed", response };
 }
 
@@ -696,10 +696,10 @@ async function scanOpenTabsForCookies() {
       void capturePlatformCookies(platform, true);
     }
     if (seen.size === 0) {
-      console.info("[OmniGet] no tracked tabs open at extension load");
+      console.info("[LibreGet] no tracked tabs open at extension load");
     }
   } catch (e) {
-    console.warn("[OmniGet] scan tabs failed", e);
+    console.warn("[LibreGet] scan tabs failed", e);
   }
 }
 
@@ -729,7 +729,7 @@ async function scanAllPlatformsForCookies() {
     try {
       void capturePlatformCookies(platform, true);
     } catch (e) {
-      console.warn(`[OmniGet] proactive capture ${platform} failed`, e);
+      console.warn(`[LibreGet] proactive capture ${platform} failed`, e);
     }
   }
 }

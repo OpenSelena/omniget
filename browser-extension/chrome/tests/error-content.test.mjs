@@ -5,9 +5,9 @@ import { resolveErrorPageContent } from "../pages/error-content.js";
 
 test("uses localized page strings when locale messages are available", () => {
   const localized = {
-    error_page_document_title: "Extension OmniGet",
-    error_page_eyebrow: "Extension OmniGet",
-    error_page_install_cta: "Installer OmniGet",
+    error_page_document_title: "Extension LibreGet",
+    error_page_eyebrow: "Extension LibreGet",
+    error_page_install_cta: "Installer LibreGet",
     error_page_open_extensions: "Ouvrir les extensions Chrome",
     error_host_missing_title: "Titre localise",
     error_host_missing_body: "Corps localise",
@@ -19,9 +19,9 @@ test("uses localized page strings when locale messages are available", () => {
     getMessage: (name) => localized[name] ?? "",
   });
 
-  assert.equal(content.documentTitle, "Extension OmniGet");
-  assert.equal(content.eyebrow, "Extension OmniGet");
-  assert.equal(content.installLabel, "Installer OmniGet");
+  assert.equal(content.documentTitle, "Extension LibreGet");
+  assert.equal(content.eyebrow, "Extension LibreGet");
+  assert.equal(content.installLabel, "Installer LibreGet");
   assert.equal(content.openExtensionsLabel, "Ouvrir les extensions Chrome");
   assert.equal(content.title, "Titre localise");
   assert.equal(content.body, "Corps localise");
@@ -34,8 +34,8 @@ test("falls back to English when locale messages are missing", () => {
     getMessage: () => "",
   });
 
-  assert.equal(content.documentTitle, "OmniGet Extension");
-  assert.equal(content.title, "This page URL cannot be sent to OmniGet");
+  assert.equal(content.documentTitle, "LibreGet Extension");
+  assert.equal(content.title, "This page URL cannot be sent to LibreGet");
   assert.equal(
     content.detail,
     "Try again from a direct video, reel, post, playlist, or course page."
@@ -59,7 +59,7 @@ test("falls back to LAUNCH_FAILED content for unknown error codes", () => {
   });
 
   assert.equal(content.code, "LAUNCH_FAILED");
-  assert.equal(content.title, "OmniGet could not be launched from your browser");
+  assert.equal(content.title, "LibreGet could not be launched from your browser");
 });
 
 test("sanitizeInstallUrl rejects malicious and foreign URLs and allows official URLs", async () => {
@@ -69,15 +69,15 @@ test("sanitizeInstallUrl rejects malicious and foreign URLs and allows official 
   assert.equal(sanitizeInstallUrl(""), DEFAULT_INSTALL_URL);
   assert.equal(sanitizeInstallUrl("javascript:alert(1)"), DEFAULT_INSTALL_URL);
   assert.equal(sanitizeInstallUrl("data:text/html,evil"), DEFAULT_INSTALL_URL);
-  assert.equal(sanitizeInstallUrl("http://github.com/OpenSelena/omniget"), DEFAULT_INSTALL_URL);
+  assert.equal(sanitizeInstallUrl("http://github.com/OpenSelena/libreget"), DEFAULT_INSTALL_URL);
   assert.equal(sanitizeInstallUrl("https://evil.com/fake-update"), DEFAULT_INSTALL_URL);
   assert.equal(
-    sanitizeInstallUrl("https://github.com/OpenSelena/omniget/releases/tag/v0.12.0"),
-    "https://github.com/OpenSelena/omniget/releases/tag/v0.12.0"
+    sanitizeInstallUrl("https://github.com/OpenSelena/libreget/releases/tag/v0.12.0"),
+    "https://github.com/OpenSelena/libreget/releases/tag/v0.12.0"
   );
   assert.equal(
-    sanitizeInstallUrl("https://omniget.org/download"),
-    "https://omniget.org/download"
+    sanitizeInstallUrl("https://libreget.org/download"),
+    "https://libreget.org/download"
   );
 });
 

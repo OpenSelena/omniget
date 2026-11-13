@@ -11,7 +11,7 @@ const {
   syntheticManifestUrl,
   parseContentLength,
   toHttpUrl,
-} = globalThis.__omnigetDeepSearchInternals;
+} = globalThis.__libregetDeepSearchInternals;
 
 const BASE = "https://cdn.example.com/videos/abc/master.m3u8";
 
@@ -207,7 +207,7 @@ test("syntheticManifestUrl builds an https url on a reserved host", () => {
   // Never the page's own host: the app picks its downloader by host, so a
   // synthetic URL on a known platform would be routed to that platform's
   // extractor instead of using the playlist text we captured.
-  assert.ok(url.startsWith("https://deep-search.omniget.invalid/"));
+  assert.ok(url.startsWith("https://deep-search.libreget.invalid/"));
   assert.equal(new URL(url).hostname.endsWith(".invalid"), true);
   // The page host stays in the path, so a log line still says where it came from.
   assert.ok(url.includes("player.example.com"));
@@ -216,7 +216,7 @@ test("syntheticManifestUrl builds an https url on a reserved host", () => {
 
 test("syntheticManifestUrl keeps the port of the page host in the path", () => {
   const url = syntheticManifestUrl("http://localhost:8080/watch");
-  assert.ok(url.startsWith("https://deep-search.omniget.invalid/"));
+  assert.ok(url.startsWith("https://deep-search.libreget.invalid/"));
   assert.ok(url.includes("localhost%3A8080"));
 });
 
@@ -251,7 +251,7 @@ test("toHttpUrl keeps real http(s) urls and drops everything else", () => {
 const toggle = await import("../src/deep-search-toggle.js");
 
 test("deep search is opt-in and stores its own flag", () => {
-  assert.equal(toggle.DEEP_SEARCH_STORAGE_KEY, "omniget_deep_search_enabled");
+  assert.equal(toggle.DEEP_SEARCH_STORAGE_KEY, "libreget_deep_search_enabled");
   assert.equal(toggle.isDeepSearchEnabled(), false);
 });
 

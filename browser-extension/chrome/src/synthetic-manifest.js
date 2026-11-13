@@ -6,7 +6,7 @@
 //
 // deep-search.js runs in the page as a plain script and cannot import this
 // module, so it repeats the host as a literal. A test keeps the two in step.
-export const SYNTHETIC_MANIFEST_HOST = "deep-search.omniget.invalid";
+export const SYNTHETIC_MANIFEST_HOST = "deep-search.libreget.invalid";
 
 export function isSyntheticManifestUrl(url) {
   try {

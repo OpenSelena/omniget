@@ -40,7 +40,7 @@ function parseArgs() {
 
   if (!output) {
     const manifest = JSON.parse(readFileSync(join(EXTENSION_DIR, "manifest.json"), "utf8"));
-    output = resolve(`omniget-chrome-extension-v${version || manifest.version}.zip`);
+    output = resolve(`libreget-chrome-extension-v${version || manifest.version}.zip`);
   }
 
   return { output, version };
@@ -182,7 +182,7 @@ function crc32(buf) {
 
 const { output, version } = parseArgs();
 
-const tempDir = mkdtempSync(join(tmpdir(), "omniget-chrome-ext-"));
+const tempDir = mkdtempSync(join(tmpdir(), "libreget-chrome-ext-"));
 const stageDir = join(tempDir, "chrome");
 
 try {

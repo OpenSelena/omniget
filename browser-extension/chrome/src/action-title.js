@@ -1,5 +1,5 @@
 const ACTION_TITLE_MESSAGES = Object.freeze({
-  action_title_supported: "Send this media page to OmniGet",
+  action_title_supported: "Send this media page to LibreGet",
   action_title_unsupported: "No supported media detected on this page",
 });
 

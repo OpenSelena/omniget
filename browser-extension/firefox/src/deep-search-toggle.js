@@ -15,11 +15,11 @@ import {
 } from "./blocked-hosts.js";
 import { hasWildcardHostPermission, requestWildcardHostPermission } from "./sniffer-toggle.js";
 
-export const DEEP_SEARCH_STORAGE_KEY = "omniget_deep_search_enabled";
+export const DEEP_SEARCH_STORAGE_KEY = "libreget_deep_search_enabled";
 
-const MAIN_SCRIPT_ID = "omniget-deep-search-main";
-const BRIDGE_SCRIPT_ID = "omniget-deep-search-bridge";
-const PROBE_SCRIPT_ID = "omniget-deep-search-probe";
+const MAIN_SCRIPT_ID = "libreget-deep-search-main";
+const BRIDGE_SCRIPT_ID = "libreget-deep-search-bridge";
+const PROBE_SCRIPT_ID = "libreget-deep-search-probe";
 const MAIN_SCRIPT_FILE = "src/deep-search.js";
 const BRIDGE_SCRIPT_FILE = "src/deep-search-bridge.js";
 const MATCHES = ["*://*/*"];
@@ -38,7 +38,7 @@ const MATCHES = ["*://*/*"];
 // bridge's `http://127.0.0.1/*` is a fixed permission in both manifests, and no
 // real page lives under this path.
 export const DEEP_SEARCH_PROBE_MATCHES = Object.freeze([
-  "http://127.0.0.1/__omniget_deep_search_probe__/*",
+  "http://127.0.0.1/__libreget_deep_search_probe__/*",
 ]);
 
 const MAX_EXCLUDE_MATCHES = 100;

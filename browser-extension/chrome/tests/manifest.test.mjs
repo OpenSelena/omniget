@@ -82,12 +82,12 @@ test("declares wildcard host access in optional_host_permissions for media sniff
   assert.ok(manifest.optional_host_permissions.includes("*://*/*"));
 });
 
-test("declares the send-to-omniget command with Alt+O default shortcut", async () => {
+test("declares the send-to-libreget command with Alt+O default shortcut", async () => {
   const manifest = await readManifest();
 
   assert.ok(manifest.commands, "manifest.commands block missing");
-  const command = manifest.commands["send-to-omniget"];
-  assert.ok(command, "send-to-omniget command missing");
+  const command = manifest.commands["send-to-libreget"];
+  assert.ok(command, "send-to-libreget command missing");
   assert.equal(command.suggested_key?.default, "Alt+O");
   assert.ok(typeof command.description === "string" && command.description.length > 0);
 });

@@ -2,9 +2,9 @@
 // YouTube. Persistido em chrome.storage.local; o registro sobrevive a
 // reinícios do navegador (persistAcrossSessions), então só é preciso
 // reconciliar quando o estado muda ou o service worker acorda.
-const STORAGE_KEY = "omniget_h264_enabled";
-const STORAGE_60 = "omniget_h264_block60";
-const SCRIPT_ID = "omniget-h264ify";
+const STORAGE_KEY = "libreget_h264_enabled";
+const STORAGE_60 = "libreget_h264_block60";
+const SCRIPT_ID = "libreget-h264ify";
 const MATCHES = ["*://*.youtube.com/*", "*://*.youtube-nocookie.com/*"];
 
 let enabled = false;
@@ -49,7 +49,7 @@ async function reconcile() {
       await chrome.scripting.unregisterContentScripts({ ids: [SCRIPT_ID] });
     }
   } catch (e) {
-    console.warn("[OmniGet] h264ify:", e);
+    console.warn("[LibreGet] h264ify:", e);
   }
 }
 

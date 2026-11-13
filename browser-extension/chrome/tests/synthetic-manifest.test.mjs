@@ -14,7 +14,7 @@ test("isSyntheticManifestUrl recognises only the reserved host", () => {
   );
   assert.equal(isSyntheticManifestUrl("https://cdn.example.com/master.m3u8"), false);
   // A real host that merely mentions the name must not be mistaken for it.
-  assert.equal(isSyntheticManifestUrl("https://deep-search.omniget.invalid.evil.com/x"), false);
+  assert.equal(isSyntheticManifestUrl("https://deep-search.libreget.invalid.evil.com/x"), false);
   assert.equal(isSyntheticManifestUrl("blob:https://example.com/uuid"), false);
   assert.equal(isSyntheticManifestUrl(""), false);
   assert.equal(isSyntheticManifestUrl(null), false);

@@ -10,10 +10,10 @@
 // be hundreds of kilobytes and the background has no use for it until the user
 // actually asks to download. It is fetched back on demand with
 // `getManifestText`.
-(function omnigetDeepSearchBridge() {
+(function libregetDeepSearchBridge() {
   "use strict";
 
-  const MESSAGE_SOURCE = "omniget-deep-search";
+  const MESSAGE_SOURCE = "libreget-deep-search";
   const MESSAGE_KIND = "manifest";
   const MAX_MANIFESTS = 64;
 

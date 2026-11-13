@@ -12,18 +12,18 @@
 // Every hook is wrapped in try/catch. A throw of ours inside a page hook would
 // break the site, so in the worst case each hook must behave exactly as if it
 // were not installed.
-(function omnigetDeepSearch() {
+(function libregetDeepSearch() {
   "use strict";
 
-  const MESSAGE_SOURCE = "omniget-deep-search";
-  const SYNTHETIC_ORIGIN = "https://deep-search.omniget.invalid";
+  const MESSAGE_SOURCE = "libreget-deep-search";
+  const SYNTHETIC_ORIGIN = "https://deep-search.libreget.invalid";
   const MESSAGE_KIND = "manifest";
 
   // Globals the worker prelude sets so a hook running inside a worker still
   // knows which page it belongs to and where its script was loaded from.
-  const PAGE_URL_GLOBAL = "__omnigetDeepSearchPageUrl";
-  const WORKER_BASE_GLOBAL = "__omnigetDeepSearchWorkerBase";
-  const INSTALLED_GLOBAL = "__omnigetDeepSearchInstalled";
+  const PAGE_URL_GLOBAL = "__libregetDeepSearchPageUrl";
+  const WORKER_BASE_GLOBAL = "__libregetDeepSearchWorkerBase";
+  const INSTALLED_GLOBAL = "__libregetDeepSearchInstalled";
 
   // Reading a body costs memory and CPU on every single response, which is why
   // catching "everything" makes an extension that freezes heavy sites. Bodies
@@ -192,7 +192,7 @@
   // Exposed for the node test suite only. In a real page `window` exists, so
   // nothing is ever attached to the page's global object.
   if (typeof window === "undefined" && !isWorkerScope) {
-    globalThis.__omnigetDeepSearchInternals = {
+    globalThis.__libregetDeepSearchInternals = {
       absolutizeManifest,
       classifyManifest,
       shouldReadBody,
@@ -652,7 +652,7 @@
       "self.importScripts=function(){var a=[];for(var k=0;k<arguments.length;k++){" +
       "try{a.push(new URL(arguments[k],self." + WORKER_BASE_GLOBAL + ").href);}catch(e){a.push(arguments[k]);}}" +
       "return i.apply(self,a);};})();" +
-      "(" + omnigetDeepSearch.toString() + ")();\n";
+      "(" + libregetDeepSearch.toString() + ")();\n";
     const blob = new Blob([prelude, source], { type: "text/javascript" });
     return URL.createObjectURL(blob);
   }

@@ -1,4 +1,4 @@
-const STORAGE_KEY = "omniget_open_app_on_download";
+const STORAGE_KEY = "libreget_open_app_on_download";
 
 let openApp = true;
 

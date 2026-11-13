@@ -1,46 +1,46 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-import { buildOmnigetSchemeUrl, openOmnigetScheme } from "../src/send-via-scheme.js";
+import { buildLibregetSchemeUrl, openLibregetScheme } from "../src/send-via-scheme.js";
 
-test("buildOmnigetSchemeUrl strips http(s) prefix and prepends omniget://", () => {
+test("buildLibregetSchemeUrl strips http(s) prefix and prepends libreget://", () => {
   assert.equal(
-    buildOmnigetSchemeUrl("https://www.youtube.com/watch?v=abc"),
-    "omniget://www.youtube.com/watch?v=abc"
+    buildLibregetSchemeUrl("https://www.youtube.com/watch?v=abc"),
+    "libreget://www.youtube.com/watch?v=abc"
   );
   assert.equal(
-    buildOmnigetSchemeUrl("http://example.com/v"),
-    "omniget://example.com/v"
-  );
-});
-
-test("buildOmnigetSchemeUrl preserves an already-omniget URL", () => {
-  assert.equal(
-    buildOmnigetSchemeUrl("omniget://example.com/v"),
-    "omniget://example.com/v"
+    buildLibregetSchemeUrl("http://example.com/v"),
+    "libreget://example.com/v"
   );
 });
 
-test("buildOmnigetSchemeUrl wraps magnet/p2p URLs without an extra slash", () => {
+test("buildLibregetSchemeUrl preserves an already-libreget URL", () => {
   assert.equal(
-    buildOmnigetSchemeUrl("magnet:?xt=urn:btih:abc"),
-    "omniget:magnet:?xt=urn:btih:abc"
-  );
-  assert.equal(
-    buildOmnigetSchemeUrl("p2p:foo"),
-    "omniget:p2p:foo"
+    buildLibregetSchemeUrl("libreget://example.com/v"),
+    "libreget://example.com/v"
   );
 });
 
-test("buildOmnigetSchemeUrl returns null for empty / non-string input", () => {
-  assert.equal(buildOmnigetSchemeUrl(""), null);
-  assert.equal(buildOmnigetSchemeUrl("   "), null);
-  assert.equal(buildOmnigetSchemeUrl(null), null);
-  assert.equal(buildOmnigetSchemeUrl(undefined), null);
-  assert.equal(buildOmnigetSchemeUrl(42), null);
+test("buildLibregetSchemeUrl wraps magnet/p2p URLs without an extra slash", () => {
+  assert.equal(
+    buildLibregetSchemeUrl("magnet:?xt=urn:btih:abc"),
+    "libreget:magnet:?xt=urn:btih:abc"
+  );
+  assert.equal(
+    buildLibregetSchemeUrl("p2p:foo"),
+    "libreget:p2p:foo"
+  );
 });
 
-test("openOmnigetScheme creates a hidden tab and schedules its removal", async () => {
+test("buildLibregetSchemeUrl returns null for empty / non-string input", () => {
+  assert.equal(buildLibregetSchemeUrl(""), null);
+  assert.equal(buildLibregetSchemeUrl("   "), null);
+  assert.equal(buildLibregetSchemeUrl(null), null);
+  assert.equal(buildLibregetSchemeUrl(undefined), null);
+  assert.equal(buildLibregetSchemeUrl(42), null);
+});
+
+test("openLibregetScheme creates a hidden tab and schedules its removal", async () => {
   const events = [];
   const scheduled = [];
 
@@ -60,15 +60,15 @@ test("openOmnigetScheme creates a hidden tab and schedules its removal", async (
     return null;
   };
 
-  const result = await openOmnigetScheme("https://example.com/v", {
+  const result = await openLibregetScheme("https://example.com/v", {
     tabs,
     schedule,
     tabLifetimeMs: 500,
   });
 
-  assert.deepEqual(result, { ok: true, schemeUrl: "omniget://example.com/v" });
+  assert.deepEqual(result, { ok: true, schemeUrl: "libreget://example.com/v" });
   assert.deepEqual(events, [
-    ["create", { url: "omniget://example.com/v", active: false }],
+    ["create", { url: "libreget://example.com/v", active: false }],
   ]);
   assert.equal(scheduled.length, 1);
   assert.equal(scheduled[0].ms, 500);
@@ -78,7 +78,7 @@ test("openOmnigetScheme creates a hidden tab and schedules its removal", async (
   assert.deepEqual(events[1], ["remove", 1234]);
 });
 
-test("openOmnigetScheme does not navigate the user's active tab", async () => {
+test("openLibregetScheme does not navigate the user's active tab", async () => {
   let updateCalled = false;
   const tabs = {
     create: async () => ({ id: 99 }),
@@ -88,7 +88,7 @@ test("openOmnigetScheme does not navigate the user's active tab", async () => {
     remove: () => Promise.resolve(),
   };
 
-  const result = await openOmnigetScheme("https://example.com/v", {
+  const result = await openLibregetScheme("https://example.com/v", {
     tabs,
     schedule: () => {},
   });
@@ -97,23 +97,23 @@ test("openOmnigetScheme does not navigate the user's active tab", async () => {
   assert.equal(updateCalled, false);
 });
 
-test("openOmnigetScheme returns invalid-url for empty input", async () => {
-  const result = await openOmnigetScheme("", {
+test("openLibregetScheme returns invalid-url for empty input", async () => {
+  const result = await openLibregetScheme("", {
     tabs: { create: async () => ({ id: 1 }), remove: () => Promise.resolve() },
     schedule: () => {},
   });
   assert.deepEqual(result, { ok: false, reason: "invalid-url" });
 });
 
-test("openOmnigetScheme returns tabs-api-unavailable when tabs.create is missing", async () => {
-  const result = await openOmnigetScheme("https://example.com/v", {
+test("openLibregetScheme returns tabs-api-unavailable when tabs.create is missing", async () => {
+  const result = await openLibregetScheme("https://example.com/v", {
     tabs: {},
     schedule: () => {},
   });
   assert.deepEqual(result, { ok: false, reason: "tabs-api-unavailable" });
 });
 
-test("openOmnigetScheme reports tabs-create-failed when tabs.create throws", async () => {
+test("openLibregetScheme reports tabs-create-failed when tabs.create throws", async () => {
   const tabs = {
     create: async () => {
       throw new Error("permission denied");
@@ -121,7 +121,7 @@ test("openOmnigetScheme reports tabs-create-failed when tabs.create throws", asy
     remove: () => Promise.resolve(),
   };
 
-  const result = await openOmnigetScheme("https://example.com/v", {
+  const result = await openLibregetScheme("https://example.com/v", {
     tabs,
     schedule: () => {},
   });
@@ -133,7 +133,7 @@ test("openOmnigetScheme reports tabs-create-failed when tabs.create throws", asy
   });
 });
 
-test("openOmnigetScheme tolerates a sync remove() that throws", async () => {
+test("openLibregetScheme tolerates a sync remove() that throws", async () => {
   const tabs = {
     create: async () => ({ id: 7 }),
     remove: () => {
@@ -146,7 +146,7 @@ test("openOmnigetScheme tolerates a sync remove() that throws", async () => {
     calls.push(fn);
   };
 
-  const result = await openOmnigetScheme("https://example.com/v", {
+  const result = await openLibregetScheme("https://example.com/v", {
     tabs,
     schedule,
   });

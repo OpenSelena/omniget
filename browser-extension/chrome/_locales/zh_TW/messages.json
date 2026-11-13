@@ -1,51 +1,51 @@
 {
   "action_title_supported": {
-    "message": "將此媒體頁面傳送到 OmniGet"
+    "message": "將此媒體頁面傳送到 LibreGet"
   },
   "action_title_unsupported": {
     "message": "此頁面未偵測到支援的媒體"
   },
   "error_page_document_title": {
-    "message": "OmniGet 擴充功能"
+    "message": "LibreGet 擴充功能"
   },
   "error_page_eyebrow": {
-    "message": "OmniGet 擴充功能"
+    "message": "LibreGet 擴充功能"
   },
   "error_page_install_cta": {
-    "message": "安裝 OmniGet"
+    "message": "安裝 LibreGet"
   },
   "error_page_open_extensions": {
     "message": "開啟擴充功能設定"
   },
   "error_host_missing_title": {
-    "message": "請先開啟一次 OmniGet 以完成設定"
+    "message": "請先開啟一次 LibreGet 以完成設定"
   },
   "error_host_missing_body": {
-    "message": "瀏覽器目前還找不到這台電腦上的 OmniGet 橋接程式。"
+    "message": "瀏覽器目前還找不到這台電腦上的 LibreGet 橋接程式。"
   },
   "error_host_missing_detail": {
-    "message": "如有需要請安裝 OmniGet，然後先啟動一次桌面應用程式，再次點擊擴充功能。"
+    "message": "如有需要請安裝 LibreGet，然後先啟動一次桌面應用程式，再次點擊擴充功能。"
   },
   "error_invalid_url_title": {
-    "message": "此頁面的 URL 無法傳送到 OmniGet"
+    "message": "此頁面的 URL 無法傳送到 LibreGet"
   },
   "error_invalid_url_body": {
-    "message": "目前頁面不是 OmniGet 擴充功能支援的媒體頁面。"
+    "message": "目前頁面不是 LibreGet 擴充功能支援的媒體頁面。"
   },
   "error_invalid_url_detail": {
     "message": "請從影片、Reel、貼文、播放清單或課程的直接頁面再試一次。"
   },
   "error_launch_failed_title": {
-    "message": "瀏覽器無法啟動 OmniGet"
+    "message": "瀏覽器無法啟動 LibreGet"
   },
   "error_launch_failed_body": {
     "message": "擴充功能已與原生主機通訊，但桌面應用程式未能正確啟動。"
   },
   "error_launch_failed_detail": {
-    "message": "請確認 OmniGet 已安裝且未被系統封鎖，然後再試一次。"
+    "message": "請確認 LibreGet 已安裝且未被系統封鎖，然後再試一次。"
   },
   "popup_send_default": {
-    "message": "傳送到 OmniGet"
+    "message": "傳送到 LibreGet"
   },
   "popup_send_audio": {
     "message": "傳送音訊"
@@ -148,46 +148,46 @@
     }
   },
   "popup_not_running": {
-    "message": "OmniGet 未執行"
+    "message": "LibreGet 未執行"
   },
   "popup_try_again": {
     "message": "重試"
   },
   "popup_get_app": {
-    "message": "取得 OmniGet"
+    "message": "取得 LibreGet"
   },
   "popup_lbl_course": {
-    "message": "傳送課程到 OmniGet"
+    "message": "傳送課程到 LibreGet"
   },
   "popup_lbl_playlist": {
-    "message": "傳送播放清單到 OmniGet"
+    "message": "傳送播放清單到 LibreGet"
   },
   "popup_lbl_video": {
-    "message": "傳送影片到 OmniGet"
+    "message": "傳送影片到 LibreGet"
   },
   "popup_lbl_reel": {
-    "message": "傳送 Reel 到 OmniGet"
+    "message": "傳送 Reel 到 LibreGet"
   },
   "popup_lbl_post": {
-    "message": "傳送貼文到 OmniGet"
+    "message": "傳送貼文到 LibreGet"
   },
   "popup_lbl_short": {
-    "message": "傳送 Shorts 到 OmniGet"
+    "message": "傳送 Shorts 到 LibreGet"
   },
   "popup_lbl_clip": {
-    "message": "傳送片段到 OmniGet"
+    "message": "傳送片段到 LibreGet"
   },
   "popup_lbl_image": {
-    "message": "傳送圖片到 OmniGet"
+    "message": "傳送圖片到 LibreGet"
   },
   "popup_lbl_audio": {
-    "message": "傳送音訊到 OmniGet"
+    "message": "傳送音訊到 LibreGet"
   },
   "popup_lbl_profile": {
-    "message": "傳送個人檔案到 OmniGet"
+    "message": "傳送個人檔案到 LibreGet"
   },
   "popup_lbl_page": {
-    "message": "傳送頁面到 OmniGet"
+    "message": "傳送頁面到 LibreGet"
   },
   "popup_ck_saving": {
     "message": "正在儲存 Cookie…"
@@ -215,7 +215,7 @@
     }
   },
   "popup_ck_hint": {
-    "message": "將此網站的 Cookie 傳送到 OmniGet 的 Cookie 管理器。"
+    "message": "將此網站的 Cookie 傳送到 LibreGet 的 Cookie 管理器。"
   },
   "popup_ckerr_no_url": {
     "message": "沒有作用中的分頁"
@@ -233,13 +233,13 @@
     "message": "此網站沒有 Cookie"
   },
   "popup_ckerr_missing_token": {
-    "message": "請先配對 OmniGet"
+    "message": "請先配對 LibreGet"
   },
   "popup_ckerr_missing_endpoint": {
-    "message": "未偵測到 OmniGet"
+    "message": "未偵測到 LibreGet"
   },
   "popup_ckerr_fetch_failed": {
-    "message": "OmniGet 未執行"
+    "message": "LibreGet 未執行"
   },
   "popup_ckerr_unauthorized": {
     "message": "配對權杖無效"

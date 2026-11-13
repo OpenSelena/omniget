@@ -1,4 +1,4 @@
-const STORAGE_KEY = "omniget_sniffer_enabled";
+const STORAGE_KEY = "libreget_sniffer_enabled";
 const WILDCARD_ORIGINS = ["*://*/*"];
 
 let enabled = true;

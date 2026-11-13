@@ -1,4 +1,4 @@
-const MENU_ID = "omniget-download";
+const MENU_ID = "libreget-download";
 
 export function registerContextMenu() {
   const api =
@@ -16,7 +16,7 @@ export function registerContextMenu() {
       api.create(
         {
           id: MENU_ID,
-          title: "Download with OmniGet",
+          title: "Download with LibreGet",
           contexts: ["page", "link", "video", "audio", "image", "selection"],
         },
         () => {

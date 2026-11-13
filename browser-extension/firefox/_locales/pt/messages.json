@@ -1,51 +1,51 @@
 {
   "action_title_supported": {
-    "message": "Enviar esta página de mídia para o OmniGet"
+    "message": "Enviar esta página de mídia para o LibreGet"
   },
   "action_title_unsupported": {
     "message": "Nenhuma mídia compatível detectada nesta página"
   },
   "error_page_document_title": {
-    "message": "Extensão OmniGet"
+    "message": "Extensão LibreGet"
   },
   "error_page_eyebrow": {
-    "message": "Extensão OmniGet"
+    "message": "Extensão LibreGet"
   },
   "error_page_install_cta": {
-    "message": "Instalar OmniGet"
+    "message": "Instalar LibreGet"
   },
   "error_page_open_extensions": {
     "message": "Abrir configurações da extensão"
   },
   "error_host_missing_title": {
-    "message": "Abra o OmniGet uma vez para concluir a configuração"
+    "message": "Abra o LibreGet uma vez para concluir a configuração"
   },
   "error_host_missing_body": {
-    "message": "O navegador ainda não conseguiu encontrar a ponte do OmniGet neste computador."
+    "message": "O navegador ainda não conseguiu encontrar a ponte do LibreGet neste computador."
   },
   "error_host_missing_detail": {
-    "message": "Instale o OmniGet se necessário, depois abra o aplicativo de desktop uma vez e clique novamente na extensão."
+    "message": "Instale o LibreGet se necessário, depois abra o aplicativo de desktop uma vez e clique novamente na extensão."
   },
   "error_invalid_url_title": {
-    "message": "A URL desta página não pode ser enviada ao OmniGet"
+    "message": "A URL desta página não pode ser enviada ao LibreGet"
   },
   "error_invalid_url_body": {
-    "message": "A página atual não é uma página de mídia compatível com a extensão OmniGet."
+    "message": "A página atual não é uma página de mídia compatível com a extensão LibreGet."
   },
   "error_invalid_url_detail": {
     "message": "Tente novamente a partir de uma página direta de vídeo, reel, publicação, playlist ou curso."
   },
   "error_launch_failed_title": {
-    "message": "O OmniGet não pôde ser iniciado pelo navegador"
+    "message": "O LibreGet não pôde ser iniciado pelo navegador"
   },
   "error_launch_failed_body": {
     "message": "A extensão falou com o host nativo, mas o aplicativo de desktop não iniciou corretamente."
   },
   "error_launch_failed_detail": {
-    "message": "Verifique se o OmniGet está instalado e não foi bloqueado pelo sistema, depois tente novamente."
+    "message": "Verifique se o LibreGet está instalado e não foi bloqueado pelo sistema, depois tente novamente."
   },
   "popup_send_default": {
-    "message": "Enviar para o OmniGet"
+    "message": "Enviar para o LibreGet"
   },
   "popup_send_audio": {
     "message": "Enviar áudio"
@@ -148,46 +148,46 @@
     }
   },
   "popup_not_running": {
-    "message": "O OmniGet não está em execução"
+    "message": "O LibreGet não está em execução"
   },
   "popup_try_again": {
     "message": "Tentar de novo"
   },
   "popup_get_app": {
-    "message": "Obter o OmniGet"
+    "message": "Obter o LibreGet"
   },
   "popup_lbl_course": {
-    "message": "Enviar curso para o OmniGet"
+    "message": "Enviar curso para o LibreGet"
   },
   "popup_lbl_playlist": {
-    "message": "Enviar playlist para o OmniGet"
+    "message": "Enviar playlist para o LibreGet"
   },
   "popup_lbl_video": {
-    "message": "Enviar vídeo para o OmniGet"
+    "message": "Enviar vídeo para o LibreGet"
   },
   "popup_lbl_reel": {
-    "message": "Enviar reel para o OmniGet"
+    "message": "Enviar reel para o LibreGet"
   },
   "popup_lbl_post": {
-    "message": "Enviar post para o OmniGet"
+    "message": "Enviar post para o LibreGet"
   },
   "popup_lbl_short": {
-    "message": "Enviar short para o OmniGet"
+    "message": "Enviar short para o LibreGet"
   },
   "popup_lbl_clip": {
-    "message": "Enviar clipe para o OmniGet"
+    "message": "Enviar clipe para o LibreGet"
   },
   "popup_lbl_image": {
-    "message": "Enviar imagem para o OmniGet"
+    "message": "Enviar imagem para o LibreGet"
   },
   "popup_lbl_audio": {
-    "message": "Enviar áudio para o OmniGet"
+    "message": "Enviar áudio para o LibreGet"
   },
   "popup_lbl_profile": {
-    "message": "Enviar perfil para o OmniGet"
+    "message": "Enviar perfil para o LibreGet"
   },
   "popup_lbl_page": {
-    "message": "Enviar página para o OmniGet"
+    "message": "Enviar página para o LibreGet"
   },
   "popup_ck_saving": {
     "message": "Salvando cookies…"
@@ -215,7 +215,7 @@
     }
   },
   "popup_ck_hint": {
-    "message": "Envia os cookies deste site para o gerenciador de cookies do OmniGet."
+    "message": "Envia os cookies deste site para o gerenciador de cookies do LibreGet."
   },
   "popup_ckerr_no_url": {
     "message": "Nenhuma aba ativa"
@@ -233,13 +233,13 @@
     "message": "Sem cookies para este site"
   },
   "popup_ckerr_missing_token": {
-    "message": "Pareie o OmniGet primeiro"
+    "message": "Pareie o LibreGet primeiro"
   },
   "popup_ckerr_missing_endpoint": {
-    "message": "OmniGet não detectado"
+    "message": "LibreGet não detectado"
   },
   "popup_ckerr_fetch_failed": {
-    "message": "O OmniGet não está em execução"
+    "message": "O LibreGet não está em execução"
   },
   "popup_ckerr_unauthorized": {
     "message": "Token de pareamento inválido"

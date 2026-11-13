@@ -270,7 +270,7 @@ if (typeof document !== "undefined") {
     const { endpoint, token } = await loadBridgeConfig();
     endpointInput.value = endpoint || "";
     tokenInput.value = token || "";
-    setDiscovery("found", `Paired with OmniGet at ${endpoint}.`);
+    setDiscovery("found", `Paired with LibreGet at ${endpoint}.`);
     setStatus("Paired automatically — you're all set.", "ok");
     stopPairPolling();
   }
@@ -346,7 +346,7 @@ if (typeof document !== "undefined") {
       const result = await checkBridgeHealth(endpoint);
       if (result.ok) {
         const versionSuffix = result.version ? ` (v${result.version})` : "";
-        setDiscovery("found", `Connected to OmniGet${versionSuffix} at ${endpoint}.`);
+        setDiscovery("found", `Connected to LibreGet${versionSuffix} at ${endpoint}.`);
         return;
       }
       setDiscovery(
@@ -361,10 +361,10 @@ if (typeof document !== "undefined") {
       const versionSuffix = found.version ? ` (v${found.version})` : "";
       setDiscovery(
         "found",
-        `Found OmniGet${versionSuffix} on ${found.endpoint}. Paste the token from OmniGet → Settings → Network → Browser extension to finish.`
+        `Found LibreGet${versionSuffix} on ${found.endpoint}. Paste the token from LibreGet → Settings → Network → Browser extension to finish.`
       );
       endpointHint.textContent =
-        "Auto-detected — change only if your OmniGet runs on a different host.";
+        "Auto-detected — change only if your LibreGet runs on a different host.";
       return;
     }
 
@@ -373,7 +373,7 @@ if (typeof document !== "undefined") {
     if (advancedDetails) advancedDetails.open = true;
     setDiscovery(
       "missing",
-      "OmniGet doesn't seem to be running. Launch the desktop app, then refresh this page — or set the endpoint manually below."
+      "LibreGet doesn't seem to be running. Launch the desktop app, then refresh this page — or set the endpoint manually below."
     );
   }
 
@@ -414,7 +414,7 @@ if (typeof document !== "undefined") {
       const paired = await tryAutoPair();
       if (paired) return;
       setStatus(
-        "No open pairing window found. In OmniGet, go to Settings → Network → Browser extension and click \"Pair extension\", then try again (or just wait — this page keeps retrying).",
+        "No open pairing window found. In LibreGet, go to Settings → Network → Browser extension and click \"Pair extension\", then try again (or just wait — this page keeps retrying).",
         "error"
       );
       if (!document.hidden) startPairPolling();
@@ -427,10 +427,10 @@ if (typeof document !== "undefined") {
     const result = await checkBridgeHealth(endpoint);
     if (result.ok) {
       const versionSuffix = result.version ? ` (v${result.version})` : "";
-      setStatus(`Connected to OmniGet${versionSuffix} at ${endpoint}.`, "ok");
+      setStatus(`Connected to LibreGet${versionSuffix} at ${endpoint}.`, "ok");
     } else {
       setStatus(
-        `Could not reach OmniGet at ${endpoint}. Make sure the app is running.`,
+        `Could not reach LibreGet at ${endpoint}. Make sure the app is running.`,
         "error"
       );
     }

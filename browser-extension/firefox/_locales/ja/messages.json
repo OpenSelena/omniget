@@ -1,51 +1,51 @@
 {
   "action_title_supported": {
-    "message": "このメディアページをOmniGetに送信"
+    "message": "このメディアページをLibreGetに送信"
   },
   "action_title_unsupported": {
     "message": "このページでは対応しているメディアが見つかりません"
   },
   "error_page_document_title": {
-    "message": "OmniGet 拡張機能"
+    "message": "LibreGet 拡張機能"
   },
   "error_page_eyebrow": {
-    "message": "OmniGet 拡張機能"
+    "message": "LibreGet 拡張機能"
   },
   "error_page_install_cta": {
-    "message": "OmniGet をインストール"
+    "message": "LibreGet をインストール"
   },
   "error_page_open_extensions": {
     "message": "拡張機能の設定を開く"
   },
   "error_host_missing_title": {
-    "message": "セットアップを完了するには OmniGet を一度開いてください"
+    "message": "セットアップを完了するには LibreGet を一度開いてください"
   },
   "error_host_missing_body": {
-    "message": "ブラウザはこのコンピューター上の OmniGet ブリッジをまだ見つけられませんでした。"
+    "message": "ブラウザはこのコンピューター上の LibreGet ブリッジをまだ見つけられませんでした。"
   },
   "error_host_missing_detail": {
-    "message": "必要なら OmniGet をインストールし、デスクトップアプリを一度起動してからもう一度拡張機能をクリックしてください。"
+    "message": "必要なら LibreGet をインストールし、デスクトップアプリを一度起動してからもう一度拡張機能をクリックしてください。"
   },
   "error_invalid_url_title": {
-    "message": "このページの URL は OmniGet に送信できません"
+    "message": "このページの URL は LibreGet に送信できません"
   },
   "error_invalid_url_body": {
-    "message": "現在のページは OmniGet 拡張機能でサポートされているメディアページではありません。"
+    "message": "現在のページは LibreGet 拡張機能でサポートされているメディアページではありません。"
   },
   "error_invalid_url_detail": {
     "message": "動画、リール、投稿、再生リスト、またはコースの直接ページからもう一度お試しください。"
   },
   "error_launch_failed_title": {
-    "message": "ブラウザから OmniGet を起動できませんでした"
+    "message": "ブラウザから LibreGet を起動できませんでした"
   },
   "error_launch_failed_body": {
     "message": "拡張機能はネイティブホストと通信しましたが、デスクトップアプリは正しく起動しませんでした。"
   },
   "error_launch_failed_detail": {
-    "message": "OmniGet がインストールされていてシステムによってブロックされていないことを確認してから、もう一度お試しください。"
+    "message": "LibreGet がインストールされていてシステムによってブロックされていないことを確認してから、もう一度お試しください。"
   },
   "popup_send_default": {
-    "message": "OmniGet に送信"
+    "message": "LibreGet に送信"
   },
   "popup_send_audio": {
     "message": "音声を送信"
@@ -148,46 +148,46 @@
     }
   },
   "popup_not_running": {
-    "message": "OmniGet が起動していません"
+    "message": "LibreGet が起動していません"
   },
   "popup_try_again": {
     "message": "再試行"
   },
   "popup_get_app": {
-    "message": "OmniGet を入手"
+    "message": "LibreGet を入手"
   },
   "popup_lbl_course": {
-    "message": "コースを OmniGet に送信"
+    "message": "コースを LibreGet に送信"
   },
   "popup_lbl_playlist": {
-    "message": "プレイリストを OmniGet に送信"
+    "message": "プレイリストを LibreGet に送信"
   },
   "popup_lbl_video": {
-    "message": "動画を OmniGet に送信"
+    "message": "動画を LibreGet に送信"
   },
   "popup_lbl_reel": {
-    "message": "リールを OmniGet に送信"
+    "message": "リールを LibreGet に送信"
   },
   "popup_lbl_post": {
-    "message": "投稿を OmniGet に送信"
+    "message": "投稿を LibreGet に送信"
   },
   "popup_lbl_short": {
-    "message": "ショートを OmniGet に送信"
+    "message": "ショートを LibreGet に送信"
   },
   "popup_lbl_clip": {
-    "message": "クリップを OmniGet に送信"
+    "message": "クリップを LibreGet に送信"
   },
   "popup_lbl_image": {
-    "message": "画像を OmniGet に送信"
+    "message": "画像を LibreGet に送信"
   },
   "popup_lbl_audio": {
-    "message": "音声を OmniGet に送信"
+    "message": "音声を LibreGet に送信"
   },
   "popup_lbl_profile": {
-    "message": "プロフィールを OmniGet に送信"
+    "message": "プロフィールを LibreGet に送信"
   },
   "popup_lbl_page": {
-    "message": "ページを OmniGet に送信"
+    "message": "ページを LibreGet に送信"
   },
   "popup_ck_saving": {
     "message": "クッキーを保存中…"
@@ -215,7 +215,7 @@
     }
   },
   "popup_ck_hint": {
-    "message": "このサイトのクッキーを OmniGet のクッキーマネージャーに送信します。"
+    "message": "このサイトのクッキーを LibreGet のクッキーマネージャーに送信します。"
   },
   "popup_ckerr_no_url": {
     "message": "アクティブなタブがありません"
@@ -233,13 +233,13 @@
     "message": "このサイトのクッキーがありません"
   },
   "popup_ckerr_missing_token": {
-    "message": "先に OmniGet をペアリングしてください"
+    "message": "先に LibreGet をペアリングしてください"
   },
   "popup_ckerr_missing_endpoint": {
-    "message": "OmniGet が見つかりません"
+    "message": "LibreGet が見つかりません"
   },
   "popup_ckerr_fetch_failed": {
-    "message": "OmniGet が起動していません"
+    "message": "LibreGet が起動していません"
   },
   "popup_ckerr_unauthorized": {
     "message": "ペアリングトークンが無効です"

@@ -225,7 +225,7 @@ export function buildBackup(list, { generatedAt = new Date().toISOString(), brow
   const entries = (Array.isArray(list) ? list : []).map(normalizeExtension).sort(compareExtensions);
 
   return {
-    format: "omniget-extension-inventory",
+    format: "libreget-extension-inventory",
     formatVersion: 1,
     browser,
     generatedAt,
@@ -249,7 +249,7 @@ export function buildJson(backup) {
 export function backupFileName(extension, generatedAt) {
   const iso = typeof generatedAt === "string" ? generatedAt : new Date().toISOString();
   const day = iso.slice(0, 10) || "export";
-  return `omniget-extensions-${day}.${extension}`;
+  return `libreget-extensions-${day}.${extension}`;
 }
 
 function permissionsLine(entry) {
@@ -309,7 +309,7 @@ export function buildMarkdown(backup) {
   const out = [];
   out.push(`# Installed extensions — ${backup.browser}`);
   out.push("");
-  out.push(`Exported by OmniGet on ${backup.generatedAt}.`);
+  out.push(`Exported by LibreGet on ${backup.generatedAt}.`);
   out.push("");
   out.push(`- Total: ${summary.total}`);
   out.push(`- Manifest V2 (at risk): ${summary.mv2}`);
@@ -458,7 +458,7 @@ th { color: #95a0b7; font-weight: 500; }
 <body>
 <main>
 <h1>Installed extensions — ${escapeHtml(backup.browser)}</h1>
-<p class="meta">Exported by OmniGet on ${escapeHtml(backup.generatedAt)}.</p>
+<p class="meta">Exported by LibreGet on ${escapeHtml(backup.generatedAt)}.</p>
 <ul class="summary">
 <li><b>${summary.total}</b>total</li>
 <li><b>${summary.mv2}</b>Manifest V2</li>

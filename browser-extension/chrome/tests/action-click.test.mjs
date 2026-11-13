@@ -172,7 +172,7 @@ test("falls back to scheme handler when native messaging throws and scheme succe
     mapChromeErrorCode: () => "HOST_MISSING",
     openSchemeUrl: async (url) => {
       calls.push(["scheme", url]);
-      return { ok: true, schemeUrl: `omniget://${url}` };
+      return { ok: true, schemeUrl: `libreget://${url}` };
     },
   });
 
