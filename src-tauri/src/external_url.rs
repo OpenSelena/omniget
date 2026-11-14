@@ -66,13 +66,16 @@ pub fn is_external_url(value: &str) -> bool {
 /// the native host entirely, so we treat scheme arrival as the user's
 /// explicit intent.
 pub fn arrived_via_scheme(raw_url: &str, source: &str) -> bool {
-    raw_url.trim_start().starts_with("omniget:") || source == "deep-link"
+    let t = raw_url.trim_start();
+    t.starts_with("libreget:") || t.starts_with("omniget:") || source == "deep-link"
 }
 
 pub fn normalize_external_url(value: &str) -> Option<String> {
     let trimmed = value.trim();
     let rest = trimmed
         .strip_prefix("libreget://")
+        .or_else(|| trimmed.strip_prefix("libreget:"))
+        .or_else(|| trimmed.strip_prefix("omniget://"))
         .or_else(|| trimmed.strip_prefix("omniget:"))?;
     let rest = rest.trim_start_matches('/');
     if rest.is_empty() {
@@ -407,7 +410,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn normalize_strips_omniget_prefix_and_adds_https() {
+    fn normalize_strips_libreget_prefix_and_adds_https() {
         assert_eq!(
             normalize_external_url("libreget://www.youtube.com/watch?v=abc"),
             Some("https://www.youtube.com/watch?v=abc".to_string())
@@ -466,7 +469,7 @@ mod tests {
     }
 
     #[test]
-    fn find_external_url_arg_preserves_omniget_prefix() {
+    fn find_external_url_arg_preserves_libreget_prefix() {
         // The single-instance / cold-start callbacks rely on this so the
         // downstream `arrived_via_scheme` check can still detect the scheme.
         let args = vec!["--flag", "libreget://www.youtube.com/watch?v=abc"];
