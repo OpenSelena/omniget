@@ -71,7 +71,7 @@ sha2 = "0.10"
 md-5 = "0.10"
 murmur3 = "0.5"
 hex = "0.4"
-thiserror = "1"
+thiserror = "2"
 hmac = "0.12"
 qrcode = { version = "0.14", default-features = false, features = ["svg"] }
 open = "5"
