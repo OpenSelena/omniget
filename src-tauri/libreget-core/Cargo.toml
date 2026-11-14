@@ -58,7 +58,7 @@ open = "5"
 # Autoclicker e ditado (enigo), espaco em disco (fs4).
 # PDF: o PDFium só lê e renderiza; escrever estrutura (senha, marca d'água,
 # CropBox, sumário) é o lopdf, MIT e Rust puro.
-lopdf = { version = "0.45", default-features = false, features = ["chrono"] }
+lopdf = { version = "0.47", default-features = false, features = ["chrono"] }
 libloading = "0.8"
 walkdir = "2"
 trash = "5"
