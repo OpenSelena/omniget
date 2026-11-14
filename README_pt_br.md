@@ -47,9 +47,7 @@ leitor pdf, flashcards anki, repetição espaçada, player de música, spicetify
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Aviso-FF7D38" alt="Aviso" height="20" /><br/>
-  <sub>Este projeto é um fork independente e não possui afiliação com o LibreGet ou com Tonho.<br/>
-  Mantido por <a href="https://github.com/igect">igect</a> sob GPL-3.0 · Baseado na arquitetura original de <a href="https://github.com/tonhowtf">Tonho</a></sub>
+  <sub>Mantido por <a href="https://github.com/igect">igect</a> sob GPL-3.0</sub>
 </p>
 
 <p align="center">

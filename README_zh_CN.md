@@ -47,9 +47,7 @@ spicetify, 下载管理器, tauri, rust, svelte.
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/免责声明-FF7D38" alt="免责声明" height="20" /><br/>
-  <sub>本项目为独立分支，与 LibreGet 或原作者 Tonho 无任何关联或隶属关系。<br/>
-  由 <a href="https://github.com/igect">igect</a> 在 GPL-3.0 协议下维护 · 基于 <a href="https://github.com/tonhowtf">Tonho</a> 的原版架构</sub>
+  <sub>由 <a href="https://github.com/igect">igect</a> 在 GPL-3.0 协议下维护</sub>
 </p>
 
 <p align="center">

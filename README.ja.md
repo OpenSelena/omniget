@@ -57,9 +57,7 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Disclaimer-FF7D38" alt="免責事項" height="20" /><br/>
-  <sub>本プロジェクトは独立したフォークであり、LibreGet または原作者 Tonho との提携・関係はありません。<br/>
-  <a href="https://github.com/igect">igect</a> が GPL-3.0 のもとでメンテナンスしています · <a href="https://github.com/tonhowtf">Tonho</a> によるオリジナルのアーキテクチャに基づいています</sub>
+  <sub><a href="https://github.com/igect">igect</a> が GPL-3.0 のもとでメンテナンスしています</sub>
 </p>
 
 <p align="center">

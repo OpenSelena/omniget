@@ -57,9 +57,7 @@ twitch-downloader, subtitle-downloader, epub-reader, spaced-repetition
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Дисклеймер-FF7D38" alt="Дисклеймер" height="20" /><br/>
-  <sub>Этот проект является независимым форком и не связан с LibreGet или с Tonho.<br/>
-  Поддерживается <a href="https://github.com/igect">igect</a> под GPL-3.0 · На основе оригинальной архитектуры <a href="https://github.com/tonhowtf">Tonho</a></sub>
+  <sub>Поддерживается <a href="https://github.com/igect">igect</a> под GPL-3.0</sub>
 </p>
 
 <p align="center">
