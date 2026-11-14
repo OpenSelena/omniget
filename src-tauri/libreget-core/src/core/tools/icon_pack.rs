@@ -283,8 +283,7 @@ mod tests {
     #[test]
     #[ignore]
     fn live_icon_pack_from_a_real_image() {
-        let input = std::env::var("LIBREGET_IMG")
-            .expect("defina LIBREGET_IMG");
+        let input = std::env::var("LIBREGET_IMG").expect("defina LIBREGET_IMG");
         let dir = std::env::temp_dir().join("libreget-icon-live");
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();

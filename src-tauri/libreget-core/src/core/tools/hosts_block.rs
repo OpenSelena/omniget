@@ -252,12 +252,10 @@ pub fn block_body(text: &str) -> Option<&str> {
     let inner = &text[start..end];
     let after_begin = inner.find('\n').map_or_else(|| inner.len(), |i| i + 1);
     let body = &inner[after_begin..];
-    let before_end = body
-        .rfind(END)
-        .map_or_else(
-            || body.len(),
-            |i| body[..i].rfind('\n').map_or(0, |j| j + 1),
-        );
+    let before_end = body.rfind(END).map_or_else(
+        || body.len(),
+        |i| body[..i].rfind('\n').map_or(0, |j| j + 1),
+    );
     Some(&body[..before_end])
 }
 

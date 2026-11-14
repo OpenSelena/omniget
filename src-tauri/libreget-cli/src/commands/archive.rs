@@ -24,7 +24,10 @@ pub struct ArchiveArgs {
     #[arg(long, help = "Archive folder (the queue state lives in it)")]
     pub dest: String,
 
-    #[arg(long, help = "NDJSON from `libreget search --json` to add to the queue")]
+    #[arg(
+        long,
+        help = "NDJSON from `libreget search --json` to add to the queue"
+    )]
     pub seed: Option<String>,
 
     #[arg(

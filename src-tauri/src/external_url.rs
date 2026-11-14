@@ -447,7 +447,10 @@ mod tests {
             "  libreget://example.com/v",
             "command-line"
         ));
-        assert!(arrived_via_scheme("libreget:magnet:?xt=foo", "command-line"));
+        assert!(arrived_via_scheme(
+            "libreget:magnet:?xt=foo",
+            "command-line"
+        ));
     }
 
     #[test]

@@ -28,7 +28,8 @@ pub async fn grancursos_login_cookies(
     *state.grancursos_session_validated_at.lock().await = None;
     *state.grancursos_courses_cache.lock().await = None;
 
-    let parsed = libreget_core::core::cookie_parser::parse_cookie_input(&cookies, "laravel_session");
+    let parsed =
+        libreget_core::core::cookie_parser::parse_cookie_input(&cookies, "laravel_session");
 
     let client = libreget_core::core::http_client::apply_global_proxy(reqwest::Client::builder())
         .user_agent(

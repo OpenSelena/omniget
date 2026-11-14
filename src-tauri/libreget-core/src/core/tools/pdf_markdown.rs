@@ -1725,7 +1725,10 @@ mod tests {
             md.contains("1. abra o app") && md.contains("2. escolha o PDF"),
             "lista"
         );
-        assert!(!md.contains("Manual do LibreGet"), "cabecalho corrido ficou");
+        assert!(
+            !md.contains("Manual do LibreGet"),
+            "cabecalho corrido ficou"
+        );
         assert!(!md.contains("Pagina 1 de 3"), "rodape corrido ficou");
         assert_eq!(out.pages[1].columns, 2, "nao viu as duas colunas");
         let esq = md.find("esquerda linha 6").expect("coluna esquerda");

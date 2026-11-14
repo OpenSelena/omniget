@@ -692,8 +692,7 @@ trailer\n<< /Size 4 /Root 1 0 R >>\nstartxref\n9999\n%%EOF\n";
     #[test]
     #[ignore]
     fn live_rebuild_of_a_real_pdf() {
-        let path = std::env::var("LIBREGET_PDF")
-            .expect("defina LIBREGET_PDF");
+        let path = std::env::var("LIBREGET_PDF").expect("defina LIBREGET_PDF");
         let original = std::fs::read(&path).unwrap();
         let mut broken = original.clone();
         // Aponta o startxref para o nada — o sintoma mais comum.

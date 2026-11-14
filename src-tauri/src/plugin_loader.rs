@@ -3,7 +3,9 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
-use libreget_plugin_sdk::{InstalledPlugin, LibregetPlugin, PluginHost, PluginManifest, ABI_VERSION};
+use libreget_plugin_sdk::{
+    InstalledPlugin, LibregetPlugin, PluginHost, PluginManifest, ABI_VERSION,
+};
 use serde::Serialize;
 use tracing;
 
@@ -438,12 +440,10 @@ fn load_single_plugin(
         host_info
     );
 
-    let init_fn: libloading::Symbol<extern "C" fn() -> *mut dyn LibregetPlugin> = unsafe {
-        lib.get(b"libreget_plugin_init")
-    }
-    .map_err(|_| {
-        PluginLoadError::simple("missing_init_symbol", "Missing libreget_plugin_init symbol")
-    })?;
+    let init_fn: libloading::Symbol<extern "C" fn() -> *mut dyn LibregetPlugin> =
+        unsafe { lib.get(b"libreget_plugin_init") }.map_err(|_| {
+            PluginLoadError::simple("missing_init_symbol", "Missing libreget_plugin_init symbol")
+        })?;
 
     // A plugin's init entrypoint runs arbitrary foreign code; convert panics
     // into load errors instead of aborting the whole app.

@@ -77,7 +77,9 @@ impl libreget_core::platforms::cookie_provider::CookieProvider for DesktopCookie
 
 struct DesktopBilibiliRuntimeProvider;
 
-impl libreget_core::platforms::bilibili::BilibiliRuntimeProvider for DesktopBilibiliRuntimeProvider {
+impl libreget_core::platforms::bilibili::BilibiliRuntimeProvider
+    for DesktopBilibiliRuntimeProvider
+{
     fn active_account_slug(&self) -> Option<String> {
         let registry = crate::cookies::load_registry();
         let bucket = registry.buckets.get("bilibili.com")?;
@@ -224,9 +226,13 @@ pub fn run() {
     // gallery-dl first: it claims bulk-listing URLs (profiles, subreddits)
     // that the single-post Twitter/Reddit downloaders would otherwise match
     registry.register(Arc::new(platforms::gallerydl::GalleryDlDownloader::new()));
-    registry.register(Arc::new(libreget_core::platforms::InstagramDownloader::new()));
+    registry.register(Arc::new(
+        libreget_core::platforms::InstagramDownloader::new(),
+    ));
     registry.register(Arc::new(libreget_core::platforms::ThreadsDownloader::new()));
-    registry.register(Arc::new(libreget_core::platforms::PinterestDownloader::new()));
+    registry.register(Arc::new(
+        libreget_core::platforms::PinterestDownloader::new(),
+    ));
     registry.register(Arc::new(libreget_core::platforms::TikTokDownloader::new()));
     registry.register(Arc::new(libreget_core::platforms::TwitterDownloader::new()));
     registry.register(Arc::new(

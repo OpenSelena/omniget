@@ -3,7 +3,7 @@
 
 use super::dispatcher::{self, DownloadResult};
 use super::{
-    nami_load_app_settings, nami_load_profiles, libreget_nami_dir, update_profile_last_pulled,
+    libreget_nami_dir, nami_load_app_settings, nami_load_profiles, update_profile_last_pulled,
     Profile,
 };
 use chrono::Utc;

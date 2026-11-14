@@ -318,7 +318,12 @@ mod tests {
         for f in [
             "base64", "base32", "hex", "url", "html", "binary", "decimal",
         ] {
-            assert_eq!(round(f, "LibreGet 2026!"), "LibreGet 2026!", "formato {}", f);
+            assert_eq!(
+                round(f, "LibreGet 2026!"),
+                "LibreGet 2026!",
+                "formato {}",
+                f
+            );
         }
     }
 

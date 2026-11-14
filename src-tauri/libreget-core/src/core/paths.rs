@@ -8,4 +8,3 @@ pub fn app_data_dir() -> Option<std::path::PathBuf> {
     let _ = std::fs::create_dir_all(&new_path);
     Some(new_path)
 }
-

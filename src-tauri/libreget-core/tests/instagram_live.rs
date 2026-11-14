@@ -17,8 +17,7 @@ use libreget_core::core::tools::noop_progress;
 #[tokio::test]
 #[ignore]
 async fn ig_live_read_only() {
-    let path = std::env::var("LIBREGET_IG_COOKIES")
-        .expect("LIBREGET_IG_COOKIES");
+    let path = std::env::var("LIBREGET_IG_COOKIES").expect("LIBREGET_IG_COOKIES");
     let content = std::fs::read_to_string(&path).expect("cookies.txt");
     let session = Session::from_netscape(&content).expect("sessionid + ds_user_id");
     let client = IgClient::new(session).unwrap();

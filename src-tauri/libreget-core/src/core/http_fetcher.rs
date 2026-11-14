@@ -1464,8 +1464,10 @@ mod tests {
 
     #[tokio::test]
     async fn fetcher_downloads_multi_segment_with_range() {
-        let temp_dir =
-            std::env::temp_dir().join(format!("libreget_http_fetcher_chunked_{}", now_unix_nanos()));
+        let temp_dir = std::env::temp_dir().join(format!(
+            "libreget_http_fetcher_chunked_{}",
+            now_unix_nanos()
+        ));
         std::fs::create_dir_all(&temp_dir).unwrap();
         let payload: Vec<u8> = (0u8..=255).cycle().take(2 * 1024 * 1024).collect();
 

@@ -275,8 +275,11 @@ async fn run_import(slug: String, kind: UrlKind) -> Result<BilibiliImportResult,
         };
         let parsed = match kind_ref {
             UrlKind::WatchLater => {
-                libreget_core::platforms::bilibili::parser::watch_later::parse(&client, current_page)
-                    .await
+                libreget_core::platforms::bilibili::parser::watch_later::parse(
+                    &client,
+                    current_page,
+                )
+                .await
             }
             UrlKind::History => {
                 libreget_core::platforms::bilibili::parser::history::parse(&client, current_page)

@@ -263,6 +263,12 @@ async fn download_file_direct(
     let out = Path::new(output_path);
     let (tx, _rx) = mpsc::channel(8);
 
-    libreget_core::core::direct_downloader::download_direct(client, url, out, tx, Some(cancel_token))
-        .await
+    libreget_core::core::direct_downloader::download_direct(
+        client,
+        url,
+        out,
+        tx,
+        Some(cancel_token),
+    )
+    .await
 }
