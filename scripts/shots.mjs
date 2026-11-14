@@ -307,7 +307,7 @@ async function main() {
     console.log("starting vite dev...");
     devProc = spawn("pnpm", ["dev"], {
       cwd: process.cwd(),
-      env: { ...process.env, LIBREGET_I18N_STRICT: "0", OMNIGET_I18N_STRICT: "0" },
+      env: { ...process.env, LIBREGET_I18N_STRICT: "0" },
       stdio: "ignore",
       detached: false,
     });

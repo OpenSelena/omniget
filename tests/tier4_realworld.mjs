@@ -199,7 +199,7 @@ export function runTier4Tests() {
       // "What is Nami?", "What is the LibreGet MCP Server?", "Why this happens:"
       const knownQuestions = [
         /What is Nami\?/i,
-        /What is the (LibreGet|OmniGet) MCP Server\?/i,
+        /What is the LibreGet MCP Server\?/i,
         /Looking for older releases/i,
         /Why this happens:/i
       ];

@@ -17,7 +17,7 @@ const PLUGINS = [
 ];
 
 function appDataPluginsDir() {
-  const dataDir = process.env.LIBREGET_DATA_DIR || process.env.OMNIGET_DATA_DIR;
+  const dataDir = process.env.LIBREGET_DATA_DIR;
   if (dataDir) {
     return path.join(dataDir, "plugins");
   }
@@ -67,7 +67,7 @@ function buildPlugin(repoDir) {
 }
 
 function main() {
-  if (process.env.LIBREGET_SKIP_PLUGIN_DEPLOY === "1" || process.env.OMNIGET_SKIP_PLUGIN_DEPLOY === "1") {
+  if (process.env.LIBREGET_SKIP_PLUGIN_DEPLOY === "1") {
     console.log("LIBREGET_SKIP_PLUGIN_DEPLOY=1 — skipping plugin deployment.");
     return;
   }

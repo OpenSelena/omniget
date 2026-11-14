@@ -26,7 +26,7 @@
   <script>
     (function() {
       try {
-        var saved = (localStorage.getItem('libreget_docs_theme') || localStorage.getItem('omniget_docs_theme')) || localStorage.getItem('theme');
+        var saved = localStorage.getItem('libreget_docs_theme') || localStorage.getItem('theme');
         var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
         if (saved === 'dark' || (!saved && prefersDark)) {
           document.documentElement.classList.add('dark');
@@ -1567,7 +1567,7 @@
             Fixes
           </h3>
           <ul class="release-list">
-            <li><strong>Shell &amp; Titlebar Alignment</strong>: Matched <code>.mac-titlebar</code> right inset and banner margins to <code>--pane-inset</code> so titlebar controls align vertically with the content pane center, and normalized the backend window title casing from <code>omniget</code> to <code>LibreGet</code>.</li>
+            <li><strong>Shell &amp; Titlebar Alignment</strong>: Matched <code>.mac-titlebar</code> right inset and banner margins to <code>--pane-inset</code> so titlebar controls align vertically with the content pane center, and normalized the backend window title casing to <code>LibreGet</code>.</li>
             <li><strong>Lossless Mascot Framing</strong>: Normalized all 7 mascot PNGs onto a square <code>1320x1320</code> canvas with stripped edge halos, centered body anatomy, a shared baseline, square CSS sizing (<code>aspect-ratio: 1; object-fit: contain</code>), and an image load-race guard in <code>Mascot.svelte</code>.</li>
             <li><strong>Concentric Home Aura</strong>: Anchored the warm radial glow inside <code>.home-stage-hero</code> instead of the full scroll stage so it stays centered behind the mascot across all viewport heights.</li>
             <li><strong>Omnibox Pill &amp; Action Menu</strong>: Switched the Home Omnibox wrapper to full pill rounding (<code>9999px</code>), equalized the left <code>+</code>, clear, and paste endcap heights to <code>32px</code>, aligned the <code>+</code> popover flush with the left inset (<code>8px</code> gap), and added localized <code>omnibox.more_actions</code> ARIA labels across all 12 locales.</li>

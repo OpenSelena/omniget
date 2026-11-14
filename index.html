@@ -14,7 +14,7 @@
 <script>
   (function () {
     try {
-      var saved = (localStorage.getItem('libreget-theme') || localStorage.getItem('omniget-theme')) || (localStorage.getItem('libreget_docs_theme') || localStorage.getItem('omniget_docs_theme')) || localStorage.getItem('omni-theme') || localStorage.getItem('theme');
+      var saved = localStorage.getItem('libreget-theme') || localStorage.getItem('libreget_docs_theme') || localStorage.getItem('theme');
       var dark = (saved === 'dark' || saved === 'light') ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
       document.documentElement.setAttribute('data-theme', dark ? 'dark' : 'light');
       if (dark) document.documentElement.classList.add('dark');
@@ -1286,7 +1286,7 @@ footer {
 (function () {
   var root = document.documentElement;
   var themeBtn = document.getElementById('themeToggleBtn') || document.getElementById('theme');
-  var THEME_KEYS = ['libreget-theme', 'libreget_docs_theme', 'omniget-theme', 'omniget_docs_theme', 'omni-theme', 'theme'];
+  var THEME_KEYS = ['libreget-theme', 'libreget_docs_theme', 'theme'];
 
   function syncBtn() {
     if (!themeBtn) return;
@@ -1338,7 +1338,7 @@ footer {
   if (systemDark.addEventListener) {
     systemDark.addEventListener('change', function (e) {
       var saved = null;
-      try { saved = (localStorage.getItem('libreget-theme') || localStorage.getItem('omniget-theme')); } catch (err) {}
+      try { saved = localStorage.getItem('libreget-theme'); } catch (err) {}
       if (saved === 'dark' || saved === 'light') return;
       root.setAttribute('data-theme', e.matches ? 'dark' : 'light');
       syncBtn();

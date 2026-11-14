@@ -18,7 +18,7 @@ import { mkdtempSync, mkdirSync, writeFileSync, copyFileSync, existsSync, rmSync
 import { tmpdir } from "node:os";
 import { join, basename, resolve } from "node:path";
 
-const BANNER = /(LibreGet|OmniGet) .* starting — pid \d+, (standard|portable) mode/;
+const BANNER = /LibreGet .* starting — pid \d+, (standard|portable) mode/;
 const WINDOW = "[startup] main window created";
 const TIMEOUT_MS = 180_000;
 const EXIT_AFTER_MS = 6000;
