@@ -11,7 +11,7 @@ use crate::core::subtitle_merge::Cue;
 #[derive(Debug, Clone, Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum Translator {
-    /// Provedor de IA já configurado no OmniGet (OpenAI, Anthropic, local).
+    /// Provedor de IA já configurado no LibreGet (OpenAI, Anthropic, local).
     Llm,
     LibreTranslate {
         base_url: String,

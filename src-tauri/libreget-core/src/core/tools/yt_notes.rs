@@ -997,7 +997,7 @@ Já isto é outro assunto.
     }
 
     /// Precisa de rede e do yt-dlp.
-    /// `cargo test -p omniget-core --lib -- --ignored live_yt_notes`
+    /// `cargo test -p libreget-core --lib -- --ignored live_yt_notes`
     #[tokio::test]
     #[ignore]
     async fn live_yt_notes_builds_markdown_from_a_real_video() {

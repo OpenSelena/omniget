@@ -646,12 +646,12 @@ pub async fn run(
             .collect();
         let emojis: Vec<String> = opts.emoji.split_whitespace().map(str::to_string).collect();
         let name = if opts.pack_name.trim().is_empty() {
-            "OmniGet".to_string()
+            "LibreGet".to_string()
         } else {
             opts.pack_name.trim().to_string()
         };
         let author = if opts.pack_author.trim().is_empty() {
-            "OmniGet".to_string()
+            "LibreGet".to_string()
         } else {
             opts.pack_author.trim().to_string()
         };
@@ -882,14 +882,14 @@ mod tests {
     }
 
     /// Gera figurinha de verdade a partir de uma imagem e de um clipe curtos.
-    /// `cargo test -p omniget-core --lib -- --ignored live_sticker`
+    /// `cargo test -p libreget-core --lib -- --ignored live_sticker`
     #[tokio::test]
     #[ignore]
     async fn live_sticker_fits_the_limits() {
         let ffmpeg = crate::core::dependencies::ensure_ffmpeg()
             .await
             .expect("ffmpeg gerido");
-        let dir = std::env::temp_dir().join(format!("omniget-sticker-{}", uuid::Uuid::new_v4()));
+        let dir = std::env::temp_dir().join(format!("libreget-sticker-{}", uuid::Uuid::new_v4()));
         std::fs::create_dir_all(&dir).expect("tempdir");
 
         // Fonte estática: PNG com alfa e uma forma colorida.

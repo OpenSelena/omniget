@@ -892,7 +892,7 @@ mod tests {
     }
 
     fn tmp(name: &str) -> PathBuf {
-        let dir = std::env::temp_dir().join("omniget-pdfwrite-test");
+        let dir = std::env::temp_dir().join("libreget-pdfwrite-test");
         std::fs::create_dir_all(&dir).unwrap();
         dir.join(name)
     }

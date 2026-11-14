@@ -140,7 +140,7 @@ pub async fn segments(input: &str, categories: &[String]) -> anyhow::Result<Spon
 // servidor deriva dela o identificador público — por isso ela nunca pode
 // nascer do nome, do e-mail ou do hardware de quem usa o app.
 
-pub const USER_AGENT_TAG: &str = concat!("OmniGet/", env!("CARGO_PKG_VERSION"));
+pub const USER_AGENT_TAG: &str = concat!("LibreGet/", env!("CARGO_PKG_VERSION"));
 pub const USER_FILE: &str = "sponsorblock-user.txt";
 /// Um envio de uma vez só; acima disso o servidor devolve limite de taxa.
 pub const MAX_SEGMENTS_PER_SUBMIT: usize = 10;
@@ -456,7 +456,7 @@ mod submit_tests {
         assert!(body["userAgent"]
             .as_str()
             .unwrap_or_default()
-            .starts_with("OmniGet/"));
+            .starts_with("LibreGet/"));
         let s = &body["segments"][0];
         assert_eq!(s["segment"][0], 30.0);
         assert_eq!(s["segment"][1], 45.5);

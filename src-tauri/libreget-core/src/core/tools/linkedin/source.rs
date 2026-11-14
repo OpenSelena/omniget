@@ -206,7 +206,7 @@ pub(crate) mod fixture {
                 "Profile.csv",
                 concat!(
                     "First Name,Last Name,Headline,Summary,Industry,Geo Location,Websites\n",
-                    "OpenSelena,Dev,\"Dev de Rust e Svelte que gosta de ferramenta local\",\"Trabalho com aplicativos de desktop ha dez anos.\",Software Development,\"Sao Paulo, Brasil\",[MY_WEBSITE:https://omniget.wtf]\n"
+                    "OpenSelena,Dev,\"Dev de Rust e Svelte que gosta de ferramenta local\",\"Trabalho com aplicativos de desktop ha dez anos.\",Software Development,\"Sao Paulo, Brasil\",[MY_WEBSITE:https://libreget.nav.bd]\n"
                 )
                 .to_string(),
             ),
@@ -254,7 +254,7 @@ pub(crate) mod fixture {
     /// Escreve o export sintetico numa pasta temporaria unica.
     pub fn dir() -> PathBuf {
         let root = std::env::temp_dir().join(format!(
-            "omniget-li-{}-{}",
+            "libreget-li-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)

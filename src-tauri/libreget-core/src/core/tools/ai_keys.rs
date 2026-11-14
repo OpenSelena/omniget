@@ -686,7 +686,7 @@ pub fn export(format: &str, ids: &[String]) -> anyhow::Result<String> {
     })
 }
 
-/// Usa esta chave como a IA do OmniGet (Ajustes → IA).
+/// Usa esta chave como a IA do LibreGet (Ajustes → IA).
 pub fn use_in_app(id: &str) -> anyhow::Result<()> {
     let e = get(id)?;
     use crate::core::ai::{self, KeyAction};

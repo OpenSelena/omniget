@@ -1782,7 +1782,7 @@ mod tests {
 
     #[test]
     fn unique_names() {
-        let dir = std::env::temp_dir().join(format!("omniget-pdf-{}", uuid::Uuid::new_v4()));
+        let dir = std::env::temp_dir().join(format!("libreget-pdf-{}", uuid::Uuid::new_v4()));
         std::fs::create_dir_all(&dir).unwrap();
         let p = dir.join("a.pdf");
         assert_eq!(unique(p.clone()), p);
@@ -1793,14 +1793,14 @@ mod tests {
 
     /// Exercita o FFI de verdade: baixa o PDFium gerido se faltar, monta um
     /// PDF de 3 páginas com JPEGs, junta, divide, renderiza e extrai texto.
-    /// `cargo test -p omniget-core --lib tools::pdf::tests::live -- --ignored --nocapture`
+    /// `cargo test -p libreget-core --lib tools::pdf::tests::live -- --ignored --nocapture`
     #[tokio::test]
     #[ignore]
     async fn live() {
         if !available() {
             crate::core::pdfium::ensure_pdfium().await.expect("pdfium");
         }
-        let dir = std::env::temp_dir().join(format!("omniget-pdf-live-{}", uuid::Uuid::new_v4()));
+        let dir = std::env::temp_dir().join(format!("libreget-pdf-live-{}", uuid::Uuid::new_v4()));
         std::fs::create_dir_all(&dir).unwrap();
         let mut jpegs = Vec::new();
         for i in 0..3u8 {
@@ -1884,7 +1884,7 @@ mod tests {
 
     /// PDF montado à mão: uma linha visível e outra coberta por um retângulo
     /// preto desenhado por cima — a "tarja" que não apaga nada.
-    /// `cargo test -p omniget-core --lib -- --ignored live_redaction`
+    /// `cargo test -p libreget-core --lib -- --ignored live_redaction`
     #[test]
     #[ignore]
     fn live_redaction_check_finds_text_under_the_bar() {
@@ -1904,7 +1904,7 @@ mod tests {
         // A xref sai da própria tool de reparo — de quebra, valida ela também.
         let (bytes, _) = super::super::pdf_repair::rebuild_xref(body.as_bytes()).unwrap();
 
-        let dir = std::env::temp_dir().join("omniget-redaction-live");
+        let dir = std::env::temp_dir().join("libreget-redaction-live");
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("tarja.pdf");
         std::fs::write(&path, &bytes).unwrap();

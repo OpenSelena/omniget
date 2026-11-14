@@ -10,7 +10,7 @@
 //!
 //! The plumbing follows the same shape as the extension cookie jar
 //! (`cookie_parser::load_extension_cookies_for_url`): the app side writes an
-//! artefact into `app_data_dir()` and `omniget-core` picks it up on its own
+//! artefact into `app_data_dir()` and `libreget-core` picks it up on its own
 //! when the download actually starts. That keeps the playlist text out of
 //! `DownloadOptions` and out of the already very wide `queue::enqueue`
 //! signature.
@@ -173,7 +173,7 @@ mod tests {
             .as_nanos();
         let seq = COUNTER.fetch_add(1, Ordering::Relaxed);
         let dir = std::env::temp_dir().join(format!(
-            "omniget-manifest-{}-{}-{}-{}",
+            "libreget-manifest-{}-{}-{}-{}",
             tag,
             std::process::id(),
             nanos,

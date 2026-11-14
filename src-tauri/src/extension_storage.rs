@@ -463,7 +463,7 @@ mod tests {
     #[test]
     fn metadata_map_roundtrip_preserves_multiple_urls() {
         let tmp = std::env::temp_dir().join(format!(
-            "omniget-meta-test-{}.json",
+            "libreget-meta-test-{}.json",
             current_unix_timestamp()
         ));
         let _ = fs::remove_file(&tmp);
@@ -501,7 +501,7 @@ mod tests {
     #[test]
     fn write_empty_metadata_map_removes_file() {
         let tmp = std::env::temp_dir().join(format!(
-            "omniget-meta-empty-{}.json",
+            "libreget-meta-empty-{}.json",
             current_unix_timestamp()
         ));
         fs::write(&tmp, "{}").unwrap();

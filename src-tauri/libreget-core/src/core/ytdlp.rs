@@ -6292,20 +6292,21 @@ ERROR: [youtube] abc123: Requested format is not available";
 
 /// Teste de ponta a ponta contra o yt-dlp gerido, ignorado por padrão porque
 /// depende de rede e do binário local. Rodar com:
-/// `OMNIGET_YTDLP=~/Library/Application\ Support/com.openselena.libreget/bin/yt-dlp cargo test -p omniget-core --features desktop -- --ignored e2e_download_reports_streams --nocapture`
+/// `LIBREGET_YTDLP=~/Library/Application\ Support/com.openselena.libreget/bin/yt-dlp cargo test -p libreget-core --features desktop -- --ignored e2e_download_reports_streams --nocapture`
 #[cfg(test)]
 mod e2e {
     #[tokio::test]
     #[ignore]
     async fn e2e_download_reports_streams() {
-        let ytdlp = match std::env::var("OMNIGET_YTDLP") {
+        let ytdlp = match std::env::var("LIBREGET_YTDLP").or_else(|_| std::env::var("OMNIGET_YTDLP")) {
             Ok(p) => std::path::PathBuf::from(p),
             Err(_) => return,
         };
-        let out = std::env::temp_dir().join(format!("omniget-e2e-{}", std::process::id()));
+        let out = std::env::temp_dir().join(format!("libreget-e2e-{}", std::process::id()));
         std::fs::create_dir_all(&out).unwrap();
         let (tx, mut rx) = tokio::sync::mpsc::channel(256);
-        let url = std::env::var("OMNIGET_E2E_URL")
+        let url = std::env::var("LIBREGET_E2E_URL")
+            .or_else(|_| std::env::var("OMNIGET_E2E_URL"))
             .unwrap_or_else(|_| "https://www.youtube.com/watch?v=jNQXAC9IVRw".to_string());
         let collector = tokio::spawn(async move {
             let mut seen = Vec::new();

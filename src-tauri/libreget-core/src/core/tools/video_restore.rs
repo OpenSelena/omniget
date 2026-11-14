@@ -157,7 +157,7 @@ async fn restore_one(
 
     let mut trf: Option<PathBuf> = None;
     if opts.stabilize {
-        let dir = std::env::temp_dir().join(format!("omniget-vidstab-{}", uuid::Uuid::new_v4()));
+        let dir = std::env::temp_dir().join(format!("libreget-vidstab-{}", uuid::Uuid::new_v4()));
         std::fs::create_dir_all(&dir)?;
         let file = dir.join("transforms.trf");
         let detect = format!(
@@ -338,12 +338,12 @@ mod tests {
 
     /// vidstab é filtro de biblioteca externa: se a build do FFmpeg gerido
     /// não trouxer, o teste falha aqui e não na mão do usuário.
-    /// `cargo test -p omniget-core --lib -- --ignored live_stabilize`
+    /// `cargo test -p libreget-core --lib -- --ignored live_stabilize`
     #[tokio::test]
     #[ignore]
     async fn live_stabilize_runs_both_passes() {
         let ffmpeg = crate::core::dependencies::ensure_ffmpeg().await.unwrap();
-        let dir = std::env::temp_dir().join("omniget-vidstab-live");
+        let dir = std::env::temp_dir().join("libreget-vidstab-live");
         std::fs::create_dir_all(&dir).unwrap();
         let src = dir.join("tremido.mp4");
         // testsrc2 com um deslocamento senoidal em x/y: tremor sintético.
@@ -407,7 +407,7 @@ mod tests {
                 .any(|e| e
                     .file_name()
                     .to_string_lossy()
-                    .starts_with("omniget-vidstab-")
+                    .starts_with("libreget-vidstab-")
                     && e.path().join("transforms.trf").exists()),
             "sobrou .trf temporário"
         );

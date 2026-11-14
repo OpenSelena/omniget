@@ -197,7 +197,7 @@ fn videos_dir() -> PathBuf {
     dirs::video_dir()
         .or_else(dirs::home_dir)
         .unwrap_or_default()
-        .join("OmniGet")
+        .join("LibreGet")
 }
 
 fn build_args(opts: &RecordOptions, target: &Path, ring: bool) -> Vec<String> {

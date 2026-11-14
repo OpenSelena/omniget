@@ -559,7 +559,7 @@ mod tests {
             ],
             csv: None,
         };
-        let dir = std::env::temp_dir().join(format!("omniget-xlsx-{}", uuid::Uuid::new_v4()));
+        let dir = std::env::temp_dir().join(format!("libreget-xlsx-{}", uuid::Uuid::new_v4()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("t.xlsx");
         write_xlsx(&[t], &path).expect("gravar xlsx");
@@ -571,7 +571,7 @@ mod tests {
     }
 
     /// PDF de verdade, montado à mão, com uma tabela de três colunas.
-    /// `cargo test -p omniget-core --lib -- --ignored live_table`
+    /// `cargo test -p libreget-core --lib -- --ignored live_table`
     #[test]
     #[ignore]
     fn live_table_extract() {
@@ -601,7 +601,7 @@ mod tests {
             content
         ));
         let (bytes, _) = super::super::pdf_repair::rebuild_xref(body.as_bytes()).unwrap();
-        let dir = std::env::temp_dir().join(format!("omniget-table-{}", uuid::Uuid::new_v4()));
+        let dir = std::env::temp_dir().join(format!("libreget-table-{}", uuid::Uuid::new_v4()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("tabela.pdf");
         std::fs::write(&path, &bytes).unwrap();

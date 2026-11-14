@@ -187,7 +187,7 @@ mod tests {
 
     #[test]
     fn finds_identical_files() {
-        let dir = std::env::temp_dir().join(format!("omniget-dupes-{}", uuid::Uuid::new_v4()));
+        let dir = std::env::temp_dir().join(format!("libreget-dupes-{}", uuid::Uuid::new_v4()));
         std::fs::create_dir_all(dir.join("sub")).unwrap();
         let big = vec![7u8; 70 * 1024];
         std::fs::write(dir.join("a.bin"), &big).unwrap();

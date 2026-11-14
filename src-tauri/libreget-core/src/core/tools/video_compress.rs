@@ -254,7 +254,7 @@ async fn compress_one(
     };
     let output = out_dir.join(format!("{}{}.{}", stem, suffix, container(&opts.codec)));
 
-    let log_dir = std::env::temp_dir().join(format!("omniget-2pass-{}", uuid::Uuid::new_v4()));
+    let log_dir = std::env::temp_dir().join(format!("libreget-2pass-{}", uuid::Uuid::new_v4()));
     std::fs::create_dir_all(&log_dir)?;
     let log = log_dir.join("pass");
 
@@ -411,12 +411,12 @@ mod tests {
 
     /// Ponta a ponta com o FFmpeg gerido: gera um clipe, comprime para 1 MB
     /// e confere que o alvo foi respeitado sem perder áudio nem duração.
-    /// `cargo test -p omniget-core --lib -- --ignored live_compress`
+    /// `cargo test -p libreget-core --lib -- --ignored live_compress`
     #[tokio::test]
     #[ignore]
     async fn live_compress_hits_the_target() {
         let ffmpeg = crate::core::dependencies::ensure_ffmpeg().await.unwrap();
-        let dir = std::env::temp_dir().join("omniget-vcompress-live");
+        let dir = std::env::temp_dir().join("libreget-vcompress-live");
         std::fs::create_dir_all(&dir).unwrap();
         let src = dir.join("fonte.mp4");
         let gen = crate::core::process::command(&ffmpeg)

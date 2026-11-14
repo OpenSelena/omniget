@@ -1143,7 +1143,7 @@ mod tests {
 
     /// PDF montado à mão, tarjado de verdade, e depois passado pelo próprio
     /// `pdf-redaction-check`: ele não pode achar nada escondido.
-    /// `cargo test -p omniget-core --lib -- --ignored live_redact`
+    /// `cargo test -p libreget-core --lib -- --ignored live_redact`
     #[test]
     #[ignore]
     fn live_redact_deixa_o_check_limpo() {
@@ -1163,7 +1163,7 @@ mod tests {
         ));
         let (bytes, _) = super::super::pdf_repair::rebuild_xref(body.as_bytes()).unwrap();
 
-        let dir = std::env::temp_dir().join(format!("omniget-redact-{}", uuid::Uuid::new_v4()));
+        let dir = std::env::temp_dir().join(format!("libreget-redact-{}", uuid::Uuid::new_v4()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("original.pdf");
         std::fs::write(&path, &bytes).unwrap();

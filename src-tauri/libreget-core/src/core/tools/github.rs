@@ -12,7 +12,7 @@ use crate::core::dependencies::integrity;
 pub fn client() -> anyhow::Result<reqwest::Client> {
     use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, USER_AGENT};
     let mut headers = HeaderMap::new();
-    headers.insert(USER_AGENT, HeaderValue::from_static("OmniGet"));
+    headers.insert(USER_AGENT, HeaderValue::from_static("LibreGet"));
     headers.insert(
         ACCEPT,
         HeaderValue::from_static("application/vnd.github+json"),

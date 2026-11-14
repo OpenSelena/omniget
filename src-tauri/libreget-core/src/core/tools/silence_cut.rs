@@ -465,12 +465,12 @@ mod tests {
 
     /// Gera um clipe com um buraco de silêncio conhecido (3 s a 6 s) e
     /// confere que o corte acha e remove exatamente aquilo.
-    /// `cargo test -p omniget-core --lib -- --ignored live_silence`
+    /// `cargo test -p libreget-core --lib -- --ignored live_silence`
     #[tokio::test]
     #[ignore]
     async fn live_silence_cut_removes_the_known_gap() {
         let ffmpeg = crate::core::dependencies::ensure_ffmpeg().await.unwrap();
-        let dir = std::env::temp_dir().join("omniget-silence-live");
+        let dir = std::env::temp_dir().join("libreget-silence-live");
         std::fs::create_dir_all(&dir).unwrap();
         let src = dir.join("fonte.mp4");
         let gen = crate::core::process::command(&ffmpeg)

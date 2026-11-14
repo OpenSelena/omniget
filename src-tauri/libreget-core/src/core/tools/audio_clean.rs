@@ -378,12 +378,12 @@ mod tests {
     }
 
     /// Mede e normaliza um tom baixo de verdade, e limpa ruído branco.
-    /// `cargo test -p omniget-core --lib -- --ignored live_audio`
+    /// `cargo test -p libreget-core --lib -- --ignored live_audio`
     #[tokio::test]
     #[ignore]
     async fn live_audio_normalizes_and_denoises() {
         let ffmpeg = crate::core::dependencies::ensure_ffmpeg().await.unwrap();
-        let dir = std::env::temp_dir().join("omniget-audio-live");
+        let dir = std::env::temp_dir().join("libreget-audio-live");
         std::fs::create_dir_all(&dir).unwrap();
         let src = dir.join("baixo.wav");
         let gen = crate::core::process::command(&ffmpeg)

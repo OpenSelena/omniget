@@ -1603,7 +1603,7 @@ mod tests {
     /// Ponta a ponta com um PDF montado à mão (mesma técnica do teste de
     /// tarja em `pdf.rs`): três páginas com cabeçalho e rodapé corridos,
     /// título, parágrafo hifenizado, lista, duas colunas e um bloco em
-    /// Courier. `cargo test -p omniget-core --lib -- --ignored live_pdf_markdown`
+    /// Courier. `cargo test -p libreget-core --lib -- --ignored live_pdf_markdown`
     #[test]
     #[ignore]
     fn live_pdf_markdown_de_ponta_a_ponta() {
@@ -1617,7 +1617,7 @@ mod tests {
         let mut pages: Vec<String> = Vec::new();
         for n in 1..=3 {
             let mut c = String::new();
-            put(&mut c, "F1", 9.0, 50.0, 760.0, "Manual do OmniGet");
+            put(&mut c, "F1", 9.0, 50.0, 760.0, "Manual do LibreGet");
             put(&mut c, "F1", 9.0, 50.0, 40.0, &format!("Pagina {} de 3", n));
             match n {
                 1 => {
@@ -1700,7 +1700,7 @@ mod tests {
         }
         let (bytes, _) = super::super::pdf_repair::rebuild_xref(body.as_bytes()).unwrap();
 
-        let dir = std::env::temp_dir().join("omniget-pdfmd-live");
+        let dir = std::env::temp_dir().join("libreget-pdfmd-live");
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("guia.pdf");
         std::fs::write(&path, &bytes).unwrap();
@@ -1725,7 +1725,7 @@ mod tests {
             md.contains("1. abra o app") && md.contains("2. escolha o PDF"),
             "lista"
         );
-        assert!(!md.contains("Manual do OmniGet"), "cabecalho corrido ficou");
+        assert!(!md.contains("Manual do LibreGet"), "cabecalho corrido ficou");
         assert!(!md.contains("Pagina 1 de 3"), "rodape corrido ficou");
         assert_eq!(out.pages[1].columns, 2, "nao viu as duas colunas");
         let esq = md.find("esquerda linha 6").expect("coluna esquerda");

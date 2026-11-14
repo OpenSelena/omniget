@@ -5,7 +5,7 @@
 //! `0.0.0.0` mata a conexão na origem.
 //!
 //! A regra dura deste módulo é **nunca tocar em nada fora do bloco**. Tudo
-//! que o OmniGet escreve vive entre dois marcadores; o texto antes e depois
+//! que o LibreGet escreve vive entre dois marcadores; o texto antes e depois
 //! deles é preservado byte a byte. Escrever no `hosts` exige admin/root: se
 //! não der, o módulo não tenta escalar privilégio — ele grava a versão
 //! pronta num arquivo de teste e devolve o comando exato para o usuário
@@ -16,8 +16,10 @@ use std::path::{Path, PathBuf};
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
 
-pub const BEGIN: &str = "# >>> OmniGet block list >>>";
-pub const END: &str = "# <<< OmniGet block list <<<";
+pub const BEGIN: &str = "# >>> LibreGet block list >>>";
+pub const END: &str = "# <<< LibreGet block list <<<";
+pub const LEGACY_BEGIN: &str = "# >>> OmniGet block list >>>";
+pub const LEGACY_END: &str = "# <<< OmniGet block list <<<";
 
 const ID: &str = "sys-hosts";
 
@@ -93,7 +95,7 @@ pub fn is_writable(path: &Path) -> bool {
 pub fn permission_hint(staging: &Path, target: &Path) -> String {
     if cfg!(windows) {
         format!(
-            "Abra o OmniGet como administrador, ou rode num Prompt elevado: copy /Y \"{}\" \"{}\"",
+            "Abra o LibreGet como administrador, ou rode num Prompt elevado: copy /Y \"{}\" \"{}\"",
             staging.display(),
             target.display()
         )
@@ -231,10 +233,10 @@ fn block_span(text: &str) -> Option<(usize, usize)> {
     for line in text.split_inclusive('\n') {
         let trimmed = line.trim_end_matches(['\r', '\n']).trim();
         if begin.is_none() {
-            if trimmed == BEGIN {
+            if trimmed == BEGIN || trimmed == LEGACY_BEGIN {
                 begin = Some(idx);
             }
-        } else if trimmed == END {
+        } else if trimmed == END || trimmed == LEGACY_END {
             return Some((begin?, idx + line.len()));
         }
         idx += line.len();
@@ -252,10 +254,13 @@ pub fn block_body(text: &str) -> Option<&str> {
     let inner = &text[start..end];
     let after_begin = inner.find('\n').map_or_else(|| inner.len(), |i| i + 1);
     let body = &inner[after_begin..];
-    let before_end = body.rfind(END).map_or_else(
-        || body.len(),
-        |i| body[..i].rfind('\n').map_or(0, |j| j + 1),
-    );
+    let before_end = body
+        .rfind(END)
+        .or_else(|| body.rfind(LEGACY_END))
+        .map_or_else(
+            || body.len(),
+            |i| body[..i].rfind('\n').map_or(0, |j| j + 1),
+        );
     Some(&body[..before_end])
 }
 
@@ -284,7 +289,7 @@ pub fn render_block(domains: &[String], ip: &str, updated_at: &str, nl: &str) ->
     let mut s = String::with_capacity(domains.len() * 32 + 256);
     s.push_str(BEGIN);
     s.push_str(nl);
-    s.push_str("# gerado pelo OmniGet — não edite aqui dentro");
+    s.push_str("# gerado pelo LibreGet — não edite aqui dentro");
     s.push_str(nl);
     s.push_str(&format!("# atualizado em {}", updated_at));
     s.push_str(nl);
@@ -362,7 +367,7 @@ pub struct HostsState {
     pub bytes: u64,
     /// Linhas fora do bloco (o que é do usuário), incluindo comentário.
     pub user_lines: usize,
-    /// Domínios dentro do bloco do OmniGet.
+    /// Domínios dentro do bloco do LibreGet.
     pub blocked: usize,
     pub block_present: bool,
     pub updated_at: Option<String>,
@@ -660,7 +665,7 @@ pub async fn apply(
         result.hint = staged.as_ref().map(|s| permission_hint(s, &path));
         result.staged = staged.map(|s| s.to_string_lossy().to_string());
         result.error = Some(if cfg!(windows) {
-            "sem permissão para escrever no hosts: o OmniGet precisa estar aberto como administrador".into()
+            "sem permissão para escrever no hosts: o LibreGet precisa estar aberto como administrador".into()
         } else {
             "sem permissão para escrever no hosts: precisa de root".into()
         });
@@ -776,7 +781,7 @@ mod tests {
     /// num arquivo temporário próprio.
     fn tempdir(tag: &str) -> PathBuf {
         let d =
-            std::env::temp_dir().join(format!("omniget-hosts-{}-{}", tag, uuid::Uuid::new_v4()));
+            std::env::temp_dir().join(format!("libreget-hosts-{}-{}", tag, uuid::Uuid::new_v4()));
         std::fs::create_dir_all(&d).expect("criar tempdir de teste");
         d
     }
@@ -1035,7 +1040,7 @@ mod tests {
     }
 
     /// Baixa as listas de verdade e monta o bloco num arquivo temporário.
-    /// `cargo test -p omniget-core --lib -- --ignored live_hosts`
+    /// `cargo test -p libreget-core --lib -- --ignored live_hosts`
     #[tokio::test]
     #[ignore]
     async fn live_hosts_sources_download_and_merge() {

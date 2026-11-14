@@ -686,13 +686,15 @@ trailer\n<< /Size 4 /Root 1 0 R >>\nstartxref\n9999\n%%EOF\n";
     }
 
     /// Teste com um PDF de verdade, ligado à mão:
-    /// `OMNIGET_PDF=/caminho/arquivo.pdf cargo test -p omniget-core --lib -- --ignored live_rebuild`
+    /// `LIBREGET_PDF=/caminho/arquivo.pdf cargo test -p libreget-core --lib -- --ignored live_rebuild`
     /// Quebra a xref como um download truncado quebraria, reconstrói e
     /// confere que toda entrada aponta mesmo para o começo de um objeto.
     #[test]
     #[ignore]
     fn live_rebuild_of_a_real_pdf() {
-        let path = std::env::var("OMNIGET_PDF").expect("defina OMNIGET_PDF");
+        let path = std::env::var("LIBREGET_PDF")
+            .or_else(|_| std::env::var("OMNIGET_PDF"))
+            .expect("defina LIBREGET_PDF");
         let original = std::fs::read(&path).unwrap();
         let mut broken = original.clone();
         // Aponta o startxref para o nada — o sintoma mais comum.
@@ -735,7 +737,7 @@ trailer\n<< /Size 4 /Root 1 0 R >>\nstartxref\n9999\n%%EOF\n";
             checked += 1;
         }
         assert!(checked > 0, "nenhuma entrada em uso");
-        let out = std::env::temp_dir().join("omniget-repair-live.pdf");
+        let out = std::env::temp_dir().join("libreget-repair-live.pdf");
         std::fs::write(&out, &fixed).unwrap();
         eprintln!(
             "{} objetos, {} entradas conferidas → {}",

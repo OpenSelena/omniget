@@ -639,7 +639,7 @@ pub fn client_snippets(url: &str, token: &str) -> Vec<(String, String)> {
         ),
         (
             "Goose".into(),
-            format!("extensions:\n  omniget:\n    enabled: true\n    type: streamable_http\n    name: libreget\n    uri: {}\n    headers:\n      Authorization: Bearer {}\n    timeout: 300", url, token),
+            format!("extensions:\n  libreget:\n    enabled: true\n    type: streamable_http\n    name: libreget\n    uri: {}\n    headers:\n      Authorization: Bearer {}\n    timeout: 300", url, token),
         ),
         (
             "Claude Desktop".into(),

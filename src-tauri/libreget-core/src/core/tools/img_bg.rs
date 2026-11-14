@@ -685,7 +685,7 @@ mod tests {
 
     #[test]
     fn a_lista_de_entrada_junta_pasta_e_arquivos_sem_repetir() {
-        let dir = std::env::temp_dir().join(format!("omniget-imgbg-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("libreget-imgbg-{}", std::process::id()));
         std::fs::create_dir_all(&dir).expect("pasta de teste");
         let a = dir.join("a.png");
         let b = dir.join("b.jpg");
@@ -716,7 +716,7 @@ mod tests {
     #[test]
     #[ignore = "rede + runtime: baixa u2netp e remove o fundo de uma imagem sintetica"]
     fn remove_o_fundo_de_verdade_com_o_u2netp() {
-        let dir = std::env::temp_dir().join("omniget-imgbg-live");
+        let dir = std::env::temp_dir().join("libreget-imgbg-live");
         std::fs::create_dir_all(&dir).expect("pasta");
         let src = dir.join("alvo.png");
         let mut img = image::RgbImage::from_pixel(256, 256, image::Rgb([12, 14, 18]));

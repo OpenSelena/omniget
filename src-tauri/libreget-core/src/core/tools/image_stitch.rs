@@ -634,7 +634,7 @@ mod tests {
 
     #[test]
     fn end_to_end_writes_the_long_image() {
-        let dir = std::env::temp_dir().join("omniget-stitch-test");
+        let dir = std::env::temp_dir().join("libreget-stitch-test");
         std::fs::create_dir_all(&dir).unwrap();
         let src = source(120, 400);
         let p1 = dir.join("a.png");

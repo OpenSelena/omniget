@@ -2,7 +2,7 @@
 //!
 //! O `--download-archive` do yt-dlp já evita rebaixar o que existe, mas ele é
 //! só uma lista de IDs: não sabe dizer o que falhou nem por quê. Aqui mora um
-//! estado próprio ao lado do destino (`.omniget-archive.json`), com um status
+//! estado próprio ao lado do destino (`.libreget-archive.json`), com um status
 //! por item, para a UI mostrar a fila e para o app poder ser fechado no meio.
 
 use std::path::{Path, PathBuf};
@@ -12,12 +12,15 @@ use std::time::Duration;
 use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
 
-pub const STATE_FILE: &str = ".omniget-archive.json";
-pub const ARCHIVE_FILE: &str = ".omniget-archive.txt";
+pub const STATE_FILE: &str = ".libreget-archive.json";
+pub const ARCHIVE_FILE: &str = ".libreget-archive.txt";
+pub const LEGACY_STATE_FILE: &str = ".omniget-archive.json";
+pub const LEGACY_ARCHIVE_FILE: &str = ".omniget-archive.txt";
 const STATE_VERSION: u32 = 1;
 const ID: &str = "yt-archive";
 /// Prefixo do `--print` para separar o caminho final das linhas de progresso.
-const FILE_MARK: &str = "__omniget_file__";
+const FILE_MARK: &str = "__libreget_file__";
+const LEGACY_FILE_MARK: &str = "__omniget_file__";
 
 // ── yt-dlp como processo ───────────────────────────────────────────────
 
@@ -231,7 +234,13 @@ impl ArchiveState {
 }
 
 pub fn state_path(dest: &Path) -> PathBuf {
-    dest.join(STATE_FILE)
+    let new_path = dest.join(STATE_FILE);
+    let legacy_path = dest.join(LEGACY_STATE_FILE);
+    if !new_path.exists() && legacy_path.exists() {
+        legacy_path
+    } else {
+        new_path
+    }
 }
 
 pub fn load_state(dest: &Path) -> Option<ArchiveState> {
@@ -347,13 +356,19 @@ pub fn parse_percent(line: &str) -> Option<f64> {
 
 /// Linha do `--print` com o arquivo final.
 pub fn parse_printed_file(line: &str) -> Option<String> {
-    let idx = line.find(FILE_MARK)?;
-    let path = line[idx + FILE_MARK.len()..].trim();
-    if path.is_empty() {
-        None
-    } else {
-        Some(path.to_string())
+    if let Some(idx) = line.find(FILE_MARK) {
+        let path = line[idx + FILE_MARK.len()..].trim();
+        if !path.is_empty() {
+            return Some(path.to_string());
+        }
     }
+    if let Some(idx) = line.find(LEGACY_FILE_MARK) {
+        let path = line[idx + LEGACY_FILE_MARK.len()..].trim();
+        if !path.is_empty() {
+            return Some(path.to_string());
+        }
+    }
+    None
 }
 
 // ── Opções e execução ──────────────────────────────────────────────────
@@ -559,7 +574,11 @@ pub async fn run(opts: Options, progress: super::ProgressFn) -> anyhow::Result<A
     let mut st = open_state(&opts, &dest, &progress).await?;
     let bin = ytdlp_path().await?;
     let cookie = CookieFile::new(opts.session_netscape.as_deref())?;
-    let archive_txt = dest.join(ARCHIVE_FILE);
+    let archive_txt = if !dest.join(ARCHIVE_FILE).exists() && dest.join(LEGACY_ARCHIVE_FILE).exists() {
+        dest.join(LEGACY_ARCHIVE_FILE)
+    } else {
+        dest.join(ARCHIVE_FILE)
+    };
     let total = st.items.len() as u64;
     let limit = match opts.max_items {
         0 => usize::MAX,
@@ -1249,7 +1268,7 @@ mod tests {
 
     /// Baixa um vídeo curto de verdade, confere o estado gravado e roda de
     /// novo para provar que a retomada não rebaixa nada.
-    /// `cargo test -p omniget-core --lib -- --ignored live_yt_archive_resumes`
+    /// `cargo test -p libreget-core --lib -- --ignored live_yt_archive_resumes`
     #[tokio::test]
     #[ignore]
     async fn live_yt_archive_resumes_without_downloading_twice() {
@@ -1296,7 +1315,7 @@ mod tests {
     }
 
     /// Precisa de rede e do yt-dlp.
-    /// `cargo test -p omniget-core --lib -- --ignored live_yt_archive`
+    /// `cargo test -p libreget-core --lib -- --ignored live_yt_archive`
     #[tokio::test]
     #[ignore]
     async fn live_yt_archive_enumerates_a_public_playlist() {

@@ -397,12 +397,12 @@ mod live {
     use super::*;
     use crate::core::tools::pinterest::api::Feed;
 
-    /// `cargo test -p omniget-core --lib pinterest::media::live -- --ignored --nocapture`
+    /// `cargo test -p libreget-core --lib pinterest::media::live -- --ignored --nocapture`
     #[tokio::test]
     #[ignore]
     async fn live_download_image_and_video() {
         let c = PinClient::new(None).unwrap();
-        let dir = std::env::temp_dir().join("omniget-pinterest-live");
+        let dir = std::env::temp_dir().join("libreget-pinterest-live");
         let _ = std::fs::remove_dir_all(&dir);
         let opts = DownloadOptions {
             dest: dir.to_string_lossy().to_string(),

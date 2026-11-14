@@ -279,12 +279,14 @@ mod tests {
 
     /// Gera o pacote inteiro de uma imagem de verdade, para conferir os
     /// arquivos com as ferramentas do sistema (`iconutil`, `sips`).
-    /// `OMNIGET_IMG=/caminho/arte.png cargo test -p omniget-core --lib -- --ignored live_icon`
+    /// `LIBREGET_IMG=/caminho/arte.png cargo test -p libreget-core --lib -- --ignored live_icon`
     #[test]
     #[ignore]
     fn live_icon_pack_from_a_real_image() {
-        let input = std::env::var("OMNIGET_IMG").expect("defina OMNIGET_IMG");
-        let dir = std::env::temp_dir().join("omniget-icon-live");
+        let input = std::env::var("LIBREGET_IMG")
+            .or_else(|_| std::env::var("OMNIGET_IMG"))
+            .expect("defina LIBREGET_IMG");
+        let dir = std::env::temp_dir().join("libreget-icon-live");
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let opts = IconOptions {

@@ -1,4 +1,4 @@
-//! Vimeo: dois caminhos que o yt-dlp já sabe fazer, mas que a UI do OmniGet
+//! Vimeo: dois caminhos que o yt-dlp já sabe fazer, mas que a UI do LibreGet
 //! ainda não expunha direito.
 //!
 //! 1. **Acesso privado / unlisted** — o link com hash (`vimeo.com/<id>/<hash>`)
@@ -29,7 +29,8 @@ const ID_SHOWCASE: &str = "vm-showcase";
 /// Marcadores do `--print` do yt-dlp: é assim que sabemos o arquivo final e o
 /// título sem ter que adivinhar a extensão.
 const MARK_FILE: &str = "LIBREGET_FILEPATH:";
-const MARK_META: &str = "OMNIGET_META:";
+const MARK_META: &str = "LIBREGET_META:";
+const LEGACY_MARK_META: &str = "OMNIGET_META:";
 
 /// Extensões que contam como "já baixado" na hora de retomar.
 const MEDIA_EXTS: &[&str] = &[
@@ -803,7 +804,7 @@ async fn run_download(
                     if !rest.is_empty() {
                         file = Some(rest.to_string());
                     }
-                } else if let Some(rest) = l.strip_prefix(MARK_META) {
+                } else if let Some(rest) = l.strip_prefix(MARK_META).or_else(|| l.strip_prefix(LEGACY_MARK_META)) {
                     let mut it = rest.splitn(2, '\t');
                     let id = it.next().unwrap_or("").to_string();
                     let title = it.next().unwrap_or("").to_string();

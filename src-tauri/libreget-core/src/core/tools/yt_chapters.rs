@@ -791,7 +791,7 @@ frame= 2 fps=0.0 q=-0.0 size=N/A time=00:00:00.08
 
     /// Gera um clipe com dois cortes de cena e silêncio no meio e confere que
     /// os capítulos caem onde deveriam.
-    /// `cargo test -p omniget-core --lib -- --ignored live_yt_chapters`
+    /// `cargo test -p libreget-core --lib -- --ignored live_yt_chapters`
     #[tokio::test]
     #[ignore]
     async fn live_yt_chapters_finds_the_planted_cut() {

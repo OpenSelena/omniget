@@ -49,7 +49,7 @@ mod tests {
 
     #[test]
     fn portatil_fica_ao_lado_do_executavel() {
-        let dir = PathBuf::from("/media/pendrive/OmniGet/data");
+        let dir = PathBuf::from("/media/pendrive/LibreGet/data");
         let got = portable_webview_dir(Some(&dir)).expect("portatil tem diretorio");
         assert_eq!(got, dir.join("webview"));
         // O ponto da issue #195: nada pode acabar sob o perfil do usuario.
@@ -58,10 +58,10 @@ mod tests {
 
     #[test]
     fn caminho_com_espaco_sobrevive() {
-        // Windows portatil vive em "C:\Users\x\Downloads\OmniGet 0.7.7\data".
-        let dir = PathBuf::from("C:/Users/x/Downloads/OmniGet 0.7.7/data");
+        // Windows portatil vive em "C:\Users\x\Downloads\LibreGet 0.7.7\data".
+        let dir = PathBuf::from("C:/Users/x/Downloads/LibreGet 0.7.7/data");
         let got = portable_webview_dir(Some(&dir)).expect("portatil tem diretorio");
-        assert!(got.to_string_lossy().contains("OmniGet 0.7.7"));
+        assert!(got.to_string_lossy().contains("LibreGet 0.7.7"));
         assert!(got.ends_with("webview"));
     }
 
@@ -188,7 +188,7 @@ mod runtime_fixo_tests {
     }
 
     fn tempdir(tag: &str) -> PathBuf {
-        let d = std::env::temp_dir().join(format!("omniget-rt-{tag}-{}", std::process::id()));
+        let d = std::env::temp_dir().join(format!("libreget-rt-{tag}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&d);
         std::fs::create_dir_all(&d).expect("cria tempdir");
         d
@@ -197,7 +197,7 @@ mod runtime_fixo_tests {
     #[test]
     fn sem_runtime_ao_lado_nao_inventa_caminho() {
         let d = tempdir("vazio");
-        std::fs::write(d.join("omniget.exe"), b"stub").expect("cria exe");
+        std::fs::write(d.join("libreget.exe"), b"stub").expect("cria exe");
         assert_eq!(find_fixed_runtime(&d), None);
         let _ = std::fs::remove_dir_all(&d);
     }

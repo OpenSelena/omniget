@@ -150,7 +150,7 @@ async fn convert_one(ffmpeg: &Path, opts: &GifOptions, input: &str) -> anyhow::R
         }
     } else {
         let tmp =
-            std::env::temp_dir().join(format!("omniget-palette-{}.png", uuid::Uuid::new_v4()));
+            std::env::temp_dir().join(format!("libreget-palette-{}.png", uuid::Uuid::new_v4()));
         let pass1 = crate::core::process::command(ffmpeg)
             .args(["-y", "-hide_banner", "-loglevel", "error"])
             .args(&cut)
@@ -285,12 +285,12 @@ mod tests {
     }
 
     /// Ponta a ponta com o FFmpeg gerido, nos dois formatos.
-    /// `cargo test -p omniget-core --lib -- --ignored live_gif`
+    /// `cargo test -p libreget-core --lib -- --ignored live_gif`
     #[tokio::test]
     #[ignore]
     async fn live_gif_and_webp_come_out_readable() {
         let ffmpeg = crate::core::dependencies::ensure_ffmpeg().await.unwrap();
-        let dir = std::env::temp_dir().join("omniget-gif-live");
+        let dir = std::env::temp_dir().join("libreget-gif-live");
         std::fs::create_dir_all(&dir).unwrap();
         let src = dir.join("fonte.mp4");
         let gen = crate::core::process::command(&ffmpeg)
@@ -361,7 +361,7 @@ mod tests {
                 .any(|e| e
                     .file_name()
                     .to_string_lossy()
-                    .starts_with("omniget-palette-")),
+                    .starts_with("libreget-palette-")),
             "sobrou paleta temporária"
         );
     }

@@ -297,7 +297,7 @@ pub fn estimate_lrc(plain: &str, duration_secs: f64, artist: &str, title: &str) 
     if !title.is_empty() {
         out.push_str(&format!("[ti:{title}]\n"));
     }
-    out.push_str("[by:OmniGet - tempos estimados]\n");
+    out.push_str("[by:LibreGet - tempos estimados]\n");
     if lines.is_empty() || duration_secs <= 0.0 {
         for l in lines {
             out.push_str(&format!("{}{}\n", fmt_ts(0.0), l));
@@ -640,7 +640,7 @@ mod tests {
     #[test]
     fn lrc_estimado_distribui_pela_duracao() {
         let lrc = estimate_lrc("uma\n\ndois\ntres\n", 90.0, "A", "T");
-        assert!(lrc.contains("[by:OmniGet - tempos estimados]"));
+        assert!(lrc.contains("[by:LibreGet - tempos estimados]"));
         let lines = parse_lrc(&lrc);
         assert_eq!(lines.len(), 3);
         assert_eq!(lines[0].0, 0.0);

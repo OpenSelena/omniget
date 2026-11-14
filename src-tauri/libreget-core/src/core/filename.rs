@@ -84,26 +84,26 @@ mod tests {
     }
 
     #[test]
-    fn omniget_prefix_basic() {
-        let name = "omniget-My Video Title [abc123]";
+    fn libreget_prefix_basic() {
+        let name = "libreget-My Video Title [abc123]";
         let result = sanitize_path_component(name);
-        assert!(result.starts_with("omniget-"));
+        assert!(result.starts_with("libreget-"));
         assert!(!result.contains(':'));
     }
 
     #[test]
-    fn omniget_prefix_with_special_chars() {
-        let name = "omniget-Video: \"Best\" <2024> [id]";
+    fn libreget_prefix_with_special_chars() {
+        let name = "libreget-Video: \"Best\" <2024> [id]";
         let result = sanitize_path_component(name);
-        assert!(result.starts_with("omniget-"));
+        assert!(result.starts_with("libreget-"));
     }
 
     #[test]
-    fn omniget_prefix_long_name() {
+    fn libreget_prefix_long_name() {
         let long_title = "a".repeat(250);
-        let name = format!("omniget-{} [id]", long_title);
+        let name = format!("libreget-{} [id]", long_title);
         let result = sanitize_path_component(&name);
-        assert!(result.starts_with("omniget-"));
+        assert!(result.starts_with("libreget-"));
         assert!(result.ends_with("[id]"));
     }
 }

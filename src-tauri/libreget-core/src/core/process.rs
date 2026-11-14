@@ -106,8 +106,8 @@ mod tests {
 
     #[test]
     fn cleans_appdir_from_ld_library_path() {
-        let appdir = "/tmp/.mount_omniget123";
-        let ld = "/tmp/.mount_omniget123/usr/lib:/tmp/.mount_omniget123/usr/lib64:/usr/lib64";
+        let appdir = "/tmp/.mount_libreget123";
+        let ld = "/tmp/.mount_libreget123/usr/lib:/tmp/.mount_libreget123/usr/lib64:/usr/lib64";
         assert_eq!(
             clean_ld_library_path(appdir, ld),
             Some("/usr/lib64".to_string())
@@ -116,14 +116,14 @@ mod tests {
 
     #[test]
     fn removes_ld_library_path_when_only_appdir_paths_present() {
-        let appdir = "/tmp/.mount_omniget123/";
-        let ld = "/tmp/.mount_omniget123/usr/lib:/tmp/.mount_omniget123/usr/lib64";
+        let appdir = "/tmp/.mount_libreget123/";
+        let ld = "/tmp/.mount_libreget123/usr/lib:/tmp/.mount_libreget123/usr/lib64";
         assert_eq!(clean_ld_library_path(appdir, ld), None);
     }
 
     #[test]
     fn preserves_custom_user_ld_paths() {
-        let appdir = "/tmp/.mount_omniget123";
+        let appdir = "/tmp/.mount_libreget123";
         let ld = "/opt/cuda/lib64:/usr/local/lib";
         assert_eq!(
             clean_ld_library_path(appdir, ld),
@@ -133,7 +133,7 @@ mod tests {
 
     #[test]
     fn handles_empty_or_whitespace_ld_path() {
-        let appdir = "/tmp/.mount_omniget123";
+        let appdir = "/tmp/.mount_libreget123";
         assert_eq!(clean_ld_library_path(appdir, ""), None);
         assert_eq!(clean_ld_library_path(appdir, "  : :  "), None);
     }

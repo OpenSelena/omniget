@@ -717,7 +717,7 @@ pub fn render_html(t: &Thread) -> String {
     }
     out.push_str("</div>");
     out.push_str(&format!(
-        "<div class=\"foot\">{} comentários salvos{} · arquivo gerado pelo OmniGet</div>",
+        "<div class=\"foot\">{} comentários salvos{} · arquivo gerado pelo LibreGet</div>",
         t.total,
         if t.missing > 0 {
             format!(" · {} não vieram", t.missing)
@@ -1172,7 +1172,7 @@ mod tests {
 
     #[test]
     fn escreve_os_tres_arquivos() {
-        let dir = std::env::temp_dir().join(format!("omniget-rdthread-{}", uuid::Uuid::new_v4()));
+        let dir = std::env::temp_dir().join(format!("libreget-rdthread-{}", uuid::Uuid::new_v4()));
         std::fs::create_dir_all(&dir).expect("tempdir");
         let t = thread_from_fixture();
         let base = "teste";
@@ -1195,7 +1195,7 @@ mod tests {
     #[tokio::test]
     #[ignore = "rede: baixa uma thread publica de verdade do Reddit"]
     async fn baixa_uma_thread_publica_de_verdade() {
-        let dir = std::env::temp_dir().join("omniget-rdthread-live");
+        let dir = std::env::temp_dir().join("libreget-rdthread-live");
         let _ = std::fs::create_dir_all(&dir);
         let opts = Options {
             url: "https://www.reddit.com/r/rust/comments/1uwmef6/so_long_rrust_and_thanks_for_all_the_slop/".to_string(),

@@ -327,7 +327,7 @@ pub fn atlas_json(frames: &[SpriteFrame], sheet: &str, w: u32, h: u32) -> String
     serde_json::to_string_pretty(&serde_json::json!({
         "frames": serde_json::Value::Object(map),
         "meta": {
-            "app": "OmniGet",
+            "app": "LibreGet",
             "image": sheet,
             "format": "RGBA8888",
             "size": { "w": w, "h": h },
@@ -700,7 +700,7 @@ mod tests {
 
     #[test]
     fn slicing_a_synthetic_sheet_returns_the_right_pixels() {
-        let dir = std::env::temp_dir().join("omniget-sprite-slice");
+        let dir = std::env::temp_dir().join("libreget-sprite-slice");
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let mut sheet = RgbaImage::new(64, 32);
@@ -738,7 +738,7 @@ mod tests {
 
     #[test]
     fn pack_then_slice_is_a_round_trip() {
-        let dir = std::env::temp_dir().join("omniget-sprite-roundtrip");
+        let dir = std::env::temp_dir().join("libreget-sprite-roundtrip");
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         let mut inputs = Vec::new();
@@ -836,7 +836,7 @@ mod tests {
 
     #[test]
     fn batch_resizes_a_whole_folder() {
-        let dir = std::env::temp_dir().join("omniget-sprite-batch");
+        let dir = std::env::temp_dir().join("libreget-sprite-batch");
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).unwrap();
         for i in 0..3u32 {

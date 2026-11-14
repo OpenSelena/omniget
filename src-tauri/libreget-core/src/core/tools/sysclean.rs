@@ -68,7 +68,7 @@ const DEFS: &[Def] = &[
     d("adobe", "apps", "Adobe (Media Cache)", "review", &["~/Library/Application Support/Adobe/Common/Media Cache Files", "~/Library/Application Support/Adobe/Common/Media Cache", "~/Library/Application Support/Adobe/Common/Peak Files"]),
     d("telegram", "apps", "Telegram", "review", &["~/Library/Group Containers/6N38VWS5BX.ru.keepcoder.Telegram/appstore/account-*/postbox/media", "~/Library/Application Support/Telegram Desktop/tdata/user_data/cache"]),
     d("whatsapp", "apps", "WhatsApp", "safe", &["~/Library/Group Containers/group.net.whatsapp.WhatsApp.shared/Message/Media/tmp", "~/Library/Containers/net.whatsapp.WhatsApp/Data/Library/Caches"]),
-    d("omniget-tmp", "apps", "OmniGet (temporários das tools)", "safe", &["~/Library/Application Support/com.openselena.libreget/tools/tmp"]),
+    d("libreget-tmp", "apps", "LibreGet (temporários das tools)", "safe", &["~/Library/Application Support/com.openselena.libreget/tools/tmp"]),
     d("xcode-derived", "dev", "Xcode DerivedData", "safe", &["~/Library/Developer/Xcode/DerivedData"]),
     d("xcode-device-support", "dev", "Xcode iOS DeviceSupport", "review", &["~/Library/Developer/Xcode/iOS DeviceSupport", "~/Library/Developer/Xcode/watchOS DeviceSupport", "~/Library/Developer/Xcode/tvOS DeviceSupport"]),
     d("simulator-caches", "dev", "Simulator caches", "safe", &["~/Library/Developer/CoreSimulator/Caches"]),
@@ -339,9 +339,9 @@ const DEFS: &[Def] = &[
         ],
     ),
     d(
-        "omniget-tmp",
+        "libreget-tmp",
         "apps",
-        "OmniGet (temporários das tools)",
+        "LibreGet (temporários das tools)",
         "safe",
         &["%APPDATA%\\com.openselena.libreget\\tools\\tmp"],
     ),
@@ -616,9 +616,9 @@ const DEFS: &[Def] = &[
         ],
     ),
     d(
-        "omniget-tmp",
+        "libreget-tmp",
         "apps",
-        "OmniGet (temporários das tools)",
+        "LibreGet (temporários das tools)",
         "safe",
         &[
             "~/.local/share/com.openselena.libreget/tools/tmp",
@@ -954,15 +954,15 @@ mod tests {
 
     #[test]
     fn vars() {
-        std::env::set_var("OMNIGET_T", "/x");
-        assert_eq!(expand_vars("%OMNIGET_T%/y"), "/x/y");
+        std::env::set_var("LIBREGET_T", "/x");
+        assert_eq!(expand_vars("%LIBREGET_T%/y"), "/x/y");
         assert_eq!(expand_vars("%NOPE_NOPE%/y"), "%NOPE_NOPE%/y");
         assert!(expand("%NOPE_NOPE%/y").is_empty());
     }
 
     #[test]
     fn measure_and_clean() {
-        let dir = std::env::temp_dir().join(format!("omniget-clean-{}", uuid::Uuid::new_v4()));
+        let dir = std::env::temp_dir().join(format!("libreget-clean-{}", uuid::Uuid::new_v4()));
         std::fs::create_dir_all(dir.join("sub")).unwrap();
         std::fs::write(dir.join("a.bin"), vec![0u8; 100]).unwrap();
         std::fs::write(dir.join("sub/b.bin"), vec![0u8; 50]).unwrap();
@@ -977,7 +977,7 @@ mod tests {
 
 #[cfg(test)]
 mod live {
-    /// `cargo test -p omniget-core --lib tools::sysclean::live -- --ignored --nocapture`
+    /// `cargo test -p libreget-core --lib tools::sysclean::live -- --ignored --nocapture`
     #[test]
     #[ignore]
     fn scan_here() {

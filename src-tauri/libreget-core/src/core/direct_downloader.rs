@@ -814,7 +814,7 @@ mod tests {
 
     fn temp_file(name: &str, bytes: &[u8]) -> PathBuf {
         let dir = std::env::temp_dir().join(format!(
-            "omniget-direct-test-{}-{}",
+            "libreget-direct-test-{}-{}",
             std::process::id(),
             name
         ));

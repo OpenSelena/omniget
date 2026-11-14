@@ -792,7 +792,7 @@ mod tests {
 
 #[cfg(test)]
 mod live {
-    /// `cargo test -p omniget-core --lib tools::uninstall::live -- --ignored --nocapture`
+    /// `cargo test -p libreget-core --lib tools::uninstall::live -- --ignored --nocapture`
     #[tokio::test]
     #[ignore]
     async fn list_here() {

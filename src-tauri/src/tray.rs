@@ -94,7 +94,7 @@ fn tooltip_for(labels: &TrayLabels, count: u32, speed_bps: Option<f64>) -> Strin
     if count == 0 {
         return "LibreGet".into();
     }
-    let mut tooltip = format!("OmniGet — {}{}", count, labels.active_suffix);
+    let mut tooltip = format!("LibreGet — {}{}", count, labels.active_suffix);
     if let Some(bps) = speed_bps.filter(|bps| *bps > 0.0) {
         tooltip.push_str(" · ");
         tooltip.push_str(&format_speed(bps, labels));
@@ -164,7 +164,7 @@ impl BadgeCache {
 
 pub fn setup(app: &AppHandle) -> tauri::Result<()> {
     let labels = labels();
-    let open_item = MenuItemBuilder::with_id("open", "OmniGet").build(app)?;
+    let open_item = MenuItemBuilder::with_id("open", "LibreGet").build(app)?;
     let downloads_item = MenuItemBuilder::with_id("downloads", active_label_for(&labels, 0))
         .enabled(false)
         .build(app)?;
@@ -198,7 +198,7 @@ pub fn setup(app: &AppHandle) -> tauri::Result<()> {
 
     TrayIconBuilder::with_id("main-tray")
         .icon(icon)
-        .tooltip("OmniGet")
+        .tooltip("LibreGet")
         .menu(&menu)
         .on_menu_event(|app, event| match event.id().as_ref() {
             "open" => show_window(app),
@@ -704,11 +704,11 @@ mod tests {
     #[test]
     fn tooltip_switches_between_count_and_speed() {
         let labels = TrayLabels::default();
-        assert_eq!(tooltip_for(&labels, 0, Some(1024.0)), "OmniGet");
-        assert_eq!(tooltip_for(&labels, 2, None), "OmniGet — 2 active");
+        assert_eq!(tooltip_for(&labels, 0, Some(1024.0)), "LibreGet");
+        assert_eq!(tooltip_for(&labels, 2, None), "LibreGet — 2 active");
         assert_eq!(
             tooltip_for(&labels, 1, Some(2.0 * 1024.0 * 1024.0)),
-            "OmniGet — 1 active · 2.0 MB/s"
+            "LibreGet — 1 active · 2.0 MB/s"
         );
     }
 

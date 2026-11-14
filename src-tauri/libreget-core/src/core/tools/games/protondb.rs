@@ -524,7 +524,7 @@ mod tests {
     }
 
     /// Bate na API de verdade com o appid 570 (Dota 2) e confere o formato.
-    /// `cargo test -p omniget-core --lib -- --ignored live_protondb`
+    /// `cargo test -p libreget-core --lib -- --ignored live_protondb`
     #[tokio::test]
     #[ignore]
     async fn live_protondb_answers_in_the_expected_shape() {

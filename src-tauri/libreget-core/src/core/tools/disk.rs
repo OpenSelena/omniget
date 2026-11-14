@@ -321,7 +321,7 @@ mod tests {
 
     #[test]
     fn tree() {
-        let dir = std::env::temp_dir().join(format!("omniget-disk-{}", uuid::Uuid::new_v4()));
+        let dir = std::env::temp_dir().join(format!("libreget-disk-{}", uuid::Uuid::new_v4()));
         std::fs::create_dir_all(dir.join("a/b")).unwrap();
         std::fs::write(dir.join("a/x.bin"), vec![0u8; 300]).unwrap();
         std::fs::write(dir.join("a/b/y.bin"), vec![0u8; 200]).unwrap();

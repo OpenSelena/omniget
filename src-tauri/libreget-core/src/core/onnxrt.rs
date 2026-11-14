@@ -1,7 +1,7 @@
 //! ONNX Runtime como binário gerido, no mesmo padrão do PDFium.
 //!
 //! O crate `ort` está com a feature `load-dynamic`: nada de nativo entra no
-//! build do OmniGet. A biblioteca do ONNX Runtime (`libonnxruntime.dylib`,
+//! build do LibreGet. A biblioteca do ONNX Runtime (`libonnxruntime.dylib`,
 //! `onnxruntime.dll`, `libonnxruntime.so`) é baixada sob demanda dos releases
 //! oficiais do `microsoft/onnxruntime` e guardada no diretório de dados do app.
 //! Quem não quiser baixar aponta um arquivo que já tem — igual ao PDFium.
@@ -185,7 +185,7 @@ pub fn version_marker_path() -> Option<PathBuf> {
 }
 
 /// A lib em uso e de onde ela veio: `"env"` quando o usuário apontou
-/// `ORT_DYLIB_PATH`, `"managed"` quando é a que o OmniGet baixou.
+/// `ORT_DYLIB_PATH`, `"managed"` quando é a que o LibreGet baixou.
 pub fn resolve_with_source() -> Option<(PathBuf, &'static str)> {
     if let Ok(raw) = std::env::var("ORT_DYLIB_PATH") {
         let p = PathBuf::from(raw.trim());
@@ -287,7 +287,7 @@ pub fn init() -> anyhow::Result<PathBuf> {
     let path = resolve_path().ok_or_else(missing_runtime_error)?;
     ort::init_from(&path)
         .map_err(|e| anyhow!("não consegui carregar {}: {}", path.display(), e))?
-        .with_name("omniget")
+        .with_name("libreget")
         .commit();
     let _ = READY.set(path.clone());
     Ok(path)

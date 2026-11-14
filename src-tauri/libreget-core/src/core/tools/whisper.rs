@@ -2,7 +2,7 @@
 //!
 //! O binário `whisper-cli` vem da release oficial no Windows (x64, CPU ou
 //! cuBLAS) e no Linux (Ubuntu x64/arm64). No macOS o upstream só publica o
-//! xcframework, então lá o OmniGet usa o `whisper-cli` do sistema (Homebrew:
+//! xcframework, então lá o LibreGet usa o `whisper-cli` do sistema (Homebrew:
 //! `brew install whisper-cpp`) ou um caminho escolhido pelo usuário.
 //! Modelos GGML vêm do Hugging Face para `<app_data>/models/whisper/`.
 

@@ -3,7 +3,7 @@
 //! O `yt_archive` sabe enumerar uma URL; para juntar vídeos de várias buscas
 //! (ex.: todos os guias de um jogo, em vários idiomas) a fila precisa ser
 //! semeada com resultados já filtrados. `seed` grava esses itens no mesmo
-//! estado `.omniget-archive.json`, sem rede, e o `yt_archive::run` segue dali
+//! estado `.libreget-archive.json`, sem rede, e o `yt_archive::run` segue dali
 //! com retomada, falhas registradas e teto de espaço em disco.
 
 use std::path::Path;
@@ -21,7 +21,7 @@ pub struct SeedResult {
     pub total: usize,
 }
 
-/// Lê NDJSON (uma linha por vídeo, como o `omniget search --json` imprime)
+/// Lê NDJSON (uma linha por vídeo, como o `libreget search --json` imprime)
 /// e devolve itens pendentes. Linha sem `id` ou que não é JSON é ignorada.
 pub fn parse_seed(text: &str) -> Vec<ArchiveItem> {
     let mut seen = std::collections::HashSet::new();

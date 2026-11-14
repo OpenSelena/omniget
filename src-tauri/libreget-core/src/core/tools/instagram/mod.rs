@@ -39,7 +39,7 @@ const ALPHABET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01
 
 #[derive(Debug, thiserror::Error)]
 pub enum IgError {
-    #[error("sessao do Instagram nao encontrada: capture os cookies pela extensao do OmniGet com o instagram.com aberto e logado")]
+    #[error("sessao do Instagram nao encontrada: capture os cookies pela extensao do LibreGet com o instagram.com aberto e logado")]
     NoSession,
     #[error("a sessao do Instagram expirou ou foi desconectada; capture os cookies de novo pela extensao")]
     LoginRequired,

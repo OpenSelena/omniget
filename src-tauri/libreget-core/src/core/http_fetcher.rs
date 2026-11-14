@@ -1341,7 +1341,7 @@ mod tests {
     async fn fetcher_downloads_small_file_streaming() {
         use std::io::Write;
         let temp_dir =
-            std::env::temp_dir().join(format!("omniget_http_fetcher_test_{}", now_unix_nanos()));
+            std::env::temp_dir().join(format!("libreget_http_fetcher_test_{}", now_unix_nanos()));
         std::fs::create_dir_all(&temp_dir).unwrap();
         let payload: Vec<u8> = (0u8..=255).cycle().take(200_000).collect();
 
@@ -1465,7 +1465,7 @@ mod tests {
     #[tokio::test]
     async fn fetcher_downloads_multi_segment_with_range() {
         let temp_dir =
-            std::env::temp_dir().join(format!("omniget_http_fetcher_chunked_{}", now_unix_nanos()));
+            std::env::temp_dir().join(format!("libreget_http_fetcher_chunked_{}", now_unix_nanos()));
         std::fs::create_dir_all(&temp_dir).unwrap();
         let payload: Vec<u8> = (0u8..=255).cycle().take(2 * 1024 * 1024).collect();
 
@@ -1522,7 +1522,7 @@ mod tests {
     #[tokio::test]
     async fn fetcher_resumes_from_sidecar_state() {
         let temp_dir = std::env::temp_dir().join(format!(
-            "omniget_http_fetcher_resume_load_{}",
+            "libreget_http_fetcher_resume_load_{}",
             now_unix_nanos()
         ));
         std::fs::create_dir_all(&temp_dir).unwrap();
@@ -1583,7 +1583,7 @@ mod tests {
     #[tokio::test]
     async fn fetcher_resume_sidecar_round_trip() {
         let temp_dir =
-            std::env::temp_dir().join(format!("omniget_http_fetcher_resume_{}", now_unix_nanos()));
+            std::env::temp_dir().join(format!("libreget_http_fetcher_resume_{}", now_unix_nanos()));
         std::fs::create_dir_all(&temp_dir).unwrap();
         let path = temp_dir.join("video.mp4.part.resume.json");
         let state = ResumeState {

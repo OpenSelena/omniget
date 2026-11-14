@@ -1,6 +1,6 @@
 //! Spicetify: personalização do cliente oficial do Spotify.
 //!
-//! O OmniGet não reimplementa o Spicetify; ele baixa o binário oficial do
+//! O LibreGet não reimplementa o Spicetify; ele baixa o binário oficial do
 //! release do GitHub (hash conferido) e o chama. A pasta de config é a
 //! padrão do Spicetify (`~/.config/spicetify`, `%APPDATA%\spicetify`), de
 //! propósito: quem já usa o CLI no terminal vê o mesmo estado aqui, e o
@@ -349,7 +349,7 @@ pub async fn status() -> SpicetifyStatus {
 fn github_client() -> anyhow::Result<reqwest::Client> {
     use reqwest::header::{HeaderMap, HeaderValue, ACCEPT, USER_AGENT};
     let mut headers = HeaderMap::new();
-    headers.insert(USER_AGENT, HeaderValue::from_static("OmniGet"));
+    headers.insert(USER_AGENT, HeaderValue::from_static("LibreGet"));
     headers.insert(
         ACCEPT,
         HeaderValue::from_static("application/vnd.github+json"),
@@ -642,7 +642,7 @@ mod tests {
     #[test]
     fn ini_le_listas_e_secoes() {
         let text = "[Setting]\ncurrent_theme = Dribbblish\ncolor_scheme = dark\n\n[AdditionalOptions]\nextensions = a.js|b.js\ncustom_apps = marketplace\n[Backup]\nversion = 1.2.3\n";
-        let dir = std::env::temp_dir().join(format!("omniget-spicetify-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("libreget-spicetify-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("config-xpui.ini");
         std::fs::write(&path, text).unwrap();

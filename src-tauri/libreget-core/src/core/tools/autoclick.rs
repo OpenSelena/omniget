@@ -2,7 +2,7 @@
 //! timer de alta resolução (sleep grosso + espera ativa no último
 //! milissegundo), CPS fixo ou em faixa aleatória, botão, clique duplo, limite
 //! por cliques ou tempo e posição fixa. Multiplataforma via `enigo`; no macOS
-//! exige a permissão de Acessibilidade para o OmniGet, no Wayland o clique
+//! exige a permissão de Acessibilidade para o LibreGet, no Wayland o clique
 //! sintético é limitado. O atalho global fica no app (hotkey.rs).
 
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
@@ -112,7 +112,7 @@ pub fn start(opts: ClickOptions) -> anyhow::Result<()> {
     *STARTED.lock().unwrap_or_else(|e| e.into_inner()) = Some(Instant::now());
 
     std::thread::Builder::new()
-        .name("omniget-autoclick".into())
+        .name("libreget-autoclick".into())
         .spawn(move || {
             let mut enigo = match Enigo::new(&Settings::default()) {
                 Ok(e) => e,

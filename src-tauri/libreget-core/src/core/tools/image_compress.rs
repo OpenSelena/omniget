@@ -345,7 +345,7 @@ mod tests {
 
     #[test]
     fn end_to_end_hits_the_target_and_shrinks_when_it_must() {
-        let dir = std::env::temp_dir().join("omniget-imgcompress-test");
+        let dir = std::env::temp_dir().join("libreget-imgcompress-test");
         std::fs::create_dir_all(&dir).unwrap();
         let src = dir.join("grande.png");
         photo(1400, 1000).save(&src).unwrap();
@@ -387,7 +387,7 @@ mod tests {
 
     #[test]
     fn an_impossible_target_is_admitted_end_to_end() {
-        let dir = std::env::temp_dir().join("omniget-imgcompress-hard");
+        let dir = std::env::temp_dir().join("libreget-imgcompress-hard");
         std::fs::create_dir_all(&dir).unwrap();
         let src = dir.join("ruido.png");
         noisy(1600, 1200).save(&src).unwrap();
@@ -413,7 +413,7 @@ mod tests {
 
     #[test]
     fn dry_run_writes_nothing() {
-        let dir = std::env::temp_dir().join("omniget-imgcompress-dry");
+        let dir = std::env::temp_dir().join("libreget-imgcompress-dry");
         std::fs::create_dir_all(&dir).unwrap();
         let src = dir.join("teste.png");
         photo(200, 200).save(&src).unwrap();

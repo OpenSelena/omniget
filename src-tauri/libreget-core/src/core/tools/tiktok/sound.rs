@@ -188,7 +188,7 @@ pub fn sidecar_text(a: &Attribution) -> String {
     if a.duration > 0 {
         out.push_str(&format!("Duração: {}s\n", a.duration));
     }
-    out.push_str("\nBaixado com o OmniGet. Dê o crédito ao usar.\n");
+    out.push_str("\nBaixado com o LibreGet. Dê o crédito ao usar.\n");
     out
 }
 

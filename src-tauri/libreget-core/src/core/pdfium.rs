@@ -115,7 +115,7 @@ pub fn pdfium_version_marker_path() -> Option<PathBuf> {
 }
 
 /// The PDFium library actually in use, and where it came from: `"custom"` for
-/// a file the user pointed at, `"managed"` for the one OmniGet downloaded.
+/// a file the user pointed at, `"managed"` for the one LibreGet downloaded.
 ///
 /// Issue #222: yt-dlp and FFmpeg have honoured the user's own binary since
 /// the feature shipped, through `find_tool_with_source`. PDFium never did —

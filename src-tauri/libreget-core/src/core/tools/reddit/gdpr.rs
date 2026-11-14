@@ -731,7 +731,7 @@ mod tests {
     use super::*;
 
     fn temp() -> PathBuf {
-        let d = std::env::temp_dir().join(format!("omniget-rdgdpr-{}", uuid::Uuid::new_v4()));
+        let d = std::env::temp_dir().join(format!("libreget-rdgdpr-{}", uuid::Uuid::new_v4()));
         std::fs::create_dir_all(&d).expect("tempdir");
         d
     }

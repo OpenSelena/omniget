@@ -217,7 +217,7 @@ fn out_path(output_dir: &str, name: &str) -> PathBuf {
         dirs::audio_dir()
             .or_else(dirs::home_dir)
             .unwrap_or_default()
-            .join("OmniGet")
+            .join("LibreGet")
     } else {
         PathBuf::from(output_dir.trim())
     };

@@ -1428,7 +1428,7 @@ mod tests {
 
     fn temp_dir(name: &str) -> PathBuf {
         let dir =
-            std::env::temp_dir().join(format!("omniget-audio-tag-{name}-{}", std::process::id()));
+            std::env::temp_dir().join(format!("libreget-audio-tag-{name}-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         std::fs::create_dir_all(&dir).expect("criar tempdir do teste");
         dir

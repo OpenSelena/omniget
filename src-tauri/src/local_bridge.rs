@@ -704,7 +704,7 @@ async fn enqueue(
                 StatusCode::BAD_REQUEST,
                 "UNSUPPORTED_PROTOCOL",
                 format!(
-                    "Extension protocol v{client_version} is newer than host v{HOST_MAX_PROTOCOL_VERSION}. Please update OmniGet."
+                    "Extension protocol v{client_version} is newer than host v{HOST_MAX_PROTOCOL_VERSION}. Please update LibreGet."
                 ),
             );
         }
@@ -814,7 +814,7 @@ async fn cookies_export(
                 StatusCode::BAD_REQUEST,
                 "UNSUPPORTED_PROTOCOL",
                 format!(
-                    "Extension protocol v{client_version} is newer than host v{HOST_MAX_PROTOCOL_VERSION}. Please update OmniGet."
+                    "Extension protocol v{client_version} is newer than host v{HOST_MAX_PROTOCOL_VERSION}. Please update LibreGet."
                 ),
             );
         }
@@ -889,7 +889,7 @@ async fn mcp_post(
         return unauthorized();
     }
     if !crate::mcp::enabled() {
-        return (StatusCode::FORBIDDEN, Json(serde_json::json!({ "error": "MCP server is disabled in OmniGet → Tools → MCP server" }))).into_response();
+        return (StatusCode::FORBIDDEN, Json(serde_json::json!({ "error": "MCP server is disabled in LibreGet → Tools → MCP server" }))).into_response();
     }
     let msg: serde_json::Value = match serde_json::from_slice(&body) {
         Ok(v) => v,

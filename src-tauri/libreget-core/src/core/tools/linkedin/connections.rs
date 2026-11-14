@@ -488,7 +488,7 @@ mod tests {
 
     #[test]
     fn export_sem_connections_nao_estoura() {
-        let tmp = std::env::temp_dir().join(format!("omniget-li-vazio-{}", std::process::id()));
+        let tmp = std::env::temp_dir().join(format!("libreget-li-vazio-{}", std::process::id()));
         let _ = std::fs::create_dir_all(&tmp);
         let _ = std::fs::write(tmp.join("Skills.csv"), "Name\nRust\n");
         let r = run(&opts(&tmp), &noop_progress()).expect("roda");

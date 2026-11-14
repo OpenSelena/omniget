@@ -562,7 +562,7 @@ mod tests {
 
     #[test]
     fn reads_gps_and_camera_then_strips_them() {
-        let dir = std::env::temp_dir().join("omniget-exif-test");
+        let dir = std::env::temp_dir().join("libreget-exif-test");
         std::fs::create_dir_all(&dir).unwrap();
         let path = dir.join("com-gps.jpg");
         std::fs::write(&path, jpeg_with_gps()).unwrap();

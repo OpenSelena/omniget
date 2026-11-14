@@ -610,7 +610,7 @@ pub async fn apply(id: &str, enable: bool) -> anyhow::Result<Rule> {
     {
         if rule.requires_admin && !is_admin().await {
             return Err(anyhow!(
-                "essa regra precisa do OmniGet aberto como administrador"
+                "essa regra precisa do LibreGet aberto como administrador"
             ));
         }
         if let Some(prev) = reg_query(&rule.key, &rule.name).await {

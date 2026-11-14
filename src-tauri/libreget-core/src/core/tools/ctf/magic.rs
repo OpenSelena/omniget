@@ -315,9 +315,9 @@ mod tests {
 
     #[test]
     fn strings_finds_readable_runs() {
-        let data = b"\x00\x01FLAG{isso_aqui}\x00\xFFab\x00OmniGet";
+        let data = b"\x00\x01FLAG{isso_aqui}\x00\xFFab\x00LibreGet";
         let s = strings(data, 4, 10);
-        assert_eq!(s, vec!["FLAG{isso_aqui}", "OmniGet"]);
+        assert_eq!(s, vec!["FLAG{isso_aqui}", "LibreGet"]);
         // "ab" tem 2 caracteres e fica de fora.
         assert!(!s.iter().any(|x| x == "ab"));
     }

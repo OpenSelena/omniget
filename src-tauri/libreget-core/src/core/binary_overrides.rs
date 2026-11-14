@@ -1,4 +1,4 @@
-//! Binarios que o usuario apontou, em vez dos que o OmniGet gerencia.
+//! Binarios que o usuario apontou, em vez dos que o LibreGet gerencia.
 //!
 //! Pedido na issue #222: quem ja tem yt-dlp, FFmpeg ou PDFium instalado nao
 //! quer uma segunda copia dentro do diretorio do app. Ate aqui so o PDFium
@@ -6,7 +6,7 @@
 //! metade do problema e cria a outra metade, porque a copia envelhece sozinha.
 //!
 //! Aqui o caminho e guardado e usado no lugar. Se o usuario atualizar o yt-dlp
-//! dele pelo gerenciador de pacotes, o OmniGet passa a usar a versao nova sem
+//! dele pelo gerenciador de pacotes, o LibreGet passa a usar a versao nova sem
 //! fazer nada.
 //!
 //! O arquivo proprio, e nao um campo no `settings.json`, por dois motivos: nao
@@ -136,7 +136,7 @@ mod tests {
     use super::*;
 
     fn tempfile(tag: &str) -> PathBuf {
-        let p = std::env::temp_dir().join(format!("omniget-ovr-{tag}-{}", std::process::id()));
+        let p = std::env::temp_dir().join(format!("libreget-ovr-{tag}-{}", std::process::id()));
         std::fs::write(&p, b"stub").expect("cria arquivo");
         p
     }

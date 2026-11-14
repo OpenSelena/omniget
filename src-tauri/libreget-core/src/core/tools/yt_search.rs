@@ -1,8 +1,8 @@
 //! Busca de vídeos por texto (YouTube/SoundCloud) via `ytsearchN:`.
 //!
-//! Mora no core, e não só no comando Tauri, para que a UI e o `omniget-cli`
+//! Mora no core, e não só no comando Tauri, para que a UI e o `libreget-cli`
 //! usem a mesma busca: a CLI precisa dela para montar acervos a partir de uma
-//! lista de termos (ex.: `omniget search "mir4 boss" --json > hits.ndjson`),
+//! lista de termos (ex.: `libreget search "mir4 boss" --json > hits.ndjson`),
 //! e os filtros de duração/título ficam numa função pura testável sem rede.
 
 use serde::Serialize;
@@ -219,7 +219,7 @@ not json
     }
 
     /// Precisa de rede e do yt-dlp.
-    /// `cargo test -p omniget-core --lib -- --ignored live_yt_search`
+    /// `cargo test -p libreget-core --lib -- --ignored live_yt_search`
     #[tokio::test]
     #[ignore]
     async fn live_yt_search_returns_hits() {

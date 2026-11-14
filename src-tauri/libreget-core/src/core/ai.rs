@@ -676,7 +676,7 @@ mod tests {
     fn the_store_keeps_the_credential_where_it_belongs() {
         // Passa pelo mesmo caminho da tela de IA (store + arquivo), só que numa
         // pasta temporária: é o teste que pega troca de provedor vazando a chave.
-        let dir = std::env::temp_dir().join(format!("omniget-ai-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("libreget-ai-{}", std::process::id()));
         let _ = std::fs::remove_dir_all(&dir);
         TEST_DIR.with(|d| *d.borrow_mut() = Some(dir.clone()));
 
