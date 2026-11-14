@@ -43,7 +43,7 @@ test("returns null for malformed URLs", () => {
 });
 
 test("returns null for unsupported sites", () => {
-  assertNull("https://www.google.com/search?q=omniget");
+  assertNull("https://www.google.com/search?q=libreget");
   assertNull("https://github.com/OpenSelena/libreget");
   assertNull("https://example.com/video/123");
 });
@@ -83,9 +83,9 @@ test("YouTube: old embed /v/ format", () => {
 });
 
 test("YouTube: channel page is supported as profile", () => {
-  assertSupported("https://www.youtube.com/@omniget", "youtube", "profile");
+  assertSupported("https://www.youtube.com/@libreget", "youtube", "profile");
   assertSupported("https://www.youtube.com/channel/UCxyz", "youtube", "profile");
-  assertSupported("https://www.youtube.com/c/omniget", "youtube", "profile");
+  assertSupported("https://www.youtube.com/c/libreget", "youtube", "profile");
 });
 
 test("YouTube: youtube-nocookie.com", () => {
