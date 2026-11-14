@@ -482,9 +482,9 @@ mod tests {
 
     #[test]
     fn bare_filename_resolves_through_search_dirs() {
-        let tmp = std::env::temp_dir().join(format!("omniget-magnet-{}", std::process::id()));
+        let tmp = std::env::temp_dir().join(format!("libreget-magnet-{}", std::process::id()));
         std::fs::create_dir_all(&tmp).unwrap();
-        let file = tmp.join("OmniGetTest.torrent");
+        let file = tmp.join("LibreGetTest.torrent");
         std::fs::write(&file, b"d4:infod4:name4:teste").unwrap();
 
         // an absolute or relative path that exists is used as given
@@ -494,21 +494,21 @@ mod tests {
         );
         // a bare filename is found in the output folder
         assert_eq!(
-            resolve_torrent_file("OmniGetTest.torrent", &tmp),
+            resolve_torrent_file("LibreGetTest.torrent", &tmp),
             Some(file.clone())
         );
 
         // a missing filename stays a local-path input so the caller can report it
-        assert!(looks_like_torrent_path("omniget-missing-xyz.torrent"));
+        assert!(looks_like_torrent_path("libreget-missing-xyz.torrent"));
         assert_eq!(
-            resolve_torrent_file("omniget-missing-xyz.torrent", &tmp),
+            resolve_torrent_file("libreget-missing-xyz.torrent", &tmp),
             None
         );
 
         // URIs are never resolved as files
         assert_eq!(resolve_torrent_file("magnet:?xt=urn:btih:abc", &tmp), None);
         assert_eq!(
-            resolve_torrent_file("https://example.com/OmniGetTest.torrent", &tmp),
+            resolve_torrent_file("https://example.com/LibreGetTest.torrent", &tmp),
             None
         );
 

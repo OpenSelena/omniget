@@ -123,7 +123,7 @@ mod tests {
 
     fn tmp(nome: &str) -> PathBuf {
         let d = std::env::temp_dir().join(format!(
-            "omniget-cas-{nome}-{}",
+            "libreget-cas-{nome}-{}",
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
                 .unwrap()

@@ -108,7 +108,7 @@ mod tests {
     }
 
     fn tmp_dir(nome: &str) -> PathBuf {
-        let dir = std::env::temp_dir().join(format!("omniget-state-{}-{}", nome, now_ms()));
+        let dir = std::env::temp_dir().join(format!("libreget-state-{}-{}", nome, now_ms()));
         std::fs::create_dir_all(&dir).unwrap();
         dir
     }

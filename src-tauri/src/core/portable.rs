@@ -29,7 +29,9 @@ pub fn portable_webview_dir_from_env() -> Option<PathBuf> {
     if std::env::var("LIBREGET_PORTABLE").ok().as_deref() != Some("1") {
         return None;
     }
-    let data_dir = std::env::var("OMNIGET_DATA_DIR").ok()?;
+    let data_dir = std::env::var("LIBREGET_DATA_DIR")
+        .or_else(|_| std::env::var("OMNIGET_DATA_DIR"))
+        .ok()?;
     if data_dir.trim().is_empty() {
         return None;
     }
@@ -270,7 +272,7 @@ pub fn startup_banner(version: &str, pid: u32, portable: bool, data_dir: Option<
     let dir = data_dir
         .map(|d| d.display().to_string())
         .unwrap_or_else(|| "<unresolved>".to_string());
-    format!("OmniGet {version} starting — pid {pid}, {modo} mode, data dir {dir}")
+    format!("LibreGet {version} starting — pid {pid}, {modo} mode, data dir {dir}")
 }
 
 #[cfg(test)]
@@ -280,7 +282,7 @@ mod banner_tests {
     #[test]
     fn banner_nomeia_o_modo_e_o_diretorio() {
         let b = startup_banner("0.7.7", 1234, true, Some(Path::new("/pendrive/data")));
-        assert!(b.contains("0.7.7"));
+        assert!(b.contains("LibreGet 0.7.7"));
         assert!(b.contains("pid 1234"));
         assert!(b.contains("portable mode"));
         assert!(b.contains("/pendrive/data"));

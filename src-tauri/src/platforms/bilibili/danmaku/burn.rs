@@ -603,14 +603,14 @@ mod tests {
     /// Ponta a ponta com o FFmpeg gerido: gera um clipe, recorta e confere que
     /// o comentário aparece na hora certa (o quadro fica mais claro quando o
     /// texto branco entra em cena).
-    /// `cargo test -p omniget --lib -- --ignored live_danmaku_burn`
+    /// `cargo test -p libreget --lib -- --ignored live_danmaku_burn`
     #[tokio::test]
     #[ignore]
     async fn live_danmaku_burn_keeps_the_timing() {
         let ffmpeg = libreget_core::core::dependencies::ensure_ffmpeg()
             .await
             .unwrap();
-        let dir = std::env::temp_dir().join("omniget-danmaku-burn-live");
+        let dir = std::env::temp_dir().join("libreget-danmaku-burn-live");
         std::fs::create_dir_all(&dir).unwrap();
         let src = dir.join("fonte.mp4");
         let gen = libreget_core::core::process::command(&ffmpeg)
@@ -709,14 +709,14 @@ mod tests {
     }
 
     /// Mesmo clipe, agora mirando um tamanho de arquivo.
-    /// `cargo test -p omniget --lib -- --ignored live_danmaku_burn_target`
+    /// `cargo test -p libreget --lib -- --ignored live_danmaku_burn_target`
     #[tokio::test]
     #[ignore]
     async fn live_danmaku_burn_hits_the_size_target() {
         let ffmpeg = libreget_core::core::dependencies::ensure_ffmpeg()
             .await
             .unwrap();
-        let dir = std::env::temp_dir().join("omniget-danmaku-target-live");
+        let dir = std::env::temp_dir().join("libreget-danmaku-target-live");
         std::fs::create_dir_all(&dir).unwrap();
         let src = dir.join("fonte.mp4");
         let gen = libreget_core::core::process::command(&ffmpeg)
