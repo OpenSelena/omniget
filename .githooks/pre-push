@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -e
+
+echo "==> Verifying Rust formatting before push..."
+if ! cargo fmt --manifest-path src-tauri/Cargo.toml --all -- --check > /dev/null 2>&1; then
+    echo "ERROR: Unformatted Rust code detected!"
+    echo "Run: cargo fmt --manifest-path src-tauri/Cargo.toml --all"
+    exit 1
+fi
+echo "==> Rust formatting check passed."

@@ -80,6 +80,7 @@ Welcome to LibreGet. This file serves as the definitive reference and operating 
 
 ### Local Pre-Commit Verification
 Before pushing to `dev`:
+- `pnpm fmt:rs` : Auto-formats Rust workspace (`cargo fmt`) — enforced automatically via `.githooks/pre-commit` and `.githooks/pre-push`.
 - `pnpm test` : Runs full Vitest suite (must pass 100%).
 - `node scripts/e2e_verify.mjs` : Validates documentation suite routes, links, and accessibility.
 - `pnpm lint:ui <target>` : Required whenever modifying Svelte routes, UI components, stylesheets, `index.html`, or `docs/` — see [.agents/skills/ui-lint/SKILL.md](.agents/skills/ui-lint/SKILL.md).

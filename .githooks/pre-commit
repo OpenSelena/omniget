@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -e
+
+# Detect staged Rust files
+STAGED_RS=$(git diff --cached --name-only --diff-filter=ACM | grep '\.rs$' || true)
+
+if [ -n "$STAGED_RS" ]; then
+    echo "==> Auto-formatting staged Rust files with cargo fmt..."
+    cargo fmt --manifest-path src-tauri/Cargo.toml --all
+    for file in $STAGED_RS; do
+        if [ -f "$file" ]; then
+            git add "$file"
+        fi
+    done
+fi
