@@ -203,7 +203,7 @@ LibreGet は、よく使われるプラットフォーム向けのネイティ�
 | <img src="https://api.iconify.design/ph:images.svg?color=%23E0A800" width="18" height="18" align="center" alt="画像ギャラリー" /> 画像ギャラリー | gallery-dl を通じて 250 以上のサイト（DeviantArt、Pixiv、ArtStation、Flickr、Tumblr、Imgur、Kemono など）からギャラリーやプロフィールを丸ごと取得 |
 | <img src="https://api.iconify.design/ph:stack.svg?color=%23FFB340" width="18" height="18" align="center" alt="一括" /> 一括 | 多数のリンクを貼り付けるか `.txt` を読み込み、サブレディット全体、Reddit や X のプロフィール、Instagram や Pinterest のプロフィール、Facebook のアルバムをダウンロード |
 | <img src="https://api.iconify.design/ph:folder-simple.svg?color=%23A66A24" width="18" height="18" align="center" alt="ファイルと転送" /> ファイルと転送 | 内蔵の BitTorrent クライアントによる `.torrent` ファイルとマグネットリンク、HTTP による直接のファイル、HLS と DASH のマニフェスト、短い単語コードを使った 2 つの LibreGet 間での個人間転送 |
-| <img src="https://cdn.simpleicons.org/telegram/2CA5E0" width="18" height="18" align="center" alt="Telegram" /> Telegram | 組み込みの Telegram プラグインを通じて、参加しているチャンネルやグループの写真、動画、ファイル、音声を、チャンネルごとに整理されたフォルダー（`OmniGram/<channel>/`）に保存 |
+| <img src="https://cdn.simpleicons.org/telegram/2CA5E0" width="18" height="18" align="center" alt="Telegram" /> Telegram | 組み込みの Telegram プラグインを通じて、参加しているチャンネルやグループの写真、動画、ファイル、音声を、チャンネルごとに整理されたフォルダー（`LibreGram/<channel>/`）に保存 |
 
 一度設定すれば忘れてよいオプション：デフォルトの画質、音声のみの形式（MP3、M4A、Opus、FLAC、WAV）、字幕の言語と形式（SRT、VTT、ASS、埋め込みまたは別ファイル）、サムネイルとメタデータの埋め込み、ファイル名のテンプレート、プラットフォームごとの整理、既存ファイルのスキップ、チャプターごとの分割、速度制限、同時ダウンロード数、プロキシ。ルールを使えば、特定のチャンネルやホストを、毎回確認することなく、指定したフォルダーと画質に振り分けられます。フォロー中のチャンネルはバックグラウンドでチェックされ、新しいアップロードをトレイ通知付きで自動的にダウンロードすることもできます。
 
@@ -566,7 +566,7 @@ AI と通信するツールはすべて、**Settings → AI** で設定したプ
 
 ### <img src="https://cdn.simpleicons.org/telegram/2CA5E0" width="20" height="20" align="center" alt="Telegram" /> Telegram
 
-QR コードまたは電話番号でログインします。参加しているすべてのチャンネルとグループを閲覧し、写真、動画、ドキュメント、音声で絞り込み、ファイルを検索し、個別のメディアやチャットのアーカイブ全体を、進捗リスト付きでダウンロードできます。メディアのダウンロードは、サニタイズされたフォルダー名で `{download_dir}/OmniGram/{channel_name}/` に整理されます。
+QR コードまたは電話番号でログインします。参加しているすべてのチャンネルとグループを閲覧し、写真、動画、ドキュメント、音声で絞り込み、ファイルを検索し、個別のメディアやチャットのアーカイブ全体を、進捗リスト付きでダウンロードできます。メディアのダウンロードは、サニタイズされたフォルダー名で `{download_dir}/LibreGram/{channel_name}/` に整理されます。
 
 ### <img src="https://api.iconify.design/ph:arrows-clockwise.svg?color=%232AA845" width="20" height="20" align="center" alt="Convert" /> Convert
 

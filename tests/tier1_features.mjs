@@ -636,7 +636,7 @@ export function runTier1Tests() {
       'Tier 1: Root index.html Theme Toggle Button Rigor & Alignment',
       hasThemeFix,
       hasThemeFix ? 'Theme toggle button has flex centering and multi-key storage synchronization' : 'Theme toggle button lacks required styling or sync logic',
-      hasThemeFix ? null : 'Expected inline-flex centering on .themebtn and omni-theme synchronization'
+      hasThemeFix ? null : 'Expected inline-flex centering on .themebtn and theme synchronization'
     );
   }
 

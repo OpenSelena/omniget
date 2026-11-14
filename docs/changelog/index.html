@@ -1510,7 +1510,7 @@
               <span class="release-tag-pill">v0.16.6 Latest Stable</span>
               <span class="release-date">Released November 2026</span>
             </div>
-            <h2 class="release-title">Home Stage &amp; Omnibox V1, 4K &amp; 2K Quality Engine &amp; Global Download Dock</h2>
+            <h2 class="release-title">Home Stage &amp; LibreBox V1, 4K &amp; 2K Quality Engine &amp; Global Download Dock</h2>
           </div>
           <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.16.6" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
@@ -1524,8 +1524,8 @@
             What's New
           </h3>
           <ul class="release-list">
-            <li><strong>4K (2160p) &amp; 2K (1440p) Quality Engine</strong>: Added dedicated 4K and 2K resolution presets in the Home Omnibox popover (<code>Quality and more</code>) and Settings (<code>Quality &amp; format</code>), with upper-bound fallback selection (<code>height &lt;= H</code>) across Rust extractors (<code>vimeo.rs</code>, <code>twitch.rs</code>, <code>ytdlp.rs</code>).</li>
-            <li><strong>V1 Home Stage &amp; Omnibox Geometry</strong>: Restored the Home input wrapper to a <code>16px</code> card radius with an integrated <code>8px</code> concentric <code>Paste</code> button pill, added circular <code>+</code> action popover (batch mode, local <code>.torrent</code>, file transfer, advanced), unified stage transitions, and 3-line media preview card with duration badges.</li>
+            <li><strong>4K (2160p) &amp; 2K (1440p) Quality Engine</strong>: Added dedicated 4K and 2K resolution presets in the Home LibreBox popover (<code>Quality and more</code>) and Settings (<code>Quality &amp; format</code>), with upper-bound fallback selection (<code>height &lt;= H</code>) across Rust extractors (<code>vimeo.rs</code>, <code>twitch.rs</code>, <code>ytdlp.rs</code>).</li>
+            <li><strong>V1 Home Stage &amp; LibreBox Geometry</strong>: Restored the Home input wrapper to a <code>16px</code> card radius with an integrated <code>8px</code> concentric <code>Paste</code> button pill, added circular <code>+</code> action popover (batch mode, local <code>.torrent</code>, file transfer, advanced), unified stage transitions, and 3-line media preview card with duration badges.</li>
             <li><strong>Global Download Dock (<code>GlobalDownloadBar.svelte</code>)</strong>: Introduced a persistent floating bottom dock across all application routes featuring real-time byte counters, ETA, dynamic 60-point SVG throughput sparkline, and consolidated status/speed filter controls in <code>/downloads</code>.</li>
           </ul>
         </div>
@@ -1553,7 +1553,7 @@
               <span class="sidebar-tag">v0.16.5</span>
               <span class="release-date">Released November 2026</span>
             </div>
-            <h2 class="release-title">Home Geometry &amp; Asset Alignment: Centered Titlebar, Concentric Pill Omnibox &amp; Lossless Mascot Frames</h2>
+            <h2 class="release-title">Home Geometry &amp; Asset Alignment: Centered Titlebar, Concentric Pill LibreBox &amp; Lossless Mascot Frames</h2>
           </div>
           <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.16.5" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
@@ -1570,7 +1570,7 @@
             <li><strong>Shell &amp; Titlebar Alignment</strong>: Matched <code>.mac-titlebar</code> right inset and banner margins to <code>--pane-inset</code> so titlebar controls align vertically with the content pane center, and normalized the backend window title casing to <code>LibreGet</code>.</li>
             <li><strong>Lossless Mascot Framing</strong>: Normalized all 7 mascot PNGs onto a square <code>1320x1320</code> canvas with stripped edge halos, centered body anatomy, a shared baseline, square CSS sizing (<code>aspect-ratio: 1; object-fit: contain</code>), and an image load-race guard in <code>Mascot.svelte</code>.</li>
             <li><strong>Concentric Home Aura</strong>: Anchored the warm radial glow inside <code>.home-stage-hero</code> instead of the full scroll stage so it stays centered behind the mascot across all viewport heights.</li>
-            <li><strong>Omnibox Pill &amp; Action Menu</strong>: Switched the Home Omnibox wrapper to full pill rounding (<code>9999px</code>), equalized the left <code>+</code>, clear, and paste endcap heights to <code>32px</code>, aligned the <code>+</code> popover flush with the left inset (<code>8px</code> gap), and added localized <code>omnibox.more_actions</code> ARIA labels across all 12 locales.</li>
+            <li><strong>LibreBox Pill &amp; Action Menu</strong>: Switched the Home LibreBox wrapper to full pill rounding (<code>9999px</code>), equalized the left <code>+</code>, clear, and paste endcap heights to <code>32px</code>, aligned the <code>+</code> popover flush with the left inset (<code>8px</code> gap), and added localized <code>librebox.more_actions</code> ARIA labels across all 12 locales.</li>
           </ul>
         </div>
       </article>
@@ -1601,7 +1601,7 @@
             <li><strong>Intuitive Mode Selector</strong>: Renamed the confusing <code>Auto</code> mode button to <code>Video</code> with a dedicated video icon, alongside <code>Audio Only (MP3)</code> and <code>No Sound</code>. Renamed <code>Options</code> to <code>Quality and more</code>.</li>
             <li><strong>Unified Centered Home Stage</strong>: Kept the single centered stage with the warm radial aura and 52px white pill input across idle, link checking, and detected states without jumping to a flat top bar.</li>
             <li><strong>Immediate Media Preview</strong>: Triggered metadata prefetching immediately upon pasting a link, briefly softening the mascot during checking and opening the inspector card already populated with the 3-line preview (Title, Author, Duration).</li>
-            <li><strong>Post-Download Feedback</strong>: Centered an inline <code>Added to Downloads · Open Downloads</code> confirmation below the Omnibox with mascot celebration upon starting a download.</li>
+            <li><strong>Post-Download Feedback</strong>: Centered an inline <code>Added to Downloads · Open Downloads</code> confirmation below the LibreBox with mascot celebration upon starting a download.</li>
             <li><strong>Global Download Dock Polish</strong>: Added ETA estimates (<code>About X left</code>), subtle rounded sparkline container, and updated button label to <code>View downloads</code>.</li>
           </ul>
         </div>
@@ -1630,7 +1630,7 @@
           </h3>
           <ul class="release-list">
             <li><strong>Route-Scoped Toolbar Cleanup</strong>: Switched <code>toolbar-store.svelte.ts</code> to <code>$state.raw</code> with a monotonic registration token so <code>Downloads | History | Tools</code> and <code>Installed | Browse</code> toolbar segments and action buttons clear immediately when leaving <code>/downloads</code> or <code>/marketplace</code>.</li>
-            <li><strong>Minimal Home Stage</strong>: Removed the secondary hero subtitle copy on the idle Home stage while keeping the primary <code>Grab a link, get the file.</code> headline, Omnibox, and top-right <code>Search Ctrl+K</code> bar.</li>
+            <li><strong>Minimal Home Stage</strong>: Removed the secondary hero subtitle copy on the idle Home stage while keeping the primary <code>Grab a link, get the file.</code> headline, LibreBox, and top-right <code>Search Ctrl+K</code> bar.</li>
             <li><strong>Sharp Mascot During Link Inspection</strong>: Removed the CSS filter blur on the Penguin mascot and speech bubble when pasting or inspecting media links on the Home screen.</li>
           </ul>
         </div>
@@ -1644,7 +1644,7 @@
               <span class="sidebar-tag">v0.16.2</span>
               <span class="release-date">Released November 2026</span>
             </div>
-            <h2 class="release-title">V1 UI Upgrade: Omnibox Action Popover, Clickable Paste Pill, Thumbnail Duration Badge &amp; Global Download Dock</h2>
+            <h2 class="release-title">V1 UI Upgrade: LibreBox Action Popover, Clickable Paste Pill, Thumbnail Duration Badge &amp; Global Download Dock</h2>
           </div>
           <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.16.2" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
@@ -1658,7 +1658,7 @@
             Interface &amp; Experience Upgrades
           </h3>
           <ul class="release-list">
-            <li><strong>Omnibox Action Popover &amp; Paste Pill</strong>: Replaced the secondary link row with a circular <code>+</code> dropdown menu for batch URLs, <code>.torrent</code> files, P2P file sharing, and advanced options, alongside an interactive <code>Paste</code> button wired to the system clipboard.</li>
+            <li><strong>LibreBox Action Popover &amp; Paste Pill</strong>: Replaced the secondary link row with a circular <code>+</code> dropdown menu for batch URLs, <code>.torrent</code> files, P2P file sharing, and advanced options, alongside an interactive <code>Paste</code> button wired to the system clipboard.</li>
             <li><strong>Thumbnail Duration Overlay</strong>: Moved video duration to a bottom-right badge directly over the preview thumbnail and added subtle background mascot blur while inspecting links.</li>
             <li><strong>Global Floating Download Dock</strong>: Added a persistent bottom status bar outside the Downloads view displaying aggregate progress, byte counters, transfer speed, and a live 60-point SVG network throughput sparkline.</li>
             <li><strong>Downloads Toolbar Alignment</strong>: Aligned the segmented status filter pills and the download speed limit selector on a single horizontal header bar.</li>
@@ -1690,9 +1690,9 @@
           <ul class="release-list">
             <li><strong>Photo Post Media Kind Refinement</strong>: Corrected download queue kind categorization so photo and carousel items from Instagram and Twitter correctly display photo icons and card badges rather than defaulting to video.</li>
             <li><strong>Instagram Photo Post Thumbnails</strong>: Populated thumbnail URLs and extracted creator usernames for single-image and carousel posts in the native Instagram extractor.</li>
-            <li><strong>Twitter / X Preview Shimmer Guard</strong>: Propagated high-resolution image URLs to thumbnail metadata and added a fallback container in the omnibox preview to prevent infinite skeleton shimmer when thumbnails are unavailable.</li>
+            <li><strong>Twitter / X Preview Shimmer Guard</strong>: Propagated high-resolution image URLs to thumbnail metadata and added a fallback container in the librebox preview to prevent infinite skeleton shimmer when thumbnails are unavailable.</li>
             <li><strong>Unix Process Group Termination</strong>: Assigned dedicated POSIX process groups (<code>process_group(0)</code>) to child engine processes in Nami and added direct PID termination fallback, ensuring the Stop button reliably kills background tasks.</li>
-            <li><strong>CPU Usage Throttling</strong>: Capped yt-dlp concurrent fragment downloads to 4, constrained ffmpeg postprocessor threads to 2, and added debouncing to omnibox metadata prefetching.</li>
+            <li><strong>CPU Usage Throttling</strong>: Capped yt-dlp concurrent fragment downloads to 4, constrained ffmpeg postprocessor threads to 2, and added debouncing to librebox metadata prefetching.</li>
             <li><strong>Threads Share URL Resolution</strong>: Followed HTTP 301/302 redirects on <code>threads.net/share/</code> and <code>threads.com/share/</code> tokens to canonical post URLs before ID extraction.</li>
           </ul>
         </div>
@@ -1818,7 +1818,7 @@
             Simplified Design &amp; Zero Telemetry
           </h3>
           <ul class="release-list">
-            <li><strong>OmniDisc Removal</strong>: Completely removed the OmniDisc real-time chat system, MLS encryption, and audio crates (56,391 lines of code deleted across 92 Tauri IPC commands and 29 UI components).</li>
+            <li><strong>Legacy Chat Removal</strong>: Completely removed the legacy real-time chat system, MLS encryption, and audio crates (56,391 lines of code deleted across 92 Tauri IPC commands and 29 UI components).</li>
             <li><strong>Decoupled Relay Servers</strong>: Purged hardcoded third-party routing servers to enforce our local-first, zero-tracking policy. Users can configure custom self-hosted relays for P2P transfers.</li>
             <li><strong>League Companion Removal</strong>: Purged experimental League of Legends background daemon and companion views (21,739 lines deleted) to focus purely on high-performance downloading.</li>
           </ul>
@@ -1887,7 +1887,7 @@
           <ul class="release-list">
             <li>Fixed CLI progress event serialization so <code>libreget-cli --json</code> emits cleanly delimited, standard JSON objects (#154).</li>
             <li>Sanitized child process execution under Linux AppImages by purging bundled <code>$APPDIR</code> entries from <code>LD_LIBRARY_PATH</code> (#147).</li>
-            <li>Enhanced URL parser across both the Omnibox and CLI to reliably extract links embedded inside raw shared text strings (#155).</li>
+            <li>Enhanced URL parser across both the LibreBox and CLI to reliably extract links embedded inside raw shared text strings (#155).</li>
             <li>Updated finished and failed download queues to sort by recency (newest-first) instead of initial entry order (#96).</li>
           </ul>
         </div>
@@ -2361,7 +2361,7 @@
               <span class="sidebar-tag" style="background: var(--bg-muted); color: var(--text); font-weight: 700; padding: 3px 8px; border-radius: 6px;">v0.10.5</span>
               <span class="release-date">Released October 2026</span>
             </div>
-            <h2 class="release-title">Telegram OmniGram Directory Isolation &amp; Statically Embedded Plugins</h2>
+            <h2 class="release-title">Telegram LibreGram Directory Isolation &amp; Statically Embedded Plugins</h2>
           </div>
           <a href="https://github.com/OpenSelena/libreget/releases/tag/v0.10.5" target="_blank" rel="noopener" class="subtab-item" style="border: 1px solid var(--border); text-decoration: none;">
             <span>GitHub Tag</span>
@@ -2372,10 +2372,10 @@
         <div class="release-section">
           <h3 class="release-section-title">
             <svg class="icon icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-            Telegram &amp; OmniGram Directory Isolation
+            Telegram &amp; LibreGram Directory Isolation
           </h3>
           <ul class="release-list">
-            <li>Media files from Telegram channels now automatically organize into dedicated <code>OmniGram/{channel_name}/</code> subfolders.</li>
+            <li>Media files from Telegram channels now automatically organize into dedicated <code>LibreGram/{channel_name}/</code> subfolders.</li>
             <li>Added OS-safe folder name sanitization for Windows, macOS, and Linux to prevent illegal filesystem characters.</li>
             <li>Automatic folder reuse on subsequent downloads prevents redundant duplicate directory trees.</li>
             <li>Fixed <code>DC_ID_INVALID</code> handshake error when pulling large files from Telegram home servers.</li>
@@ -2621,7 +2621,7 @@
         </li>
         <li class="search-result-item" onclick="location.href='../changelog/'">
           <span class="search-result-title">Release Notes &amp; Changelog</span>
-          <span class="search-result-desc">Version v0.16.6 updates, V1 home omnibox, 4K &amp; 2K quality engine, and global download dock</span>
+          <span class="search-result-desc">Version v0.16.6 updates, V1 home librebox, 4K &amp; 2K quality engine, and global download dock</span>
         </li>
       </ul>
     </div>

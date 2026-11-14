@@ -203,7 +203,7 @@ LibreGet has native extractors for the platforms people use most, and hands ever
 | <img src="https://api.iconify.design/ph:images.svg?color=%23E0A800" width="18" height="18" align="center" alt="Image galleries" /> Image galleries | Whole galleries and profiles from 250+ sites through gallery-dl (DeviantArt, Pixiv, ArtStation, Flickr, Tumblr, Imgur, Kemono and more) |
 | <img src="https://api.iconify.design/ph:stack.svg?color=%23FFB340" width="18" height="18" align="center" alt="Bulk" /> Bulk | Paste many links or load a `.txt`, download whole subreddits, Reddit and X profiles, Instagram and Pinterest profiles, Facebook albums |
 | <img src="https://api.iconify.design/ph:folder-simple.svg?color=%23A66A24" width="18" height="18" align="center" alt="Files and transfer" /> Files and transfer | `.torrent` files and magnet links with a built-in BitTorrent client, direct HTTP files, HLS and DASH manifests, and person-to-person transfer between two LibreGet installs with a short word code |
-| <img src="https://cdn.simpleicons.org/telegram/2CA5E0" width="18" height="18" align="center" alt="Telegram" /> Telegram | Photos, videos, files and audio from any channel or group you belong to, saved into organized channel folders (`OmniGram/<channel>/`), through the embedded Telegram plugin |
+| <img src="https://cdn.simpleicons.org/telegram/2CA5E0" width="18" height="18" align="center" alt="Telegram" /> Telegram | Photos, videos, files and audio from any channel or group you belong to, saved into organized channel folders (`LibreGram/<channel>/`), through the embedded Telegram plugin |
 
 Options you set once and forget: default quality, audio-only format (MP3, M4A, Opus, FLAC or WAV), subtitle languages and format (SRT, VTT, ASS, embedded or sidecar), thumbnail and metadata embedding, filename template, organize by platform, skip existing files, split by chapters, speed limit, concurrent downloads, proxy. Rules send a given channel or host to a folder and quality of your choice without asking again. Followed channels are checked in the background and can download new uploads automatically with a tray notification.
 
@@ -566,7 +566,7 @@ The embedded Courses plugin supports 38 learning platforms, including **Hotmart*
 
 ### <img src="https://cdn.simpleicons.org/telegram/2CA5E0" width="20" height="20" align="center" alt="Telegram" /> Telegram
 
-Sign in with a QR code or your phone number. Browse every channel and group you belong to, filter by photo, video, document or audio, search files, and download individual media or entire chat archives with a progress list. Media downloads are organized into `{download_dir}/OmniGram/{channel_name}/` with sanitized folder names.
+Sign in with a QR code or your phone number. Browse every channel and group you belong to, filter by photo, video, document or audio, search files, and download individual media or entire chat archives with a progress list. Media downloads are organized into `{download_dir}/LibreGram/{channel_name}/` with sanitized folder names.
 
 ### <img src="https://api.iconify.design/ph:arrows-clockwise.svg?color=%232AA845" width="20" height="20" align="center" alt="Convert" /> Convert
 

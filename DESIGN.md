@@ -1,7 +1,7 @@
 ---
 version: alpha
-name: LibreGet Universal Studio & OmniGuard Security Suite
-description: Precision local media workbench and privacy security suite for LibreGet, OmniGuard, and Nami.
+name: LibreGet Universal Studio & LibreGuard Security Suite
+description: Precision local media workbench and privacy security suite for LibreGet, LibreGuard, and Nami.
 colors:
   primary: "#FF7D38"
   primary-container: "#F28500"
@@ -84,27 +84,27 @@ components:
     textColor: "{colors.text-muted}"
     rounded: "{rounded.sm}"
     padding: 4px
-  omnibox:
+  librebox:
     backgroundColor: "{colors.background}"
     textColor: "{colors.text-primary}"
     rounded: "{rounded.lg}"
     padding: 16px
 ---
 
-# Design System: LibreGet Universal Studio & OmniGuard Security Suite
+# Design System: LibreGet Universal Studio & LibreGuard Security Suite
 
-Design specification for LibreGet desktop suite, OmniGuard privacy shield, and Nami social archiver.
+Design specification for LibreGet desktop suite, LibreGuard privacy shield, and Nami social archiver.
 
 ## Overview
 - **Core Mental Model**: Precision local media workbench. Unifies high-velocity media extraction with offline reading, Hi-Fi listening, and verifiable system security.
 - **Surface Materiality**: Frosted glassmorphism (`backdrop-filter: blur(16px)`), precision hairline borders (`1px solid var(--border-line)`), layered card elevations, and tactile feedback. Avoids flat ungrounded cards or generic SaaS fluff.
-- **Physical Feedback**: Smooth state transitions (`0.25s cubic-bezier(0.16, 1, 0.3, 1)`), interactive live Omnibox preview with instant platform badge recognition, animated progress rings, and responsive tabs.
+- **Physical Feedback**: Smooth state transitions (`0.25s cubic-bezier(0.16, 1, 0.3, 1)`), interactive live LibreBox preview with instant platform badge recognition, animated progress rings, and responsive tabs.
 
 ## Colors
 ### Primary Foundations
 - **Brand Primary Orange (`#FF7D38` / `#F28500`)**: Download triggers, primary action buttons, key metrics, active focus rings.
 - **Accent Tech Sky (`#0284C7` / `#38BDF8`)**: Stream connections, protocol indicators, secondary actions, Nami accent.
-- **OmniGuard Security Emerald (`#10B981` / `#059669`)**: Cryptographic SHA-256 verification, zero-telemetry badge, integrity check passes, offline status.
+- **LibreGuard Security Emerald (`#10B981` / `#059669`)**: Cryptographic SHA-256 verification, zero-telemetry badge, integrity check passes, offline status.
 - **Course & Academic Violet (`#8B5CF6`)**: Course downloads, notes, PDF attachments, EPUB reader.
 
 ### Surface Tones (Adaptive Light & Dark Modes)
@@ -155,9 +155,9 @@ Design specification for LibreGet desktop suite, OmniGuard privacy shield, and N
   - Interactive inputs & chips: `10px` to `12px` (`sm`)
 
 ## Components
-1. **Floating Pill Navigation Bar**: High-contrast blur pill housing brand mascot (`Loop`), live tab switches (`Home`, `OmniGuard`, `Nami`, `158 Tools`, `Downloads`, `Release Notes`, `FAQ`), theme toggle, and GitHub star badge.
-2. **Interactive Omnibox Simulator**: Real-time URL parser with platform icon auto-detection (YouTube, Udemy, Instagram, TikTok, Bilibili, Magnet), dynamic resolution selector, and simulated live download stream with real-time ETA/speed telemetry.
-3. **OmniGuard Security & Privacy Matrix**: Detailed cryptographic security view with real SHA-256 hash checks, zero-telemetry guarantee, localhost 127.0.0.1 token verification, and sandboxed ABI isolation cards.
+1. **Floating Pill Navigation Bar**: High-contrast blur pill housing brand mascot (`Loop`), live tab switches (`Home`, `LibreGuard`, `Nami`, `158 Tools`, `Downloads`, `Release Notes`, `FAQ`), theme toggle, and GitHub star badge.
+2. **Interactive LibreBox Simulator**: Real-time URL parser with platform icon auto-detection (YouTube, Udemy, Instagram, TikTok, Bilibili, Magnet), dynamic resolution selector, and simulated live download stream with real-time ETA/speed telemetry.
+3. **LibreGuard Security & Privacy Matrix**: Detailed cryptographic security view with real SHA-256 hash checks, zero-telemetry guarantee, localhost 127.0.0.1 token verification, and sandboxed ABI isolation cards.
 4. **Interactive 158 Tools Hub**: 25-category filterable toolbox with live instant search query filter, status tags (`Ready`, `Beta`, `Planned`), and Rust command-line inspector.
 5. **Nami Social Archiver Shell**: Embedded interactive TUI and desktop console mirror for Instagram, TikTok, and X downloads with circular progress ring.
 6. **Operating System Platform Matrix**: Direct detection of client OS with instant Windows (.exe/portable/.msi), macOS (Universal M1-M4 DMG), and Linux (.AppImage/.deb/.rpm) download cards.

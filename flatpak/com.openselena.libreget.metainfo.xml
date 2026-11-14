@@ -149,7 +149,7 @@
     </release>
     <release version="0.7.0" date="2026-06-14">
       <description>
-        <p>Plugins install and update themselves at runtime with no restart, using defaults from the registry and honouring uninstalls. Redesigned marketplace with a My Plugins view and live install state. Settings were restructured into a grouped sidebar with drill-down sections, a search that filters and highlights, and controls removed for fields the backend ignored. New macOS shell with a source-list sidebar and command palette. The home omnibox was rebuilt around a URL bar, inspector and hero.</p>
+        <p>Plugins install and update themselves at runtime with no restart, using defaults from the registry and honouring uninstalls. Redesigned marketplace with a My Plugins view and live install state. Settings were restructured into a grouped sidebar with drill-down sections, a search that filters and highlights, and controls removed for fields the backend ignored. New macOS shell with a source-list sidebar and command palette. The home LibreBox was rebuilt around a URL bar, inspector and hero.</p>
       </description>
     </release>
     <release version="0.6.4" date="2026-06-11">
