@@ -17,7 +17,6 @@ export interface Announcement {
 }
 
 export const ANNOUNCEMENT_STORAGE_KEY = "libreget_seen_announcements";
-export const LEGACY_ANNOUNCEMENT_STORAGE_KEY = "omniget_seen_announcements";
 export const DEFAULT_ANNOUNCEMENT_URL =
   "https://raw.githubusercontent.com/OpenSelena/libreget/main/assets/announcements.json";
 
@@ -84,14 +83,14 @@ export async function checkAnnouncements(
     // Check seen IDs in storage
     if (typeof localStorage !== "undefined") {
       try {
-        const rawSeen = localStorage.getItem(ANNOUNCEMENT_STORAGE_KEY) ?? localStorage.getItem(LEGACY_ANNOUNCEMENT_STORAGE_KEY);
+        const rawSeen = localStorage.getItem(ANNOUNCEMENT_STORAGE_KEY);
         const seen: string[] = JSON.parse(rawSeen || "[]");
         if (Array.isArray(seen) && seen.includes(data.id)) {
           return;
         }
 
         // Avoid showing if onboarding wizard is incomplete
-        const onboardingDone = localStorage.getItem("libreget_onboarding_completed") ?? localStorage.getItem("omniget_onboarding_completed");
+        const onboardingDone = localStorage.getItem("libreget_onboarding_completed");
         if (onboardingDone === "false") {
           return;
         }

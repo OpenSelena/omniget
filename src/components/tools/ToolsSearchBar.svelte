@@ -16,7 +16,6 @@
   }: { query?: string; filter?: PlatformFilter; autofocus?: boolean; resultCount?: number } = $props();
 
   const FILTER_KEY = "libreget.tools.platform_filter";
-  const LEGACY_FILTER_KEY = "omniget.tools.platform_filter";
   const FILTERS: { id: PlatformFilter; key: string }[] = [
     { id: "all", key: "tools.hub.filter_all" },
     { id: "cross", key: "tools.hub.filter_cross" },
@@ -29,7 +28,7 @@
 
   onMount(() => {
     try {
-      const saved = (localStorage.getItem(FILTER_KEY) ?? localStorage.getItem(LEGACY_FILTER_KEY)) as PlatformFilter | null;
+      const saved = localStorage.getItem(FILTER_KEY) as PlatformFilter | null;
       if (saved && FILTERS.some((f) => f.id === saved)) filter = saved;
     } catch {}
     if (autofocus) input?.focus();

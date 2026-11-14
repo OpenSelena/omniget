@@ -334,12 +334,11 @@
   let { children }: { children: Snippet } = $props();
 
   const VACUUM_LAST_RUN_KEY = "libreget.library.auto_vacuum.last_run";
-  const LEGACY_VACUUM_LAST_RUN_KEY = "omniget.library.auto_vacuum.last_run";
 
   async function checkAutoVacuum() {
     try {
       const now = Date.now();
-      const lastRunStr = localStorage.getItem(VACUUM_LAST_RUN_KEY) ?? localStorage.getItem(LEGACY_VACUUM_LAST_RUN_KEY);
+      const lastRunStr = localStorage.getItem(VACUUM_LAST_RUN_KEY);
       const lastRun = lastRunStr ? parseInt(lastRunStr, 10) : 0;
 
       if (now - lastRun > 7 * 24 * 60 * 60 * 1000) {

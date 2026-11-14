@@ -133,10 +133,9 @@ export function paletteCss(sw: Swatch[]): string {
 }
 
 const COOKIES_KEY = "libreget.pinterest.cookies";
-const LEGACY_COOKIES_KEY = "omniget.pinterest.cookies";
 export function loadCookies(): string {
   try {
-    return localStorage.getItem(COOKIES_KEY) ?? localStorage.getItem(LEGACY_COOKIES_KEY) ?? "";
+    return localStorage.getItem(COOKIES_KEY) ?? "";
   } catch {
     return "";
   }

@@ -108,7 +108,7 @@
   let settings = $derived(getSettings());
   let typo = $derived(settings?.typography ?? DEFAULTS);
   let activePresetId = $derived(
-    typo.preset_name === "omniget-default" ? "libreget-default" : (typo.preset_name ?? null)
+    typo.preset_name ?? null
   );
   let isModified = $derived.by(() => {
     if (!activePresetId) return true;

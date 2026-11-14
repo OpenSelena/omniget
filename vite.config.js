@@ -55,7 +55,7 @@ function i18nKeysPlugin({ strict } = { strict: false }) {
 export default defineConfig(({ command }) => {
   const gitInfo = getGitInfo();
   const isBuild = command === "build";
-  const strictEnv = process.env.LIBREGET_I18N_STRICT ?? process.env.OMNIGET_I18N_STRICT;
+  const strictEnv = process.env.LIBREGET_I18N_STRICT;
   const strictI18n =
     strictEnv === "1" ||
     (isBuild && strictEnv !== "0");
