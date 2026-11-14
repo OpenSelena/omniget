@@ -643,7 +643,7 @@ pub fn run() {
                 });
             }
             // Make sure the OS routes `libreget://` to this binary even when the
-            // package didn't ship a desktop file with `MimeType=x-scheme-handler/omniget;`
+            // package didn't ship a desktop file with `MimeType=x-scheme-handler/libreget;`
             // or when the user is running from an AppImage / unpacked build.
             // No-op on macOS (which uses Info.plist registered by the bundler).
             #[cfg(any(target_os = "linux", target_os = "windows"))]

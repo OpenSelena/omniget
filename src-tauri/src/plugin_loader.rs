@@ -384,7 +384,7 @@ fn load_single_plugin(
     // ABI_VERSION alone cannot detect a plugin compiled by a different rustc.
     // Rust has no stable ABI — trait-object vtables, fat-pointer conventions
     // and std/serde type layouts can change between compiler releases — and
-    // every non-C-ABI type crossing this boundary (Box<dyn OmnigetPlugin>,
+    // every non-C-ABI type crossing this boundary (Box<dyn LibregetPlugin>,
     // Arc<dyn PluginHost>, String, serde_json::Value, boxed futures) is UB on
     // a mismatch. This is exactly what crashed v0.7.1 (host: rustc 1.97.0)
     // with registry plugins built by rustc 1.95/1.96: they passed the ABI v2
