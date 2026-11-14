@@ -31,7 +31,6 @@
         "scope": {
           "allow": [
             "$APPDATA/libreget/**",
-            "$APPDATA/omniget/**",
             "$DOWNLOAD/**",
             "$TEMP/**"
           ],
@@ -56,8 +55,7 @@
     "deep-link": {
       "desktop": {
         "schemes": [
-          "libreget",
-          "omniget"
+          "libreget"
         ]
       }
     }
