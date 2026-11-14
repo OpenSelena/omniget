@@ -211,7 +211,7 @@ pub fn resolve_telegram_download_dir(
     let is_already_folder = base
         .file_name()
         .and_then(|n| n.to_str())
-        .map(|n| n.eq_ignore_ascii_case("LibreGram") || n.eq_ignore_ascii_case("OmniGram"))
+        .map(|n| n.eq_ignore_ascii_case("LibreGram"))
         .unwrap_or(false);
 
     let libregram_root = if is_already_folder {
@@ -1331,19 +1331,12 @@ mod tests {
     }
 
     #[test]
-    fn test_resolve_telegram_download_dir_when_base_already_libregram_or_legacy() {
+    fn test_resolve_telegram_download_dir_when_base_already_libregram() {
         let base = "C:/Users/mint/Downloads/LibreGram";
         let dir = resolve_telegram_download_dir(base, Some("Evelina Ava"));
         assert_eq!(
             dir,
             PathBuf::from("C:/Users/mint/Downloads/LibreGram").join("Evelina Ava")
-        );
-
-        let legacy_base = "C:/Users/mint/Downloads/OmniGram";
-        let dir_legacy = resolve_telegram_download_dir(legacy_base, Some("Evelina Ava"));
-        assert_eq!(
-            dir_legacy,
-            PathBuf::from("C:/Users/mint/Downloads/OmniGram").join("Evelina Ava")
         );
     }
 
