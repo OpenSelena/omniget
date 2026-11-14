@@ -159,8 +159,8 @@ importers:
         version: 1.15.7
     devDependencies:
       '@sveltejs/adapter-static':
-        specifier: ^3.0.6
-        version: 3.0.10(@sveltejs/kit@2.51.0(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.57.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))(svelte@5.57.3)(typescript@5.9.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))
+        specifier: ^3.0.11
+        version: 3.0.11(@sveltejs/kit@2.51.0(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.57.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))(svelte@5.57.3)(typescript@5.9.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))
       '@sveltejs/kit':
         specifier: ^2.9.0
         version: 2.51.0(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.57.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))(svelte@5.57.3)(typescript@5.9.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4))
@@ -212,8 +212,8 @@ packages:
   '@antfu/install-pkg@1.1.0':
     resolution: {integrity: sha512-MGQsmw10ZyI+EJo45CdSER4zEb+p31LpDAFp2Z3gkSd1yqVZGi0Ebx++YTEMonJy4oChEMLsxZ64j8FH6sSqtQ==}
 
-  '@babel/runtime@7.29.10':
-    resolution: {integrity: sha512-NpugTzbKgGrNe45Ui32cN8vCFFMxVtP/9rtfwv0nP5FRDAjvYBxJcLVpYA9mr1jxP6cnIT7x9LUzuDTbWYYNRA==}
+  '@babel/runtime@7.29.13':
+    resolution: {integrity: sha512-v+oN26xP4YIlQsbQ/CbTH1WG5m/l/DjKKZNy/Kp3f/AFvbgt7Em/D0FeMM3O2hX0YzeN2M16W8lOpyhIkfCBcQ==}
     engines: {node: '>=6.9.0'}
 
   '@babel/runtime@7.29.2':
@@ -621,8 +621,8 @@ packages:
     peerDependencies:
       acorn: ^8.9.0
 
-  '@sveltejs/adapter-static@3.0.10':
-    resolution: {integrity: sha512-7D9lYFWJmB7zxZyTE/qxjksvMqzMuYrrsyh1f4AlZqeZeACPRySjbC3aFiY55wb1tWUaKOQG9PVbm74JcN2Iew==}
+  '@sveltejs/adapter-static@3.0.11':
+    resolution: {integrity: sha512-DyX1bWx9uiPxzq7Mr+jnxqY+w3UhE3pYy5D1LcfdS++2KZTHSZBD60BoP44LjVgtGILfeOQCF8ESqzmLVrz4Ng==}
     peerDependencies:
       '@sveltejs/kit': ^2.0.0
 
@@ -1779,19 +1779,23 @@ packages:
 
   markmap-common@0.18.9:
     resolution: {integrity: sha512-MV2HQO7IGIm3jWEJXSG8vmdpqf4WIDXcEyAEN52lrWR1qD53Zg5l81JwjXoZ2l0rY5mofKYqUFlmdM2fqTGMVg==}
+    deprecated: Replaced by @markmap/* in 1.0.0. See https://markmap.js.org/docs/migration
 
   markmap-html-parser@0.18.11:
     resolution: {integrity: sha512-+kC5C4sCGntGUhGvTa5VIb5rtM75cSy/VCy3tzZoNAcn2qZGdgYvljN0WvjsOzrEzp+V6XKgwzO0u2TdzNAiOg==}
+    deprecated: Replaced by @markmap/* in 1.0.0. See https://markmap.js.org/docs/migration
     peerDependencies:
       markmap-common: '*'
 
   markmap-lib@0.18.12:
     resolution: {integrity: sha512-WCA4OT+b71jYg0e4PS/6NRKqihod5OpPsvw1jEGHQwCtqQrY/yXXCeRyuL3axOS5cMy5pV8BSl4CwKfJU1LxJg==}
+    deprecated: Replaced by @markmap/* in 1.0.0. See https://markmap.js.org/docs/migration
     peerDependencies:
       markmap-common: '*'
 
   markmap-view@0.18.12:
     resolution: {integrity: sha512-D8bzT1YwIC/8rkbwm6WzigVUrpOAGv7ioEGTi1Lj+Oo8gO5sAm6hhli27jvTgUcZ9TwBeIWZ+dSUP+AupYUGlQ==}
+    deprecated: Replaced by @markmap/* in 1.0.0. See https://markmap.js.org/docs/migration
     peerDependencies:
       markmap-common: '*'
 
@@ -2249,7 +2253,7 @@ snapshots:
       package-manager-detector: 1.6.0
       tinyexec: 1.1.1
 
-  '@babel/runtime@7.29.10': {}
+  '@babel/runtime@7.29.13': {}
 
   '@babel/runtime@7.29.2': {}
 
@@ -2367,7 +2371,7 @@ snapshots:
 
   '@gera2ld/jsx-dom@2.2.2':
     dependencies:
-      '@babel/runtime': 7.29.10
+      '@babel/runtime': 7.29.13
 
   '@iconify/types@2.0.0': {}
 
@@ -2500,7 +2504,7 @@ snapshots:
     dependencies:
       acorn: 8.15.0
 
-  '@sveltejs/adapter-static@3.0.10(@sveltejs/kit@2.51.0(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.57.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))(svelte@5.57.3)(typescript@5.9.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))':
+  '@sveltejs/adapter-static@3.0.11(@sveltejs/kit@2.51.0(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.57.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))(svelte@5.57.3)(typescript@5.9.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))':
     dependencies:
       '@sveltejs/kit': 2.51.0(@sveltejs/vite-plugin-svelte@5.1.1(svelte@5.57.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4)))(svelte@5.57.3)(typescript@5.9.3)(vite@6.4.4(@types/node@26.6.6)(yaml@2.8.4))
 
@@ -3674,7 +3678,7 @@ snapshots:
 
   markmap-common@0.18.9:
     dependencies:
-      '@babel/runtime': 7.29.10
+      '@babel/runtime': 7.29.13
       '@gera2ld/jsx-dom': 2.2.2
       npm2url: 0.2.4
 
