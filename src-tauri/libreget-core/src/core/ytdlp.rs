@@ -1128,7 +1128,7 @@ pub enum UpdateCheck {
 }
 
 /// `yt-dlp --update-to <canal>` uma vez por sessão, no mesmo canal que
-/// `check_ytdlp_freshness` usa (`OMNIGET_YTDLP_CHANNEL`, padrão stable). Antes
+/// `check_ytdlp_freshness` usa (`LIBREGET_YTDLP_CHANNEL`, padrão stable). Antes
 /// o boot pedia `nightly` e a freshness pedia `stable`, e um rebaixava o
 /// outro (B2).
 pub async fn check_ytdlp_update(ytdlp: &Path) -> anyhow::Result<bool> {

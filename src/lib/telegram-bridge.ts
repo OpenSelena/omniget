@@ -666,7 +666,6 @@ export function isLibregetFolder(chat: TelegramChat): boolean {
   if (chat.chat_type !== "channel") return false;
   return /\[(og|lg)\]\s*$/i.test(chat.title);
 }
-export const isOmnigetFolder = isLibregetFolder;
 
 export function studyChatsCacheGet(): Promise<{ chats: StudyCachedChat[] }> {
   return pluginInvoke<{ chats: StudyCachedChat[] }>(

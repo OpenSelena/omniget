@@ -66,7 +66,7 @@ Welcome to LibreGet. This file serves as the definitive reference and operating 
 
 5. **Asset Name & Casing Verification**:
    - Check the exact asset filenames uploaded by Tauri (`gh release view vX.Y.Z --json assets`).
-   - Notice casing: e.g. `LibreGet_0.11.0_x64-setup.exe` (capitalized `OmniGet`) vs `libreget_0.11.0_x64-portable.exe` (lowercase `omniget`).
+   - Notice casing: e.g. `LibreGet_0.11.0_x64-setup.exe` (capitalized `LibreGet`) vs `libreget_0.11.0_x64-portable.exe` (lowercase `libreget`).
    - Ensure `index.html` download buttons use the exact asset filenames.
 
 ---

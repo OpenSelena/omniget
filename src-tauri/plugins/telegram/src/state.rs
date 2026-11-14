@@ -206,10 +206,6 @@ pub fn libreget_data_dir() -> PathBuf {
     }
 }
 
-#[allow(dead_code)]
-pub fn omniget_data_dir() -> PathBuf {
-    libreget_data_dir()
-}
 
 pub fn persistent_state_path() -> PathBuf {
     let base = dirs::data_dir().unwrap_or_else(|| PathBuf::from("."));
