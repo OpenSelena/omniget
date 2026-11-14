@@ -24,7 +24,7 @@ pub async fn ensure_api_webview(
     .visible(false)
     .inner_size(100.0, 100.0)
     .initialization_script(
-        r#"window.__libreget_fetch = window.__omniget_fetch = function(url) {
+        r#"window.__libreget_fetch = function(url) {
             fetch(url, {
                 credentials: 'include',
                 headers: {
@@ -43,7 +43,7 @@ pub async fn ensure_api_webview(
     )
     .on_navigation(move |url| {
         let host = url.host_str().unwrap_or("");
-        if host == "libreget-api-result.local" || host == "omniget-api-result.local" {
+        if host == "libreget-api-result.local" {
             for (key, value) in url.query_pairs() {
                 if key == "data" {
                     *store.lock().unwrap() = Some(value.to_string());
@@ -74,7 +74,7 @@ pub async fn webview_get(
 ) -> anyhow::Result<String> {
     *result_store.lock().unwrap() = None;
 
-    let js = format!("(window.__libreget_fetch || window.__omniget_fetch)('{}')", url);
+    let js = format!("window.__libreget_fetch('{}')", url);
     window
         .eval(&js)
         .map_err(|e| anyhow!("eval failed: {}", e))?;

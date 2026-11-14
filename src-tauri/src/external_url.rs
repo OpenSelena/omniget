@@ -67,16 +67,14 @@ pub fn is_external_url(value: &str) -> bool {
 /// explicit intent.
 pub fn arrived_via_scheme(raw_url: &str, source: &str) -> bool {
     let t = raw_url.trim_start();
-    t.starts_with("libreget:") || t.starts_with("omniget:") || source == "deep-link"
+    t.starts_with("libreget:") || source == "deep-link"
 }
 
 pub fn normalize_external_url(value: &str) -> Option<String> {
     let trimmed = value.trim();
     let rest = trimmed
         .strip_prefix("libreget://")
-        .or_else(|| trimmed.strip_prefix("libreget:"))
-        .or_else(|| trimmed.strip_prefix("omniget://"))
-        .or_else(|| trimmed.strip_prefix("omniget:"))?;
+        .or_else(|| trimmed.strip_prefix("libreget:"))?;
     let rest = rest.trim_start_matches('/');
     if rest.is_empty() {
         return None;
@@ -428,7 +426,7 @@ mod tests {
     #[test]
     fn normalize_preserves_magnet_payload() {
         assert_eq!(
-            normalize_external_url("omniget:magnet:?xt=urn:btih:abc"),
+            normalize_external_url("libreget:magnet:?xt=urn:btih:abc"),
             Some("magnet:?xt=urn:btih:abc".to_string())
         );
     }
@@ -449,7 +447,7 @@ mod tests {
             "  libreget://example.com/v",
             "command-line"
         ));
-        assert!(arrived_via_scheme("omniget:magnet:?xt=foo", "command-line"));
+        assert!(arrived_via_scheme("libreget:magnet:?xt=foo", "command-line"));
     }
 
     #[test]

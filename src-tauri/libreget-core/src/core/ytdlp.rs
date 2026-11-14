@@ -450,7 +450,7 @@ pub(crate) fn prepare_override_args(
     }
     if !args
         .iter()
-        .any(|a| a.starts_with("after_move:LIBREGET_FILEPATH") || a.starts_with("after_move:OMNIGET_FILEPATH"))
+        .any(|a| a.starts_with("after_move:LIBREGET_FILEPATH"))
     {
         args.push("--print".to_string());
         args.push("after_move:LIBREGET_FILEPATH:%(filepath)s".to_string());
@@ -1110,9 +1110,7 @@ async fn probe_pot_provider(base_url: &str) -> super::pot_provider::ProviderHeal
 }
 
 fn pot_provider_base_url() -> Option<String> {
-    let raw = std::env::var("LIBREGET_POT_PROVIDER_URL")
-        .or_else(|_| std::env::var("OMNIGET_POT_PROVIDER_URL"))
-        .ok()?;
+    let raw = std::env::var("LIBREGET_POT_PROVIDER_URL").ok()?;
     super::pot_provider::normalize_base_url(&raw)
 }
 
@@ -1636,7 +1634,7 @@ fn parse_python_version(out: &str) -> Option<(u32, u32)> {
 
 fn python_candidates() -> Vec<PathBuf> {
     let mut v = Vec::new();
-    if let Ok(custom) = std::env::var("LIBREGET_PYTHON").or_else(|_| std::env::var("OMNIGET_PYTHON")) {
+    if let Ok(custom) = std::env::var("LIBREGET_PYTHON") {
         if !custom.trim().is_empty() {
             v.push(PathBuf::from(custom.trim()));
         }
@@ -1921,7 +1919,7 @@ pub enum YtdlpChannel {
 }
 
 fn ytdlp_channel() -> YtdlpChannel {
-    match std::env::var("LIBREGET_YTDLP_CHANNEL").or_else(|_| std::env::var("OMNIGET_YTDLP_CHANNEL")) {
+    match std::env::var("LIBREGET_YTDLP_CHANNEL") {
         Ok(v) if v.trim().eq_ignore_ascii_case("nightly") => YtdlpChannel::Nightly,
         _ => YtdlpChannel::Stable,
     }
@@ -4217,7 +4215,7 @@ fn spawn_stdout_reader(
                     _timer_start.elapsed()
                 );
             }
-            if let Some(rest) = line.strip_prefix("LIBREGET_FILEPATH:").or_else(|| line.strip_prefix("OMNIGET_FILEPATH:")) {
+            if let Some(rest) = line.strip_prefix("LIBREGET_FILEPATH:") {
                 let final_path = rest.trim();
                 if !final_path.is_empty() && final_path != "NA" {
                     authoritative_capture = true;
@@ -5422,7 +5420,7 @@ mod tests {
         assert!(args.contains(&PROGRESS_TEMPLATE.to_string()));
         assert!(args
             .iter()
-            .any(|a| a.starts_with("after_move:LIBREGET_FILEPATH") || a.starts_with("after_move:OMNIGET_FILEPATH")));
+            .any(|a| a.starts_with("after_move:LIBREGET_FILEPATH")));
         assert!(args.contains(&"-o".to_string()), "sem -o, recebe o padrão");
         assert_eq!(
             args.iter().filter(|a| *a == url).count(),
@@ -6061,10 +6059,8 @@ ERROR: [youtube] abc123: Requested format is not available";
     #[test]
     fn sem_variavel_nao_ha_provedor_de_pot_token() {
         let restore_libreget = std::env::var("LIBREGET_POT_PROVIDER_URL").ok();
-        let restore_omniget = std::env::var("OMNIGET_POT_PROVIDER_URL").ok();
 
         std::env::remove_var("LIBREGET_POT_PROVIDER_URL");
-        std::env::remove_var("OMNIGET_POT_PROVIDER_URL");
         assert_eq!(pot_provider_base_url(), None, "sem env nao ha provedor");
 
         std::env::set_var("LIBREGET_POT_PROVIDER_URL", "   ");
@@ -6084,10 +6080,6 @@ ERROR: [youtube] abc123: Requested format is not available";
         match restore_libreget {
             Some(v) => std::env::set_var("LIBREGET_POT_PROVIDER_URL", v),
             None => std::env::remove_var("LIBREGET_POT_PROVIDER_URL"),
-        }
-        match restore_omniget {
-            Some(v) => std::env::set_var("OMNIGET_POT_PROVIDER_URL", v),
-            None => std::env::remove_var("OMNIGET_POT_PROVIDER_URL"),
         }
     }
 
@@ -6298,7 +6290,7 @@ mod e2e {
     #[tokio::test]
     #[ignore]
     async fn e2e_download_reports_streams() {
-        let ytdlp = match std::env::var("LIBREGET_YTDLP").or_else(|_| std::env::var("OMNIGET_YTDLP")) {
+        let ytdlp = match std::env::var("LIBREGET_YTDLP") {
             Ok(p) => std::path::PathBuf::from(p),
             Err(_) => return,
         };
@@ -6306,7 +6298,6 @@ mod e2e {
         std::fs::create_dir_all(&out).unwrap();
         let (tx, mut rx) = tokio::sync::mpsc::channel(256);
         let url = std::env::var("LIBREGET_E2E_URL")
-            .or_else(|_| std::env::var("OMNIGET_E2E_URL"))
             .unwrap_or_else(|_| "https://www.youtube.com/watch?v=jNQXAC9IVRw".to_string());
         let collector = tokio::spawn(async move {
             let mut seen = Vec::new();

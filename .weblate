@@ -1,9 +1,9 @@
 [weblate]
 url = https://hosted.weblate.org/api/
-translation = omniget-openselena/frontend
+translation = libreget-openselena/frontend
 
-[component "omniget-openselena/frontend"]
-slug = omniget-openselena/frontend
+[component "libreget-openselena/frontend"]
+slug = libreget-openselena/frontend
 file_format = json-nested
 filemask = src/lib/i18n/*.json
 template = src/lib/i18n/en.json

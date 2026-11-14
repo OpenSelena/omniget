@@ -29,28 +29,12 @@ macro_rules! export_plugin {
         }
 
         #[no_mangle]
-        pub extern "C" fn omniget_plugin_abi_version() -> u32 {
-            $crate::ABI_VERSION
-        }
-
-        #[no_mangle]
         pub extern "C" fn libreget_plugin_build_info() -> *const ::std::os::raw::c_char {
             $crate::BUILD_INFO.as_ptr() as *const ::std::os::raw::c_char
         }
 
         #[no_mangle]
-        pub extern "C" fn omniget_plugin_build_info() -> *const ::std::os::raw::c_char {
-            $crate::BUILD_INFO.as_ptr() as *const ::std::os::raw::c_char
-        }
-
-        #[no_mangle]
         pub extern "C" fn libreget_plugin_init() -> *mut dyn $crate::LibregetPlugin {
-            let plugin = $constructor;
-            Box::into_raw(Box::new(plugin))
-        }
-
-        #[no_mangle]
-        pub extern "C" fn omniget_plugin_init() -> *mut dyn $crate::LibregetPlugin {
             let plugin = $constructor;
             Box::into_raw(Box::new(plugin))
         }

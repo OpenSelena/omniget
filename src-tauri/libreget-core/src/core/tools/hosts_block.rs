@@ -18,8 +18,6 @@ use serde::{Deserialize, Serialize};
 
 pub const BEGIN: &str = "# >>> LibreGet block list >>>";
 pub const END: &str = "# <<< LibreGet block list <<<";
-pub const LEGACY_BEGIN: &str = "# >>> OmniGet block list >>>";
-pub const LEGACY_END: &str = "# <<< OmniGet block list <<<";
 
 const ID: &str = "sys-hosts";
 
@@ -233,10 +231,10 @@ fn block_span(text: &str) -> Option<(usize, usize)> {
     for line in text.split_inclusive('\n') {
         let trimmed = line.trim_end_matches(['\r', '\n']).trim();
         if begin.is_none() {
-            if trimmed == BEGIN || trimmed == LEGACY_BEGIN {
+            if trimmed == BEGIN {
                 begin = Some(idx);
             }
-        } else if trimmed == END || trimmed == LEGACY_END {
+        } else if trimmed == END {
             return Some((begin?, idx + line.len()));
         }
         idx += line.len();
@@ -256,7 +254,6 @@ pub fn block_body(text: &str) -> Option<&str> {
     let body = &inner[after_begin..];
     let before_end = body
         .rfind(END)
-        .or_else(|| body.rfind(LEGACY_END))
         .map_or_else(
             || body.len(),
             |i| body[..i].rfind('\n').map_or(0, |j| j + 1),

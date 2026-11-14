@@ -16,47 +16,17 @@ impl AppPaths for DesktopPaths {
 
     fn data_dir(&self) -> PathBuf {
         dirs::data_dir()
-            .map(|d| {
-                let p = d.join("libreget");
-                if p.exists() {
-                    return p;
-                }
-                let old = d.join("omniget");
-                if old.exists() {
-                    return old;
-                }
-                p
-            })
+            .map(|d| d.join("libreget"))
             .unwrap_or_else(|| PathBuf::from("."))
     }
 
     fn cache_dir(&self) -> PathBuf {
         dirs::cache_dir()
-            .map(|d| {
-                let p = d.join("libreget");
-                if p.exists() {
-                    return p;
-                }
-                let old = d.join("omniget");
-                if old.exists() {
-                    return old;
-                }
-                p
-            })
+            .map(|d| d.join("libreget"))
             .unwrap_or_else(|| PathBuf::from("."))
     }
 
     fn bin_dir(&self) -> Option<PathBuf> {
-        dirs::data_dir().map(|d| {
-            let p = d.join("libreget").join("bin");
-            if p.exists() {
-                return p;
-            }
-            let old = d.join("omniget").join("bin");
-            if old.exists() {
-                return old;
-            }
-            p
-        })
+        dirs::data_dir().map(|d| d.join("libreget").join("bin"))
     }
 }

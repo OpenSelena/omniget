@@ -29,9 +29,7 @@ pub fn portable_webview_dir_from_env() -> Option<PathBuf> {
     if std::env::var("LIBREGET_PORTABLE").ok().as_deref() != Some("1") {
         return None;
     }
-    let data_dir = std::env::var("LIBREGET_DATA_DIR")
-        .or_else(|_| std::env::var("OMNIGET_DATA_DIR"))
-        .ok()?;
+    let data_dir = std::env::var("LIBREGET_DATA_DIR").ok()?;
     if data_dir.trim().is_empty() {
         return None;
     }
@@ -73,12 +71,10 @@ mod tests {
         let restore = (
             std::env::var("LIBREGET_PORTABLE").ok(),
             std::env::var("LIBREGET_DATA_DIR").ok(),
-            std::env::var("OMNIGET_DATA_DIR").ok(),
         );
 
         std::env::remove_var("LIBREGET_PORTABLE");
         std::env::remove_var("LIBREGET_DATA_DIR");
-        std::env::remove_var("OMNIGET_DATA_DIR");
         assert_eq!(
             portable_webview_dir_from_env(),
             None,
@@ -105,15 +101,6 @@ mod tests {
             Some(PathBuf::from("/tmp/libreget-portatil/data/webview"))
         );
 
-        // Fallback legado quando LIBREGET_DATA_DIR nao existe
-        std::env::remove_var("LIBREGET_DATA_DIR");
-        std::env::set_var("OMNIGET_DATA_DIR", "/tmp/legacy-omniget-portatil/data");
-        assert_eq!(
-            portable_webview_dir_from_env(),
-            Some(PathBuf::from("/tmp/legacy-omniget-portatil/data/webview"))
-        );
-        std::env::remove_var("OMNIGET_DATA_DIR");
-
         std::env::set_var("LIBREGET_PORTABLE", "0");
         assert_eq!(
             portable_webview_dir_from_env(),
@@ -128,10 +115,6 @@ mod tests {
         match restore.1 {
             Some(v) => std::env::set_var("LIBREGET_DATA_DIR", v),
             None => std::env::remove_var("LIBREGET_DATA_DIR"),
-        }
-        match restore.2 {
-            Some(v) => std::env::set_var("OMNIGET_DATA_DIR", v),
-            None => std::env::remove_var("OMNIGET_DATA_DIR"),
         }
     }
 }

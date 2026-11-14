@@ -14,13 +14,10 @@ use serde::{Deserialize, Serialize};
 
 pub const STATE_FILE: &str = ".libreget-archive.json";
 pub const ARCHIVE_FILE: &str = ".libreget-archive.txt";
-pub const LEGACY_STATE_FILE: &str = ".omniget-archive.json";
-pub const LEGACY_ARCHIVE_FILE: &str = ".omniget-archive.txt";
 const STATE_VERSION: u32 = 1;
 const ID: &str = "yt-archive";
 /// Prefixo do `--print` para separar o caminho final das linhas de progresso.
 const FILE_MARK: &str = "__libreget_file__";
-const LEGACY_FILE_MARK: &str = "__omniget_file__";
 
 // ── yt-dlp como processo ───────────────────────────────────────────────
 
@@ -234,13 +231,7 @@ impl ArchiveState {
 }
 
 pub fn state_path(dest: &Path) -> PathBuf {
-    let new_path = dest.join(STATE_FILE);
-    let legacy_path = dest.join(LEGACY_STATE_FILE);
-    if !new_path.exists() && legacy_path.exists() {
-        legacy_path
-    } else {
-        new_path
-    }
+    dest.join(STATE_FILE)
 }
 
 pub fn load_state(dest: &Path) -> Option<ArchiveState> {
@@ -358,12 +349,6 @@ pub fn parse_percent(line: &str) -> Option<f64> {
 pub fn parse_printed_file(line: &str) -> Option<String> {
     if let Some(idx) = line.find(FILE_MARK) {
         let path = line[idx + FILE_MARK.len()..].trim();
-        if !path.is_empty() {
-            return Some(path.to_string());
-        }
-    }
-    if let Some(idx) = line.find(LEGACY_FILE_MARK) {
-        let path = line[idx + LEGACY_FILE_MARK.len()..].trim();
         if !path.is_empty() {
             return Some(path.to_string());
         }
@@ -574,11 +559,7 @@ pub async fn run(opts: Options, progress: super::ProgressFn) -> anyhow::Result<A
     let mut st = open_state(&opts, &dest, &progress).await?;
     let bin = ytdlp_path().await?;
     let cookie = CookieFile::new(opts.session_netscape.as_deref())?;
-    let archive_txt = if !dest.join(ARCHIVE_FILE).exists() && dest.join(LEGACY_ARCHIVE_FILE).exists() {
-        dest.join(LEGACY_ARCHIVE_FILE)
-    } else {
-        dest.join(ARCHIVE_FILE)
-    };
+    let archive_txt = dest.join(ARCHIVE_FILE);
     let total = st.items.len() as u64;
     let limit = match opts.max_items {
         0 => usize::MAX,

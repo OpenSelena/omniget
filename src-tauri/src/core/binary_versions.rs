@@ -17,7 +17,6 @@ use std::path::{Path, PathBuf};
 pub const KEEP_VERSIONS: usize = 3;
 
 const SUFFIX: &str = ".libreget-prev.";
-const LEGACY_SUFFIX: &str = ".omniget-prev.";
 
 /// Caminho de arquivamento de `binary`, carimbado.
 ///
@@ -35,7 +34,7 @@ pub fn archive_path(binary: &Path, stamp_ms: u128) -> PathBuf {
 /// `Some(carimbo)` quando o arquivo e um arquivamento de `binary_name`.
 pub fn parse_archive(file_name: &str, binary_name: &str) -> Option<u128> {
     let rest = file_name.strip_prefix(binary_name)?;
-    let stamp = rest.strip_prefix(SUFFIX).or_else(|| rest.strip_prefix(LEGACY_SUFFIX))?;
+    let stamp = rest.strip_prefix(SUFFIX)?;
     stamp.parse().ok()
 }
 
@@ -141,13 +140,8 @@ mod tests {
             parse_archive("yt-dlp.libreget-prev.1234", "yt-dlp"),
             Some(1234)
         );
-        assert_eq!(
-            parse_archive("yt-dlp.omniget-prev.1234", "yt-dlp"),
-            Some(1234)
-        );
         assert_eq!(parse_archive("yt-dlp", "yt-dlp"), None);
         assert_eq!(parse_archive("ffmpeg.libreget-prev.1", "yt-dlp"), None);
-        assert_eq!(parse_archive("ffmpeg.omniget-prev.1", "yt-dlp"), None);
     }
 
     #[test]
@@ -173,7 +167,7 @@ mod tests {
     fn a_poda_mantem_exatamente_as_n_mais_novas() {
         let arch: Vec<(u128, PathBuf)> = (1..=6)
             .rev()
-            .map(|i| (i as u128, PathBuf::from(format!("/x/b.omniget-prev.{i}"))))
+            .map(|i| (i as u128, PathBuf::from(format!("/x/b.libreget-prev.{i}"))))
             .collect();
         let apagar = prune_list(&arch, 3);
         assert_eq!(apagar.len(), 3);
@@ -230,11 +224,11 @@ mod tests {
         std::fs::write(&intruso, "malicioso").unwrap();
         assert!(rollback_to(&bin, &intruso).is_err());
 
-        let de_outro = dir.join("ffmpeg.omniget-prev.1");
+        let de_outro = dir.join("ffmpeg.libreget-prev.1");
         std::fs::write(&de_outro, "outro binario").unwrap();
         assert!(rollback_to(&bin, &de_outro).is_err());
 
-        let fora = std::env::temp_dir().join("yt-dlp.omniget-prev.9");
+        let fora = std::env::temp_dir().join("yt-dlp.libreget-prev.9");
         std::fs::write(&fora, "de fora").unwrap();
         assert!(
             rollback_to(&bin, &fora).is_err(),

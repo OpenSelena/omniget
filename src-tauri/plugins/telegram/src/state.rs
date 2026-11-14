@@ -197,25 +197,12 @@ pub struct TelegramStreamInfo {
 
 pub fn libreget_data_dir() -> PathBuf {
     let base = dirs::data_dir().unwrap_or_else(|| PathBuf::from("."));
-    let new_dir = base.join("libreget");
-    let old_dir = base.join("omniget");
-    if !new_dir.exists() && old_dir.exists() {
-        old_dir
-    } else {
-        new_dir
-    }
+    base.join("libreget")
 }
-
 
 pub fn persistent_state_path() -> PathBuf {
     let base = dirs::data_dir().unwrap_or_else(|| PathBuf::from("."));
-    let new_path = base.join("libreget").join("telegram_plugin_state.json");
-    let old_path = base.join("omniget").join("telegram_plugin_state.json");
-    if !new_path.exists() && old_path.exists() {
-        old_path
-    } else {
-        new_path
-    }
+    base.join("libreget").join("telegram_plugin_state.json")
 }
 
 pub fn accounts_dir() -> PathBuf {

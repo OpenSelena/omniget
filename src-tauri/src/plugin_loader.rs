@@ -356,7 +356,6 @@ fn load_single_plugin(
 
     let abi_fn: libloading::Symbol<extern "C" fn() -> u32> = unsafe {
         lib.get(b"libreget_plugin_abi_version")
-            .or_else(|_| lib.get(b"omniget_plugin_abi_version"))
     }
     .map_err(|_| PluginLoadError {
         message: format!(
@@ -395,7 +394,6 @@ fn load_single_plugin(
     let build_info_fn: libloading::Symbol<extern "C" fn() -> *const std::os::raw::c_char> =
         unsafe {
             lib.get(b"libreget_plugin_build_info")
-                .or_else(|_| lib.get(b"omniget_plugin_build_info"))
         }
         .map_err(|_| PluginLoadError {
             message: format!(
@@ -442,7 +440,6 @@ fn load_single_plugin(
 
     let init_fn: libloading::Symbol<extern "C" fn() -> *mut dyn LibregetPlugin> = unsafe {
         lib.get(b"libreget_plugin_init")
-            .or_else(|_| lib.get(b"omniget_plugin_init"))
     }
     .map_err(|_| {
         PluginLoadError::simple("missing_init_symbol", "Missing libreget_plugin_init symbol")
