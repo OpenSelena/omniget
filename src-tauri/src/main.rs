@@ -8,7 +8,6 @@ fn check_portable_mode() {
                 let _ = std::fs::create_dir_all(&data_dir);
                 std::env::set_var("LIBREGET_PORTABLE", "1");
                 std::env::set_var("LIBREGET_DATA_DIR", data_dir.to_string_lossy().to_string());
-                std::env::set_var("OMNIGET_DATA_DIR", data_dir.to_string_lossy().to_string());
 
                 #[cfg(windows)]
                 if std::env::var("WEBVIEW2_USER_DATA_FOLDER").is_err() {

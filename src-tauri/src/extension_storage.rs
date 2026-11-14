@@ -344,7 +344,7 @@ pub fn read_extension_metadata(url: &str) -> Option<ExtensionMetadata> {
 
 /// Best-effort removal of the native-messaging artefacts left behind by the
 /// pre-0.5.3 builds: the Chrome / Firefox host manifests and the copied
-/// `omniget-native-host` binary that lived under `chrome-native-host/`.
+/// native host binary that lived under `chrome-native-host/`.
 ///
 /// We can't unregister the manifest atomically across all browsers — the
 /// best we can do is delete the files and let Chrome / Firefox skip them

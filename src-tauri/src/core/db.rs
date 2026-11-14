@@ -4,16 +4,10 @@ use std::sync::{Mutex, OnceLock};
 use rusqlite::Connection;
 
 const DB_FILE: &str = "libreget.db";
-const LEGACY_DB_FILE: &str = "omniget.db";
 
 fn db_path() -> Option<PathBuf> {
     let dir = crate::core::paths::app_data_dir()?;
-    let new_path = dir.join(DB_FILE);
-    let legacy_path = dir.join(LEGACY_DB_FILE);
-    if !new_path.exists() && legacy_path.exists() {
-        let _ = std::fs::rename(&legacy_path, &new_path);
-    }
-    Some(new_path)
+    Some(dir.join(DB_FILE))
 }
 
 fn open() -> Option<Connection> {

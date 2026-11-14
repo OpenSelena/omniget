@@ -48,9 +48,7 @@ pub fn get_portable_info() -> PortableInfo {
 
     PortableInfo {
         is_portable,
-        data_dir: std::env::var("LIBREGET_DATA_DIR")
-            .or_else(|_| std::env::var("OMNIGET_DATA_DIR"))
-            .ok(),
+        data_dir: std::env::var("LIBREGET_DATA_DIR").ok(),
         macos_webview_notice: cfg!(target_os = "macos") && is_portable,
     }
 }

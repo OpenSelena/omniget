@@ -8,7 +8,7 @@ pub struct PluginManifest {
     pub version: String,
     pub description: String,
     pub author: String,
-    #[serde(default, alias = "min_omniget_version")]
+    #[serde(default)]
     pub min_libreget_version: Option<String>,
     #[serde(default)]
     pub license: Option<String>,

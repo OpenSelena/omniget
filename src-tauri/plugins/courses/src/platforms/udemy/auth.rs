@@ -444,7 +444,7 @@ pub async fn authenticate(app: &tauri::AppHandle, email: &str) -> anyhow::Result
 
         #[cfg(not(windows))]
         {
-            if host == "libreget-udemy-cookie-extract.local" || host == "omniget-udemy-cookie-extract.local" {
+            if host == "libreget-udemy-cookie-extract.local" {
                 for (key, value) in url.query_pairs() {
                     if key == "cookies" {
                         *cookie_data_nav.lock().unwrap() = Some(value.to_string());

@@ -41,13 +41,6 @@ pub mod voompplay;
 pub fn session_file(filename: &str) -> anyhow::Result<std::path::PathBuf> {
     let data_dir = dirs::data_dir().ok_or_else(|| anyhow::anyhow!("Could not find app data directory"))?;
     let target = data_dir.join("libreget").join(filename);
-    if target.exists() {
-        return Ok(target);
-    }
-    let legacy = data_dir.join("omniget").join(filename);
-    if legacy.exists() {
-        return Ok(legacy);
-    }
     if let Some(parent) = target.parent() {
         let _ = std::fs::create_dir_all(parent);
     }
