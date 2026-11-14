@@ -1,4 +1,4 @@
-export type OmniState =
+export type LibreState =
   | { kind: "idle" }
   | { kind: "detecting" }
   | { kind: "detected"; info: PlatformInfo }
@@ -73,7 +73,7 @@ export function extractUrls(text: string): string[] {
   return results;
 }
 
-export function showInspectorForState(state: OmniState): boolean {
+export function showInspectorForState(state: LibreState): boolean {
   return (
     state.kind === "detected" ||
     state.kind === "preparing" ||
@@ -81,7 +81,7 @@ export function showInspectorForState(state: OmniState): boolean {
   );
 }
 
-export function showOmniboxForState(state: OmniState): boolean {
+export function showLibreboxForState(state: LibreState): boolean {
   return (
     state.kind === "idle" ||
     state.kind === "detecting" ||
@@ -93,3 +93,4 @@ export function showOmniboxForState(state: OmniState): boolean {
     state.kind === "search-empty"
   );
 }
+

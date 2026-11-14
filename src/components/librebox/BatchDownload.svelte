@@ -6,12 +6,12 @@
 
 <div class="feedback feedback-enter" data-supported="true">
   <span class="feedback-text">
-    {$t('omnibox.batch_detected', { count })}
+    {$t('librebox.batch_detected', { count })}
   </span>
 </div>
 
 <button class="button action-btn" onclick={onDownload}>
-  {$t('omnibox.batch_download_all')}
+  {$t('librebox.batch_download_all')}
 </button>
 
 <style>

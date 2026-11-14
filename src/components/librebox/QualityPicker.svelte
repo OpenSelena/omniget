@@ -10,13 +10,13 @@
 
   // Full ordered list of resolution options (label, yt-dlp quality value, height for filtering)
   const RESOLUTION_OPTIONS = [
-    { value: "best", key: "omnibox.quality_best", height: Infinity },
-    { value: "2160p", key: "omnibox.quality_2160p", height: 2160 },
-    { value: "1440p", key: "omnibox.quality_1440p", height: 1440 },
-    { value: "1080p", key: "omnibox.quality_1080p", height: 1080 },
-    { value: "720p", key: "omnibox.quality_720p", height: 720 },
-    { value: "480p", key: "omnibox.quality_480p", height: 480 },
-    { value: "360p", key: "omnibox.quality_360p", height: 360 },
+    { value: "best", key: "librebox.quality_best", height: Infinity },
+    { value: "2160p", key: "librebox.quality_2160p", height: 2160 },
+    { value: "1440p", key: "librebox.quality_1440p", height: 1440 },
+    { value: "1080p", key: "librebox.quality_1080p", height: 1080 },
+    { value: "720p", key: "librebox.quality_720p", height: 720 },
+    { value: "480p", key: "librebox.quality_480p", height: 480 },
+    { value: "360p", key: "librebox.quality_360p", height: 360 },
   ];
 
   let visibleOptions = $derived.by(() => {
@@ -40,7 +40,7 @@
 
 {#if !selectedFormatId}
   <div class="quality-group">
-    <span class="quality-label">{$t('omnibox.quality')}</span>
+    <span class="quality-label">{$t('librebox.quality')}</span>
     <div class="quality-pills">
       {#each visibleOptions as q (q.value)}
         <button
@@ -57,12 +57,12 @@
           class:active={selectedQuality === "audio"}
           onclick={() => { selectedQuality = "audio"; }}
         >
-          {$t('omnibox.quality_audio')}
+          {$t('librebox.quality_audio')}
         </button>
       {/if}
     </div>
     {#if availableHeights}
-      <span class="quality-hint">{$t('omnibox.quality_from_formats')}</span>
+      <span class="quality-hint">{$t('librebox.quality_from_formats')}</span>
     {/if}
   </div>
 {/if}

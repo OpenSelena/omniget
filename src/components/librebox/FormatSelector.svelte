@@ -115,7 +115,7 @@
 
 {#if isYtdlpPlatform(platform) && isPlaylist}
   <div class="formats-playlist-note">
-    {$t('omnibox.formats_playlist_note')}
+    {$t('librebox.formats_playlist_note')}
   </div>
 {:else if isYtdlpPlatform(platform)}
   <button
@@ -131,11 +131,11 @@
       </svg>
     {/if}
     {#if loadingFormats}
-      {$t('omnibox.view_formats')}...
+      {$t('librebox.view_formats')}...
     {:else if formats.length > 0}
-      {$t('omnibox.hide_formats')}
+      {$t('librebox.hide_formats')}
     {:else}
-      {$t('omnibox.view_formats')}
+      {$t('librebox.view_formats')}
     {/if}
   </button>
 
@@ -143,14 +143,14 @@
     <div class="formats-error">
       <span class="formats-error-text">{formatError}</span>
       <button class="button formats-retry-btn" onclick={onLoadFormats}>
-        {$t('omnibox.retry')}
+        {$t('librebox.retry')}
       </button>
     </div>
   {/if}
 
   {#if formats.length > 0}
     <div class="formats-panel">
-      <div class="formats-presets" role="radiogroup" aria-label={$t('omnibox.formats_presets_label')}>
+      <div class="formats-presets" role="radiogroup" aria-label={$t('librebox.formats_presets_label')}>
         {#if bestVA || bestVideo}
           <button
             type="button"
@@ -163,7 +163,7 @@
             <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <polygon points="5 3 19 12 5 21 5 3" />
             </svg>
-            <span>{$t('omnibox.preset_best')}</span>
+            <span>{$t('librebox.preset_best')}</span>
           </button>
         {/if}
         {#if hasMusicPreset}
@@ -180,7 +180,7 @@
               <circle cx="6" cy="18" r="3" />
               <circle cx="18" cy="16" r="3" />
             </svg>
-            <span>{$t('omnibox.preset_music')}</span>
+            <span>{$t('librebox.preset_music')}</span>
           </button>
         {/if}
         <button
@@ -195,7 +195,7 @@
             <circle cx="12" cy="12" r="3" />
             <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
           </svg>
-          <span>{$t('omnibox.preset_custom')}</span>
+          <span>{$t('librebox.preset_custom')}</span>
         </button>
       </div>
 
@@ -211,7 +211,7 @@
       {:else}
         <div class="formats-info">
           <span class="formats-note">
-            {$t('omnibox.formats_merge_note')}
+            {$t('librebox.formats_merge_note')}
           </span>
         </div>
       {/if}
@@ -220,13 +220,13 @@
         <div class="formats-list">
           <div class="format-header">
             <span>ID</span>
-            <span>{$t('omnibox.fmt_type')}</span>
-            <span>{$t('omnibox.fmt_quality')}</span>
-            <span>{$t('omnibox.fmt_streams')}</span>
-            <span>{$t('omnibox.fmt_video')}</span>
-            <span>{$t('omnibox.fmt_audio')}</span>
-            <span>{$t('omnibox.fmt_size')}</span>
-            <span>{$t('omnibox.fmt_speed')}</span>
+            <span>{$t('librebox.fmt_type')}</span>
+            <span>{$t('librebox.fmt_quality')}</span>
+            <span>{$t('librebox.fmt_streams')}</span>
+            <span>{$t('librebox.fmt_video')}</span>
+            <span>{$t('librebox.fmt_audio')}</span>
+            <span>{$t('librebox.fmt_size')}</span>
+            <span>{$t('librebox.fmt_speed')}</span>
           </div>
           {#each formats as fmt (fmt.format_id)}
             <button

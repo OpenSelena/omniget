@@ -46,7 +46,7 @@
         <circle cx="15" cy="10" r="1.5" />
         <circle cx="12" cy="15" r="1.5" />
       </svg>
-      <span class="cookie-picker-label">{$t('omnibox.cookie_account')}:</span>
+      <span class="cookie-picker-label">{$t('librebox.cookie_account')}:</span>
       <span class="cookie-picker-value">{selectedLabel}</span>
       <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <polyline points="6 9 12 15 18 9" />
@@ -67,7 +67,7 @@
             >
               <span class="cookie-picker-option-alias">{acc.alias}</span>
               <span class="cookie-picker-option-meta">
-                {acc.cookie_count} {$t('omnibox.cookie_account_cookies')}
+                {acc.cookie_count} {$t('librebox.cookie_account_cookies')}
               </span>
             </button>
           </li>

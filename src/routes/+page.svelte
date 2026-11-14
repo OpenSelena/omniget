@@ -3,30 +3,30 @@
   import { open } from "@tauri-apps/plugin-dialog";
   import { goto } from "$app/navigation";
   import { onMount } from "svelte";
-  import BilibiliPreviewExtras from "$components/omnibox/BilibiliPreviewExtras.svelte";
-  import DownloadModeSelector from "$components/omnibox/DownloadModeSelector.svelte";
-  import QualityPicker from "$components/omnibox/QualityPicker.svelte";
-  import FormatSelector from "$components/omnibox/FormatSelector.svelte";
-  import CookieAccountPicker from "$components/omnibox/CookieAccountPicker.svelte";
-  import OmniboxAdvanced from "$components/omnibox/OmniboxAdvanced.svelte";
-  import MediaPreview from "$components/omnibox/MediaPreview.svelte";
-  import BatchDownload from "$components/omnibox/BatchDownload.svelte";
-  import SearchResults from "$components/omnibox/SearchResults.svelte";
+  import BilibiliPreviewExtras from "$components/librebox/BilibiliPreviewExtras.svelte";
+  import DownloadModeSelector from "$components/librebox/DownloadModeSelector.svelte";
+  import QualityPicker from "$components/librebox/QualityPicker.svelte";
+  import FormatSelector from "$components/librebox/FormatSelector.svelte";
+  import CookieAccountPicker from "$components/librebox/CookieAccountPicker.svelte";
+  import LibreboxAdvanced from "$components/librebox/LibreboxAdvanced.svelte";
+  import MediaPreview from "$components/librebox/MediaPreview.svelte";
+  import BatchDownload from "$components/librebox/BatchDownload.svelte";
+  import SearchResults from "$components/librebox/SearchResults.svelte";
   import P2pSendDialog from "$components/p2p/P2pSendDialog.svelte";
   import P2pReceiveDialog from "$components/p2p/P2pReceiveDialog.svelte";
   import HomeHero from "$components/home/HomeHero.svelte";
   import HomeUrlBar from "$components/home/HomeUrlBar.svelte";
   import HomeInspector from "$components/home/HomeInspector.svelte";
   import {
-    type OmniState,
+    type LibreState,
     type PlatformInfo,
     type SearchResult,
     type HomeInputMode,
     showInspectorForState,
-    showOmniboxForState,
+    showLibreboxForState,
     isUrl,
     extractUrls,
-  } from "$lib/home/omnibox-controller";
+  } from "$lib/home/librebox-controller";
   import { getDownloads, formatBytes } from "$lib/stores/download-store.svelte";
   import { getDownloadStats } from "$lib/stores/download-stats.svelte";
   import { getSettings, updateSettings } from "$lib/stores/settings-store.svelte";
@@ -34,7 +34,7 @@
   import { onClipboardUrl } from "$lib/stores/clipboard-monitor";
   import { getMediaPreview, clearMediaPreview } from "$lib/stores/media-preview-store.svelte";
   import { clearPendingExternalPrefill, getPendingExternalPrefill, type ExternalUrlEvent } from "$lib/stores/external-url-store.svelte";
-  import { getOmniboxDraftUrl, setOmniboxDraftUrl } from "$lib/stores/omnibox-draft-store.svelte";
+  import { getLibreboxDraftUrl, setLibreboxDraftUrl } from "$lib/stores/librebox-draft-store.svelte";
   import { t } from "$lib/i18n";
   import { translateBackendError } from "$lib/error-translate";
   import { platformDisplayName } from "$lib/platform-display-names";
@@ -65,9 +65,9 @@
   // plugin + logged-in account), not from a pasted URL.
   const COURSE_PLATFORMS = new Set(["hotmart", "udemy"]);
 
-  let url = $state(getOmniboxDraftUrl());
+  let url = $state(getLibreboxDraftUrl());
   let homeInputMode = $state<HomeInputMode>("url");
-  let omniState = $state<OmniState>({ kind: "idle" });
+  let libreState = $state<LibreState>({ kind: "idle" });
   let debounceTimer = $state<ReturnType<typeof setTimeout> | null>(null);
   let downloadMode = $state<"auto" | "audio" | "mute">("auto");
   let selectedQuality = $state("best");
@@ -137,7 +137,7 @@
 
   onMount(() => {
     onClipboardUrl((detectedUrl) => {
-      if (omniState.kind === "preparing") return;
+      if (libreState.kind === "preparing") return;
       url = detectedUrl;
       const settings = getSettings();
       const autoDownload = !!(settings?.download.auto_download_on_paste && settings?.download.clipboard_detection);
@@ -154,15 +154,15 @@
   });
 
   $effect(() => {
-    setOmniboxDraftUrl(url);
+    setLibreboxDraftUrl(url);
   });
 
   const AUTO_DOWNLOAD_DELAY_MS = 2000;
 
   $effect(() => {
     if (!pendingAutoDownload) return;
-    if (omniState.kind === "detected") {
-      const info = omniState.info;
+    if (libreState.kind === "detected") {
+      const info = libreState.info;
       if (COURSE_PLATFORMS.has(info.platform) || info.platform === "p2p") {
         pendingAutoDownload = false;
         return;
@@ -170,17 +170,17 @@
       pendingAutoDownload = false;
       const snapshotUrl = url;
       setTimeout(() => {
-        if (url === snapshotUrl && omniState.kind === "detected") {
+        if (url === snapshotUrl && libreState.kind === "detected") {
           handleAction();
         }
       }, AUTO_DOWNLOAD_DELAY_MS);
     } else if (
-      omniState.kind === "unsupported" ||
-      omniState.kind === "error" ||
-      omniState.kind === "batch" ||
-      omniState.kind === "search-results" ||
-      omniState.kind === "search-empty" ||
-      omniState.kind === "idle"
+      libreState.kind === "unsupported" ||
+      libreState.kind === "error" ||
+      libreState.kind === "batch" ||
+      libreState.kind === "search-results" ||
+      libreState.kind === "search-empty" ||
+      libreState.kind === "idle"
     ) {
       pendingAutoDownload = false;
     }
@@ -252,8 +252,8 @@
       return firstCompletionOfSession && completionSeenIds.size === 1 ? "amazed" : "complete";
     }
 
-    if (omniState.kind === "preparing") return "downloading";
-    if (omniState.kind === "error") return "error";
+    if (libreState.kind === "preparing") return "downloading";
+    if (libreState.kind === "error") return "error";
 
     let hasActiveDownloading = false;
     let hasActiveStalled = false;
@@ -297,7 +297,7 @@
     else if (mascotEmotion === "downloading") key = "downloading";
     else if (mascotEmotion === "stalled") key = "stalled";
     else {
-      switch (omniState.kind) {
+      switch (libreState.kind) {
         case "idle": key = "idle"; break;
         case "detecting": key = "detecting"; break;
         case "detected": key = "detected"; break;
@@ -318,8 +318,8 @@
   });
 
 
-  let showOmnibox = $derived(showOmniboxForState(omniState));
-  let showInspector = $derived(showInspectorForState(omniState));
+  let showLibrebox = $derived(showLibreboxForState(libreState));
+  let showInspector = $derived(showInspectorForState(libreState));
 
   function isValidTimeBound(v: string): boolean {
     return /^(\d+:)?\d{1,2}:\d{1,2}(\.\d+)?$|^\d+(\.\d+)?$/.test(v.trim());
@@ -414,14 +414,14 @@
 
     const trimmed = url.trim();
     if (!trimmed) {
-      omniState = { kind: "idle" };
+      libreState = { kind: "idle" };
       return;
     }
 
     const urls = extractUrls(trimmed);
 
     if (urls.length > 1) {
-      omniState = { kind: "batch", urls };
+      libreState = { kind: "batch", urls };
       return;
     }
 
@@ -430,7 +430,7 @@
       if (url !== targetUrl) {
         url = targetUrl;
       }
-      omniState = { kind: "detecting" };
+      libreState = { kind: "detecting" };
       if (getSettings()?.download.auto_download_on_paste) {
         pendingAutoDownload = true;
       }
@@ -441,12 +441,12 @@
     }
 
     if (trimmed.length >= 2) {
-      omniState = { kind: "searching" };
+      libreState = { kind: "searching" };
       debounceTimer = setTimeout(() => {
         performSearch(trimmed);
       }, 600);
     } else {
-      omniState = { kind: "idle" };
+      libreState = { kind: "idle" };
     }
   }
 
@@ -479,13 +479,13 @@
           }
         }
         if (url.trim() !== value) return;
-        omniState = { kind: "detected", info: result };
+        libreState = { kind: "detected", info: result };
       } else {
-        omniState = { kind: "unsupported" };
+        libreState = { kind: "unsupported" };
       }
     } catch {
       if (url.trim() === value) {
-        omniState = { kind: "unsupported" };
+        libreState = { kind: "unsupported" };
       }
     }
   }
@@ -605,28 +605,28 @@
       });
       if (url.trim() !== query) return;
       if (results.length > 0) {
-        omniState = { kind: "search-results", results };
+        libreState = { kind: "search-results", results };
       } else {
-        omniState = { kind: "search-empty" };
+        libreState = { kind: "search-empty" };
       }
     } catch {
       if (url.trim() === query) {
-        omniState = { kind: "search-empty" };
+        libreState = { kind: "search-empty" };
       }
     }
   }
 
   function selectSearchResult(result: SearchResult) {
     url = result.url;
-    omniState = { kind: "detecting" };
+    libreState = { kind: "detecting" };
     detectPlatform(result.url);
   }
 
   function getContentTypeLabel(contentType: string | null): string {
-    if (!contentType) return $t("omnibox.content_type.unknown");
-    const key = `omnibox.content_type.${contentType}`;
+    if (!contentType) return $t("librebox.content_type.unknown");
+    const key = `librebox.content_type.${contentType}`;
     const result = $t(key);
-    if (result === key) return $t("omnibox.content_type.unknown");
+    if (result === key) return $t("librebox.content_type.unknown");
     return result;
   }
 
@@ -641,7 +641,7 @@
     }
     const targetUrl = url.trim();
     if (!targetUrl) {
-      formatError = $t("omnibox.formats_error");
+      formatError = $t("librebox.formats_error");
       return;
     }
     loadingFormats = true;
@@ -652,13 +652,13 @@
       if (gen !== formatFetchGeneration) return;
       formats = result;
       if (result.length === 0) {
-        formatError = $t("omnibox.no_formats");
+        formatError = $t("librebox.no_formats");
       }
     } catch (e: any) {
       if (gen !== formatFetchGeneration) return;
       formats = [];
       const msg = typeof e === "string" ? e : e.message ?? "";
-      formatError = msg ? translateBackendError(msg, $t) : $t("omnibox.formats_error");
+      formatError = msg ? translateBackendError(msg, $t) : $t("librebox.formats_error");
     } finally {
       loadingFormats = false;
     }
@@ -696,8 +696,8 @@
   }
 
   async function handleAction() {
-    if (omniState.kind !== "detected") return;
-    const info = omniState.info;
+    if (libreState.kind !== "detected") return;
+    const info = libreState.info;
 
     if (COURSE_PLATFORMS.has(info.platform)) {
       goto(`/courses/${encodeURIComponent(info.platform)}`);
@@ -714,13 +714,13 @@
 
     const isPlaylist = info.content_type === "playlist" && playlistEntries.length > 0;
     if (isPlaylist && selectedPlaylistItems.size === 0) {
-      showToast("error", $t("omnibox.playlist_none_selected") as string);
+      showToast("error", $t("librebox.playlist_none_selected") as string);
       return;
     }
 
     const isTorrent = torrentEntries.length > 0;
     if (isTorrent && selectedTorrentFiles.size === 0) {
-      showToast("error", $t("omnibox.torrent_none_selected") as string);
+      showToast("error", $t("librebox.torrent_none_selected") as string);
       return;
     }
 
@@ -751,7 +751,7 @@
       if (hit) {
         if (hit.then.output_dir) outputDir = hit.then.output_dir;
         if (hit.then.quality && !selectedQuality) ruleQuality = hit.then.quality;
-        showToast("info", $t("omnibox.rule_applied", { name: hit.name }) as string);
+        showToast("info", $t("librebox.rule_applied", { name: hit.name }) as string);
       }
     } catch {
       // Regra é conveniência: se falhar, o download segue com as escolhas manuais.
@@ -771,14 +771,14 @@
         current: snapshot,
       });
       if (mudou) {
-        showToast("info", $t("omnibox.media_changed", { summary: mudou }) as string);
+        showToast("info", $t("librebox.media_changed", { summary: mudou }) as string);
       }
     } catch {
       // Aviso é cortesia: se falhar, o download segue como sempre seguiu.
     }
     void invoke("record_media_snapshot", { url: currentUrl, snapshot }).catch(() => {});
 
-    omniState = { kind: "preparing", platform };
+    libreState = { kind: "preparing", platform };
     url = "";
 
     try {
@@ -798,15 +798,15 @@
       });
       persistLastDownloadOptions();
       clearMediaPreview();
-      omniState = { kind: "idle" };
+      libreState = { kind: "idle" };
       addedNoticeActive = true;
       if (addedNoticeTimer) clearTimeout(addedNoticeTimer);
       addedNoticeTimer = setTimeout(() => {
         addedNoticeActive = false;
       }, 3000);
     } catch (e: any) {
-      const msg = typeof e === "string" ? e : e.message ?? $t("omnibox.error");
-      omniState = {
+      const msg = typeof e === "string" ? e : e.message ?? $t("librebox.error");
+      libreState = {
         kind: "error",
         message: msg,
         originalUrl: currentUrl,
@@ -823,8 +823,8 @@
   };
 
   async function handleBatchDownload() {
-    if (omniState.kind !== "batch") return;
-    const batchUrls = omniState.urls;
+    if (libreState.kind !== "batch") return;
+    const batchUrls = libreState.urls;
 
     const settings = getSettings();
     let outputDir = settings?.download.default_output_dir ?? "";
@@ -848,13 +848,13 @@
         outputDir,
       });
       if (report.verdict === "stop") {
-        showToast("error", $t("omnibox.preflight_stop", { total: report.total }) as string);
+        showToast("error", $t("librebox.preflight_stop", { total: report.total }) as string);
         return;
       }
       if (report.problems.length > 0) {
         const ruins = new Set(report.problems.map(p => p.url));
         paraBaixar = batchUrls.filter(u => !ruins.has(u));
-        showToast("info", $t("omnibox.preflight_skips", {
+        showToast("info", $t("librebox.preflight_skips", {
           skipped: report.problems.length,
           total: report.total,
         }) as string);
@@ -864,7 +864,7 @@
       // segue como seguia antes.
     }
 
-    omniState = { kind: "idle" };
+    libreState = { kind: "idle" };
     url = "";
 
     const results = await Promise.allSettled(
@@ -881,15 +881,15 @@
 
     const queued = results.filter(r => r.status === "fulfilled").length;
     if (queued > 0) {
-      showToast("info", $t("omnibox.batch_queued", { count: queued }));
+      showToast("info", $t("librebox.batch_queued", { count: queued }));
       persistLastDownloadOptions();
     }
   }
 
   function handleRetry() {
-    if (omniState.kind !== "error") return;
-    url = omniState.originalUrl;
-    omniState = { kind: "detecting" };
+    if (libreState.kind !== "error") return;
+    url = libreState.originalUrl;
+    libreState = { kind: "detecting" };
     detectPlatform(url.trim());
   }
 
@@ -910,7 +910,7 @@
       outputDir = selected;
     }
 
-    omniState = { kind: "preparing", platform: "p2p" };
+    libreState = { kind: "preparing", platform: "p2p" };
     url = "";
 
     try {
@@ -923,10 +923,10 @@
         referer: null,
         cookieSlug: null,
       });
-      omniState = { kind: "idle" };
+      libreState = { kind: "idle" };
     } catch (e: any) {
-      const msg = typeof e === "string" ? e : e.message ?? $t("omnibox.error");
-      omniState = { kind: "error", message: msg, originalUrl: currentUrl, platform: "p2p" };
+      const msg = typeof e === "string" ? e : e.message ?? $t("librebox.error");
+      libreState = { kind: "error", message: msg, originalUrl: currentUrl, platform: "p2p" };
     }
   }
 
@@ -949,7 +949,7 @@
 
   async function openBatchFile() {
     const selected = await open({
-      title: $t("omnibox.batch_file_title"),
+      title: $t("librebox.batch_file_title"),
       filters: [{ name: "Text", extensions: ["txt"] }],
       multiple: false,
     });
@@ -957,7 +957,7 @@
     try {
       const urls = await invoke<string[]>("parse_batch_file", { path: selected });
       if (urls.length === 0) {
-        showToast("info", $t("omnibox.batch_file_empty"));
+        showToast("info", $t("librebox.batch_file_empty"));
         return;
       }
       if (urls.length === 1) {
@@ -966,9 +966,9 @@
         return;
       }
       url = urls.join("\n");
-      omniState = { kind: "batch", urls };
+      libreState = { kind: "batch", urls };
     } catch (e: any) {
-      const msg = typeof e === "string" ? e : e.message ?? $t("omnibox.error");
+      const msg = typeof e === "string" ? e : e.message ?? $t("librebox.error");
       showToast("error", msg);
     }
   }
@@ -993,7 +993,7 @@
 
   function handleDismiss() {
     clearMediaPreview();
-    omniState = { kind: "idle" };
+    libreState = { kind: "idle" };
     url = "";
   }
 </script>
@@ -1014,13 +1014,13 @@
             {$t('home.action_simple')}
           </button>
         </div>
-        <OmniboxAdvanced />
+        <LibreboxAdvanced />
       </div>
     </div>
   {:else}
     <div class="home-stage">
       <div class="home-stage-inner">
-        <div class="home-stage-hero" class:home-stage-hero--detecting={omniState.kind === "detecting"}>
+        <div class="home-stage-hero" class:home-stage-hero--detecting={libreState.kind === "detecting"}>
           <HomeHero
             emotion={mascotEmotion}
             stage
@@ -1036,7 +1036,7 @@
                   <path d="M12 5v14" />
                   <path d="M5 12h14" />
                 </svg>
-                <span class="card-title">{$t('omnibox.external_url_ready')}</span>
+                <span class="card-title">{$t('librebox.external_url_ready')}</span>
                 <button class="dismiss-btn" onclick={() => { externalNotice = null; }} aria-label={$t('common.close')}>
                   <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                     <path d="M18 6L6 18M6 6l12 12" />
@@ -1049,7 +1049,7 @@
             </div>
           {/if}
 
-          {#if showOmnibox}
+          {#if showLibrebox}
             <HomeUrlBar
               variant="stage"
               bind:url
@@ -1060,78 +1060,78 @@
             />
           {/if}
 
-          {#if omniState.kind === "detecting"}
+          {#if libreState.kind === "detecting"}
             <div class="feedback feedback-enter">
-              <span class="feedback-text">{$t('omnibox.detecting')}</span>
+              <span class="feedback-text">{$t('librebox.detecting')}</span>
             </div>
 
-          {:else if omniState.kind === "detected"}
+          {:else if libreState.kind === "detected"}
             <div class="feedback feedback-enter" data-supported="true">
-              <span class="feedback-text">{platformDisplayName(omniState.info.platform)}</span>
+              <span class="feedback-text">{platformDisplayName(libreState.info.platform)}</span>
             </div>
 
-          {:else if omniState.kind === "idle" && addedNoticeActive}
+          {:else if libreState.kind === "idle" && addedNoticeActive}
             <div class="feedback feedback-enter added-notice">
-              <strong class="added-notice-title">{$t('omnibox.added_to_downloads')}</strong>
+              <strong class="added-notice-title">{$t('librebox.added_to_downloads')}</strong>
               <button type="button" class="added-notice-link" onclick={() => goto("/downloads")}>
-                {$t('omnibox.open_downloads')}
+                {$t('librebox.open_downloads')}
               </button>
             </div>
 
-          {:else if omniState.kind === "batch"}
+          {:else if libreState.kind === "batch"}
             <div class="batch-options">
               <DownloadModeSelector bind:downloadMode />
-              <BatchDownload count={omniState.urls.length} onDownload={handleBatchDownload} />
+              <BatchDownload count={libreState.urls.length} onDownload={handleBatchDownload} />
             </div>
 
-          {:else if omniState.kind === "searching"}
+          {:else if libreState.kind === "searching"}
             <div class="feedback feedback-enter">
               <span class="feedback-spinner"></span>
-              <span class="feedback-text search-hint">{$t('omnibox.searching')}</span>
+              <span class="feedback-text search-hint">{$t('librebox.searching')}</span>
             </div>
 
-          {:else if omniState.kind === "search-results"}
-            <SearchResults results={omniState.results} onSelect={selectSearchResult} />
+          {:else if libreState.kind === "search-results"}
+            <SearchResults results={libreState.results} onSelect={selectSearchResult} />
 
-          {:else if omniState.kind === "search-empty"}
+          {:else if libreState.kind === "search-empty"}
             <div class="feedback feedback-enter" data-supported="false">
               <svg class="feedback-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="11" cy="11" r="8" />
                 <path d="M21 21l-4.35-4.35" />
               </svg>
-              <span class="feedback-text">{$t('omnibox.search_empty')}</span>
+              <span class="feedback-text">{$t('librebox.search_empty')}</span>
             </div>
 
-          {:else if omniState.kind === "unsupported"}
+          {:else if libreState.kind === "unsupported"}
             <div class="feedback feedback-enter" data-supported="false">
               <svg class="feedback-icon" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <path d="M12 8v4m0 4h.01" />
               </svg>
-              <span class="feedback-text">{$t('omnibox.unsupported')}</span>
+              <span class="feedback-text">{$t('librebox.unsupported')}</span>
             </div>
           {/if}
 
           <HomeInspector open={showInspector} title={$t('home.inspector_title')}>
-            {#if omniState.kind === "detected"}
+            {#if libreState.kind === "detected"}
               <MediaPreview bind:mediaPreview bind:imageLoading={previewImageLoading} />
-              {#if omniState.info.content_type === "playlist"}
+              {#if libreState.info.content_type === "playlist"}
                 <div class="playlist-picker">
                   <div class="playlist-head">
                     <span class="playlist-count">
-                      {$t('omnibox.playlist_selected', { selected: selectedPlaylistItems.size, total: playlistEntries.length })}
+                      {$t('librebox.playlist_selected', { selected: selectedPlaylistItems.size, total: playlistEntries.length })}
                     </span>
                     {#if !playlistLoading && playlistEntries.length > 0}
                       <div class="playlist-bulk">
-                        <button type="button" class="playlist-link" onclick={selectAllPlaylist}>{$t('omnibox.playlist_all')}</button>
-                        <button type="button" class="playlist-link" onclick={selectNonePlaylist}>{$t('omnibox.playlist_none')}</button>
+                        <button type="button" class="playlist-link" onclick={selectAllPlaylist}>{$t('librebox.playlist_all')}</button>
+                        <button type="button" class="playlist-link" onclick={selectNonePlaylist}>{$t('librebox.playlist_none')}</button>
                       </div>
                     {/if}
                   </div>
                   {#if playlistLoading}
-                    <div class="playlist-status"><span class="feedback-spinner"></span> {$t('omnibox.playlist_loading')}</div>
+                    <div class="playlist-status"><span class="feedback-spinner"></span> {$t('librebox.playlist_loading')}</div>
                   {:else if playlistEntries.length === 0}
-                    <span class="playlist-status">{$t('omnibox.playlist_empty')}</span>
+                    <span class="playlist-status">{$t('librebox.playlist_empty')}</span>
                   {:else}
                     <ul class="playlist-list">
                       {#each playlistEntries as entry (entry.index)}
@@ -1151,17 +1151,17 @@
                 <div class="playlist-picker">
                   <div class="playlist-head">
                     <span class="playlist-count">
-                      {$t('omnibox.torrent_selected', { selected: selectedTorrentFiles.size, total: torrentEntries.length })}
+                      {$t('librebox.torrent_selected', { selected: selectedTorrentFiles.size, total: torrentEntries.length })}
                     </span>
                     {#if !torrentLoading && torrentEntries.length > 0}
                       <div class="playlist-bulk">
-                        <button type="button" class="playlist-link" onclick={selectAllTorrent}>{$t('omnibox.playlist_all')}</button>
-                        <button type="button" class="playlist-link" onclick={selectNoneTorrent}>{$t('omnibox.playlist_none')}</button>
+                        <button type="button" class="playlist-link" onclick={selectAllTorrent}>{$t('librebox.playlist_all')}</button>
+                        <button type="button" class="playlist-link" onclick={selectNoneTorrent}>{$t('librebox.playlist_none')}</button>
                       </div>
                     {/if}
                   </div>
                   {#if torrentLoading}
-                    <div class="playlist-status"><span class="feedback-spinner"></span> {$t('omnibox.torrent_loading')}</div>
+                    <div class="playlist-status"><span class="feedback-spinner"></span> {$t('librebox.torrent_loading')}</div>
                   {:else}
                     <ul class="playlist-list">
                       {#each torrentEntries as entry (entry.index)}
@@ -1179,28 +1179,28 @@
               {/if}
               {#if cookieHint}
                 <p class="cookie-hint" class:expired={cookieHint === "expired"} role="status">
-                  <span>{cookieHint === "expired" ? $t("omnibox.cookie_hint_expired") : $t("omnibox.cookie_hint_stale")}</span>
-                  <button type="button" class="cookie-hint-link" onclick={() => goto("/settings?tab=cookies")}>{$t("omnibox.cookie_hint_action")}</button>
+                  <span>{cookieHint === "expired" ? $t("librebox.cookie_hint_expired") : $t("librebox.cookie_hint_stale")}</span>
+                  <button type="button" class="cookie-hint-link" onclick={() => goto("/settings?tab=cookies")}>{$t("librebox.cookie_hint_action")}</button>
                 </p>
               {/if}
-              {#if COURSE_PLATFORMS.has(omniState.info.platform)}
+              {#if COURSE_PLATFORMS.has(libreState.info.platform)}
                 {#if coursesPluginInstalled === false}
-                  <p class="course-upsell">{$t('omnibox.courses_plugin_needed')}</p>
-                  <button class="download-primary-btn" onclick={() => goto("/marketplace")}>{$t('omnibox.install_courses_plugin')}</button>
+                  <p class="course-upsell">{$t('librebox.courses_plugin_needed')}</p>
+                  <button class="download-primary-btn" onclick={() => goto("/marketplace")}>{$t('librebox.install_courses_plugin')}</button>
                 {:else}
-                  <p class="course-upsell">{$t('omnibox.courses_plugin_ready')}</p>
-                  <button class="download-primary-btn" onclick={handleAction}>{$t(omniState.info.platform === "udemy" ? 'omnibox.go_to_udemy' : 'omnibox.go_to_hotmart')}</button>
+                  <p class="course-upsell">{$t('librebox.courses_plugin_ready')}</p>
+                  <button class="download-primary-btn" onclick={handleAction}>{$t(libreState.info.platform === "udemy" ? 'librebox.go_to_udemy' : 'librebox.go_to_hotmart')}</button>
                 {/if}
               {:else}
-                {@const playlistBlocked = omniState.info.content_type === "playlist" && playlistEntries.length > 0 && selectedPlaylistItems.size === 0}
+                {@const playlistBlocked = libreState.info.content_type === "playlist" && playlistEntries.length > 0 && selectedPlaylistItems.size === 0}
                 {@const torrentBlocked = torrentEntries.length > 0 && selectedTorrentFiles.size === 0}
-                {#if omniState.info.platform === "bilibili"}
+                {#if libreState.info.platform === "bilibili"}
                   <BilibiliPreviewExtras {url} accountSlug={selectedCookieSlug && selectedCookieSlug !== "_anonymous" ? selectedCookieSlug : null} />
                 {/if}
-                <button class="download-primary-btn" disabled={playlistBlocked || torrentBlocked} onclick={handleAction}>{$t('omnibox.download')}</button>
-                {#if omniState.info.platform !== "direct_file"}
+                <button class="download-primary-btn" disabled={playlistBlocked || torrentBlocked} onclick={handleAction}>{$t('librebox.download')}</button>
+                {#if libreState.info.platform !== "direct_file"}
                   <details class="options-panel">
-                    <summary class="options-toggle">{$t('omnibox.options')}</summary>
+                    <summary class="options-toggle">{$t('librebox.options')}</summary>
                     <div class="options-content">
                       <DownloadModeSelector bind:downloadMode onChange={() => { selectedFormatId = null; }} />
                       {#if downloadMode !== "audio"}
@@ -1210,47 +1210,47 @@
                         <CookieAccountPicker accounts={cookieAccounts} bind:selectedSlug={selectedCookieSlug} />
                       {/if}
                       <details class="options-panel">
-                        <summary class="options-toggle">{$t('omnibox.advanced')}</summary>
+                        <summary class="options-toggle">{$t('librebox.advanced')}</summary>
                         <div class="options-content">
-                          {#if omniState.info.platform === "vimeo" || omniState.info.platform === "generic"}
+                          {#if libreState.info.platform === "vimeo" || libreState.info.platform === "generic"}
                             <div class="referer-input-wrapper">
-                              <label class="referer-label" for="referer-input">{$t('omnibox.referer_label')}</label>
-                              <input id="referer-input" class="referer-input" type="text" placeholder={$t('omnibox.referer_placeholder')} bind:value={referer} spellcheck="false" />
+                              <label class="referer-label" for="referer-input">{$t('librebox.referer_label')}</label>
+                              <input id="referer-input" class="referer-input" type="text" placeholder={$t('librebox.referer_placeholder')} bind:value={referer} spellcheck="false" />
                             </div>
                           {/if}
-                          {#if omniState.info.content_type !== "playlist"}
+                          {#if libreState.info.content_type !== "playlist"}
                             <div class="timerange-wrapper">
-                              <span class="timerange-label">{$t('omnibox.timerange_label')}</span>
+                              <span class="timerange-label">{$t('librebox.timerange_label')}</span>
                               <div class="timerange-inputs">
-                                <input class="timerange-input" type="text" placeholder={$t('omnibox.timerange_start')} bind:value={clipStart} spellcheck="false" inputmode="numeric" aria-label={$t('omnibox.timerange_start') as string} />
+                                <input class="timerange-input" type="text" placeholder={$t('librebox.timerange_start')} bind:value={clipStart} spellcheck="false" inputmode="numeric" aria-label={$t('librebox.timerange_start') as string} />
                                 <span class="timerange-sep" aria-hidden="true">—</span>
-                                <input class="timerange-input" type="text" placeholder={$t('omnibox.timerange_end')} bind:value={clipEnd} spellcheck="false" inputmode="numeric" aria-label={$t('omnibox.timerange_end') as string} />
+                                <input class="timerange-input" type="text" placeholder={$t('librebox.timerange_end')} bind:value={clipEnd} spellcheck="false" inputmode="numeric" aria-label={$t('librebox.timerange_end') as string} />
                               </div>
-                              <span class="timerange-hint">{$t('omnibox.timerange_hint')}</span>
+                              <span class="timerange-hint">{$t('librebox.timerange_hint')}</span>
                             </div>
                           {/if}
                           <div class="timerange-wrapper">
-                            <span class="timerange-label">{$t('omnibox.schedule_label')}</span>
+                            <span class="timerange-label">{$t('librebox.schedule_label')}</span>
                             <div class="schedule-presets">
-                              <button type="button" class="schedule-preset" onclick={() => setSchedulePreset('1h')}>{$t('omnibox.schedule_1h')}</button>
-                              <button type="button" class="schedule-preset" onclick={() => setSchedulePreset('tonight')}>{$t('omnibox.schedule_tonight')}</button>
-                              <button type="button" class="schedule-preset" onclick={() => setSchedulePreset('1d')}>{$t('omnibox.schedule_1d')}</button>
+                              <button type="button" class="schedule-preset" onclick={() => setSchedulePreset('1h')}>{$t('librebox.schedule_1h')}</button>
+                              <button type="button" class="schedule-preset" onclick={() => setSchedulePreset('tonight')}>{$t('librebox.schedule_tonight')}</button>
+                              <button type="button" class="schedule-preset" onclick={() => setSchedulePreset('1d')}>{$t('librebox.schedule_1d')}</button>
                               {#if scheduleAt || scheduleStop}
-                                <button type="button" class="schedule-preset" onclick={() => { scheduleAt = ""; scheduleStop = ""; }}>{$t('omnibox.schedule_clear')}</button>
+                                <button type="button" class="schedule-preset" onclick={() => { scheduleAt = ""; scheduleStop = ""; }}>{$t('librebox.schedule_clear')}</button>
                               {/if}
                             </div>
                             <div class="timerange-inputs schedule-row">
-                              <input class="timerange-input schedule-date" type="date" value={schedulePart(scheduleAt, "date")} oninput={(e) => { scheduleAt = withSchedulePart(scheduleAt, "date", e.currentTarget.value); }} aria-label={$t('omnibox.schedule_start') as string} />
-                              <input class="timerange-input schedule-time" type="time" step="60" value={schedulePart(scheduleAt, "time")} oninput={(e) => { scheduleAt = withSchedulePart(scheduleAt, "time", e.currentTarget.value); }} aria-label={$t('omnibox.schedule_start') as string} />
+                              <input class="timerange-input schedule-date" type="date" value={schedulePart(scheduleAt, "date")} oninput={(e) => { scheduleAt = withSchedulePart(scheduleAt, "date", e.currentTarget.value); }} aria-label={$t('librebox.schedule_start') as string} />
+                              <input class="timerange-input schedule-time" type="time" step="60" value={schedulePart(scheduleAt, "time")} oninput={(e) => { scheduleAt = withSchedulePart(scheduleAt, "time", e.currentTarget.value); }} aria-label={$t('librebox.schedule_start') as string} />
                               <span class="timerange-sep" aria-hidden="true">—</span>
-                              <input class="timerange-input schedule-date" type="date" value={schedulePart(scheduleStop, "date")} oninput={(e) => { scheduleStop = withSchedulePart(scheduleStop, "date", e.currentTarget.value); }} aria-label={$t('omnibox.schedule_stop') as string} />
-                              <input class="timerange-input schedule-time" type="time" step="60" value={schedulePart(scheduleStop, "time")} oninput={(e) => { scheduleStop = withSchedulePart(scheduleStop, "time", e.currentTarget.value); }} aria-label={$t('omnibox.schedule_stop') as string} />
+                              <input class="timerange-input schedule-date" type="date" value={schedulePart(scheduleStop, "date")} oninput={(e) => { scheduleStop = withSchedulePart(scheduleStop, "date", e.currentTarget.value); }} aria-label={$t('librebox.schedule_stop') as string} />
+                              <input class="timerange-input schedule-time" type="time" step="60" value={schedulePart(scheduleStop, "time")} oninput={(e) => { scheduleStop = withSchedulePart(scheduleStop, "time", e.currentTarget.value); }} aria-label={$t('librebox.schedule_stop') as string} />
                             </div>
-                            <span class="timerange-hint">{$t('omnibox.schedule_hint')}</span>
+                            <span class="timerange-hint">{$t('librebox.schedule_hint')}</span>
                           </div>
                           <FormatSelector
-                            platform={omniState.info.platform}
-                            isPlaylist={omniState.info.content_type === "playlist"}
+                            platform={libreState.info.platform}
+                            isPlaylist={libreState.info.content_type === "playlist"}
                             bind:formats
                             bind:selectedFormatId
                             {loadingFormats}
@@ -1267,20 +1267,20 @@
                   </details>
                 {/if}
               {/if}
-            {:else if omniState.kind === "preparing"}
+            {:else if libreState.kind === "preparing"}
               <div class="feedback-card feedback-enter">
                 <div class="card-row">
                   <span class="feedback-spinner"></span>
-                  <span class="card-text">{$t('omnibox.preparing')}</span>
+                  <span class="card-text">{$t('librebox.preparing')}</span>
                 </div>
               </div>
-            {:else if omniState.kind === "error"}
+            {:else if libreState.kind === "error"}
               <div class="feedback-card feedback-enter" data-status="error">
                 <div class="card-row">
-                  <span class="card-title card-error-text">{omniState.message}</span>
+                  <span class="card-title card-error-text">{libreState.message}</span>
                 </div>
                 <div class="card-row card-actions">
-                  <button class="button card-action-btn" onclick={handleRetry}>{$t('omnibox.retry')}</button>
+                  <button class="button card-action-btn" onclick={handleRetry}>{$t('librebox.retry')}</button>
                 </div>
               </div>
             {/if}
@@ -1316,7 +1316,7 @@
     gap: var(--space-3);
   }
 
-  /* detection line under the omnibox */
+  /* detection line under the librebox */
   .feedback {
     display: flex;
     align-items: center;

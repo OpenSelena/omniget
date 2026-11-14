@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { extractUrls, isUrl } from "./omnibox-controller";
+import { extractUrls, isUrl } from "./librebox-controller";
 
-describe("omnibox URL detection and extraction", () => {
+describe("librebox URL detection and extraction", () => {
   it("detects clean URLs directly", () => {
     expect(isUrl("https://example.com/video")).toBe(true);
     expect(extractUrls("https://example.com/video")).toEqual(["https://example.com/video"]);

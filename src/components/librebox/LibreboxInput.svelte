@@ -1,7 +1,7 @@
 <script lang="ts">
   import { t } from "$lib/i18n";
   import { shortcut } from "$lib/platform";
-  import type { HomeInputMode } from "$lib/home/omnibox-controller";
+  import type { HomeInputMode } from "$lib/home/librebox-controller";
   import { readText } from "@tauri-apps/plugin-clipboard-manager";
 
   let {
@@ -108,7 +108,7 @@
 <!-- svelte-ignore a11y_click_events_have_key_events -->
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <div
-  class="omnibox-wrapper"
+  class="librebox-wrapper"
   class:drag-over={dragOver}
   class:prominent
   ondragover={handleDragOver}
@@ -118,12 +118,12 @@
     if (e.target === e.currentTarget) focusInput();
   }}
 >
-  <div class="omnibox-plus-wrap" bind:this={menuWrapEl}>
+  <div class="librebox-plus-wrap" bind:this={menuWrapEl}>
     <button
       type="button"
-      class="omnibox-plus-btn"
+      class="librebox-plus-btn"
       class:open={menuOpen}
-      aria-label={$t('omnibox.more_actions')}
+      aria-label={$t('librebox.more_actions')}
       aria-expanded={menuOpen}
       aria-haspopup="menu"
       onclick={(e) => {
@@ -137,11 +137,11 @@
     </button>
 
     {#if menuOpen}
-      <div class="omnibox-plus-menu" role="menu">
+      <div class="librebox-plus-menu" role="menu">
         {#each secondary as item (item.mode)}
           <button
             type="button"
-            class="omnibox-plus-item"
+            class="librebox-plus-item"
             role="menuitem"
             onclick={(e) => {
               e.stopPropagation();
@@ -156,10 +156,10 @@
           </button>
         {/each}
         {#if onAdvanced}
-          <div class="omnibox-plus-sep" role="separator"></div>
+          <div class="librebox-plus-sep" role="separator"></div>
           <button
             type="button"
-            class="omnibox-plus-item"
+            class="librebox-plus-item"
             role="menuitem"
             onclick={(e) => {
               e.stopPropagation();
@@ -179,10 +179,10 @@
 
   <input
     bind:this={inputEl}
-    class="omnibox"
+    class="librebox"
     type="text"
-    placeholder={$t('omnibox.placeholder')}
-    aria-label={$t('omnibox.placeholder')}
+    placeholder={$t('librebox.placeholder')}
+    aria-label={$t('librebox.placeholder')}
     bind:value={url}
     oninput={onInput}
     autocomplete="off"
@@ -200,18 +200,18 @@
   {:else}
     <button
       type="button"
-      class="omnibox-paste-btn"
+      class="librebox-paste-btn"
       onclick={handlePasteClick}
       aria-label="{$t('tools.ig.download.paste')} ({shortcut('V')})"
     >
-      <span class="omnibox-paste-label">{$t('tools.ig.download.paste')}</span>
-      <span class="omnibox-paste-kbd">{shortcut("V")}</span>
+      <span class="librebox-paste-label">{$t('tools.ig.download.paste')}</span>
+      <span class="librebox-paste-kbd">{shortcut("V")}</span>
     </button>
   {/if}
 </div>
 
 <style>
-  .omnibox-wrapper {
+  .librebox-wrapper {
     width: 100%;
     position: relative;
     display: flex;
@@ -226,7 +226,7 @@
     transition: box-shadow var(--duration-fast) var(--ease-out), background var(--duration-fast) var(--ease-out);
   }
 
-  .omnibox-wrapper.prominent {
+  .librebox-wrapper.prominent {
     height: 52px;
     padding: 0 var(--space-3);
     border-radius: var(--radius-xl);
@@ -237,33 +237,33 @@
       0 2px 6px rgba(var(--shadow-ink), var(--elev-alpha-1));
   }
 
-  .omnibox-wrapper.prominent .omnibox {
+  .librebox-wrapper.prominent .librebox {
     font-size: var(--text-lg);
     font-weight: 400;
     letter-spacing: var(--track-snug);
   }
 
-  .omnibox-wrapper.drag-over {
+  .librebox-wrapper.drag-over {
     background: var(--accent-soft);
     box-shadow:
       inset 0 0 0 2px var(--accent),
       0 0 0 4px var(--accent-soft);
   }
 
-  .omnibox-wrapper:focus-within {
+  .librebox-wrapper:focus-within {
     box-shadow:
       inset 0 0 0 var(--hairline) var(--accent),
       0 0 0 3px var(--accent-soft);
   }
 
-  .omnibox-wrapper.prominent:focus-within {
+  .librebox-wrapper.prominent:focus-within {
     box-shadow:
       inset 0 0 0 var(--hairline) var(--accent),
       0 0 0 4px var(--accent-soft),
       0 10px 30px rgba(var(--shadow-ink), var(--elev-alpha-2));
   }
 
-  .omnibox-plus-wrap {
+  .librebox-plus-wrap {
     position: relative;
     display: flex;
     align-items: center;
@@ -271,7 +271,7 @@
     flex-shrink: 0;
   }
 
-  .omnibox-plus-btn {
+  .librebox-plus-btn {
     display: flex;
     align-items: center;
     justify-content: center;
@@ -290,38 +290,38 @@
       transform var(--duration-fast) var(--ease-out);
   }
 
-  .omnibox-wrapper.prominent .omnibox-plus-btn {
+  .librebox-wrapper.prominent .librebox-plus-btn {
     width: 32px;
     height: 32px;
   }
 
-  .omnibox-plus-btn.open {
+  .librebox-plus-btn.open {
     background: var(--fill-2);
     color: var(--text);
   }
 
-  .omnibox-plus-btn.open svg {
+  .librebox-plus-btn.open svg {
     transform: rotate(45deg);
   }
 
-  .omnibox-plus-btn svg {
+  .librebox-plus-btn svg {
     pointer-events: none;
     transition: transform var(--duration-fast) var(--ease-out);
   }
 
   @media (hover: hover) {
-    .omnibox-plus-btn:hover {
+    .librebox-plus-btn:hover {
       background: var(--fill-2);
       color: var(--text);
     }
   }
 
-  .omnibox-plus-btn:focus-visible {
+  .librebox-plus-btn:focus-visible {
     outline: var(--focus-ring);
     outline-offset: var(--focus-ring-offset);
   }
 
-  .omnibox-plus-menu {
+  .librebox-plus-menu {
     position: absolute;
     top: calc(100% + var(--space-2));
     inset-inline-start: 0;
@@ -339,7 +339,7 @@
     z-index: 40;
   }
 
-  .omnibox-plus-item {
+  .librebox-plus-item {
     display: flex;
     align-items: center;
     gap: var(--space-2);
@@ -357,34 +357,34 @@
     transition: background var(--duration-fast) var(--ease-out);
   }
 
-  .omnibox-plus-item svg {
+  .librebox-plus-item svg {
     color: var(--text-muted);
     flex-shrink: 0;
     pointer-events: none;
   }
 
   @media (hover: hover) {
-    .omnibox-plus-item:hover {
+    .librebox-plus-item:hover {
       background: var(--fill-2);
     }
 
-    .omnibox-plus-item:hover svg {
+    .librebox-plus-item:hover svg {
       color: var(--text);
     }
   }
 
-  .omnibox-plus-item:focus-visible {
+  .librebox-plus-item:focus-visible {
     outline: var(--focus-ring);
     outline-offset: -2px;
   }
 
-  .omnibox-plus-sep {
+  .librebox-plus-sep {
     height: var(--hairline);
     margin: var(--space-1) var(--space-2);
     background: var(--separator);
   }
 
-  .omnibox {
+  .librebox {
     flex: 1;
     min-width: 0;
     height: 100%;
@@ -395,15 +395,15 @@
     border: none;
   }
 
-  .omnibox::placeholder {
+  .librebox::placeholder {
     color: var(--text-dim);
   }
 
-  .omnibox:focus {
+  .librebox:focus {
     outline: none;
   }
 
-  .omnibox-paste-btn {
+  .librebox-paste-btn {
     display: inline-flex;
     align-items: center;
     gap: 6px;
@@ -423,30 +423,30 @@
       color var(--duration-fast) var(--ease-out);
   }
 
-  .omnibox-wrapper.prominent .omnibox-paste-btn {
+  .librebox-wrapper.prominent .librebox-paste-btn {
     height: 32px;
     padding: 0 var(--space-3);
     border-radius: var(--radius-md);
   }
 
-  .omnibox-paste-label {
+  .librebox-paste-label {
     color: var(--text);
   }
 
-  .omnibox-paste-kbd {
+  .librebox-paste-kbd {
     font-family: var(--font-mono);
     font-size: var(--text-xs);
     color: var(--text-dim);
   }
 
   @media (hover: hover) {
-    .omnibox-paste-btn:hover {
+    .librebox-paste-btn:hover {
       background: var(--fill-2);
       color: var(--text);
     }
   }
 
-  .omnibox-paste-btn:focus-visible {
+  .librebox-paste-btn:focus-visible {
     outline: var(--focus-ring);
     outline-offset: var(--focus-ring-offset);
   }
@@ -466,7 +466,7 @@
     flex-shrink: 0;
   }
 
-  .omnibox-wrapper.prominent .clear-btn {
+  .librebox-wrapper.prominent .clear-btn {
     width: 32px;
     height: 32px;
   }

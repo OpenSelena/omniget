@@ -31,7 +31,7 @@
     try {
       templates = await invoke<Template[]>("yt_templates_list");
     } catch (e) {
-      console.warn("[advanced-omnibox] list failed:", e);
+      console.warn("[advanced-librebox] list failed:", e);
     }
   }
 
@@ -78,7 +78,7 @@
 
   async function saveTemplate() {
     if (!saveName.trim()) {
-      showToast("error", $t("omnibox.adv.template_name_required"));
+      showToast("error", $t("librebox.adv.template_name_required"));
       return;
     }
     savingTpl = true;
@@ -93,7 +93,7 @@
       });
       selectedTemplateId = tpl.id;
       await refreshTemplates();
-      showToast("success", $t("omnibox.adv.template_saved"));
+      showToast("success", $t("librebox.adv.template_saved"));
     } catch (e) {
       showToast("error", String(e));
     } finally {
@@ -123,7 +123,7 @@
   async function runDownload() {
     const trimmedUrl = url.trim();
     if (!trimmedUrl) {
-      showToast("error", $t("omnibox.adv.url_required"));
+      showToast("error", $t("librebox.adv.url_required"));
       return;
     }
     const settings = getSettings();
@@ -151,7 +151,7 @@
         customArgs: parsedArgs,
         cookieSlug: null,
       });
-      showToast("success", $t("omnibox.adv.queued"));
+      showToast("success", $t("librebox.adv.queued"));
       url = "";
     } catch (e) {
       showToast("error", String(e));
@@ -163,28 +163,28 @@
 
 <div class="advanced">
   <div class="row">
-    <label class="field-label" for="adv-url">{$t("omnibox.adv.url_label")}</label>
+    <label class="field-label" for="adv-url">{$t("librebox.adv.url_label")}</label>
     <input
       id="adv-url"
       class="text-input"
       type="text"
-      placeholder={$t("omnibox.adv.url_placeholder")}
+      placeholder={$t("librebox.adv.url_placeholder")}
       bind:value={url}
       spellcheck="false"
     />
   </div>
 
   <div class="row">
-    <label class="field-label" for="adv-args">{$t("omnibox.adv.args_label")}</label>
+    <label class="field-label" for="adv-args">{$t("librebox.adv.args_label")}</label>
     <textarea
       id="adv-args"
       class="args-input"
-      placeholder={$t("omnibox.adv.args_placeholder")}
+      placeholder={$t("librebox.adv.args_placeholder")}
       bind:value={argsText}
       spellcheck="false"
       rows="4"
     ></textarea>
-    <span class="hint">{$t("omnibox.adv.args_hint")}</span>
+    <span class="hint">{$t("librebox.adv.args_hint")}</span>
   </div>
 
   <div class="actions">
@@ -194,15 +194,15 @@
       onclick={runDownload}
       disabled={submitting || !url.trim()}
     >
-      {submitting ? $t("omnibox.adv.queuing") : $t("omnibox.adv.run")}
+      {submitting ? $t("librebox.adv.queuing") : $t("librebox.adv.run")}
     </button>
   </div>
 
   <div class="templates">
     <div class="templates-header">
-      <h4>{$t("omnibox.adv.templates_title")}</h4>
+      <h4>{$t("librebox.adv.templates_title")}</h4>
       <button type="button" class="ghost-btn small" onclick={newTemplate}>
-        {$t("omnibox.adv.template_new")}
+        {$t("librebox.adv.template_new")}
       </button>
     </div>
 
@@ -210,13 +210,13 @@
       <input
         class="text-input small"
         type="text"
-        placeholder={$t("omnibox.adv.template_name_placeholder")}
+        placeholder={$t("librebox.adv.template_name_placeholder")}
         bind:value={saveName}
       />
       <button type="button" class="ghost-btn small" onclick={saveTemplate} disabled={savingTpl}>
         {selectedTemplateId
-          ? $t("omnibox.adv.template_update")
-          : $t("omnibox.adv.template_save")}
+          ? $t("librebox.adv.template_update")
+          : $t("librebox.adv.template_save")}
       </button>
     </div>
 
@@ -226,13 +226,13 @@
           <li class="tpl-item" class:active={selectedTemplateId === tpl.id}>
             <button type="button" class="tpl-pick" onclick={() => applyTemplate(tpl)}>
               <span class="tpl-name">{tpl.name}</span>
-              <span class="tpl-count">{tpl.args.length} {$t("omnibox.adv.template_flags")}</span>
+              <span class="tpl-count">{tpl.args.length} {$t("librebox.adv.template_flags")}</span>
             </button>
             <button
               type="button"
               class="tpl-delete"
               onclick={() => deleteTemplate(tpl)}
-              aria-label={$t("omnibox.adv.template_delete")}
+              aria-label={$t("librebox.adv.template_delete")}
             >
               <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
@@ -242,7 +242,7 @@
         {/each}
       </ul>
     {:else}
-      <p class="empty-hint">{$t("omnibox.adv.templates_empty")}</p>
+      <p class="empty-hint">{$t("librebox.adv.templates_empty")}</p>
     {/if}
   </div>
 </div>

@@ -14,7 +14,7 @@
       <rect x="2" y="6" width="14" height="12" rx="2" />
       <path d="m22 8-6 4 6 4V8Z" />
     </svg>
-    {$t('omnibox.mode_auto')}
+    {$t('librebox.mode_auto')}
   </button>
   <button
     class="mode-btn"
@@ -26,7 +26,7 @@
       <circle cx="6" cy="18" r="3" />
       <circle cx="18" cy="16" r="3" />
     </svg>
-    {$t('omnibox.mode_audio')}
+    {$t('librebox.mode_audio')}
   </button>
   <button
     class="mode-btn"
@@ -38,7 +38,7 @@
       <line x1="23" y1="9" x2="17" y2="15" />
       <line x1="17" y1="9" x2="23" y2="15" />
     </svg>
-    {$t('omnibox.mode_mute')}
+    {$t('librebox.mode_mute')}
   </button>
 </div>
 

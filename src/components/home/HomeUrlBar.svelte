@@ -1,6 +1,6 @@
 <script lang="ts">
-  import OmniboxInput from "$components/omnibox/OmniboxInput.svelte";
-  import type { HomeInputMode } from "$lib/home/omnibox-controller";
+  import LibreboxInput from "$components/librebox/LibreboxInput.svelte";
+  import type { HomeInputMode } from "$lib/home/librebox-controller";
 
   let {
     url = $bindable(""),
@@ -28,7 +28,7 @@
 
 <div class="home-url-bar" class:stage={variant === "stage"}>
   {#if mode === "url"}
-    <OmniboxInput
+    <LibreboxInput
       bind:url
       onInput={onInput}
       prominent={variant === "stage"}

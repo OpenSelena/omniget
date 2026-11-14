@@ -59,12 +59,12 @@
   }
 
   function qualityChip(item: GenericDownloadItem): string | null {
-    if (item.downloadMode === "audio") return $t('omnibox.quality_audio') as string;
+    if (item.downloadMode === "audio") return $t('librebox.quality_audio') as string;
     if (!item.quality) return null;
     const q = item.quality.toLowerCase();
-    if (q === "audio") return $t('omnibox.quality_audio') as string;
+    if (q === "audio") return $t('librebox.quality_audio') as string;
     if (!isVideoItem(item)) return null;
-    if (q === "best" || q === "highest") return $t('omnibox.quality_best_short') as string;
+    if (q === "best" || q === "highest") return $t('librebox.quality_best_short') as string;
     return item.quality;
   }
 
@@ -83,7 +83,7 @@
     const a = s.acodec && s.acodec !== "none" ? s.acodec.split(".")[0] : null;
     if (v && s.height) parts.push(`${s.height}p${s.fps && s.fps >= 48 ? Math.round(s.fps) : ""}`);
     else if (v) parts.push(s.format_note ?? s.format_id);
-    else if (a) parts.push($t('omnibox.quality_audio') as string);
+    else if (a) parts.push($t('librebox.quality_audio') as string);
     if (s.ext) parts.push(s.ext);
     if (v) parts.push(v);
     else if (a) parts.push(a);
