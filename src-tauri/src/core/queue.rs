@@ -286,7 +286,7 @@ pub struct DownloadQueue {
     pub stagger_delay_ms: u64,
     pub default_max_retries: u32,
     /// Ultimo id entregue por `next_available_id`. Sem ele, dois `download_from_url`
-    /// simultaneos (um lote colado na omnibox dispara todos de uma vez) pegam o
+    /// simultaneos (um lote colado na librebox dispara todos de uma vez) pegam o
     /// mesmo timestamp em ms, soltam o lock para resolver o downloader e so depois
     /// enfileiram — os dois entram com o mesmo id. Como todo o resto da fila acha
     /// o item por `find(|i| i.id == id)`, o segundo item some: baixa o primeiro

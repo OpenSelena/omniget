@@ -374,7 +374,7 @@ mod tests {
         ));
     }
 
-    // Issue #311: the collection page listed its videos in the omnibox but the
+    // Issue #311: the collection page listed its videos in the librebox but the
     // download went down the single-video path and failed on the listing page.
     #[test]
     fn modern_collection_link_is_playlist() {

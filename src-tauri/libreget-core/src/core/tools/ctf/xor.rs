@@ -211,9 +211,9 @@ mod tests {
     fn repeating_key_is_recovered() {
         let plain = "the quick brown fox jumps over the lazy dog while the cat sleeps \
                      under the warm sun and nothing else happens in this small town today";
-        let enc = xor(plain.as_bytes(), b"omni");
+        let enc = xor(plain.as_bytes(), b"rust");
         let best = break_repeating(&enc, 12).unwrap();
-        assert_eq!(best.key, "omni", "chave achada: {:?}", best.key);
+        assert_eq!(best.key, "rust", "chave achada: {:?}", best.key);
         assert_eq!(best.text, plain);
     }
 

@@ -527,7 +527,7 @@ mod tests {
         entry(&mut t, 0x8825, 4, 1, GPS_IFD_AT.to_le_bytes());
         t.extend_from_slice(&0u32.to_le_bytes());
         assert_eq!(t.len(), MAKE_AT as usize);
-        t.extend_from_slice(b"OmniG\0");
+        t.extend_from_slice(b"LibrG\0");
         t.extend_from_slice(b"Test\0");
         while t.len() < GPS_IFD_AT as usize {
             t.push(0);
@@ -571,7 +571,7 @@ mod tests {
         let r = read(&p);
         assert!(r.error.is_none(), "erro na leitura: {:?}", r.error);
         assert!(r.has_exif);
-        assert_eq!(r.camera.as_deref(), Some("OmniG Test"));
+        assert_eq!(r.camera.as_deref(), Some("LibrG Test"));
         let (lat, lon) = r.gps.expect("não achou o GPS");
         assert!((lat + 23.55).abs() < 1e-6, "latitude: {}", lat);
         assert!((lon + 46.6333333).abs() < 1e-5, "longitude: {}", lon);

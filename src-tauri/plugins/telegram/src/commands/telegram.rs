@@ -208,24 +208,24 @@ pub fn resolve_telegram_download_dir(
     chat_title: Option<&str>,
 ) -> std::path::PathBuf {
     let base = std::path::PathBuf::from(base_dir);
-    let is_already_omnigram = base
+    let is_already_folder = base
         .file_name()
         .and_then(|n| n.to_str())
-        .map(|n| n.eq_ignore_ascii_case("OmniGram"))
+        .map(|n| n.eq_ignore_ascii_case("LibreGram") || n.eq_ignore_ascii_case("OmniGram"))
         .unwrap_or(false);
 
-    let omnigram_root = if is_already_omnigram {
+    let libregram_root = if is_already_folder {
         base
     } else {
-        base.join("OmniGram")
+        base.join("LibreGram")
     };
 
     match chat_title {
         Some(title) if !title.trim().is_empty() => {
             let clean = sanitize_folder_name(title);
-            omnigram_root.join(clean)
+            libregram_root.join(clean)
         }
-        _ => omnigram_root,
+        _ => libregram_root,
     }
 }
 
@@ -1311,13 +1311,13 @@ mod tests {
     }
 
     #[test]
-    fn test_resolve_telegram_download_dir_creates_omnigram_and_channel_folder() {
+    fn test_resolve_telegram_download_dir_creates_libregram_and_channel_folder() {
         let base = "C:/Users/mint/Downloads";
         let dir = resolve_telegram_download_dir(base, Some("Evelina Ava"));
         assert_eq!(
             dir,
             PathBuf::from("C:/Users/mint/Downloads")
-                .join("OmniGram")
+                .join("LibreGram")
                 .join("Evelina Ava")
         );
 
@@ -1325,17 +1325,24 @@ mod tests {
         assert_eq!(
             dir2,
             PathBuf::from("C:/Users/mint/Downloads")
-                .join("OmniGram")
+                .join("LibreGram")
                 .join("Ivana")
         );
     }
 
     #[test]
-    fn test_resolve_telegram_download_dir_when_base_already_omnigram() {
-        let base = "C:/Users/mint/Downloads/OmniGram";
+    fn test_resolve_telegram_download_dir_when_base_already_libregram_or_legacy() {
+        let base = "C:/Users/mint/Downloads/LibreGram";
         let dir = resolve_telegram_download_dir(base, Some("Evelina Ava"));
         assert_eq!(
             dir,
+            PathBuf::from("C:/Users/mint/Downloads/LibreGram").join("Evelina Ava")
+        );
+
+        let legacy_base = "C:/Users/mint/Downloads/OmniGram";
+        let dir_legacy = resolve_telegram_download_dir(legacy_base, Some("Evelina Ava"));
+        assert_eq!(
+            dir_legacy,
             PathBuf::from("C:/Users/mint/Downloads/OmniGram").join("Evelina Ava")
         );
     }
@@ -1346,13 +1353,13 @@ mod tests {
         let dir = resolve_telegram_download_dir(base, None);
         assert_eq!(
             dir,
-            PathBuf::from("C:/Users/mint/Downloads").join("OmniGram")
+            PathBuf::from("C:/Users/mint/Downloads").join("LibreGram")
         );
 
         let dir2 = resolve_telegram_download_dir(base, Some("   "));
         assert_eq!(
             dir2,
-            PathBuf::from("C:/Users/mint/Downloads").join("OmniGram")
+            PathBuf::from("C:/Users/mint/Downloads").join("LibreGram")
         );
     }
 }
