@@ -3688,7 +3688,7 @@
       "always_ask_path": "Always ask where to save",
       "always_ask_path_desc": "Show a save dialog for every download.",
       "video_quality": "Video quality",
-      "video_quality_desc": "Default quality when you don't pick one in the omnibox.",
+      "video_quality_desc": "Default quality when you don't pick one in the LibreBox.",
       "speed_limit": "Download speed limit",
       "speed_limit_desc": "Cap the download rate. Leave empty for no limit.",
       "speed_limit_unlimited": "No limit",
@@ -4250,7 +4250,7 @@
     "hero_desc_plugins": "Inspect yt-dlp, ffmpeg binaries status, updates, and manage embedded extensions",
     "hero_desc_advanced": "Hardware acceleration, debug diagnostics, storage paths, and app reset"
   },
-  "omnibox": {
+  "librebox": {
     "placeholder": "Paste a URL, magnet link, .torrent, or search",
     "searching": "Searching...",
     "search_empty": "No results found",
@@ -4565,10 +4565,10 @@
     "more_later": "Plugins for courses and Telegram, the global hotkey and Discord presence live in Settings whenever you want them."
   },
   "hints": {
-    "omnibox": "Paste the URL of the video or media you want to download here.",
+    "librebox": "Paste the URL of the video or media you want to download here.",
     "telegram": "Connect your Telegram account to download media from channels and groups.",
     "hotkey": "Global hotkey: automatically downloads the URL currently in your clipboard.",
-    "clipboard": "Detects URLs automatically when you copy a link and fills the omnibox."
+    "clipboard": "Detects URLs automatically when you copy a link and fills the LibreBox."
   },
   "common": {
     "cancel": "Cancel",
@@ -4728,7 +4728,7 @@
   "p2p": {
     "send_file": "Send File",
     "send_title": "Send File via P2P",
-    "send_description": "Send any file to another LibreGet user. A share code will be generated — the receiver pastes it in the omnibox to download.",
+    "send_description": "Send any file to another LibreGet user. A share code will be generated — the receiver pastes it in the LibreBox to download.",
     "select_file": "Select File",
     "share_code": "Share Code",
     "click_to_copy": "Click to copy",

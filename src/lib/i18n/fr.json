@@ -3688,7 +3688,7 @@
       "always_ask_path": "Toujours demander où enregistrer",
       "always_ask_path_desc": "Show a save dialog for every download.",
       "video_quality": "Qualité vidéo",
-      "video_quality_desc": "Default quality when you don't pick one in the omnibox.",
+      "video_quality_desc": "Default quality when you don't pick one in the LibreBox.",
       "speed_limit": "Limite de vitesse",
       "speed_limit_desc": "Limite le débit de téléchargement. Laissez vide pour aucune limite.",
       "speed_limit_unlimited": "Aucune limite",
@@ -4250,7 +4250,7 @@
     "hero_desc_plugins": "Vérifiez l'état de yt-dlp et ffmpeg, mises à jour et extensions intégrées",
     "hero_desc_advanced": "Accélération matérielle, diagnostics de débogage et réinitialisation"
   },
-  "omnibox": {
+  "librebox": {
     "placeholder": "Collez une URL ou recherchez",
     "searching": "Recherche...",
     "search_empty": "Aucun résultat trouvé",
@@ -4565,7 +4565,7 @@
     "more_later": "Plugins for courses and Telegram, the global hotkey and Discord presence live in Settings whenever you want them."
   },
   "hints": {
-    "omnibox": "Collez ici l'URL de la vidéo ou du média que vous souhaitez télécharger.",
+    "librebox": "Collez ici l'URL de la vidéo ou du média que vous souhaitez télécharger.",
     "telegram": "Connectez votre compte Telegram pour télécharger des médias depuis les canaux et les groupes.",
     "hotkey": "Raccourci global : télécharge automatiquement l'URL actuellement dans votre presse-papiers.",
     "clipboard": "Détecte automatiquement les URLs lorsque vous copiez un lien et remplit la barre de recherche."

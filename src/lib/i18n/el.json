@@ -3688,7 +3688,7 @@
       "always_ask_path": "Πάντα ερώτηση πριν αποθήκευση",
       "always_ask_path_desc": "Show a save dialog for every download.",
       "video_quality": "Ποιότητα βίντεο",
-      "video_quality_desc": "Default quality when you don't pick one in the omnibox.",
+      "video_quality_desc": "Default quality when you don't pick one in the LibreBox.",
       "speed_limit": "Όριο ταχύτητας λήψης",
       "speed_limit_desc": "Περιορίζει τον ρυθμό λήψης. Άφησέ το κενό για χωρίς όριο.",
       "speed_limit_unlimited": "Χωρίς όριο",
@@ -4250,7 +4250,7 @@
     "hero_desc_plugins": "Έλεγχος κατάστασης των yt-dlp και ffmpeg, ενημερώσεων και επεκτάσεων",
     "hero_desc_advanced": "Επιτάχυνση υλικού, διαγνωστικά αποσφαλμάτωσης και επαναφορά εφαρμογής"
   },
-  "omnibox": {
+  "librebox": {
     "placeholder": "Επικόλληση διεύθυνσης URL ή αναζήτηση",
     "searching": "Αναζήτηση...",
     "search_empty": "Δεν βρέθηκαν αποτελέσματα",
@@ -4565,10 +4565,10 @@
     "more_later": "Plugins for courses and Telegram, the global hotkey and Discord presence live in Settings whenever you want them."
   },
   "hints": {
-    "omnibox": "Επικολλήστε τη διεύθυνση URL του βίντεο ή των μέσων που θέλετε να κατεβάσετε εδώ.",
+    "librebox": "Επικολλήστε τη διεύθυνση URL του βίντεο ή των μέσων που θέλετε να κατεβάσετε εδώ.",
     "telegram": "Συνδέστε τον λογαριασμό σας στο Telegram για λήψη πολυμέσων από κανάλια και ομάδες.",
     "hotkey": "Καθολικό πλήκτρο πρόσβασης: κατεβάζει αυτόματα τη διεύθυνση URL που βρίσκεται αυτή τη στιγμή στο πρόχειρό σας.",
-    "clipboard": "Εντοπίζει αυτόματα τις διευθύνσεις URL όταν αντιγράφετε έναν σύνδεσμο και στέλνεται στο omnibox."
+    "clipboard": "Εντοπίζει αυτόματα τις διευθύνσεις URL όταν αντιγράφετε έναν σύνδεσμο και στέλνεται στο LibreBox."
   },
   "common": {
     "cancel": "Ακύρωση",
@@ -4728,7 +4728,7 @@
   "p2p": {
     "send_file": "Αποστολή αρχείου",
     "send_title": "Αποστολή αρχείου μέσω P2P",
-    "send_description": "Στείλτε ένα αρχείο σε άλλον χρήστη LibreGet. Θα δημιουργηθεί ένας κωδικός κοινής χρήσης — ο παραλήπτης τον επικολλά στο omnibox για λήψη.",
+    "send_description": "Στείλτε ένα αρχείο σε άλλον χρήστη LibreGet. Θα δημιουργηθεί ένας κωδικός κοινής χρήσης — ο παραλήπτης τον επικολλά στο LibreBox για λήψη.",
     "select_file": "Επιλογή αρχείου",
     "share_code": "Κωδικός κοινής χρήσης",
     "click_to_copy": "Κλικ για αντιγραφή",

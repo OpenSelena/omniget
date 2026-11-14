@@ -3688,7 +3688,7 @@
       "always_ask_path": "每次都詢問儲存位置",
       "always_ask_path_desc": "Show a save dialog for every download.",
       "video_quality": "影片品質",
-      "video_quality_desc": "Default quality when you don't pick one in the omnibox.",
+      "video_quality_desc": "Default quality when you don't pick one in the LibreBox.",
       "speed_limit": "下載速度限制",
       "speed_limit_desc": "限制下載速率。留空表示不限速。",
       "speed_limit_unlimited": "不限速",
@@ -4250,7 +4250,7 @@
     "hero_desc_plugins": "檢查 yt-dlp、ffmpeg 狀態、更新與內建擴充功能",
     "hero_desc_advanced": "硬體加速、除錯診斷、儲存路徑與應用程式重設"
   },
-  "omnibox": {
+  "librebox": {
     "placeholder": "貼上 URL、磁力連結、.torrent，或搜尋",
     "searching": "搜尋中...",
     "search_empty": "找不到結果",
@@ -4565,7 +4565,7 @@
     "more_later": "Plugins for courses and Telegram, the global hotkey and Discord presence live in Settings whenever you want them."
   },
   "hints": {
-    "omnibox": "在此貼上您要下載的影片或媒體 URL。",
+    "librebox": "在此貼上您要下載的影片或媒體 URL。",
     "telegram": "連接您的 Telegram 帳戶，即可下載頻道與群組中的媒體。",
     "hotkey": "全域快捷鍵: 會自動下載目前剪貼簿中的 URL。",
     "clipboard": "當您複製連結時會自動偵測 URL，並填入輸入欄位。"

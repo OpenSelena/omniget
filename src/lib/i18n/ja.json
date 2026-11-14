@@ -3688,7 +3688,7 @@
       "always_ask_path": "保存先を毎回確認する",
       "always_ask_path_desc": "Show a save dialog for every download.",
       "video_quality": "動画の画質",
-      "video_quality_desc": "Default quality when you don't pick one in the omnibox.",
+      "video_quality_desc": "Default quality when you don't pick one in the LibreBox.",
       "speed_limit": "ダウンロード速度制限",
       "speed_limit_desc": "ダウンロード速度の上限。空欄で無制限。",
       "speed_limit_unlimited": "無制限",
@@ -4250,7 +4250,7 @@
     "hero_desc_plugins": "yt-dlp、ffmpegの状態確認、更新、拡張プラグインの管理",
     "hero_desc_advanced": "ハードウェアアクセラレーション、デバッグ診断、アプリのリセット"
   },
-  "omnibox": {
+  "librebox": {
     "placeholder": "URLを貼り付けるか検索",
     "searching": "検索中...",
     "search_empty": "結果が見つかりません",
@@ -4565,7 +4565,7 @@
     "more_later": "Plugins for courses and Telegram, the global hotkey and Discord presence live in Settings whenever you want them."
   },
   "hints": {
-    "omnibox": "ダウンロードしたい動画やメディアのURLをここに貼り付けてください。",
+    "librebox": "ダウンロードしたい動画やメディアのURLをここに貼り付けてください。",
     "telegram": "Telegramアカウントを接続して、チャンネルやグループからメディアをダウンロードしましょう。",
     "hotkey": "グローバルホットキー：クリップボードにあるURLを自動的にダウンロードします。",
     "clipboard": "リンクをコピーするとURLを自動検出し、オムニボックスに入力します。"

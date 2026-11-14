@@ -3688,7 +3688,7 @@
       "always_ask_path": "Chiedi sempre dove salvare",
       "always_ask_path_desc": "Show a save dialog for every download.",
       "video_quality": "Qualità video",
-      "video_quality_desc": "Default quality when you don't pick one in the omnibox.",
+      "video_quality_desc": "Default quality when you don't pick one in the LibreBox.",
       "speed_limit": "Limite di velocità",
       "speed_limit_desc": "Limita la velocità di download. Lascia vuoto per nessun limite.",
       "speed_limit_unlimited": "Nessun limite",
@@ -4250,7 +4250,7 @@
     "hero_desc_plugins": "Verifica lo stato di yt-dlp e ffmpeg, aggiornamenti ed estensioni integrate",
     "hero_desc_advanced": "Accelerazione hardware, diagnostica di debug e ripristino dell'app"
   },
-  "omnibox": {
+  "librebox": {
     "placeholder": "Incolla un URL o cerca",
     "searching": "Ricerca in corso...",
     "search_empty": "Nessun risultato trovato",
@@ -4565,10 +4565,10 @@
     "more_later": "Plugins for courses and Telegram, the global hotkey and Discord presence live in Settings whenever you want them."
   },
   "hints": {
-    "omnibox": "Incolla qui l'URL del video o del media che vuoi scaricare.",
+    "librebox": "Incolla qui l'URL del video o del media che vuoi scaricare.",
     "telegram": "Collega il tuo account Telegram per scaricare media da canali e gruppi.",
     "hotkey": "Scorciatoia globale: scarica automaticamente l'URL presente negli appunti.",
-    "clipboard": "Rileva automaticamente gli URL quando copi un link e compila la omnibox."
+    "clipboard": "Rileva automaticamente gli URL quando copi un link e compila la LibreBox."
   },
   "common": {
     "cancel": "Annulla",
@@ -4728,7 +4728,7 @@
   "p2p": {
     "send_file": "Invia file",
     "send_title": "Invia file tramite P2P",
-    "send_description": "Invia un file a un altro utente LibreGet. Verrà generato un codice di condivisione — il destinatario lo incolla nella omnibox per scaricarlo.",
+    "send_description": "Invia un file a un altro utente LibreGet. Verrà generato un codice di condivisione — il destinatario lo incolla nella LibreBox per scaricarlo.",
     "select_file": "Seleziona file",
     "share_code": "Codice di condivisione",
     "click_to_copy": "Clicca per copiare",

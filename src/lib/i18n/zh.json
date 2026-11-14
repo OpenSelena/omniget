@@ -4250,7 +4250,7 @@
     "hero_desc_plugins": "检查 yt-dlp、ffmpeg 二进制文件状态、更新和内置扩展",
     "hero_desc_advanced": "硬件加速、调试诊断、存储路径和应用重置"
   },
-  "omnibox": {
+  "librebox": {
     "placeholder": "粘贴链接或搜索",
     "searching": "搜索中...",
     "search_empty": "未找到结果",
@@ -4565,7 +4565,7 @@
     "more_later": "课程和 Telegram 插件、全局快捷键和 Discord 状态都在设置里，随时可以去开启。"
   },
   "hints": {
-    "omnibox": "在此粘贴你想要下载的视频或媒体链接。",
+    "librebox": "在此粘贴你想要下载的视频或媒体链接。",
     "telegram": "连接你的 Telegram 账号，以便从频道和群组中下载媒体。",
     "hotkey": "全局快捷键：自动下载当前剪贴板中的链接。",
     "clipboard": "复制链接时自动检测链接并填入输入框。"
